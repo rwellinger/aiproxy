@@ -6,9 +6,9 @@ A full-stack platform for AI-powered image and music generation with Python back
 
 ## 🎯 Features
 
+- **Chat Integration** via Ollama (llama3.2:3b, gpt-oss:20b and others)
 - **Image Generation** via DALL·E 3 (OpenAI)
 - **Song Generation** via Mureka API (asynchronous with Celery)
-- **Chat Integration** via Ollama (llama3.2:3b & gpt-oss:20b)
 - **PostgreSQL** database for persistent storage
 - **Angular 18** frontend with Material Design
 - **Redis & Celery** for asynchronous task processing
