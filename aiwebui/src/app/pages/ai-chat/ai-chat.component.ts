@@ -208,8 +208,6 @@ export class AiChatComponent implements OnInit, OnDestroy {
           this.selectConversation(conversation);
           this.showNewChatForm = false;
           this.newChatTitle = '';
-          // Keep system context - it persists across sessions
-          this.notificationService.success('Conversation created');
         },
         error: (error) => {
           console.error('Error creating conversation:', error);
@@ -247,8 +245,6 @@ export class AiChatComponent implements OnInit, OnDestroy {
           if (this.conversations.length > 0) {
             this.selectConversation(this.conversations[0]);
           }
-
-          this.notificationService.success('Conversation deleted');
         },
         error: (error) => {
           console.error('Error deleting conversation:', error);
