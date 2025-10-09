@@ -47,10 +47,10 @@ git push origin github-build
 
 ```bash
 # Create version tag
-git tag v2.1.0 -m "Release v2.1.0 - Description of changes"
+git tag v2.1.1 -m "Release v2.1.1 - Description of changes"
 
 # Push tag to trigger build
-git push origin v2.1.0
+git push origin v2.1.1
 ```
 
 ### Step 4: Monitor Build
@@ -63,9 +63,9 @@ https://github.com/rwellinger/thwelly_ai_tools/actions
 **Expected Duration:** 20-30 minutes
 
 The workflow builds:
-- `ghcr.io/rwellinger/aiproxysrv-app:v2.1.0` + `:latest`
-- `ghcr.io/rwellinger/celery-worker-app:v2.1.0` + `:latest`
-- `ghcr.io/rwellinger/aiwebui-app:v2.1.0` + `:latest`
+- `ghcr.io/rwellinger/aiproxysrv-app:v2.1.1` + `:latest`
+- `ghcr.io/rwellinger/celery-worker-app:v2.1.1` + `:latest`
+- `ghcr.io/rwellinger/aiwebui-app:v2.1.1` + `:latest`
 
 ### Step 5: Create GitHub Release (Optional)
 
@@ -73,8 +73,8 @@ Once build succeeds, create a GitHub Release:
 
 **Via GitHub CLI:**
 ```bash
-gh release create v2.1.0 \
-  --title "Release v2.1.0" \
+gh release create v2.1.1 \
+  --title "Release v2.1.1" \
   --notes "## What's New
 - Feature A
 - Feature B
@@ -82,16 +82,16 @@ gh release create v2.1.0 \
 
 ## Docker Images
 \`\`\`bash
-docker pull ghcr.io/rwellinger/aiproxysrv-app:v2.1.0
-docker pull ghcr.io/rwellinger/celery-worker-app:v2.1.0
-docker pull ghcr.io/rwellinger/aiwebui-app:v2.1.0
+docker pull ghcr.io/rwellinger/aiproxysrv-app:v2.1.1
+docker pull ghcr.io/rwellinger/celery-worker-app:v2.1.1
+docker pull ghcr.io/rwellinger/aiwebui-app:v2.1.1
 \`\`\`
 "
 ```
 
 **Or via GitHub UI:**
 1. Go to: https://github.com/rwellinger/thwelly_ai_tools/releases/new
-2. Select tag: `v2.1.0`
+2. Select tag: `v2.1.1`
 3. Add title and description
 4. Publish release
 
@@ -117,14 +117,14 @@ If you need to rebuild:
 
 ```bash
 # Delete local tag
-git tag -d v2.1.0
+git tag -d v2.1.1
 
 # Delete remote tag
-git push origin :refs/tags/v2.1.0
+git push origin :refs/tags/v2.1.1
 
 # Create new tag and push
-git tag v2.1.0 -m "Release v2.1.0"
-git push origin v2.1.0
+git tag v2.1.0 -m "Release v2.1.1"
+git push origin v2.1.1
 ```
 
 ### Manual Trigger
