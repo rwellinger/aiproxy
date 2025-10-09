@@ -68,6 +68,7 @@
 
 ### 1.1 Requirements Overview
 The Mac AI Service System is a personal AI-based multimedia generation platform offering the following main features:
+- **AI Chat Conversations** - Interactive conversational AI via Ollama with persistent conversation history
 - **Image Generation** via DALL-E 3 (OpenAI API)
 - **Music Generation** via Mureka API
 - **Asynchronous Processing** for time-intensive generation processes
@@ -120,9 +121,11 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
 
 **Internal Interfaces:**
 - **Frontend ↔ Backend**: REST API (JSON over HTTPS)
-- **Backend ↔ Database**: PostgreSQL (SQL)
+- **Backend ↔ Database**: PostgreSQL (SQL) - Including conversations and messages tables
 - **Backend ↔ Cache**: Redis (Key-Value)
-- **Ollama LLM**: Various AI model chats (HTTPS/REST)
+- **Backend ↔ Ollama**: AI Chat & Prompt Enhancement (HTTP/REST)
+  - Chat Generation (Conversations)
+  - Unified Prompt Enhancement (Template-based)
 
 ---
 
@@ -169,6 +172,7 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   src/app/
   ├── components/    # Shared Components
   ├── pages/         # Feature Pages
+  │   ├── ai-chat/            # AI Chat conversation interface
   │   ├── image-generator/    # UI for image generation
   │   ├── image-view/         # Display of generated images
   │   ├── song-generator/     # UI for music generation
@@ -177,8 +181,12 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   │   ├── user-profile/       # User profile page
   │   └── prompt-templates/   # Template management for prompts
   ├── services/      # API Services & Business Logic
+  │   ├── business/           # ConversationService for chat management
+  │   └── config/             # ChatService, ApiConfigService
   ├── models/        # TypeScript Interfaces & Models
+  │   └── conversation.model.ts  # Conversation, Message, OllamaModel
   ├── pipes/         # Custom Angular Pipes
+  │   └── message-content.pipe.ts  # Markdown & link formatting
   ├── guards/        # Route Guards
   ├── interceptors/  # HTTP Interceptors
   └── auth/          # Authentication Logic
@@ -194,9 +202,13 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   ```
   src/
   ├── api/           # API Layer (Business Logic & Routing)
+  │   ├── controllers/        # ConversationController, ChatController
+  │   └── routes/             # conversation_routes, chat_routes
   ├── business/      # Core Business Logic Services
   ├── db/            # Models & Database Connection
+  │   └── models/             # Conversation, Message models
   ├── schemas/       # Pydantic Data Schemas
+  │   └── conversation_schemas.py  # Request/Response schemas
   ├── celery_app/    # Async Processing (Mureka API)
   ├── config/        # Configuration (reads .env)
   ├── utils/         # Utility Functions
@@ -437,11 +449,15 @@ services:
 | **Choice**     | Single music variant from Mureka (usually 2 per generation)                     |
 | **Ollama**     | Open-source LLM runtime for local chat generation (10.0.1.120:11434)           |
 | **Chat API**   | Ollama-based text generation for conversational AI with 4 endpoints             |
+| **Conversation** | Persistent chat session with AI model, system context, and token tracking     |
+| **Message**    | Individual user or assistant message within a conversation                      |
+| **System Context** | Custom instructions that define AI behavior for a conversation                |
+| **Token Tracking** | Real-time monitoring of context window usage with visual indicators          |
 | **AI Magic Functions** | Template-based intelligent prompt enhancement via prompt_templates       |
 | **Prompt Templates** | Reusable prompt templates with pre/post conditions and AI parameters       |
 | **Template Processing** | Automatic prompt optimization with model, temperature, max_tokens        |
 | **Settings**   | Frontend component for system configuration and user preferences                |
-| **Entity-Relationship** | Database schema with 4 tables and defined relationships                   |
+| **Entity-Relationship** | Database schema with 6 tables (including conversations, messages)         |
 | **aitestmock** | Mock server for OpenAI and Mureka APIs for cost reduction in development/testing |
 
 ---
@@ -536,12 +552,40 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
+#### 13.2.5 conversations
+**Purpose**: AI Chat conversations with persistent context
+
+| Column | Type | Description |
+|--------|-----|-------------|
+| `id` | UUID | Primary Key |
+| `title` | VARCHAR(500) | Conversation title |
+| `model` | VARCHAR(100) | Ollama model used (e.g., llama3.2:3b) |
+| `system_context` | TEXT | System context for AI behavior |
+| `context_window_size` | INTEGER | Maximum context window size |
+| `current_token_count` | INTEGER | Current token usage |
+| `created_at` | TIMESTAMP | Creation timestamp |
+| `updated_at` | TIMESTAMP | Last update |
+
+#### 13.2.6 messages
+**Purpose**: Individual messages within conversations (1:N to conversations)
+
+| Column | Type | Description |
+|--------|-----|-------------|
+| `id` | UUID | Primary Key |
+| `conversation_id` | UUID | Foreign Key to conversations.id |
+| `role` | VARCHAR(20) | Message role: user, assistant, system |
+| `content` | TEXT | Message content |
+| `created_at` | TIMESTAMP | Creation timestamp |
+
 ### 13.3 Relationships and Constraints
 
 - **songs ↔ song_choices**: 1:N relationship with CASCADE DELETE
+- **conversations ↔ messages**: 1:N relationship with CASCADE DELETE
 - **Unique Constraints**: `songs.task_id`, `generated_images.filename`
-- **Indexes**: On `task_id`, `job_id`, `song_id` for performance
-- **Foreign Keys**: `song_choices.song_id` → `songs.id`
+- **Indexes**: On `task_id`, `job_id`, `song_id`, `conversation_id` for performance
+- **Foreign Keys**:
+  - `song_choices.song_id` → `songs.id`
+  - `messages.conversation_id` → `conversations.id`
 
 ### 13.4 Migration and Maintenance
 

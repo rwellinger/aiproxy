@@ -6,7 +6,11 @@ A full-stack platform for AI-powered image and music generation with Python back
 
 ## 🎯 Features
 
-- **Chat Integration** via Ollama (llama3.2:3b, gpt-oss:20b and others)
+- **AI Chat Conversations** - Interactive chat with Ollama LLMs (llama3.2:3b, gpt-oss:20b and others)
+  - Multi-conversation management with persistent history
+  - Configurable system context for AI behavior customization
+  - Token usage tracking with context window visualization
+  - Message formatting with markdown support
 - **Image Generation** via DALL·E 3 (OpenAI)
 - **Song Generation** via Mureka API (asynchronous with Celery)
 - **PostgreSQL** database for persistent storage
@@ -224,7 +228,13 @@ mac_ki_service/
 ├── aiwebui/             # Angular 18 Frontend
 │   ├── src/app/
 │   │   ├── pages/       # Feature pages
+│   │   │   ├── ai-chat/          # AI Chat conversations
+│   │   │   ├── image-generator/  # Image generation UI
+│   │   │   ├── song-generator/   # Song generation UI
+│   │   │   └── ...
 │   │   ├── services/    # API services
+│   │   │   ├── business/         # Conversation management
+│   │   │   └── config/           # Chat & API config
 │   │   ├── components/  # Shared components
 │   │   └── models/      # TypeScript interfaces
 │   └── package.json
