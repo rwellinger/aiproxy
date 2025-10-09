@@ -17,13 +17,14 @@ from schemas.conversation_schemas import (
 from utils.logger import logger
 from config.settings import OLLAMA_URL, OLLAMA_TIMEOUT
 from config.model_context_windows import get_context_window_size
+from api.controllers.openai_chat_controller import OpenAIChatController, OpenAIAPIError as OpenAIError
 
 
 class ConversationController:
     """Controller for managing AI chat conversations."""
 
     def list_conversations(
-        self, db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20
+        self, db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20, provider: str = None
     ) -> Tuple[Dict[str, Any], int]:
         """
         List all conversations for a user.
@@ -33,6 +34,7 @@ class ConversationController:
             user_id: User UUID
             skip: Pagination offset
             limit: Pagination limit
+            provider: Optional provider filter ('internal' or 'external')
 
         Returns:
             Tuple of (response_data, status_code)
@@ -46,9 +48,13 @@ class ConversationController:
                 )
                 .outerjoin(Message, Conversation.id == Message.conversation_id)
                 .filter(Conversation.user_id == user_id)
-                .group_by(Conversation.id)
-                .order_by(Conversation.updated_at.desc())
             )
+
+            # Filter by provider if specified
+            if provider:
+                query = query.filter(Conversation.provider == provider)
+
+            query = query.group_by(Conversation.id).order_by(Conversation.updated_at.desc())
 
             total = query.count()
             conversations_with_count = query.offset(skip).limit(limit).all()
@@ -151,6 +157,7 @@ class ConversationController:
                 user_id=user_id,
                 title=data.title,
                 model=data.model,
+                provider=data.provider or "internal",
                 system_context=data.system_context,
                 context_window_size=context_window_size,
                 current_token_count=0,
@@ -346,20 +353,27 @@ class ConversationController:
                 .all()
             )
 
-            # Build messages for Ollama chat API
+            # Build messages for chat API
             chat_messages = []
             for msg in messages:
                 chat_messages.append({"role": msg.role, "content": msg.content})
 
-            # Call Ollama chat API
+            # Route to appropriate provider
             try:
-                assistant_content, prompt_eval_count, eval_count = self._call_ollama_chat_api(
-                    conversation.model, chat_messages
-                )
-            except OllamaAPIError as e:
+                if conversation.provider == "external":
+                    # Call OpenAI Chat API
+                    assistant_content, prompt_eval_count, eval_count = self._call_openai_chat_api(
+                        conversation.model, chat_messages
+                    )
+                else:
+                    # Call Ollama chat API (default/internal)
+                    assistant_content, prompt_eval_count, eval_count = self._call_ollama_chat_api(
+                        conversation.model, chat_messages
+                    )
+            except (OllamaAPIError, OpenAIError) as e:
                 db.rollback()
-                logger.error("Ollama API Error", error=str(e))
-                return {"error": f"Ollama API Error: {e}"}, 500
+                logger.error("Chat API Error", error=str(e), provider=conversation.provider)
+                return {"error": f"Chat API Error: {e}"}, 500
 
             # Calculate user message token count (part of prompt_eval_count)
             # Note: prompt_eval_count includes system context + all previous messages + new user message
@@ -468,6 +482,42 @@ class ConversationController:
                 error=str(e),
             )
             raise OllamaAPIError(f"Unexpected Error: {e}")
+
+
+    def _call_openai_chat_api(self, model: str, messages: List[Dict[str, str]]) -> Tuple[str, int, int]:
+        """
+        Call OpenAI chat API.
+
+        Args:
+            model: Model name
+            messages: List of messages with role and content
+
+        Returns:
+            Tuple of (assistant_content, prompt_tokens, completion_tokens)
+
+        Raises:
+            OpenAIError: If API call fails
+        """
+        openai_controller = OpenAIChatController()
+        logger.debug("Calling OpenAI chat API", model=model)
+
+        try:
+            content, prompt_tokens, completion_tokens = openai_controller.send_chat_message(
+                model=model,
+                messages=messages
+            )
+
+            logger.debug(
+                "Token counts extracted",
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens
+            )
+
+            return content, prompt_tokens, completion_tokens
+
+        except OpenAIError as e:
+            logger.error("OpenAI API Error", error=str(e))
+            raise
 
 
 class OllamaAPIError(Exception):

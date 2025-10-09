@@ -24,9 +24,9 @@ export class ConversationService {
   /**
    * List all conversations for the authenticated user
    */
-  public getConversations(skip: number = 0, limit: number = 20): Observable<ConversationListResponse> {
+  public getConversations(skip: number = 0, limit: number = 20, provider?: string): Observable<ConversationListResponse> {
     return this.http.get<ConversationListResponse>(
-      this.apiConfig.endpoints.conversation.list(skip, limit)
+      this.apiConfig.endpoints.conversation.list(skip, limit, provider)
     );
   }
 

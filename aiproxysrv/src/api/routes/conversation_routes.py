@@ -32,9 +32,10 @@ def list_conversations():
         # Get pagination params
         skip = request.args.get("skip", default=0, type=int)
         limit = request.args.get("limit", default=20, type=int)
+        provider = request.args.get("provider", default=None, type=str)
 
         response_data, status_code = conversation_controller.list_conversations(
-            db=db, user_id=user_id, skip=skip, limit=limit
+            db=db, user_id=user_id, skip=skip, limit=limit, provider=provider
         )
 
         return jsonify(response_data), status_code

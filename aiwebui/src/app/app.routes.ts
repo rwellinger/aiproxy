@@ -13,6 +13,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/ai-chat/ai-chat.component').then(m => m.AiChatComponent)
     },
     {
+        path: 'openai-chat',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/openai-chat/openai-chat.component').then(m => m.OpenaiChatComponent)
+    },
+    {
         path: 'songgen',
         canActivate: [AuthGuard],
         loadComponent: () => import('./pages/song-generator/song-generator.component').then(m => m.SongGeneratorComponent)

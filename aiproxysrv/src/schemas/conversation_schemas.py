@@ -34,6 +34,7 @@ class ConversationCreate(BaseModel):
 
     title: str = Field(..., min_length=1, max_length=255, description="Conversation title")
     model: str = Field(..., min_length=1, max_length=100, description="AI model name")
+    provider: Optional[str] = Field("internal", pattern="^(internal|external)$", description="Provider type: internal (Ollama) or external (OpenAI)")
     system_context: Optional[str] = Field(None, description="System context/prompt")
 
 
@@ -44,6 +45,7 @@ class ConversationResponse(BaseModel):
     user_id: UUID
     title: str
     model: str
+    provider: str = "internal"
     system_context: Optional[str]
     context_window_size: int = 2048
     current_token_count: int = 0

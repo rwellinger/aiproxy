@@ -7,6 +7,7 @@ export interface Conversation {
   user_id: string;
   title: string;
   model: string;
+  provider?: 'internal' | 'external';
   system_context?: string;
   context_window_size?: number;
   current_token_count?: number;
@@ -56,5 +57,11 @@ export interface SendMessageResponse {
 export interface ConversationCreateRequest {
   title: string;
   model: string;
+  provider?: 'internal' | 'external';
   system_context?: string;
+}
+
+export interface OpenAIModel {
+  name: string;
+  context_window: number;
 }

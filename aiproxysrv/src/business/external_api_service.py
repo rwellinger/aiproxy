@@ -3,7 +3,7 @@ import os
 import logging
 import requests
 from typing import Dict, Any
-from config.settings import OPENAI_API_KEY, OPENAI_URL, OPENAI_MODEL
+from config.settings import OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_IMAGE_MODEL
 
 logger = logging.getLogger(__name__)
 
@@ -14,12 +14,12 @@ class OpenAIAPIError(Exception):
 
 
 class OpenAIService:
-    """Service for OpenAI API integration"""
+    """Service for OpenAI API integration (Images)"""
 
     def __init__(self):
         self.api_key = OPENAI_API_KEY
-        self.base_url = OPENAI_URL
-        self.model = OPENAI_MODEL
+        self.base_url = OPENAI_BASE_URL
+        self.model = OPENAI_IMAGE_MODEL
 
     def generate_image(self, prompt: str, size: str) -> str:
         """
@@ -47,8 +47,8 @@ class OpenAIService:
             'n': 1
         }
 
-        api_url = os.path.join(self.base_url, "generations")
-        logger.info(f"Calling OpenAI API: {api_url}")
+        api_url = f"{self.base_url}/images/generations"
+        logger.info(f"Calling OpenAI Image API: {api_url}")
 
         try:
             response = requests.post(

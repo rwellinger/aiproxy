@@ -15,17 +15,18 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { ConversationService } from '../../services/business/conversation.service';
+import { OpenaiChatService } from '../../services/business/openai-chat.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import {
   Conversation,
   Message,
-  OllamaModel,
+  OpenAIModel,
   ConversationDetailResponse
 } from '../../models/conversation.model';
 import { MessageContentPipe } from '../../pipes/message-content.pipe';
 
 @Component({
-  selector: 'app-ai-chat',
+  selector: 'app-openai-chat',
   standalone: true,
   imports: [
     CommonModule,
@@ -42,12 +43,13 @@ import { MessageContentPipe } from '../../pipes/message-content.pipe';
     MatProgressBarModule,
     MessageContentPipe
   ],
-  templateUrl: './ai-chat.component.html',
-  styleUrl: './ai-chat.component.scss'
+  templateUrl: './openai-chat.component.html',
+  styleUrl: './openai-chat.component.scss'
 })
-export class AiChatComponent implements OnInit, OnDestroy {
+export class OpenaiChatComponent implements OnInit, OnDestroy {
   // Services
   private conversationService = inject(ConversationService);
+  private openaiChatService = inject(OpenaiChatService);
   private notificationService = inject(NotificationService);
   private messageContentPipe = new MessageContentPipe(inject(DomSanitizer));
   private destroy$ = new Subject<void>();
@@ -56,7 +58,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
   conversations: Conversation[] = [];
   currentConversation: Conversation | null = null;
   messages: Message[] = [];
-  models: OllamaModel[] = [];
+  models: OpenAIModel[] = [];
 
   // UI State
   isLoading = false;
@@ -82,7 +84,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
     this.loadConversations();
 
     // Load saved system context from localStorage
-    this.systemContext = this.conversationService.loadSystemContext();
+    this.systemContext = this.openaiChatService.loadSystemContext();
   }
 
   ngOnDestroy(): void {
@@ -91,11 +93,11 @@ export class AiChatComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load available Ollama models
+   * Load available OpenAI models
    */
   private loadModels(): void {
     this.isLoadingModels = true;
-    this.conversationService
+    this.openaiChatService
       .getModels()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -108,7 +110,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading models:', error);
-          this.notificationService.error('Failed to load models');
+          this.notificationService.error('Failed to load OpenAI models');
         },
         complete: () => {
           this.isLoadingModels = false;
@@ -117,12 +119,12 @@ export class AiChatComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load list of conversations (Ollama provider only)
+   * Load list of conversations (OpenAI provider only)
    */
   public loadConversations(): void {
     this.isLoading = true;
     this.conversationService
-      .getConversations(0, 50, 'internal')
+      .getConversations(0, 50, 'external')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -177,7 +179,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
     this.showNewChatForm = true;
     this.newChatTitle = '';
     // Load persisted system context
-    this.systemContext = this.conversationService.loadSystemContext();
+    this.systemContext = this.openaiChatService.loadSystemContext();
   }
 
   /**
@@ -190,7 +192,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Create new conversation (with provider: 'internal')
+   * Create new conversation (with provider: 'external')
    */
   public createConversation(): void {
     if (!this.newChatTitle.trim() || !this.selectedModel) {
@@ -204,7 +206,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
         title: this.newChatTitle.trim(),
         model: this.selectedModel,
         system_context: this.systemContext.trim() || undefined,
-        provider: 'internal'
+        provider: 'external'
       })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -419,7 +421,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
    * Handle system context changes and save to localStorage
    */
   public onSystemContextChange(): void {
-    this.conversationService.saveSystemContext(this.systemContext);
+    this.openaiChatService.saveSystemContext(this.systemContext);
   }
 
   /**
@@ -427,7 +429,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
    */
   public clearSystemContext(): void {
     this.systemContext = '';
-    this.conversationService.clearSystemContext();
+    this.openaiChatService.clearSystemContext();
   }
 
   /**
