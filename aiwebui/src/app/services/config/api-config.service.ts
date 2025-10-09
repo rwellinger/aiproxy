@@ -74,6 +74,9 @@ export class ApiConfigService {
         ollama: {
             tags: `${this.baseUrl}/api/v1/ollama/tags`,
             chatGenerateUnified: `${this.baseUrl}/api/v1/ollama/chat/generate-unified`
+        },
+        openai: {
+            models: `${this.baseUrl}/api/v1/openai/chat/models`
         }
     };
 
