@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   Conversation,
@@ -9,27 +9,24 @@ import {
   ConversationCreateRequest,
   OllamaModel
 } from '../../models/conversation.model';
-import { environment } from '../../../environments/environment';
+import { ApiConfigService } from '../config/api-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConversationService {
-  private readonly baseUrl = `${environment.apiUrl}/api/v1`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private apiConfig: ApiConfigService
+  ) {}
 
   /**
    * List all conversations for the authenticated user
    */
   public getConversations(skip: number = 0, limit: number = 20): Observable<ConversationListResponse> {
-    const params = new HttpParams()
-      .set('skip', skip.toString())
-      .set('limit', limit.toString());
-
     return this.http.get<ConversationListResponse>(
-      `${this.baseUrl}/conversations`,
-      { params }
+      this.apiConfig.endpoints.conversation.list(skip, limit)
     );
   }
 
@@ -38,7 +35,7 @@ export class ConversationService {
    */
   public getConversation(id: string): Observable<ConversationDetailResponse> {
     return this.http.get<ConversationDetailResponse>(
-      `${this.baseUrl}/conversations/${id}`
+      this.apiConfig.endpoints.conversation.detail(id)
     );
   }
 
@@ -47,7 +44,7 @@ export class ConversationService {
    */
   public createConversation(data: ConversationCreateRequest): Observable<Conversation> {
     return this.http.post<Conversation>(
-      `${this.baseUrl}/conversations`,
+      this.apiConfig.endpoints.conversation.create,
       data
     );
   }
@@ -57,7 +54,7 @@ export class ConversationService {
    */
   public deleteConversation(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(
-      `${this.baseUrl}/conversations/${id}`
+      this.apiConfig.endpoints.conversation.delete(id)
     );
   }
 
@@ -66,7 +63,7 @@ export class ConversationService {
    */
   public sendMessage(conversationId: string, content: string): Observable<SendMessageResponse> {
     return this.http.post<SendMessageResponse>(
-      `${this.baseUrl}/conversations/${conversationId}/messages`,
+      this.apiConfig.endpoints.conversation.sendMessage(conversationId),
       { content }
     );
   }
@@ -76,7 +73,7 @@ export class ConversationService {
    */
   public getModels(): Observable<{ models: OllamaModel[] }> {
     return this.http.get<{ models: OllamaModel[] }>(
-      `http://10.0.1.120:11434/api/tags`
+      this.apiConfig.endpoints.ollama.tags
     );
   }
 

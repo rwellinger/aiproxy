@@ -49,9 +49,6 @@ export class ApiConfigService {
             generate: `${this.baseUrl}/api/v1/instrumental/generate`,
             status: (taskId: string) => `${this.baseUrl}/api/v1/instrumental/task/status/${taskId}`
         },
-        chat: {
-            generateUnified: `${this.baseUrl}/api/v1/ollama/chat/generate-unified`
-        },
         prompt: {
             list: `${this.baseUrl}/api/v1/prompts`,
             category: (category: string) => `${this.baseUrl}/api/v1/prompts/${category}`,
@@ -59,6 +56,23 @@ export class ApiConfigService {
             update: (category: string, action: string) => `${this.baseUrl}/api/v1/prompts/${category}/${action}`,
             create: `${this.baseUrl}/api/v1/prompts`,
             delete: (category: string, action: string) => `${this.baseUrl}/api/v1/prompts/${category}/${action}`
+        },
+        conversation: {
+            list: (skip?: number, limit?: number) => {
+                const params = new URLSearchParams();
+                if (skip !== undefined) params.append('skip', skip.toString());
+                if (limit !== undefined) params.append('limit', limit.toString());
+                const query = params.toString();
+                return `${this.baseUrl}/api/v1/conversations${query ? '?' + query : ''}`;
+            },
+            detail: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}`,
+            create: `${this.baseUrl}/api/v1/conversations`,
+            delete: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}`,
+            sendMessage: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}/messages`
+        },
+        ollama: {
+            tags: `${this.baseUrl}/api/v1/ollama/tags`,
+            chatGenerateUnified: `${this.baseUrl}/api/v1/ollama/chat/generate-unified`
         }
     };
 
