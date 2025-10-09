@@ -189,7 +189,8 @@ class Conversation(Base):
 
     # Conversation metadata
     title = Column(String(255), nullable=False)
-    model = Column(String(100), nullable=False)  # Ollama model used
+    model = Column(String(100), nullable=False)  # Model name (Ollama or OpenAI)
+    provider = Column(String(50), nullable=False, server_default="internal", index=True)  # 'internal' (Ollama) or 'external' (OpenAI, DeepSeek)
     system_context = Column(Text, nullable=True)  # System prompt/context
 
     # Token tracking
@@ -205,7 +206,7 @@ class Conversation(Base):
     messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan", order_by="Message.created_at")
 
     def __repr__(self):
-        return f"<Conversation(id={self.id}, title='{self.title}', model='{self.model}', messages={len(self.messages) if self.messages else 0})>"
+        return f"<Conversation(id={self.id}, title='{self.title}', model='{self.model}', provider='{self.provider}', messages={len(self.messages) if self.messages else 0})>"
 
 
 class Message(Base):

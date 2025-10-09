@@ -17,6 +17,7 @@ from .routes.prompt_routes import api_prompt_v1
 from .routes.user_routes import api_user_v1
 from .routes.conversation_routes import api_conversation_v1
 from .routes.ollama_routes import api_ollama_v1
+from .routes.openai_chat_routes import api_openai_chat_v1
 
 
 def create_app():
@@ -445,5 +446,6 @@ def create_app():
     app.register_blueprint(api_user_v1)
     app.register_blueprint(api_conversation_v1)
     app.register_blueprint(api_ollama_v1)
+    app.register_blueprint(api_openai_chat_v1)
 
     return app

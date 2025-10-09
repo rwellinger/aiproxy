@@ -32,11 +32,17 @@ MUREKA_POLL_INTERVAL_MEDIUM = int(os.getenv("MUREKA_POLL_INTERVAL_MEDIUM", "15")
 MUREKA_POLL_INTERVAL_LONG = int(os.getenv("MUREKA_POLL_INTERVAL_LONG", "30"))
 
 # --------------------------------------------------
-# OpenAI Config
+# OpenAI Config (Images + Chat)
 # --------------------------------------------------
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_URL = os.getenv("OPENAI_URL")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+OPENAI_IMAGE_MODEL = os.getenv("OPENAI_IMAGE_MODEL", "dall-e-3")
+OPENAI_CHAT_MODELS = os.getenv("OPENAI_CHAT_MODELS", "gpt-4o,gpt-4o-mini,gpt-5,gpt-5-mini")
+OPENAI_TIMEOUT = int(os.getenv("OPENAI_TIMEOUT", "60"))
+
+# Backwards compatibility (deprecated - use OPENAI_BASE_URL + endpoints)
+OPENAI_URL = os.getenv("OPENAI_URL", f"{OPENAI_BASE_URL}/images")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", OPENAI_IMAGE_MODEL)
 
 # --------------------------------------------------
 # Image URL Config
