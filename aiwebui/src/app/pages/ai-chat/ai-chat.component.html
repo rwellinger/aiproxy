@@ -25,10 +25,29 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>System Context (Optional)</mat-label>
-          <textarea matInput [(ngModel)]="systemContext" rows="3" placeholder="Set system behavior..."></textarea>
-        </mat-form-field>
+        <mat-expansion-panel class="system-context-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>settings</mat-icon>
+              System Context (Optional)
+              @if (systemContext.trim()) {
+                <span class="context-indicator">●</span>
+              }
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <mat-form-field appearance="outline">
+            <mat-label>System Context</mat-label>
+            <textarea matInput [(ngModel)]="systemContext" (ngModelChange)="onSystemContextChange()" rows="4" placeholder="Set system behavior..."></textarea>
+            <mat-hint>Automatically saved to browser</mat-hint>
+          </mat-form-field>
+
+          @if (systemContext.trim()) {
+            <button mat-stroked-button color="warn" (click)="clearSystemContext()" class="clear-context-btn">
+              <mat-icon>clear</mat-icon> Clear System Context
+            </button>
+          }
+        </mat-expansion-panel>
 
         <div class="form-actions">
           <button mat-button (click)="cancelNewChat()">Cancel</button>
@@ -80,18 +99,50 @@
           <h2>{{ currentConversation.title }}</h2>
           <span class="model-badge">{{ currentConversation.model }}</span>
         </div>
+        <div class="token-info">
+          <span class="token-count">{{ getFormattedTokenCount() }} tokens</span>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="getTokenPercentage()"
+            [color]="getTokenProgressColor()"
+            class="token-progress">
+          </mat-progress-bar>
+        </div>
         <button mat-icon-button color="warn" (click)="deleteConversation()" title="Delete conversation">
           <mat-icon>delete</mat-icon>
         </button>
       </div>
 
+      @if (shouldShowTokenWarning()) {
+        <div class="token-warning">
+          <mat-icon>warning</mat-icon>
+          <span>Context window nearly full ({{ getTokenPercentage().toFixed(0) }}%)! Oldest messages may be lost.</span>
+        </div>
+      }
+
+      @if (currentConversation.system_context) {
+        <mat-expansion-panel class="conversation-system-context">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>info</mat-icon>
+              System Context
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="system-context-content">
+            {{ currentConversation.system_context }}
+          </div>
+        </mat-expansion-panel>
+      }
+
       <div class="messages-container" #messagesContainer>
         @for (message of messages; track message.id) {
-          <div class="message" [ngClass]="getMessageClass(message)">
-            <div class="message-role">{{ message.role }}</div>
-            <div class="message-content" [innerHTML]="message.content | messageContent"></div>
-            <div class="message-time">{{ formatDate(message.created_at) }}</div>
-          </div>
+          @if (message.role !== 'system') {
+            <div class="message" [ngClass]="getMessageClass(message)">
+              <div class="message-role">{{ message.role }}</div>
+              <div class="message-content" [innerHTML]="message.content | messageContent"></div>
+              <div class="message-time">{{ formatDate(message.created_at) }}</div>
+            </div>
+          }
         }
 
         @if (isSending) {

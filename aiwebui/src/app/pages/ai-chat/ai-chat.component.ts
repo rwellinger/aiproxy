@@ -10,6 +10,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { ConversationService } from '../../services/business/conversation.service';
 import { NotificationService } from '../../services/ui/notification.service';
@@ -35,6 +37,8 @@ import { MessageContentPipe } from '../../pipes/message-content.pipe';
     MatInputModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatExpansionModule,
+    MatProgressBarModule,
     MessageContentPipe
   ],
   templateUrl: './ai-chat.component.html',
@@ -72,6 +76,9 @@ export class AiChatComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadModels();
     this.loadConversations();
+
+    // Load saved system context from localStorage
+    this.systemContext = this.conversationService.loadSystemContext();
   }
 
   ngOnDestroy(): void {
@@ -165,7 +172,8 @@ export class AiChatComponent implements OnInit, OnDestroy {
   public showNewChat(): void {
     this.showNewChatForm = true;
     this.newChatTitle = '';
-    this.systemContext = '';
+    // Load persisted system context
+    this.systemContext = this.conversationService.loadSystemContext();
   }
 
   /**
@@ -174,7 +182,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
   public cancelNewChat(): void {
     this.showNewChatForm = false;
     this.newChatTitle = '';
-    this.systemContext = '';
+    // Keep system context - it persists across sessions
   }
 
   /**
@@ -200,7 +208,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
           this.selectConversation(conversation);
           this.showNewChatForm = false;
           this.newChatTitle = '';
-          this.systemContext = '';
+          // Keep system context - it persists across sessions
           this.notificationService.success('Conversation created');
         },
         error: (error) => {
@@ -357,5 +365,62 @@ export class AiChatComponent implements OnInit, OnDestroy {
    */
   public getMessageClass(message: Message): string {
     return `message--${message.role}`;
+  }
+
+  /**
+   * Handle system context changes and save to localStorage
+   */
+  public onSystemContextChange(): void {
+    this.conversationService.saveSystemContext(this.systemContext);
+  }
+
+  /**
+   * Clear saved system context
+   */
+  public clearSystemContext(): void {
+    this.systemContext = '';
+    this.conversationService.clearSystemContext();
+  }
+
+  /**
+   * Get token usage percentage
+   */
+  public getTokenPercentage(): number {
+    if (!this.currentConversation?.context_window_size || !this.currentConversation?.current_token_count) return 0;
+    return (this.currentConversation.current_token_count / this.currentConversation.context_window_size) * 100;
+  }
+
+  /**
+   * Get formatted token count (e.g., "1.2k / 8k")
+   */
+  public getFormattedTokenCount(): string {
+    if (!this.currentConversation?.context_window_size) return '';
+
+    const format = (num: number): string => {
+      if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
+      return num.toString();
+    };
+
+    const current = this.currentConversation.current_token_count || 0;
+    const max = this.currentConversation.context_window_size;
+
+    return `${format(current)} / ${format(max)}`;
+  }
+
+  /**
+   * Get progress bar color based on usage
+   */
+  public getTokenProgressColor(): string {
+    const percentage = this.getTokenPercentage();
+    if (percentage >= 90) return 'warn';
+    if (percentage >= 70) return 'accent';
+    return 'primary';
+  }
+
+  /**
+   * Check if token warning should be shown
+   */
+  public shouldShowTokenWarning(): boolean {
+    return this.getTokenPercentage() >= 90;
   }
 }

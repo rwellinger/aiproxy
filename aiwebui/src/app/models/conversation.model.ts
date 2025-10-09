@@ -8,6 +8,8 @@ export interface Conversation {
   title: string;
   model: string;
   system_context?: string;
+  context_window_size?: number;
+  current_token_count?: number;
   created_at: string;
   updated_at?: string;
   message_count?: number;
@@ -18,6 +20,7 @@ export interface Message {
   conversation_id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
+  token_count?: number;
   created_at: string;
 }
 

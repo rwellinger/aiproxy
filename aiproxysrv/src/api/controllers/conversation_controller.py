@@ -15,6 +15,7 @@ from schemas.conversation_schemas import (
 )
 from utils.logger import logger
 from config.settings import OLLAMA_URL, OLLAMA_TIMEOUT
+from config.model_context_windows import get_context_window_size
 
 
 class ConversationController:
@@ -140,6 +141,9 @@ class ConversationController:
             Tuple of (response_data, status_code)
         """
         try:
+            # Get context window size for the model
+            context_window_size = get_context_window_size(data.model)
+
             # Create conversation
             conversation = Conversation(
                 id=uuid.uuid4(),
@@ -147,6 +151,8 @@ class ConversationController:
                 title=data.title,
                 model=data.model,
                 system_context=data.system_context,
+                context_window_size=context_window_size,
+                current_token_count=0,
                 created_at=datetime.utcnow(),
                 updated_at=datetime.utcnow(),
             )
@@ -160,6 +166,7 @@ class ConversationController:
                     conversation_id=conversation.id,
                     role="system",
                     content=data.system_context,
+                    token_count=len(data.system_context.split()),  # Rough approximation
                     created_at=datetime.utcnow(),
                 )
                 db.add(system_message)
@@ -290,7 +297,7 @@ class ConversationController:
 
             # Call Ollama chat API
             try:
-                assistant_content = self._call_ollama_chat_api(
+                assistant_content, prompt_eval_count, eval_count = self._call_ollama_chat_api(
                     conversation.model, chat_messages
                 )
             except OllamaAPIError as e:
@@ -298,15 +305,24 @@ class ConversationController:
                 logger.error("Ollama API Error", error=str(e))
                 return {"error": f"Ollama API Error: {e}"}, 500
 
+            # Calculate user message token count (part of prompt_eval_count)
+            # Note: prompt_eval_count includes system context + all previous messages + new user message
+            # For simplicity, we use eval_count for assistant and store prompt_eval_count
+            user_message.token_count = len(content.split())  # Rough approximation
+
             # Create assistant message
             assistant_message = Message(
                 id=uuid.uuid4(),
                 conversation_id=conversation_id,
                 role="assistant",
                 content=assistant_content,
+                token_count=eval_count,
                 created_at=datetime.utcnow(),
             )
             db.add(assistant_message)
+
+            # Update conversation token count
+            conversation.current_token_count = prompt_eval_count + eval_count
 
             # Update conversation timestamp
             conversation.updated_at = datetime.utcnow()
@@ -336,7 +352,7 @@ class ConversationController:
             )
             return {"error": f"Failed to send message: {e}"}, 500
 
-    def _call_ollama_chat_api(self, model: str, messages: List[Dict[str, str]]) -> str:
+    def _call_ollama_chat_api(self, model: str, messages: List[Dict[str, str]]) -> Tuple[str, int, int]:
         """
         Call Ollama chat API.
 
@@ -345,7 +361,7 @@ class ConversationController:
             messages: List of messages with role and content
 
         Returns:
-            Assistant response content
+            Tuple of (assistant_content, prompt_eval_count, eval_count)
 
         Raises:
             OllamaAPIError: If API call fails
@@ -372,7 +388,17 @@ class ConversationController:
 
             # Extract assistant message
             if "message" in resp_json and "content" in resp_json["message"]:
-                return resp_json["message"]["content"]
+                content = resp_json["message"]["content"]
+                prompt_eval_count = resp_json.get("prompt_eval_count", 0)
+                eval_count = resp_json.get("eval_count", 0)
+
+                logger.debug(
+                    "Token counts extracted",
+                    prompt_tokens=prompt_eval_count,
+                    response_tokens=eval_count
+                )
+
+                return content, prompt_eval_count, eval_count
             else:
                 raise OllamaAPIError("Invalid API response format")
 

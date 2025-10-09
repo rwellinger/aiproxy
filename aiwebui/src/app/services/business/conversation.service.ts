@@ -79,4 +79,32 @@ export class ConversationService {
       `http://10.0.1.120:11434/api/tags`
     );
   }
+
+  // LocalStorage methods for System Context persistence
+  private readonly STORAGE_KEY = 'aiChatSystemContext';
+
+  /**
+   * Load saved system context from localStorage
+   */
+  public loadSystemContext(): string {
+    return localStorage.getItem(this.STORAGE_KEY) || '';
+  }
+
+  /**
+   * Save system context to localStorage
+   */
+  public saveSystemContext(context: string): void {
+    if (context.trim()) {
+      localStorage.setItem(this.STORAGE_KEY, context);
+    } else {
+      this.clearSystemContext();
+    }
+  }
+
+  /**
+   * Clear saved system context from localStorage
+   */
+  public clearSystemContext(): void {
+    localStorage.removeItem(this.STORAGE_KEY);
+  }
 }

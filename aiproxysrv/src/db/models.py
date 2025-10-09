@@ -192,6 +192,10 @@ class Conversation(Base):
     model = Column(String(100), nullable=False)  # Ollama model used
     system_context = Column(Text, nullable=True)  # System prompt/context
 
+    # Token tracking
+    context_window_size = Column(Integer, nullable=False, server_default="2048")  # Max tokens for this model
+    current_token_count = Column(Integer, nullable=False, server_default="0")  # Current total tokens used
+
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -216,6 +220,9 @@ class Message(Base):
     # Message content
     role = Column(String(50), nullable=False)  # 'user', 'assistant', 'system'
     content = Column(Text, nullable=False)
+
+    # Token tracking
+    token_count = Column(Integer, nullable=True)  # Token count for this message
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

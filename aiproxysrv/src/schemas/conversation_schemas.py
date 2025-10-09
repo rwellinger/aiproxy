@@ -20,6 +20,7 @@ class MessageResponse(BaseModel):
     conversation_id: UUID
     role: str
     content: str
+    token_count: Optional[int] = None
     created_at: datetime
 
     class Config:
@@ -44,6 +45,8 @@ class ConversationResponse(BaseModel):
     title: str
     model: str
     system_context: Optional[str]
+    context_window_size: int = 2048
+    current_token_count: int = 0
     created_at: datetime
     updated_at: Optional[datetime]
     message_count: Optional[int] = None
