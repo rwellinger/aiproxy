@@ -48,9 +48,9 @@ docker pull ghcr.io/rwellinger/celery-worker-app:latest
 docker pull ghcr.io/rwellinger/aiwebui-app:latest
 
 # Or use a specific version
-docker pull ghcr.io/rwellinger/aiproxysrv-app:v2.0.1
-docker pull ghcr.io/rwellinger/celery-worker-app:v2.0.1
-docker pull ghcr.io/rwellinger/aiwebui-app:v2.0.1
+docker pull ghcr.io/rwellinger/aiproxysrv-app:v2.1.1
+docker pull ghcr.io/rwellinger/celery-worker-app:v2.1.1
+docker pull ghcr.io/rwellinger/aiwebui-app:v2.1.1
 
 # Configure environment and start
 cd aiproxysrv
