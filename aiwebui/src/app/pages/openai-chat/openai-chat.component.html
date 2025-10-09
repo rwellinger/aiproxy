@@ -1,216 +1,230 @@
 <div class="openai-chat-container">
-  <!-- Left sidebar - Conversation list -->
-  <aside class="conversation-list">
-    <div class="conversation-list-header">
-      <h2>AI Chat (OpenAI)</h2>
-      <button mat-raised-button color="primary" (click)="showNewChat()">
-        <mat-icon>add</mat-icon> New Chat
-      </button>
-    </div>
-
-    <!-- New chat form -->
-    @if (showNewChatForm) {
-      <mat-card class="new-chat-form">
-        <mat-form-field appearance="outline">
-          <mat-label>Title</mat-label>
-          <input matInput [(ngModel)]="newChatTitle" placeholder="Chat title">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Model</mat-label>
-          <mat-select [(ngModel)]="selectedModel">
-            @for (model of models; track model.name) {
-              <mat-option [value]="model.name">{{ model.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-expansion-panel class="system-context-panel">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <mat-icon>settings</mat-icon>
-              System Context (Optional)
-              @if (systemContext.trim()) {
-                <span class="context-indicator">●</span>
-              }
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-
-          <mat-form-field appearance="outline">
-            <mat-label>System Context</mat-label>
-            <textarea matInput [(ngModel)]="systemContext" (ngModelChange)="onSystemContextChange()" rows="4" placeholder="Set system behavior..."></textarea>
-            <mat-hint>Automatically saved to browser</mat-hint>
-          </mat-form-field>
-
-          @if (systemContext.trim()) {
-            <button mat-stroked-button color="warn" (click)="clearSystemContext()" class="clear-context-btn">
-              <mat-icon>clear</mat-icon> Clear System Context
+    <!-- Left sidebar - Conversation list -->
+    <aside class="conversation-list">
+        <div class="conversation-list-header">
+            <h2>OpenAI Chat (Extern)</h2>
+            <button mat-raised-button color="primary" (click)="showNewChat()">
+                <mat-icon>add</mat-icon>
+                New Chat
             </button>
-          }
-        </mat-expansion-panel>
-
-        <div class="form-actions">
-          <button mat-button (click)="cancelNewChat()">Cancel</button>
-          <button mat-raised-button color="primary" (click)="createConversation()">Create</button>
         </div>
-      </mat-card>
-    }
 
-    <!-- Conversation items -->
-    <div class="conversation-items">
-      @if (isLoading && conversations.length === 0) {
-        <div class="loading-state">
-          <mat-spinner diameter="40"></mat-spinner>
-        </div>
-      }
+        <!-- New chat form -->
+        @if (showNewChatForm) {
+            <mat-card class="new-chat-form">
+                <mat-form-field appearance="outline">
+                    <mat-label>Title</mat-label>
+                    <input matInput [(ngModel)]="newChatTitle" placeholder="Chat title">
+                </mat-form-field>
 
-      @for (conv of conversations; track conv.id) {
-        <div class="conversation-item"
-             [class.active]="currentConversation?.id === conv.id"
-             (click)="selectConversation(conv)">
-          <div class="conversation-item-title">{{ conv.title }}</div>
-          <div class="conversation-item-model">{{ conv.model }}</div>
-          <div class="conversation-item-meta">
-            <span>{{ conv.message_count || 0 }} messages</span>
-            <span class="conversation-date">{{ formatDate(conv.updated_at || conv.created_at) }}</span>
-          </div>
-        </div>
-      }
+                <mat-form-field appearance="outline">
+                    <mat-label>Model</mat-label>
+                    <mat-select [(ngModel)]="selectedModel">
+                        @for (model of models; track model.name) {
+                            <mat-option [value]="model.name">{{ model.name }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
 
-      @if (!isLoading && conversations.length === 0) {
-        <div class="empty-state">
-          <p>No conversations yet</p>
-          <p>Create one to get started!</p>
-        </div>
-      }
-    </div>
-  </aside>
+                <mat-expansion-panel class="system-context-panel">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            <mat-icon>settings</mat-icon>
+                            System Context (Optional)
+                            @if (systemContext.trim()) {
+                                <span class="context-indicator">●</span>
+                            }
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
 
-  <!-- Main content - Conversation view -->
-  <main class="conversation-view">
-    @if (!currentConversation) {
-      <div class="empty-conversation">
-        <mat-icon>chat_bubble_outline</mat-icon>
-        <h2>No conversation selected</h2>
-        <p>Select a conversation from the list or create a new one</p>
-      </div>
-    } @else {
-      <div class="conversation-header">
-        <div class="conversation-info">
-          <div class="title-section">
-            <span class="model-badge-small">{{ currentConversation.model }}</span>
-            @if (!isEditingTitle) {
-              <div class="title-display">
-                <h2>{{ currentConversation.title }}</h2>
-                <button mat-icon-button (click)="startEditTitle()" title="Titel bearbeiten" class="edit-title-btn">
-                  <mat-icon>edit</mat-icon>
-                </button>
-              </div>
-            } @else {
-              <div class="title-edit">
-                <input
-                  type="text"
-                  [(ngModel)]="editTitleValue"
-                  (keydown)="onTitleInputKeydown($event)"
-                  class="title-input"
-                  placeholder="Conversation title">
-                <button mat-icon-button color="primary" (click)="saveTitle()" title="Speichern">
-                  <mat-icon>check</mat-icon>
-                </button>
-                <button mat-icon-button (click)="cancelEditTitle()" title="Abbrechen">
-                  <mat-icon>close</mat-icon>
-                </button>
-              </div>
+                    <mat-form-field appearance="outline">
+                        <mat-label>System Context</mat-label>
+                        <textarea matInput [(ngModel)]="systemContext" (ngModelChange)="onSystemContextChange()"
+                                  rows="4" placeholder="Set system behavior..."></textarea>
+                        <mat-hint>Automatically saved to browser</mat-hint>
+                    </mat-form-field>
+
+                    @if (systemContext.trim()) {
+                        <button mat-stroked-button color="warn" (click)="clearSystemContext()"
+                                class="clear-context-btn">
+                            <mat-icon>clear</mat-icon>
+                            Clear System Context
+                        </button>
+                    }
+                </mat-expansion-panel>
+
+                <div class="form-actions">
+                    <button mat-button (click)="cancelNewChat()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="createConversation()">Create</button>
+                </div>
+            </mat-card>
+        }
+
+        <!-- Conversation items -->
+        <div class="conversation-items">
+            @if (isLoading && conversations.length === 0) {
+                <div class="loading-state">
+                    <mat-spinner diameter="40"></mat-spinner>
+                </div>
             }
-          </div>
-        </div>
-        <div class="token-info">
-          <span class="token-count">{{ getFormattedTokenCount() }} tokens</span>
-          <mat-progress-bar
-            mode="determinate"
-            [value]="getTokenPercentage()"
-            [color]="getTokenProgressColor()"
-            class="token-progress">
-          </mat-progress-bar>
-        </div>
-        <button mat-icon-button color="warn" (click)="deleteConversation()" title="Delete conversation">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </div>
 
-      @if (shouldShowTokenWarning()) {
-        <div class="token-warning">
-          <mat-icon>warning</mat-icon>
-          <span>Context window nearly full ({{ getTokenPercentage().toFixed(0) }}%)! Oldest messages may be lost.</span>
+            @for (conv of conversations; track conv.id) {
+                <div class="conversation-item"
+                     [class.active]="currentConversation?.id === conv.id"
+                     (click)="selectConversation(conv)">
+                    <div class="conversation-item-title">{{ conv.title }}</div>
+                    <div class="conversation-item-model">{{ conv.model }}</div>
+                    <div class="conversation-item-meta">
+                        <span>{{ conv.message_count || 0 }} messages</span>
+                        <span class="conversation-date">{{ formatDate(conv.updated_at || conv.created_at) }}</span>
+                    </div>
+                </div>
+            }
+
+            @if (!isLoading && conversations.length === 0) {
+                <div class="empty-state">
+                    <p>No conversations yet</p>
+                    <p>Create one to get started!</p>
+                </div>
+            }
         </div>
-      }
+    </aside>
 
-      @if (currentConversation.system_context) {
-        <mat-expansion-panel class="conversation-system-context">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <mat-icon>info</mat-icon>
-              System Context
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <div class="system-context-content">
-            {{ currentConversation.system_context }}
-          </div>
-        </mat-expansion-panel>
-      }
+    <!-- Main content - Conversation view -->
+    <main class="conversation-view">
+        @if (!currentConversation) {
+            <div class="empty-conversation">
+                <mat-icon>chat_bubble_outline</mat-icon>
+                <h2>No conversation selected</h2>
+                <p>Select a conversation from the list or create a new one</p>
+            </div>
+        } @else {
+            <div class="conversation-header">
+                <div class="conversation-info">
+                    <div class="title-section">
+                        <span class="model-badge-small">{{ currentConversation.model }}</span>
+                        @if (!isEditingTitle) {
+                            <div class="title-display">
+                                <h2>{{ currentConversation.title }}</h2>
+                                <button mat-icon-button (click)="startEditTitle()" title="Titel bearbeiten"
+                                        class="edit-title-btn">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                            </div>
+                        } @else {
+                            <div class="title-edit">
+                                <input
+                                        type="text"
+                                        [(ngModel)]="editTitleValue"
+                                        (keydown)="onTitleInputKeydown($event)"
+                                        class="title-input"
+                                        placeholder="Conversation title">
+                                <button mat-icon-button color="primary" (click)="saveTitle()" title="Speichern">
+                                    <mat-icon>check</mat-icon>
+                                </button>
+                                <button mat-icon-button (click)="cancelEditTitle()" title="Abbrechen">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="token-info">
+                    <span class="token-count">{{ getFormattedTokenCount() }} tokens</span>
+                    <mat-progress-bar
+                            mode="determinate"
+                            [value]="getTokenPercentage()"
+                            [color]="getTokenProgressColor()"
+                            class="token-progress">
+                    </mat-progress-bar>
+                </div>
+                <button mat-icon-button color="warn" (click)="deleteConversation()" title="Delete conversation">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
 
-      <div class="messages-container" #messagesContainer>
-        @for (message of messages; track message.id) {
-          @if (message.role !== 'system') {
-            <div class="message" [ngClass]="getMessageClass(message)">
-              <div class="message-role">{{ message.role }}</div>
-              <div class="message-content" [innerHTML]="message.content | messageContent"></div>
-              <div class="message-footer">
-                @if (message.role === 'assistant') {
-                  <div class="copy-buttons">
-                    <button mat-icon-button class="copy-btn" (click)="copyToClipboard(message.content)" title="Copy as plain text">
-                      <mat-icon>content_copy</mat-icon>
-                    </button>
-                    <button mat-icon-button class="copy-btn" (click)="copyAsMarkdown(message.content)" title="Copy as Markdown">
-                      <mat-icon>code</mat-icon>
-                    </button>
-                  </div>
+            @if (shouldShowTokenWarning()) {
+                <div class="token-warning">
+                    <mat-icon>warning</mat-icon>
+                    <span>Context window nearly full ({{ getTokenPercentage().toFixed(0) }}%)! Oldest messages may be lost.</span>
+                </div>
+            }
+
+            @if (currentConversation.system_context) {
+                <mat-expansion-panel class="conversation-system-context">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            <mat-icon>info</mat-icon>
+                            System Context
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <div class="system-context-content">
+                        {{ currentConversation.system_context }}
+                    </div>
+                </mat-expansion-panel>
+            }
+
+            <div class="messages-container" #messagesContainer>
+                @for (message of messages; track message.id) {
+                    @if (message.role !== 'system') {
+                        <div class="message" [ngClass]="getMessageClass(message)">
+                            <div class="message-role">{{ message.role }}</div>
+                            <div class="message-content" [innerHTML]="message.content | messageContent"></div>
+                            <div class="message-footer">
+                                @if (message.role === 'assistant') {
+                                    <div class="copy-buttons">
+                                        <button mat-icon-button class="copy-btn"
+                                                (click)="copyToClipboard(message.content)" title="Copy as plain text">
+                                            <mat-icon>content_copy</mat-icon>
+                                        </button>
+                                        <button mat-icon-button class="copy-btn"
+                                                (click)="copyAsMarkdown(message.content)" title="Copy as Markdown">
+                                            <mat-icon>code</mat-icon>
+                                        </button>
+                                    </div>
+                                }
+                                <div class="message-time">{{ formatDate(message.created_at) }}</div>
+                            </div>
+                        </div>
+                    }
                 }
-                <div class="message-time">{{ formatDate(message.created_at) }}</div>
-              </div>
-            </div>
-          }
-        }
 
-        @if (isSending) {
-          <div class="message message--assistant message--loading">
-            <div class="message-role">assistant</div>
-            <div class="message-content">
-              <mat-spinner diameter="20"></mat-spinner>
-              Thinking...
+                @if (isSending) {
+                    <div class="message message--assistant message--loading">
+                        <div class="message-role">assistant</div>
+                        <div class="message-content">
+                            <mat-spinner diameter="20"></mat-spinner>
+                            Thinking...
+                        </div>
+                    </div>
+                }
             </div>
-          </div>
-        }
-      </div>
 
-      <div class="message-input-container">
+            <mat-card-actions align="end">
+                <p class="cost-info">
+                    <i class="fas fa-info-circle"></i>
+                    Chat Message: ~$0,03 pro 100 Token
+                </p>
+            </mat-card-actions>
+
+            <div class="message-input-container">
         <textarea
-          #messageInputField
-          class="message-input"
-          [(ngModel)]="messageInput"
-          (keydown)="onMessageInputKeydown($event)"
-          placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
-          rows="3"
-          [disabled]="isSending"></textarea>
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="sendMessage()"
-          [disabled]="!messageInput.trim() || isSending">
-          <mat-icon>send</mat-icon>
-          Send
-        </button>
-      </div>
-    }
-  </main>
+            #messageInputField
+            class="message-input"
+            [(ngModel)]="messageInput"
+            (keydown)="onMessageInputKeydown($event)"
+            placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
+            rows="3"
+            [disabled]="isSending"></textarea>
+                <button
+                        mat-raised-button
+                        color="primary"
+                        (click)="sendMessage()"
+                        [disabled]="!messageInput.trim() || isSending">
+                    <mat-icon>send</mat-icon>
+                    Send
+                </button>
+            </div>
+        }
+    </main>
 </div>
