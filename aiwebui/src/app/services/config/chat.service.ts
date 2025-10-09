@@ -67,7 +67,7 @@ export class ChatService {
     };
 
     const data: ChatResponse = await firstValueFrom(
-      this.http.post<ChatResponse>(this.apiConfig.endpoints.chat.generateUnified, request)
+      this.http.post<ChatResponse>(this.apiConfig.endpoints.ollama.chatGenerateUnified, request)
     );
     return data.response;
   }
@@ -115,7 +115,7 @@ export class ChatService {
     };
 
     const data: ChatResponse = await firstValueFrom(
-      this.http.post<ChatResponse>(this.apiConfig.endpoints.chat.generateUnified, request)
+      this.http.post<ChatResponse>(this.apiConfig.endpoints.ollama.chatGenerateUnified, request)
     );
     return data.response;
   }
@@ -159,7 +159,7 @@ export class ChatService {
     };
 
     const data: ChatResponse = await firstValueFrom(
-      this.http.post<ChatResponse>(this.apiConfig.endpoints.chat.generateUnified, request)
+      this.http.post<ChatResponse>(this.apiConfig.endpoints.ollama.chatGenerateUnified, request)
     );
     return data.response;
   }
