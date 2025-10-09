@@ -36,5 +36,10 @@ export const routes: Routes = [
         path: 'prompt-templates',
         canActivate: [AuthGuard],
         loadComponent: () => import('./pages/prompt-templates/prompt-templates.component').then(m => m.PromptTemplatesComponent)
+    },
+    {
+        path: 'ai-chat',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/ai-chat/ai-chat.component').then(m => m.AiChatComponent)
     }
 ];

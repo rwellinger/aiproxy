@@ -63,3 +63,13 @@ def get_current_user():
             'email': g.current_user_email
         }
     return None
+
+
+def get_current_user_id():
+    """
+    Helper function to get current authenticated user ID from Flask g object.
+    Returns user_id (UUID) or None if not authenticated.
+    """
+    if hasattr(g, 'current_user_id'):
+        return g.current_user_id
+    return None

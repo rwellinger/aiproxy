@@ -1,0 +1,60 @@
+/**
+ * Conversation and Message models for AI Chat
+ */
+
+export interface Conversation {
+  id: string;
+  user_id: string;
+  title: string;
+  model: string;
+  system_context?: string;
+  context_window_size?: number;
+  current_token_count?: number;
+  created_at: string;
+  updated_at?: string;
+  message_count?: number;
+}
+
+export interface Message {
+  id: string;
+  conversation_id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  token_count?: number;
+  created_at: string;
+}
+
+export interface OllamaModel {
+  name: string;
+  model: string;
+  size: number;
+  modified_at: string;
+  details: {
+    parameter_size: string;
+    quantization_level: string;
+    family: string;
+  };
+}
+
+export interface ConversationListResponse {
+  conversations: Conversation[];
+  total: number;
+  skip: number;
+  limit: number;
+}
+
+export interface ConversationDetailResponse {
+  conversation: Conversation;
+  messages: Message[];
+}
+
+export interface SendMessageResponse {
+  user_message: Message;
+  assistant_message: Message;
+}
+
+export interface ConversationCreateRequest {
+  title: string;
+  model: string;
+  system_context?: string;
+}

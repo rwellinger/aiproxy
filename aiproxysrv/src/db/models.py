@@ -171,5 +171,64 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     last_login = Column(DateTime(timezone=True), nullable=True)
 
+    # Relationships
+    conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
+
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', active={self.is_active})>"
+
+
+class Conversation(Base):
+    """Model for storing AI chat conversations"""
+    __tablename__ = "conversations"
+    __table_args__ = {'extend_existing': True}
+
+    # Primary identifier
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+
+    # Conversation metadata
+    title = Column(String(255), nullable=False)
+    model = Column(String(100), nullable=False)  # Ollama model used
+    system_context = Column(Text, nullable=True)  # System prompt/context
+
+    # Token tracking
+    context_window_size = Column(Integer, nullable=False, server_default="2048")  # Max tokens for this model
+    current_token_count = Column(Integer, nullable=False, server_default="0")  # Current total tokens used
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    user = relationship("User", back_populates="conversations")
+    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan", order_by="Message.created_at")
+
+    def __repr__(self):
+        return f"<Conversation(id={self.id}, title='{self.title}', model='{self.model}', messages={len(self.messages) if self.messages else 0})>"
+
+
+class Message(Base):
+    """Model for storing individual messages in a conversation"""
+    __tablename__ = "messages"
+    __table_args__ = {'extend_existing': True}
+
+    # Primary identifier
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.id"), nullable=False, index=True)
+
+    # Message content
+    role = Column(String(50), nullable=False)  # 'user', 'assistant', 'system'
+    content = Column(Text, nullable=False)
+
+    # Token tracking
+    token_count = Column(Integer, nullable=True)  # Token count for this message
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationship
+    conversation = relationship("Conversation", back_populates="messages")
+
+    def __repr__(self):
+        return f"<Message(id={self.id}, role='{self.role}', conversation_id={self.conversation_id})>"
