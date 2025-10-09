@@ -58,10 +58,11 @@ export class ApiConfigService {
             delete: (category: string, action: string) => `${this.baseUrl}/api/v1/prompts/${category}/${action}`
         },
         conversation: {
-            list: (skip?: number, limit?: number) => {
+            list: (skip?: number, limit?: number, provider?: string) => {
                 const params = new URLSearchParams();
                 if (skip !== undefined) params.append('skip', skip.toString());
                 if (limit !== undefined) params.append('limit', limit.toString());
+                if (provider) params.append('provider', provider);
                 const query = params.toString();
                 return `${this.baseUrl}/api/v1/conversations${query ? '?' + query : ''}`;
             },

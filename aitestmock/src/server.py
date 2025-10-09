@@ -7,6 +7,7 @@ from pathlib import Path
 from api.openai import openai_routes
 from api.mureka import mureka_routes
 from api.chat import api_chat_mock
+from api.openai_chat_mock import api_openai_chat_mock
 import logging
 import tomli
 
@@ -33,9 +34,10 @@ def create_app():
 
     app.config['DEBUG'] = os.getenv('DEBUG', 'false').lower() == 'true'
 
-    app.register_blueprint(openai_routes, url_prefix='/v1')
+    app.register_blueprint(openai_routes, url_prefix='/api/v1/openai')
     app.register_blueprint(mureka_routes, url_prefix='/v1')
     app.register_blueprint(api_chat_mock)
+    app.register_blueprint(api_openai_chat_mock)
 
     @app.route('/health')
     def health():

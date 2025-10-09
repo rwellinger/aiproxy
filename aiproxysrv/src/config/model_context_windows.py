@@ -1,12 +1,41 @@
 """
 Model Context Window Configuration
 
-Maps Ollama model names to their context window sizes (in tokens).
-Default: 2048 tokens (Ollama standard)
+Maps AI model names to their context window sizes (in tokens).
+Includes:
+- OpenAI Models (gpt-4o, gpt-5, etc.)
+- Ollama Models (llama3, gpt-oss, etc.)
+
+Default: 2048 tokens
 """
 
 MODEL_CONTEXT_WINDOWS = {
-    # GPT-OSS Models
+    # OpenAI Models (External) - GPT-5 Series
+    "gpt-5": 200000,              # GPT-5 base (estimated 200k)
+    "gpt-5-pro": 200000,          # GPT-5 Pro
+    "gpt-5-mini": 200000,         # GPT-5 Mini
+    "gpt-5-nano": 200000,         # GPT-5 Nano
+    "gpt-5-codex": 200000,        # GPT-5 Codex
+    "gpt-5-chat-latest": 200000,  # GPT-5 Chat Latest
+
+    # OpenAI Models - GPT-4.1 Series
+    "gpt-4.1": 128000,            # GPT-4.1 base
+    "gpt-4.1-mini": 128000,       # GPT-4.1 Mini
+    "gpt-4.1-nano": 128000,       # GPT-4.1 Nano
+
+    # OpenAI Models - GPT-4o Series
+    "gpt-4o": 128000,
+    "gpt-4o-mini": 128000,
+
+    # OpenAI Models - GPT-4 Series
+    "gpt-4-turbo": 128000,
+    "gpt-4": 8192,
+
+    # OpenAI Models - GPT-3.5 Series
+    "gpt-3.5-turbo": 16385,
+    "gpt-3.5-turbo-16k": 16385,
+
+    # GPT-OSS Models (Ollama)
     "gpt-oss:20b": 8192,
 
     # LLaMA Models
@@ -55,12 +84,14 @@ def get_context_window_size(model_name: str) -> int:
     Get context window size for a given model.
 
     Args:
-        model_name: Ollama model name (e.g., "gpt-oss:20b", "llama3.1:8b")
+        model_name: Model name (e.g., "gpt-4o", "gpt-oss:20b", "llama3.1:8b")
 
     Returns:
         Context window size in tokens
 
     Examples:
+        >>> get_context_window_size("gpt-4o")
+        128000
         >>> get_context_window_size("gpt-oss:20b")
         8192
         >>> get_context_window_size("llama3.1:8b")

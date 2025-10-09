@@ -24,7 +24,7 @@ class ConversationController:
     """Controller for managing AI chat conversations."""
 
     def list_conversations(
-        self, db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20
+        self, db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20, provider: str = None
     ) -> Tuple[Dict[str, Any], int]:
         """
         List all conversations for a user.
@@ -34,6 +34,7 @@ class ConversationController:
             user_id: User UUID
             skip: Pagination offset
             limit: Pagination limit
+            provider: Optional provider filter ('internal' or 'external')
 
         Returns:
             Tuple of (response_data, status_code)
@@ -47,9 +48,13 @@ class ConversationController:
                 )
                 .outerjoin(Message, Conversation.id == Message.conversation_id)
                 .filter(Conversation.user_id == user_id)
-                .group_by(Conversation.id)
-                .order_by(Conversation.updated_at.desc())
             )
+
+            # Filter by provider if specified
+            if provider:
+                query = query.filter(Conversation.provider == provider)
+
+            query = query.group_by(Conversation.id).order_by(Conversation.updated_at.desc())
 
             total = query.count()
             conversations_with_count = query.offset(skip).limit(limit).all()
