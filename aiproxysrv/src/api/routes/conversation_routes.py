@@ -8,6 +8,7 @@ from api.controllers.conversation_controller import ConversationController
 from db.database import get_db
 from schemas.conversation_schemas import (
     ConversationCreate,
+    ConversationUpdate,
     SendMessageRequest,
 )
 from utils.logger import logger
@@ -86,6 +87,32 @@ def get_conversation(conversation_id: str):
     except Exception as e:
         logger.error("Error in get_conversation route", error=str(e))
         return jsonify({"error": f"Failed to get conversation: {e}"}), 500
+
+
+@api_conversation_v1.route("/<conversation_id>", methods=["PATCH"])
+@jwt_required
+@validate()
+def update_conversation(conversation_id: str, body: ConversationUpdate):
+    """Update a conversation (title only)."""
+    try:
+        user_id = get_current_user_id()
+        db = next(get_db())
+
+        # Parse UUID
+        try:
+            conv_uuid = uuid.UUID(conversation_id)
+        except ValueError:
+            return jsonify({"error": "Invalid conversation ID format"}), 400
+
+        response_data, status_code = conversation_controller.update_conversation(
+            db=db, conversation_id=conv_uuid, user_id=user_id, data=body
+        )
+
+        return jsonify(response_data), status_code
+
+    except Exception as e:
+        logger.error("Error in update_conversation route", error=str(e))
+        return jsonify({"error": f"Failed to update conversation: {e}"}), 500
 
 
 @api_conversation_v1.route("/<conversation_id>", methods=["DELETE"])

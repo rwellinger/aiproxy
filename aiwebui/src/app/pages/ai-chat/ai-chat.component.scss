@@ -114,8 +114,16 @@
     }
 
     .conversation-item-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-size: 0.7rem;
       color: #999;
+
+      .conversation-date {
+        margin-left: 0.5rem;
+        white-space: nowrap;
+      }
     }
   }
 
@@ -169,20 +177,82 @@
 
     .conversation-info {
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+      flex: 1;
+      min-width: 0;
 
-      h2 {
-        margin: 0;
-        font-size: 1.2rem;
-      }
+      .title-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        width: 100%;
+        min-width: 0;
 
-      .model-badge {
-        padding: 0.25rem 0.5rem;
-        background: #e3f2fd;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        color: #1976d2;
+        .model-badge-small {
+          font-size: 0.7rem;
+          color: #666;
+          opacity: 0.8;
+          font-weight: 500;
+        }
+
+        .title-display {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          min-width: 0;
+
+          h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .edit-title-btn {
+            opacity: 0;
+            transition: opacity 0.2s;
+
+            mat-icon {
+              font-size: 1rem;
+              width: 1rem;
+              height: 1rem;
+            }
+          }
+
+          &:hover .edit-title-btn {
+            opacity: 1;
+          }
+        }
+
+        .title-edit {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          width: 100%;
+          min-width: 0;
+
+          .title-input {
+            flex: 1;
+            min-width: 0;
+            padding: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+            border: 2px solid #2196f3;
+            border-radius: 4px;
+            outline: none;
+
+            &:focus {
+              border-color: #1976d2;
+            }
+          }
+
+          button {
+            flex-shrink: 0;
+          }
+        }
       }
     }
 
@@ -372,10 +442,45 @@
       }
     }
 
-    .message-time {
-      font-size: 0.7rem;
-      color: #999;
-      margin-top: 0.25rem;
+    .message-footer {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+
+      .copy-buttons {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .copy-btn {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+
+        ::ng-deep mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          line-height: 18px;
+        }
+
+        &:hover {
+          opacity: 1;
+          background: rgba(0, 0, 0, 0.04);
+        }
+      }
+
+      .message-time {
+        font-size: 0.7rem;
+        color: #999;
+      }
     }
   }
 

@@ -50,6 +50,16 @@ export class ConversationService {
   }
 
   /**
+   * Update a conversation (title only)
+   */
+  public updateConversation(id: string, data: { title: string }): Observable<Conversation> {
+    return this.http.patch<Conversation>(
+      this.apiConfig.endpoints.conversation.update(id),
+      data
+    );
+  }
+
+  /**
    * Delete a conversation
    */
   public deleteConversation(id: string): Observable<{ message: string }> {

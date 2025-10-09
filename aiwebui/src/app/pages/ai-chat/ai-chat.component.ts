@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChild, ElementRef, inject } from '@an
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
+import { DomSanitizer } from '@angular/platform-browser';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -48,6 +49,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
   // Services
   private conversationService = inject(ConversationService);
   private notificationService = inject(NotificationService);
+  private messageContentPipe = new MessageContentPipe(inject(DomSanitizer));
   private destroy$ = new Subject<void>();
 
   // Data
@@ -69,6 +71,8 @@ export class AiChatComponent implements OnInit, OnDestroy {
 
   // View State
   showNewChatForm = false;
+  isEditingTitle = false;
+  editTitleValue = '';
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   @ViewChild('messageInputField') private messageInputField!: ElementRef;
@@ -266,15 +270,34 @@ export class AiChatComponent implements OnInit, OnDestroy {
 
     const content = this.messageInput.trim();
     this.messageInput = '';
+
+    // Create temporary user message for optimistic UI
+    const tempUserMessage: Message = {
+      id: 'temp-' + Date.now(),
+      conversation_id: this.currentConversation.id,
+      role: 'user',
+      content: content,
+      token_count: undefined,
+      created_at: new Date().toISOString()
+    };
+
+    // Add user message immediately (optimistic)
+    this.messages.push(tempUserMessage);
     this.isSending = true;
+    setTimeout(() => this.scrollToBottom(), 50);
 
     this.conversationService
       .sendMessage(this.currentConversation.id, content)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          // Add both user and assistant messages to the view
-          this.messages.push(response.user_message);
+          // Replace temporary user message with real one from backend
+          const tempIndex = this.messages.findIndex(m => m.id === tempUserMessage.id);
+          if (tempIndex !== -1) {
+            this.messages[tempIndex] = response.user_message;
+          }
+
+          // Add assistant message
           this.messages.push(response.assistant_message);
 
           setTimeout(() => this.scrollToBottom(), 100);
@@ -283,6 +306,10 @@ export class AiChatComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Error sending message:', error);
           this.notificationService.error('Failed to send message');
+
+          // Remove temporary message on error
+          this.messages = this.messages.filter(m => m.id !== tempUserMessage.id);
+
           // Restore message input on error
           this.messageInput = content;
         },
@@ -322,32 +349,56 @@ export class AiChatComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Format date for display
+   * Format date for display with relative time
    */
   public formatDate(dateString: string): string {
     const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMinutes = Math.floor(diffMs / 60000);
+    const diffDays = Math.floor(diffMs / 86400000);
 
-    // Check if today
+    // < 1 Minute
+    if (diffMinutes < 1) {
+      return 'just now';
+    }
+
+    // < 60 Minutes
+    if (diffMinutes < 60) {
+      return `${diffMinutes} min ago`;
+    }
+
+    // Today
+    const today = new Date();
     if (date.toDateString() === today.toDateString()) {
-      return date.toLocaleTimeString('de-CH', {
+      return date.toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit'
       });
     }
 
-    // Check if yesterday
+    // Yesterday
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
     if (date.toDateString() === yesterday.toDateString()) {
-      return `Yesterday ${date.toLocaleTimeString('de-CH', {
+      return `Yesterday ${date.toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit'
       })}`;
     }
 
-    // Otherwise show full date
-    return date.toLocaleDateString('de-CH', {
+    // < 7 Days - Show weekday
+    if (diffDays < 7) {
+      const weekday = date.toLocaleDateString('en-GB', { weekday: 'long' });
+      const time = date.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      return `${weekday} ${time}`;
+    }
+
+    // Older - Show full date
+    return date.toLocaleDateString('en-GB', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -418,5 +469,112 @@ export class AiChatComponent implements OnInit, OnDestroy {
    */
   public shouldShowTokenWarning(): boolean {
     return this.getTokenPercentage() >= 90;
+  }
+
+  /**
+   * Start editing conversation title
+   */
+  public startEditTitle(): void {
+    if (!this.currentConversation) return;
+    this.isEditingTitle = true;
+    this.editTitleValue = this.currentConversation.title;
+  }
+
+  /**
+   * Save edited title
+   */
+  public saveTitle(): void {
+    if (!this.currentConversation || !this.editTitleValue.trim()) {
+      this.cancelEditTitle();
+      return;
+    }
+
+    const newTitle = this.editTitleValue.trim();
+    if (newTitle === this.currentConversation.title) {
+      this.cancelEditTitle();
+      return;
+    }
+
+    this.conversationService
+      .updateConversation(this.currentConversation.id, { title: newTitle })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedConversation) => {
+          // Update current conversation
+          if (this.currentConversation) {
+            this.currentConversation.title = updatedConversation.title;
+          }
+
+          // Update in list
+          const convIndex = this.conversations.findIndex(c => c.id === updatedConversation.id);
+          if (convIndex !== -1) {
+            this.conversations[convIndex].title = updatedConversation.title;
+          }
+
+          this.isEditingTitle = false;
+          this.editTitleValue = '';
+        },
+        error: (error) => {
+          console.error('Error updating title:', error);
+          this.notificationService.error('Failed to update title');
+          this.cancelEditTitle();
+        }
+      });
+  }
+
+  /**
+   * Cancel title editing
+   */
+  public cancelEditTitle(): void {
+    this.isEditingTitle = false;
+    this.editTitleValue = '';
+  }
+
+  /**
+   * Handle Enter key in title edit
+   */
+  public onTitleInputKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.saveTitle();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.cancelEditTitle();
+    }
+  }
+
+  /**
+   * Copy message content to clipboard as plain text
+   */
+  public copyToClipboard(content: string): void {
+    if (!content) return;
+
+    // Convert markdown to plain text
+    const plainText = this.messageContentPipe.toPlainText(content);
+
+    navigator.clipboard.writeText(plainText)
+      .then(() => {
+        this.notificationService.success('Copied as plain text');
+      })
+      .catch((error) => {
+        console.error('Error copying to clipboard:', error);
+        this.notificationService.error('Failed to copy to clipboard');
+      });
+  }
+
+  /**
+   * Copy message content to clipboard as Markdown
+   */
+  public copyAsMarkdown(content: string): void {
+    if (!content) return;
+
+    navigator.clipboard.writeText(content)
+      .then(() => {
+        this.notificationService.success('Copied as Markdown');
+      })
+      .catch((error) => {
+        console.error('Error copying to clipboard:', error);
+        this.notificationService.error('Failed to copy to clipboard');
+      });
   }
 }

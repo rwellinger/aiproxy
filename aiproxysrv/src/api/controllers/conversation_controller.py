@@ -10,6 +10,7 @@ from sqlalchemy import func
 from db.models import Conversation, Message
 from schemas.conversation_schemas import (
     ConversationCreate,
+    ConversationUpdate,
     ConversationResponse,
     MessageResponse,
 )
@@ -192,6 +193,61 @@ class ConversationController:
                 stacktrace=traceback.format_exc(),
             )
             return {"error": f"Failed to create conversation: {e}"}, 500
+
+    def update_conversation(
+        self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID, data: ConversationUpdate
+    ) -> Tuple[Dict[str, Any], int]:
+        """
+        Update a conversation (title only).
+
+        Args:
+            db: Database session
+            conversation_id: Conversation UUID
+            user_id: User UUID
+            data: Update data
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            conversation = (
+                db.query(Conversation)
+                .filter(
+                    Conversation.id == conversation_id,
+                    Conversation.user_id == user_id,
+                )
+                .first()
+            )
+
+            if not conversation:
+                return {"error": "Conversation not found"}, 404
+
+            # Only allow title updates
+            if data.title is not None:
+                conversation.title = data.title
+                conversation.updated_at = datetime.utcnow()
+
+            db.commit()
+            db.refresh(conversation)
+
+            logger.info(
+                "Conversation updated",
+                conversation_id=str(conversation_id),
+                user_id=str(user_id),
+            )
+
+            return ConversationResponse.from_orm(conversation).dict(), 200
+
+        except Exception as e:
+            db.rollback()
+            logger.error(
+                "Error updating conversation",
+                conversation_id=str(conversation_id),
+                error_type=type(e).__name__,
+                error=str(e),
+                stacktrace=traceback.format_exc(),
+            )
+            return {"error": f"Failed to update conversation: {e}"}, 500
 
     def delete_conversation(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID

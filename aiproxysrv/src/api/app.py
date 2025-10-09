@@ -55,7 +55,7 @@ def create_app():
     # Configure CORS to allow requests from Angular frontend
     CORS(app,
          origins="*",
-         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+         methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
 
     # OpenAPI/Swagger Configuration
     spec = APISpec(

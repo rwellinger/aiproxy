@@ -67,6 +67,7 @@ export class ApiConfigService {
             },
             detail: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}`,
             create: `${this.baseUrl}/api/v1/conversations`,
+            update: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}`,
             delete: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}`,
             sendMessage: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}/messages`
         },

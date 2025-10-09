@@ -1,7 +1,8 @@
-import { Pipe, PipeTransform, SecurityContext } from '@angular/core';
+import { Pipe, PipeTransform, SecurityContext, inject } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked, Renderer } from 'marked';
 import hljs from 'highlight.js';
+import { HtmlToTextService } from '../services/utils/html-to-text.service';
 
 /**
  * Pipe to render markdown content with syntax highlighting
@@ -12,6 +13,7 @@ import hljs from 'highlight.js';
 })
 export class MessageContentPipe implements PipeTransform {
   private renderer: Renderer;
+  private htmlToTextService = inject(HtmlToTextService);
 
   constructor(private sanitizer: DomSanitizer) {
     // Create custom renderer for code blocks
@@ -60,6 +62,24 @@ export class MessageContentPipe implements PipeTransform {
     } catch (err) {
       console.error('Markdown parsing error:', err);
       return value; // Return original value on error
+    }
+  }
+
+  /**
+   * Convert markdown to plain text (for clipboard)
+   */
+  toPlainText(markdown: string): string {
+    if (!markdown) return '';
+
+    try {
+      // Parse markdown to HTML
+      const html = marked.parse(markdown) as string;
+
+      // Convert HTML to plain text
+      return this.htmlToTextService.convert(html);
+    } catch (err) {
+      console.error('Markdown to text conversion error:', err);
+      return markdown; // Return original markdown on error
     }
   }
 }

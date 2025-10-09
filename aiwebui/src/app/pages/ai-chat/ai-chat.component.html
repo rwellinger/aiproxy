@@ -72,6 +72,7 @@
           <div class="conversation-item-model">{{ conv.model }}</div>
           <div class="conversation-item-meta">
             <span>{{ conv.message_count || 0 }} messages</span>
+            <span class="conversation-date">{{ formatDate(conv.updated_at || conv.created_at) }}</span>
           </div>
         </div>
       }
@@ -96,8 +97,32 @@
     } @else {
       <div class="conversation-header">
         <div class="conversation-info">
-          <h2>{{ currentConversation.title }}</h2>
-          <span class="model-badge">{{ currentConversation.model }}</span>
+          <div class="title-section">
+            <span class="model-badge-small">{{ currentConversation.model }}</span>
+            @if (!isEditingTitle) {
+              <div class="title-display">
+                <h2>{{ currentConversation.title }}</h2>
+                <button mat-icon-button (click)="startEditTitle()" title="Titel bearbeiten" class="edit-title-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            } @else {
+              <div class="title-edit">
+                <input
+                  type="text"
+                  [(ngModel)]="editTitleValue"
+                  (keydown)="onTitleInputKeydown($event)"
+                  class="title-input"
+                  placeholder="Conversation title">
+                <button mat-icon-button color="primary" (click)="saveTitle()" title="Speichern">
+                  <mat-icon>check</mat-icon>
+                </button>
+                <button mat-icon-button (click)="cancelEditTitle()" title="Abbrechen">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
         </div>
         <div class="token-info">
           <span class="token-count">{{ getFormattedTokenCount() }} tokens</span>
@@ -140,7 +165,19 @@
             <div class="message" [ngClass]="getMessageClass(message)">
               <div class="message-role">{{ message.role }}</div>
               <div class="message-content" [innerHTML]="message.content | messageContent"></div>
-              <div class="message-time">{{ formatDate(message.created_at) }}</div>
+              <div class="message-footer">
+                @if (message.role === 'assistant') {
+                  <div class="copy-buttons">
+                    <button mat-icon-button class="copy-btn" (click)="copyToClipboard(message.content)" title="Copy as plain text">
+                      <mat-icon>content_copy</mat-icon>
+                    </button>
+                    <button mat-icon-button class="copy-btn" (click)="copyAsMarkdown(message.content)" title="Copy as Markdown">
+                      <mat-icon>code</mat-icon>
+                    </button>
+                  </div>
+                }
+                <div class="message-time">{{ formatDate(message.created_at) }}</div>
+              </div>
             </div>
           }
         }
