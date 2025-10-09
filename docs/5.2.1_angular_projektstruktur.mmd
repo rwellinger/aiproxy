@@ -1,6 +1,7 @@
 flowchart TB
     subgraph PRESENTATION["🖥️ Presentation Layer"]
         direction LR
+        AI_CHAT[💬 AI Chat]
         IMG_GEN[🖼️ Image Generator]
         SONG_GEN[🎵 Song Generator]
         IMG_VIEW[👁️ Image View]
@@ -54,7 +55,7 @@ flowchart TB
     classDef infrastructureStyle fill:#FCE4EC,stroke:#E91E63,stroke-width:2px
     classDef externalStyle fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
 
-    class IMG_GEN,SONG_GEN,IMG_VIEW,SONG_VIEW,PROFILE,TEMPLATES presentationStyle
+    class AI_CHAT,IMG_GEN,SONG_GEN,IMG_VIEW,SONG_VIEW,PROFILE,TEMPLATES presentationStyle
     class HEADER,FOOTER,DETAIL_PANEL,AUDIO_PLAYER,PROGRESS componentStyle
     class API_SVC,DATA_SVC,NOTIFY_SVC,CONFIG_SVC serviceStyle
     class MODELS,PIPES,GUARDS,INTERCEPTORS,AUTH infrastructureStyle

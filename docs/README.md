@@ -21,6 +21,7 @@
 6. [Runtime View](#6-runtime-view)
    - [6.1 Image Generation (Synchronous)](#61-image-generation-synchronous)
    - [6.2 Music Generation (Asynchronous)](#62-music-generation-asynchronous)
+   - [6.3 AI Chat Conversation (Persistent)](#63-ai-chat-conversation-persistent)
 7. [Deployment View](#7-deployment-view)
    - [7.1 Development Environment](#71-development-environment)
    - [7.2 Production Environment](#72-production-environment)
@@ -53,6 +54,7 @@
 - [Figure 5.2.1: Angular Project Structure](#521-aiwebui-frontend) - `images/5.2.1_angular_projektstruktur.png`
 - [Figure 6.1: Image Generation (Synchronous)](#61-image-generation-synchronous) - `images/6.1_bildgenerierung.png`
 - [Figure 6.2: Music Generation (Asynchronous)](#62-music-generation-asynchronous) - `images/6.2_musikgenerierung.png`
+- [Figure 6.3: AI Chat Conversation (Persistent)](#63-ai-chat-conversation-persistent) - `images/6.3_ai_chat_workflow.png`
 - [Figure 7.3: Network Architecture](#73-network-architecture) - `images/7.3_netzwerk_architektur.png`
 - [Figure 9.1: Development Deployment](#91-development-deployment) - `images/9.1_entwicklungs_deployment.png`
 - [Figure 9.2: Production Deployment](#92-production-deployment) - `images/9.2_produktions_deployment.png`
@@ -257,6 +259,22 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
 
 *Figure 6.2: Music Generation (Asynchronous) - Sequence diagram of the asynchronous music generation process*
 
+### 6.3 AI Chat Conversation (Persistent)
+
+![AI Chat Workflow](images/6.3_ai_chat_workflow.png)
+
+*Figure 6.3: AI Chat Conversation (Persistent) - Sequence diagram of the AI chat conversation workflow with persistent history*
+
+**Key Features:**
+- **Persistent Conversations**: All conversations and messages stored in PostgreSQL
+- **Context Management**: System context defines AI behavior per conversation
+- **Token Tracking**: Real-time monitoring of context window usage with visual indicators
+- **Multi-Model Support**: Dynamic selection of Ollama models (llama3.2:3b, mistral, etc.)
+- **Optimistic UI**: Immediate message display for better UX
+- **Message History**: Full conversation context sent to Ollama for coherent responses
+- **CRUD Operations**: Create, read, update (title), delete conversations
+- **Markdown Support**: Messages rendered with markdown formatting and clickable links
+
 ---
 
 ## 7. Deployment View
@@ -420,6 +438,7 @@ services:
 - **API Response Time**: < 200ms for standard requests
 - **Image Generation**: < 30s for DALL-E 3 calls
 - **Song Generation**: 2-5 minutes (depending on Mureka)
+- **AI Chat Response**: 1-5 seconds (depending on Ollama model and context size)
 - **Concurrent Users**: 1 (personal use)
 
 ### 11.2 Security
@@ -610,6 +629,6 @@ cd src && alembic current
 ---
 
 *Document created: 01.09.2025*
-*Last updated: 29.09.2025*
-*Version: 1.5*
+*Last updated: 09.10.2025*
+*Version: 1.6*
 *Author: Rob (rob.wellinger@gmail.com)*

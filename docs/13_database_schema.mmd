@@ -67,4 +67,26 @@ erDiagram
         TIMESTAMP updated_at "Last update timestamp"
     }
 
+    conversations {
+        UUID id PK "Primary Key"
+        UUID user_id FK "Foreign Key to users"
+        VARCHAR title "Conversation title"
+        VARCHAR model "Ollama model used (e.g., llama3.2:3b)"
+        TEXT system_context "System prompt/context for AI behavior"
+        INTEGER context_window_size "Maximum context window size"
+        INTEGER current_token_count "Current total tokens used"
+        TIMESTAMP created_at "Creation timestamp"
+        TIMESTAMP updated_at "Last update timestamp"
+    }
+
+    messages {
+        UUID id PK "Primary Key"
+        UUID conversation_id FK "Foreign Key to conversations"
+        VARCHAR role "Message role: user, assistant, system"
+        TEXT content "Message content"
+        INTEGER token_count "Token count for this message"
+        TIMESTAMP created_at "Creation timestamp"
+    }
+
     songs ||--o{ song_choices : "has choices"
+    conversations ||--o{ messages : "contains messages"

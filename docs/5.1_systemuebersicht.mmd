@@ -12,6 +12,7 @@ graph TB
         IMG[Image Controller]
         SONG[Song Controller]
         CHAT[Chat Controller]
+        CONV[Conversation Controller]
         PROMPT[Prompt Controller]
         REDIS[Redis Controller]
     end
@@ -38,6 +39,7 @@ graph TB
     API --> IMG
     API --> SONG
     API --> CHAT
+    API --> CONV
     API --> PROMPT
     API --> REDIS
 
@@ -46,11 +48,13 @@ graph TB
     CELERY --> MUREKA
     MUREKA --> MRK
     CHAT --> OLLAMA
+    CONV --> OLLAMA
 
     API --> PG
     API --> RD
     PROMPT --> PG
     CHAT --> PG
     CHAT --> PROMPT
+    CONV --> PG
     CELERY --> RD
     IMG --> FILES
