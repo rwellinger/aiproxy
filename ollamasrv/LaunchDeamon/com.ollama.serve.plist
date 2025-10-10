@@ -28,11 +28,11 @@
             <key>OLLAMA_ORIGINS</key>
             <string>*</string>
             <key>OLLAMA_KEEP_ALIVE</key>
-            <string>86400</string>
+            <string>3600</string>
+            <key>OLLAMA_MAX_MEMORY</key>
+            <string>25GiB</string>
             <key>OLLAMA_DEVICE</key>
             <string>metal</string>
-            <key>OLLAMA_MAX_MEMORY</key>
-            <string>13GiB</string>
             <key>PATH</key>
             <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
         </dict>
