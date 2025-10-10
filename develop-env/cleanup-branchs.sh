@@ -1,9 +1,13 @@
 #!/bin/bash
 
-git branch -r | awk -F/ '{print $2}' | sort -u | \
-  grep -vxFf <(git branch --format='%(refname:short)' | tr -d '* ') | \
-  while read -r branch; do
-      echo "lösche $branch"
-      git branch -D "$branch"
-  done
+# Alle Remote‑Refs holen und veraltete einbeziehen
+git fetch --all --prune
 
+# 2. Lokale Branches, die nicht im Remote existieren, löschen
+git for-each-ref --format='%(refname:short)' refs/heads/ |
+  while read -r local; do
+      if ! git show-ref --quiet "refs/remotes/origin/$local"; then
+          echo "lokal löschen: $local"
+          git branch -D "$local"
+      fi
+  done
