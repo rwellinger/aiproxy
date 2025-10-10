@@ -4,15 +4,6 @@
     <!-- Left Side: Song Library Card -->
     <div class="song-library-section">
       <mat-card class="song-library-card">
-        <mat-card-header>
-          <mat-card-title>
-            <i class="fas fa-music"></i>
-            Song Library
-          </mat-card-title>
-          <mat-card-subtitle>
-            Browse and manage your generated songs
-          </mat-card-subtitle>
-        </mat-card-header>
         <div class="song-list-panel">
         <div class="list-header">
             <h2>Available Songs</h2>
@@ -212,15 +203,6 @@
     <!-- Right Side: Song Details Card -->
     <div class="song-details-section">
       <mat-card class="song-details-card">
-        <mat-card-header>
-          <mat-card-title>
-            <i class="fas fa-info-circle"></i>
-            Song Details
-          </mat-card-title>
-          <mat-card-subtitle>
-            View and edit detailed information about selected song
-          </mat-card-subtitle>
-        </mat-card-header>
         <mat-card-content>
           <app-song-detail-panel
               [songId]="selectedSongId"

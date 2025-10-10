@@ -63,25 +63,12 @@ export class ImageGeneratorComponent implements OnInit {
     }
 
     async onSubmit() {
-        console.error('DEBUG: Form submitted');
-        console.error('DEBUG: Form valid?', this.promptForm.valid);
-        console.error('DEBUG: Form errors:', this.promptForm.errors);
         if (this.promptForm.valid) {
-            console.error('DEBUG: Form is valid');
             this.isLoading = true;
             this.result = '';
 
             try {
                 const formValue = this.promptForm.value;
-                console.error('DEBUG: Form values:', formValue);
-                console.error('DEBUG: API URL:', this.apiConfig.endpoints.image.generate);
-                console.error('DEBUG: Request payload:', {
-                    title: formValue.title?.trim() || null,
-                    prompt: formValue.prompt,
-                    size: formValue.size
-                });
-
-                console.error('DEBUG: Starting API call...');
                 const data = await firstValueFrom(
                     this.http.post<any>(this.apiConfig.endpoints.image.generate, {
                         title: formValue.title?.trim() || null,
@@ -89,13 +76,9 @@ export class ImageGeneratorComponent implements OnInit {
                         size: formValue.size
                     })
                 );
-                console.error('DEBUG: API call completed:', data);
 
                 if (data.url) {
                     // Store the generated image URL and ID
-                    console.error('DEBUG: Image generated:', data);
-                    console.error('DEBUG: Image URL:', data.url);
-                    console.error('DEBUG: Image ID:', data.id);
                     this.generatedImageUrl = data.url || '';
                     this.generatedImageId = data.id || null;
 
@@ -126,23 +109,10 @@ export class ImageGeneratorComponent implements OnInit {
                     this.notificationService.error('Error generating image.');
                 }
             } catch (error: any) {
-                console.error('DEBUG: Image generation failed:', error);
-                console.error('DEBUG: Error message:', error.message);
-                console.error('DEBUG: Full error object:', error);
                 this.notificationService.error(`Error: ${error.message}`);
             } finally {
                 this.isLoading = false;
             }
-        } else {
-            console.error('DEBUG: Form is INVALID');
-            console.error('DEBUG: Form value:', this.promptForm.value);
-            console.error('DEBUG: All form errors:');
-            Object.keys(this.promptForm.controls).forEach(key => {
-                const control = this.promptForm.get(key);
-                if (control && control.errors) {
-                    console.error(`DEBUG: ${key} errors:`, control.errors);
-                }
-            });
         }
     }
 

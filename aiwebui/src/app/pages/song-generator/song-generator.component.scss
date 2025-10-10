@@ -13,6 +13,24 @@
     gap: 0;
   }
 
+  .song-generator-header {
+    display: flex;
+    border-bottom: 1px solid #e9ecef;
+    padding: .9375rem;
+    justify-content: space-between;
+    align-items: center;
+    
+    .song-generator-title {
+      margin: 0;
+      padding: 0;
+      h2 {
+        font-weight: 600;
+        line-height: 1.5;
+        font-size: 1.25rem;
+      }
+    }
+  }
+  
   .generator-grid {
     display: contents;
 
