@@ -16,6 +16,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { ConversationService } from '../../services/business/conversation.service';
 import { NotificationService } from '../../services/ui/notification.service';
+import { ChatExportService } from '../../services/business/chat-export.service';
 import {
   Conversation,
   Message,
@@ -49,6 +50,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
   // Services
   private conversationService = inject(ConversationService);
   private notificationService = inject(NotificationService);
+  private chatExportService = inject(ChatExportService);
   private messageContentPipe = new MessageContentPipe(inject(DomSanitizer));
   private destroy$ = new Subject<void>();
 
@@ -577,5 +579,20 @@ export class AiChatComponent implements OnInit, OnDestroy {
         console.error('Error copying to clipboard:', error);
         this.notificationService.error('Failed to copy to clipboard');
       });
+  }
+
+  /**
+   * Export conversation to Markdown
+   */
+  public exportToMarkdown(): void {
+    if (!this.currentConversation) return;
+
+    try {
+      this.chatExportService.exportToMarkdown(this.currentConversation, this.messages);
+      this.notificationService.success('Chat exported as Markdown');
+    } catch (error) {
+      console.error('Error exporting to Markdown:', error);
+      this.notificationService.error('Failed to export chat');
+    }
   }
 }
