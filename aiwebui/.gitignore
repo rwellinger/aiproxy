@@ -40,6 +40,9 @@ yarn-error.log
 testem.log
 /typings
 
+# Generated files (auto-created during build)
+src/assets/app-version.json
+
 # System files
 .DS_Store
 Thumbs.db
