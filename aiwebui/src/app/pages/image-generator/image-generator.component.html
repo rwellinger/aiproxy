@@ -1,180 +1,179 @@
 <div class="image-generator-container master-detail-layout">
-  <!-- Main Content Grid -->
-  <div class="generator-grid">
-    <!-- Left Side: Image Creation Card -->
-    <div class="image-creation-section">
-      <mat-card class="image-creation-card">
-        <mat-card-header>
-          <mat-card-title>
-            <i class="fas fa-palette"></i>
-            Create Picture
-          </mat-card-title>
-          <mat-card-subtitle>
-            Generate stunning picture with AI - describe what you want to see
-          </mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="controls-content">
-
-            <form [formGroup]="promptForm" (ngSubmit)="onSubmit()">
-                <!-- Title Field -->
-                <div class="form-group">
-                    <label for="title">Title:</label>
-                    <div class="prompt-input-group">
-                        <input
-                            id="title"
-                            type="text"
-                            formControlName="title"
-                            placeholder="Enter picture title (optional, max 50 characters)..."
-                            maxlength="50"
-                            [disabled]="isLoading"
-                            class="title-input">
-                        <div class="title-dropdown-container">
-                            <button
-                                type="button"
-                                (click)="toggleTitleDropdown()"
-                                [disabled]="isLoading || isGeneratingTitle"
-                                class="magic-icon-button"
-                                title="Title actions">
-                                <i class="fas fa-ellipsis-vertical" *ngIf="!isGeneratingTitle"></i>
-                                <i class="fas fa-spinner fa-spin" *ngIf="isGeneratingTitle"></i>
-                            </button>
-                            <div class="dropdown-menu" *ngIf="showTitleDropdown" (click)="$event.stopPropagation()">
-                                <button
-                                    type="button"
-                                    class="dropdown-item"
-                                    [disabled]="isLoading || isGeneratingTitle"
-                                    (click)="selectTitleAction('generate')">
-                                    <i class="fas fa-wand-magic-sparkles"></i>
-                                    <span>Generate Title</span>
-                                    <i class="fas fa-spinner fa-spin action-spinner" *ngIf="isGeneratingTitle"></i>
-                                </button>
-                            </div>
+    <!-- Main Content Grid -->
+    <div class="generator-grid">
+        <!-- Left Side: Image Creation Card -->
+        <div class="image-creation-section">
+            <mat-card class="image-creation-card">
+                <mat-card-content>
+                    <div class="image-generator-header">
+                        <div class="image-generator-title">
+                            <h2>Create Picture</h2>
                         </div>
                     </div>
-                    <div class="char-counter">{{ promptForm.get('title')?.value?.length || 0 }}/50</div>
-                </div>
 
-                <div class="form-group">
-                    <label for="prompt">Prompt:</label>
-                    <div class="prompt-input-group">
+                    <div class="controls-content">
+                        <form [formGroup]="promptForm" (ngSubmit)="onSubmit()">
+                            <!-- Title Field -->
+                            <div class="form-group">
+                                <label for="title">Title:</label>
+                                <div class="prompt-input-group">
+                                    <input
+                                            id="title"
+                                            type="text"
+                                            formControlName="title"
+                                            placeholder="Enter picture title (optional, max 50 characters)..."
+                                            maxlength="50"
+                                            [disabled]="isLoading"
+                                            class="title-input">
+                                    <div class="title-dropdown-container">
+                                        <button
+                                                type="button"
+                                                (click)="toggleTitleDropdown()"
+                                                [disabled]="isLoading || isGeneratingTitle"
+                                                class="magic-icon-button"
+                                                title="Title actions">
+                                            <i class="fas fa-ellipsis-vertical" *ngIf="!isGeneratingTitle"></i>
+                                            <i class="fas fa-spinner fa-spin" *ngIf="isGeneratingTitle"></i>
+                                        </button>
+                                        <div class="dropdown-menu" *ngIf="showTitleDropdown"
+                                             (click)="$event.stopPropagation()">
+                                            <button
+                                                    type="button"
+                                                    class="dropdown-item"
+                                                    [disabled]="isLoading || isGeneratingTitle"
+                                                    (click)="selectTitleAction('generate')">
+                                                <i class="fas fa-wand-magic-sparkles"></i>
+                                                <span>Generate Title</span>
+                                                <i class="fas fa-spinner fa-spin action-spinner"
+                                                   *ngIf="isGeneratingTitle"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="char-counter">{{ promptForm.get('title')?.value?.length || 0 }}/50</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="prompt">Prompt:</label>
+                                <div class="prompt-input-group">
                         <textarea
-                            id="prompt"
-                            formControlName="prompt"
-                            placeholder="Describe the picture you want to create..."
-                            required
-                            [disabled]="isLoading"
-                            class="prompt-input">
+                                id="prompt"
+                                formControlName="prompt"
+                                placeholder="Describe the picture you want to create..."
+                                required
+                                [disabled]="isLoading"
+                                class="prompt-input">
                         </textarea>
-                        <div class="prompt-dropdown-container">
-                            <button
-                                type="button"
-                                (click)="togglePromptDropdown()"
-                                [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt || !promptForm.get('prompt')?.value?.trim()"
-                                class="magic-icon-button"
-                                title="Picture prompt actions">
-                                <i class="fas fa-ellipsis-vertical" *ngIf="!isImprovingPrompt && !isTranslatingPrompt"></i>
-                                <i class="fas fa-spinner fa-spin" *ngIf="isImprovingPrompt || isTranslatingPrompt"></i>
-                            </button>
-                            <div class="dropdown-menu" *ngIf="showPromptDropdown" (click)="$event.stopPropagation()">
-                                <button
-                                    type="button"
-                                    class="dropdown-item"
-                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt"
-                                    (click)="selectPromptAction('enhance')">
-                                    <i class="fas fa-wand-magic-sparkles"></i>
-                                    <span>Enhance Prompt</span>
-                                    <i class="fas fa-spinner fa-spin action-spinner" *ngIf="isImprovingPrompt"></i>
+                                    <div class="prompt-dropdown-container">
+                                        <button
+                                                type="button"
+                                                (click)="togglePromptDropdown()"
+                                                [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt || !promptForm.get('prompt')?.value?.trim()"
+                                                class="magic-icon-button"
+                                                title="Picture prompt actions">
+                                            <i class="fas fa-ellipsis-vertical"
+                                               *ngIf="!isImprovingPrompt && !isTranslatingPrompt"></i>
+                                            <i class="fas fa-spinner fa-spin"
+                                               *ngIf="isImprovingPrompt || isTranslatingPrompt"></i>
+                                        </button>
+                                        <div class="dropdown-menu" *ngIf="showPromptDropdown"
+                                             (click)="$event.stopPropagation()">
+                                            <button
+                                                    type="button"
+                                                    class="dropdown-item"
+                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt"
+                                                    (click)="selectPromptAction('enhance')">
+                                                <i class="fas fa-wand-magic-sparkles"></i>
+                                                <span>Enhance Prompt</span>
+                                                <i class="fas fa-spinner fa-spin action-spinner"
+                                                   *ngIf="isImprovingPrompt"></i>
+                                            </button>
+                                            <button
+                                                    type="button"
+                                                    class="dropdown-item"
+                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt"
+                                                    (click)="selectPromptAction('translate')">
+                                                <i class="fas fa-language"></i>
+                                                <span>Translate to English</span>
+                                                <i class="fas fa-spinner fa-spin action-spinner"
+                                                   *ngIf="isTranslatingPrompt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="size">Picture Size:</label>
+                                <select id="size" formControlName="size" required [disabled]="isLoading"
+                                        class="size-select">
+                                    <option value="1024x1024">Square (1024x1024)</option>
+                                    <option value="1792x1024">Landscape (1792x1024)</option>
+                                    <option value="1024x1792">Portrait (1024x1792)</option>
+                                </select>
+                            </div>
+
+                            <div class="button-group">
+                                <button type="submit"
+                                        [disabled]="promptForm.invalid || isLoading || isImprovingPrompt || isTranslatingPrompt || isGeneratingTitle"
+                                        class="create-button">
+                                    <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+                                    <i class="fas fa-brain" *ngIf="!isLoading"></i>
+                                    {{ isLoading ? 'Creating...' : 'Create Picture' }}
                                 </button>
-                                <button
-                                    type="button"
-                                    class="dropdown-item"
-                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt"
-                                    (click)="selectPromptAction('translate')">
-                                    <i class="fas fa-language"></i>
-                                    <span>Translate to English</span>
-                                    <i class="fas fa-spinner fa-spin action-spinner" *ngIf="isTranslatingPrompt"></i>
+                                <button type="button" (click)="resetForm()"
+                                        [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt || isGeneratingTitle"
+                                        class="reset-button">
+                                    <i class="fas fa-rotate-left"></i> Reset
                                 </button>
                             </div>
-                        </div>
+
+                            <div *ngIf="isLoading" class="loading-status">
+                                <small class="loading-text">
+                                    <i class="fas fa-info-circle"></i>
+                                    Creating your picture - this usually takes 10-30 seconds
+                                </small>
+                            </div>
+                        </form>
                     </div>
-                </div>
+                </mat-card-content>
+                <mat-card-actions align="end">
+                    <p class="cost-info">
+                        <i class="fas fa-info-circle"></i>
+                        Picture generation: ~$0.02 each
+                    </p>
+                </mat-card-actions>
+            </mat-card>
+        </div>
 
-                <div class="form-group">
-                    <label for="size">Picture Size:</label>
-                    <select id="size" formControlName="size" required [disabled]="isLoading" class="size-select">
-                        <option value="1024x1024">Square (1024x1024)</option>
-                        <option value="1792x1024">Landscape (1792x1024)</option>
-                        <option value="1024x1792">Portrait (1024x1792)</option>
-                    </select>
-                </div>
-
-                <div class="button-group">
-                    <button type="submit" [disabled]="promptForm.invalid || isLoading || isImprovingPrompt || isTranslatingPrompt || isGeneratingTitle" class="create-button">
-                        <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
-                        <i class="fas fa-brain" *ngIf="!isLoading"></i>
-                        {{ isLoading ? 'Creating...' : 'Create Picture' }}
-                    </button>
-                    <button type="button" (click)="resetForm()" [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt || isGeneratingTitle" class="reset-button">
-                        <i class="fas fa-rotate-left"></i> Reset
-                    </button>
-                </div>
-
-              <div *ngIf="isLoading" class="loading-status">
-                <small class="loading-text">
-                  <i class="fas fa-info-circle"></i>
-                  Creating your picture - this usually takes 10-30 seconds
-                </small>
-              </div>
-            </form>
-          </div>
-        </mat-card-content>
-        <mat-card-actions align="end">
-          <p class="cost-info">
-            <i class="fas fa-info-circle"></i>
-            Picture generation: ~$0.02 each
-          </p>
-        </mat-card-actions>
-      </mat-card>
+        <!-- Right Side: Generated Image Card -->
+        <div class="generated-image-section">
+            <mat-card class="generated-image-card">
+                <mat-card-content>
+                    <app-image-detail-panel
+                            [image]="generatedImageData"
+                            [showEditTitle]="true"
+                            [showActionButtons]="false"
+                            [isGenerating]="isLoading"
+                            title=""
+                            [showMetaInfo]="['model', 'size']"
+                            placeholderText="Your generated picture will appear here"
+                            (titleChanged)="onTitleChanged()">
+                    </app-image-detail-panel>
+                </mat-card-content>
+                <mat-card-actions align="end">
+                    <div class="detail-actions" *ngIf="generatedImageData">
+                        <button mat-button type="button" (click)="onDownloadImage()">
+                            <i class="fas fa-download"></i> Download Original
+                        </button>
+                        <button mat-button type="button" (click)="onPreviewImage()">
+                            <i class="fas fa-expand"></i> Full Size
+                        </button>
+                    </div>
+                </mat-card-actions>
+            </mat-card>
+        </div>
     </div>
-
-    <!-- Right Side: Generated Image Card -->
-    <div class="generated-image-section">
-      <mat-card class="generated-image-card">
-        <mat-card-header>
-          <mat-card-title>
-            <i class="fas fa-image"></i>
-            Create Picture
-          </mat-card-title>
-          <mat-card-subtitle>
-            View and download your AI-generated picture
-          </mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <app-image-detail-panel
-              [image]="generatedImageData"
-              [showEditTitle]="true"
-              [showActionButtons]="false"
-              [isGenerating]="isLoading"
-              title=""
-              [showMetaInfo]="['model', 'size']"
-              placeholderText="Your generated picture will appear here"
-              (titleChanged)="onTitleChanged()">
-          </app-image-detail-panel>
-        </mat-card-content>
-        <mat-card-actions align="end">
-          <div class="detail-actions" *ngIf="generatedImageData">
-            <button mat-button type="button" (click)="onDownloadImage()">
-              <i class="fas fa-download"></i> Download Original
-            </button>
-            <button mat-button type="button" (click)="onPreviewImage()">
-              <i class="fas fa-expand"></i> Full Size
-            </button>
-          </div>
-        </mat-card-actions>
-      </mat-card>
-    </div>
-  </div>
 </div>
 
 

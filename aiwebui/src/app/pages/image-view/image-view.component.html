@@ -4,15 +4,6 @@
     <!-- Left Side: Image Gallery Card -->
     <div class="image-gallery-section">
       <mat-card class="image-gallery-card">
-        <mat-card-header>
-          <mat-card-title>
-            <i class="fas fa-images"></i>
-            Picture Gallery
-          </mat-card-title>
-          <mat-card-subtitle>
-            Browse and manage your generated pictures
-          </mat-card-subtitle>
-        </mat-card-header>
         <mat-card-content>
           <div class="image-list-panel">
         <div class="list-header">
@@ -168,15 +159,6 @@
     <!-- Right Side: Image Details Card -->
     <div class="image-details-section">
       <mat-card class="image-details-card">
-        <mat-card-header>
-          <mat-card-title>
-            <i class="fas fa-info-circle"></i>
-            Picture Details
-          </mat-card-title>
-          <mat-card-subtitle>
-            View and edit detailed information about selected picture
-          </mat-card-subtitle>
-        </mat-card-header>
         <mat-card-content>
           <app-image-detail-panel
               [imageId]="selectedImage?.id || null"

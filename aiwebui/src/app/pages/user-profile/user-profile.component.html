@@ -5,16 +5,6 @@
         <!-- User Profile Section (Right) -->
         <div class="user-section">
             <mat-card class="profile-card">
-                <mat-card-header>
-                    <mat-card-title>
-                        <i class="fas fa-user"></i>
-                        User Profile
-                    </mat-card-title>
-                    <mat-card-subtitle>
-                        Personal Information and Settings
-                    </mat-card-subtitle>
-                </mat-card-header>
-
                 <mat-card-content>
                     <div class="user-info" *ngIf="currentUser">
                         <!-- Avatar Section -->
@@ -213,15 +203,6 @@
         <!-- Mureka Profile Section (Left) -->
         <div class="mureka-section">
             <mat-card class="profile-card">
-                <mat-card-header>
-                    <mat-card-title>
-                        <i class="fas fa-music"></i>
-                        Mureka Account
-                    </mat-card-title>
-                    <mat-card-subtitle>
-                        Current Billing Information and Account Status
-                    </mat-card-subtitle>
-                </mat-card-header>
                 <mat-card-content>
                     <!-- Embed the existing SongProfile component -->
                     <app-song-profile [isEmbedded]="true"></app-song-profile>
