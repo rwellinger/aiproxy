@@ -15,8 +15,7 @@ graph TB
         end
 
         subgraph "Host Services (Native)"
-            OLLAMA_HOST[Ollama<br/>:11434]
-            WEBUI_HOST[Open WebUI<br/>webui:8080]
+            OLLAMA_HOST[Ollama<br/>:11434<br/>LLM Backend]
         end
 
         subgraph "Docker Volumes"
@@ -36,7 +35,6 @@ graph TB
     end
 
     NGINX --> API_CONTAINER
-    NGINX --> WEBUI_HOST
     NGINX --> STATIC
 
     API_CONTAINER --> PROD_PG
@@ -58,4 +56,3 @@ graph TB
     style PROD_PG fill:#fce4ec
     style PROD_REDIS fill:#ffebee
     style OLLAMA_HOST fill:#f3e5f5
-    style WEBUI_HOST fill:#e1f5fe

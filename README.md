@@ -7,6 +7,7 @@ A full-stack platform for AI-powered image and music generation with Python back
 ## 🎯 Features
 
 - **AI Chat Conversations** - Interactive chat with Ollama LLMs (llama3.2:3b, gpt-oss:20b and others)
+  - Integrated chat UI replacing Open WebUI (now part of thWelly Toolbox)
   - Multi-conversation management with persistent history
   - Configurable system context for AI behavior customization
   - Token usage tracking with context window visualization
@@ -87,6 +88,7 @@ colima start --arch aarch64 --cpu 4 --memory 4 --disk 80 --vm-type=vz
 ### 3. Create Docker Network
 
 ```bash
+# Create shared Docker network for all services
 docker network create webui-network
 ```
 

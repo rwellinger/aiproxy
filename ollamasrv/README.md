@@ -1,15 +1,18 @@
-# Ollama AI Server - Local LLM with Web Interface
+# Ollama AI Server - Local LLM Backend
 
-Local AI server running Ollama with Open WebUI for chat interactions.
+Local AI server running Ollama as LLM backend for thWelly Toolbox chat functionality.
 
 ## Overview
 
 This setup provides:
 - **Ollama 0.12.0**: Latest stable version with full GPU support
 - **Native Mac Installation**: Direct GitHub releases for optimal M1/M4 performance
-- **Open WebUI**: Docker-based web interface for chat
+- **thWelly Toolbox Integration**: Chat UI integrated in Angular frontend (replaced Open WebUI)
 - **LaunchDaemon**: Auto-start on system boot
 - **GPU Acceleration**: Full Metal GPU support on Apple Silicon
+
+> **Note**: Chat functionality previously provided by Open WebUI is now integrated
+> directly into the thWelly Toolbox Angular frontend at `/ai-chat`.
 
 ## Architecture
 
@@ -22,8 +25,9 @@ This setup provides:
                │
                ▼
 ┌─────────────────────────────────────┐
-│      Docker Container               │
-│  Open WebUI (Port 8080)             │
+│    thWelly Toolbox (Angular)        │
+│  Chat UI @ /ai-chat                 │
+│  via aiproxysrv proxy               │
 └─────────────────────────────────────┘
 ```
 
@@ -41,8 +45,8 @@ This setup provides:
 ### Prerequisites
 
 - macOS with Apple Silicon (M1/M2/M3/M4)
-- Docker and Docker Compose (for Open WebUI)
 - Internet connection for downloading models
+- thWelly Toolbox for chat UI (Angular frontend)
 
 ### 1. Install Ollama
 
@@ -164,31 +168,22 @@ ollama pull codellama:13b
 ollama pull llava:13b
 ```
 
-### 5. Install Open WebUI
+### 5. Access Chat UI
 
-Open WebUI provides a ChatGPT-like interface for Ollama.
+The chat interface is integrated into thWelly Toolbox Angular frontend.
 
-```bash
-# Start Open WebUI with Docker Compose
-docker-compose up -d
+**Access Chat**:
+- Navigate to `/ai-chat` in thWelly Toolbox
+- Chat UI connects to Ollama via aiproxysrv proxy
+- Full conversation management with persistent history
+- Multi-model support (llama3.2:3b, gpt-oss:20b, etc.)
 
-# View logs
-docker-compose logs -f
-
-# Check status
-docker-compose ps
-```
-
-**Access Open WebUI**:
-- Local: http://localhost:8080
-- Network: http://<Server-IP>:8080
-
-**First-time setup**:
-1. Open http://localhost:8080
-2. Create admin account
-3. Configure Ollama endpoint: http://host.docker.internal:11434
-4. Select model: gpt-oss:20b
-5. Start chatting!
+**Features**:
+- ✅ Multi-conversation management
+- ✅ Configurable system context per conversation
+- ✅ Token usage tracking with visual indicators
+- ✅ Markdown support in messages
+- ✅ Persistent conversation history in PostgreSQL
 
 ## Configuration
 
@@ -363,7 +358,7 @@ sudo kill -9 [PID]
 export OLLAMA_HOST=0.0.0.0:11435
 ```
 
-### Open WebUI Connection Issues
+### Chat UI Connection Issues
 
 **Error**: "Cannot connect to Ollama"
 
@@ -371,12 +366,14 @@ export OLLAMA_HOST=0.0.0.0:11435
 # Verify Ollama is accessible
 curl http://localhost:11434/api/tags
 
-# Check Docker network
-docker exec -it open-webui curl http://host.docker.internal:11434/api/tags
+# Test via aiproxysrv proxy
+curl http://localhost:5050/api/v1/ollama/models
 
-# Update Open WebUI Ollama endpoint
-# In UI: Settings → Connections → Ollama API URL
-# Set to: http://host.docker.internal:11434
+# Check aiproxysrv logs
+docker compose logs -f aiproxysrv
+
+# Verify OLLAMA_API_BASE_URL in .env
+# Should be: http://10.0.1.120:11434 (or localhost:11434 for dev)
 ```
 
 ## Model Management
@@ -471,14 +468,16 @@ sudo launchctl start com.ollama.serve
 ollama --version
 ```
 
-### Update Open WebUI
+### Update thWelly Toolbox
+
+Chat UI is part of the Angular frontend. Update via:
 
 ```bash
-# Pull latest image
-docker-compose pull
+cd aiwebui
+npm run build:prod
 
-# Restart container
-docker-compose up -d
+# Or pull latest Docker image
+docker pull ghcr.io/rwellinger/aiwebui-app:latest
 ```
 
 ## Best Practices
@@ -503,9 +502,10 @@ docker-compose up -d
 ## Related Documentation
 
 - **Ollama GitHub**: https://github.com/ollama/ollama
-- **Open WebUI**: https://github.com/open-webui/open-webui
-- **Backend Integration**: `../aiproxysrv/openai_impl.md`
+- **thWelly Toolbox**: `../aiwebui/README.md`
+- **Backend Integration**: `../aiproxysrv/README.md`
 - **Model Library**: https://ollama.ai/library
+- **Chat UI Component**: `../aiwebui/src/app/pages/ai-chat/`
 
 ## Quick Reference
 
@@ -521,10 +521,11 @@ sudo launchctl load /Library/LaunchDaemons/com.ollama.serve.plist
 # Install model
 ollama pull gpt-oss:20b
 
-# Start Open WebUI
-docker-compose up -d
-
-# Test
+# Test Ollama
 curl http://localhost:11434/api/tags
 ollama run gpt-oss:20b "Hello!"
+
+# Access Chat UI
+# Navigate to thWelly Toolbox at /ai-chat
+# Chat connects via aiproxysrv proxy to Ollama
 ```

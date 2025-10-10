@@ -5,7 +5,7 @@ graph TB
 
     subgraph "Mac Studio Production (10.0.1.120)"
         subgraph "Docker Network: webui-network"
-            NGINX[Nginx Proxy<br/>:443]
+            NGINX[Nginx Proxy<br/>:443<br/>serves Angular + API]
             API[AI Proxy Server<br/>:5050]
             WORKER[Celery Worker<br/>:6379]
             PG[PostgreSQL<br/>:5432]
@@ -13,19 +13,17 @@ graph TB
         end
 
         subgraph "Host Services"
-            OLLAMA[Ollama<br/>:11434]
-            WEBUI[Open WebUI<br/>:8080]
+            OLLAMA[Ollama<br/>:11434<br/>LLM Backend]
         end
     end
 
     CLIENT -->|HTTPS| NGINX
-    NGINX -->|/aiwebui/| NGINX
+    NGINX -->|/aiwebui/<br/>incl. /ai-chat| NGINX
     NGINX -->|/api/v1/image/| API
     NGINX -->|/api/v1/song/| API
     NGINX -->|/api/v1/ollama/chat/| API
     NGINX -->|/api/v1/prompts/| API
     NGINX -->|/api/v1/redis/| API
-    NGINX -->|/| WEBUI
 
     API --> PG
     API --> REDIS

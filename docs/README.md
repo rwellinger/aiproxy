@@ -71,6 +71,8 @@
 ### 1.1 Requirements Overview
 The Mac AI Service System is a personal AI-based multimedia generation platform offering the following main features:
 - **AI Chat Conversations** - Interactive conversational AI via Ollama with persistent conversation history
+  - Integrated chat UI as part of thWelly Toolbox (replaced Open WebUI dependency)
+  - Direct Ollama integration with full conversation management
 - **Image Generation** via DALL-E 3 (OpenAI API)
 - **Music Generation** via Mureka API
 - **Asynchronous Processing** for time-intensive generation processes
@@ -309,16 +311,18 @@ Mac Studio M1 Max (32GB RAM) - IP: 10.0.1.120
 │   ├── API Server (Container: aiproxysrv)
 │   │   └── Image: ghcr.io/rwellinger/aiproxysrv-app:latest
 │   └── Nginx Proxy (Container: forward-proxy)
-│       └── Image: ghcr.io/rwellinger/aiwebui-app:latest (serves Angular app)
+│       └── Image: ghcr.io/rwellinger/aiwebui-app:latest (serves Angular app with integrated chat UI)
 ├── Native Services
-│   ├── Ollama (Port 11434)
-│   └── Open WebUI
+│   └── Ollama (Port 11434) - LLM backend for chat conversations
 └── Storage
     ├── postgres-data (Volume)
     ├── redis-data (Volume)
     └── images-data (Volume)
 
 All images built via GitHub Actions (Multi-platform: AMD64 + ARM64)
+
+Note: Chat functionality previously provided by Open WebUI is now
+integrated directly into the thWelly Toolbox Angular frontend.
 ```
 
 ### 7.3 Network Architecture
