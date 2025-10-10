@@ -1,10 +1,6 @@
-name: Build WebUI
+name: aiwebui image multiplatform
 
 on:
-  push:
-    tags:
-      - 'v?.?.?'
-      - 'v?.?.?-ui'
   workflow_dispatch:
 
 jobs:

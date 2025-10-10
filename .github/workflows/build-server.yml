@@ -1,11 +1,7 @@
-name: Build and Push Multi-Platform Docker Images
+name: aiproxysrv and celery-worker image multiplatform
 
 on:
-  push:
-    tags:
-      - 'v?.?.?'
-      - 'v?.?.?-srv'
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
