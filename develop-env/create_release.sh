@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v2.1.4"
+VERSION="v2.1.5"
 
 git fetch
 
