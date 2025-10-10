@@ -22,153 +22,11 @@ A full-stack platform for AI-powered image and music generation with Python back
 
 ## 📋 System Requirements
 
-### Hardware
-- **Development**: MacBook min. M1, 32GB RAM (Apple Silicon)
-- **Production**: min. Mac Studio M1 Max, 32GB RAM (Apple Silicon)
-
-### Software
-- **macOS** (Apple Silicon)
-- **Python 3.x** (with Miniconda3)
-- **Node.js & npm** (for Angular)
+- **macOS** (Apple Silicon - M1/M4)
+- **Python 3.11+** (with Miniconda3)
+- **Node.js & npm** (for Angular 18)
 - **Docker** (via Colima for macOS)
 - **Git**
-
----
-
-## 🚀 Installation
-
-### Quick Start with Pre-built Docker Images
-
-**Recommended for users who just want to run the services:**
-
-```bash
-# Pull pre-built images from GitHub Container Registry
-# Supports both AMD64 (Intel/AMD) and ARM64 (Apple Silicon)
-docker pull ghcr.io/rwellinger/aiproxysrv-app:latest
-docker pull ghcr.io/rwellinger/celery-worker-app:latest
-docker pull ghcr.io/rwellinger/aiwebui-app:latest
-
-# Or use a specific version
-docker pull ghcr.io/rwellinger/aiproxysrv-app:v2.1.1
-docker pull ghcr.io/rwellinger/celery-worker-app:v2.1.1
-docker pull ghcr.io/rwellinger/aiwebui-app:v2.1.1
-
-# Configure environment and start
-cd aiproxysrv
-cp env_template .env
-# Edit .env with your API keys
-docker compose pull
-docker compose up -d
-```
-
----
-
-### Full Installation from Source
-
-### 1. Clone Repository
-
-```bash
-git clone <repository-url>
-cd mac_ki_service
-```
-
-### 2. Install Docker/Colima
-
-```bash
-# Install Homebrew (if not already installed)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Install Colima
-brew install colima docker
-
-# Start Colima (optimized for Apple Silicon)
-colima start --arch aarch64 --cpu 4 --memory 4 --disk 80 --vm-type=vz
-```
-
-### 3. Create Docker Network
-
-```bash
-# Create shared Docker network for all services
-docker network create webui-network
-```
-
-### 4. Python Environment (Conda)
-
-```bash
-# Install Miniconda3 (if not already installed)
-# https://docs.conda.io/en/latest/miniconda.html
-
-# Create environment
-conda create -n mac_ki_service python=3.11
-conda activate mac_ki_service
-```
-
-### 5. Backend Setup (aiproxysrv)
-
-```bash
-cd aiproxysrv
-
-# Install Python dependencies
-pip install -e .
-
-# Create .env file
-cp env_template .env
-```
-
-**Important: Configure `.env` file:**
-
-```bash
-# Generate JWT secret
-openssl rand -base64 32
-
-# Edit .env and set the following values:
-# - JWT_SECRET_KEY=<generated-key>
-# - OPENAI_API_KEY=<your-openai-key>
-# - MUREKA_API_KEY=<your-mureka-key>
-# - POSTGRES_PASSWORD=<secure-password>
-# - DATABASE_URL=postgresql://aiproxy:<password>@localhost:5432/aiproxysrv
-```
-
-**Create PostgreSQL .env:**
-
-```bash
-# Create .env_postgres
-cat > .env_postgres << EOF
-POSTGRES_USER=aiproxy
-POSTGRES_PASSWORD=<same-as-above>
-POSTGRES_DB=aiproxysrv
-EOF
-```
-
-### 6. Frontend Setup (aiwebui)
-
-```bash
-cd ../aiwebui
-
-# Install dependencies
-npm install
-```
-
-### 7. Start Database & Services
-
-#### Option A: Development (PostgreSQL + Redis in Docker)
-
-```bash
-# In develop-env/
-cd develop-env
-docker compose up -d
-
-# Database migrations
-cd ../aiproxysrv
-alembic upgrade head
-```
-
-#### Option B: Production (Full Stack in Docker)
-
-```bash
-cd aiproxysrv
-docker compose up -d
-```
 
 ---
 
@@ -211,6 +69,77 @@ npm run build:prod
 
 ---
 
+## 🚀 Release Management
+
+### Creating a New Release
+
+The release process is automated with scripts that handle versioning, git tagging, and Docker image builds.
+
+#### 1. Create Release (Version + Git Tag)
+
+```bash
+# Creates VERSION files, commits, tags, and pushes
+./scripts/build/create_release.sh v2.1.6
+```
+
+**What this does:**
+- ✅ Validates version format (`vX.Y.Z`)
+- ✅ Checks git status (clean tree, no unpushed commits)
+- ✅ Updates `aiproxysrv/VERSION` and `aiwebui/VERSION`
+- ✅ Commits: `"Bump version to vX.Y.Z"`
+- ✅ Creates git tag with message
+- ✅ Pushes commit and tag to remote
+
+#### 2. Build & Push Docker Images
+
+After creating the release, build and push Docker images:
+
+```bash
+# Build and push backend images (aiproxysrv-app + celery-worker-app)
+./scripts/build/build-and-push-aiproxysrv.sh
+
+# Build and push frontend image (aiwebui-app)
+./scripts/build/build-and-push-aiwebui.sh
+```
+
+**What these do:**
+- ✅ Read version from VERSION files automatically
+- ✅ Build Docker images with correct tags (`vX.Y.Z` + `latest`)
+- ✅ Check if version already exists in registry
+- ✅ Push to GitHub Container Registry (`ghcr.io/rwellinger/*`)
+- ✅ Support `--force` flag to skip confirmation
+
+**Available Docker Images:**
+- `ghcr.io/rwellinger/aiproxysrv-app:vX.Y.Z` (Backend API)
+- `ghcr.io/rwellinger/celery-worker-app:vX.Y.Z` (Async Worker)
+- `ghcr.io/rwellinger/aiwebui-app:vX.Y.Z` (Frontend)
+
+#### Optional: Force Push (Overwrite Existing Tags)
+
+```bash
+# Build and push with force (skip confirmation)
+./scripts/build/build-and-push-aiproxysrv.sh --force
+./scripts/build/build-and-push-aiwebui.sh --force
+```
+
+### Cleanup Scripts
+
+```bash
+# Clean up old git tags
+./scripts/build/cleanup-tags.sh
+
+# Clean up old git branches
+./scripts/build/cleanup-branchs.sh
+
+# Clean up old Docker images
+./scripts/build/cleanup-docker-images.sh
+
+# General git cleanup
+./scripts/build/gitcleanup.sh
+```
+
+---
+
 ## 🗂️ Project Structure
 
 ```
@@ -225,6 +154,7 @@ mac_ki_service/
 │   │   └── worker.py    # Celery worker
 │   ├── docker-compose.yml
 │   ├── env_template
+│   ├── VERSION          # Version file for releases
 │   └── pyproject.toml
 │
 ├── aiwebui/             # Angular 18 Frontend
@@ -239,7 +169,17 @@ mac_ki_service/
 │   │   │   └── config/           # Chat & API config
 │   │   ├── components/  # Shared components
 │   │   └── models/      # TypeScript interfaces
-│   └── package.json
+│   ├── package.json
+│   └── VERSION          # Version file for releases
+│
+├── scripts/build/       # Release & Build automation
+│   ├── create_release.sh           # Create versioned release
+│   ├── build-and-push-aiproxysrv.sh
+│   ├── build-and-push-aiwebui.sh
+│   ├── cleanup-docker-images.sh
+│   ├── cleanup-tags.sh
+│   ├── cleanup-branchs.sh
+│   └── gitcleanup.sh
 │
 ├── forwardproxy/        # Nginx reverse proxy (Production)
 │   ├── html/           # Angular build output
@@ -253,6 +193,26 @@ mac_ki_service/
 ---
 
 ## 🛠️ Important Commands
+
+### Release Management
+
+```bash
+# Create new release (version + git tag)
+./scripts/build/create_release.sh v2.1.6
+
+# Build and push Docker images
+./scripts/build/build-and-push-aiproxysrv.sh    # Backend + Worker
+./scripts/build/build-and-push-aiwebui.sh       # Frontend
+
+# Force push (skip confirmation)
+./scripts/build/build-and-push-aiproxysrv.sh --force
+./scripts/build/build-and-push-aiwebui.sh --force
+
+# Cleanup
+./scripts/build/cleanup-docker-images.sh
+./scripts/build/cleanup-tags.sh
+./scripts/build/cleanup-branchs.sh
+```
 
 ### Backend
 

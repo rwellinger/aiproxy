@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 # Configuration
 REGISTRY="ghcr.io/rwellinger"
 APP_IMAGE="aiwebui-app"
-PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 BUILD_DIR="$PROJECT_DIR/aiwebui"
 FORCE_PUSH=false
 

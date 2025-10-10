@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 REGISTRY="ghcr.io/rwellinger"
 APP_IMAGE="aiproxysrv-app"
 WORKER_IMAGE="celery-worker-app"
-PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 BUILD_DIR="$PROJECT_DIR/aiproxysrv"
 FORCE_PUSH=false
 
