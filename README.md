@@ -1,6 +1,6 @@
 # thWelly's AI Toolbox
 
-<img src="python_ai_services.png" alt="Python AI Services" width="204" height="204">
+<img src="thwellysAIToolbar.jpg" alt="thWelly's AI Toolbox" width="204" height="204">
 
 A full-stack platform for AI-powered image and music generation with Python backend (FastAPI) and Angular 18 frontend.
 
