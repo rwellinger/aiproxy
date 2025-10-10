@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-cd ../forwardproxy
+cd ../../forwardproxy
 docker-compose up -d
 
 docker ps
