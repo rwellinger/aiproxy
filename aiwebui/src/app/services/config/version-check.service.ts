@@ -14,19 +14,19 @@ export interface AppVersion {
 export class VersionCheckService {
   private readonly VERSION_KEY = 'app_version';
   private readonly VERSION_URL = '/aiwebui/assets/app-version.json';
-  private readonly CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
+  private readonly CHECK_INTERVAL = 15 * 60 * 1000; // 15 minutes
 
   private http = inject(HttpClient);
 
   /**
    * Initialisiert den Version-Check beim App-Start
-   * Prüft sofort und dann alle 5 Minuten
+   * Prüft sofort und dann alle 15 Minuten
    */
   public initVersionCheck(): void {
     // Sofortiger Check beim Start
     this.checkVersion().subscribe();
 
-    // Periodischer Check alle 5 Minuten
+    // Periodischer Check alle 15 Minuten
     interval(this.CHECK_INTERVAL)
       .pipe(
         startWith(0),
