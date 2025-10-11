@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from db.models import Conversation, Message, MessageArchive
 from utils.logger import logger
-from api.controllers.openai_chat_controller import OpenAIChatController, OpenAIAPIError as OpenAIError
+from api.controllers.openai_chat_controller import OpenAIChatController
 from config.settings import OLLAMA_URL, OLLAMA_TIMEOUT
 import requests
 
@@ -16,7 +16,7 @@ class CompressionController:
     """Controller for compressing conversations by archiving old messages and creating AI summaries."""
 
     def compress_conversation(
-        self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID, keep_recent: int = 10
+        self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID, keep_recent: int = 2
     ) -> Tuple[Dict[str, Any], int]:
         """
         Compress a conversation by archiving old messages and creating an AI summary.
@@ -183,9 +183,10 @@ class CompressionController:
             Exception: If AI summary creation fails
         """
         # Build prompt for summarization (keep it very brief to reduce tokens)
+        # Include all messages, but with variable detail level
         conversation_text = "\n".join([
-            f"{msg.role}: {msg.content[:200]}"  # Limit each message to 200 chars
-            for msg in messages[:10]  # Only include first 10 messages
+            f"{msg.role}: {msg.content[:500 if i < 5 else 150]}"  # First 5 messages: 500 chars, rest: 150 chars
+            for i, msg in enumerate(messages[:20])  # Include up to 20 messages
         ])
 
         summary_prompt = f"""Summarize this conversation in MAX 5 bullet points (max 50 words total):

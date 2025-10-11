@@ -195,8 +195,11 @@ def compress_conversation(conversation_id: str):
         except ValueError:
             return jsonify({"error": "Invalid conversation ID format"}), 400
 
-        # Get optional keep_recent parameter
-        keep_recent = request.args.get("keep_recent", default=10, type=int)
+        # Get optional keep_recent parameter (default=2, min=1, max=20)
+        keep_recent = request.args.get("keep_recent", default=2, type=int)
+        # Validate parameter range
+        if keep_recent < 1 or keep_recent > 20:
+            return jsonify({"error": "keep_recent must be between 1 and 20"}), 400
 
         response_data, status_code = compression_controller.compress_conversation(
             db=db, conversation_id=conv_uuid, user_id=user_id, keep_recent=keep_recent
