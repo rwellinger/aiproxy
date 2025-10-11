@@ -389,6 +389,19 @@ class ConversationController:
             if not conversation:
                 return {"error": "Conversation not found"}, 404
 
+            # Delete archived messages first (foreign key constraint)
+            archived_count = db.query(MessageArchive).filter(
+                MessageArchive.conversation_id == conversation_id
+            ).delete()
+
+            if archived_count > 0:
+                logger.debug(
+                    "Deleted archived messages",
+                    conversation_id=str(conversation_id),
+                    archived_count=archived_count
+                )
+
+            # Now delete conversation (cascade will delete regular messages)
             db.delete(conversation)
             db.commit()
 

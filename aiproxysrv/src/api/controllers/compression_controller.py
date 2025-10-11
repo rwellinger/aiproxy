@@ -93,13 +93,17 @@ class CompressionController:
 
             # Create summary message as 'assistant' (not 'system') so it can be compressed later
             # Keep prefix very short to minimize tokens
+            prefix = f"[Summary: {len(old_messages)} msgs archived]\n"
+            # Rough token count for prefix (~ 1.3 tokens per word)
+            prefix_token_count = int(len(prefix.split()) * 1.3)
+
             summary_message = Message(
                 id=uuid.uuid4(),
                 conversation_id=conversation_id,
                 role="assistant",  # Changed from 'system' to allow future compression
-                content=f"[Summary: {len(old_messages)} msgs archived]\n{summary_content}",
+                content=f"{prefix}{summary_content}",
                 is_summary=True,
-                token_count=summary_token_count,  # Use actual token count from AI
+                token_count=summary_token_count + prefix_token_count,  # Include prefix tokens
                 created_at=datetime.utcnow(),
             )
             db.add(summary_message)
@@ -108,14 +112,29 @@ class CompressionController:
             # Archive old messages
             archived_count = self._archive_messages(db, old_messages, summary_message.id)
 
-            # Recalculate token count
+            # Recalculate ACTUAL token count by querying the model
+            # This ensures accuracy after compression
             remaining_messages = (
                 db.query(Message)
                 .filter(Message.conversation_id == conversation_id)
+                .order_by(Message.created_at.asc())
                 .all()
             )
-            total_tokens = sum([m.token_count or 0 for m in remaining_messages])
-            conversation.current_token_count = total_tokens
+
+            # Build message list for token count verification
+            verification_messages = [
+                {"role": msg.role, "content": msg.content}
+                for msg in remaining_messages
+            ]
+
+            # Get actual token count from the model
+            actual_token_count = self._get_actual_token_count(
+                verification_messages,
+                conversation.model,
+                conversation.provider
+            )
+
+            conversation.current_token_count = actual_token_count
             conversation.updated_at = datetime.utcnow()
 
             db.commit()
@@ -124,15 +143,15 @@ class CompressionController:
                 "Conversation compressed successfully",
                 conversation_id=str(conversation_id),
                 archived_count=archived_count,
-                new_token_count=total_tokens,
+                new_token_count=actual_token_count,
             )
 
             return {
                 "message": "Conversation compressed successfully",
                 "archived_messages": archived_count,
                 "summary_created": True,
-                "new_token_count": total_tokens,
-                "token_percentage": (total_tokens / conversation.context_window_size) * 100
+                "new_token_count": actual_token_count,
+                "token_percentage": (actual_token_count / conversation.context_window_size) * 100
             }, 200
 
         except Exception as e:
@@ -227,6 +246,79 @@ Brief summary:"""
             # Rough token estimate for fallback
             fallback_token_count = len(fallback_summary.split())
             return fallback_summary, fallback_token_count
+
+    def _get_actual_token_count(
+        self, messages: List[Dict[str, str]], model: str, provider: str
+    ) -> int:
+        """
+        Get actual token count by making a test call to the model.
+
+        This method makes a lightweight API call to get the prompt_eval_count,
+        which represents the total tokens in the conversation context.
+
+        Args:
+            messages: List of messages with role and content
+            model: Model name
+            provider: Provider ('internal' or 'external')
+
+        Returns:
+            Actual token count from the model
+
+        Raises:
+            Exception: If token count retrieval fails
+        """
+        try:
+            if provider == "external":
+                # Use OpenAI - they don't provide token counts without actual generation
+                # Fall back to rough estimate based on message lengths
+                total_chars = sum(len(msg.get("content", "")) for msg in messages)
+                # Rough OpenAI estimate: ~4 chars per token
+                estimated_tokens = int(total_chars / 4)
+                logger.info(
+                    "Token count estimated for OpenAI",
+                    estimated_tokens=estimated_tokens,
+                    provider=provider
+                )
+                return estimated_tokens
+            else:
+                # Use Ollama - get prompt_eval_count without generating response
+                api_url = f"{OLLAMA_URL}/api/chat"
+
+                # Add a minimal user message to trigger eval
+                test_messages = messages + [{"role": "user", "content": "."}]
+
+                payload = {
+                    "model": model,
+                    "messages": test_messages,
+                    "stream": False,
+                }
+
+                resp = requests.post(api_url, json=payload, timeout=OLLAMA_TIMEOUT)
+                resp.raise_for_status()
+                resp_json = resp.json()
+
+                # Get prompt_eval_count (includes all messages + system context)
+                prompt_eval_count = resp_json.get("prompt_eval_count", 0)
+
+                logger.info(
+                    "Actual token count retrieved from Ollama",
+                    prompt_eval_count=prompt_eval_count,
+                    provider=provider
+                )
+
+                return prompt_eval_count
+
+        except Exception as e:
+            logger.warning(
+                "Failed to get actual token count, using fallback",
+                error=str(e),
+                provider=provider
+            )
+            # Fallback: sum of individual message token counts (if available)
+            total_chars = sum(len(msg.get("content", "")) for msg in messages)
+            # Rough estimate: ~1.3 tokens per word, ~5 chars per word
+            estimated_tokens = int(total_chars / 4)
+            return estimated_tokens
 
     def _archive_messages(
         self, db: Session, messages: List[Message], summary_id: uuid.UUID

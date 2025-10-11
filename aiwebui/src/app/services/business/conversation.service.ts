@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
@@ -15,11 +15,8 @@ import { ApiConfigService } from '../config/api-config.service';
   providedIn: 'root'
 })
 export class ConversationService {
-
-  constructor(
-    private http: HttpClient,
-    private apiConfig: ApiConfigService
-  ) {}
+  private http = inject(HttpClient);
+  private apiConfig = inject(ApiConfigService);
 
   /**
    * List all conversations for the authenticated user

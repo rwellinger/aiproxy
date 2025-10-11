@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, ViewChild, ElementRef, inject } from '@an
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { DomSanitizer } from '@angular/platform-browser';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -53,7 +52,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
   private openaiChatService = inject(OpenaiChatService);
   private notificationService = inject(NotificationService);
   private chatExportService = inject(ChatExportService);
-  private messageContentPipe = new MessageContentPipe(inject(DomSanitizer));
+  private messageContentPipe = new MessageContentPipe();
   private destroy$ = new Subject<void>();
 
   // Data
@@ -66,6 +65,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
   isLoading = false;
   isSending = false;
   isLoadingModels = false;
+  isCompressing = false;
 
   // Form State
   newChatTitle = '';
@@ -272,7 +272,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
    * Send message in current conversation
    */
   public sendMessage(): void {
-    if (!this.currentConversation || !this.messageInput.trim() || this.isSending) {
+    if (!this.currentConversation || !this.messageInput.trim() || this.isSending || this.isCompressing) {
       return;
     }
 
@@ -494,7 +494,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
    * Compress conversation (archive old messages + create summary)
    */
   public compressConversation(): void {
-    if (!this.currentConversation) return;
+    if (!this.currentConversation || this.isCompressing) return;
 
     const confirmed = confirm(
       'Compress this conversation?\n\n' +
@@ -506,7 +506,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
 
     if (!confirmed) return;
 
-    this.isLoading = true;
+    this.isCompressing = true;
     this.conversationService
       .compressConversation(this.currentConversation.id)
       .pipe(takeUntil(this.destroy$))
@@ -523,9 +523,10 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Error compressing conversation:', error);
           this.notificationService.error('Compression failed');
+          this.isCompressing = false;
         },
         complete: () => {
-          this.isLoading = false;
+          this.isCompressing = false;
         }
       });
   }

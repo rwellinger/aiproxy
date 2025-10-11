@@ -154,21 +154,28 @@
                 </button>
             </div>
 
-            @if (shouldShowCompressionWarning()) {
+            @if (isCompressing) {
+                <div class="compressing-indicator">
+                    <mat-spinner diameter="20"></mat-spinner>
+                    <span>Compressing conversation... Creating AI summary...</span>
+                </div>
+            }
+
+            @if (shouldShowCompressionWarning() && !isCompressing) {
                 <div class="compression-warning">
                     <mat-icon>compress</mat-icon>
                     <span>Memory running low ({{ getTokenPercentage().toFixed(0) }}%)!</span>
-                    <button mat-raised-button color="accent" (click)="compressConversation()">
+                    <button mat-raised-button color="accent" (click)="compressConversation()" [disabled]="isCompressing">
                         Compress Chat
                     </button>
                 </div>
             }
 
-            @if (shouldShowTokenWarning()) {
+            @if (shouldShowTokenWarning() && !isCompressing) {
                 <div class="token-warning">
                     <mat-icon>warning</mat-icon>
                     <span>Context window nearly full ({{ getTokenPercentage().toFixed(0) }}%)! Oldest messages may be lost.</span>
-                    <button mat-raised-button color="warn" (click)="compressConversation()">
+                    <button mat-raised-button color="warn" (click)="compressConversation()" [disabled]="isCompressing">
                         Compress Now
                     </button>
                 </div>
@@ -245,12 +252,12 @@
             (keydown)="onMessageInputKeydown($event)"
             placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
             rows="3"
-            [disabled]="isSending || currentConversation.archived === true"></textarea>
+            [disabled]="isSending || isCompressing || currentConversation.archived === true"></textarea>
                 <button
                         mat-raised-button
                         color="primary"
                         (click)="sendMessage()"
-                        [disabled]="!messageInput.trim() || isSending || currentConversation.archived === true">
+                        [disabled]="!messageInput.trim() || isSending || isCompressing || currentConversation.archived === true">
                     <mat-icon>send</mat-icon>
                     Send
                 </button>
