@@ -21,8 +21,14 @@
       font-size: 1.2rem;
     }
 
-    button {
-      width: 100%;
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      button[mat-raised-button] {
+        flex: 1;
+      }
     }
   }
 
@@ -487,10 +493,34 @@
 
   .message-input-container {
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
     padding: 1rem;
     border-top: 1px solid #e0e0e0;
     background: #fff;
+
+    .archived-notice {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: #fff3e0;
+      border: 1px solid #ffa726;
+      border-radius: 4px;
+      color: #e65100;
+      font-size: 0.9rem;
+
+      mat-icon {
+        font-size: 1.2rem;
+        width: 1.2rem;
+        height: 1.2rem;
+      }
+    }
+
+    > div:last-child {
+      display: flex;
+      gap: 0.5rem;
+    }
 
     .message-input {
       flex: 1;

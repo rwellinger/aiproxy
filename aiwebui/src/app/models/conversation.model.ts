@@ -9,6 +9,7 @@ export interface Conversation {
   model: string;
   provider?: 'internal' | 'external';
   system_context?: string;
+  archived?: boolean;
   context_window_size?: number;
   current_token_count?: number;
   created_at: string;

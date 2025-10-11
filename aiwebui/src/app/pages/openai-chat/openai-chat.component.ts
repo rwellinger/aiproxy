@@ -77,6 +77,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
   showNewChatForm = false;
   isEditingTitle = false;
   editTitleValue = '';
+  showArchived = false;
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   @ViewChild('messageInputField') private messageInputField!: ElementRef;
@@ -125,8 +126,10 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
    */
   public loadConversations(): void {
     this.isLoading = true;
+    // archived: undefined = only non-archived, true = only archived
+    const archived = this.showArchived ? true : undefined;
     this.conversationService
-      .getConversations(0, 50, 'external')
+      .getConversations(0, 50, 'external', archived)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -596,5 +599,48 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
       console.error('Error exporting to Markdown:', error);
       this.notificationService.error('Failed to export chat');
     }
+  }
+
+  /**
+   * Toggle between showing archived and non-archived conversations
+   */
+  public toggleShowArchived(): void {
+    this.showArchived = !this.showArchived;
+    this.currentConversation = null;
+    this.messages = [];
+    this.loadConversations();
+  }
+
+  /**
+   * Archive or unarchive the current conversation
+   */
+  public toggleArchive(): void {
+    if (!this.currentConversation) return;
+
+    const newArchivedState = !this.currentConversation.archived;
+    const action = newArchivedState ? 'archived' : 'unarchived';
+
+    this.conversationService
+      .archiveConversation(this.currentConversation.id, newArchivedState)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          // Remove from current list
+          this.conversations = this.conversations.filter(c => c.id !== this.currentConversation?.id);
+          this.currentConversation = null;
+          this.messages = [];
+
+          // Select first available conversation
+          if (this.conversations.length > 0) {
+            this.selectConversation(this.conversations[0]);
+          }
+
+          this.notificationService.success(`Conversation ${action}`);
+        },
+        error: (error) => {
+          console.error(`Error ${action}:`, error);
+          this.notificationService.error(`Failed to ${action === 'archived' ? 'archive' : 'unarchive'} conversation`);
+        }
+      });
   }
 }

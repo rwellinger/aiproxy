@@ -24,7 +24,7 @@ class ConversationController:
     """Controller for managing AI chat conversations."""
 
     def list_conversations(
-        self, db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20, provider: str = None
+        self, db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20, provider: str = None, archived: bool = None
     ) -> Tuple[Dict[str, Any], int]:
         """
         List all conversations for a user.
@@ -35,6 +35,7 @@ class ConversationController:
             skip: Pagination offset
             limit: Pagination limit
             provider: Optional provider filter ('internal' or 'external')
+            archived: Optional archived filter (None = only non-archived, True = only archived, False = all)
 
         Returns:
             Tuple of (response_data, status_code)
@@ -53,6 +54,18 @@ class ConversationController:
             # Filter by provider if specified
             if provider:
                 query = query.filter(Conversation.provider == provider)
+
+            # Filter by archived status
+            # None (default) = only non-archived conversations
+            # True = only archived conversations
+            # False = all conversations (no filter)
+            if archived is None:
+                # Default: show only non-archived conversations
+                query = query.filter(Conversation.archived == False)
+            elif archived is True:
+                # Show only archived conversations
+                query = query.filter(Conversation.archived == True)
+            # If archived is False, no filter is applied (show all)
 
             query = query.group_by(Conversation.id).order_by(Conversation.updated_at.desc())
 
@@ -229,10 +242,13 @@ class ConversationController:
             if not conversation:
                 return {"error": "Conversation not found"}, 404
 
-            # Only allow title updates
+            # Update allowed fields
             if data.title is not None:
                 conversation.title = data.title
-                conversation.updated_at = datetime.utcnow()
+            if data.archived is not None:
+                conversation.archived = data.archived
+
+            conversation.updated_at = datetime.utcnow()
 
             db.commit()
             db.refresh(conversation)

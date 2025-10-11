@@ -192,6 +192,7 @@ class Conversation(Base):
     model = Column(String(100), nullable=False)  # Model name (Ollama or OpenAI)
     provider = Column(String(50), nullable=False, server_default="internal", index=True)  # 'internal' (Ollama) or 'external' (OpenAI, DeepSeek)
     system_context = Column(Text, nullable=True)  # System prompt/context
+    archived = Column(Boolean, nullable=False, server_default="false")  # Archive status
 
     # Token tracking
     context_window_size = Column(Integer, nullable=False, server_default="2048")  # Max tokens for this model

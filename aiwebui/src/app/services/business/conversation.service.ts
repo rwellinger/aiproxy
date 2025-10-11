@@ -24,9 +24,9 @@ export class ConversationService {
   /**
    * List all conversations for the authenticated user
    */
-  public getConversations(skip: number = 0, limit: number = 20, provider?: string): Observable<ConversationListResponse> {
+  public getConversations(skip: number = 0, limit: number = 20, provider?: string, archived?: boolean): Observable<ConversationListResponse> {
     return this.http.get<ConversationListResponse>(
-      this.apiConfig.endpoints.conversation.list(skip, limit, provider)
+      this.apiConfig.endpoints.conversation.list(skip, limit, provider, archived)
     );
   }
 
@@ -50,13 +50,20 @@ export class ConversationService {
   }
 
   /**
-   * Update a conversation (title only)
+   * Update a conversation (title, archived)
    */
-  public updateConversation(id: string, data: { title: string }): Observable<Conversation> {
+  public updateConversation(id: string, data: { title?: string; archived?: boolean }): Observable<Conversation> {
     return this.http.patch<Conversation>(
       this.apiConfig.endpoints.conversation.update(id),
       data
     );
+  }
+
+  /**
+   * Archive or unarchive a conversation
+   */
+  public archiveConversation(id: string, archived: boolean): Observable<Conversation> {
+    return this.updateConversation(id, { archived });
   }
 
   /**

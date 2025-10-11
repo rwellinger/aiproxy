@@ -58,11 +58,14 @@ export class ApiConfigService {
             delete: (category: string, action: string) => `${this.baseUrl}/api/v1/prompts/${category}/${action}`
         },
         conversation: {
-            list: (skip?: number, limit?: number, provider?: string) => {
+            list: (skip?: number, limit?: number, provider?: string, archived?: boolean) => {
                 const params = new URLSearchParams();
                 if (skip !== undefined) params.append('skip', skip.toString());
                 if (limit !== undefined) params.append('limit', limit.toString());
                 if (provider) params.append('provider', provider);
+                if (archived === true) params.append('archived', 'true');
+                if (archived === false) params.append('archived', 'false');
+                // archived === undefined means default (only non-archived)
                 const query = params.toString();
                 return `${this.baseUrl}/api/v1/conversations${query ? '?' + query : ''}`;
             },

@@ -3,9 +3,14 @@
   <aside class="conversation-list">
     <div class="conversation-list-header">
       <h2>Ollama Chat (intern)</h2>
-      <button mat-raised-button color="primary" (click)="showNewChat()">
-        <mat-icon>add</mat-icon> New Chat
-      </button>
+      <div class="header-actions">
+        <button mat-icon-button (click)="toggleShowArchived()" [title]="showArchived ? 'Show active chats' : 'Show archive'">
+          <mat-icon>{{ showArchived ? 'unarchive' : 'archive' }}</mat-icon>
+        </button>
+        <button mat-raised-button color="primary" (click)="showNewChat()">
+          <mat-icon>add</mat-icon> New Chat
+        </button>
+      </div>
     </div>
 
     <!-- New chat form -->
@@ -136,6 +141,9 @@
         <button mat-icon-button (click)="exportToMarkdown()" title="Export as Markdown">
           <mat-icon>download</mat-icon>
         </button>
+        <button mat-icon-button (click)="toggleArchive()" [title]="currentConversation.archived ? 'Unarchive' : 'Archive'">
+          <mat-icon>{{ currentConversation.archived ? 'unarchive' : 'archive' }}</mat-icon>
+        </button>
         <button mat-icon-button color="warn" (click)="deleteConversation()" title="Delete conversation">
           <mat-icon>delete</mat-icon>
         </button>
@@ -197,6 +205,12 @@
       </div>
 
       <div class="message-input-container">
+        @if (currentConversation.archived) {
+          <div class="archived-notice">
+            <mat-icon>archive</mat-icon>
+            <span>This conversation is archived. Messages cannot be sent.</span>
+          </div>
+        }
         <textarea
           #messageInputField
           class="message-input"
@@ -204,12 +218,12 @@
           (keydown)="onMessageInputKeydown($event)"
           placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
           rows="3"
-          [disabled]="isSending"></textarea>
+          [disabled]="isSending || currentConversation.archived === true"></textarea>
         <button
           mat-raised-button
           color="primary"
           (click)="sendMessage()"
-          [disabled]="!messageInput.trim() || isSending">
+          [disabled]="!messageInput.trim() || isSending || currentConversation.archived === true">
           <mat-icon>send</mat-icon>
           Send
         </button>

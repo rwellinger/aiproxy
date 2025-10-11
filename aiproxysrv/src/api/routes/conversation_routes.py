@@ -34,8 +34,17 @@ def list_conversations():
         limit = request.args.get("limit", default=20, type=int)
         provider = request.args.get("provider", default=None, type=str)
 
+        # Get archived filter (defaults to None = only non-archived)
+        # 'true' = only archived, 'false' = all conversations
+        archived_param = request.args.get("archived", default=None, type=str)
+        archived = None  # Default: show only non-archived
+        if archived_param == "true":
+            archived = True  # Show only archived
+        elif archived_param == "false":
+            archived = False  # Show all conversations (no filter)
+
         response_data, status_code = conversation_controller.list_conversations(
-            db=db, user_id=user_id, skip=skip, limit=limit, provider=provider
+            db=db, user_id=user_id, skip=skip, limit=limit, provider=provider, archived=archived
         )
 
         return jsonify(response_data), status_code
