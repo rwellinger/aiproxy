@@ -47,6 +47,7 @@ class ConversationResponse(BaseModel):
     model: str
     provider: str = "internal"
     system_context: Optional[str]
+    archived: bool = False
     context_window_size: int = 2048
     current_token_count: int = 0
     created_at: datetime
@@ -94,3 +95,4 @@ class ConversationUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=255)
     model: Optional[str] = Field(None, min_length=1, max_length=100)
     system_context: Optional[str] = None
+    archived: Optional[bool] = None

@@ -7,7 +7,7 @@ import requests
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from db.models import Conversation, Message
+from db.models import Conversation, Message, MessageArchive
 from schemas.conversation_schemas import (
     ConversationCreate,
     ConversationUpdate,
@@ -24,7 +24,7 @@ class ConversationController:
     """Controller for managing AI chat conversations."""
 
     def list_conversations(
-        self, db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20, provider: str = None
+        self, db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20, provider: str = None, archived: bool = None
     ) -> Tuple[Dict[str, Any], int]:
         """
         List all conversations for a user.
@@ -35,6 +35,7 @@ class ConversationController:
             skip: Pagination offset
             limit: Pagination limit
             provider: Optional provider filter ('internal' or 'external')
+            archived: Optional archived filter (None = only non-archived, True = only archived, False = all)
 
         Returns:
             Tuple of (response_data, status_code)
@@ -53,6 +54,18 @@ class ConversationController:
             # Filter by provider if specified
             if provider:
                 query = query.filter(Conversation.provider == provider)
+
+            # Filter by archived status
+            # None (default) = only non-archived conversations
+            # True = only archived conversations
+            # False = all conversations (no filter)
+            if archived is None:
+                # Default: show only non-archived conversations
+                query = query.filter(Conversation.archived == False)
+            elif archived is True:
+                # Show only archived conversations
+                query = query.filter(Conversation.archived == True)
+            # If archived is False, no filter is applied (show all)
 
             query = query.group_by(Conversation.id).order_by(Conversation.updated_at.desc())
 
@@ -132,6 +145,96 @@ class ConversationController:
                 stacktrace=traceback.format_exc(),
             )
             return {"error": f"Failed to get conversation: {e}"}, 500
+
+    def get_conversation_with_archive(
+        self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID
+    ) -> Tuple[Dict[str, Any], int]:
+        """
+        Get conversation with messages including archived messages (for export).
+
+        This method merges active messages with archived messages,
+        replacing summary messages with their original archived content.
+
+        Args:
+            db: Database session
+            conversation_id: Conversation UUID
+            user_id: User UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            # Get conversation
+            conversation = (
+                db.query(Conversation)
+                .filter(
+                    Conversation.id == conversation_id,
+                    Conversation.user_id == user_id,
+                )
+                .first()
+            )
+
+            if not conversation:
+                return {"error": "Conversation not found"}, 404
+
+            # Get active messages
+            active_messages = (
+                db.query(Message)
+                .filter(Message.conversation_id == conversation_id)
+                .order_by(Message.created_at.asc())
+                .all()
+            )
+
+            # Get archived messages
+            archived_messages = (
+                db.query(MessageArchive)
+                .filter(MessageArchive.conversation_id == conversation_id)
+                .order_by(MessageArchive.original_created_at.asc())
+                .all()
+            )
+
+            # Build complete message list
+            all_messages = []
+
+            for msg in active_messages:
+                if msg.is_summary and msg.id:
+                    # Replace summary with archived messages
+                    related_archived = [
+                        a for a in archived_messages if a.summary_message_id == msg.id
+                    ]
+                    # Add archived messages as dict (with original timestamps)
+                    for archive in related_archived:
+                        all_messages.append({
+                            "id": str(archive.original_message_id),
+                            "conversation_id": str(archive.conversation_id),
+                            "role": archive.role,
+                            "content": archive.content,
+                            "token_count": archive.token_count,
+                            "created_at": archive.original_created_at.isoformat() if archive.original_created_at else None,
+                            "is_archived": True,
+                        })
+                else:
+                    # Add regular message
+                    all_messages.append(MessageResponse.from_orm(msg).dict())
+
+            # Sort by created_at
+            all_messages.sort(key=lambda x: x.get("created_at") or "")
+
+            return {
+                "conversation": ConversationResponse.from_orm(conversation).dict(),
+                "messages": all_messages,
+                "has_archived": len(archived_messages) > 0,
+            }, 200
+
+        except Exception as e:
+            logger.error(
+                "Error getting conversation with archive",
+                conversation_id=str(conversation_id),
+                error_type=type(e).__name__,
+                error=str(e),
+                stacktrace=traceback.format_exc(),
+            )
+            return {"error": f"Failed to get conversation with archive: {e}"}, 500
 
     def create_conversation(
         self, db: Session, user_id: uuid.UUID, data: ConversationCreate
@@ -229,10 +332,13 @@ class ConversationController:
             if not conversation:
                 return {"error": "Conversation not found"}, 404
 
-            # Only allow title updates
+            # Update allowed fields
             if data.title is not None:
                 conversation.title = data.title
-                conversation.updated_at = datetime.utcnow()
+            if data.archived is not None:
+                conversation.archived = data.archived
+
+            conversation.updated_at = datetime.utcnow()
 
             db.commit()
             db.refresh(conversation)
@@ -283,6 +389,19 @@ class ConversationController:
             if not conversation:
                 return {"error": "Conversation not found"}, 404
 
+            # Delete archived messages first (foreign key constraint)
+            archived_count = db.query(MessageArchive).filter(
+                MessageArchive.conversation_id == conversation_id
+            ).delete()
+
+            if archived_count > 0:
+                logger.debug(
+                    "Deleted archived messages",
+                    conversation_id=str(conversation_id),
+                    archived_count=archived_count
+                )
+
+            # Now delete conversation (cascade will delete regular messages)
             db.delete(conversation)
             db.commit()
 
@@ -409,6 +528,7 @@ class ConversationController:
             return {
                 "user_message": MessageResponse.from_orm(user_message).dict(),
                 "assistant_message": MessageResponse.from_orm(assistant_message).dict(),
+                "conversation": ConversationResponse.from_orm(conversation).dict(),
             }, 200
 
         except Exception as e:

@@ -14,8 +14,9 @@ import { HtmlToTextService } from '../services/utils/html-to-text.service';
 export class MessageContentPipe implements PipeTransform {
   private renderer: Renderer;
   private htmlToTextService = inject(HtmlToTextService);
+  private sanitizer = inject(DomSanitizer);
 
-  constructor(private sanitizer: DomSanitizer) {
+  constructor() {
     // Create custom renderer for code blocks
     this.renderer = new Renderer();
 

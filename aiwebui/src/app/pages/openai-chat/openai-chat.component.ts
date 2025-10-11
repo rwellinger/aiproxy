@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, ViewChild, ElementRef, inject } from '@an
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { DomSanitizer } from '@angular/platform-browser';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -53,7 +52,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
   private openaiChatService = inject(OpenaiChatService);
   private notificationService = inject(NotificationService);
   private chatExportService = inject(ChatExportService);
-  private messageContentPipe = new MessageContentPipe(inject(DomSanitizer));
+  private messageContentPipe = new MessageContentPipe();
   private destroy$ = new Subject<void>();
 
   // Data
@@ -66,6 +65,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
   isLoading = false;
   isSending = false;
   isLoadingModels = false;
+  isCompressing = false;
 
   // Form State
   newChatTitle = '';
@@ -77,6 +77,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
   showNewChatForm = false;
   isEditingTitle = false;
   editTitleValue = '';
+  showArchived = false;
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   @ViewChild('messageInputField') private messageInputField!: ElementRef;
@@ -125,8 +126,10 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
    */
   public loadConversations(): void {
     this.isLoading = true;
+    // archived: undefined = only non-archived, true = only archived
+    const archived = this.showArchived ? true : undefined;
     this.conversationService
-      .getConversations(0, 50, 'external')
+      .getConversations(0, 50, 'external', archived)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -269,7 +272,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
    * Send message in current conversation
    */
   public sendMessage(): void {
-    if (!this.currentConversation || !this.messageInput.trim() || this.isSending) {
+    if (!this.currentConversation || !this.messageInput.trim() || this.isSending || this.isCompressing) {
       return;
     }
 
@@ -304,6 +307,9 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
 
           // Add assistant message
           this.messages.push(response.assistant_message);
+
+          // Update conversation with new token counts
+          this.currentConversation = response.conversation;
 
           setTimeout(() => this.scrollToBottom(), 100);
           setTimeout(() => this.focusInput(), 200);
@@ -477,6 +483,55 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Check if compression warning should be shown (85%+)
+   */
+  public shouldShowCompressionWarning(): boolean {
+    const percentage = this.getTokenPercentage();
+    return percentage >= 85 && percentage < 90;
+  }
+
+  /**
+   * Compress conversation (archive old messages + create summary)
+   */
+  public compressConversation(): void {
+    if (!this.currentConversation || this.isCompressing) return;
+
+    const confirmed = confirm(
+      'Compress this conversation?\n\n' +
+      'Older messages will be archived and replaced with an AI summary.\n' +
+      '✓ Chat can continue\n' +
+      '✓ Export includes full history\n' +
+      '✓ System context preserved'
+    );
+
+    if (!confirmed) return;
+
+    this.isCompressing = true;
+    this.conversationService
+      .compressConversation(this.currentConversation.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.notificationService.success(
+            `Chat compressed: ${response.archived_messages} messages archived`
+          );
+          // Reload conversation to see updated token count
+          if (this.currentConversation) {
+            this.selectConversation(this.currentConversation);
+          }
+        },
+        error: (error) => {
+          console.error('Error compressing conversation:', error);
+          this.notificationService.error('Compression failed');
+          this.isCompressing = false;
+        },
+        complete: () => {
+          this.isCompressing = false;
+        }
+      });
+  }
+
+  /**
    * Start editing conversation title
    */
   public startEditTitle(): void {
@@ -596,5 +651,48 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
       console.error('Error exporting to Markdown:', error);
       this.notificationService.error('Failed to export chat');
     }
+  }
+
+  /**
+   * Toggle between showing archived and non-archived conversations
+   */
+  public toggleShowArchived(): void {
+    this.showArchived = !this.showArchived;
+    this.currentConversation = null;
+    this.messages = [];
+    this.loadConversations();
+  }
+
+  /**
+   * Archive or unarchive the current conversation
+   */
+  public toggleArchive(): void {
+    if (!this.currentConversation) return;
+
+    const newArchivedState = !this.currentConversation.archived;
+    const action = newArchivedState ? 'archived' : 'unarchived';
+
+    this.conversationService
+      .archiveConversation(this.currentConversation.id, newArchivedState)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          // Remove from current list
+          this.conversations = this.conversations.filter(c => c.id !== this.currentConversation?.id);
+          this.currentConversation = null;
+          this.messages = [];
+
+          // Select first available conversation
+          if (this.conversations.length > 0) {
+            this.selectConversation(this.conversations[0]);
+          }
+
+          this.notificationService.success(`Conversation ${action}`);
+        },
+        error: (error) => {
+          console.error(`Error ${action}:`, error);
+          this.notificationService.error(`Failed to ${action === 'archived' ? 'archive' : 'unarchive'} conversation`);
+        }
+      });
   }
 }

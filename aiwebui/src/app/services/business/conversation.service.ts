@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
@@ -15,18 +15,15 @@ import { ApiConfigService } from '../config/api-config.service';
   providedIn: 'root'
 })
 export class ConversationService {
-
-  constructor(
-    private http: HttpClient,
-    private apiConfig: ApiConfigService
-  ) {}
+  private http = inject(HttpClient);
+  private apiConfig = inject(ApiConfigService);
 
   /**
    * List all conversations for the authenticated user
    */
-  public getConversations(skip: number = 0, limit: number = 20, provider?: string): Observable<ConversationListResponse> {
+  public getConversations(skip: number = 0, limit: number = 20, provider?: string, archived?: boolean): Observable<ConversationListResponse> {
     return this.http.get<ConversationListResponse>(
-      this.apiConfig.endpoints.conversation.list(skip, limit, provider)
+      this.apiConfig.endpoints.conversation.list(skip, limit, provider, archived)
     );
   }
 
@@ -50,13 +47,20 @@ export class ConversationService {
   }
 
   /**
-   * Update a conversation (title only)
+   * Update a conversation (title, archived)
    */
-  public updateConversation(id: string, data: { title: string }): Observable<Conversation> {
+  public updateConversation(id: string, data: { title?: string; archived?: boolean }): Observable<Conversation> {
     return this.http.patch<Conversation>(
       this.apiConfig.endpoints.conversation.update(id),
       data
     );
+  }
+
+  /**
+   * Archive or unarchive a conversation
+   */
+  public archiveConversation(id: string, archived: boolean): Observable<Conversation> {
+    return this.updateConversation(id, { archived });
   }
 
   /**
@@ -84,6 +88,55 @@ export class ConversationService {
   public getModels(): Observable<{ models: OllamaModel[] }> {
     return this.http.get<{ models: OllamaModel[] }>(
       this.apiConfig.endpoints.ollama.tags
+    );
+  }
+
+  /**
+   * Compress conversation by archiving old messages
+   */
+  public compressConversation(id: string, keepRecent?: number): Observable<{
+    message: string;
+    archived_messages: number;
+    summary_created: boolean;
+    new_token_count: number;
+    token_percentage: number;
+  }> {
+    return this.http.post<{
+      message: string;
+      archived_messages: number;
+      summary_created: boolean;
+      new_token_count: number;
+      token_percentage: number;
+    }>(
+      this.apiConfig.endpoints.conversation.compress(id, keepRecent),
+      {}
+    );
+  }
+
+  /**
+   * Restore archived messages (optional feature)
+   */
+  public restoreArchive(id: string): Observable<{
+    message: string;
+    restored_messages: number;
+    new_token_count: number;
+  }> {
+    return this.http.post<{
+      message: string;
+      restored_messages: number;
+      new_token_count: number;
+    }>(
+      this.apiConfig.endpoints.conversation.restoreArchive(id),
+      {}
+    );
+  }
+
+  /**
+   * Get conversation with archived messages (for export)
+   */
+  public getConversationForExport(id: string): Observable<ConversationDetailResponse> {
+    return this.http.get<ConversationDetailResponse>(
+      this.apiConfig.endpoints.conversation.exportFull(id)
     );
   }
 
