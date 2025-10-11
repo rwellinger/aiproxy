@@ -223,6 +223,9 @@ class Message(Base):
     role = Column(String(50), nullable=False)  # 'user', 'assistant', 'system'
     content = Column(Text, nullable=False)
 
+    # Compression tracking
+    is_summary = Column(Boolean, nullable=True, default=False)  # True if this is a compressed summary
+
     # Token tracking
     token_count = Column(Integer, nullable=True)  # Token count for this message
 
@@ -234,3 +237,34 @@ class Message(Base):
 
     def __repr__(self):
         return f"<Message(id={self.id}, role='{self.role}', conversation_id={self.conversation_id})>"
+
+
+class MessageArchive(Base):
+    """Model for storing archived messages - used for compression without data loss"""
+    __tablename__ = "messages_archive"
+    __table_args__ = {'extend_existing': True}
+
+    # Primary identifier
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+
+    # Original message reference
+    original_message_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.id"), nullable=False, index=True)
+
+    # Message content (copied from original)
+    role = Column(String(50), nullable=False)  # 'user', 'assistant'
+    content = Column(Text, nullable=False)
+    token_count = Column(Integer, nullable=True)
+
+    # Original timestamp
+    original_created_at = Column(DateTime(timezone=True), nullable=False)
+
+    # Archive metadata
+    archived_at = Column(DateTime(timezone=True), server_default=func.now())
+    summary_message_id = Column(UUID(as_uuid=True), nullable=True)  # Reference to summary that replaced these messages
+
+    # Relationship
+    conversation = relationship("Conversation")
+
+    def __repr__(self):
+        return f"<MessageArchive(id={self.id}, original_id={self.original_message_id}, role='{self.role}')>"

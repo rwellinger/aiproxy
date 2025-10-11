@@ -94,6 +94,55 @@ export class ConversationService {
     );
   }
 
+  /**
+   * Compress conversation by archiving old messages
+   */
+  public compressConversation(id: string, keepRecent?: number): Observable<{
+    message: string;
+    archived_messages: number;
+    summary_created: boolean;
+    new_token_count: number;
+    token_percentage: number;
+  }> {
+    return this.http.post<{
+      message: string;
+      archived_messages: number;
+      summary_created: boolean;
+      new_token_count: number;
+      token_percentage: number;
+    }>(
+      this.apiConfig.endpoints.conversation.compress(id, keepRecent),
+      {}
+    );
+  }
+
+  /**
+   * Restore archived messages (optional feature)
+   */
+  public restoreArchive(id: string): Observable<{
+    message: string;
+    restored_messages: number;
+    new_token_count: number;
+  }> {
+    return this.http.post<{
+      message: string;
+      restored_messages: number;
+      new_token_count: number;
+    }>(
+      this.apiConfig.endpoints.conversation.restoreArchive(id),
+      {}
+    );
+  }
+
+  /**
+   * Get conversation with archived messages (for export)
+   */
+  public getConversationForExport(id: string): Observable<ConversationDetailResponse> {
+    return this.http.get<ConversationDetailResponse>(
+      this.apiConfig.endpoints.conversation.exportFull(id)
+    );
+  }
+
   // LocalStorage methods for System Context persistence
   private readonly STORAGE_KEY = 'aiChatSystemContext';
 

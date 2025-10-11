@@ -73,7 +73,13 @@ export class ApiConfigService {
             create: `${this.baseUrl}/api/v1/conversations`,
             update: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}`,
             delete: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}`,
-            sendMessage: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}/messages`
+            sendMessage: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}/messages`,
+            compress: (id: string, keepRecent?: number) => {
+                const query = keepRecent !== undefined ? `?keep_recent=${keepRecent}` : '';
+                return `${this.baseUrl}/api/v1/conversations/${id}/compress${query}`;
+            },
+            restoreArchive: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}/restore-archive`,
+            exportFull: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}/export-full`
         },
         ollama: {
             tags: `${this.baseUrl}/api/v1/ollama/tags`,

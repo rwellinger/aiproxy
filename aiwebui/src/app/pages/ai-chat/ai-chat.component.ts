@@ -306,6 +306,9 @@ export class AiChatComponent implements OnInit, OnDestroy {
           // Add assistant message
           this.messages.push(response.assistant_message);
 
+          // Update conversation with new token counts
+          this.currentConversation = response.conversation;
+
           setTimeout(() => this.scrollToBottom(), 100);
           setTimeout(() => this.focusInput(), 200);
         },
@@ -475,6 +478,54 @@ export class AiChatComponent implements OnInit, OnDestroy {
    */
   public shouldShowTokenWarning(): boolean {
     return this.getTokenPercentage() >= 90;
+  }
+
+  /**
+   * Check if compression warning should be shown (85%+)
+   */
+  public shouldShowCompressionWarning(): boolean {
+    const percentage = this.getTokenPercentage();
+    return percentage >= 85 && percentage < 90;
+  }
+
+  /**
+   * Compress conversation (archive old messages + create summary)
+   */
+  public compressConversation(): void {
+    if (!this.currentConversation) return;
+
+    const confirmed = confirm(
+      'Compress this conversation?\n\n' +
+      'Older messages will be archived and replaced with an AI summary.\n' +
+      '✓ Chat can continue\n' +
+      '✓ Export includes full history\n' +
+      '✓ System context preserved'
+    );
+
+    if (!confirmed) return;
+
+    this.isLoading = true;
+    this.conversationService
+      .compressConversation(this.currentConversation.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.notificationService.success(
+            `Chat compressed: ${response.archived_messages} messages archived`
+          );
+          // Reload conversation to see updated token count
+          if (this.currentConversation) {
+            this.selectConversation(this.currentConversation);
+          }
+        },
+        error: (error) => {
+          console.error('Error compressing conversation:', error);
+          this.notificationService.error('Compression failed');
+        },
+        complete: () => {
+          this.isLoading = false;
+        }
+      });
   }
 
   /**

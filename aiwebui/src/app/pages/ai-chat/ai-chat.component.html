@@ -149,10 +149,23 @@
         </button>
       </div>
 
+      @if (shouldShowCompressionWarning()) {
+        <div class="compression-warning">
+          <mat-icon>compress</mat-icon>
+          <span>Memory running low ({{ getTokenPercentage().toFixed(0) }}%)!</span>
+          <button mat-raised-button color="accent" (click)="compressConversation()">
+            Compress Chat
+          </button>
+        </div>
+      }
+
       @if (shouldShowTokenWarning()) {
         <div class="token-warning">
           <mat-icon>warning</mat-icon>
           <span>Context window nearly full ({{ getTokenPercentage().toFixed(0) }}%)! Oldest messages may be lost.</span>
+          <button mat-raised-button color="warn" (click)="compressConversation()">
+            Compress Now
+          </button>
         </div>
       }
 

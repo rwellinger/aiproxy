@@ -53,6 +53,7 @@ export interface ConversationDetailResponse {
 export interface SendMessageResponse {
   user_message: Message;
   assistant_message: Message;
+  conversation: Conversation;
 }
 
 export interface ConversationCreateRequest {
