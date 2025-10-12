@@ -4,6 +4,7 @@ import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, switchMap, filter, take } from 'rxjs/operators';
 import { AuthService } from '../services/business/auth.service';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 let isRefreshing = false;
 const refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
@@ -11,6 +12,7 @@ const refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null)
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const snackBar = inject(MatSnackBar);
 
   // Skip authentication for auth-related endpoints
   if (isAuthEndpoint(req.url)) {
@@ -27,7 +29,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       // Handle 401 Unauthorized errors
       if (error.status === 401 && authToken) {
-        return handle401Error(req, next, authService, router);
+        return handle401Error(req, next, authService, router, snackBar);
       }
 
       // Handle other errors
@@ -62,7 +64,7 @@ function addTokenToRequest(request: HttpRequest<any>, token: string): HttpReques
   });
 }
 
-function handle401Error(request: HttpRequest<any>, next: HttpHandlerFn, authService: AuthService, router: Router): Observable<any> {
+function handle401Error(request: HttpRequest<any>, next: HttpHandlerFn, authService: AuthService, router: Router, snackBar: MatSnackBar): Observable<any> {
   if (!isRefreshing) {
     isRefreshing = true;
     refreshTokenSubject.next(null);
@@ -82,12 +84,22 @@ function handle401Error(request: HttpRequest<any>, next: HttpHandlerFn, authServ
         }
 
         // Token is invalid, logout user
+        snackBar.open('Session expired. Please log in again.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
         authService.forceLogout();
         router.navigate(['/login']);
         return throwError(() => new Error('Authentication failed'));
       }),
       catchError((error) => {
         isRefreshing = false;
+        snackBar.open('Session expired. Please log in again.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
         authService.forceLogout();
         router.navigate(['/login']);
         return throwError(() => error);

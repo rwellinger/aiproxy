@@ -43,6 +43,17 @@ def jwt_required(f):
                 "error": "Invalid or expired token"
             }), 401
 
+        # Verify user still exists in database (prevents phantom users after DB restore)
+        from db.database import get_db
+        db = next(get_db())
+        user = user_service.get_user_by_id(db, payload.get('user_id'))
+
+        if not user:
+            return jsonify({
+                "success": False,
+                "error": "User no longer exists. Please log in again."
+            }), 401
+
         # Set user info in Flask's g object for use in route handlers
         g.current_user_id = payload.get('user_id')
         g.current_user_email = payload.get('email')
