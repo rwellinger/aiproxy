@@ -3,7 +3,14 @@ import re
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from config.settings import DATABASE_URL, DATABASE_ECHO
+from config.settings import (
+    DATABASE_URL,
+    DATABASE_ECHO,
+    DATABASE_POOL_SIZE,
+    DATABASE_MAX_OVERFLOW,
+    DATABASE_POOL_PRE_PING,
+    DATABASE_POOL_RECYCLE
+)
 from utils.logger import logger  # Direct import to avoid circular dependency with utils.__init__
 
 def sanitize_url_for_logging(url):
@@ -12,8 +19,24 @@ def sanitize_url_for_logging(url):
 
 logger.info("database_connection_initiated", database_url=sanitize_url_for_logging(DATABASE_URL))
 try:
-    engine = create_engine(DATABASE_URL, echo=DATABASE_ECHO)
-    logger.info("database_engine_created", echo=DATABASE_ECHO)
+    # Create engine with configurable connection pool settings
+    # Pool settings can be configured via environment variables (see env_template)
+    engine = create_engine(
+        DATABASE_URL,
+        echo=DATABASE_ECHO,
+        pool_size=DATABASE_POOL_SIZE,
+        max_overflow=DATABASE_MAX_OVERFLOW,
+        pool_pre_ping=DATABASE_POOL_PRE_PING,
+        pool_recycle=DATABASE_POOL_RECYCLE
+    )
+    logger.info(
+        "database_engine_created",
+        echo=DATABASE_ECHO,
+        pool_size=DATABASE_POOL_SIZE,
+        max_overflow=DATABASE_MAX_OVERFLOW,
+        pool_pre_ping=DATABASE_POOL_PRE_PING,
+        pool_recycle=DATABASE_POOL_RECYCLE
+    )
 except Exception as e:
     logger.error("database_engine_creation_failed", error=str(e), error_type=type(e).__name__)
     raise

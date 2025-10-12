@@ -34,8 +34,9 @@ export class AuthGuard implements CanActivate, CanActivateChild {
   private checkAuthentication(url: string): Observable<boolean> {
     // If user is already authenticated locally, allow access
     if (this.authService.isAuthenticated()) {
-      // Optionally validate token with server
-      return this.authService.validateToken().pipe(
+      // Validate token (uses cache, so minimal overhead)
+      // forceBackendCheck=false uses local validation + 5-minute cache
+      return this.authService.validateToken(false).pipe(
         map(isValid => {
           if (!isValid) {
             this.redirectToLogin(url);

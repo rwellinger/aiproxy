@@ -80,4 +80,5 @@ export interface AuthState {
   token: string | null;
   loading: boolean;
   error: string | null;
+  lastValidated: number | null; // Timestamp of last token validation
 }

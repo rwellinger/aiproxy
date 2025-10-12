@@ -1,13 +1,14 @@
 import { inject } from '@angular/core';
 import { HttpInterceptorFn, HttpErrorResponse, HttpRequest, HttpHandlerFn } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, switchMap, filter, take } from 'rxjs/operators';
+import { Observable, throwError, BehaviorSubject, timeout } from 'rxjs';
+import { catchError, switchMap, filter, take, finalize } from 'rxjs/operators';
 import { AuthService } from '../services/business/auth.service';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 let isRefreshing = false;
 const refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+const TOKEN_REFRESH_TIMEOUT_MS = 5000; // 5 seconds timeout for token validation
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
@@ -69,11 +70,10 @@ function handle401Error(request: HttpRequest<any>, next: HttpHandlerFn, authServ
     isRefreshing = true;
     refreshTokenSubject.next(null);
 
-    // Validate current token
-    return authService.validateToken().pipe(
+    // Validate current token with timeout and force backend check
+    return authService.validateToken(true).pipe(
+      timeout(TOKEN_REFRESH_TIMEOUT_MS),
       switchMap((isValid: boolean) => {
-        isRefreshing = false;
-
         if (isValid) {
           // Token is still valid, retry original request
           const token = authService.getToken();
@@ -94,8 +94,12 @@ function handle401Error(request: HttpRequest<any>, next: HttpHandlerFn, authServ
         return throwError(() => new Error('Authentication failed'));
       }),
       catchError((error) => {
-        isRefreshing = false;
-        snackBar.open('Session expired. Please log in again.', 'Close', {
+        // Handle both validation errors and timeouts
+        const errorMessage = error.name === 'TimeoutError'
+          ? 'Session validation timeout. Please log in again.'
+          : 'Session expired. Please log in again.';
+
+        snackBar.open(errorMessage, 'Close', {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'top'
@@ -103,15 +107,33 @@ function handle401Error(request: HttpRequest<any>, next: HttpHandlerFn, authServ
         authService.forceLogout();
         router.navigate(['/login']);
         return throwError(() => error);
+      }),
+      finalize(() => {
+        // Always reset refreshing state, even on error
+        isRefreshing = false;
       })
     );
   } else {
-    // Wait for token refresh to complete
+    // Wait for token refresh to complete with timeout
     return refreshTokenSubject.pipe(
       filter(token => token != null),
       take(1),
+      timeout(TOKEN_REFRESH_TIMEOUT_MS),
       switchMap(token => {
         return next(addTokenToRequest(request, token));
+      }),
+      catchError((error) => {
+        // Timeout while waiting for other request's validation
+        if (error.name === 'TimeoutError') {
+          snackBar.open('Session validation timeout. Please log in again.', 'Close', {
+            duration: 5000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top'
+          });
+          authService.forceLogout();
+          router.navigate(['/login']);
+        }
+        return throwError(() => error);
       })
     );
   }

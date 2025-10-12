@@ -92,3 +92,18 @@ POSTGRES_PORT=5432
 POSTGRES_DB=aiproxysrv
 POSTGRES_USER=aiproxy
 POSTGRES_PASSWORD=
+
+# Database Connection Pool Settings (Optional - uses defaults if not set)
+# pool_size: Number of permanent connections (default: 10)
+# max_overflow: Additional burst connections (default: 20)
+# pool_pre_ping: Test connections before use (default: true)
+# pool_recycle: Recycle connections after N seconds (default: 3600 = 1 hour)
+#
+# Recommended settings:
+# - Development: pool_size=5, max_overflow=10 (lighter load)
+# - Production: pool_size=10, max_overflow=20 (handle concurrent users)
+# - High-traffic: pool_size=20, max_overflow=40 (heavy load)
+#DATABASE_POOL_SIZE=10
+#DATABASE_MAX_OVERFLOW=20
+#DATABASE_POOL_PRE_PING=true
+#DATABASE_POOL_RECYCLE=3600

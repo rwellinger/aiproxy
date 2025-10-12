@@ -231,7 +231,31 @@ class UserController:
             db.close()
 
     def validate_token(self, token: str) -> Optional[Dict[str, Any]]:
-        """Validate JWT token and return user info"""
+        """Validate JWT token and return user info (with database check)"""
+        db = self._get_db()
+        try:
+            payload = self.user_service.verify_jwt_token(token)
+            if not payload:
+                return None
+
+            # Verify user still exists in database
+            user = self.user_service.get_user_by_id(db, payload.get('user_id'))
+            if not user:
+                logger.warning("Token valid but user not found in database", user_id=payload.get('user_id'))
+                return None
+
+            return {
+                'user_id': payload.get('user_id'),
+                'email': payload.get('email')
+            }
+        except Exception as e:
+            logger.error("Error validating token", error=str(e))
+            return None
+        finally:
+            db.close()
+
+    def validate_token_light(self, token: str) -> Optional[Dict[str, Any]]:
+        """Lightweight JWT token validation (no database check)"""
         try:
             payload = self.user_service.verify_jwt_token(token)
             if payload:
@@ -241,5 +265,5 @@ class UserController:
                 }
             return None
         except Exception as e:
-            logger.error("Error validating token", error=str(e))
+            logger.error("Error validating token (light)", error=str(e))
             return None

@@ -103,3 +103,13 @@ DATABASE_URL = os.getenv("DATABASE_URL",
     "postgresql://aiproxy:aiproxy123@postgres:5432/aiproxysrv"
 )
 DATABASE_ECHO = os.getenv("DATABASE_ECHO", "false").lower() == "true"
+
+# Database Connection Pool Settings
+# pool_size: Number of permanent connections in the pool
+# max_overflow: Additional connections when pool is exhausted
+# pool_pre_ping: Test connections before using (prevents stale connections)
+# pool_recycle: Recycle connections after N seconds (prevents stale connections)
+DATABASE_POOL_SIZE = int(os.getenv("DATABASE_POOL_SIZE", "10"))
+DATABASE_MAX_OVERFLOW = int(os.getenv("DATABASE_MAX_OVERFLOW", "20"))
+DATABASE_POOL_PRE_PING = os.getenv("DATABASE_POOL_PRE_PING", "true").lower() == "true"
+DATABASE_POOL_RECYCLE = int(os.getenv("DATABASE_POOL_RECYCLE", "3600"))  # 1 hour default

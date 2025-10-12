@@ -109,7 +109,7 @@ def list_users():
 
 @api_user_v1.route("/validate-token", methods=["POST"])
 def validate_token():
-    """Validate JWT token"""
+    """Validate JWT token with database check"""
     try:
         auth_header = request.headers.get('Authorization')
         if not auth_header or not auth_header.startswith('Bearer '):
@@ -117,6 +117,35 @@ def validate_token():
 
         token = auth_header.split(' ')[1]
         user_info = user_controller.validate_token(token)
+
+        if user_info:
+            return jsonify({
+                "success": True,
+                "valid": True,
+                "user_id": user_info['user_id'],
+                "email": user_info['email']
+            }), 200
+        else:
+            return jsonify({
+                "success": False,
+                "valid": False,
+                "error": "Invalid or expired token"
+            }), 401
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@api_user_v1.route("/validate-token-light", methods=["POST"])
+def validate_token_light():
+    """Lightweight JWT token validation (no database check)"""
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({"success": False, "error": "Missing or invalid authorization header"}), 401
+
+        token = auth_header.split(' ')[1]
+        user_info = user_controller.validate_token_light(token)
 
         if user_info:
             return jsonify({

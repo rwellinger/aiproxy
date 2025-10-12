@@ -27,8 +27,12 @@ export class AuthService {
     user: null,
     token: null,
     loading: false,
-    error: null
+    error: null,
+    lastValidated: null
   });
+
+  // Token validation cache duration (5 minutes)
+  private readonly TOKEN_VALIDATION_CACHE_MS = 5 * 60 * 1000;
 
   public authState$ = this.authStateSubject.asObservable();
 
@@ -107,7 +111,8 @@ export class AuthService {
               user: response.user,
               token: response.token,
               loading: false,
-              error: null
+              error: null,
+              lastValidated: Date.now()
             });
           }
         }),
@@ -136,7 +141,8 @@ export class AuthService {
             user: null,
             token: null,
             loading: false,
-            error: null
+            error: null,
+            lastValidated: null
           });
         }),
         catchError(error => {
@@ -147,7 +153,8 @@ export class AuthService {
             user: null,
             token: null,
             loading: false,
-            error: null
+            error: null,
+            lastValidated: null
           });
           return throwError(() => error);
         })
@@ -179,9 +186,53 @@ export class AuthService {
   }
 
   /**
-   * Validate current token
+   * Check if token needs validation (older than cache duration)
    */
-  public validateToken(): Observable<boolean> {
+  private needsValidation(): boolean {
+    const lastValidated = this.authStateSubject.value.lastValidated;
+    if (!lastValidated) {
+      return true;
+    }
+    const now = Date.now();
+    return (now - lastValidated) > this.TOKEN_VALIDATION_CACHE_MS;
+  }
+
+  /**
+   * Decode JWT token locally without API call
+   */
+  private decodeToken(token: string): any {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * Check if token is expired locally
+   */
+  private isTokenExpiredLocally(token: string): boolean {
+    const decoded = this.decodeToken(token);
+    if (!decoded || !decoded.exp) {
+      return true;
+    }
+    const now = Math.floor(Date.now() / 1000);
+    return decoded.exp < now;
+  }
+
+  /**
+   * Validate current token with caching
+   * Uses local validation first, then backend validation if needed
+   */
+  public validateToken(forceBackendCheck: boolean = false): Observable<boolean> {
     const token = this.getToken();
     if (!token) {
       return new Observable(observer => {
@@ -190,6 +241,30 @@ export class AuthService {
       });
     }
 
+    // Check if token is expired locally
+    if (this.isTokenExpiredLocally(token)) {
+      this.clearAuthData();
+      this.updateAuthState({
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        lastValidated: null
+      });
+      return new Observable(observer => {
+        observer.next(false);
+        observer.complete();
+      });
+    }
+
+    // If recently validated and no force check, return cached result
+    if (!forceBackendCheck && !this.needsValidation()) {
+      return new Observable(observer => {
+        observer.next(true);
+        observer.complete();
+      });
+    }
+
+    // Perform backend validation
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -198,13 +273,17 @@ export class AuthService {
       .pipe(
         map(response => {
           if (response.valid) {
+            this.updateAuthState({
+              lastValidated: Date.now()
+            });
             return true;
           } else {
             this.clearAuthData();
             this.updateAuthState({
               isAuthenticated: false,
               user: null,
-              token: null
+              token: null,
+              lastValidated: null
             });
             return false;
           }
@@ -214,7 +293,8 @@ export class AuthService {
           this.updateAuthState({
             isAuthenticated: false,
             user: null,
-            token: null
+            token: null,
+            lastValidated: null
           });
           return new Observable<boolean>(observer => {
             observer.next(false);
@@ -269,7 +349,8 @@ export class AuthService {
       user: null,
       token: null,
       loading: false,
-      error: null
+      error: null,
+      lastValidated: null
     });
   }
 
