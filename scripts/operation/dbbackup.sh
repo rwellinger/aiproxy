@@ -1,6 +1,14 @@
 #!/usr/bin/env zsh
 
 # -------------------------------------------------------------
+# PostgreSQL Full Database Backup Script
+# -------------------------------------------------------------
+# Creates a FULL backup (schema + data) of the PostgreSQL database.
+# WARNING: This creates a complete dump including all table data.
+# For schema-only backups, add the -s flag to pg_dump.
+# -------------------------------------------------------------
+
+# -------------------------------------------------------------
 # 1. Konfiguration
 # -------------------------------------------------------------
 BACKUP_DIR="$HOME/backup"
@@ -40,20 +48,27 @@ done
 mkdir -p "$BACKUP_DIR"
 
 # -------------------------------------------------------------
-# 6. Schema‑Dump aus Container holen
+# 6. Full Dump (Schema + Data) aus Container holen
 # -------------------------------------------------------------
-DUMP_FILE="$BACKUP_DIR/${DATESTAMP}_${POSTGRES_DB}_schema.sql"
+DUMP_FILE="$BACKUP_DIR/${DATESTAMP}_${POSTGRES_DB}_full.sql"
 
+echo "Creating full database backup (schema + data)..."
 docker exec "$CONTAINER_NAME" \
-  pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -s \
+  pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
   > "$DUMP_FILE"
 
 # -------------------------------------------------------------
 # 7. Ergebnis melden
 # -------------------------------------------------------------
 if [[ -f "$DUMP_FILE" ]]; then
-  echo "Schema-Dump erstellt: $DUMP_FILE"
-  gzip $DUMP_FILE
+  echo "Full backup created: $DUMP_FILE"
+  echo "Compressing backup..."
+  gzip "$DUMP_FILE"
+  echo ""
+  echo "✓ Backup completed successfully!"
+  echo "  File: ${DUMP_FILE}.gz"
+  echo "  Type: FULL (schema + data)"
+  echo ""
 else
   echo "Dump fehlgeschlagen."
   exit 1
