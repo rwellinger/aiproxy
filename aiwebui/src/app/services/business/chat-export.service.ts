@@ -1,10 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Conversation, Message } from '../../models/conversation.model';
+import { ConversationService } from './conversation.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatExportService {
+  private conversationService = inject(ConversationService);
 
   /**
    * Export conversation to Markdown format
@@ -13,6 +16,28 @@ export class ChatExportService {
     const content = this.generateMarkdownContent(conversation, messages);
     const filename = this.generateFilename(conversation.title, 'md');
     this.downloadFile(content, filename, 'text/markdown');
+  }
+
+  /**
+   * Export conversation with full history (including archived messages, excluding summaries)
+   */
+  public async exportFullToMarkdown(conversationId: string, conversationTitle: string): Promise<void> {
+    try {
+      // Fetch full conversation including archived messages
+      const response = await firstValueFrom(
+        this.conversationService.getConversationForExport(conversationId)
+      );
+
+      // Filter out summary messages (we only want original messages)
+      const messages = response.messages.filter((msg: any) => !msg.is_summary);
+
+      const content = this.generateMarkdownContent(response.conversation, messages);
+      const filename = this.generateFilename(conversationTitle, 'md');
+      this.downloadFile(content, filename, 'text/markdown');
+    } catch (error) {
+      console.error('Error exporting full conversation:', error);
+      throw error;
+    }
   }
 
   /**

@@ -21,6 +21,7 @@ class MessageResponse(BaseModel):
     role: str
     content: str
     token_count: Optional[int] = None
+    is_summary: Optional[bool] = None
     created_at: datetime
 
     class Config:
@@ -50,6 +51,7 @@ class ConversationResponse(BaseModel):
     archived: bool = False
     context_window_size: int = 2048
     current_token_count: int = 0
+    has_archived_messages: bool = False
     created_at: datetime
     updated_at: Optional[datetime]
     message_count: Optional[int] = None

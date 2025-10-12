@@ -131,8 +131,17 @@ class ConversationController:
                 .all()
             )
 
+            # Check if conversation has archived messages
+            has_archived = db.query(MessageArchive).filter(
+                MessageArchive.conversation_id == conversation_id
+            ).first() is not None
+
+            # Build conversation response
+            conv_response = ConversationResponse.from_orm(conversation).dict()
+            conv_response["has_archived_messages"] = has_archived
+
             return {
-                "conversation": ConversationResponse.from_orm(conversation).dict(),
+                "conversation": conv_response,
                 "messages": [MessageResponse.from_orm(msg).dict() for msg in messages],
             }, 200
 
@@ -214,10 +223,13 @@ class ConversationController:
                             "is_archived": True,
                         })
                 else:
-                    # Add regular message
-                    all_messages.append(MessageResponse.from_orm(msg).dict())
+                    # Add regular message (convert created_at to ISO string for consistent sorting)
+                    msg_dict = MessageResponse.from_orm(msg).dict()
+                    if msg.created_at:
+                        msg_dict["created_at"] = msg.created_at.isoformat()
+                    all_messages.append(msg_dict)
 
-            # Sort by created_at
+            # Sort by created_at (all are ISO strings now)
             all_messages.sort(key=lambda x: x.get("created_at") or "")
 
             return {

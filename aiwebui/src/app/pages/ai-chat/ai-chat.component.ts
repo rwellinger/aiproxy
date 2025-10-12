@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { ConversationService } from '../../services/business/conversation.service';
 import { NotificationService } from '../../services/ui/notification.service';
@@ -40,6 +41,7 @@ import { MessageContentPipe } from '../../pipes/message-content.pipe';
     MatProgressSpinnerModule,
     MatExpansionModule,
     MatProgressBarModule,
+    MatMenuModule,
     MessageContentPipe
   ],
   templateUrl: './ai-chat.component.html',
@@ -648,6 +650,27 @@ export class AiChatComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error exporting to Markdown:', error);
       this.notificationService.error('Failed to export chat');
+    }
+  }
+
+  /**
+   * Export conversation with full history (including archived messages)
+   */
+  public async exportFullToMarkdown(): Promise<void> {
+    if (!this.currentConversation) return;
+
+    this.isLoading = true;
+    try {
+      await this.chatExportService.exportFullToMarkdown(
+        this.currentConversation.id,
+        this.currentConversation.title
+      );
+      this.notificationService.success('Full chat history exported as Markdown');
+    } catch (error) {
+      console.error('Error exporting full chat history:', error);
+      this.notificationService.error('Failed to export full chat history');
+    } finally {
+      this.isLoading = false;
     }
   }
 
