@@ -1,6 +1,0 @@
-# GitHub OAuth (von Schritt 2.1)
-DRONE_GITHUB_CLIENT_ID=
-DRONE_GITHUB_CLIENT_SECRET=
-
-# RPC Secret (generiere einen zufälligen String)
-DRONE_RPC_SECRET=
