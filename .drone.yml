@@ -35,10 +35,7 @@ type: docker
 name: build-and-deploy
 
 trigger:
-  event:
-    - tag
-  ref:
-    - refs/tags/v*
+  none
 
 platform:
   os: linux
