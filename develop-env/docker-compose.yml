@@ -29,6 +29,12 @@ services:
       # Logs
       - DRONE_LOGS_DEBUG=true
       - DRONE_LOGS_TRACE=false
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     networks:
       - drone-net
 
@@ -37,7 +43,8 @@ services:
     container_name: drone-runner
     restart: unless-stopped
     depends_on:
-      - drone-server
+      drone-server:
+        condition: service_healthy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -47,6 +54,12 @@ services:
       - DRONE_RUNNER_CAPACITY=2
       - DRONE_RUNNER_NAME=mac-studio-runner
       - DRONE_RUNNER_LABELS=os:linux,arch:arm64
+    healthcheck:
+      test: ["CMD", "sh", "-c", "pgrep -f drone-runner-docker || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
     networks:
       - drone-net
 
