@@ -8,8 +8,7 @@ name: lint-and-test
 
 trigger:
   event:
-    include:
-      - push
+  ref:
   branch:
     - main
 
@@ -35,11 +34,7 @@ name: build-and-deploy
 
 trigger:
   event:
-    include:
-      - push
-      - tags
   ref:
-    - refs/tags/v*
   branch:
     - main
 
