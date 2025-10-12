@@ -65,4 +65,5 @@ volumes:
 
 networks:
   drone-net:
-    driver: bridge
+    external: true
+    name: drone-net
