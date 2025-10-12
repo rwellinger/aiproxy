@@ -1,23 +1,50 @@
+---
+# ═══════════════════════════════════════════════════════════
+# Pipeline 1: Lint & Test (bei Push auf main)
+# ═══════════════════════════════════════════════════════════
 kind: pipeline
 type: docker
-name: default
+name: lint-and-test
 
-# Trigger: Wann soll die Pipeline laufen?
 trigger:
   event:
     - push
-    - tag
   branch:
     - main
 
-# Platform
 platform:
   os: linux
   arch: arm64
 
-# Build Steps
 steps:
+  - name: lint-frontend
+    image: node:20-slim
+    commands:
+      - cd aiwebui
+      - npm ci --prefer-offline --no-audit
+      - npm run lint
+      # Optional: Tests ausführen
+      # - npm run test -- --watch=false --browsers=ChromeHeadless
 
+---
+# ═══════════════════════════════════════════════════════════
+# Pipeline 2: Build & Deploy (nur bei Tags v*)
+# ═══════════════════════════════════════════════════════════
+kind: pipeline
+type: docker
+name: build-and-deploy
+
+trigger:
+  event:
+    - tag
+  ref:
+    - refs/tags/v*
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
   # ─────────────────────────────────────────────────────────
   # STEP 1: Version auslesen
   # ─────────────────────────────────────────────────────────
@@ -31,21 +58,10 @@ steps:
       - export FRONTEND_VERSION=$(cat aiwebui/VERSION | tr -d '[:space:]')
       - echo "Backend Version = $BACKEND_VERSION"
       - echo "Frontend Version = $FRONTEND_VERSION"
+      - echo "Building for tag = ${DRONE_TAG}"
 
   # ─────────────────────────────────────────────────────────
-  # STEP 2: Angular Lint & Test
-  # ─────────────────────────────────────────────────────────
-  - name: lint-frontend
-    image: node:20-slim
-    commands:
-      - cd aiwebui
-      - npm ci --prefer-offline --no-audit
-      - npm run lint
-      # Optional: Tests ausführen
-      # - npm run test -- --watch=false --browsers=ChromeHeadless
-
-  # ─────────────────────────────────────────────────────────
-  # STEP 3: Build aiproxysrv Docker Images
+  # STEP 2: Build aiproxysrv Docker Images
   # ─────────────────────────────────────────────────────────
   - name: build-aiproxysrv
     image: plugins/docker
@@ -63,14 +79,9 @@ steps:
       tags:
         - latest
         - ${DRONE_TAG}
-    when:
-      event:
-        - tag
-      ref:
-        - refs/tags/v*
 
   # ─────────────────────────────────────────────────────────
-  # STEP 4: Build celery-worker Docker Images
+  # STEP 3: Build celery-worker Docker Images
   # ─────────────────────────────────────────────────────────
   - name: build-celery-worker
     image: plugins/docker
@@ -88,14 +99,9 @@ steps:
       tags:
         - latest
         - ${DRONE_TAG}
-    when:
-      event:
-        - tag
-      ref:
-        - refs/tags/v*
 
   # ─────────────────────────────────────────────────────────
-  # STEP 5: Build aiwebui Docker Image
+  # STEP 4: Build aiwebui Docker Image
   # ─────────────────────────────────────────────────────────
   - name: build-aiwebui
     image: plugins/docker
@@ -113,14 +119,9 @@ steps:
       tags:
         - latest
         - ${DRONE_TAG}
-    when:
-      event:
-        - tag
-      ref:
-        - refs/tags/v*
 
   # ─────────────────────────────────────────────────────────
-  # STEP 6: (Optional) Deployment
+  # STEP 5: (Optional) Deployment
   # ─────────────────────────────────────────────────────────
   # - name: deploy-production
   #   image: appleboy/drone-ssh
@@ -133,14 +134,9 @@ steps:
   #       - cd /path/to/deployment
   #       - docker compose pull
   #       - docker compose up -d
-  #   when:
-  #     event:
-  #       - tag
-  #     ref:
-  #       - refs/tags/v*
 
   # ─────────────────────────────────────────────────────────
-  # STEP 7: Notification (Optional)
+  # STEP 6: Notification (Optional)
   # ─────────────────────────────────────────────────────────
   # - name: notify
   #   image: plugins/slack
@@ -152,7 +148,3 @@ steps:
   #       Build {{build.status}} for {{repo.name}}
   #       Tag: {{build.tag}}
   #       Author: {{build.author}}
-  #   when:
-  #     status:
-  #       - success
-  #       - failure
