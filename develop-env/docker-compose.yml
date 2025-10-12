@@ -56,7 +56,6 @@ services:
       - DRONE_RUNNER_NAME=mac-studio-runner
       - DRONE_RUNNER_LABELS=os:linux,arch:arm64
       - DRONE_RUNNER_VOLUMES=/var/run/docker.sock:/var/run/docker.sock
-      - DRONE_RUNNER_ENVIRON=DRONE_TAG,DRONE_COMMIT,DRONE_BRANCH
       - DRONE_DEBUG=true
       - DRONE_TRACE=true
     networks:
