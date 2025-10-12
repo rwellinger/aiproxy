@@ -55,11 +55,11 @@ services:
       - DRONE_RUNNER_NAME=mac-studio-runner
       - DRONE_RUNNER_LABELS=os:linux,arch:arm64
     healthcheck:
-      test: ["CMD", "sh", "-c", "pgrep -f drone-runner-docker || exit 1"]
+      test: ["CMD", "sh", "-c", "ps aux | grep -v grep | grep -q drone-runner-docker"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 15s
+      retries: 5
+      start_period: 20s
     networks:
       - drone-net
 
