@@ -38,6 +38,8 @@ A full-stack platform for AI-powered image and music generation with Python back
 - **Build Server:** Mac Studio M1 Max
 - **Registry:** GitHub Container Registry (GHCR)
 
+---
+
 
 ## 🔧 Development Workflow
 
