@@ -46,7 +46,7 @@ class ChatController:
             return cleaned_response, 200
 
         except OllamaAPIError as e:
-            logger.error("Ollama API Error during chat generation", error=str(e))
+            logger.error("Ollama API Error during chat generation", error=str(e), stacktrace=traceback.format_exc())
             return {"error": f"Ollama API Error: {e}"}, 500
         except Exception as e:
             logger.error("Unexpected error in chat generation",
@@ -84,7 +84,7 @@ class ChatController:
             logger.debug("Ollama API response received", status_code=resp.status_code)
             resp.raise_for_status()
         except requests.exceptions.RequestException as e:
-            logger.error("Ollama API Network Error", error_type=type(e).__name__, error=str(e))
+            logger.error("Ollama API Network Error", error_type=type(e).__name__, error=str(e), stacktrace=traceback.format_exc())
             raise OllamaAPIError(f"Network Error: {e}")
         except Exception as e:
             logger.error("Unexpected Ollama API error",
@@ -106,7 +106,7 @@ class ChatController:
             logger.debug("Ollama API response parsed successfully")
             return resp_json
         except ValueError as e:
-            logger.error("Error parsing Ollama API response", error=str(e), response_text=resp.text)
+            logger.error("Error parsing Ollama API response", error=str(e), response_text=resp.text, stacktrace=traceback.format_exc())
             raise OllamaAPIError(f"Invalid API response format: {e}")
 
     def _clean_ollama_response(self, response_data: Dict[str, Any]) -> Dict[str, Any]:

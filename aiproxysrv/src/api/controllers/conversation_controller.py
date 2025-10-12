@@ -307,12 +307,14 @@ class ConversationController:
 
         except Exception as e:
             db.rollback()
+            error_details = f"{type(e).__name__}: {str(e)}"
+            stack = traceback.format_exc()
             logger.error(
-                "Error creating conversation",
+                f"Error creating conversation",
                 user_id=str(user_id),
-                error_type=type(e).__name__,
-                error=str(e),
-                stacktrace=traceback.format_exc(),
+                model=data.model,
+                provider=data.provider,
+                stacktrace=stack,
             )
             return {"error": f"Failed to create conversation: {e}"}, 500
 
@@ -503,7 +505,7 @@ class ConversationController:
                     )
             except (OllamaAPIError, OpenAIError) as e:
                 db.rollback()
-                logger.error("Chat API Error", error=str(e), provider=conversation.provider)
+                logger.error("Chat API Error", error=str(e), provider=conversation.provider, stacktrace=traceback.format_exc())
                 return {"error": f"Chat API Error: {e}"}, 500
 
             # Calculate user message token count (part of prompt_eval_count)
@@ -612,6 +614,7 @@ class ConversationController:
                 "Unexpected Ollama API error",
                 error_type=type(e).__name__,
                 error=str(e),
+                stacktrace=traceback.format_exc(),
             )
             raise OllamaAPIError(f"Unexpected Error: {e}")
 
@@ -648,7 +651,7 @@ class ConversationController:
             return content, prompt_tokens, completion_tokens
 
         except OpenAIError as e:
-            logger.error("OpenAI API Error", error=str(e))
+            logger.error("OpenAI API Error", error=str(e), stacktrace=traceback.format_exc())
             raise
 
 

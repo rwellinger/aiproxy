@@ -237,7 +237,8 @@ Brief summary:"""
             logger.error(
                 "Failed to create AI summary",
                 error=str(e),
-                provider=provider
+                provider=provider,
+                stacktrace=traceback.format_exc(),
             )
             # Fallback: Create simple text summary
             fallback_summary = f"Summary of {len(messages)} messages:\n" + "\n".join([
@@ -313,7 +314,8 @@ Brief summary:"""
             logger.warning(
                 "Failed to get actual token count, using fallback",
                 error=str(e),
-                provider=provider
+                provider=provider,
+                stacktrace=traceback.format_exc()
             )
             # Fallback: sum of individual message token counts (if available)
             total_chars = sum(len(msg.get("content", "")) for msg in messages)
