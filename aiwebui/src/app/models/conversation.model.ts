@@ -12,6 +12,7 @@ export interface Conversation {
   archived?: boolean;
   context_window_size?: number;
   current_token_count?: number;
+  has_archived_messages?: boolean;
   created_at: string;
   updated_at?: string;
   message_count?: number;

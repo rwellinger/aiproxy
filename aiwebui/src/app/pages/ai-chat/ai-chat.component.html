@@ -138,9 +138,25 @@
             class="token-progress">
           </mat-progress-bar>
         </div>
-        <button mat-icon-button (click)="exportToMarkdown()" title="Export as Markdown">
-          <mat-icon>download</mat-icon>
-        </button>
+        @if (currentConversation.has_archived_messages) {
+          <button mat-icon-button [matMenuTriggerFor]="exportMenu" title="Export chat">
+            <mat-icon>download</mat-icon>
+          </button>
+          <mat-menu #exportMenu="matMenu">
+            <button mat-menu-item (click)="exportToMarkdown()">
+              <mat-icon>description</mat-icon>
+              <span>Export</span>
+            </button>
+            <button mat-menu-item (click)="exportFullToMarkdown()">
+              <mat-icon>history</mat-icon>
+              <span>Export (with History)</span>
+            </button>
+          </mat-menu>
+        } @else {
+          <button mat-icon-button (click)="exportToMarkdown()" title="Export chat">
+            <mat-icon>download</mat-icon>
+          </button>
+        }
         <button mat-icon-button (click)="toggleArchive()" [title]="currentConversation.archived ? 'Unarchive' : 'Archive'">
           <mat-icon>{{ currentConversation.archived ? 'unarchive' : 'archive' }}</mat-icon>
         </button>
