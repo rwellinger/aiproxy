@@ -30,6 +30,15 @@ A full-stack platform for AI-powered image and music generation with Python back
 
 ---
 
+## Build Status
+
+[![Build Status](http://10.0.1.120:8080/api/badges/rwellinger/thwelly_ai_tools/status.svg)](http://10.0.1.120:8080/rwellinger/thwelly_ai_tools)
+
+- **CI/CD:** Drone CI
+- **Build Server:** Mac Studio M1 Max
+- **Registry:** GitHub Container Registry (GHCR)
+
+
 ## 🔧 Development Workflow
 
 ### Start Backend (Development)
