@@ -27,7 +27,7 @@ services:
 
       # Logs
       - DRONE_LOGS_DEBUG=true
-      - DRONE_LOGS_TRACE=true
+      - DRONE_LOGS_TRACE=false
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/healthz"]
       interval: 30s
@@ -56,7 +56,7 @@ services:
       - DRONE_RUNNER_LABELS=os:linux,arch:arm64
       - DRONE_RUNNER_VOLUMES=/var/run/docker.sock:/var/run/docker.sock
       - DRONE_DEBUG=true
-      - DRONE_TRACE=true
+      - DRONE_TRACE=false
     networks:
       - drone-net
 
