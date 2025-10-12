@@ -7,10 +7,7 @@ type: docker
 name: lint-and-test
 
 trigger:
-  event:
-    - push
-  branch:
-    - main
+  none
 
 platform:
   os: linux
