@@ -8,6 +8,7 @@ name: lint-and-test
 
 trigger:
   event:
+    - push
   branch:
     - main
 
@@ -22,8 +23,6 @@ steps:
       - cd aiwebui
       - npm ci --prefer-offline --no-audit
       - npm run lint
-      # Optional: Tests ausführen
-      # - npm run test -- --watch=false --browsers=ChromeHeadless
 
 ---
 # ═══════════════════════════════════════════════════════════
@@ -35,6 +34,9 @@ name: build-and-deploy
 
 trigger:
   event:
+    - tags
+  ref:
+    - refs/tags/v*
   branch:
     - main
 
@@ -117,32 +119,3 @@ steps:
       tags:
         - latest
         - ${DRONE_TAG}
-
-  # ─────────────────────────────────────────────────────────
-  # STEP 5: (Optional) Deployment
-  # ─────────────────────────────────────────────────────────
-  # - name: deploy-production
-  #   image: appleboy/drone-ssh
-  #   settings:
-  #     host: 10.0.1.120
-  #     username: robertw
-  #     key:
-  #       from_secret: ssh_key
-  #     script:
-  #       - cd /path/to/deployment
-  #       - docker compose pull
-  #       - docker compose up -d
-
-  # ─────────────────────────────────────────────────────────
-  # STEP 6: Notification (Optional)
-  # ─────────────────────────────────────────────────────────
-  # - name: notify
-  #   image: plugins/slack
-  #   settings:
-  #     webhook:
-  #       from_secret: slack_webhook
-  #     channel: ci-builds
-  #     template: >
-  #       Build {{build.status}} for {{repo.name}}
-  #       Tag: {{build.tag}}
-  #       Author: {{build.author}}
