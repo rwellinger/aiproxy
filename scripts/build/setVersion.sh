@@ -11,6 +11,8 @@
 # - aiproxysrv/pyproject.toml
 # - aitestmock/pyproject.toml
 # - aiwebui/package.json
+# - aiproxysrv/docker-compose.yml (celery-worker-app, aiproxysrv-app)
+# - forwardproxy/docker-compose.yml (aiwebui-app)
 ###############################################################################
 
 set -e  # Exit on error
@@ -29,6 +31,8 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 AIPROXYSRV_TOML="$PROJECT_ROOT/aiproxysrv/pyproject.toml"
 AITESTMOCK_TOML="$PROJECT_ROOT/aitestmock/pyproject.toml"
 AIWEBUI_PACKAGE="$PROJECT_ROOT/aiwebui/package.json"
+AIPROXYSRV_COMPOSE="$PROJECT_ROOT/aiproxysrv/docker-compose.yml"
+FORWARDPROXY_COMPOSE="$PROJECT_ROOT/forwardproxy/docker-compose.yml"
 
 # Function to print usage
 usage() {
@@ -39,6 +43,8 @@ usage() {
     echo "  - aiproxysrv/pyproject.toml"
     echo "  - aitestmock/pyproject.toml"
     echo "  - aiwebui/package.json"
+    echo "  - aiproxysrv/docker-compose.yml (celery-worker-app, aiproxysrv-app)"
+    echo "  - forwardproxy/docker-compose.yml (aiwebui-app)"
     exit 1
 }
 
@@ -83,6 +89,23 @@ update_package_json() {
     echo -e "  ${YELLOW}$old_version${NC} → ${GREEN}$new_version${NC}"
 }
 
+# Function to update docker-compose.yml
+update_docker_compose() {
+    local file=$1
+    local new_version=$2
+    local image_name=$3
+    local old_version
+
+    # Extract current version for the specific image
+    old_version=$(grep "image: ghcr.io/rwellinger/${image_name}:" "$file" | sed "s/.*:v\(.*\)/\1/")
+
+    # Update version using sed (macOS compatible)
+    sed -i '' "s|image: ghcr.io/rwellinger/${image_name}:v.*|image: ghcr.io/rwellinger/${image_name}:v${new_version}|g" "$file"
+
+    echo -e "${GREEN}✓${NC} Updated $file (${image_name})"
+    echo -e "  ${YELLOW}v$old_version${NC} → ${GREEN}v$new_version${NC}"
+}
+
 # Main script
 main() {
     # Check if version argument is provided
@@ -97,7 +120,7 @@ main() {
     validate_version "$NEW_VERSION"
 
     # Check if all files exist
-    for file in "$AIPROXYSRV_TOML" "$AITESTMOCK_TOML" "$AIWEBUI_PACKAGE"; do
+    for file in "$AIPROXYSRV_TOML" "$AITESTMOCK_TOML" "$AIWEBUI_PACKAGE" "$AIPROXYSRV_COMPOSE" "$FORWARDPROXY_COMPOSE"; do
         if [ ! -f "$file" ]; then
             echo -e "${RED}Error:${NC} File not found: $file"
             exit 1
@@ -112,6 +135,10 @@ main() {
     update_pyproject "$AIPROXYSRV_TOML" "$NEW_VERSION"
     update_pyproject "$AITESTMOCK_TOML" "$NEW_VERSION"
     update_package_json "$AIWEBUI_PACKAGE" "$NEW_VERSION"
+    echo ""
+    update_docker_compose "$AIPROXYSRV_COMPOSE" "$NEW_VERSION" "celery-worker-app"
+    update_docker_compose "$AIPROXYSRV_COMPOSE" "$NEW_VERSION" "aiproxysrv-app"
+    update_docker_compose "$FORWARDPROXY_COMPOSE" "$NEW_VERSION" "aiwebui-app"
 
     echo ""
     echo -e "${GREEN}✓ Successfully updated all version files to ${NEW_VERSION}${NC}"
