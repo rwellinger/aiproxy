@@ -128,16 +128,20 @@ git push origin main
 git push origin ${VERSION}
 print_success "Tag und Commit gepusht"
 
-# ──────────────────────────────────────
-# 7. Summary
-# ──────────────────────────────────────
-print_header "Release ${VERSION} erfolgreich erstellt"
-echo "Nächste Schritte:"
+# ──────────────────────────────────────────────────────────
+# 8. Drone CI Information
+# ──────────────────────────────────────────────────────────
+print_header "Drone CI Build"
+print_info "Drone CI wird automatisch den Build starten..."
 echo ""
-echo "  1. Build aiproxysrv:"
-echo -e "     ${BLUE}./scripts/build/build-and-push-aiproxysrv.sh${NC}"
+echo "  🔗 Build Status: ${BLUE}http://10.0.1.120:8080/rwellinger/thwelly_ai_tools${NC}"
 echo ""
-echo "  2. Build aiwebui:"
-echo -e "     ${BLUE}./scripts/build/build-and-push-aiwebui.sh${NC}"
+print_info "Drone CI wird folgende Images bauen und pushen:"
+echo "  • ghcr.io/rwellinger/aiproxysrv-app:${VERSION}"
+echo "  • ghcr.io/rwellinger/celery-worker-app:${VERSION}"
+echo "  • ghcr.io/rwellinger/aiwebui-app:${VERSION}"
 echo ""
-print_info "Die Scripts lesen automatisch die VERSION Files"
+print_warning "Manuelle Builds sind weiterhin möglich:"
+echo "  ./scripts/build/build-and-push-aiproxysrv.sh ${VERSION}"
+echo "  ./scripts/build/build-and-push-aiwebui.sh ${VERSION}"
+echo ""
