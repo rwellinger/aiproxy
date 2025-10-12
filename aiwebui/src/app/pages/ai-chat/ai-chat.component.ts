@@ -83,7 +83,6 @@ export class AiChatComponent implements OnInit, OnDestroy {
   @ViewChild('messageInputField') private messageInputField!: ElementRef;
 
   ngOnInit(): void {
-    this.loadModels();
     this.loadConversations();
 
     // Load saved system context from localStorage
@@ -96,16 +95,21 @@ export class AiChatComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load available Ollama models
+   * Load available Ollama models (via cache)
    */
   private loadModels(): void {
+    // Skip if models already loaded
+    if (this.models.length > 0) {
+      return;
+    }
+
     this.isLoadingModels = true;
     this.conversationService
       .getModels()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
-          this.models = response.models || [];
+        next: (models) => {
+          this.models = models || [];
           // Set default model if available
           if (this.models.length > 0 && !this.selectedModel) {
             this.selectedModel = this.models[0].name;
@@ -154,6 +158,11 @@ export class AiChatComponent implements OnInit, OnDestroy {
    * Select a conversation and load its messages
    */
   public selectConversation(conversation: Conversation): void {
+    // Prevent re-loading if conversation is already active
+    if (this.currentConversation?.id === conversation.id) {
+      return;
+    }
+
     this.isLoading = true;
     this.currentConversation = conversation;
 
@@ -185,6 +194,8 @@ export class AiChatComponent implements OnInit, OnDestroy {
     this.newChatTitle = '';
     // Load persisted system context
     this.systemContext = this.conversationService.loadSystemContext();
+    // Lazy load models when needed
+    this.loadModels();
   }
 
   /**
