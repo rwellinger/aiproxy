@@ -47,6 +47,7 @@ services:
         condition: service_healthy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    env_file: .env
     environment:
       - DRONE_RPC_PROTO=http
       - DRONE_RPC_HOST=10.0.1.120:8080
