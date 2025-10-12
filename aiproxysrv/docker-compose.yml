@@ -9,7 +9,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - webui-net
+      - thwelly-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U aiproxy -d aiproxysrv"]
       interval: 10s
@@ -25,7 +25,7 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - webui-net
+      - thwelly-net
     command: redis-server --appendonly yes
     healthcheck:
         test: ["CMD", "redis-cli", "ping"]
@@ -61,7 +61,7 @@ services:
       - .:/app
       - ./alembic.ini:/app/alembic.ini:ro
     networks:
-      - webui-net
+      - thwelly-net
 
   aiproxy-app:
     container_name: aiproxysrv
@@ -78,9 +78,9 @@ services:
     volumes:
       - .:/app
       - ./alembic.ini:/app/alembic.ini:ro
-      - images-data:/images
+      - ./images:/images
     networks:
-      - webui-net
+      - thwelly-net
     depends_on:
       postgres:
         condition: service_healthy
@@ -99,6 +99,6 @@ volumes:
   images-data:
 
 networks:
-  webui-net:
+  thwelly-net:
     external: true
-    name: webui-network
+    name: thwelly-net

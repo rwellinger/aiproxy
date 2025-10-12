@@ -12,7 +12,7 @@ services:
       - ./certs/webui.key:/etc/ssl/private/webui.key:ro
       - ./logs:/var/log/nginx
     networks:
-      - webui-net
+      - thwelly-net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/nginx_status"]
       interval: 30s
@@ -21,6 +21,6 @@ services:
       start_period: 10s
 
 networks:
-  webui-net:
+  thwelly-net:
     external: true
-    name: webui-network
+    name: thwelly-net
