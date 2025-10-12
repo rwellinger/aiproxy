@@ -10,6 +10,7 @@ import {
   OllamaModel
 } from '../../models/conversation.model';
 import { ApiConfigService } from '../config/api-config.service';
+import { ModelCacheService } from '../config/model-cache.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,7 @@ import { ApiConfigService } from '../config/api-config.service';
 export class ConversationService {
   private http = inject(HttpClient);
   private apiConfig = inject(ApiConfigService);
+  private modelCache = inject(ModelCacheService);
 
   /**
    * List all conversations for the authenticated user
@@ -83,12 +85,10 @@ export class ConversationService {
   }
 
   /**
-   * Get available Ollama models
+   * Get available Ollama models (via cache)
    */
-  public getModels(): Observable<{ models: OllamaModel[] }> {
-    return this.http.get<{ models: OllamaModel[] }>(
-      this.apiConfig.endpoints.ollama.tags
-    );
+  public getModels(): Observable<OllamaModel[]> {
+    return this.modelCache.getOllamaModels();
   }
 
   /**

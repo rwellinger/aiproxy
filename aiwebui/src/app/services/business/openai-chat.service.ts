@@ -1,23 +1,19 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { OpenAIModel } from '../../models/conversation.model';
-import { ApiConfigService } from '../config/api-config.service';
+import { ModelCacheService } from '../config/model-cache.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OpenaiChatService {
-  private http = inject(HttpClient);
-  private apiConfig = inject(ApiConfigService);
+  private modelCache = inject(ModelCacheService);
 
   /**
-   * Get available OpenAI models
+   * Get available OpenAI models (via cache)
    */
-  public getModels(): Observable<{ models: OpenAIModel[] }> {
-    return this.http.get<{ models: OpenAIModel[] }>(
-      this.apiConfig.endpoints.openai.models
-    );
+  public getModels(): Observable<OpenAIModel[]> {
+    return this.modelCache.getOpenAIModels();
   }
 
   // LocalStorage methods for System Context persistence
