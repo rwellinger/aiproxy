@@ -12,11 +12,6 @@ services:
       # Server Settings
       - DRONE_SERVER_HOST=10.0.1.120:8080
       - DRONE_SERVER_PROTO=http
-      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
-
-      # GitHub OAuth
-      - DRONE_GITHUB_CLIENT_ID=${DRONE_GITHUB_CLIENT_ID}
-      - DRONE_GITHUB_CLIENT_SECRET=${DRONE_GITHUB_CLIENT_SECRET}
 
       # Database
       - DRONE_DATABASE_DRIVER=sqlite3
@@ -51,7 +46,6 @@ services:
     environment:
       - DRONE_RPC_PROTO=http
       - DRONE_RPC_HOST=10.0.1.120:8080
-      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
       - DRONE_RUNNER_CAPACITY=2
       - DRONE_RUNNER_NAME=mac-studio-runner
       - DRONE_RUNNER_LABELS=os:linux,arch:arm64
