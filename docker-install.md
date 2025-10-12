@@ -14,3 +14,7 @@ colima start --profile m1-native \
 
 # Später einfach:
 colima start --profile m1-native
+
+
+# Network
+docker network create thwelly-net
