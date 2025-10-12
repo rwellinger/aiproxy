@@ -7,7 +7,9 @@ type: docker
 name: lint-and-test
 
 trigger:
-  none
+  event:
+  branch:
+    - main
 
 platform:
   os: linux
@@ -32,7 +34,9 @@ type: docker
 name: build-and-deploy
 
 trigger:
-  none
+  event:
+  branch:
+    - main
 
 platform:
   os: linux
