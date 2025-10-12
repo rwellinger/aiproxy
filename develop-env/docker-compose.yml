@@ -5,7 +5,6 @@ services:
     restart: unless-stopped
     ports:
       - "8080:80"
-      - "8443:443"
     volumes:
       - drone-data:/data
     env_file: .env
@@ -50,7 +49,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - DRONE_RPC_PROTO=http
-      - DRONE_RPC_HOST=localhost:8080
+      - DRONE_RPC_HOST=drone-server:8080
       - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
       - DRONE_RUNNER_CAPACITY=2
       - DRONE_RUNNER_NAME=mac-studio-runner
