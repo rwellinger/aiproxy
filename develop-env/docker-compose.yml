@@ -1,43 +1,58 @@
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: postgres
+  drone-server:
+    image: drone/drone:2
+    container_name: drone-server
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - drone-data:/data
     env_file: .env
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - webui-net
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aiproxy -d aiproxysrv"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+    environment:
+      # Server Settings
+      - DRONE_SERVER_HOST=10.0.1.120:8080
+      - DRONE_SERVER_PROTO=http
+      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
 
-  redis:
-    image: redis:alpine
-    container_name: redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
+      # GitHub OAuth
+      - DRONE_GITHUB_CLIENT_ID=${DRONE_GITHUB_CLIENT_ID}
+      - DRONE_GITHUB_CLIENT_SECRET=${DRONE_GITHUB_CLIENT_SECRET}
+
+      # Database
+      - DRONE_DATABASE_DRIVER=sqlite3
+      - DRONE_DATABASE_DATASOURCE=/data/database.sqlite
+
+      # Admin User (DEIN GitHub Username!)
+      - DRONE_USER_CREATE=username:rwellinger,admin:true
+
+      # Logs
+      - DRONE_LOGS_DEBUG=true
+      - DRONE_LOGS_TRACE=false
     networks:
-      - webui-net
-    command: redis-server --appendonly yes
-    healthcheck:
-        test: ["CMD", "redis-cli", "ping"]
-        interval: 10s
-        timeout: 5s
-        retries: 3
+      - drone-net
+
+  drone-runner:
+    image: drone/drone-runner-docker:1
+    container_name: drone-runner
+    restart: unless-stopped
+    depends_on:
+      - drone-server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DRONE_RPC_PROTO=http
+      - DRONE_RPC_HOST=drone-server
+      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
+      - DRONE_RUNNER_CAPACITY=2
+      - DRONE_RUNNER_NAME=mac-studio-runner
+      - DRONE_RUNNER_LABELS=platform:darwin,arch:arm64
+    networks:
+      - drone-net
 
 volumes:
-  postgres-data:
-  redis-data:
+  drone-data:
 
 networks:
-  webui-net:
-    external: true
-    name: webui-network
+  drone-net:
+    driver: bridge

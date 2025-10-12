@@ -35,3 +35,5 @@ dump.rdb
 /aitestmock/static/images/*
 /aitestmock/static/audio/*
 /docs/*.pdf
+
+/develop-env/.env-dev
