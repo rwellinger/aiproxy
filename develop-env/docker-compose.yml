@@ -28,7 +28,7 @@ services:
 
       # Logs
       - DRONE_LOGS_DEBUG=true
-      - DRONE_LOGS_TRACE=false
+      - DRONE_LOGS_TRACE=true
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/healthz"]
       interval: 30s
