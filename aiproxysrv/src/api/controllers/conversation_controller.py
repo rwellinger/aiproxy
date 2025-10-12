@@ -309,13 +309,7 @@ class ConversationController:
             db.rollback()
             error_details = f"{type(e).__name__}: {str(e)}"
             stack = traceback.format_exc()
-            logger.error(
-                f"Error creating conversation",
-                user_id=str(user_id),
-                model=data.model,
-                provider=data.provider,
-                stacktrace=stack,
-            )
+            logger.error(f"Error creating conversation - {error_details}\nStacktrace:\n{stack}")
             return {"error": f"Failed to create conversation: {e}"}, 500
 
     def update_conversation(
