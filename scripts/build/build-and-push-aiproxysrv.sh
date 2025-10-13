@@ -117,11 +117,11 @@ build_images() {
     cd "$BUILD_DIR"
 
     print_info "Building $APP_IMAGE..."
-    docker build -f dockerfile --target app -t "$APP_IMAGE:local" -t "$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:latest" .
+    docker build -f Dockerfile --target app -t "$APP_IMAGE:local" -t "$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:latest" .
     print_success "$APP_IMAGE built successfully"
 
     print_info "Building $WORKER_IMAGE..."
-    docker build -f dockerfile --target worker -t "$WORKER_IMAGE:local" -t "$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:latest" .
+    docker build -f Dockerfile --target worker -t "$WORKER_IMAGE:local" -t "$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:latest" .
     print_success "$WORKER_IMAGE built successfully"
 }
 

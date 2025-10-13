@@ -1,4 +1,4 @@
-FROM python:3.10.18-slim AS base
+FROM python:3.11-slim AS base
 
 # Create image directory
 RUN mkdir /images
@@ -16,7 +16,8 @@ RUN apt-get update && \
 
 # Install PIP Dependencies
 # Note: src/ must exist before this step for editable install
-RUN pip install --no-cache-dir -e .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -vvv -e .
 
 # NO .env or alembic.ini copied - these come from volume mounts at runtime!
 
