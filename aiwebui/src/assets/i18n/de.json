@@ -71,6 +71,12 @@
   },
   "songView": {
     "title": "Song-Bibliothek",
+    "library": {
+      "header": "Verfügbare Songs",
+      "songsCount": "{{count}} Songs",
+      "searchPlaceholder": "Suche in Titel, Text & Tags...",
+      "clearSearch": "Suche löschen"
+    },
     "filters": {
       "all": "Alle",
       "inUse": "In Verwendung",
@@ -92,7 +98,67 @@
       "downloadMp3": "MP3 herunterladen",
       "downloadStems": "Stems herunterladen",
       "copyLyrics": "Text kopieren",
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "selectAll": "Alle auswählen",
+      "deselectAll": "Alle abwählen",
+      "deleteCount": "Löschen ({{count}})",
+      "refresh": "Aktualisieren",
+      "selectMode": "Auswahlmodus",
+      "exitSelect": "Auswahl beenden",
+      "stop": "Stopp",
+      "playPause": "Abspielen/Pause",
+      "copyAll": "Alles kopieren",
+      "close": "Schließen"
+    },
+    "messages": {
+      "noSongsInDb": "Keine Songs in der Datenbank gefunden.",
+      "noSearchResults": "Keine Songs entsprechen deinen Suchkriterien.",
+      "adjustSearch": "Versuche deinen Suchbegriff anzupassen oder lösche die Suche, um alle Songs zu sehen.",
+      "loadingSongs": "Lade Songs...",
+      "noLyrics": "Kein Songtext",
+      "noLyricsAvailable": "Kein Songtext verfügbar",
+      "noStylePrompt": "Kein Stil-Prompt verfügbar",
+      "noTags": "Keine Tags",
+      "untitledSong": "Unbenannter Song",
+      "untitled": "Unbenannt",
+      "unknownSong": "Unbekannter Song",
+      "noSongSelected": "Kein Song ausgewählt",
+      "selectSongPlaceholder": "Wähle einen Song aus der Liste, um Details anzuzeigen"
+    },
+    "dialogs": {
+      "lyricsTitle": "Songtext - {{title}}",
+      "stylePromptTitle": "Stil-Prompt - {{title}}"
+    },
+    "errors": {
+      "loadingSongs": "Fehler beim Laden der Songs: {{error}}",
+      "loadingMore": "Fehler beim Laden weiterer Songs: {{error}}",
+      "updatingTitle": "Fehler beim Aktualisieren des Titels: {{error}}",
+      "updatingTags": "Fehler beim Aktualisieren der Tags: {{error}}",
+      "updatingWorkflow": "Fehler beim Aktualisieren des Workflows: {{error}}",
+      "updatingRating": "Fehler beim Aktualisieren der Bewertung: {{error}}",
+      "deletingSongs": "Fehler beim Löschen der Songs: {{error}}",
+      "copyFailed": "Fehler beim Kopieren in die Zwischenablage",
+      "copyLyricsFailed": "Fehler beim Kopieren des Songtextes in die Zwischenablage",
+      "noSongsSelected": "Keine Songs zum Löschen ausgewählt",
+      "cannotSelectProtected": "Songs mit {{workflow}}-Workflow können nicht zum Löschen ausgewählt werden",
+      "cannotDeleteProtected": "Songs mit {{workflow}}-Workflow können nicht gelöscht werden: {{songs}}"
+    },
+    "tooltips": {
+      "inUseNoDelete": "Dieser Song ist in Verwendung und kann nicht gelöscht werden",
+      "onWorkNoDelete": "Dieser Song ist in Arbeit und kann nicht gelöscht werden",
+      "cannotDeleteInUse": "Songs mit In Verwendung-Workflow können nicht gelöscht werden",
+      "cannotDeleteOnWork": "Songs mit In Arbeit-Workflow können nicht gelöscht werden",
+      "cannotDelete": "Dieser Song kann nicht gelöscht werden",
+      "instrumental": "Instrumental",
+      "withVocals": "Mit Gesang"
+    },
+    "confirmations": {
+      "bulkDelete": "Möchtest du wirklich {{count}} ausgewählte(n) Song(s) löschen?"
+    },
+    "bulkDelete": {
+      "completed": "Massenlöschung abgeschlossen: {{deleted}} gelöscht",
+      "notFound": "{{count}} nicht gefunden",
+      "errors": "{{count}} Fehler"
     },
     "placeholderText": "Dein generierter Song erscheint hier",
     "noSongs": "Keine Songs gefunden",

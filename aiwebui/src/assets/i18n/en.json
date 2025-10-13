@@ -71,6 +71,12 @@
   },
   "songView": {
     "title": "Song Library",
+    "library": {
+      "header": "Available Songs",
+      "songsCount": "{{count}} songs",
+      "searchPlaceholder": "Search in titles, lyrics & tags...",
+      "clearSearch": "Clear search"
+    },
     "filters": {
       "all": "All",
       "inUse": "In Use",
@@ -92,7 +98,67 @@
       "downloadMp3": "Download MP3",
       "downloadStems": "Download Stems",
       "copyLyrics": "Copy Lyrics",
-      "delete": "Delete"
+      "delete": "Delete",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "deleteCount": "Delete ({{count}})",
+      "refresh": "Refresh",
+      "selectMode": "Select Mode",
+      "exitSelect": "Exit Select",
+      "stop": "Stop",
+      "playPause": "Play/Pause",
+      "copyAll": "Copy All",
+      "close": "Close"
+    },
+    "messages": {
+      "noSongsInDb": "No songs found in the database.",
+      "noSearchResults": "No songs match your search criteria.",
+      "adjustSearch": "Try adjusting your search term or clear the search to see all songs.",
+      "loadingSongs": "Loading songs...",
+      "noLyrics": "No lyrics",
+      "noLyricsAvailable": "No lyrics available",
+      "noStylePrompt": "No style prompt available",
+      "noTags": "No tags",
+      "untitledSong": "Untitled Song",
+      "untitled": "Untitled",
+      "unknownSong": "Unknown Song",
+      "noSongSelected": "No song selected",
+      "selectSongPlaceholder": "Select a song from the list to view details"
+    },
+    "dialogs": {
+      "lyricsTitle": "Lyrics - {{title}}",
+      "stylePromptTitle": "Style Prompt - {{title}}"
+    },
+    "errors": {
+      "loadingSongs": "Error loading songs: {{error}}",
+      "loadingMore": "Error loading more songs: {{error}}",
+      "updatingTitle": "Error updating title: {{error}}",
+      "updatingTags": "Error updating tags: {{error}}",
+      "updatingWorkflow": "Error updating workflow: {{error}}",
+      "updatingRating": "Error updating rating: {{error}}",
+      "deletingSongs": "Error deleting songs: {{error}}",
+      "copyFailed": "Failed to copy to clipboard",
+      "copyLyricsFailed": "Failed to copy lyrics to clipboard",
+      "noSongsSelected": "No songs selected for deletion",
+      "cannotSelectProtected": "Cannot select songs with {{workflow}} workflow for deletion",
+      "cannotDeleteProtected": "Cannot delete songs with {{workflow}} workflow: {{songs}}"
+    },
+    "tooltips": {
+      "inUseNoDelete": "This song is In Use and cannot be deleted",
+      "onWorkNoDelete": "This song is On Work and cannot be deleted",
+      "cannotDeleteInUse": "Cannot delete songs with In Use workflow",
+      "cannotDeleteOnWork": "Cannot delete songs with On Work workflow",
+      "cannotDelete": "Cannot delete this song",
+      "instrumental": "Instrumental",
+      "withVocals": "With Vocals"
+    },
+    "confirmations": {
+      "bulkDelete": "Are you sure you want to delete {{count}} selected song(s)?"
+    },
+    "bulkDelete": {
+      "completed": "Bulk delete completed: {{deleted}} deleted",
+      "notFound": "{{count}} not found",
+      "errors": "{{count}} errors"
     },
     "placeholderText": "Your generated song will appear here",
     "noSongs": "No songs found",
