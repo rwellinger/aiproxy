@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { UserService } from '../../services/business/user.service';
 import { NotificationService } from '../../services/ui/notification.service';
 
@@ -19,7 +20,8 @@ import { NotificationService } from '../../services/ui/notification.service';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule
+    MatIconModule,
+    TranslateModule
   ],
   templateUrl: './password-change-modal.component.html',
   styleUrl: './password-change-modal.component.scss'
@@ -35,6 +37,7 @@ export class PasswordChangeModalComponent {
   private dialogRef = inject(MatDialogRef<PasswordChangeModalComponent>);
   private userService = inject(UserService);
   private notificationService = inject(NotificationService);
+  private translate = inject(TranslateService);
 
   constructor() {
     this.passwordForm = this.fb.group({
@@ -84,15 +87,15 @@ export class PasswordChangeModalComponent {
     const field = this.passwordForm.get(fieldName);
 
     if (field?.hasError('required')) {
-      return `${this.getFieldDisplayName(fieldName)} is required`;
+      return this.translate.instant('passwordChangeModal.errors.required', { field: this.getFieldDisplayName(fieldName) });
     }
 
     if (field?.hasError('minlength')) {
-      return `${this.getFieldDisplayName(fieldName)} must be at least 6 characters long`;
+      return this.translate.instant('passwordChangeModal.errors.minLength', { field: this.getFieldDisplayName(fieldName) });
     }
 
     if (fieldName === 'confirmPassword' && this.passwordForm.hasError('passwordMismatch')) {
-      return 'Passwords do not match';
+      return this.translate.instant('passwordChangeModal.errors.passwordMismatch');
     }
 
     return '';
@@ -104,11 +107,11 @@ export class PasswordChangeModalComponent {
   private getFieldDisplayName(fieldName: string): string {
     switch (fieldName) {
       case 'oldPassword':
-        return 'Current password';
+        return this.translate.instant('passwordChangeModal.fields.currentPassword');
       case 'newPassword':
-        return 'New password';
+        return this.translate.instant('passwordChangeModal.fields.newPassword');
       case 'confirmPassword':
-        return 'Confirm password';
+        return this.translate.instant('passwordChangeModal.fields.confirmPassword');
       default:
         return fieldName;
     }
@@ -138,11 +141,11 @@ export class PasswordChangeModalComponent {
       this.userService.changeCurrentUserPassword(passwordChangeData)
         .subscribe({
           next: () => {
-            this.notificationService.success('Password changed successfully');
+            this.notificationService.success(this.translate.instant('passwordChangeModal.notifications.success'));
             this.dialogRef.close(true);
           },
           error: (error) => {
-            this.notificationService.error(error.message || 'Error changing password');
+            this.notificationService.error(error.message || this.translate.instant('passwordChangeModal.notifications.error'));
             this.isLoading = false;
           }
         });

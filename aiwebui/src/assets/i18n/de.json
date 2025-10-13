@@ -255,6 +255,61 @@
   "openaiChat": {
     "title": "OpenAI Chat (Extern)"
   },
+  "passwordChangeModal": {
+    "title": "Passwort ändern",
+    "fields": {
+      "currentPassword": "Aktuelles Passwort",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Passwort bestätigen"
+    },
+    "placeholders": {
+      "currentPassword": "Gib dein aktuelles Passwort ein",
+      "newPassword": "Gib dein neues Passwort ein",
+      "confirmPassword": "Wiederhole dein neues Passwort"
+    },
+    "aria": {
+      "showPassword": "Passwort anzeigen",
+      "hidePassword": "Passwort verbergen"
+    },
+    "errors": {
+      "required": "{{field}} ist erforderlich",
+      "minLength": "{{field}} muss mindestens 6 Zeichen lang sein",
+      "passwordMismatch": "Passwörter stimmen nicht überein"
+    },
+    "info": {
+      "requirement": "Passwort muss mindestens 6 Zeichen lang sein."
+    },
+    "actions": {
+      "changing": "Ändere...",
+      "changePassword": "Passwort ändern"
+    },
+    "notifications": {
+      "success": "Passwort erfolgreich geändert",
+      "error": "Fehler beim Ändern des Passworts"
+    }
+  },
+  "songProfile": {
+    "title": "Profil-Steuerung",
+    "actions": {
+      "refresh": "Kontoinformationen aktualisieren"
+    },
+    "account": {
+      "title": "Kontoinformationen",
+      "murekaAccount": "Mureka-Konto",
+      "currentBalance": "Aktuelles Guthaben",
+      "totalSpending": "Gesamtausgaben",
+      "totalRecharge": "Gesamtaufladung",
+      "requestLimit": "Anfragelimit",
+      "concurrentRequests": "gleichzeitige Anfragen"
+    },
+    "empty": {
+      "title": "Keine Kontoinformationen verfügbar",
+      "description": "Kontoinformationen konnten nicht geladen werden. Bitte aktualisiere die Seite oder überprüfe deine Verbindung."
+    },
+    "notifications": {
+      "loadError": "Fehler beim Laden der Rechnungsinformationen"
+    }
+  },
   "promptTemplates": {
     "title": "Prompt Vorlagen",
     "list": {

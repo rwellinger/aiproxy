@@ -255,6 +255,61 @@
   "openaiChat": {
     "title": "OpenAI Chat (External)"
   },
+  "passwordChangeModal": {
+    "title": "Change Password",
+    "fields": {
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password"
+    },
+    "placeholders": {
+      "currentPassword": "Enter your current password",
+      "newPassword": "Enter your new password",
+      "confirmPassword": "Repeat your new password"
+    },
+    "aria": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+    },
+    "errors": {
+      "required": "{{field}} is required",
+      "minLength": "{{field}} must be at least 6 characters long",
+      "passwordMismatch": "Passwords do not match"
+    },
+    "info": {
+      "requirement": "Password must be at least 6 characters long."
+    },
+    "actions": {
+      "changing": "Changing...",
+      "changePassword": "Change Password"
+    },
+    "notifications": {
+      "success": "Password changed successfully",
+      "error": "Error changing password"
+    }
+  },
+  "songProfile": {
+    "title": "Profile Controls",
+    "actions": {
+      "refresh": "Refresh Account Info"
+    },
+    "account": {
+      "title": "Account Information",
+      "murekaAccount": "Mureka Account",
+      "currentBalance": "Current Balance",
+      "totalSpending": "Total Spending",
+      "totalRecharge": "Total Recharge",
+      "requestLimit": "Request Limit",
+      "concurrentRequests": "concurrent requests"
+    },
+    "empty": {
+      "title": "No Account Information Available",
+      "description": "Unable to load account information. Please try refreshing or check your connection."
+    },
+    "notifications": {
+      "loadError": "Error loading billing info"
+    }
+  },
   "promptTemplates": {
     "title": "Prompt Templates",
     "list": {

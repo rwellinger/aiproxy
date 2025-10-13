@@ -5,11 +5,12 @@ import {firstValueFrom} from 'rxjs';
 import {ApiConfigService} from '../../services/config/api-config.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 
 @Component({
     selector: 'app-song-profile',
     standalone: true,
-    imports: [CommonModule, MatSnackBarModule],
+    imports: [CommonModule, MatSnackBarModule, TranslateModule],
     templateUrl: './song-profile.component.html',
     styleUrl: './song-profile.component.scss'
 })
@@ -22,6 +23,7 @@ export class SongProfileComponent implements OnInit {
     private apiConfig = inject(ApiConfigService);
     private notificationService = inject(NotificationService);
     private http = inject(HttpClient);
+    private translate = inject(TranslateService);
 
     ngOnInit() {
         this.loadBillingInfo();
@@ -35,7 +37,7 @@ export class SongProfileComponent implements OnInit {
             );
         } catch (error) {
             console.error('Error loading billing info:', error);
-            this.notificationService.error('Error loading billing info');
+            this.notificationService.error(this.translate.instant('songProfile.notifications.loadError'));
             this.billingInfo = null;
         } finally {
             this.isLoading = false;
