@@ -13,16 +13,16 @@
                                 <i class="fas fa-user-circle"></i>
                             </div>
                             <div class="user-details">
-                                <h3>{{ getUserDisplayName() }}</h3>
+                                <h3>{{ userDisplayName }}</h3>
                                 <p class="email">{{ currentUser.email }}</p>
                                 <div class="badges">
                   <span class="badge" [class.active]="currentUser.is_active">
                     <i class="fas fa-circle"></i>
-                      {{ currentUser.is_active ? 'Active' : 'Inactive' }}
+                      {{ currentUser.is_active ? ('userProfile.active' | translate) : ('userProfile.inactive' | translate) }}
                   </span>
                                     <span class="badge" [class.verified]="currentUser.is_verified">
                     <i class="fas fa-check-circle"></i>
-                                        {{ currentUser.is_verified ? 'Verified' : 'Not verified' }}
+                                        {{ currentUser.is_verified ? ('userProfile.verified' | translate) : ('userProfile.notVerified' | translate) }}
                   </span>
                                 </div>
                             </div>
@@ -33,14 +33,14 @@
                             <div class="info-row">
                 <span class="label">
                   <i class="fas fa-calendar-plus"></i>
-                  Member since:
+                  {{ 'userProfile.memberSince' | translate }}
                 </span>
                                 <span class="value">{{ formatDate(currentUser.created_at) }}</span>
                             </div>
                             <div class="info-row" *ngIf="currentUser.last_login">
                 <span class="label">
                   <i class="fas fa-clock"></i>
-                  Last login:
+                  {{ 'userProfile.lastLogin' | translate }}
                 </span>
                                 <span class="value">{{ formatDate(currentUser.last_login) }}</span>
                             </div>
@@ -52,13 +52,13 @@
                             <div class="form-row">
                                 <mat-form-field appearance="outline" class="half-width"
                                                 [class.readonly-field]="!isEditing">
-                                    <mat-label>First Name</mat-label>
+                                    <mat-label>{{ 'userProfile.firstName' | translate }}</mat-label>
                                     <input
                                             matInput
                                             formControlName="first_name"
                                             [readonly]="!isEditing"
                                             [class.readonly-input]="!isEditing"
-                                            placeholder="Enter first name">
+                                            [placeholder]="'userProfile.firstNamePlaceholder' | translate">
                                     <mat-error *ngIf="hasFieldError('first_name') && isEditing">
                                         {{ getErrorMessage('first_name') }}
                                     </mat-error>
@@ -66,13 +66,13 @@
 
                                 <mat-form-field appearance="outline" class="half-width"
                                                 [class.readonly-field]="!isEditing">
-                                    <mat-label>Last Name</mat-label>
+                                    <mat-label>{{ 'userProfile.lastName' | translate }}</mat-label>
                                     <input
                                             matInput
                                             formControlName="last_name"
                                             [readonly]="!isEditing"
                                             [class.readonly-input]="!isEditing"
-                                            placeholder="Enter last name">
+                                            [placeholder]="'userProfile.lastNamePlaceholder' | translate">
                                     <mat-error *ngIf="hasFieldError('last_name') && isEditing">
                                         {{ getErrorMessage('last_name') }}
                                     </mat-error>
@@ -81,14 +81,14 @@
 
                             <!-- Email (Always Read-only) -->
                             <mat-form-field appearance="outline" class="full-width readonly-field">
-                                <mat-label>Email</mat-label>
+                                <mat-label>{{ 'userProfile.email' | translate }}</mat-label>
                                 <input
                                         matInput
                                         [value]="currentUser.email"
                                         readonly
                                         class="readonly-input"
-                                        placeholder="Email address">
-                                <mat-hint>Email cannot be changed</mat-hint>
+                                        [placeholder]="'userProfile.email' | translate">
+                                <mat-hint>{{ 'userProfile.emailHint' | translate }}</mat-hint>
                             </mat-form-field>
                         </form>
 
@@ -96,13 +96,13 @@
                         <div class="settings-section" *ngIf="currentSettings">
                             <h4 class="settings-title">
                                 <i class="fas fa-cog"></i>
-                                User Settings
+                                {{ 'userProfile.userSettings' | translate }}
                             </h4>
 
                             <form [formGroup]="settingsForm" class="settings-form">
                                 <div class="form-row">
                                     <mat-form-field appearance="outline" class="half-width">
-                                        <mat-label>Songs per page</mat-label>
+                                        <mat-label>{{ 'userProfile.songsPerPage' | translate }}</mat-label>
                                         <input
                                                 matInput
                                                 type="number"
@@ -110,12 +110,12 @@
                                                 (blur)="updateSongListLimit()"
                                                 min="5"
                                                 max="100"
-                                                placeholder="Number of songs">
-                                        <mat-hint>5-100 songs per page</mat-hint>
+                                                [placeholder]="'userProfile.songsPerPageHint' | translate">
+                                        <mat-hint>{{ 'userProfile.songsPerPageHint' | translate }}</mat-hint>
                                     </mat-form-field>
 
                                     <mat-form-field appearance="outline" class="half-width">
-                                        <mat-label>Images per page</mat-label>
+                                        <mat-label>{{ 'userProfile.imagesPerPage' | translate }}</mat-label>
                                         <input
                                                 matInput
                                                 type="number"
@@ -123,8 +123,22 @@
                                                 (blur)="updateImageListLimit()"
                                                 min="5"
                                                 max="100"
-                                                placeholder="Number of images">
-                                        <mat-hint>5-100 images per page</mat-hint>
+                                                [placeholder]="'userProfile.imagesPerPageHint' | translate">
+                                        <mat-hint>{{ 'userProfile.imagesPerPageHint' | translate }}</mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="form-row">
+                                    <mat-form-field appearance="outline" class="half-width">
+                                        <mat-label>{{ 'userProfile.language' | translate }}</mat-label>
+                                        <mat-select
+                                                formControlName="language"
+                                                (selectionChange)="updateLanguage()">
+                                            <mat-option *ngFor="let lang of availableLanguages" [value]="lang.code">
+                                                {{ lang.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-hint>{{ 'userProfile.languageHint' | translate }}</mat-hint>
                                     </mat-form-field>
                                 </div>
 
@@ -135,7 +149,7 @@
                                             color="warn"
                                             (click)="resetSettingsToDefaults()">
                                         <i class="fas fa-undo"></i>
-                                        Reset to Defaults
+                                        {{ 'userProfile.resetToDefaults' | translate }}
                                     </button>
                                 </div>
                             </form>
@@ -145,7 +159,7 @@
                     <!-- Loading State -->
                     <div class="loading-state" *ngIf="isLoading && !currentUser">
                         <i class="fas fa-spinner fa-spin"></i>
-                        <p>Loading profile...</p>
+                        <p>{{ 'userProfile.loadingProfile' | translate }}</p>
                     </div>
                 </mat-card-content>
 
@@ -158,7 +172,7 @@
                                 (click)="cancelEditing()"
                                 [disabled]="isLoading">
                             <i class="fas fa-times"></i>
-                            Cancel
+                            {{ 'userProfile.cancelButton' | translate }}
                         </button>
                         <button
                                 mat-raised-button
@@ -168,11 +182,11 @@
                                 [disabled]="userForm.invalid || isLoading">
               <span *ngIf="isLoading">
                 <i class="fas fa-spinner fa-spin"></i>
-                Saving...
+                {{ 'userProfile.saving' | translate }}
               </span>
                             <span *ngIf="!isLoading">
                 <i class="fas fa-save"></i>
-                Save
+                {{ 'userProfile.saveButton' | translate }}
               </span>
                         </button>
                     </div>
@@ -185,7 +199,7 @@
                                 type="button"
                                 (click)="openPasswordChangeModal()">
                             <i class="fas fa-key"></i>
-                            Change Password
+                            {{ 'userProfile.changePassword' | translate }}
                         </button>
                         <button
                                 mat-raised-button
@@ -193,7 +207,7 @@
                                 type="button"
                                 (click)="startEditing()">
                             <i class="fas fa-edit"></i>
-                            Edit
+                            {{ 'userProfile.editButton' | translate }}
                         </button>
                     </div>
                 </mat-card-actions>
@@ -216,7 +230,7 @@
                                 (click)="refreshMurekaAccount()"
                                 [disabled]="isLoading">
                             <i class="fas fa-refresh"></i>
-                            Refresh
+                            {{ 'userProfile.refreshButton' | translate }}
                         </button>
                     </div>
                 </mat-card-actions>

@@ -2,6 +2,7 @@ import {Component, OnInit, ViewEncapsulation, inject, HostListener, ViewChild, E
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {MatDialog} from '@angular/material/dialog';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {SongService} from '../../services/business/song.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
 import {NotificationService} from '../../services/ui/notification.service';
@@ -18,7 +19,7 @@ import {MusicStyleChooserService} from '../../services/music-style-chooser.servi
 @Component({
     selector: 'app-song-generator',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, SongDetailPanelComponent],
+    imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, SongDetailPanelComponent, TranslateModule],
     templateUrl: './song-generator.component.html',
     styleUrl: './song-generator.component.scss',
     encapsulation: ViewEncapsulation.None
@@ -38,6 +39,7 @@ export class SongGeneratorComponent implements OnInit {
     result = '';
     currentlyPlaying: string | null = null;
     currentSongId: string | null = null;
+    isInstrumentalMode = false; // Computed property to avoid method calls in template
 
     // Audio player state
     audioUrl: string | null = null;
@@ -61,6 +63,7 @@ export class SongGeneratorComponent implements OnInit {
     private dialog = inject(MatDialog);
     private architectureService = inject(LyricArchitectureService);
     private musicStyleChooserService = inject(MusicStyleChooserService);
+    private translate = inject(TranslateService);
 
     ngOnInit() {
         this.songForm = this.fb.group({
@@ -77,8 +80,12 @@ export class SongGeneratorComponent implements OnInit {
             this.songForm.patchValue(savedData);
         }
 
+        // Initialize isInstrumentalMode property
+        this.isInstrumentalMode = this.songForm.get('isInstrumental')?.value || false;
+
         // Update validators when isInstrumental changes
         this.songForm.get('isInstrumental')?.valueChanges.subscribe(isInstrumental => {
+            this.isInstrumentalMode = isInstrumental; // Update computed property
             this.updateValidators(isInstrumental);
         });
 
@@ -104,6 +111,7 @@ export class SongGeneratorComponent implements OnInit {
 
     resetForm() {
         this.songForm.reset({model: 'auto', isInstrumental: false});
+        this.isInstrumentalMode = false; // Reset computed property
         this.songService.clearFormData();
         this.result = '';
     }
@@ -129,8 +137,9 @@ export class SongGeneratorComponent implements OnInit {
                 }
                 await this.checkSongStatus(data.task_id, false);
             } else {
-                this.notificationService.error('Error initiating song generation.');
-                this.result = 'Error initiating song generation.';
+                const errorMsg = this.translate.instant('songGenerator.errors.errorInitSong');
+                this.notificationService.error(errorMsg);
+                this.result = errorMsg;
             }
         } catch (err: any) {
             this.notificationService.error(`Error: ${err.message}`);
@@ -157,8 +166,9 @@ export class SongGeneratorComponent implements OnInit {
                 }
                 await this.checkSongStatus(data.task_id, true);
             } else {
-                this.notificationService.error('Error initiating instrumental generation.');
-                this.result = 'Error initiating instrumental generation.';
+                const errorMsg = this.translate.instant('songGenerator.errors.errorInitInstrumental');
+                this.notificationService.error(errorMsg);
+                this.result = errorMsg;
             }
         } catch (err: any) {
             this.notificationService.error(`Error: ${err.message}`);
@@ -180,19 +190,21 @@ export class SongGeneratorComponent implements OnInit {
                     await this.renderResultTask(data.result);
                     completed = true;
                 } else if (data.status === 'FAILURE') {
-                    const errorMessage = data.result?.error || data.result || `${isInstrumental ? 'Instrumental' : 'Song'} generation failed`;
-                    this.notificationService.error(`${isInstrumental ? 'Instrumental' : 'Song'} generation failed: ${errorMessage}`);
+                    const errorKey = isInstrumental ? 'songGenerator.errors.instrumentalFailed' : 'songGenerator.errors.generationFailed';
+                    const errorMessage = data.result?.error || data.result || this.translate.instant(errorKey);
+                    this.notificationService.error(`${this.translate.instant(errorKey)}: ${errorMessage}`);
                     this.result = `<div class="error-box">Error: ${errorMessage}</div>`;
                     completed = true;
                 } else {
                     const statusText = this.getStatusText(data);
-                    this.loadingMessage = `${statusText} ... Please wait until finished.`;
+                    this.loadingMessage = statusText;
                     interval = Math.min(interval * 1.5, 60000);
                     await new Promise(resolve => setTimeout(resolve, interval));
                 }
             } catch (error: any) {
-                this.notificationService.error(`Error fetching status: ${error.message}`);
-                this.result = `Error fetching status: ${error.message}`;
+                const errorMsg = this.translate.instant('songGenerator.errors.errorFetchingStatus');
+                this.notificationService.error(`${errorMsg}: ${error.message}`);
+                this.result = `${errorMsg}: ${error.message}`;
                 completed = true;
             }
         }
@@ -342,11 +354,11 @@ export class SongGeneratorComponent implements OnInit {
         if (data.progress?.status) {
             switch (data.progress.status) {
                 case 'SLOT_ACQUIRED':
-                    return 'Acquiring Mureka slot';
+                    return this.translate.instant('songGenerator.status.acquiring');
                 case 'GENERATION_STARTED':
-                    return 'Starting song generation';
+                    return this.translate.instant('songGenerator.status.starting');
                 case 'POLLING':
-                    return 'Processing with Mureka';
+                    return this.translate.instant('songGenerator.status.polling');
                 default:
                     break;
             }
@@ -356,26 +368,26 @@ export class SongGeneratorComponent implements OnInit {
         if (data.progress?.mureka_status) {
             switch (data.progress.mureka_status) {
                 case 'preparing':
-                    return 'Preparing song generation';
+                    return this.translate.instant('songGenerator.status.preparing');
                 case 'queued':
-                    return 'Queued for processing';
+                    return this.translate.instant('songGenerator.status.queued');
                 case 'running':
-                    return 'Generating song with AI';
+                    return this.translate.instant('songGenerator.status.generatingAi');
                 case 'timeouted':
-                    return 'Processing (timeout handling)';
+                    return this.translate.instant('songGenerator.status.timeout');
                 default:
-                    return `Processing with Mureka (${data.progress.mureka_status})`;
+                    return `${this.translate.instant('songGenerator.status.polling')} (${data.progress.mureka_status})`;
             }
         }
 
         // Fallback to general celery status
         switch (data.status) {
             case 'PENDING':
-                return 'Initializing request';
+                return this.translate.instant('songGenerator.status.initializing');
             case 'PROGRESS':
-                return 'Processing request';
+                return this.translate.instant('songGenerator.status.processingRequest');
             default:
-                return 'Processing';
+                return this.translate.instant('songGenerator.status.processing');
         }
     }
 
@@ -429,7 +441,7 @@ export class SongGeneratorComponent implements OnInit {
     async improvePrompt() {
         const currentPrompt = this.songForm.get('prompt')?.value?.trim();
         if (!currentPrompt) {
-            this.notificationService.error('Please enter a music style prompt first');
+            this.notificationService.error(this.translate.instant('songGenerator.errors.promptRequired'));
             return;
         }
 
@@ -437,8 +449,8 @@ export class SongGeneratorComponent implements OnInit {
         try {
             const improvedPrompt = await this.progressService.executeWithProgress(
                 () => this.chatService.improveMusicStylePrompt(currentPrompt),
-                'Enhancing Style Prompt...',
-                'AI is improving your music style description'
+                this.translate.instant('songGenerator.progress.enhancing'),
+                this.translate.instant('songGenerator.progress.enhancinghint')
             );
             this.songForm.patchValue({prompt: this.removeQuotes(improvedPrompt)});
         } catch (error: any) {
@@ -451,7 +463,7 @@ export class SongGeneratorComponent implements OnInit {
     async generateLyrics() {
         const currentText = this.songForm.get('lyrics')?.value?.trim();
         if (!currentText) {
-            this.notificationService.error('Please enter text first');
+            this.notificationService.error(this.translate.instant('songGenerator.errors.textRequired'));
             return;
         }
 
@@ -459,8 +471,8 @@ export class SongGeneratorComponent implements OnInit {
         try {
             const generatedLyrics = await this.progressService.executeWithProgress(
                 () => this.chatService.generateLyrics(currentText),
-                'Creating Lyrics...',
-                'AI is generating song lyrics from your text'
+                this.translate.instant('songGenerator.progress.generatingLyrics'),
+                this.translate.instant('songGenerator.progress.generatingLyricsHint')
             );
             this.songForm.patchValue({lyrics: this.removeQuotes(generatedLyrics)});
         } catch (error: any) {
@@ -473,7 +485,7 @@ export class SongGeneratorComponent implements OnInit {
     async translateLyrics() {
         const currentLyrics = this.songForm.get('lyrics')?.value?.trim();
         if (!currentLyrics) {
-            this.notificationService.error('Please enter lyrics first');
+            this.notificationService.error(this.translate.instant('songGenerator.errors.lyricsRequired'));
             return;
         }
 
@@ -481,8 +493,8 @@ export class SongGeneratorComponent implements OnInit {
         try {
             const translatedLyrics = await this.progressService.executeWithProgress(
                 () => this.chatService.translateLyric(currentLyrics),
-                'Translating Lyrics...',
-                'AI is translating your lyrics to English'
+                this.translate.instant('songGenerator.progress.translatingLyrics'),
+                this.translate.instant('songGenerator.progress.translatingLyricsHint')
             );
             this.songForm.patchValue({lyrics: this.removeQuotes(translatedLyrics)});
         } catch (error: any) {
@@ -523,13 +535,13 @@ export class SongGeneratorComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe(result => {
             if (result && result.architectureString) {
-                this.notificationService.success('Song architecture updated successfully');
+                this.notificationService.success(this.translate.instant('songGenerator.success.architectureUpdated'));
             }
         });
     }
 
     openMusicStyleChooserModal(): void {
-        const isInstrumental = this.isInstrumental();
+        const isInstrumental = this.isInstrumentalMode; // Use property instead of method call
         const dialogRef = this.dialog.open(MusicStyleChooserModalComponent, {
             width: '1100px',
             maxWidth: '95vw',
@@ -545,7 +557,7 @@ export class SongGeneratorComponent implements OnInit {
                 this.songForm.patchValue({
                     prompt: result.stylePrompt
                 });
-                this.notificationService.success('Music style selection applied successfully');
+                this.notificationService.success(this.translate.instant('songGenerator.success.styleApplied'));
             }
         });
     }
@@ -573,7 +585,7 @@ export class SongGeneratorComponent implements OnInit {
     async translateStylePrompt() {
         const currentPrompt = this.songForm.get('prompt')?.value?.trim();
         if (!currentPrompt) {
-            this.notificationService.error('Please enter a music style prompt first');
+            this.notificationService.error(this.translate.instant('songGenerator.errors.promptRequired'));
             return;
         }
 
@@ -581,8 +593,8 @@ export class SongGeneratorComponent implements OnInit {
         try {
             const translatedPrompt = await this.progressService.executeWithProgress(
                 () => this.chatService.translateMusicStylePrompt(currentPrompt),
-                'Translating Style Prompt...',
-                'AI is translating your music style description to English'
+                this.translate.instant('songGenerator.progress.translatingPrompt'),
+                this.translate.instant('songGenerator.progress.translatingPromptHint')
             );
             this.songForm.patchValue({prompt: this.removeQuotes(translatedPrompt)});
         } catch (error: any) {
@@ -642,11 +654,12 @@ export class SongGeneratorComponent implements OnInit {
 
     setMode(mode: 'song' | 'instrumental') {
         const isInstrumental = mode === 'instrumental';
+        this.isInstrumentalMode = isInstrumental; // Update computed property
         this.songForm.patchValue({isInstrumental: isInstrumental});
     }
 
     async generateTitle() {
-        const isInstrumental = this.isInstrumental();
+        const isInstrumental = this.isInstrumentalMode; // Use property instead of method call
         let inputText = '';
 
         // Priority logic: Title > Lyrics (non-instrumental) / Style (instrumental) > Fallback
@@ -664,15 +677,15 @@ export class SongGeneratorComponent implements OnInit {
             inputText = currentLyrics;
         } else {
             // Fallback constant
-            inputText = 'Generate a creative song title';
+            inputText = this.translate.instant('songGenerator.generateTitleFallback');
         }
 
         this.isGeneratingTitle = true;
         try {
             const generatedTitle = await this.progressService.executeWithProgress(
                 () => this.chatService.generateTitle(inputText),
-                'Generating Title...',
-                'AI is creating a song title for you'
+                this.translate.instant('songGenerator.progress.generatingTitle'),
+                this.translate.instant('songGenerator.progress.generatingTitleHint')
             );
             this.songForm.patchValue({title: this.removeQuotes(generatedTitle)});
         } catch (error: any) {

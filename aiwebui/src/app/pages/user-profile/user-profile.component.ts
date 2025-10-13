@@ -8,6 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSelectModule } from '@angular/material/select';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -18,8 +20,9 @@ import { UserService } from '../../services/business/user.service';
 import { AuthService } from '../../services/business/auth.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import { UserSettingsService } from '../../services/user-settings.service';
+import { LanguageService } from '../../services/language.service';
 import { User } from '../../models/user.model';
-import { UserSettings } from '../../models/user-settings.model';
+import { UserSettings, Language } from '../../models/user-settings.model';
 
 @Component({
   selector: 'app-user-profile',
@@ -33,6 +36,8 @@ import { UserSettings } from '../../models/user-settings.model';
     MatCardModule,
     MatIconModule,
     MatSnackBarModule,
+    MatSelectModule,
+    TranslateModule,
     SongProfileComponent
   ],
   templateUrl: './user-profile.component.html',
@@ -47,6 +52,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   currentSettings: UserSettings | null = null;
   isLoading = false;
   isEditing = false;
+  userDisplayName = 'Unknown User'; // Computed property to avoid method calls in template
+  availableLanguages: {code: Language, name: string}[] = []; // Computed property to avoid method calls in template
 
   private destroy$ = new Subject<void>();
   private fb = inject(FormBuilder);
@@ -55,6 +62,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private settingsService = inject(UserSettingsService);
+  private languageService = inject(LanguageService);
+  private translate = inject(TranslateService);
 
   constructor() {
     this.userForm = this.fb.group({
@@ -64,11 +73,13 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     this.settingsForm = this.fb.group({
       songListLimit: [10, [Validators.required, Validators.min(5), Validators.max(100)]],
-      imageListLimit: [10, [Validators.required, Validators.min(5), Validators.max(100)]]
+      imageListLimit: [10, [Validators.required, Validators.min(5), Validators.max(100)]],
+      language: ['en', [Validators.required]]
     });
   }
 
   ngOnInit(): void {
+    this.availableLanguages = this.languageService.getAvailableLanguages(); // Initialize once
     this.loadUserProfile();
     this.subscribeToAuthState();
     this.loadUserSettings();
@@ -89,6 +100,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         this.currentUser = authState.user;
         if (this.currentUser) {
           this.updateFormValues();
+          this.updateUserDisplayName();
         }
       });
   }
@@ -105,11 +117,12 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         next: (user) => {
           this.currentUser = user;
           this.updateFormValues();
+          this.updateUserDisplayName();
           this.isLoading = false;
         },
         error: (error) => {
           console.error('Error loading user profile:', error);
-          this.notificationService.error('Error loading profile');
+          this.notificationService.error(this.translate.instant('userProfile.errors.errorLoadingProfile'));
           this.isLoading = false;
         }
       });
@@ -132,14 +145,15 @@ export class UserProfileComponent implements OnInit, OnDestroy {
    */
   public getErrorMessage(fieldName: string): string {
     const field = this.userForm.get(fieldName);
+    const fieldDisplayName = this.getFieldDisplayName(fieldName);
 
     if (field?.hasError('required')) {
-      return `${this.getFieldDisplayName(fieldName)} is required`;
+      return this.translate.instant('userProfile.errors.required', { field: fieldDisplayName });
     }
 
     if (field?.hasError('minlength')) {
       const requiredLength = field.errors?.['minlength']?.requiredLength;
-      return `${this.getFieldDisplayName(fieldName)} must be at least ${requiredLength} characters long`;
+      return this.translate.instant('userProfile.errors.minLength', { field: fieldDisplayName, length: requiredLength });
     }
 
     return '';
@@ -151,9 +165,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   private getFieldDisplayName(fieldName: string): string {
     switch (fieldName) {
       case 'first_name':
-        return 'First name';
+        return this.translate.instant('userProfile.fieldNames.firstName');
       case 'last_name':
-        return 'Last name';
+        return this.translate.instant('userProfile.fieldNames.lastName');
       default:
         return fieldName;
     }
@@ -196,12 +210,13 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (updatedUser) => {
             this.currentUser = updatedUser;
+            this.updateUserDisplayName(); // Update display name after save
             this.isEditing = false;
             this.isLoading = false;
           },
           error: (error) => {
             console.error('Error updating profile:', error);
-            this.notificationService.error(error.message || 'Error updating profile');
+            this.notificationService.error(error.message || this.translate.instant('userProfile.errors.errorUpdatingProfile'));
             this.isLoading = false;
           }
         });
@@ -226,27 +241,33 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get user display name
+   * Update userDisplayName property based on current user
+   * Called when user changes to avoid method calls in template
    */
-  public getUserDisplayName(): string {
-    if (!this.currentUser) return 'Unknown User';
+  private updateUserDisplayName(): void {
+    if (!this.currentUser) {
+      this.userDisplayName = this.translate.instant('userProfile.unknownUser');
+      return;
+    }
 
     if (this.currentUser.first_name && this.currentUser.last_name) {
-      return `${this.currentUser.first_name} ${this.currentUser.last_name}`;
+      this.userDisplayName = `${this.currentUser.first_name} ${this.currentUser.last_name}`;
+      return;
     }
 
     if (this.currentUser.first_name) {
-      return this.currentUser.first_name;
+      this.userDisplayName = this.currentUser.first_name;
+      return;
     }
 
-    return this.currentUser.email.split('@')[0];
+    this.userDisplayName = this.currentUser.email.split('@')[0];
   }
 
   /**
    * Format date for display
    */
   public formatDate(dateString: string): string {
-    if (!dateString) return 'Unknown';
+    if (!dateString) return this.translate.instant('userProfile.unknown');
 
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -286,7 +307,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     const value = this.settingsForm.get('songListLimit')?.value;
     if (value && value >= 5 && value <= 100) {
       this.settingsService.updateSongListLimit(value);
-      this.notificationService.success('Song list limit updated');
+      this.notificationService.success(this.translate.instant('userProfile.notifications.songListLimitUpdated'));
     }
   }
 
@@ -297,7 +318,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     const value = this.settingsForm.get('imageListLimit')?.value;
     if (value && value >= 5 && value <= 100) {
       this.settingsService.updateImageListLimit(value);
-      this.notificationService.success('Image list limit updated');
+      this.notificationService.success(this.translate.instant('userProfile.notifications.imageListLimitUpdated'));
     }
   }
 
@@ -306,6 +327,31 @@ export class UserProfileComponent implements OnInit, OnDestroy {
    */
   public resetSettingsToDefaults(): void {
     this.settingsService.resetToDefaults();
-    this.notificationService.success('Settings reset to defaults');
+    this.notificationService.success(this.translate.instant('userProfile.notifications.settingsReset'));
+  }
+
+  /**
+   * Update language setting
+   */
+  public updateLanguage(): void {
+    const value = this.settingsForm.get('language')?.value as Language;
+    if (value) {
+      this.languageService.changeLanguage(value);
+      this.notificationService.success(this.translate.instant('userProfile.notifications.languageUpdated'));
+    }
+  }
+
+  /**
+   * Get available languages
+   */
+  public getAvailableLanguages(): {code: Language, name: string}[] {
+    return this.languageService.getAvailableLanguages();
+  }
+
+  /**
+   * Get current language
+   */
+  public getCurrentLanguage(): Language {
+    return this.languageService.getCurrentLanguage();
   }
 }

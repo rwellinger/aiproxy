@@ -7,16 +7,16 @@
         <mat-card-content>
           <div class="image-list-panel">
         <div class="list-header">
-            <h2>Available Pictures</h2>
+            <h2>{{ 'imageView.gallery.header' | translate }}</h2>
             <div class="pagination-info-badge" *ngIf="pagination.total > 0">
-                {{ pagination.total }} items
+                {{ 'imageView.gallery.itemsCount' | translate:{count: pagination.total} }}
             </div>
         </div>
 
         <div class="search-controls">
             <div class="search-input-container">
                 <input type="text"
-                       placeholder="Search in titles and prompts..."
+                       [placeholder]="'imageView.gallery.searchPlaceholder' | translate"
                        class="search-input"
                        [(ngModel)]="searchTerm"
                        (ngModelChange)="onSearchChange($event)"
@@ -27,7 +27,7 @@
                         *ngIf="searchTerm"
                         (click)="clearSearch()"
                         [disabled]="isLoading"
-                        title="Clear search">
+                        [title]="'imageView.gallery.clearSearch' | translate">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -44,10 +44,10 @@
                                [indeterminate]="selectedImageIds.size > 0 && selectedImageIds.size < images.length"
                                (change)="onSelectAllChange($event)">
                     </th>
-                    <th class="title-col">Title</th>
-                    <th class="size-col">Size</th>
+                    <th class="title-col">{{ 'imageView.table.title' | translate }}</th>
+                    <th class="size-col">{{ 'imageView.table.size' | translate }}</th>
                     <th class="sortable-header" (click)="toggleSort()">
-                        Created
+                        {{ 'imageView.table.created' | translate }}
                         <i class="fas" [class.fa-sort-down]="sortDirection === 'desc'"
                            [class.fa-sort-up]="sortDirection === 'asc'"></i>
                     </th>
@@ -109,16 +109,16 @@
         </div>
 
         <div *ngIf="!images.length && !isLoading && !searchTerm.trim()" class="no-images-message">
-            <p>No pictures found in the database.</p>
+            <p>{{ 'imageView.messages.noImagesInDb' | translate }}</p>
         </div>
 
         <div *ngIf="!images.length && !isLoading && searchTerm.trim()" class="no-results-message">
-            <p>No pictures match your search criteria.</p>
-            <small>Try adjusting your search term or clear the search to see all images.</small>
+            <p>{{ 'imageView.messages.noSearchResults' | translate }}</p>
+            <small>{{ 'imageView.messages.adjustSearch' | translate }}</small>
         </div>
 
           <div *ngIf="isLoading" class="loading-message">
-            <i class="fas fa-spinner fa-spin"></i> Loading pictures...
+            <i class="fas fa-spinner fa-spin"></i> {{ 'imageView.messages.loadingImages' | translate }}
           </div>
           </div>
         </mat-card-content>
@@ -129,13 +129,13 @@
               <div class="action-group-left">
                 <ng-container *ngIf="isSelectionMode">
                   <button mat-button type="button" (click)="selectAllImages()" [disabled]="isLoading">
-                    <i class="fas fa-check-double"></i> Select All
+                    <i class="fas fa-check-double"></i> {{ 'imageView.actions.selectAll' | translate }}
                   </button>
                   <button mat-button type="button" (click)="deselectAllImages()" [disabled]="isLoading || selectedImageIds.size === 0">
-                    <i class="fas fa-square"></i> Deselect All
+                    <i class="fas fa-square"></i> {{ 'imageView.actions.deselectAll' | translate }}
                   </button>
                   <button mat-raised-button color="warn" type="button" (click)="bulkDeleteImages()" [disabled]="isLoading || selectedImageIds.size === 0">
-                    <i class="fas fa-trash"></i> Delete ({{ selectedImageIds.size }})
+                    <i class="fas fa-trash"></i> {{ 'imageView.actions.deleteCount' | translate:{count: selectedImageIds.size} }}
                   </button>
                 </ng-container>
               </div>
@@ -143,11 +143,11 @@
               <!-- Right Group: Main controls -->
               <div class="action-group-right">
                 <button mat-button type="button" (click)="loadImages(0)" [disabled]="isLoading">
-                  <i class="fas fa-refresh"></i> Refresh
+                  <i class="fas fa-refresh"></i> {{ 'imageView.actions.refresh' | translate }}
                 </button>
                 <button mat-button type="button" (click)="toggleSelectionMode()" [disabled]="isLoading"
                         [class.active]="isSelectionMode">
-                  <i class="fas fa-check-square"></i> {{ isSelectionMode ? 'Exit Select' : 'Select Mode' }}
+                  <i class="fas fa-check-square"></i> {{ isSelectionMode ? ('imageView.actions.exitSelect' | translate) : ('imageView.actions.selectMode' | translate) }}
                 </button>
               </div>
             </div>
@@ -166,17 +166,17 @@
               [showActionButtons]="false"
               title=""
               [showMetaInfo]="['model', 'size', 'created']"
-              placeholderText="Select an image from the list to view details"
+              [placeholderText]="'imageView.messages.selectImagePlaceholder' | translate"
               (titleChanged)="onTitleChanged()">
           </app-image-detail-panel>
         </mat-card-content>
         <mat-card-actions align="end">
           <div class="detail-actions" *ngIf="selectedImage">
             <button mat-button type="button" (click)="onDownloadImage()">
-              <i class="fas fa-download"></i> Download Original
+              <i class="fas fa-download"></i> {{ 'imageView.actions.downloadOriginal' | translate }}
             </button>
             <button mat-button type="button" (click)="onPreviewImage()">
-              <i class="fas fa-expand"></i> Full Size
+              <i class="fas fa-expand"></i> {{ 'imageView.actions.fullSize' | translate }}
             </button>
           </div>
         </mat-card-actions>

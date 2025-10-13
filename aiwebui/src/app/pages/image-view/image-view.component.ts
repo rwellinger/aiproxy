@@ -11,6 +11,7 @@ import {
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {HttpClient} from '@angular/common/http';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {ImageBlobService} from '../../services/ui/image-blob.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
 import {NotificationService} from '../../services/ui/notification.service';
@@ -46,7 +47,7 @@ interface PaginationInfo {
 @Component({
     selector: 'app-image-view',
     standalone: true,
-    imports: [CommonModule, FormsModule, MatSnackBarModule, MatCardModule, MatButtonModule, DisplayNamePipe, ImageDetailPanelComponent],
+    imports: [CommonModule, FormsModule, TranslateModule, MatSnackBarModule, MatCardModule, MatButtonModule, DisplayNamePipe, ImageDetailPanelComponent],
     templateUrl: './image-view.component.html',
     styleUrl: './image-view.component.scss',
     encapsulation: ViewEncapsulation.None
@@ -103,6 +104,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     private apiConfig = inject(ApiConfigService);
     private notificationService = inject(NotificationService);
     private settingsService = inject(UserSettingsService);
+    private translate = inject(TranslateService);
 
     constructor() {
         // Setup search debouncing
@@ -177,7 +179,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     async loadImages(page: number = 0) {
         this.isLoading = true;
-        this.loadingMessage = 'Loading images...';
+        this.loadingMessage = this.translate.instant('imageView.messages.loadingImages');
 
         try {
             const offset = page * this.pagination.limit;
@@ -213,7 +215,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.images = [];
             }
         } catch (error: any) {
-            this.notificationService.error(`Error loading images: ${error.message}`);
+            this.notificationService.error(this.translate.instant('imageView.errors.loadingImages', { error: error.message }));
             this.images = [];
         } finally {
             this.isLoading = false;
@@ -411,11 +413,11 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     async bulkDeleteImages() {
         if (this.selectedImageIds.size === 0) {
-            this.notificationService.error('No images selected for deletion');
+            this.notificationService.error(this.translate.instant('imageView.errors.noImagesSelected'));
             return;
         }
 
-        const confirmation = confirm(`Are you sure you want to delete ${this.selectedImageIds.size} selected image(s)?`);
+        const confirmation = confirm(this.translate.instant('imageView.confirmations.bulkDelete', { count: this.selectedImageIds.size }));
         if (!confirmation) {
             return;
         }
@@ -433,9 +435,9 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             // Show detailed result notification
             if (result.summary) {
                 const {deleted, not_found, errors} = result.summary;
-                let message = `Bulk delete completed: ${deleted} deleted`;
-                if (not_found > 0) message += `, ${not_found} not found`;
-                if (errors > 0) message += `, ${errors} errors`;
+                let message = this.translate.instant('imageView.bulkDelete.completed', { deleted });
+                if (not_found > 0) message += `, ${this.translate.instant('imageView.bulkDelete.notFound', { count: not_found })}`;
+                if (errors > 0) message += `, ${this.translate.instant('imageView.bulkDelete.errors', { count: errors })}`;
 
                 if (deleted <= 0) {
                     this.notificationService.error(message);
@@ -455,7 +457,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             await this.loadImages(this.currentPage);
 
         } catch (error: any) {
-            this.notificationService.error(`Error deleting images: ${error.message}`);
+            this.notificationService.error(this.translate.instant('imageView.errors.deletingImages', { error: error.message }));
         } finally {
             this.isLoading = false;
         }
@@ -525,7 +527,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             this.editTitleValue = '';
 
         } catch (error: any) {
-            this.notificationService.error(`Error updating title: ${error.message}`);
+            this.notificationService.error(this.translate.instant('imageView.errors.updatingTitle', { error: error.message }));
         } finally {
             this.isLoading = false;
         }

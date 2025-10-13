@@ -3,6 +3,7 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Subject, debounceTime, distinctUntilChanged, takeUntil, firstValueFrom} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {SongService} from '../../services/business/song.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
 import {NotificationService} from '../../services/ui/notification.service';
@@ -15,7 +16,7 @@ import {SongDetailPanelComponent} from '../../components/song-detail-panel/song-
 @Component({
   selector: 'app-song-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatSnackBarModule, MatCardModule, MatButtonModule, SongDetailPanelComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, MatSnackBarModule, MatCardModule, MatButtonModule, SongDetailPanelComponent],
   templateUrl: './song-view.component.html',
   styleUrl: './song-view.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -105,6 +106,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
   private notificationService = inject(NotificationService);
   private settingsService = inject(UserSettingsService);
   private http = inject(HttpClient);
+  private translate = inject(TranslateService);
 
   constructor() {
     // Setup search debouncing
@@ -185,7 +187,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
         // Player is now self-contained in detail panel
       }
     } catch (error: any) {
-      this.notificationService.error(`Error loading songs: ${error.message}`);
+      this.notificationService.error(this.translate.instant('songView.errors.loadingSongs', { error: error.message }));
     } finally {
       this.isLoadingSongs = false;
     }
@@ -241,7 +243,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
       // Update filtered songs (direct assignment as no client-side filtering)
       this.filteredSongs = this.songs;
     } catch (error: any) {
-      this.notificationService.error(`Error loading more songs: ${error.message}`);
+      this.notificationService.error(this.translate.instant('songView.errors.loadingMore', { error: error.message }));
     } finally {
       this.isLoadingSongs = false;
     }
@@ -249,14 +251,14 @@ export class SongViewComponent implements OnInit, OnDestroy {
 
   // Utility methods
   getSongPreview(song: any): string {
-    if (!song.lyrics) return 'No lyrics';
+    if (!song.lyrics) return this.translate.instant('songView.messages.noLyrics');
     // Use similar logic to DisplayNamePipe but for 20 chars
     const lyrics = song.lyrics.trim();
     return lyrics.length > 20 ? lyrics.substring(0, 17) + '...' : lyrics;
   }
 
   getSongTitle(song: any): string {
-    return song.prompt || 'Untitled Song';
+    return song.prompt || this.translate.instant('songView.messages.untitledSong');
   }
 
   // Title editing methods
@@ -270,7 +272,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
       return lyrics.length > 30 ? lyrics.substring(0, 27) + '...' : lyrics;
     }
     // Final fallback
-    return 'Untitled Song';
+    return this.translate.instant('songView.messages.untitledSong');
   }
 
   startEditTitle() {
@@ -327,7 +329,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
 
 
     } catch (error: any) {
-      this.notificationService.error(`Error updating title: ${error.message}`);
+      this.notificationService.error(this.translate.instant('songView.errors.updatingTitle', { error: error.message }));
     } finally {
       this.isLoading = false;
     }
@@ -389,8 +391,12 @@ export class SongViewComponent implements OnInit, OnDestroy {
   toggleSongSelection(songId: string) {
     const song = this.songs.find(s => s.id === songId);
     if (song && !this.canDeleteSong(song)) {
-      const workflowText = song.workflow === 'inUse' ? '"In Use"' : song.workflow === 'onWork' ? '"On Work"' : song.workflow;
-      this.notificationService.error(`Cannot select songs with ${workflowText} workflow for deletion`);
+      const workflowText = song.workflow === 'inUse'
+        ? this.translate.instant('songView.filters.inUse')
+        : song.workflow === 'onWork'
+          ? this.translate.instant('songView.filters.onWork')
+          : song.workflow;
+      this.notificationService.error(this.translate.instant('songView.errors.cannotSelectProtected', { workflow: workflowText }));
       return;
     }
 
@@ -424,7 +430,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
 
   async bulkDeleteSongs() {
     if (this.selectedSongIds.size === 0) {
-      this.notificationService.error('No songs selected for deletion');
+      this.notificationService.error(this.translate.instant('songView.errors.noSongsSelected'));
       return;
     }
 
@@ -435,21 +441,21 @@ export class SongViewComponent implements OnInit, OnDestroy {
 
     if (protectedSongs.length > 0) {
       const songTitles = protectedSongs.map(song =>
-        song.title || song.lyrics?.slice(0, 30) + '...' || 'Untitled'
+        song.title || song.lyrics?.slice(0, 30) + '...' || this.translate.instant('songView.messages.untitled')
       ).join(', ');
 
       const workflowTypes = [...new Set(protectedSongs.map(song => song.workflow))];
       const workflowText = workflowTypes.map(w =>
-        w === 'inUse' ? '"In Use"' : w === 'onWork' ? '"On Work"' : w
+        w === 'inUse' ? this.translate.instant('songView.filters.inUse') : w === 'onWork' ? this.translate.instant('songView.filters.onWork') : w
       ).join(' and ');
 
       this.notificationService.error(
-        `Cannot delete songs with ${workflowText} workflow: ${songTitles}`
+        this.translate.instant('songView.errors.cannotDeleteProtected', { workflow: workflowText, songs: songTitles })
       );
       return;
     }
 
-    const confirmation = confirm(`Are you sure you want to delete ${this.selectedSongIds.size} selected song(s)?`);
+    const confirmation = confirm(this.translate.instant('songView.confirmations.bulkDelete', { count: this.selectedSongIds.size }));
     if (!confirmation) {
       return;
     }
@@ -467,9 +473,9 @@ export class SongViewComponent implements OnInit, OnDestroy {
       // Show detailed result notification
       if (result.summary) {
         const { deleted, not_found, errors } = result.summary;
-        let message = `Bulk delete completed: ${deleted} deleted`;
-        if (not_found > 0) message += `, ${not_found} not found`;
-        if (errors > 0) message += `, ${errors} errors`;
+        let message = this.translate.instant('songView.bulkDelete.completed', { deleted });
+        if (not_found > 0) message += `, ${this.translate.instant('songView.bulkDelete.notFound', { count: not_found })}`;
+        if (errors > 0) message += `, ${this.translate.instant('songView.bulkDelete.errors', { count: errors })}`;
 
         if (deleted > 0) {
           this.notificationService.success(message);
@@ -493,7 +499,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
       await this.loadSongs(currentPage);
 
     } catch (error: any) {
-      this.notificationService.error(`Error deleting songs: ${error.message}`);
+      this.notificationService.error(this.translate.instant('songView.errors.deletingSongs', { error: error.message }));
     } finally {
       this.isLoading = false;
     }
@@ -551,15 +557,15 @@ export class SongViewComponent implements OnInit, OnDestroy {
 
   // Modal methods
   showLyrics(song: any) {
-    this.modalTitle = `Lyrics - ${this.getSongTitle(song)}`;
-    this.modalContent = song.lyrics || 'No lyrics available';
+    this.modalTitle = this.translate.instant('songView.dialogs.lyricsTitle', { title: this.getSongTitle(song) });
+    this.modalContent = song.lyrics || this.translate.instant('songView.messages.noLyricsAvailable');
     this.modalType = 'lyrics';
     this.showModal = true;
   }
 
   showPrompt(song: any) {
-    this.modalTitle = `Style Prompt - ${this.getSongTitle(song)}`;
-    this.modalContent = song.prompt || 'No style prompt available';
+    this.modalTitle = this.translate.instant('songView.dialogs.stylePromptTitle', { title: this.getSongTitle(song) });
+    this.modalContent = song.prompt || this.translate.instant('songView.messages.noStylePrompt');
     this.modalType = 'prompt';
     this.showModal = true;
   }
@@ -584,7 +590,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
       try {
         document.execCommand('copy');
       } catch (err) {
-        this.notificationService.error('Failed to copy to clipboard');
+        this.notificationService.error(this.translate.instant('songView.errors.copyFailed'));
       }
       document.body.removeChild(textArea);
     }
@@ -615,7 +621,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
       try {
         document.execCommand('copy');
       } catch (err) {
-        this.notificationService.error('Failed to copy lyrics to clipboard');
+        this.notificationService.error(this.translate.instant('songView.errors.copyLyricsFailed'));
       }
       document.body.removeChild(textArea);
     }
@@ -640,7 +646,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
     this.currentlyPlaying = choiceId;
 
     // Get song title and limit to 40 characters
-    const songTitle = this.selectedSong?.title || 'Unknown Song';
+    const songTitle = this.selectedSong?.title || this.translate.instant('songView.messages.unknownSong');
     this.currentSongTitle = songTitle.length > 40 ? songTitle.substring(0, 37) + '...' : songTitle;
 
     // Wait for audio element to be ready
@@ -821,7 +827,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
 
 
     } catch (error: any) {
-      this.notificationService.error(`Error updating tags: ${error.message}`);
+      this.notificationService.error(this.translate.instant('songView.errors.updatingTags', { error: error.message }));
     } finally {
       this.isLoading = false;
     }
@@ -829,10 +835,10 @@ export class SongViewComponent implements OnInit, OnDestroy {
 
   getSelectedTagsDisplay(): string {
     if (!this.selectedSong?.tags) {
-      return 'No tags';
+      return this.translate.instant('songView.messages.noTags');
     }
     const tags = this.parseTagsFromString(this.selectedSong.tags);
-    return tags.size > 0 ? Array.from(tags).join(', ') : 'No tags';
+    return tags.size > 0 ? Array.from(tags).join(', ') : this.translate.instant('songView.messages.noTags');
   }
 
   // Handlers for shared song detail panel
@@ -874,7 +880,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
         this.loadSongs(0); // Refresh filtered list from server
       }
     } catch (error: any) {
-      this.notificationService.error(`Error updating workflow: ${error.message}`);
+      this.notificationService.error(this.translate.instant('songView.errors.updatingWorkflow', { error: error.message }));
     } finally {
       this.isLoading = false;
     }
@@ -899,7 +905,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
 
 
     } catch (error: any) {
-      this.notificationService.error(`Error updating rating: ${error.message}`);
+      this.notificationService.error(this.translate.instant('songView.errors.updatingRating', { error: error.message }));
     }
   }
 
@@ -928,6 +934,8 @@ export class SongViewComponent implements OnInit, OnDestroy {
 
   // Get the song type display text
   getSongTypeText(song: any): string {
-    return this.isInstrumental(song) ? 'Instrumental' : 'With Vocals';
+    return this.isInstrumental(song)
+      ? this.translate.instant('songView.tooltips.instrumental')
+      : this.translate.instant('songView.tooltips.withVocals');
   }
 }

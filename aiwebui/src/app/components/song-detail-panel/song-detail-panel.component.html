@@ -3,7 +3,7 @@
     <div *ngIf="isLoading" class="loading-state">
         <div class="placeholder-content">
             <i class="fas fa-spinner fa-spin placeholder-icon"></i>
-            <p>Loading song details...</p>
+            <p>{{ 'songDetailPanel.loading' | translate }}</p>
         </div>
     </div>
 
@@ -73,7 +73,7 @@
                         <i class="fas meta-icon"
                            [class.fa-guitar]="song.is_instrumental === true"
                            [class.fa-microphone]="song.is_instrumental !== true"></i>
-                        <span class="meta-value">{{ song.is_instrumental === true ? 'Instrumental' : 'With Vocals' }}</span>
+                        <span class="meta-value">{{ getSongTypeText(song) }}</span>
                     </div>
                     <div class="meta-item" *ngIf="shouldShowMetaInfo('completed') && song.completed_at">
                         <i class="fas fa-calendar-check meta-icon"></i>
@@ -93,7 +93,7 @@
                 <!-- Tags Section -->
                 <div class="song-tags-section" *ngIf="showEditTags && !editingWorkflow">
                     <div class="tags-row" *ngIf="!editingTags">
-                        <h3 class="tags-title">Tags:</h3>
+                        <h3 class="tags-title">{{ 'songDetailPanel.tags.label' | translate }}</h3>
                         <span class="tags-display">{{ getSelectedTagsDisplay() }}</span>
                         <button type="button" class="edit-btn" (click)="startEditTags()" [disabled]="isGenerating">
                             <i class="fas fa-edit"></i>
@@ -101,7 +101,7 @@
                     </div>
                     <div class="tags-edit-section" *ngIf="editingTags">
                         <div class="tags-edit-header">
-                            <h3 class="tags-title">Edit Tags:</h3>
+                            <h3 class="tags-title">{{ 'songDetailPanel.tags.editTitle' | translate }}</h3>
                             <div class="tags-edit-buttons">
                                 <button type="button" class="save-btn" (click)="saveTags()">
                                     <i class="fas fa-check"></i>
@@ -115,7 +115,7 @@
                         <div class="tags-categories">
                             <!-- Style Tags -->
                             <div class="tag-category">
-                                <h4 class="category-title">Style</h4>
+                                <h4 class="category-title">{{ 'songDetailPanel.tags.styleCategory' | translate }}</h4>
                                 <div class="tag-checkboxes">
                                     <label *ngFor="let tag of tagCategories.style" class="tag-checkbox">
                                         <input type="checkbox"
@@ -129,7 +129,7 @@
 
                             <!-- Theme Tags -->
                             <div class="tag-category">
-                                <h4 class="category-title">Theme</h4>
+                                <h4 class="category-title">{{ 'songDetailPanel.tags.themeCategory' | translate }}</h4>
                                 <div class="tag-checkboxes">
                                     <label *ngFor="let tag of tagCategories.theme" class="tag-checkbox">
                                         <input type="checkbox"
@@ -147,7 +147,7 @@
                 <!-- Workflow Section -->
                 <div class="song-workflow-section" *ngIf="showEditWorkflow && !editingTags">
                     <div class="workflow-row" *ngIf="!editingWorkflow">
-                        <h3 class="workflow-title">Workflow:</h3>
+                        <h3 class="workflow-title">{{ 'songDetailPanel.workflow.label' | translate }}</h3>
                         <span class="workflow-display">{{ getWorkflowDisplay() }}</span>
                         <button type="button" class="edit-btn" (click)="startEditWorkflow()" [disabled]="isGenerating">
                             <i class="fas fa-edit"></i>
@@ -155,7 +155,7 @@
                     </div>
                     <div class="workflow-edit-section" *ngIf="editingWorkflow">
                         <div class="workflow-edit-header">
-                            <h3 class="workflow-title">Edit Workflow:</h3>
+                            <h3 class="workflow-title">{{ 'songDetailPanel.workflow.editTitle' | translate }}</h3>
                             <div class="workflow-edit-buttons">
                                 <button type="button" class="save-btn" (click)="saveWorkflow()">
                                     <i class="fas fa-check"></i>
@@ -180,15 +180,15 @@
 
             <!-- Choices Table -->
             <div class="song-choices" *ngIf="song.choices && song.choices.length > 0">
-                <h3>Song Choices:</h3>
+                <h3>{{ 'songDetailPanel.choices.title' | translate }}</h3>
                 <table class="choices-table">
                     <thead>
                     <tr>
-                        <th>Duration</th>
-                        <th>FLAC File</th>
-                        <th>MP3 File</th>
-                        <th>Stem Generation</th>
-                        <th *ngIf="showRating">Rating</th>
+                        <th>{{ 'songDetailPanel.choices.duration' | translate }}</th>
+                        <th>{{ 'songDetailPanel.choices.flacFile' | translate }}</th>
+                        <th>{{ 'songDetailPanel.choices.mp3File' | translate }}</th>
+                        <th>{{ 'songDetailPanel.choices.stemGeneration' | translate }}</th>
+                        <th *ngIf="showRating">{{ 'songDetailPanel.choices.rating' | translate }}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -199,9 +199,9 @@
                                     *ngIf="choice.flac_url"
                                     (click)="onDownloadFlac(choice.flac_url)"
                                     class="download-flac-btn">
-                                <i class="fas fa-download"></i> Download FLAC
+                                <i class="fas fa-download"></i> {{ 'songDetailPanel.choices.downloadFlac' | translate }}
                             </button>
-                            <span *ngIf="!choice.flac_url" class="not-available">N/A</span>
+                            <span *ngIf="!choice.flac_url" class="not-available">{{ 'songDetailPanel.choices.notAvailable' | translate }}</span>
                         </td>
                         <td>
                             <button type="button"
@@ -209,9 +209,9 @@
                                     (click)="onPlayAudio(choice.mp3_url, choice.id, i + 1)"
                                     [class.active]="currentlyPlayingId === choice.id">
                                 <i class="fas fa-music"></i>
-                                {{ currentlyPlayingId === choice.id ? 'Playing' : 'Play' }}
+                                {{ currentlyPlayingId === choice.id ? ('songDetailPanel.choices.playing' | translate) : ('songDetailPanel.choices.play' | translate) }}
                             </button>
-                            <span *ngIf="!choice.mp3_url" class="not-available">N/A</span>
+                            <span *ngIf="!choice.mp3_url" class="not-available">{{ 'songDetailPanel.choices.notAvailable' | translate }}</span>
                         </td>
                         <td>
                             <button type="button"
@@ -220,15 +220,15 @@
                                     [disabled]="stemGenerationInProgress.has(choice.id)">
                                 <i class="fas fa-spinner fa-spin" *ngIf="stemGenerationInProgress.has(choice.id)"></i>
                                 <i class="fas fa-brain" *ngIf="!stemGenerationInProgress.has(choice.id)"></i>
-                                {{ stemGenerationInProgress.has(choice.id) ? 'Generating...' : 'Generate Stems' }}
+                                {{ stemGenerationInProgress.has(choice.id) ? ('songDetailPanel.choices.generating' | translate) : ('songDetailPanel.choices.generateStems' | translate) }}
                             </button>
                             <button type="button"
                                     *ngIf="choice.stem_url"
                                     (click)="onDownloadStems(choice.stem_url)"
                                     class="download-stems-btn">
-                                <i class="fas fa-download"></i> Download Stems
+                                <i class="fas fa-download"></i> {{ 'songDetailPanel.choices.downloadStems' | translate }}
                             </button>
-                            <span *ngIf="!choice.mp3_url" class="not-available">N/A</span>
+                            <span *ngIf="!choice.mp3_url" class="not-available">{{ 'songDetailPanel.choices.notAvailable' | translate }}</span>
                         </td>
                         <td *ngIf="showRating">
                             <div class="rating-buttons">
@@ -237,7 +237,7 @@
                                         [class.active]="choice.rating === 1"
                                         [class.inactive]="choice.rating === 0"
                                         (click)="onUpdateRating(choice.id, choice.rating === 1 ? null : 1)"
-                                        title="Thumbs Up">
+                                        [title]="'songDetailPanel.choices.thumbsUp' | translate">
                                     <i class="fas fa-thumbs-up"></i>
                                 </button>
                                 <button type="button"
@@ -245,7 +245,7 @@
                                         [class.active]="choice.rating === 0"
                                         [class.inactive]="choice.rating === 1"
                                         (click)="onUpdateRating(choice.id, choice.rating === 0 ? null : 0)"
-                                        title="Thumbs Down">
+                                        [title]="'songDetailPanel.choices.thumbsDown' | translate">
                                     <i class="fas fa-thumbs-down"></i>
                                 </button>
                             </div>
@@ -260,25 +260,25 @@
                 <!-- Lyrics Section -->
                 <div class="song-lyrics" *ngIf="song.lyrics">
                     <div class="lyrics-header">
-                        <h3>Lyrics:</h3>
+                        <h3>{{ 'songDetailPanel.lyrics.label' | translate }}</h3>
                         <button type="button" class="copy-button" (click)="openLyricsDialog()">
-                            <i class="fas fa-expand-alt"></i> Show Lyrics
+                            <i class="fas fa-expand-alt"></i> {{ 'songDetailPanel.lyrics.showButton' | translate }}
                         </button>
                     </div>
                     <pre class="lyrics-content">{{ song.lyrics }}</pre>
-                    <div class="character-count">{{ song.lyrics.length }} characters</div>
+                    <div class="character-count">{{ song.lyrics.length }} {{ 'songDetailPanel.lyrics.characters' | translate }}</div>
                 </div>
 
                 <!-- Style Prompt -->
                 <div class="song-prompt" *ngIf="song.prompt">
-                    <h3>Style Prompt:</h3>
+                    <h3>{{ 'songDetailPanel.prompt.label' | translate }}</h3>
                     <p class="prompt-content">{{ song.prompt }}</p>
                 </div>
             </div>
         </div>
 
         <div *ngIf="!song.choices || song.choices.length === 0" class="no-choices">
-            <p>No song choices available for this song.</p>
+            <p>{{ 'songDetailPanel.choices.noChoices' | translate }}</p>
         </div>
     </div>
 
@@ -289,7 +289,7 @@
 <div *ngIf="showLyricsDialog" class="lyrics-dialog-overlay" (click)="closeLyricsDialog()">
     <div class="lyrics-dialog" (click)="$event.stopPropagation()">
         <div class="lyrics-dialog-header">
-            <h3>Lyrics - {{ getDisplayTitle(song) }}</h3>
+            <h3>{{ 'songDetailPanel.lyrics.dialogTitle' | translate:{title: getDisplayTitle(song)} }}</h3>
             <button type="button" class="close-button" (click)="closeLyricsDialog()">
                 <i class="fas fa-times"></i>
             </button>
@@ -299,10 +299,10 @@
         </div>
         <div class="lyrics-dialog-actions">
             <button type="button" class="copy-all-button" (click)="copyLyricsToClipboard()">
-                <i class="fas fa-copy"></i> Copy All
+                <i class="fas fa-copy"></i> {{ 'songDetailPanel.lyrics.copyAll' | translate }}
             </button>
             <button type="button" class="close-dialog-button" (click)="closeLyricsDialog()">
-                Close
+                {{ 'common.close' | translate }}
             </button>
         </div>
     </div>

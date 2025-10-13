@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: ghcr.io/rwellinger/aiwebui-app:v2.1.12
+    image: ghcr.io/rwellinger/aiwebui-app:v2.1.13
     container_name: forward-proxy
     restart: unless-stopped
     ports:

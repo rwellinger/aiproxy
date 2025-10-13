@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Subject } from 'rxjs';
 
@@ -22,6 +23,7 @@ import { SongSectionDisplayPipe } from '../../pipes/song-section-display.pipe';
   standalone: true,
   imports: [
     CommonModule,
+    TranslateModule,
     MatDialogModule,
     MatButtonModule,
     MatIconModule,
@@ -39,6 +41,7 @@ export class LyricArchitectModalComponent implements OnInit, OnDestroy {
 
   private architectureService = inject(LyricArchitectureService);
   private notificationService = inject(NotificationService);
+  private translateService = inject(TranslateService);
   private dialogRef = inject(MatDialogRef<LyricArchitectModalComponent>);
 
   ngOnInit(): void {
@@ -87,7 +90,7 @@ export class LyricArchitectModalComponent implements OnInit, OnDestroy {
     try {
       this.config = this.architectureService.removeSection(itemId);
     } catch (error: any) {
-      this.notificationService.error(`Error removing section: ${error.message}`);
+      this.notificationService.error(this.translateService.instant('lyricArchitect.messages.removeError', { message: error.message }));
     }
   }
 
@@ -101,7 +104,7 @@ export class LyricArchitectModalComponent implements OnInit, OnDestroy {
 
   reset(): void {
     this.config = this.architectureService.resetToDefault();
-    this.notificationService.success('Song architecture reset to default');
+    this.notificationService.success(this.translateService.instant('lyricArchitect.messages.resetSuccess'));
   }
 
   save(): void {
@@ -114,7 +117,7 @@ export class LyricArchitectModalComponent implements OnInit, OnDestroy {
         architectureString: architectureString
       });
     } catch (error: any) {
-      this.notificationService.error(`Error saving configuration: ${error.message}`);
+      this.notificationService.error(this.translateService.instant('lyricArchitect.messages.saveError', { message: error.message }));
     }
   }
 
@@ -127,7 +130,7 @@ export class LyricArchitectModalComponent implements OnInit, OnDestroy {
       const sectionIds = this.config.sections.map(s => s.id);
       this.config = this.architectureService.reorderSections(sectionIds);
     } catch (error: any) {
-      this.notificationService.error(`Error updating configuration: ${error.message}`);
+      this.notificationService.error(this.translateService.instant('lyricArchitect.messages.updateError', { message: error.message }));
     }
   }
 

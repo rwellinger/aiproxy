@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 
 import {
@@ -17,6 +18,7 @@ import { NotificationService } from '../../services/ui/notification.service';
   standalone: true,
   imports: [
     CommonModule,
+    TranslateModule,
     MatDialogModule,
     MatButtonModule,
     MatIconModule
@@ -35,6 +37,7 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
 
   private styleChooserService = inject(MusicStyleChooserService);
   private notificationService = inject(NotificationService);
+  private translateService = inject(TranslateService);
   private dialogRef = inject(MatDialogRef<MusicStyleChooserModalComponent>);
   private data = inject<{ isInstrumental?: boolean }>(MAT_DIALOG_DATA);
 
@@ -139,7 +142,7 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
 
   reset(): void {
     this.config = this.styleChooserService.resetToDefault();
-    this.notificationService.success('Music style selection reset');
+    this.notificationService.success(this.translateService.instant('musicStyleChooser.messages.resetSuccess'));
   }
 
   save(): void {
@@ -150,7 +153,7 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
         const hasFemaleVoice = this.isInstrumentSelected('female-voice');
 
         if (!hasMaleVoice && !hasFemaleVoice) {
-          this.notificationService.error('Please select either male or female voice for lyrics mode');
+          this.notificationService.error(this.translateService.instant('musicStyleChooser.messages.voiceRequired'));
           return;
         }
       }
@@ -163,7 +166,7 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
         stylePrompt: stylePrompt
       });
     } catch (error: any) {
-      this.notificationService.error(`Error saving configuration: ${error.message}`);
+      this.notificationService.error(this.translateService.instant('musicStyleChooser.messages.saveError', { message: error.message }));
     }
   }
 
@@ -173,7 +176,7 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
 
   getPreviewText(): string {
     const prompt = this.styleChooserService.generateStylePrompt(this.config, this.isInstrumental);
-    return prompt || 'No styles, instruments, or themes selected';
+    return prompt || this.translateService.instant('musicStyleChooser.preview.empty');
   }
 
   getSelectionSummary(): string {
@@ -182,20 +185,23 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
     const instrumentsCount = this.config.selectedInstruments.length;
 
     if (stylesCount === 0 && themesCount === 0 && instrumentsCount === 0) {
-      return 'No selection';
+      return this.translateService.instant('musicStyleChooser.summary.empty');
     }
 
     const parts = [];
     if (stylesCount > 0) {
-      parts.push(`${stylesCount} style${stylesCount > 1 ? 's' : ''}`);
+      const styleKey = stylesCount > 1 ? 'musicStyleChooser.summary.styles' : 'musicStyleChooser.summary.style';
+      parts.push(`${stylesCount} ${this.translateService.instant(styleKey)}`);
     }
     if (instrumentsCount > 0) {
-      parts.push(`${instrumentsCount} instrument${instrumentsCount > 1 ? 's' : ''}`);
+      const instrumentKey = instrumentsCount > 1 ? 'musicStyleChooser.summary.instruments' : 'musicStyleChooser.summary.instrument';
+      parts.push(`${instrumentsCount} ${this.translateService.instant(instrumentKey)}`);
     }
     if (themesCount > 0) {
-      parts.push(`${themesCount} theme${themesCount > 1 ? 's' : ''}`);
+      const themeKey = themesCount > 1 ? 'musicStyleChooser.summary.themes' : 'musicStyleChooser.summary.theme';
+      parts.push(`${themesCount} ${this.translateService.instant(themeKey)}`);
     }
 
-    return parts.join(', ') + ' selected';
+    return parts.join(', ') + ' ' + this.translateService.instant('musicStyleChooser.summary.selected');
   }
 }
