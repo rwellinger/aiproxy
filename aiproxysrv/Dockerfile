@@ -17,7 +17,7 @@ RUN apt-get update && \
 # Install PIP Dependencies
 # Note: src/ must exist before this step for editable install
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -vvv -e .
+    pip install --no-cache-dir -e .
 
 # NO .env or alembic.ini copied - these come from volume mounts at runtime!
 
