@@ -255,6 +255,53 @@
   "openaiChat": {
     "title": "OpenAI Chat (Extern)"
   },
+  "promptTemplates": {
+    "title": "Prompt Vorlagen",
+    "list": {
+      "count": "{{count}} Vorlagen",
+      "noTemplates": "Keine Vorlagen verfügbar",
+      "refresh": "Aktualisieren",
+      "status": {
+        "active": "Aktiv",
+        "inactive": "Inaktiv"
+      }
+    },
+    "detail": {
+      "noSelection": "Wähle eine Vorlage um Details anzuzeigen",
+      "aiParameters": "KI-Parameter",
+      "tokensHint": "(ca. {{words}} Wörter)",
+      "fields": {
+        "description": "Beschreibung",
+        "model": "Modell",
+        "temperature": "Temperatur",
+        "maxTokens": "Max. Token",
+        "preCondition": "Vorbedingung",
+        "postCondition": "Nachbedingung"
+      },
+      "defaults": {
+        "noDescription": "Keine Beschreibung",
+        "model": "Standard (llama3.2:3b)",
+        "temperature": "Standard (0.7)",
+        "maxTokens": "Standard (2048)"
+      },
+      "placeholders": {
+        "description": "Beschreibung eingeben...",
+        "preCondition": "Vorbedingung eingeben...",
+        "postCondition": "Nachbedingung eingeben..."
+      }
+    },
+    "actions": {
+      "edit": "Bearbeiten",
+      "save": "Speichern",
+      "cancel": "Abbrechen"
+    },
+    "notifications": {
+      "loading": "Lade Prompt Vorlagen...",
+      "saving": "Speichere Vorlage...",
+      "loadError": "Fehler beim Laden der Vorlagen: {{message}}",
+      "saveError": "Fehler beim Speichern der Vorlage: {{message}}"
+    }
+  },
   "detailPanel": {
     "songDetails": "Song-Details",
     "imageDetails": "Bild-Details",

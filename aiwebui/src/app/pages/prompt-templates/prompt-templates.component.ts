@@ -8,11 +8,12 @@ import {NotificationService} from '../../services/ui/notification.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 
 @Component({
     selector: 'app-prompt-templates',
     standalone: true,
-    imports: [CommonModule, FormsModule, MatSnackBarModule, MatCardModule, MatButtonModule],
+    imports: [CommonModule, FormsModule, MatSnackBarModule, MatCardModule, MatButtonModule, TranslateModule],
     templateUrl: './prompt-templates.component.html',
     styleUrl: './prompt-templates.component.scss'
 })
@@ -61,6 +62,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
 
     private promptService = inject(PromptTemplateService);
     private notificationService = inject(NotificationService);
+    private translate = inject(TranslateService);
 
     constructor() {
         // Setup search debouncing
@@ -89,7 +91,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
 
     async loadTemplates(): Promise<void> {
         this.isLoading = true;
-        this.loadingMessage = 'Loading prompt templates...';
+        this.loadingMessage = this.translate.instant('promptTemplates.notifications.loading');
 
         try {
             this.templates = await this.promptService.getAllTemplates().toPromise() || [];
@@ -100,7 +102,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
                 this.selectTemplate(this.filteredTemplates[0]);
             }
         } catch (error: any) {
-            this.notificationService.error(`Error loading templates: ${error.message}`);
+            this.notificationService.error(this.translate.instant('promptTemplates.notifications.loadError', { message: error.message }));
             this.templates = [];
             this.filteredTemplates = [];
         } finally {
@@ -175,7 +177,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
         if (!this.selectedTemplate || !this.editingTemplate) return;
 
         this.isLoading = true;
-        this.loadingMessage = 'Saving template...';
+        this.loadingMessage = this.translate.instant('promptTemplates.notifications.saving');
 
         try {
             const update: PromptTemplateUpdate = {
@@ -207,7 +209,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
             this.applyFilter();
             this.cancelEdit();
         } catch (error: any) {
-            this.notificationService.error(`Error saving template: ${error.message}`);
+            this.notificationService.error(this.translate.instant('promptTemplates.notifications.saveError', { message: error.message }));
         } finally {
             this.isLoading = false;
         }
@@ -239,6 +241,6 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
         if (!tokens || tokens === null || tokens === undefined) return '';
         // Rough estimation: 1 token ≈ 0.75 words
         const words = Math.round(tokens * 0.75);
-        return `(ca. ${words} words)`;
+        return this.translate.instant('promptTemplates.detail.tokensHint', { words });
     }
 }

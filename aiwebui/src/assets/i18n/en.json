@@ -255,6 +255,53 @@
   "openaiChat": {
     "title": "OpenAI Chat (External)"
   },
+  "promptTemplates": {
+    "title": "Prompt Templates",
+    "list": {
+      "count": "{{count}} templates",
+      "noTemplates": "No templates available",
+      "refresh": "Refresh",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      }
+    },
+    "detail": {
+      "noSelection": "Select a template to view details",
+      "aiParameters": "AI Parameters",
+      "tokensHint": "(approx. {{words}} words)",
+      "fields": {
+        "description": "Description",
+        "model": "Model",
+        "temperature": "Temperature",
+        "maxTokens": "Max Tokens",
+        "preCondition": "Pre-condition",
+        "postCondition": "Post-condition"
+      },
+      "defaults": {
+        "noDescription": "No description",
+        "model": "Default (llama3.2:3b)",
+        "temperature": "Default (0.7)",
+        "maxTokens": "Default (2048)"
+      },
+      "placeholders": {
+        "description": "Enter description...",
+        "preCondition": "Enter pre-condition...",
+        "postCondition": "Enter post-condition..."
+      }
+    },
+    "actions": {
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "notifications": {
+      "loading": "Loading prompt templates...",
+      "saving": "Saving template...",
+      "loadError": "Error loading templates: {{message}}",
+      "saveError": "Error saving template: {{message}}"
+    }
+  },
   "detailPanel": {
     "songDetails": "Song Details",
     "imageDetails": "Image Details",
