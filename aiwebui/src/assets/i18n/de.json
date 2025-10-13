@@ -180,6 +180,12 @@
   },
   "imageView": {
     "title": "Bild-Galerie",
+    "gallery": {
+      "header": "Verfügbare Bilder",
+      "itemsCount": "{{count}} Einträge",
+      "searchPlaceholder": "Suche in Titel und Prompts...",
+      "clearSearch": "Suche löschen"
+    },
     "table": {
       "preview": "Vorschau",
       "title": "Titel",
@@ -192,7 +198,36 @@
     "actions": {
       "view": "Ansehen",
       "download": "Herunterladen",
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "selectAll": "Alle auswählen",
+      "deselectAll": "Alle abwählen",
+      "deleteCount": "Löschen ({{count}})",
+      "refresh": "Aktualisieren",
+      "selectMode": "Auswahlmodus",
+      "exitSelect": "Auswahl beenden",
+      "downloadOriginal": "Original herunterladen",
+      "fullSize": "Vollbildansicht"
+    },
+    "messages": {
+      "noImagesInDb": "Keine Bilder in der Datenbank gefunden.",
+      "noSearchResults": "Keine Bilder entsprechen deinen Suchkriterien.",
+      "adjustSearch": "Versuche deinen Suchbegriff anzupassen oder lösche die Suche, um alle Bilder zu sehen.",
+      "loadingImages": "Lade Bilder...",
+      "selectImagePlaceholder": "Wähle ein Bild aus der Liste, um Details anzuzeigen"
+    },
+    "errors": {
+      "loadingImages": "Fehler beim Laden der Bilder: {{error}}",
+      "deletingImages": "Fehler beim Löschen der Bilder: {{error}}",
+      "updatingTitle": "Fehler beim Aktualisieren des Titels: {{error}}",
+      "noImagesSelected": "Keine Bilder zum Löschen ausgewählt"
+    },
+    "confirmations": {
+      "bulkDelete": "Möchtest du wirklich {{count}} ausgewählte(s) Bild(er) löschen?"
+    },
+    "bulkDelete": {
+      "completed": "Massenlöschung abgeschlossen: {{deleted}} gelöscht",
+      "notFound": "{{count}} nicht gefunden",
+      "errors": "{{count}} Fehler"
     },
     "noImages": "Keine Bilder gefunden",
     "placeholderText": "Dein generiertes Bild erscheint hier"

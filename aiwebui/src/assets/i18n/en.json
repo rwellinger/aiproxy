@@ -180,6 +180,12 @@
   },
   "imageView": {
     "title": "Image Gallery",
+    "gallery": {
+      "header": "Available Pictures",
+      "itemsCount": "{{count}} items",
+      "searchPlaceholder": "Search in titles and prompts...",
+      "clearSearch": "Clear search"
+    },
     "table": {
       "preview": "Preview",
       "title": "Title",
@@ -192,7 +198,36 @@
     "actions": {
       "view": "View",
       "download": "Download",
-      "delete": "Delete"
+      "delete": "Delete",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "deleteCount": "Delete ({{count}})",
+      "refresh": "Refresh",
+      "selectMode": "Select Mode",
+      "exitSelect": "Exit Select",
+      "downloadOriginal": "Download Original",
+      "fullSize": "Full Size"
+    },
+    "messages": {
+      "noImagesInDb": "No pictures found in the database.",
+      "noSearchResults": "No pictures match your search criteria.",
+      "adjustSearch": "Try adjusting your search term or clear the search to see all images.",
+      "loadingImages": "Loading pictures...",
+      "selectImagePlaceholder": "Select an image from the list to view details"
+    },
+    "errors": {
+      "loadingImages": "Error loading images: {{error}}",
+      "deletingImages": "Error deleting images: {{error}}",
+      "updatingTitle": "Error updating title: {{error}}",
+      "noImagesSelected": "No images selected for deletion"
+    },
+    "confirmations": {
+      "bulkDelete": "Are you sure you want to delete {{count}} selected image(s)?"
+    },
+    "bulkDelete": {
+      "completed": "Bulk delete completed: {{deleted}} deleted",
+      "notFound": "{{count}} not found",
+      "errors": "{{count}} errors"
     },
     "noImages": "No images found",
     "placeholderText": "Your generated image will appear here"
