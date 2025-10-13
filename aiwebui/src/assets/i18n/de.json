@@ -528,6 +528,10 @@
   "versionCheck": {
     "newVersion": "Neue Version {{version}} verfügbar!\nDie Anwendung wird jetzt neu geladen."
   },
+  "authInterceptor": {
+    "sessionExpired": "Sitzung abgelaufen. Bitte melde dich erneut an.",
+    "sessionTimeout": "Zeitüberschreitung bei der Sitzungsvalidierung. Bitte melde dich erneut an."
+  },
   "notifications": {
     "success": "Erfolg",
     "error": "Fehler",

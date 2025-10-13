@@ -5,6 +5,7 @@ import { catchError, switchMap, filter, take, finalize } from 'rxjs/operators';
 import { AuthService } from '../services/business/auth.service';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TranslateService } from '@ngx-translate/core';
 
 let isRefreshing = false;
 const refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
@@ -14,6 +15,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
   const snackBar = inject(MatSnackBar);
+  const translate = inject(TranslateService);
 
   // Skip authentication for auth-related endpoints
   if (isAuthEndpoint(req.url)) {
@@ -30,7 +32,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       // Handle 401 Unauthorized errors
       if (error.status === 401 && authToken) {
-        return handle401Error(req, next, authService, router, snackBar);
+        return handle401Error(req, next, authService, router, snackBar, translate);
       }
 
       // Handle other errors
@@ -65,7 +67,7 @@ function addTokenToRequest(request: HttpRequest<any>, token: string): HttpReques
   });
 }
 
-function handle401Error(request: HttpRequest<any>, next: HttpHandlerFn, authService: AuthService, router: Router, snackBar: MatSnackBar): Observable<any> {
+function handle401Error(request: HttpRequest<any>, next: HttpHandlerFn, authService: AuthService, router: Router, snackBar: MatSnackBar, translate: TranslateService): Observable<any> {
   if (!isRefreshing) {
     isRefreshing = true;
     refreshTokenSubject.next(null);
@@ -84,11 +86,15 @@ function handle401Error(request: HttpRequest<any>, next: HttpHandlerFn, authServ
         }
 
         // Token is invalid, logout user
-        snackBar.open('Session expired. Please log in again.', 'Close', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top'
-        });
+        snackBar.open(
+          translate.instant('authInterceptor.sessionExpired'),
+          translate.instant('common.close'),
+          {
+            duration: 5000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top'
+          }
+        );
         authService.forceLogout();
         router.navigate(['/login']);
         return throwError(() => new Error('Authentication failed'));
@@ -96,10 +102,10 @@ function handle401Error(request: HttpRequest<any>, next: HttpHandlerFn, authServ
       catchError((error) => {
         // Handle both validation errors and timeouts
         const errorMessage = error.name === 'TimeoutError'
-          ? 'Session validation timeout. Please log in again.'
-          : 'Session expired. Please log in again.';
+          ? translate.instant('authInterceptor.sessionTimeout')
+          : translate.instant('authInterceptor.sessionExpired');
 
-        snackBar.open(errorMessage, 'Close', {
+        snackBar.open(errorMessage, translate.instant('common.close'), {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'top'
@@ -125,11 +131,15 @@ function handle401Error(request: HttpRequest<any>, next: HttpHandlerFn, authServ
       catchError((error) => {
         // Timeout while waiting for other request's validation
         if (error.name === 'TimeoutError') {
-          snackBar.open('Session validation timeout. Please log in again.', 'Close', {
-            duration: 5000,
-            horizontalPosition: 'center',
-            verticalPosition: 'top'
-          });
+          snackBar.open(
+            translate.instant('authInterceptor.sessionTimeout'),
+            translate.instant('common.close'),
+            {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top'
+            }
+          );
           authService.forceLogout();
           router.navigate(['/login']);
         }

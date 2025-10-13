@@ -528,6 +528,10 @@
   "versionCheck": {
     "newVersion": "New version {{version}} available!\nThe application will now reload."
   },
+  "authInterceptor": {
+    "sessionExpired": "Session expired. Please log in again.",
+    "sessionTimeout": "Session validation timeout. Please log in again."
+  },
   "notifications": {
     "success": "Success",
     "error": "Error",
