@@ -171,6 +171,90 @@
     "loginButton": "Login",
     "loggingIn": "Logging in..."
   },
+  "aiChat": {
+    "title": "Ollama Chat (Internal)",
+    "sidebar": {
+      "showActive": "Show active chats",
+      "showArchive": "Show archive",
+      "newChat": "New Chat",
+      "noConversations": "No conversations yet",
+      "getStarted": "Create one to get started!",
+      "messagesCount": "{{count}} messages"
+    },
+    "form": {
+      "title": "Title",
+      "titlePlaceholder": "Chat title",
+      "model": "Model",
+      "systemContext": "System Context",
+      "systemContextOptional": "System Context (Optional)",
+      "systemContextPlaceholder": "Set system behavior...",
+      "systemContextHint": "Automatically saved to browser",
+      "clearSystemContext": "Clear System Context"
+    },
+    "conversation": {
+      "noSelection": "No conversation selected",
+      "noSelectionHint": "Select a conversation from the list or create a new one",
+      "conversationTitle": "Conversation title",
+      "tokens": "tokens",
+      "editTitle": "Edit title"
+    },
+    "actions": {
+      "export": "Export",
+      "exportChat": "Export chat",
+      "exportWithHistory": "Export (with History)",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "delete": "Delete conversation"
+    },
+    "messages": {
+      "thinking": "Thinking...",
+      "copyPlainText": "Copy as plain text",
+      "copyMarkdown": "Copy as Markdown",
+      "sendPlaceholder": "Type your message... (Enter to send, Shift+Enter for new line)",
+      "send": "Send",
+      "archived": "This conversation is archived. Messages cannot be sent."
+    },
+    "compression": {
+      "compressing": "Compressing conversation... Creating AI summary...",
+      "memoryLow": "Memory running low ({{percent}}%)!",
+      "compressChat": "Compress Chat",
+      "contextFull": "Context window nearly full ({{percent}}%)! Oldest messages may be lost.",
+      "compressNow": "Compress Now",
+      "confirmMessage": "Older messages will be archived and replaced with an AI summary.\n\n✓ Chat can continue\n✓ Export includes full history\n✓ System context preserved"
+    },
+    "time": {
+      "justNow": "just now",
+      "minAgo": "{{min}} min ago",
+      "yesterday": "Yesterday"
+    },
+    "notifications": {
+      "modelsFailed": "Failed to load models",
+      "conversationsFailed": "Failed to load conversations",
+      "conversationFailed": "Failed to load conversation",
+      "titleModelRequired": "Please provide a title and select a model",
+      "createFailed": "Failed to create conversation",
+      "deleteConfirm": "Delete conversation \"{{title}}\"?",
+      "deleteFailed": "Failed to delete conversation",
+      "sendFailed": "Failed to send message",
+      "titleUpdateFailed": "Failed to update title",
+      "copiedPlainText": "Copied as plain text",
+      "copiedMarkdown": "Copied as Markdown",
+      "copyFailed": "Failed to copy to clipboard",
+      "exported": "Chat exported as Markdown",
+      "exportFailed": "Failed to export chat",
+      "exportedFull": "Full chat history exported as Markdown",
+      "exportFullFailed": "Failed to export full chat history",
+      "compressed": "Chat compressed: {{count}} messages archived",
+      "compressionFailed": "Compression failed",
+      "archived": "Conversation archived",
+      "unarchived": "Conversation unarchived",
+      "archiveFailed": "Failed to archive conversation",
+      "unarchiveFailed": "Failed to unarchive conversation"
+    }
+  },
+  "openaiChat": {
+    "title": "OpenAI Chat (External)"
+  },
   "detailPanel": {
     "songDetails": "Song Details",
     "imageDetails": "Image Details",

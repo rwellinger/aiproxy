@@ -171,6 +171,90 @@
     "loginButton": "Anmelden",
     "loggingIn": "Melde an..."
   },
+  "aiChat": {
+    "title": "Ollama Chat (Intern)",
+    "sidebar": {
+      "showActive": "Aktive Chats anzeigen",
+      "showArchive": "Archiv anzeigen",
+      "newChat": "Neuer Chat",
+      "noConversations": "Noch keine Unterhaltungen",
+      "getStarted": "Erstelle eine, um loszulegen!",
+      "messagesCount": "{{count}} Nachrichten"
+    },
+    "form": {
+      "title": "Titel",
+      "titlePlaceholder": "Chat-Titel",
+      "model": "Modell",
+      "systemContext": "System-Kontext",
+      "systemContextOptional": "System-Kontext (Optional)",
+      "systemContextPlaceholder": "Systemverhalten festlegen...",
+      "systemContextHint": "Wird automatisch im Browser gespeichert",
+      "clearSystemContext": "System-Kontext löschen"
+    },
+    "conversation": {
+      "noSelection": "Keine Unterhaltung ausgewählt",
+      "noSelectionHint": "Wähle eine Unterhaltung aus der Liste aus oder erstelle eine neue",
+      "conversationTitle": "Unterhaltungs-Titel",
+      "tokens": "Tokens",
+      "editTitle": "Titel bearbeiten"
+    },
+    "actions": {
+      "export": "Exportieren",
+      "exportChat": "Chat exportieren",
+      "exportWithHistory": "Exportieren (mit Verlauf)",
+      "archive": "Archivieren",
+      "unarchive": "Aus Archiv holen",
+      "delete": "Unterhaltung löschen"
+    },
+    "messages": {
+      "thinking": "Denke nach...",
+      "copyPlainText": "Als reinen Text kopieren",
+      "copyMarkdown": "Als Markdown kopieren",
+      "sendPlaceholder": "Schreibe deine Nachricht... (Enter zum Senden, Shift+Enter für neue Zeile)",
+      "send": "Senden",
+      "archived": "Diese Unterhaltung ist archiviert. Nachrichten können nicht gesendet werden."
+    },
+    "compression": {
+      "compressing": "Komprimiere Unterhaltung... Erstelle KI-Zusammenfassung...",
+      "memoryLow": "Speicher wird knapp ({{percent}}%)!",
+      "compressChat": "Chat komprimieren",
+      "contextFull": "Kontext-Fenster fast voll ({{percent}}%)! Älteste Nachrichten gehen möglicherweise verloren.",
+      "compressNow": "Jetzt komprimieren",
+      "confirmMessage": "Ältere Nachrichten werden archiviert und durch eine KI-Zusammenfassung ersetzt.\n\n✓ Chat kann fortgesetzt werden\n✓ Export enthält vollständigen Verlauf\n✓ System-Kontext bleibt erhalten"
+    },
+    "time": {
+      "justNow": "gerade eben",
+      "minAgo": "vor {{min}} Min",
+      "yesterday": "Gestern"
+    },
+    "notifications": {
+      "modelsFailed": "Fehler beim Laden der Modelle",
+      "conversationsFailed": "Fehler beim Laden der Unterhaltungen",
+      "conversationFailed": "Fehler beim Laden der Unterhaltung",
+      "titleModelRequired": "Bitte gib einen Titel ein und wähle ein Modell",
+      "createFailed": "Fehler beim Erstellen der Unterhaltung",
+      "deleteConfirm": "Unterhaltung \"{{title}}\" löschen?",
+      "deleteFailed": "Fehler beim Löschen der Unterhaltung",
+      "sendFailed": "Fehler beim Senden der Nachricht",
+      "titleUpdateFailed": "Fehler beim Aktualisieren des Titels",
+      "copiedPlainText": "Als reiner Text kopiert",
+      "copiedMarkdown": "Als Markdown kopiert",
+      "copyFailed": "Fehler beim Kopieren in die Zwischenablage",
+      "exported": "Chat als Markdown exportiert",
+      "exportFailed": "Fehler beim Exportieren des Chats",
+      "exportedFull": "Vollständiger Chat-Verlauf als Markdown exportiert",
+      "exportFullFailed": "Fehler beim Exportieren des vollständigen Chat-Verlaufs",
+      "compressed": "Chat komprimiert: {{count}} Nachrichten archiviert",
+      "compressionFailed": "Komprimierung fehlgeschlagen",
+      "archived": "Unterhaltung archiviert",
+      "unarchived": "Unterhaltung aus Archiv geholt",
+      "archiveFailed": "Fehler beim Archivieren der Unterhaltung",
+      "unarchiveFailed": "Fehler beim Entarchivieren der Unterhaltung"
+    }
+  },
+  "openaiChat": {
+    "title": "OpenAI Chat (Extern)"
+  },
   "detailPanel": {
     "songDetails": "Song-Details",
     "imageDetails": "Bild-Details",

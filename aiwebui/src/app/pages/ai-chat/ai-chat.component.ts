@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ConversationService } from '../../services/business/conversation.service';
 import { NotificationService } from '../../services/ui/notification.service';
@@ -42,6 +43,7 @@ import { MessageContentPipe } from '../../pipes/message-content.pipe';
     MatExpansionModule,
     MatProgressBarModule,
     MatMenuModule,
+    TranslateModule,
     MessageContentPipe
   ],
   templateUrl: './ai-chat.component.html',
@@ -52,6 +54,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
   private conversationService = inject(ConversationService);
   private notificationService = inject(NotificationService);
   private chatExportService = inject(ChatExportService);
+  private translate = inject(TranslateService);
   private messageContentPipe = new MessageContentPipe();
   private destroy$ = new Subject<void>();
 
@@ -121,7 +124,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading models:', error);
-          this.notificationService.error('Failed to load models');
+          this.notificationService.error(this.translate.instant('aiChat.notifications.modelsFailed'));
         },
         complete: () => {
           this.isLoadingModels = false;
@@ -150,7 +153,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading conversations:', error);
-          this.notificationService.error('Failed to load conversations');
+          this.notificationService.error(this.translate.instant('aiChat.notifications.conversationsFailed'));
         },
         complete: () => {
           this.isLoading = false;
@@ -183,7 +186,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading conversation:', error);
-          this.notificationService.error('Failed to load conversation');
+          this.notificationService.error(this.translate.instant('aiChat.notifications.conversationFailed'));
         },
         complete: () => {
           this.isLoading = false;
@@ -217,7 +220,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
    */
   public createConversation(): void {
     if (!this.newChatTitle.trim() || !this.selectedModel) {
-      this.notificationService.error('Please provide a title and select a model');
+      this.notificationService.error(this.translate.instant('aiChat.notifications.titleModelRequired'));
       return;
     }
 
@@ -239,7 +242,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error creating conversation:', error);
-          this.notificationService.error('Failed to create conversation');
+          this.notificationService.error(this.translate.instant('aiChat.notifications.createFailed'));
         },
         complete: () => {
           this.isLoading = false;
@@ -253,7 +256,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
   public deleteConversation(): void {
     if (!this.currentConversation) return;
 
-    if (!confirm(`Delete conversation "${this.currentConversation.title}"?`)) {
+    if (!confirm(this.translate.instant('aiChat.notifications.deleteConfirm', { title: this.currentConversation.title }))) {
       return;
     }
 
@@ -276,7 +279,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error deleting conversation:', error);
-          this.notificationService.error('Failed to delete conversation');
+          this.notificationService.error(this.translate.instant('aiChat.notifications.deleteFailed'));
         },
         complete: () => {
           this.isLoading = false;
@@ -333,7 +336,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error sending message:', error);
-          this.notificationService.error('Failed to send message');
+          this.notificationService.error(this.translate.instant('aiChat.notifications.sendFailed'));
 
           // Remove temporary message on error
           this.messages = this.messages.filter(m => m.id !== tempUserMessage.id);
@@ -388,12 +391,12 @@ export class AiChatComponent implements OnInit, OnDestroy {
 
     // < 1 Minute
     if (diffMinutes < 1) {
-      return 'just now';
+      return this.translate.instant('aiChat.time.justNow');
     }
 
     // < 60 Minutes
     if (diffMinutes < 60) {
-      return `${diffMinutes} min ago`;
+      return this.translate.instant('aiChat.time.minAgo', { min: diffMinutes });
     }
 
     // Today
@@ -409,7 +412,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
     if (date.toDateString() === yesterday.toDateString()) {
-      return `Yesterday ${date.toLocaleTimeString('en-GB', {
+      return `${this.translate.instant('aiChat.time.yesterday')} ${date.toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit'
       })}`;
@@ -528,13 +531,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
   public compressConversation(): void {
     if (!this.currentConversation || this.isCompressing) return;
 
-    const confirmed = confirm(
-      'Compress this conversation?\n\n' +
-      'Older messages will be archived and replaced with an AI summary.\n' +
-      '✓ Chat can continue\n' +
-      '✓ Export includes full history\n' +
-      '✓ System context preserved'
-    );
+    const confirmed = confirm(this.translate.instant('aiChat.compression.confirmMessage'));
 
     if (!confirmed) return;
 
@@ -545,7 +542,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.notificationService.success(
-            `Chat compressed: ${response.archived_messages} messages archived`
+            this.translate.instant('aiChat.notifications.compressed', { count: response.archived_messages })
           );
           // Reload conversation to see updated token count
           if (this.currentConversation) {
@@ -554,7 +551,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error compressing conversation:', error);
-          this.notificationService.error('Compression failed');
+          this.notificationService.error(this.translate.instant('aiChat.notifications.compressionFailed'));
           this.isCompressing = false;
         },
         complete: () => {
@@ -608,7 +605,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error updating title:', error);
-          this.notificationService.error('Failed to update title');
+          this.notificationService.error(this.translate.instant('aiChat.notifications.titleUpdateFailed'));
           this.cancelEditTitle();
         }
       });
@@ -646,11 +643,11 @@ export class AiChatComponent implements OnInit, OnDestroy {
 
     navigator.clipboard.writeText(plainText)
       .then(() => {
-        this.notificationService.success('Copied as plain text');
+        this.notificationService.success(this.translate.instant('aiChat.notifications.copiedPlainText'));
       })
       .catch((error) => {
         console.error('Error copying to clipboard:', error);
-        this.notificationService.error('Failed to copy to clipboard');
+        this.notificationService.error(this.translate.instant('aiChat.notifications.copyFailed'));
       });
   }
 
@@ -662,11 +659,11 @@ export class AiChatComponent implements OnInit, OnDestroy {
 
     navigator.clipboard.writeText(content)
       .then(() => {
-        this.notificationService.success('Copied as Markdown');
+        this.notificationService.success(this.translate.instant('aiChat.notifications.copiedMarkdown'));
       })
       .catch((error) => {
         console.error('Error copying to clipboard:', error);
-        this.notificationService.error('Failed to copy to clipboard');
+        this.notificationService.error(this.translate.instant('aiChat.notifications.copyFailed'));
       });
   }
 
@@ -678,10 +675,10 @@ export class AiChatComponent implements OnInit, OnDestroy {
 
     try {
       this.chatExportService.exportToMarkdown(this.currentConversation, this.messages);
-      this.notificationService.success('Chat exported as Markdown');
+      this.notificationService.success(this.translate.instant('aiChat.notifications.exported'));
     } catch (error) {
       console.error('Error exporting to Markdown:', error);
-      this.notificationService.error('Failed to export chat');
+      this.notificationService.error(this.translate.instant('aiChat.notifications.exportFailed'));
     }
   }
 
@@ -697,10 +694,10 @@ export class AiChatComponent implements OnInit, OnDestroy {
         this.currentConversation.id,
         this.currentConversation.title
       );
-      this.notificationService.success('Full chat history exported as Markdown');
+      this.notificationService.success(this.translate.instant('aiChat.notifications.exportedFull'));
     } catch (error) {
       console.error('Error exporting full chat history:', error);
-      this.notificationService.error('Failed to export full chat history');
+      this.notificationService.error(this.translate.instant('aiChat.notifications.exportFullFailed'));
     } finally {
       this.isLoading = false;
     }
@@ -723,7 +720,6 @@ export class AiChatComponent implements OnInit, OnDestroy {
     if (!this.currentConversation) return;
 
     const newArchivedState = !this.currentConversation.archived;
-    const action = newArchivedState ? 'archived' : 'unarchived';
 
     this.conversationService
       .archiveConversation(this.currentConversation.id, newArchivedState)
@@ -740,11 +736,13 @@ export class AiChatComponent implements OnInit, OnDestroy {
             this.selectConversation(this.conversations[0]);
           }
 
-          this.notificationService.success(`Conversation ${action}`);
+          const successKey = newArchivedState ? 'aiChat.notifications.archived' : 'aiChat.notifications.unarchived';
+          this.notificationService.success(this.translate.instant(successKey));
         },
         error: (error) => {
-          console.error(`Error ${action}:`, error);
-          this.notificationService.error(`Failed to ${action === 'archived' ? 'archive' : 'unarchive'} conversation`);
+          console.error(`Error ${newArchivedState ? 'archive' : 'unarchive'}:`, error);
+          const errorKey = newArchivedState ? 'aiChat.notifications.archiveFailed' : 'aiChat.notifications.unarchiveFailed';
+          this.notificationService.error(this.translate.instant(errorKey));
         }
       });
   }
