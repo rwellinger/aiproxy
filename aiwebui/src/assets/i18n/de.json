@@ -436,6 +436,95 @@
     "noLyrics": "Kein Songtext verfügbar",
     "noTags": "Keine Tags"
   },
+  "songDetailPanel": {
+    "loading": "Lade Song-Details...",
+    "selectSong": "Wähle einen Song aus der Liste, um Details anzuzeigen",
+    "untitled": "Unbenannter Song",
+    "title": {
+      "edit": "Bearbeiten",
+      "save": "Speichern",
+      "cancel": "Abbrechen"
+    },
+    "tags": {
+      "label": "Tags:",
+      "noTags": "Keine Tags",
+      "editTitle": "Tags bearbeiten:",
+      "styleCategory": "Stil",
+      "themeCategory": "Thema"
+    },
+    "workflow": {
+      "label": "Workflow:",
+      "editTitle": "Workflow bearbeiten:",
+      "noWorkflow": "Kein Workflow",
+      "inUse": "In Verwendung",
+      "onWork": "In Arbeit",
+      "notUsed": "Nicht verwendet"
+    },
+    "choices": {
+      "title": "Song-Auswahl:",
+      "noChoices": "Für diesen Song sind keine Song-Auswahl verfügbar.",
+      "duration": "Dauer",
+      "flacFile": "FLAC-Datei",
+      "mp3File": "MP3-Datei",
+      "stemGeneration": "Stem-Erzeugung",
+      "rating": "Bewertung",
+      "downloadFlac": "FLAC herunterladen",
+      "play": "Abspielen",
+      "playing": "Spielt ab",
+      "generateStems": "Stems erzeugen",
+      "generating": "Erzeuge...",
+      "downloadStems": "Stems herunterladen",
+      "notAvailable": "N/V",
+      "thumbsUp": "Daumen hoch",
+      "thumbsDown": "Daumen runter"
+    },
+    "lyrics": {
+      "label": "Songtext:",
+      "showButton": "Songtext anzeigen",
+      "dialogTitle": "Songtext - {{title}}",
+      "copyAll": "Alles kopieren",
+      "characters": "Zeichen"
+    },
+    "prompt": {
+      "label": "Stil-Prompt:"
+    },
+    "type": {
+      "instrumental": "Instrumental",
+      "withVocals": "Mit Gesang"
+    },
+    "errors": {
+      "updateTitle": "Fehler beim Aktualisieren des Titels",
+      "updateTags": "Fehler beim Aktualisieren der Tags",
+      "updateWorkflow": "Fehler beim Aktualisieren des Workflows",
+      "generateStem": "Fehler beim Erzeugen der Stems",
+      "stemFailed": "Stem-Erzeugung fehlgeschlagen oder unvollständig.",
+      "stemTimeout": "Zeitüberschreitung nach 2 Minuten",
+      "updateRating": "Fehler beim Aktualisieren der Bewertung",
+      "loadSong": "Fehler beim Laden des Songs",
+      "loadSongDetails": "Fehler beim Laden der Song-Details"
+    }
+  },
+  "imageDetailPanel": {
+    "title": "Bild-Details",
+    "placeholder": "Wähle ein Bild aus der Liste, um Details anzuzeigen",
+    "loading": "Lade Bild-Details...",
+    "untitled": "Unbenanntes Bild",
+    "prompt": {
+      "label": "Prompt:"
+    },
+    "alt": {
+      "image": "Generiertes Bild"
+    },
+    "actions": {
+      "download": "Original herunterladen",
+      "fullSize": "Vollbildansicht"
+    },
+    "errors": {
+      "updateTitle": "Fehler beim Aktualisieren des Titels",
+      "loadImage": "Fehler beim Laden der Bild-Details",
+      "failedToLoad": "Fehler beim Laden des Bildes"
+    }
+  },
   "notifications": {
     "success": "Erfolg",
     "error": "Fehler",

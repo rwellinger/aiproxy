@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ImageBlobService } from '../../services/ui/image-blob.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import { ApiConfigService } from '../../services/config/api-config.service';
@@ -10,7 +11,7 @@ import { ApiConfigService } from '../../services/config/api-config.service';
 @Component({
   selector: 'app-image-detail-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './image-detail-panel.component.html',
   styleUrl: './image-detail-panel.component.scss'
 })
@@ -19,14 +20,15 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
   private notificationService = inject(NotificationService);
   private apiConfigService = inject(ApiConfigService);
   private http = inject(HttpClient);
+  private translate = inject(TranslateService);
 
   imageBlobUrl: string = '';
   @Input() image: any = null;
   @Input() imageId: string | null = null;
   @Input() showEditTitle: boolean = true;
-  @Input() title: string = 'Image Details';
+  @Input() title: string = '';
   @Input() showMetaInfo: string[] = ['model', 'size', 'created'];
-  @Input() placeholderText: string = 'Select an image from the list to view details';
+  @Input() placeholderText: string = '';
   @Input() placeholderIcon: string = 'fas fa-image';
   @Input() isGenerating: boolean = false;
   @Input() showActionButtons: boolean = true;
@@ -70,7 +72,7 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
       await this.reloadImage();
 
     } catch (error: any) {
-      this.notificationService.error(`Error updating title: ${error.message}`);
+      this.notificationService.error(this.translate.instant('imageDetailPanel.errors.updateTitle'));
     }
   }
 
@@ -88,6 +90,14 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    // Set default values for inputs if not provided
+    if (!this.title) {
+      this.title = this.translate.instant('imageDetailPanel.title');
+    }
+    if (!this.placeholderText) {
+      this.placeholderText = this.translate.instant('imageDetailPanel.placeholder');
+    }
+
     if (this.imageId) {
       this.loadImageFromDB(this.imageId);
     }
@@ -143,8 +153,8 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
       this.loadImageBlob();
 
     } catch (error: any) {
-      this.loadingError = `Failed to load image: ${error.message}`;
-      this.notificationService.error(`Error loading image details: ${error.message}`);
+      this.loadingError = this.translate.instant('imageDetailPanel.errors.failedToLoad');
+      this.notificationService.error(this.translate.instant('imageDetailPanel.errors.loadImage'));
       this.image = null;
     } finally {
       this.isLoading = false;
@@ -153,7 +163,7 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
 
   getDisplayTitle(image: any): string {
     if (!image) return '';
-    return image.title || image.prompt?.slice(0, 50) + (image.prompt?.length > 50 ? '...' : '') || 'Untitled Image';
+    return image.title || image.prompt?.slice(0, 50) + (image.prompt?.length > 50 ? '...' : '') || this.translate.instant('imageDetailPanel.untitled');
   }
 
   formatDate(dateString: string): string {

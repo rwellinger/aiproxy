@@ -3,6 +3,7 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {HttpClient} from '@angular/common/http';
 import {firstValueFrom} from 'rxjs';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {SongService} from '../../services/business/song.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
@@ -11,7 +12,7 @@ import {MUSIC_STYLE_CATEGORIES} from '../../models/music-style-chooser.model';
 @Component({
     selector: 'app-song-detail-panel',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, TranslateModule],
     templateUrl: './song-detail-panel.component.html',
     styleUrl: './song-detail-panel.component.scss'
 })
@@ -55,6 +56,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     private notificationService = inject(NotificationService);
     private apiConfigService = inject(ApiConfigService);
     private http = inject(HttpClient);
+    private translate = inject(TranslateService);
 
     // Component state
     editingTitle = false;
@@ -68,13 +70,8 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     // Tag categories from shared constants
     tagCategories = MUSIC_STYLE_CATEGORIES;
 
-    // Workflow options
-    workflowOptions = [
-        { value: '', label: 'No Workflow' },
-        { value: 'inUse', label: 'In Use' },
-        { value: 'onWork', label: 'On Work' },
-        { value: 'notUsed', label: 'Not Used' }
-    ];
+    // Workflow options - will be initialized in ngOnInit with translated labels
+    workflowOptions: { value: string; label: string }[] = [];
 
     // Title editing methods
     startEditTitle() {
@@ -103,7 +100,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
             await this.reloadSong();
 
         } catch (error: any) {
-            this.notificationService.error(`Error updating title: ${error.message}`);
+            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.updateTitle')}: ${error.message}`);
         }
     }
 
@@ -138,7 +135,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
             await this.reloadSong();
 
         } catch (error: any) {
-            this.notificationService.error(`Error updating tags: ${error.message}`);
+            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.updateTags')}: ${error.message}`);
         }
     }
 
@@ -161,7 +158,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     }
 
     getSelectedTagsDisplay(): string {
-        if (!this.song?.tags) return 'No tags';
+        if (!this.song?.tags) return this.translate.instant('songDetailPanel.tags.noTags');
         return this.song.tags;
     }
 
@@ -189,7 +186,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
             await this.reloadSong();
 
         } catch (error: any) {
-            this.notificationService.error(`Error updating workflow: ${error.message}`);
+            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.updateWorkflow')}: ${error.message}`);
         }
     }
 
@@ -199,7 +196,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     }
 
     getWorkflowDisplay(): string {
-        if (!this.song?.workflow) return 'No Workflow';
+        if (!this.song?.workflow) return this.translate.instant('songDetailPanel.workflow.noWorkflow');
         const option = this.workflowOptions.find(opt => opt.value === this.song.workflow);
         return option?.label || this.song.workflow;
     }
@@ -224,19 +221,19 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
                     })
                 ),
                 this.delay(120000).then(() => {
-                    throw new Error('Timeout after 2 minutes');
+                    throw new Error(this.translate.instant('songDetailPanel.errors.stemTimeout'));
                 })
             ]);
 
             if (data.status === 'SUCCESS' && data.result && data.result.zip_url) {
                 await this.reloadSong();
             } else {
-                this.notificationService.error('Stem generation failed or incomplete.');
+                this.notificationService.error(this.translate.instant('songDetailPanel.errors.stemFailed'));
             }
 
 
         } catch (error: any) {
-            this.notificationService.error(`Error generating stem: ${error.message}`);
+            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.generateStem')}: ${error.message}`);
         } finally {
             this.stemGenerationInProgress.delete(choiceId);
         }
@@ -262,7 +259,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
 
         } catch (error: any) {
             console.error('Rating update error:', error);
-            this.notificationService.error(`Error updating rating: ${error.message}`);
+            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.updateRating')}: ${error.message}`);
         }
     }
 
@@ -282,7 +279,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     // Utility methods
     getDisplayTitle(song: any): string {
         if (!song) return '';
-        return song.title || song.lyrics?.slice(0, 50) + (song.lyrics?.length > 50 ? '...' : '') || 'Untitled Song';
+        return song.title || song.lyrics?.slice(0, 50) + (song.lyrics?.length > 50 ? '...' : '') || this.translate.instant('songDetailPanel.untitled');
     }
 
     formatDateDetailed(dateString: string): string {
@@ -326,6 +323,14 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     }
 
     ngOnInit() {
+        // Initialize workflow options with translated labels
+        this.workflowOptions = [
+            { value: '', label: this.translate.instant('songDetailPanel.workflow.noWorkflow') },
+            { value: 'inUse', label: this.translate.instant('songDetailPanel.workflow.inUse') },
+            { value: 'onWork', label: this.translate.instant('songDetailPanel.workflow.onWork') },
+            { value: 'notUsed', label: this.translate.instant('songDetailPanel.workflow.notUsed') }
+        ];
+
         if (this.songId) {
             this.loadSongFromDB(this.songId);
         }
@@ -355,8 +360,8 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
                 this.song = response;
             }
         } catch (error: any) {
-            this.loadingError = `Failed to load song: ${error.message}`;
-            this.notificationService.error(`Error loading song details: ${error.message}`);
+            this.loadingError = `${this.translate.instant('songDetailPanel.errors.loadSong')}: ${error.message}`;
+            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.loadSongDetails')}: ${error.message}`);
             this.song = null;
         } finally {
             this.isLoading = false;
@@ -375,6 +380,8 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
 
     // Get the song type display text
     getSongTypeText(song: any): string {
-        return this.isInstrumental(song) ? 'Instrumental' : 'With Vocals';
+        return this.isInstrumental(song)
+            ? this.translate.instant('songDetailPanel.type.instrumental')
+            : this.translate.instant('songDetailPanel.type.withVocals');
     }
 }

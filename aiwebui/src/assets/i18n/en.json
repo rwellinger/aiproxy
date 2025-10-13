@@ -436,6 +436,95 @@
     "noLyrics": "No lyrics available",
     "noTags": "No tags"
   },
+  "songDetailPanel": {
+    "loading": "Loading song details...",
+    "selectSong": "Select a song from the list to view details",
+    "untitled": "Untitled Song",
+    "title": {
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "tags": {
+      "label": "Tags:",
+      "noTags": "No tags",
+      "editTitle": "Edit Tags:",
+      "styleCategory": "Style",
+      "themeCategory": "Theme"
+    },
+    "workflow": {
+      "label": "Workflow:",
+      "editTitle": "Edit Workflow:",
+      "noWorkflow": "No Workflow",
+      "inUse": "In Use",
+      "onWork": "On Work",
+      "notUsed": "Not Used"
+    },
+    "choices": {
+      "title": "Song Choices:",
+      "noChoices": "No song choices available for this song.",
+      "duration": "Duration",
+      "flacFile": "FLAC File",
+      "mp3File": "MP3 File",
+      "stemGeneration": "Stem Generation",
+      "rating": "Rating",
+      "downloadFlac": "Download FLAC",
+      "play": "Play",
+      "playing": "Playing",
+      "generateStems": "Generate Stems",
+      "generating": "Generating...",
+      "downloadStems": "Download Stems",
+      "notAvailable": "N/A",
+      "thumbsUp": "Thumbs Up",
+      "thumbsDown": "Thumbs Down"
+    },
+    "lyrics": {
+      "label": "Lyrics:",
+      "showButton": "Show Lyrics",
+      "dialogTitle": "Lyrics - {{title}}",
+      "copyAll": "Copy All",
+      "characters": "characters"
+    },
+    "prompt": {
+      "label": "Style Prompt:"
+    },
+    "type": {
+      "instrumental": "Instrumental",
+      "withVocals": "With Vocals"
+    },
+    "errors": {
+      "updateTitle": "Error updating title",
+      "updateTags": "Error updating tags",
+      "updateWorkflow": "Error updating workflow",
+      "generateStem": "Error generating stem",
+      "stemFailed": "Stem generation failed or incomplete.",
+      "stemTimeout": "Timeout after 2 minutes",
+      "updateRating": "Error updating rating",
+      "loadSong": "Failed to load song",
+      "loadSongDetails": "Error loading song details"
+    }
+  },
+  "imageDetailPanel": {
+    "title": "Image Details",
+    "placeholder": "Select an image from the list to view details",
+    "loading": "Loading image details...",
+    "untitled": "Untitled Image",
+    "prompt": {
+      "label": "Prompt:"
+    },
+    "alt": {
+      "image": "Generated Picture"
+    },
+    "actions": {
+      "download": "Download Original",
+      "fullSize": "Full Size"
+    },
+    "errors": {
+      "updateTitle": "Error updating title",
+      "loadImage": "Error loading image details",
+      "failedToLoad": "Failed to load image"
+    }
+  },
   "notifications": {
     "success": "Success",
     "error": "Error",

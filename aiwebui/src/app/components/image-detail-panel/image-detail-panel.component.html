@@ -3,7 +3,7 @@
     <div *ngIf="isLoading" class="loading-section">
         <div class="placeholder-content">
             <i class="fas fa-spinner fa-spin placeholder-icon"></i>
-            <p>Loading image details...</p>
+            <p>{{ 'imageDetailPanel.loading' | translate }}</p>
         </div>
     </div>
 
@@ -70,14 +70,14 @@
             </div>
 
             <div class="image-prompt" *ngIf="image.prompt">
-                <h3>Prompt:</h3>
+                <h3>{{ 'imageDetailPanel.prompt.label' | translate }}</h3>
                 <p class="prompt-content">{{ image.prompt }}</p>
             </div>
 
             <div class="image-display">
                 <div class="responsive-image-container" [ngClass]="getImageSizeClass()">
                     <img [src]="imageBlobUrl"
-                         [alt]="image.prompt || 'Generated Picture'"
+                         [alt]="image.prompt || ('imageDetailPanel.alt.image' | translate)"
                          (error)="onImageError($event)"
                          loading="lazy"
                          class="responsive-image">
@@ -90,11 +90,11 @@
             <div class="action-buttons">
                 <button type="button" (click)="onDownloadOriginal()" class="action-btn download-btn">
                     <i class="fas fa-download"></i>
-                    <span>Download Original</span>
+                    <span>{{ 'imageDetailPanel.actions.download' | translate }}</span>
                 </button>
                 <button type="button" (click)="onPreview()" class="action-btn preview-btn">
                     <i class="fas fa-expand"></i>
-                    <span>Full Size</span>
+                    <span>{{ 'imageDetailPanel.actions.fullSize' | translate }}</span>
                 </button>
             </div>
     </div>
