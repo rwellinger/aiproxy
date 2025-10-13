@@ -20,7 +20,7 @@
                                     <button
                                             type="button"
                                             class="segment-button"
-                                            [class.active]="!isInstrumental()"
+                                            [class.active]="!isInstrumentalMode"
                                             [disabled]="isLoading"
                                             (click)="setMode('song')">
                                         <i class="fas fa-microphone"></i>
@@ -29,7 +29,7 @@
                                     <button
                                             type="button"
                                             class="segment-button"
-                                            [class.active]="isInstrumental()"
+                                            [class.active]="isInstrumentalMode"
                                             [disabled]="isLoading"
                                             (click)="setMode('instrumental')">
                                         <i class="fas fa-guitar"></i>
@@ -41,14 +41,14 @@
                             <!-- Title Field (always visible, required only for instrumental) -->
                             <div class="form-group">
                                 <label for="title">Title:<span class="required"
-                                                               *ngIf="isInstrumental()"> *</span></label>
+                                                               *ngIf="isInstrumentalMode"> *</span></label>
                                 <div class="prompt-input-group">
                                     <input
                                             id="title"
                                             type="text"
                                             formControlName="title"
                                             placeholder="Enter song title (max 50 characters)..."
-                                            [required]="isInstrumental()"
+                                            [required]="isInstrumentalMode"
                                             maxlength="50"
                                             [disabled]="isLoading"
                                             class="title-input">
@@ -82,20 +82,20 @@
 
                             <div class="form-group">
                                 <label for="lyrics">Lyrics:</label>
-                                <div class="prompt-input-group" [class.disabled-section]="isInstrumental()">
+                                <div class="prompt-input-group" [class.disabled-section]="isInstrumentalMode">
                         <textarea
                                 id="lyrics"
                                 formControlName="lyrics"
                                 placeholder="Type your lyrics or a song idea here..."
-                                [required]="!isInstrumental()"
-                                [disabled]="isLoading || isInstrumental()"
+                                [required]="!isInstrumentalMode"
+                                [disabled]="isLoading || isInstrumentalMode"
                                 class="lyrics-input">
                         </textarea>
                                     <div class="lyrics-dropdown-container">
                                         <button
                                                 type="button"
                                                 (click)="toggleLyricsDropdown()"
-                                                [disabled]="isLoading || isGeneratingLyrics || isTranslatingLyrics || isImprovingPrompt || !songForm.get('lyrics')?.value?.trim() || isInstrumental()"
+                                                [disabled]="isLoading || isGeneratingLyrics || isTranslatingLyrics || isImprovingPrompt || !songForm.get('lyrics')?.value?.trim() || isInstrumentalMode"
                                                 class="magic-icon-button"
                                                 title="Lyrics actions">
                                             <i class="fas fa-ellipsis-vertical"
@@ -103,7 +103,7 @@
                                             <i class="fas fa-spinner fa-spin"
                                                *ngIf="isGeneratingLyrics || isTranslatingLyrics"></i>
                                         </button>
-                                        <div class="dropdown-menu" *ngIf="showLyricsDropdown && !isInstrumental()"
+                                        <div class="dropdown-menu" *ngIf="showLyricsDropdown && !isInstrumentalMode"
                                              (click)="$event.stopPropagation()">
                                             <button
                                                     type="button"
@@ -140,7 +140,7 @@
                                 <div class="lyrics-char-count" *ngIf="songForm.get('lyrics')?.value">
                                     {{ songForm.get('lyrics')?.value?.length || 0 }} characters
                                 </div>
-                                <div class="instrumental-notice" *ngIf="isInstrumental()">
+                                <div class="instrumental-notice" *ngIf="isInstrumentalMode">
                                     <i class="fas fa-info-circle"></i>
                                     Lyrics are disabled for instrumental songs
                                 </div>
@@ -223,7 +223,7 @@
                                         class="create-button">
                                     <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
                                     <i class="fas fa-music" *ngIf="!isLoading"></i>
-                                    {{ isLoading ? 'Creating...' : (isInstrumental() ? 'Create Instrumental' : 'Create Song') }}
+                                    {{ isLoading ? 'Creating...' : (isInstrumentalMode ? 'Create Instrumental' : 'Create Song') }}
                                 </button>
                                 <button type="button" (click)="resetForm()"
                                         [disabled]="isLoading || isImprovingPrompt || isTranslatingLyrics || isGeneratingLyrics || isTranslatingStylePrompt || isGeneratingTitle"

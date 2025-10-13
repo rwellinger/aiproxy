@@ -38,6 +38,7 @@ export class SongGeneratorComponent implements OnInit {
     result = '';
     currentlyPlaying: string | null = null;
     currentSongId: string | null = null;
+    isInstrumentalMode = false; // Computed property to avoid method calls in template
 
     // Audio player state
     audioUrl: string | null = null;
@@ -77,8 +78,12 @@ export class SongGeneratorComponent implements OnInit {
             this.songForm.patchValue(savedData);
         }
 
+        // Initialize isInstrumentalMode property
+        this.isInstrumentalMode = this.songForm.get('isInstrumental')?.value || false;
+
         // Update validators when isInstrumental changes
         this.songForm.get('isInstrumental')?.valueChanges.subscribe(isInstrumental => {
+            this.isInstrumentalMode = isInstrumental; // Update computed property
             this.updateValidators(isInstrumental);
         });
 
@@ -104,6 +109,7 @@ export class SongGeneratorComponent implements OnInit {
 
     resetForm() {
         this.songForm.reset({model: 'auto', isInstrumental: false});
+        this.isInstrumentalMode = false; // Reset computed property
         this.songService.clearFormData();
         this.result = '';
     }
@@ -529,7 +535,7 @@ export class SongGeneratorComponent implements OnInit {
     }
 
     openMusicStyleChooserModal(): void {
-        const isInstrumental = this.isInstrumental();
+        const isInstrumental = this.isInstrumentalMode; // Use property instead of method call
         const dialogRef = this.dialog.open(MusicStyleChooserModalComponent, {
             width: '1100px',
             maxWidth: '95vw',
@@ -642,11 +648,12 @@ export class SongGeneratorComponent implements OnInit {
 
     setMode(mode: 'song' | 'instrumental') {
         const isInstrumental = mode === 'instrumental';
+        this.isInstrumentalMode = isInstrumental; // Update computed property
         this.songForm.patchValue({isInstrumental: isInstrumental});
     }
 
     async generateTitle() {
-        const isInstrumental = this.isInstrumental();
+        const isInstrumental = this.isInstrumentalMode; // Use property instead of method call
         let inputText = '';
 
         // Priority logic: Title > Lyrics (non-instrumental) / Style (instrumental) > Fallback

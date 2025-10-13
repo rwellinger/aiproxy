@@ -130,10 +130,10 @@
           </div>
         </div>
         <div class="token-info">
-          <span class="token-count">{{ getFormattedTokenCount() }} tokens</span>
+          <span class="token-count">{{ formattedTokenCount }} tokens</span>
           <mat-progress-bar
             mode="determinate"
-            [value]="getTokenPercentage()"
+            [value]="tokenPercentage"
             [color]="getTokenProgressColor()"
             class="token-progress">
           </mat-progress-bar>
@@ -175,7 +175,7 @@
       @if (shouldShowCompressionWarning() && !isCompressing) {
         <div class="compression-warning">
           <mat-icon>compress</mat-icon>
-          <span>Memory running low ({{ getTokenPercentage().toFixed(0) }}%)!</span>
+          <span>Memory running low ({{ tokenPercentage.toFixed(0) }}%)!</span>
           <button mat-raised-button color="accent" (click)="compressConversation()" [disabled]="isCompressing">
             Compress Chat
           </button>
@@ -185,7 +185,7 @@
       @if (shouldShowTokenWarning() && !isCompressing) {
         <div class="token-warning">
           <mat-icon>warning</mat-icon>
-          <span>Context window nearly full ({{ getTokenPercentage().toFixed(0) }}%)! Oldest messages may be lost.</span>
+          <span>Context window nearly full ({{ tokenPercentage.toFixed(0) }}%)! Oldest messages may be lost.</span>
           <button mat-raised-button color="warn" (click)="compressConversation()" [disabled]="isCompressing">
             Compress Now
           </button>

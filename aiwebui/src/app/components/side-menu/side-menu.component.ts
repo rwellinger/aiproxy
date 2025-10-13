@@ -19,6 +19,7 @@ export class SideMenuComponent implements OnInit, OnDestroy {
   version = (packageInfo as any).version;
   authState: AuthState | null = null;
   currentUser: User | null = null;
+  firstName = 'Guest'; // Computed property to avoid method calls in template
 
   private destroy$ = new Subject<void>();
   private authService = inject(AuthService);
@@ -30,6 +31,7 @@ export class SideMenuComponent implements OnInit, OnDestroy {
       .subscribe(authState => {
         this.authState = authState;
         this.currentUser = authState.user;
+        this.updateFirstName(); // Update computed property
       });
   }
 
@@ -53,22 +55,30 @@ export class SideMenuComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+   * Update firstName property based on current user
+   * Called when user changes to avoid method calls in template
+   */
+  private updateFirstName(): void {
+    if (!this.currentUser) {
+      this.firstName = 'Guest';
+      return;
+    }
+
+    if (this.currentUser.first_name) {
+      this.firstName = this.currentUser.first_name;
+      return;
+    }
+
+    this.firstName = this.currentUser.email.split('@')[0];
+  }
+
   public getUserDisplayName(): string {
     if (!this.currentUser) return 'Guest';
 
     if (this.currentUser.first_name && this.currentUser.last_name) {
       return `${this.currentUser.first_name} ${this.currentUser.last_name}`;
     }
-
-    if (this.currentUser.first_name) {
-      return this.currentUser.first_name;
-    }
-
-    return this.currentUser.email.split('@')[0];
-  }
-
-  public getFirstName(): string {
-    if (!this.currentUser) return 'Guest';
 
     if (this.currentUser.first_name) {
       return this.currentUser.first_name;

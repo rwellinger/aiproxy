@@ -52,6 +52,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   currentSettings: UserSettings | null = null;
   isLoading = false;
   isEditing = false;
+  userDisplayName = 'Unknown User'; // Computed property to avoid method calls in template
+  availableLanguages: {code: Language, name: string}[] = []; // Computed property to avoid method calls in template
 
   private destroy$ = new Subject<void>();
   private fb = inject(FormBuilder);
@@ -76,6 +78,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.availableLanguages = this.languageService.getAvailableLanguages(); // Initialize once
     this.loadUserProfile();
     this.subscribeToAuthState();
     this.loadUserSettings();
@@ -96,6 +99,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         this.currentUser = authState.user;
         if (this.currentUser) {
           this.updateFormValues();
+          this.updateUserDisplayName();
         }
       });
   }
@@ -112,6 +116,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         next: (user) => {
           this.currentUser = user;
           this.updateFormValues();
+          this.updateUserDisplayName();
           this.isLoading = false;
         },
         error: (error) => {
@@ -203,6 +208,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (updatedUser) => {
             this.currentUser = updatedUser;
+            this.updateUserDisplayName(); // Update display name after save
             this.isEditing = false;
             this.isLoading = false;
           },
@@ -233,20 +239,26 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get user display name
+   * Update userDisplayName property based on current user
+   * Called when user changes to avoid method calls in template
    */
-  public getUserDisplayName(): string {
-    if (!this.currentUser) return 'Unknown User';
+  private updateUserDisplayName(): void {
+    if (!this.currentUser) {
+      this.userDisplayName = 'Unknown User';
+      return;
+    }
 
     if (this.currentUser.first_name && this.currentUser.last_name) {
-      return `${this.currentUser.first_name} ${this.currentUser.last_name}`;
+      this.userDisplayName = `${this.currentUser.first_name} ${this.currentUser.last_name}`;
+      return;
     }
 
     if (this.currentUser.first_name) {
-      return this.currentUser.first_name;
+      this.userDisplayName = this.currentUser.first_name;
+      return;
     }
 
-    return this.currentUser.email.split('@')[0];
+    this.userDisplayName = this.currentUser.email.split('@')[0];
   }
 
   /**

@@ -21,16 +21,21 @@ export class LanguageService {
     const settings = this.settingsService.getCurrentSettings();
     const currentLang = settings.language || 'en';
 
-    this.translateService.setDefaultLang('en');
-    this.translateService.use(currentLang);
+    // Default language is already set in app.config.ts
+    // Subscribe to use() to ensure translation loading completes
+    this.translateService.use(currentLang).subscribe({
+      error: (error) => console.error('Error loading translations:', error)
+    });
   }
 
   /**
    * Change the current language
    */
   public changeLanguage(language: Language): void {
-    this.translateService.use(language);
-    this.settingsService.updateLanguage(language);
+    this.translateService.use(language).subscribe({
+      next: () => this.settingsService.updateLanguage(language),
+      error: (error) => console.error('Error changing language:', error)
+    });
   }
 
   /**

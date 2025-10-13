@@ -81,6 +81,10 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
   editTitleValue = '';
   showArchived = false;
 
+  // Computed properties to avoid method calls in template
+  formattedTokenCount = '';
+  tokenPercentage = 0;
+
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   @ViewChild('messageInputField') private messageInputField!: ElementRef;
 
@@ -176,6 +180,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
           this.messages = response.messages;
           this.currentConversation = response.conversation;
           this.systemContext = response.conversation.system_context || '';
+          this.updateTokenDisplay(); // Update computed properties
           setTimeout(() => this.scrollToBottom(), 100);
         },
         error: (error) => {
@@ -323,6 +328,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
 
           // Update conversation with new token counts
           this.currentConversation = response.conversation;
+          this.updateTokenDisplay(); // Update computed properties
 
           setTimeout(() => this.scrollToBottom(), 100);
           setTimeout(() => this.focusInput(), 200);
@@ -454,28 +460,43 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get token usage percentage
+   * Update token display properties
+   * Called when conversation changes to avoid method calls in template
    */
-  public getTokenPercentage(): number {
-    if (!this.currentConversation?.context_window_size || !this.currentConversation?.current_token_count) return 0;
-    return (this.currentConversation.current_token_count / this.currentConversation.context_window_size) * 100;
-  }
+  private updateTokenDisplay(): void {
+    if (!this.currentConversation?.context_window_size) {
+      this.formattedTokenCount = '';
+      this.tokenPercentage = 0;
+      return;
+    }
 
-  /**
-   * Get formatted token count (e.g., "1.2k / 8k")
-   */
-  public getFormattedTokenCount(): string {
-    if (!this.currentConversation?.context_window_size) return '';
+    // Update percentage
+    const currentTokens = this.currentConversation.current_token_count || 0;
+    const maxTokens = this.currentConversation.context_window_size;
+    this.tokenPercentage = (currentTokens / maxTokens) * 100;
 
+    // Update formatted count
     const format = (num: number): string => {
       if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
       return num.toString();
     };
+    this.formattedTokenCount = `${format(currentTokens)} / ${format(maxTokens)}`;
+  }
 
-    const current = this.currentConversation.current_token_count || 0;
-    const max = this.currentConversation.context_window_size;
+  /**
+   * Get token usage percentage
+   * @deprecated Use tokenPercentage property instead
+   */
+  public getTokenPercentage(): number {
+    return this.tokenPercentage;
+  }
 
-    return `${format(current)} / ${format(max)}`;
+  /**
+   * Get formatted token count (e.g., "1.2k / 8k")
+   * @deprecated Use formattedTokenCount property instead
+   */
+  public getFormattedTokenCount(): string {
+    return this.formattedTokenCount;
   }
 
   /**
