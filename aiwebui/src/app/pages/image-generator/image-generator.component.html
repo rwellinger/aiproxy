@@ -7,7 +7,7 @@
                 <mat-card-content>
                     <div class="image-generator-header">
                         <div class="image-generator-title">
-                            <h2>Create Picture</h2>
+                            <h2>{{ 'imageGenerator.title' | translate }}</h2>
                         </div>
                     </div>
 
@@ -15,13 +15,13 @@
                         <form [formGroup]="promptForm" (ngSubmit)="onSubmit()">
                             <!-- Title Field -->
                             <div class="form-group">
-                                <label for="title">Title:</label>
+                                <label for="title">{{ 'imageGenerator.titleLabel' | translate }}</label>
                                 <div class="prompt-input-group">
                                     <input
                                             id="title"
                                             type="text"
                                             formControlName="title"
-                                            placeholder="Enter picture title (optional, max 50 characters)..."
+                                            [placeholder]="'imageGenerator.titlePlaceholder' | translate"
                                             maxlength="50"
                                             [disabled]="isLoading"
                                             class="title-input">
@@ -31,7 +31,7 @@
                                                 (click)="toggleTitleDropdown()"
                                                 [disabled]="isLoading || isGeneratingTitle"
                                                 class="magic-icon-button"
-                                                title="Title actions">
+                                                [title]="'imageGenerator.titleActions' | translate">
                                             <i class="fas fa-ellipsis-vertical" *ngIf="!isGeneratingTitle"></i>
                                             <i class="fas fa-spinner fa-spin" *ngIf="isGeneratingTitle"></i>
                                         </button>
@@ -43,23 +43,23 @@
                                                     [disabled]="isLoading || isGeneratingTitle"
                                                     (click)="selectTitleAction('generate')">
                                                 <i class="fas fa-wand-magic-sparkles"></i>
-                                                <span>Generate Title</span>
+                                                <span>{{ 'imageGenerator.generateTitle' | translate }}</span>
                                                 <i class="fas fa-spinner fa-spin action-spinner"
                                                    *ngIf="isGeneratingTitle"></i>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="char-counter">{{ promptForm.get('title')?.value?.length || 0 }}/50</div>
+                                <div class="char-counter">{{ 'imageGenerator.charCounter' | translate: {count: promptForm.get('title')?.value?.length || 0} }}</div>
                             </div>
 
                             <div class="form-group">
-                                <label for="prompt">Prompt:</label>
+                                <label for="prompt">{{ 'imageGenerator.promptLabel' | translate }}</label>
                                 <div class="prompt-input-group">
                         <textarea
                                 id="prompt"
                                 formControlName="prompt"
-                                placeholder="Describe the picture you want to create..."
+                                [placeholder]="'imageGenerator.promptPlaceholder' | translate"
                                 required
                                 [disabled]="isLoading"
                                 class="prompt-input">
@@ -70,7 +70,7 @@
                                                 (click)="togglePromptDropdown()"
                                                 [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt || !promptForm.get('prompt')?.value?.trim()"
                                                 class="magic-icon-button"
-                                                title="Picture prompt actions">
+                                                [title]="'imageGenerator.picturePromptActions' | translate">
                                             <i class="fas fa-ellipsis-vertical"
                                                *ngIf="!isImprovingPrompt && !isTranslatingPrompt"></i>
                                             <i class="fas fa-spinner fa-spin"
@@ -84,7 +84,7 @@
                                                     [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt"
                                                     (click)="selectPromptAction('enhance')">
                                                 <i class="fas fa-wand-magic-sparkles"></i>
-                                                <span>Enhance Prompt</span>
+                                                <span>{{ 'imageGenerator.enhancePrompt' | translate }}</span>
                                                 <i class="fas fa-spinner fa-spin action-spinner"
                                                    *ngIf="isImprovingPrompt"></i>
                                             </button>
@@ -94,7 +94,7 @@
                                                     [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt"
                                                     (click)="selectPromptAction('translate')">
                                                 <i class="fas fa-language"></i>
-                                                <span>Translate to English</span>
+                                                <span>{{ 'imageGenerator.translateToEnglish' | translate }}</span>
                                                 <i class="fas fa-spinner fa-spin action-spinner"
                                                    *ngIf="isTranslatingPrompt"></i>
                                             </button>
@@ -104,7 +104,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="size">Picture Size:</label>
+                                <label for="size">{{ 'imageGenerator.sizeLabel' | translate }}</label>
                                 <select id="size" formControlName="size" required [disabled]="isLoading"
                                         class="size-select">
                                     <option value="1024x1024">Square (1024x1024)</option>
@@ -119,19 +119,19 @@
                                         class="create-button">
                                     <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
                                     <i class="fas fa-brain" *ngIf="!isLoading"></i>
-                                    {{ isLoading ? 'Creating...' : 'Create Picture' }}
+                                    {{ isLoading ? ('imageGenerator.creating' | translate) : ('imageGenerator.createButton' | translate) }}
                                 </button>
                                 <button type="button" (click)="resetForm()"
                                         [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt || isGeneratingTitle"
                                         class="reset-button">
-                                    <i class="fas fa-rotate-left"></i> Reset
+                                    <i class="fas fa-rotate-left"></i> {{ 'imageGenerator.resetButton' | translate }}
                                 </button>
                             </div>
 
                             <div *ngIf="isLoading" class="loading-status">
                                 <small class="loading-text">
                                     <i class="fas fa-info-circle"></i>
-                                    Creating your picture - this usually takes 10-30 seconds
+                                    {{ 'imageGenerator.loadingMessage' | translate }}
                                 </small>
                             </div>
                         </form>
@@ -140,7 +140,7 @@
                 <mat-card-actions align="end">
                     <p class="cost-info">
                         <i class="fas fa-info-circle"></i>
-                        Picture generation: ~$0.02 each
+                        {{ 'imageGenerator.costInfo' | translate }}
                     </p>
                 </mat-card-actions>
             </mat-card>
@@ -157,17 +157,17 @@
                             [isGenerating]="isLoading"
                             title=""
                             [showMetaInfo]="['model', 'size']"
-                            placeholderText="Your generated picture will appear here"
+                            [placeholderText]="'imageView.placeholderText' | translate"
                             (titleChanged)="onTitleChanged()">
                     </app-image-detail-panel>
                 </mat-card-content>
                 <mat-card-actions align="end">
                     <div class="detail-actions" *ngIf="generatedImageData">
                         <button mat-button type="button" (click)="onDownloadImage()">
-                            <i class="fas fa-download"></i> Download Original
+                            <i class="fas fa-download"></i> {{ 'imageDetailPanel.actions.download' | translate }}
                         </button>
                         <button mat-button type="button" (click)="onPreviewImage()">
-                            <i class="fas fa-expand"></i> Full Size
+                            <i class="fas fa-expand"></i> {{ 'imageDetailPanel.actions.fullSize' | translate }}
                         </button>
                     </div>
                 </mat-card-actions>
@@ -186,7 +186,7 @@
             </button>
         </div>
         <div class="modal-body">
-            <img [src]="generatedImageBlobUrl" alt="Generated Picture" class="preview-image">
+            <img [src]="generatedImageBlobUrl" [alt]="'imageDetailPanel.alt.image' | translate" class="preview-image">
         </div>
     </div>
 </div>

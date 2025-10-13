@@ -18,6 +18,7 @@
 5. [Building Block View](#5-building-block-view)
    - [5.1 System Overview](#51-system-overview)
    - [5.2 Component Details](#52-component-details)
+     - [5.2.1.1 Internationalization (i18n)](#5211-internationalization-i18n)
 6. [Runtime View](#6-runtime-view)
    - [6.1 Image Generation (Synchronous)](#61-image-generation-synchronous)
    - [6.2 Music Generation (Asynchronous)](#62-music-generation-asynchronous)
@@ -197,8 +198,107 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   ```
 - **Services**: API integration, configuration, prompt management, notifications
 - **Shared Components**: Header, footer, detail panels, audio player, progress overlay
-- **Dependencies**: Angular Material, RxJS, ngx-cookie-service, compromise
+- **Dependencies**: Angular Material, RxJS, ngx-cookie-service, compromise, ngx-translate
 - **Build**: `npm run build:prod` → Deployment to `forwardproxy/html/aiwebui`
+
+##### 5.2.1.1 Internationalization (i18n)
+
+**Technology**: ngx-translate with JSON translation files
+
+**Supported Languages**:
+- `en` - English (default)
+- `de` - Deutsch (German)
+
+**Translation Files Location**:
+```
+src/assets/i18n/
+├── en.json  # English translations
+└── de.json  # German translations
+```
+
+**Key Structure** (Hierarchical, max 3 levels):
+```json
+{
+  "featureName": {
+    "subsection": {
+      "key": "Translated Text"
+    }
+  }
+}
+```
+
+**Adding New Translations:**
+
+1. **Add Translation Keys** to both `en.json` and `de.json`:
+   ```json
+   {
+     "myFeature": {
+       "title": "My Feature Title",
+       "buttons": {
+         "save": "Save",
+         "cancel": "Cancel"
+       },
+       "errors": {
+         "required": "{{field}} is required"
+       }
+     }
+   }
+   ```
+
+2. **Import TranslateModule** in your component:
+   ```typescript
+   import { TranslateModule, TranslateService } from '@ngx-translate/core';
+
+   @Component({
+     standalone: true,
+     imports: [TranslateModule, /* other imports */]
+   })
+   ```
+
+3. **Inject TranslateService** (if needed in TypeScript):
+   ```typescript
+   private translate = inject(TranslateService);
+
+   // Usage example
+   const msg = this.translate.instant('myFeature.errors.required',
+     { field: 'Name' }
+   );
+   ```
+
+4. **Use in Templates**:
+   ```html
+   <!-- Simple translation -->
+   <h1>{{ 'myFeature.title' | translate }}</h1>
+
+   <!-- With parameters -->
+   <p>{{ 'myFeature.errors.required' | translate:{field: 'Email'} }}</p>
+
+   <!-- In attributes -->
+   <input [placeholder]="'myFeature.placeholder' | translate">
+   ```
+
+**Best Practices**:
+- ❌ DON'T hardcode UI text strings
+- ❌ DON'T use flat keys (`buttonSave` instead of `common.buttons.save`)
+- ❌ DON'T forget to update BOTH `en.json` AND `de.json`
+- ❌ DON'T nest deeper than 3 levels
+- ✅ DO use feature-grouped hierarchical keys
+- ✅ DO provide parameter placeholders for dynamic content (`{{variable}}`)
+- ✅ DO test language switching (User Profile → Settings → Language)
+
+**Existing Translation Categories**:
+- `common.*` - Shared UI elements (buttons, labels, etc.)
+- `chat.*` - AI Chat interface
+- `imageGenerator.*` - Image generation page
+- `imageView.*` - Image gallery and details
+- `songGenerator.*` - Song generation page (50+ keys)
+- `songView.*` - Song gallery and details
+- `userProfile.*` - User profile and settings (35+ keys)
+- `nav.*` - Navigation menu items
+- `errors.*` - Global error messages
+
+**Language Switching**:
+Users can change the language in **User Profile → Settings → Language**. The selection is persisted in `UserSettings` and automatically applied on app startup.
 
 #### 5.2.2 aiproxysrv (Backend API)
 - **Technology**: Python Flask + SQLAlchemy + Pydantic

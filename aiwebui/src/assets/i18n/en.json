@@ -1,418 +1,390 @@
 {
-  "common": {
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "edit": "Edit",
-    "create": "Create",
-    "reset": "Reset",
-    "refresh": "Refresh",
-    "loading": "Loading...",
-    "search": "Search",
-    "filter": "Filter",
-    "actions": "Actions",
-    "close": "Close",
-    "confirm": "Confirm",
-    "download": "Download",
-    "copy": "Copy",
-    "play": "Play",
-    "pause": "Pause",
-    "stop": "Stop"
-  },
-  "sideMenu": {
-    "brandName": "thWelly's AI Toolbox",
-    "aiChat": "AI Chat",
-    "ollamaChat": "Ollama Chat",
-    "openaiChat": "OpenAI Chat",
-    "picture": "Picture",
-    "gallery": "Gallery",
-    "createImage": "Create",
-    "music": "Music",
-    "library": "Library",
-    "createSong": "Create",
-    "external": "External",
-    "aiUsage": "AI Usage",
-    "humanize": "Humanize",
-    "settings": "Settings",
-    "promptTemplates": "Prompt Templates",
-    "profile": "Profile",
-    "logout": "Logout",
-    "login": "Login"
-  },
-  "songGenerator": {
-    "title": "Create Song",
-    "withLyrics": "With Lyrics",
-    "instrumental": "Instrumental",
-    "titleLabel": "Title:",
-    "titlePlaceholder": "Enter song title (max 50 characters)...",
-    "lyricsLabel": "Lyrics:",
-    "lyricsPlaceholder": "Type your lyrics or a song idea here...",
-    "musicStyleLabel": "Music Style Prompt:",
-    "musicStylePlaceholder": "Describe the music style (e.g., upbeat pop, melancholic ballad, rock anthem)...",
-    "modelLabel": "Model:",
-    "createButton": "Create Song",
-    "createInstrumental": "Create Instrumental",
-    "creating": "Creating...",
-    "resetButton": "Reset",
-    "costInfo": "Song generation: ~$0.15 each",
-    "titleActions": "Title actions",
-    "generateTitle": "Generate Title",
-    "lyricsActions": "Lyrics actions",
-    "lyricArchitecture": "Lyric Architecture",
-    "createLyrics": "Create Lyrics",
-    "translateToEnglish": "Translate to English",
-    "musicStyleActions": "Music style actions",
-    "styleChooser": "Style Chooser",
-    "enhanceStylePrompt": "Enhance Style Prompt",
-    "instrumentalNotice": "Lyrics are disabled for instrumental songs",
-    "charactersCount": "characters",
-    "loadingMessage": "This may take several minutes",
-    "charCounter": "{{count}}/50"
-  },
-  "songView": {
-    "title": "Song Library",
-    "library": {
-      "header": "Available Songs",
-      "songsCount": "{{count}} songs",
-      "searchPlaceholder": "Search in titles, lyrics & tags...",
-      "clearSearch": "Clear search"
-    },
-    "filters": {
-      "all": "All",
-      "inUse": "In Use",
-      "onWork": "On Work",
-      "notUsed": "Not Used"
-    },
-    "table": {
-      "title": "Title",
-      "model": "Model",
-      "status": "Status",
-      "workflow": "Workflow",
-      "rating": "Rating",
-      "created": "Created",
-      "actions": "Actions"
-    },
-    "actions": {
-      "playAudio": "Play Audio",
-      "downloadFlac": "Download FLAC",
-      "downloadMp3": "Download MP3",
-      "downloadStems": "Download Stems",
-      "copyLyrics": "Copy Lyrics",
-      "delete": "Delete",
-      "selectAll": "Select All",
-      "deselectAll": "Deselect All",
-      "deleteCount": "Delete ({{count}})",
-      "refresh": "Refresh",
-      "selectMode": "Select Mode",
-      "exitSelect": "Exit Select",
-      "stop": "Stop",
-      "playPause": "Play/Pause",
-      "copyAll": "Copy All",
-      "close": "Close"
-    },
-    "messages": {
-      "noSongsInDb": "No songs found in the database.",
-      "noSearchResults": "No songs match your search criteria.",
-      "adjustSearch": "Try adjusting your search term or clear the search to see all songs.",
-      "loadingSongs": "Loading songs...",
-      "noLyrics": "No lyrics",
-      "noLyricsAvailable": "No lyrics available",
-      "noStylePrompt": "No style prompt available",
-      "noTags": "No tags",
-      "untitledSong": "Untitled Song",
-      "untitled": "Untitled",
-      "unknownSong": "Unknown Song",
-      "noSongSelected": "No song selected",
-      "selectSongPlaceholder": "Select a song from the list to view details"
-    },
-    "dialogs": {
-      "lyricsTitle": "Lyrics - {{title}}",
-      "stylePromptTitle": "Style Prompt - {{title}}"
-    },
-    "errors": {
-      "loadingSongs": "Error loading songs: {{error}}",
-      "loadingMore": "Error loading more songs: {{error}}",
-      "updatingTitle": "Error updating title: {{error}}",
-      "updatingTags": "Error updating tags: {{error}}",
-      "updatingWorkflow": "Error updating workflow: {{error}}",
-      "updatingRating": "Error updating rating: {{error}}",
-      "deletingSongs": "Error deleting songs: {{error}}",
-      "copyFailed": "Failed to copy to clipboard",
-      "copyLyricsFailed": "Failed to copy lyrics to clipboard",
-      "noSongsSelected": "No songs selected for deletion",
-      "cannotSelectProtected": "Cannot select songs with {{workflow}} workflow for deletion",
-      "cannotDeleteProtected": "Cannot delete songs with {{workflow}} workflow: {{songs}}"
-    },
-    "tooltips": {
-      "inUseNoDelete": "This song is In Use and cannot be deleted",
-      "onWorkNoDelete": "This song is On Work and cannot be deleted",
-      "cannotDeleteInUse": "Cannot delete songs with In Use workflow",
-      "cannotDeleteOnWork": "Cannot delete songs with On Work workflow",
-      "cannotDelete": "Cannot delete this song",
-      "instrumental": "Instrumental",
-      "withVocals": "With Vocals"
-    },
-    "confirmations": {
-      "bulkDelete": "Are you sure you want to delete {{count}} selected song(s)?"
-    },
-    "bulkDelete": {
-      "completed": "Bulk delete completed: {{deleted}} deleted",
-      "notFound": "{{count}} not found",
-      "errors": "{{count}} errors"
-    },
-    "placeholderText": "Your generated song will appear here",
-    "noSongs": "No songs found",
-    "pagination": {
-      "itemsPerPage": "Items per page:",
-      "of": "of"
-    }
-  },
-  "imageGenerator": {
-    "title": "Create Image",
-    "promptLabel": "Image Prompt:",
-    "promptPlaceholder": "Describe the image you want to generate...",
-    "sizeLabel": "Size:",
-    "modelLabel": "Model:",
-    "createButton": "Create Image",
-    "creating": "Creating...",
-    "resetButton": "Reset",
-    "costInfo": "Image generation: ~$0.05 each"
-  },
-  "imageView": {
-    "title": "Image Gallery",
-    "gallery": {
-      "header": "Available Pictures",
-      "itemsCount": "{{count}} items",
-      "searchPlaceholder": "Search in titles and prompts...",
-      "clearSearch": "Clear search"
-    },
-    "table": {
-      "preview": "Preview",
-      "title": "Title",
-      "model": "Model",
-      "size": "Size",
-      "status": "Status",
-      "created": "Created",
-      "actions": "Actions"
-    },
-    "actions": {
-      "view": "View",
-      "download": "Download",
-      "delete": "Delete",
-      "selectAll": "Select All",
-      "deselectAll": "Deselect All",
-      "deleteCount": "Delete ({{count}})",
-      "refresh": "Refresh",
-      "selectMode": "Select Mode",
-      "exitSelect": "Exit Select",
-      "downloadOriginal": "Download Original",
-      "fullSize": "Full Size"
-    },
-    "messages": {
-      "noImagesInDb": "No pictures found in the database.",
-      "noSearchResults": "No pictures match your search criteria.",
-      "adjustSearch": "Try adjusting your search term or clear the search to see all images.",
-      "loadingImages": "Loading pictures...",
-      "selectImagePlaceholder": "Select an image from the list to view details"
-    },
-    "errors": {
-      "loadingImages": "Error loading images: {{error}}",
-      "deletingImages": "Error deleting images: {{error}}",
-      "updatingTitle": "Error updating title: {{error}}",
-      "noImagesSelected": "No images selected for deletion"
-    },
-    "confirmations": {
-      "bulkDelete": "Are you sure you want to delete {{count}} selected image(s)?"
-    },
-    "bulkDelete": {
-      "completed": "Bulk delete completed: {{deleted}} deleted",
-      "notFound": "{{count}} not found",
-      "errors": "{{count}} errors"
-    },
-    "noImages": "No images found",
-    "placeholderText": "Your generated image will appear here"
-  },
-  "userProfile": {
-    "title": "User Profile",
-    "accountInfo": "Account Information",
-    "memberSince": "Member since:",
-    "lastLogin": "Last login:",
-    "active": "Active",
-    "inactive": "Inactive",
-    "verified": "Verified",
-    "notVerified": "Not verified",
-    "firstName": "First Name",
-    "firstNamePlaceholder": "Enter first name",
-    "lastName": "Last Name",
-    "lastNamePlaceholder": "Enter last name",
-    "email": "Email",
-    "emailHint": "Email cannot be changed",
-    "userSettings": "User Settings",
-    "songsPerPage": "Songs per page",
-    "songsPerPageHint": "5-100 songs per page",
-    "imagesPerPage": "Images per page",
-    "imagesPerPageHint": "5-100 images per page",
-    "language": "Language",
-    "languageHint": "Select your preferred language",
-    "resetToDefaults": "Reset to Defaults",
-    "changePassword": "Change Password",
-    "saveButton": "Save",
-    "saving": "Saving...",
-    "editButton": "Edit",
-    "cancelButton": "Cancel",
-    "loadingProfile": "Loading profile...",
-    "murekaAccount": "Mureka Account",
-    "refreshButton": "Refresh"
-  },
-  "auth": {
-    "loginTitle": "Login",
-    "logoutConfirm": "Are you sure you want to logout?",
-    "email": "Email",
-    "password": "Password",
-    "loginButton": "Login",
-    "loggingIn": "Logging in..."
-  },
   "aiChat": {
-    "title": "Ollama Chat (Internal)",
-    "sidebar": {
-      "showActive": "Show active chats",
-      "showArchive": "Show archive",
-      "newChat": "New Chat",
-      "noConversations": "No conversations yet",
-      "getStarted": "Create one to get started!",
-      "messagesCount": "{{count}} messages"
-    },
-    "form": {
-      "title": "Title",
-      "titlePlaceholder": "Chat title",
-      "model": "Model",
-      "systemContext": "System Context",
-      "systemContextOptional": "System Context (Optional)",
-      "systemContextPlaceholder": "Set system behavior...",
-      "systemContextHint": "Automatically saved to browser",
-      "clearSystemContext": "Clear System Context"
-    },
-    "conversation": {
-      "noSelection": "No conversation selected",
-      "noSelectionHint": "Select a conversation from the list or create a new one",
-      "conversationTitle": "Conversation title",
-      "tokens": "tokens",
-      "editTitle": "Edit title"
-    },
     "actions": {
+      "archive": "Archive",
+      "delete": "Delete conversation",
       "export": "Export",
       "exportChat": "Export chat",
       "exportWithHistory": "Export (with History)",
-      "archive": "Archive",
-      "unarchive": "Unarchive",
-      "delete": "Delete conversation"
-    },
-    "messages": {
-      "thinking": "Thinking...",
-      "copyPlainText": "Copy as plain text",
-      "copyMarkdown": "Copy as Markdown",
-      "sendPlaceholder": "Type your message... (Enter to send, Shift+Enter for new line)",
-      "send": "Send",
-      "archived": "This conversation is archived. Messages cannot be sent."
+      "unarchive": "Unarchive"
     },
     "compression": {
-      "compressing": "Compressing conversation... Creating AI summary...",
-      "memoryLow": "Memory running low ({{percent}}%)!",
       "compressChat": "Compress Chat",
-      "contextFull": "Context window nearly full ({{percent}}%)! Oldest messages may be lost.",
       "compressNow": "Compress Now",
-      "confirmMessage": "Older messages will be archived and replaced with an AI summary.\n\n✓ Chat can continue\n✓ Export includes full history\n✓ System context preserved"
+      "compressing": "Compressing conversation... Creating AI summary...",
+      "confirmMessage": "Older messages will be archived and replaced with an AI summary.\n\n✓ Chat can continue\n✓ Export includes full history\n✓ System context preserved",
+      "contextFull": "Context window nearly full ({{percent}}%)! Oldest messages may be lost.",
+      "memoryLow": "Memory running low ({{percent}}%)!"
+    },
+    "conversation": {
+      "conversationTitle": "Conversation title",
+      "editTitle": "Edit title",
+      "noSelection": "No conversation selected",
+      "noSelectionHint": "Select a conversation from the list or create a new one",
+      "tokens": "tokens"
+    },
+    "form": {
+      "clearSystemContext": "Clear System Context",
+      "model": "Model",
+      "systemContext": "System Context",
+      "systemContextHint": "Automatically saved to browser",
+      "systemContextOptional": "System Context (Optional)",
+      "systemContextPlaceholder": "Set system behavior...",
+      "title": "Title",
+      "titlePlaceholder": "Chat title"
+    },
+    "messages": {
+      "archived": "This conversation is archived. Messages cannot be sent.",
+      "copyMarkdown": "Copy as Markdown",
+      "copyPlainText": "Copy as plain text",
+      "send": "Send",
+      "sendPlaceholder": "Type your message... (Enter to send, Shift+Enter for new line)",
+      "thinking": "Thinking..."
+    },
+    "notifications": {
+      "archiveFailed": "Failed to archive conversation",
+      "archived": "Conversation archived",
+      "compressed": "Chat compressed: {{count}} messages archived",
+      "compressionFailed": "Compression failed",
+      "conversationFailed": "Failed to load conversation",
+      "conversationsFailed": "Failed to load conversations",
+      "copiedMarkdown": "Copied as Markdown",
+      "copiedPlainText": "Copied as plain text",
+      "copyFailed": "Failed to copy to clipboard",
+      "createFailed": "Failed to create conversation",
+      "deleteConfirm": "Delete conversation \"{{title}}\"?",
+      "deleteFailed": "Failed to delete conversation",
+      "exportFailed": "Failed to export chat",
+      "exportFullFailed": "Failed to export full chat history",
+      "exported": "Chat exported as Markdown",
+      "exportedFull": "Full chat history exported as Markdown",
+      "modelsFailed": "Failed to load models",
+      "sendFailed": "Failed to send message",
+      "titleModelRequired": "Please provide a title and select a model",
+      "titleUpdateFailed": "Failed to update title",
+      "unarchiveFailed": "Failed to unarchive conversation",
+      "unarchived": "Conversation unarchived"
+    },
+    "sidebar": {
+      "getStarted": "Create one to get started!",
+      "messagesCount": "{{count}} messages",
+      "newChat": "New Chat",
+      "noConversations": "No conversations yet",
+      "showActive": "Show active chats",
+      "showArchive": "Show archive"
     },
     "time": {
       "justNow": "just now",
       "minAgo": "{{min}} min ago",
       "yesterday": "Yesterday"
     },
-    "notifications": {
-      "modelsFailed": "Failed to load models",
-      "conversationsFailed": "Failed to load conversations",
-      "conversationFailed": "Failed to load conversation",
-      "titleModelRequired": "Please provide a title and select a model",
-      "createFailed": "Failed to create conversation",
-      "deleteConfirm": "Delete conversation \"{{title}}\"?",
-      "deleteFailed": "Failed to delete conversation",
-      "sendFailed": "Failed to send message",
-      "titleUpdateFailed": "Failed to update title",
-      "copiedPlainText": "Copied as plain text",
-      "copiedMarkdown": "Copied as Markdown",
-      "copyFailed": "Failed to copy to clipboard",
-      "exported": "Chat exported as Markdown",
-      "exportFailed": "Failed to export chat",
-      "exportedFull": "Full chat history exported as Markdown",
-      "exportFullFailed": "Failed to export full chat history",
-      "compressed": "Chat compressed: {{count}} messages archived",
-      "compressionFailed": "Compression failed",
-      "archived": "Conversation archived",
-      "unarchived": "Conversation unarchived",
-      "archiveFailed": "Failed to archive conversation",
-      "unarchiveFailed": "Failed to unarchive conversation"
-    }
+    "title": "Ollama Chat (Internal)"
+  },
+  "auth": {
+    "email": "Email",
+    "loggingIn": "Logging in...",
+    "loginButton": "Login",
+    "loginTitle": "Login",
+    "logoutConfirm": "Are you sure you want to logout?",
+    "password": "Password"
+  },
+  "authInterceptor": {
+    "sessionExpired": "Session expired. Please log in again.",
+    "sessionTimeout": "Session validation timeout. Please log in again."
+  },
+  "common": {
+    "actions": "Actions",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "copy": "Copy",
+    "create": "Create",
+    "delete": "Delete",
+    "download": "Download",
+    "edit": "Edit",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "pause": "Pause",
+    "play": "Play",
+    "refresh": "Refresh",
+    "reset": "Reset",
+    "save": "Save",
+    "search": "Search",
+    "stop": "Stop"
+  },
+  "detailPanel": {
+    "addTag": "Add tag...",
+    "completed": "Completed",
+    "created": "Created",
+    "imageDetails": "Image Details",
+    "jobId": "Job ID",
+    "lyrics": "Lyrics",
+    "model": "Model",
+    "noLyrics": "No lyrics available",
+    "noTags": "No tags",
+    "prompt": "Prompt",
+    "rating": "Rating",
+    "songDetails": "Song Details",
+    "status": "Status",
+    "tags": "Tags",
+    "title": "Title",
+    "workflow": "Workflow"
+  },
+  "errors": {
+    "loadingError": "Error loading data",
+    "maxLength": "Must be at most {{length}} characters",
+    "minLength": "Must be at least {{length}} characters",
+    "networkError": "Network error occurred",
+    "required": "This field is required",
+    "savingError": "Error saving data"
+  },
+  "imageDetailPanel": {
+    "actions": {
+      "download": "Download Original",
+      "fullSize": "Full Size"
+    },
+    "alt": {
+      "image": "Generated Picture"
+    },
+    "errors": {
+      "failedToLoad": "Failed to load image",
+      "loadImage": "Error loading image details",
+      "updateTitle": "Error updating title"
+    },
+    "loading": "Loading image details...",
+    "placeholder": "Select an image from the list to view details",
+    "prompt": {
+      "label": "Prompt:"
+    },
+    "title": "Image Details",
+    "untitled": "Untitled Image"
+  },
+  "imageGenerator": {
+    "charCounter": "{{count}}/50",
+    "costInfo": "Image generation: ~$0.05 each",
+    "createButton": "Create Image",
+    "creating": "Creating...",
+    "enhancePrompt": "Enhance Prompt",
+    "errors": {
+      "promptRequired": "Please enter a prompt first"
+    },
+    "generateTitle": "Generate Title",
+    "generateTitleFallback": "Generate a creative image title",
+    "loadingMessage": "Creating your picture - this usually takes 10-30 seconds",
+    "modelLabel": "Model:",
+    "picturePromptActions": "Picture prompt actions",
+    "progress": {
+      "enhancing": "Enhancing Prompt...",
+      "enhancinghint": "AI is improving your image prompt",
+      "generatingTitle": "Generating Title...",
+      "generatingTitleHint": "AI is creating an image title for you",
+      "translating": "Translating Prompt...",
+      "translatingHint": "AI is translating your prompt to English"
+    },
+    "promptLabel": "Prompt:",
+    "promptPlaceholder": "Describe the picture you want to create...",
+    "resetButton": "Reset",
+    "sizeLabel": "Picture Size:",
+    "title": "Create Picture",
+    "titleActions": "Title actions",
+    "titleLabel": "Title:",
+    "titlePlaceholder": "Enter picture title (optional, max 50 characters)...",
+    "translateToEnglish": "Translate to English"
+  },
+  "imageView": {
+    "actions": {
+      "delete": "Delete",
+      "deleteCount": "Delete ({{count}})",
+      "deselectAll": "Deselect All",
+      "download": "Download",
+      "downloadOriginal": "Download Original",
+      "exitSelect": "Exit Select",
+      "fullSize": "Full Size",
+      "refresh": "Refresh",
+      "selectAll": "Select All",
+      "selectMode": "Select Mode",
+      "view": "View"
+    },
+    "bulkDelete": {
+      "completed": "Bulk delete completed: {{deleted}} deleted",
+      "errors": "{{count}} errors",
+      "notFound": "{{count}} not found"
+    },
+    "confirmations": {
+      "bulkDelete": "Are you sure you want to delete {{count}} selected image(s)?"
+    },
+    "errors": {
+      "deletingImages": "Error deleting images: {{error}}",
+      "loadingImages": "Error loading images: {{error}}",
+      "noImagesSelected": "No images selected for deletion",
+      "updatingTitle": "Error updating title: {{error}}"
+    },
+    "gallery": {
+      "clearSearch": "Clear search",
+      "header": "Available Pictures",
+      "itemsCount": "{{count}} items",
+      "searchPlaceholder": "Search in titles and prompts..."
+    },
+    "messages": {
+      "adjustSearch": "Try adjusting your search term or clear the search to see all images.",
+      "loadingImages": "Loading pictures...",
+      "noImagesInDb": "No pictures found in the database.",
+      "noSearchResults": "No pictures match your search criteria.",
+      "selectImagePlaceholder": "Select an image from the list to view details"
+    },
+    "noImages": "No images found",
+    "placeholderText": "Your generated image will appear here",
+    "table": {
+      "actions": "Actions",
+      "created": "Created",
+      "model": "Model",
+      "preview": "Preview",
+      "size": "Size",
+      "status": "Status",
+      "title": "Title"
+    },
+    "title": "Image Gallery"
+  },
+  "lyricArchitect": {
+    "buttons": {
+      "apply": "Apply Architecture",
+      "reset": "Reset"
+    },
+    "messages": {
+      "removeError": "Error removing section: {{message}}",
+      "resetSuccess": "Song architecture reset to default",
+      "saveError": "Error saving configuration: {{message}}",
+      "updateError": "Error updating configuration: {{message}}"
+    },
+    "panels": {
+      "availableSections": "Available Sections",
+      "songStructure": "Song Structure"
+    },
+    "preview": {
+      "label": "Preview:"
+    },
+    "sections": {
+      "alreadyAdded": "Already added",
+      "usedMultiple": "Used {{count}} times",
+      "usedOnce": "Used {{count}} time"
+    },
+    "structure": {
+      "empty": "Drag sections here to build your song structure",
+      "removeSection": "Remove section"
+    },
+    "title": "Lyric Architecture"
+  },
+  "musicStyleChooser": {
+    "buttons": {
+      "apply": "Apply Styles",
+      "reset": "Reset",
+      "resetTitle": "Reset all selections"
+    },
+    "categories": {
+      "instruments": "INSTRUMENTS (select multiple)",
+      "styles": "STYLES (select multiple)",
+      "themes": "THEMES (select multiple)"
+    },
+    "messages": {
+      "resetSuccess": "Music style selection reset",
+      "saveError": "Error saving configuration: {{message}}",
+      "voiceRequired": "Please select either male or female voice for lyrics mode"
+    },
+    "preview": {
+      "empty": "No styles, instruments, or themes selected",
+      "title": "Preview"
+    },
+    "summary": {
+      "empty": "No selection",
+      "instrument": "instrument",
+      "instruments": "instruments",
+      "selected": "selected",
+      "style": "style",
+      "styles": "styles",
+      "theme": "theme",
+      "themes": "themes"
+    },
+    "title": "Music Style Chooser"
+  },
+  "notifications": {
+    "copied": "Copied to clipboard",
+    "deleted": "Deleted successfully",
+    "error": "Error",
+    "imageCreated": "Image created successfully",
+    "info": "Info",
+    "passwordChanged": "Password changed successfully",
+    "profileUpdated": "Profile updated successfully",
+    "settingsUpdated": "Settings updated successfully",
+    "songCreated": "Song created successfully",
+    "success": "Success",
+    "warning": "Warning"
   },
   "openaiChat": {
     "title": "OpenAI Chat (External)"
   },
   "passwordChangeModal": {
-    "title": "Change Password",
-    "fields": {
-      "currentPassword": "Current password",
-      "newPassword": "New password",
-      "confirmPassword": "Confirm password"
-    },
-    "placeholders": {
-      "currentPassword": "Enter your current password",
-      "newPassword": "Enter your new password",
-      "confirmPassword": "Repeat your new password"
+    "actions": {
+      "changePassword": "Change Password",
+      "changing": "Changing..."
     },
     "aria": {
-      "showPassword": "Show password",
-      "hidePassword": "Hide password"
+      "hidePassword": "Hide password",
+      "showPassword": "Show password"
     },
     "errors": {
-      "required": "{{field}} is required",
       "minLength": "{{field}} must be at least 6 characters long",
-      "passwordMismatch": "Passwords do not match"
+      "passwordMismatch": "Passwords do not match",
+      "required": "{{field}} is required"
+    },
+    "fields": {
+      "confirmPassword": "Confirm password",
+      "currentPassword": "Current password",
+      "newPassword": "New password"
     },
     "info": {
       "requirement": "Password must be at least 6 characters long."
     },
-    "actions": {
-      "changing": "Changing...",
-      "changePassword": "Change Password"
-    },
     "notifications": {
-      "success": "Password changed successfully",
-      "error": "Error changing password"
-    }
-  },
-  "songProfile": {
-    "title": "Profile Controls",
-    "actions": {
-      "refresh": "Refresh Account Info"
+      "error": "Error changing password",
+      "success": "Password changed successfully"
     },
-    "account": {
-      "title": "Account Information",
-      "murekaAccount": "Mureka Account",
-      "currentBalance": "Current Balance",
-      "totalSpending": "Total Spending",
-      "totalRecharge": "Total Recharge",
-      "requestLimit": "Request Limit",
-      "concurrentRequests": "concurrent requests"
+    "placeholders": {
+      "confirmPassword": "Repeat your new password",
+      "currentPassword": "Enter your current password",
+      "newPassword": "Enter your new password"
     },
-    "empty": {
-      "title": "No Account Information Available",
-      "description": "Unable to load account information. Please try refreshing or check your connection."
-    },
-    "notifications": {
-      "loadError": "Error loading billing info"
-    }
+    "title": "Change Password"
   },
   "promptTemplates": {
-    "title": "Prompt Templates",
+    "actions": {
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "save": "Save"
+    },
+    "detail": {
+      "aiParameters": "AI Parameters",
+      "defaults": {
+        "maxTokens": "Default (2048)",
+        "model": "Default (llama3.2:3b)",
+        "noDescription": "No description",
+        "temperature": "Default (0.7)"
+      },
+      "fields": {
+        "description": "Description",
+        "maxTokens": "Max Tokens",
+        "model": "Model",
+        "postCondition": "Post-condition",
+        "preCondition": "Pre-condition",
+        "temperature": "Temperature"
+      },
+      "noSelection": "Select a template to view details",
+      "placeholders": {
+        "description": "Enter description...",
+        "postCondition": "Enter post-condition...",
+        "preCondition": "Enter pre-condition..."
+      },
+      "tokensHint": "(approx. {{words}} words)"
+    },
     "list": {
       "count": "{{count}} templates",
       "noTemplates": "No templates available",
@@ -422,236 +394,349 @@
         "inactive": "Inactive"
       }
     },
-    "detail": {
-      "noSelection": "Select a template to view details",
-      "aiParameters": "AI Parameters",
-      "tokensHint": "(approx. {{words}} words)",
-      "fields": {
-        "description": "Description",
-        "model": "Model",
-        "temperature": "Temperature",
-        "maxTokens": "Max Tokens",
-        "preCondition": "Pre-condition",
-        "postCondition": "Post-condition"
-      },
-      "defaults": {
-        "noDescription": "No description",
-        "model": "Default (llama3.2:3b)",
-        "temperature": "Default (0.7)",
-        "maxTokens": "Default (2048)"
-      },
-      "placeholders": {
-        "description": "Enter description...",
-        "preCondition": "Enter pre-condition...",
-        "postCondition": "Enter post-condition..."
-      }
-    },
-    "actions": {
-      "edit": "Edit",
-      "save": "Save",
-      "cancel": "Cancel"
-    },
     "notifications": {
-      "loading": "Loading prompt templates...",
-      "saving": "Saving template...",
       "loadError": "Error loading templates: {{message}}",
-      "saveError": "Error saving template: {{message}}"
-    }
+      "loading": "Loading prompt templates...",
+      "saveError": "Error saving template: {{message}}",
+      "saving": "Saving template..."
+    },
+    "title": "Prompt Templates"
   },
-  "musicStyleChooser": {
-    "title": "Music Style Chooser",
-    "categories": {
-      "styles": "STYLES (select multiple)",
-      "instruments": "INSTRUMENTS (select multiple)",
-      "themes": "THEMES (select multiple)"
-    },
-    "preview": {
-      "title": "Preview",
-      "empty": "No styles, instruments, or themes selected"
-    },
-    "summary": {
-      "empty": "No selection",
-      "selected": "selected",
-      "style": "style",
-      "styles": "styles",
-      "instrument": "instrument",
-      "instruments": "instruments",
-      "theme": "theme",
-      "themes": "themes"
-    },
-    "buttons": {
-      "reset": "Reset",
-      "resetTitle": "Reset all selections",
-      "apply": "Apply Styles"
-    },
-    "messages": {
-      "resetSuccess": "Music style selection reset",
-      "voiceRequired": "Please select either male or female voice for lyrics mode",
-      "saveError": "Error saving configuration: {{message}}"
-    }
-  },
-  "lyricArchitect": {
-    "title": "Lyric Architecture",
-    "panels": {
-      "songStructure": "Song Structure",
-      "availableSections": "Available Sections"
-    },
-    "preview": {
-      "label": "Preview:"
-    },
-    "structure": {
-      "empty": "Drag sections here to build your song structure",
-      "removeSection": "Remove section"
-    },
-    "sections": {
-      "alreadyAdded": "Already added",
-      "usedOnce": "Used {{count}} time",
-      "usedMultiple": "Used {{count}} times"
-    },
-    "buttons": {
-      "reset": "Reset",
-      "apply": "Apply Architecture"
-    },
-    "messages": {
-      "resetSuccess": "Song architecture reset to default",
-      "removeError": "Error removing section: {{message}}",
-      "saveError": "Error saving configuration: {{message}}",
-      "updateError": "Error updating configuration: {{message}}"
-    }
-  },
-  "detailPanel": {
-    "songDetails": "Song Details",
-    "imageDetails": "Image Details",
-    "title": "Title",
-    "lyrics": "Lyrics",
-    "prompt": "Prompt",
-    "model": "Model",
-    "status": "Status",
-    "workflow": "Workflow",
-    "rating": "Rating",
-    "jobId": "Job ID",
-    "created": "Created",
-    "completed": "Completed",
-    "tags": "Tags",
-    "addTag": "Add tag...",
-    "noLyrics": "No lyrics available",
-    "noTags": "No tags"
+  "sideMenu": {
+    "aiChat": "AI Chat",
+    "aiUsage": "AI Usage",
+    "brandName": "thWelly's AI Toolbox",
+    "createImage": "Create",
+    "createSong": "Create",
+    "external": "External",
+    "gallery": "Gallery",
+    "humanize": "Humanize",
+    "library": "Library",
+    "login": "Login",
+    "logout": "Logout",
+    "music": "Music",
+    "ollamaChat": "Ollama Chat",
+    "openaiChat": "OpenAI Chat",
+    "picture": "Picture",
+    "profile": "Profile",
+    "promptTemplates": "Prompt Templates",
+    "settings": "Settings"
   },
   "songDetailPanel": {
-    "loading": "Loading song details...",
-    "selectSong": "Select a song from the list to view details",
-    "untitled": "Untitled Song",
-    "title": {
-      "edit": "Edit",
-      "save": "Save",
-      "cancel": "Cancel"
-    },
-    "tags": {
-      "label": "Tags:",
-      "noTags": "No tags",
-      "editTitle": "Edit Tags:",
-      "styleCategory": "Style",
-      "themeCategory": "Theme"
-    },
-    "workflow": {
-      "label": "Workflow:",
-      "editTitle": "Edit Workflow:",
-      "noWorkflow": "No Workflow",
-      "inUse": "In Use",
-      "onWork": "On Work",
-      "notUsed": "Not Used"
-    },
     "choices": {
-      "title": "Song Choices:",
-      "noChoices": "No song choices available for this song.",
+      "downloadFlac": "Download FLAC",
+      "downloadStems": "Download Stems",
       "duration": "Duration",
       "flacFile": "FLAC File",
-      "mp3File": "MP3 File",
-      "stemGeneration": "Stem Generation",
-      "rating": "Rating",
-      "downloadFlac": "Download FLAC",
-      "play": "Play",
-      "playing": "Playing",
       "generateStems": "Generate Stems",
       "generating": "Generating...",
-      "downloadStems": "Download Stems",
+      "mp3File": "MP3 File",
+      "noChoices": "No song choices available for this song.",
       "notAvailable": "N/A",
+      "play": "Play",
+      "playing": "Playing",
+      "rating": "Rating",
+      "stemGeneration": "Stem Generation",
+      "thumbsDown": "Thumbs Down",
       "thumbsUp": "Thumbs Up",
-      "thumbsDown": "Thumbs Down"
+      "title": "Song Choices:"
     },
+    "errors": {
+      "generateStem": "Error generating stem",
+      "loadSong": "Failed to load song",
+      "loadSongDetails": "Error loading song details",
+      "stemFailed": "Stem generation failed or incomplete.",
+      "stemTimeout": "Timeout after 2 minutes",
+      "updateRating": "Error updating rating",
+      "updateTags": "Error updating tags",
+      "updateTitle": "Error updating title",
+      "updateWorkflow": "Error updating workflow"
+    },
+    "loading": "Loading song details...",
     "lyrics": {
-      "label": "Lyrics:",
-      "showButton": "Show Lyrics",
-      "dialogTitle": "Lyrics - {{title}}",
+      "characters": "characters",
       "copyAll": "Copy All",
-      "characters": "characters"
+      "dialogTitle": "Lyrics - {{title}}",
+      "label": "Lyrics:",
+      "showButton": "Show Lyrics"
     },
     "prompt": {
       "label": "Style Prompt:"
+    },
+    "selectSong": "Select a song from the list to view details",
+    "tags": {
+      "editTitle": "Edit Tags:",
+      "label": "Tags:",
+      "noTags": "No tags",
+      "styleCategory": "Style",
+      "themeCategory": "Theme"
+    },
+    "title": {
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "save": "Save"
     },
     "type": {
       "instrumental": "Instrumental",
       "withVocals": "With Vocals"
     },
-    "errors": {
-      "updateTitle": "Error updating title",
-      "updateTags": "Error updating tags",
-      "updateWorkflow": "Error updating workflow",
-      "generateStem": "Error generating stem",
-      "stemFailed": "Stem generation failed or incomplete.",
-      "stemTimeout": "Timeout after 2 minutes",
-      "updateRating": "Error updating rating",
-      "loadSong": "Failed to load song",
-      "loadSongDetails": "Error loading song details"
+    "untitled": "Untitled Song",
+    "workflow": {
+      "editTitle": "Edit Workflow:",
+      "inUse": "In Use",
+      "label": "Workflow:",
+      "noWorkflow": "No Workflow",
+      "notUsed": "Not Used",
+      "onWork": "On Work"
     }
   },
-  "imageDetailPanel": {
-    "title": "Image Details",
-    "placeholder": "Select an image from the list to view details",
-    "loading": "Loading image details...",
-    "untitled": "Untitled Image",
-    "prompt": {
-      "label": "Prompt:"
+  "songGenerator": {
+    "charCounter": "{{count}}/50",
+    "charactersCount": "characters",
+    "costInfo": "Song generation: ~$0.15 each",
+    "createButton": "Create Song",
+    "createInstrumental": "Create Instrumental",
+    "createLyrics": "Create Lyrics",
+    "creating": "Creating...",
+    "enhanceStylePrompt": "Enhance Style Prompt",
+    "errors": {
+      "errorFetchingStatus": "Error fetching status",
+      "errorInitInstrumental": "Error initiating instrumental generation.",
+      "errorInitSong": "Error initiating song generation.",
+      "generationFailed": "Song generation failed",
+      "instrumentalFailed": "Instrumental generation failed",
+      "lyricsRequired": "Please enter lyrics first",
+      "promptRequired": "Please enter a music style prompt first",
+      "textRequired": "Please enter text first"
     },
-    "alt": {
-      "image": "Generated Picture"
+    "generateTitle": "Generate Title",
+    "generateTitleFallback": "Generate a creative song title",
+    "instrumental": "Instrumental",
+    "instrumentalNotice": "Lyrics are disabled for instrumental songs",
+    "loadingMessage": "This may take several minutes",
+    "lyricArchitecture": "Lyric Architecture",
+    "lyricsActions": "Lyrics actions",
+    "lyricsLabel": "Lyrics:",
+    "lyricsPlaceholder": "Type your lyrics or a song idea here...",
+    "modelLabel": "Model:",
+    "musicStyleActions": "Music style actions",
+    "musicStyleLabel": "Music Style Prompt:",
+    "musicStylePlaceholder": "Describe the music style (e.g., upbeat pop, melancholic ballad, rock anthem)...",
+    "player": {
+      "muteUnmute": "Mute/Unmute",
+      "playPause": "Play/Pause",
+      "selectSongToPlay": "Select a song to play audio",
+      "stop": "Stop"
+    },
+    "progress": {
+      "enhancing": "Enhancing Style Prompt...",
+      "enhancinghint": "AI is improving your music style description",
+      "generatingLyrics": "Creating Lyrics...",
+      "generatingLyricsHint": "AI is generating song lyrics from your text",
+      "generatingTitle": "Generating Title...",
+      "generatingTitleHint": "AI is creating a song title for you",
+      "translatingLyrics": "Translating Lyrics...",
+      "translatingLyricsHint": "AI is translating your lyrics to English",
+      "translatingPrompt": "Translating Style Prompt...",
+      "translatingPromptHint": "AI is translating your music style description to English"
+    },
+    "resetButton": "Reset",
+    "status": {
+      "acquiring": "Acquiring Mureka slot",
+      "generatingAi": "Generating song with AI",
+      "initializing": "Initializing request",
+      "polling": "Processing with Mureka",
+      "preparing": "Preparing song generation",
+      "processing": "Processing",
+      "processingRequest": "Processing request",
+      "queued": "Queued for processing",
+      "starting": "Starting song generation",
+      "timeout": "Processing (timeout handling)"
+    },
+    "styleChooser": "Style Chooser",
+    "success": {
+      "architectureUpdated": "Song architecture updated successfully",
+      "styleApplied": "Music style selection applied successfully"
+    },
+    "title": "Create Song",
+    "titleActions": "Title actions",
+    "titleLabel": "Title:",
+    "titlePlaceholder": "Enter song title (max 50 characters)...",
+    "titleRequired": "*",
+    "translateToEnglish": "Translate to English",
+    "withLyrics": "With Lyrics"
+  },
+  "songProfile": {
+    "account": {
+      "concurrentRequests": "concurrent requests",
+      "currentBalance": "Current Balance",
+      "murekaAccount": "Mureka Account",
+      "requestLimit": "Request Limit",
+      "title": "Account Information",
+      "totalRecharge": "Total Recharge",
+      "totalSpending": "Total Spending"
     },
     "actions": {
-      "download": "Download Original",
-      "fullSize": "Full Size"
+      "refresh": "Refresh Account Info"
+    },
+    "empty": {
+      "description": "Unable to load account information. Please try refreshing or check your connection.",
+      "title": "No Account Information Available"
+    },
+    "notifications": {
+      "loadError": "Error loading billing info"
+    },
+    "title": "Profile Controls"
+  },
+  "songView": {
+    "actions": {
+      "close": "Close",
+      "copyAll": "Copy All",
+      "copyLyrics": "Copy Lyrics",
+      "delete": "Delete",
+      "deleteCount": "Delete ({{count}})",
+      "deselectAll": "Deselect All",
+      "downloadFlac": "Download FLAC",
+      "downloadMp3": "Download MP3",
+      "downloadStems": "Download Stems",
+      "exitSelect": "Exit Select",
+      "playAudio": "Play Audio",
+      "playPause": "Play/Pause",
+      "refresh": "Refresh",
+      "selectAll": "Select All",
+      "selectMode": "Select Mode",
+      "stop": "Stop"
+    },
+    "bulkDelete": {
+      "completed": "Bulk delete completed: {{deleted}} deleted",
+      "errors": "{{count}} errors",
+      "notFound": "{{count}} not found"
+    },
+    "confirmations": {
+      "bulkDelete": "Are you sure you want to delete {{count}} selected song(s)?"
+    },
+    "dialogs": {
+      "lyricsTitle": "Lyrics - {{title}}",
+      "stylePromptTitle": "Style Prompt - {{title}}"
     },
     "errors": {
-      "updateTitle": "Error updating title",
-      "loadImage": "Error loading image details",
-      "failedToLoad": "Failed to load image"
+      "cannotDeleteProtected": "Cannot delete songs with {{workflow}} workflow: {{songs}}",
+      "cannotSelectProtected": "Cannot select songs with {{workflow}} workflow for deletion",
+      "copyFailed": "Failed to copy to clipboard",
+      "copyLyricsFailed": "Failed to copy lyrics to clipboard",
+      "deletingSongs": "Error deleting songs: {{error}}",
+      "loadingMore": "Error loading more songs: {{error}}",
+      "loadingSongs": "Error loading songs: {{error}}",
+      "noSongsSelected": "No songs selected for deletion",
+      "updatingRating": "Error updating rating: {{error}}",
+      "updatingTags": "Error updating tags: {{error}}",
+      "updatingTitle": "Error updating title: {{error}}",
+      "updatingWorkflow": "Error updating workflow: {{error}}"
+    },
+    "filters": {
+      "all": "All",
+      "inUse": "In Use",
+      "notUsed": "Not Used",
+      "onWork": "On Work"
+    },
+    "library": {
+      "clearSearch": "Clear search",
+      "header": "Available Songs",
+      "searchPlaceholder": "Search in titles, lyrics & tags...",
+      "songsCount": "{{count}} songs"
+    },
+    "messages": {
+      "adjustSearch": "Try adjusting your search term or clear the search to see all songs.",
+      "loadingSongs": "Loading songs...",
+      "noLyrics": "No lyrics",
+      "noLyricsAvailable": "No lyrics available",
+      "noSearchResults": "No songs match your search criteria.",
+      "noSongSelected": "No song selected",
+      "noSongsInDb": "No songs found in the database.",
+      "noStylePrompt": "No style prompt available",
+      "noTags": "No tags",
+      "selectSongPlaceholder": "Select a song from the list to view details",
+      "unknownSong": "Unknown Song",
+      "untitled": "Untitled",
+      "untitledSong": "Untitled Song"
+    },
+    "noSongs": "No songs found",
+    "pagination": {
+      "itemsPerPage": "Items per page:",
+      "of": "of"
+    },
+    "placeholderText": "Your generated song will appear here",
+    "table": {
+      "actions": "Actions",
+      "created": "Created",
+      "model": "Model",
+      "rating": "Rating",
+      "status": "Status",
+      "title": "Title",
+      "workflow": "Workflow"
+    },
+    "title": "Song Library",
+    "tooltips": {
+      "cannotDelete": "Cannot delete this song",
+      "cannotDeleteInUse": "Cannot delete songs with In Use workflow",
+      "cannotDeleteOnWork": "Cannot delete songs with On Work workflow",
+      "inUseNoDelete": "This song is In Use and cannot be deleted",
+      "instrumental": "Instrumental",
+      "onWorkNoDelete": "This song is On Work and cannot be deleted",
+      "withVocals": "With Vocals"
     }
+  },
+  "userProfile": {
+    "accountInfo": "Account Information",
+    "active": "Active",
+    "cancelButton": "Cancel",
+    "changePassword": "Change Password",
+    "editButton": "Edit",
+    "email": "Email",
+    "emailHint": "Email cannot be changed",
+    "errors": {
+      "errorLoadingProfile": "Error loading profile",
+      "errorUpdatingProfile": "Error updating profile",
+      "minLength": "{{field}} must be at least {{length}} characters long",
+      "required": "{{field}} is required"
+    },
+    "fieldNames": {
+      "firstName": "First name",
+      "lastName": "Last name"
+    },
+    "firstName": "First Name",
+    "firstNamePlaceholder": "Enter first name",
+    "imagesPerPage": "Images per page",
+    "imagesPerPageHint": "5-100 images per page",
+    "inactive": "Inactive",
+    "language": "Language",
+    "languageHint": "Select your preferred language",
+    "lastLogin": "Last login:",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Enter last name",
+    "loadingProfile": "Loading profile...",
+    "memberSince": "Member since:",
+    "murekaAccount": "Mureka Account",
+    "notVerified": "Not verified",
+    "notifications": {
+      "imageListLimitUpdated": "Image list limit updated",
+      "languageUpdated": "Language updated",
+      "settingsReset": "Settings reset to defaults",
+      "songListLimitUpdated": "Song list limit updated"
+    },
+    "refreshButton": "Refresh",
+    "resetToDefaults": "Reset to Defaults",
+    "saveButton": "Save",
+    "saving": "Saving...",
+    "songsPerPage": "Songs per page",
+    "songsPerPageHint": "5-100 songs per page",
+    "title": "User Profile",
+    "unknown": "Unknown",
+    "unknownUser": "Unknown User",
+    "userSettings": "User Settings",
+    "verified": "Verified"
   },
   "versionCheck": {
     "newVersion": "New version {{version}} available!\nThe application will now reload."
-  },
-  "authInterceptor": {
-    "sessionExpired": "Session expired. Please log in again.",
-    "sessionTimeout": "Session validation timeout. Please log in again."
-  },
-  "notifications": {
-    "success": "Success",
-    "error": "Error",
-    "warning": "Warning",
-    "info": "Info",
-    "songCreated": "Song created successfully",
-    "imageCreated": "Image created successfully",
-    "settingsUpdated": "Settings updated successfully",
-    "profileUpdated": "Profile updated successfully",
-    "passwordChanged": "Password changed successfully",
-    "copied": "Copied to clipboard",
-    "deleted": "Deleted successfully"
-  },
-  "errors": {
-    "required": "This field is required",
-    "minLength": "Must be at least {{length}} characters",
-    "maxLength": "Must be at most {{length}} characters",
-    "loadingError": "Error loading data",
-    "savingError": "Error saving data",
-    "networkError": "Network error occurred"
   }
 }

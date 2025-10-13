@@ -3,6 +3,7 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {CommonModule} from '@angular/common';
 import {HttpClient} from '@angular/common/http';
 import {firstValueFrom} from 'rxjs';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {ImageBlobService} from '../../services/ui/image-blob.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
 import {NotificationService} from '../../services/ui/notification.service';
@@ -17,7 +18,7 @@ import {ProgressService} from '../../services/ui/progress.service';
 @Component({
     selector: 'app-image-generator',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, MatButtonModule, ImageDetailPanelComponent],
+    imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, MatButtonModule, ImageDetailPanelComponent, TranslateModule],
     templateUrl: './image-generator.component.html',
     styleUrl: './image-generator.component.scss'
 })
@@ -44,6 +45,7 @@ export class ImageGeneratorComponent implements OnInit {
     private chatService = inject(ChatService);
     private progressService = inject(ProgressService);
     private imageBlobService = inject(ImageBlobService);
+    private translate = inject(TranslateService);
 
     ngOnInit() {
         this.promptForm = this.fb.group({
@@ -163,7 +165,7 @@ export class ImageGeneratorComponent implements OnInit {
     async improvePrompt() {
         const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
         if (!currentPrompt) {
-            this.notificationService.error('Please enter a prompt first');
+            this.notificationService.error(this.translate.instant('imageGenerator.errors.promptRequired'));
             return;
         }
 
@@ -171,8 +173,8 @@ export class ImageGeneratorComponent implements OnInit {
         try {
             const improvedPrompt = await this.progressService.executeWithProgress(
                 () => this.chatService.improveImagePrompt(currentPrompt),
-                'Enhancing Prompt...',
-                'AI is improving your image prompt'
+                this.translate.instant('imageGenerator.progress.enhancing'),
+                this.translate.instant('imageGenerator.progress.enhancinghint')
             );
             this.promptForm.patchValue({prompt: this.removeQuotes(improvedPrompt)});
         } catch (error: any) {
@@ -185,7 +187,7 @@ export class ImageGeneratorComponent implements OnInit {
     async translatePrompt() {
         const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
         if (!currentPrompt) {
-            this.notificationService.error('Please enter a prompt first');
+            this.notificationService.error(this.translate.instant('imageGenerator.errors.promptRequired'));
             return;
         }
 
@@ -193,8 +195,8 @@ export class ImageGeneratorComponent implements OnInit {
         try {
             const translatedPrompt = await this.progressService.executeWithProgress(
                 () => this.chatService.translateImagePrompt(currentPrompt),
-                'Translating Prompt...',
-                'AI is translating your image prompt to English'
+                this.translate.instant('imageGenerator.progress.translating'),
+                this.translate.instant('imageGenerator.progress.translatingHint')
             );
             this.promptForm.patchValue({prompt: this.removeQuotes(translatedPrompt)});
         } catch (error: any) {
@@ -230,15 +232,15 @@ export class ImageGeneratorComponent implements OnInit {
             inputText = this.promptForm.get('prompt')?.value?.trim();
         }
         if (!inputText) {
-            inputText = 'image';
+            inputText = this.translate.instant('imageGenerator.generateTitleFallback');
         }
 
         this.isGeneratingTitle = true;
         try {
             const generatedTitle = await this.progressService.executeWithProgress(
                 () => this.chatService.generateTitle(inputText),
-                'Generating Title...',
-                'AI is creating a title for your image'
+                this.translate.instant('imageGenerator.progress.generatingTitle'),
+                this.translate.instant('imageGenerator.progress.generatingTitleHint')
             );
             this.promptForm.patchValue({title: this.removeQuotes(generatedTitle)});
         } catch (error: any) {

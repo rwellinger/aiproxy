@@ -9,7 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSelectModule } from '@angular/material/select';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -63,6 +63,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   private notificationService = inject(NotificationService);
   private settingsService = inject(UserSettingsService);
   private languageService = inject(LanguageService);
+  private translate = inject(TranslateService);
 
   constructor() {
     this.userForm = this.fb.group({
@@ -121,7 +122,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading user profile:', error);
-          this.notificationService.error('Error loading profile');
+          this.notificationService.error(this.translate.instant('userProfile.errors.errorLoadingProfile'));
           this.isLoading = false;
         }
       });
@@ -144,14 +145,15 @@ export class UserProfileComponent implements OnInit, OnDestroy {
    */
   public getErrorMessage(fieldName: string): string {
     const field = this.userForm.get(fieldName);
+    const fieldDisplayName = this.getFieldDisplayName(fieldName);
 
     if (field?.hasError('required')) {
-      return `${this.getFieldDisplayName(fieldName)} is required`;
+      return this.translate.instant('userProfile.errors.required', { field: fieldDisplayName });
     }
 
     if (field?.hasError('minlength')) {
       const requiredLength = field.errors?.['minlength']?.requiredLength;
-      return `${this.getFieldDisplayName(fieldName)} must be at least ${requiredLength} characters long`;
+      return this.translate.instant('userProfile.errors.minLength', { field: fieldDisplayName, length: requiredLength });
     }
 
     return '';
@@ -163,9 +165,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   private getFieldDisplayName(fieldName: string): string {
     switch (fieldName) {
       case 'first_name':
-        return 'First name';
+        return this.translate.instant('userProfile.fieldNames.firstName');
       case 'last_name':
-        return 'Last name';
+        return this.translate.instant('userProfile.fieldNames.lastName');
       default:
         return fieldName;
     }
@@ -214,7 +216,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Error updating profile:', error);
-            this.notificationService.error(error.message || 'Error updating profile');
+            this.notificationService.error(error.message || this.translate.instant('userProfile.errors.errorUpdatingProfile'));
             this.isLoading = false;
           }
         });
@@ -244,7 +246,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
    */
   private updateUserDisplayName(): void {
     if (!this.currentUser) {
-      this.userDisplayName = 'Unknown User';
+      this.userDisplayName = this.translate.instant('userProfile.unknownUser');
       return;
     }
 
@@ -265,7 +267,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
    * Format date for display
    */
   public formatDate(dateString: string): string {
-    if (!dateString) return 'Unknown';
+    if (!dateString) return this.translate.instant('userProfile.unknown');
 
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -305,7 +307,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     const value = this.settingsForm.get('songListLimit')?.value;
     if (value && value >= 5 && value <= 100) {
       this.settingsService.updateSongListLimit(value);
-      this.notificationService.success('Song list limit updated');
+      this.notificationService.success(this.translate.instant('userProfile.notifications.songListLimitUpdated'));
     }
   }
 
@@ -316,7 +318,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     const value = this.settingsForm.get('imageListLimit')?.value;
     if (value && value >= 5 && value <= 100) {
       this.settingsService.updateImageListLimit(value);
-      this.notificationService.success('Image list limit updated');
+      this.notificationService.success(this.translate.instant('userProfile.notifications.imageListLimitUpdated'));
     }
   }
 
@@ -325,7 +327,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
    */
   public resetSettingsToDefaults(): void {
     this.settingsService.resetToDefaults();
-    this.notificationService.success('Settings reset to defaults');
+    this.notificationService.success(this.translate.instant('userProfile.notifications.settingsReset'));
   }
 
   /**
@@ -335,7 +337,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     const value = this.settingsForm.get('language')?.value as Language;
     if (value) {
       this.languageService.changeLanguage(value);
-      this.notificationService.success('Language updated');
+      this.notificationService.success(this.translate.instant('userProfile.notifications.languageUpdated'));
     }
   }
 

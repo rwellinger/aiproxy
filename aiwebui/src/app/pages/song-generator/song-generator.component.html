@@ -8,7 +8,7 @@
                     <div class="controls-content">
                         <div class="song-generator-header">
                             <div class="song-generator-title">
-                                <h2>Create Song</h2>
+                                <h2>{{ 'songGenerator.title' | translate }}</h2>
                             </div>
                         </div>
 
@@ -24,7 +24,7 @@
                                             [disabled]="isLoading"
                                             (click)="setMode('song')">
                                         <i class="fas fa-microphone"></i>
-                                        <span>With Lyrics</span>
+                                        <span>{{ 'songGenerator.withLyrics' | translate }}</span>
                                     </button>
                                     <button
                                             type="button"
@@ -33,21 +33,21 @@
                                             [disabled]="isLoading"
                                             (click)="setMode('instrumental')">
                                         <i class="fas fa-guitar"></i>
-                                        <span>Instrumental</span>
+                                        <span>{{ 'songGenerator.instrumental' | translate }}</span>
                                     </button>
                                 </div>
                             </div>
 
                             <!-- Title Field (always visible, required only for instrumental) -->
                             <div class="form-group">
-                                <label for="title">Title:<span class="required"
-                                                               *ngIf="isInstrumentalMode"> *</span></label>
+                                <label for="title">{{ 'songGenerator.titleLabel' | translate }}<span class="required"
+                                                               *ngIf="isInstrumentalMode"> {{ 'songGenerator.titleRequired' | translate }}</span></label>
                                 <div class="prompt-input-group">
                                     <input
                                             id="title"
                                             type="text"
                                             formControlName="title"
-                                            placeholder="Enter song title (max 50 characters)..."
+                                            [placeholder]="'songGenerator.titlePlaceholder' | translate"
                                             [required]="isInstrumentalMode"
                                             maxlength="50"
                                             [disabled]="isLoading"
@@ -58,7 +58,7 @@
                                                 (click)="toggleTitleDropdown()"
                                                 [disabled]="isLoading || isGeneratingTitle"
                                                 class="magic-icon-button"
-                                                title="Title actions">
+                                                [title]="'songGenerator.titleActions' | translate">
                                             <i class="fas fa-ellipsis-vertical" *ngIf="!isGeneratingTitle"></i>
                                             <i class="fas fa-spinner fa-spin" *ngIf="isGeneratingTitle"></i>
                                         </button>
@@ -70,23 +70,23 @@
                                                     [disabled]="isLoading || isGeneratingTitle"
                                                     (click)="selectTitleAction('generate')">
                                                 <i class="fas fa-wand-magic-sparkles"></i>
-                                                <span>Generate Title</span>
+                                                <span>{{ 'songGenerator.generateTitle' | translate }}</span>
                                                 <i class="fas fa-spinner fa-spin action-spinner"
                                                    *ngIf="isGeneratingTitle"></i>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="char-counter">{{ songForm.get('title')?.value?.length || 0 }}/50</div>
+                                <div class="char-counter">{{ 'songGenerator.charCounter' | translate: {count: songForm.get('title')?.value?.length || 0} }}</div>
                             </div>
 
                             <div class="form-group">
-                                <label for="lyrics">Lyrics:</label>
+                                <label for="lyrics">{{ 'songGenerator.lyricsLabel' | translate }}</label>
                                 <div class="prompt-input-group" [class.disabled-section]="isInstrumentalMode">
                         <textarea
                                 id="lyrics"
                                 formControlName="lyrics"
-                                placeholder="Type your lyrics or a song idea here..."
+                                [placeholder]="'songGenerator.lyricsPlaceholder' | translate"
                                 [required]="!isInstrumentalMode"
                                 [disabled]="isLoading || isInstrumentalMode"
                                 class="lyrics-input">
@@ -97,7 +97,7 @@
                                                 (click)="toggleLyricsDropdown()"
                                                 [disabled]="isLoading || isGeneratingLyrics || isTranslatingLyrics || isImprovingPrompt || !songForm.get('lyrics')?.value?.trim() || isInstrumentalMode"
                                                 class="magic-icon-button"
-                                                title="Lyrics actions">
+                                                [title]="'songGenerator.lyricsActions' | translate">
                                             <i class="fas fa-ellipsis-vertical"
                                                *ngIf="!isGeneratingLyrics && !isTranslatingLyrics"></i>
                                             <i class="fas fa-spinner fa-spin"
@@ -111,7 +111,7 @@
                                                     [disabled]="isLoading"
                                                     (click)="selectLyricsAction('architecture')">
                                                 <i class="fas fa-layer-group"></i>
-                                                <span>Lyric Architecture</span>
+                                                <span>{{ 'songGenerator.lyricArchitecture' | translate }}</span>
                                             </button>
                                             <div class="dropdown-divider"></div>
                                             <button
@@ -120,7 +120,7 @@
                                                     [disabled]="isLoading || isGeneratingLyrics || isTranslatingLyrics || isImprovingPrompt"
                                                     (click)="selectLyricsAction('generate')">
                                                 <i class="fas fa-music"></i>
-                                                <span>Create Lyrics</span>
+                                                <span>{{ 'songGenerator.createLyrics' | translate }}</span>
                                                 <i class="fas fa-spinner fa-spin action-spinner"
                                                    *ngIf="isGeneratingLyrics"></i>
                                             </button>
@@ -130,7 +130,7 @@
                                                     [disabled]="isLoading || isGeneratingLyrics || isTranslatingLyrics || isImprovingPrompt"
                                                     (click)="selectLyricsAction('translate')">
                                                 <i class="fas fa-language"></i>
-                                                <span>Translate to English</span>
+                                                <span>{{ 'songGenerator.translateToEnglish' | translate }}</span>
                                                 <i class="fas fa-spinner fa-spin action-spinner"
                                                    *ngIf="isTranslatingLyrics"></i>
                                             </button>
@@ -138,21 +138,21 @@
                                     </div>
                                 </div>
                                 <div class="lyrics-char-count" *ngIf="songForm.get('lyrics')?.value">
-                                    {{ songForm.get('lyrics')?.value?.length || 0 }} characters
+                                    {{ songForm.get('lyrics')?.value?.length || 0 }} {{ 'songGenerator.charactersCount' | translate }}
                                 </div>
                                 <div class="instrumental-notice" *ngIf="isInstrumentalMode">
                                     <i class="fas fa-info-circle"></i>
-                                    Lyrics are disabled for instrumental songs
+                                    {{ 'songGenerator.instrumentalNotice' | translate }}
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="prompt">Music Style Prompt:</label>
+                                <label for="prompt">{{ 'songGenerator.musicStyleLabel' | translate }}</label>
                                 <div class="prompt-input-group">
                         <textarea
                                 id="prompt"
                                 formControlName="prompt"
-                                placeholder="Describe the music style (e.g., upbeat pop, melancholic ballad, rock anthem)..."
+                                [placeholder]="'songGenerator.musicStylePlaceholder' | translate"
                                 required
                                 [disabled]="isLoading"
                                 class="prompt-input">
@@ -163,7 +163,7 @@
                                                 (click)="toggleStyleDropdown()"
                                                 [disabled]="isLoading || isImprovingPrompt || isTranslatingLyrics || isGeneratingLyrics || isTranslatingStylePrompt"
                                                 class="magic-icon-button"
-                                                title="Music style actions">
+                                                [title]="'songGenerator.musicStyleActions' | translate">
                                             <i class="fas fa-ellipsis-vertical"
                                                *ngIf="!isImprovingPrompt && !isTranslatingStylePrompt"></i>
                                             <i class="fas fa-spinner fa-spin"
@@ -177,7 +177,7 @@
                                                     [disabled]="isLoading"
                                                     (click)="selectStyleAction('chooser')">
                                                 <i class="fas fa-sliders"></i>
-                                                <span>Style Chooser</span>
+                                                <span>{{ 'songGenerator.styleChooser' | translate }}</span>
                                             </button>
                                             <div class="dropdown-divider"></div>
                                             <button
@@ -186,7 +186,7 @@
                                                     [disabled]="isLoading || isImprovingPrompt || isTranslatingLyrics || isGeneratingLyrics || isTranslatingStylePrompt || !songForm.get('prompt')?.value?.trim()"
                                                     (click)="selectStyleAction('enhance')">
                                                 <i class="fas fa-wand-magic-sparkles"></i>
-                                                <span>Enhance Style Prompt</span>
+                                                <span>{{ 'songGenerator.enhanceStylePrompt' | translate }}</span>
                                                 <i class="fas fa-spinner fa-spin action-spinner"
                                                    *ngIf="isImprovingPrompt"></i>
                                             </button>
@@ -196,7 +196,7 @@
                                                     [disabled]="isLoading || isImprovingPrompt || isTranslatingLyrics || isGeneratingLyrics || isTranslatingStylePrompt || !songForm.get('prompt')?.value?.trim()"
                                                     (click)="selectStyleAction('translate')">
                                                 <i class="fas fa-language"></i>
-                                                <span>Translate to English</span>
+                                                <span>{{ 'songGenerator.translateToEnglish' | translate }}</span>
                                                 <i class="fas fa-spinner fa-spin action-spinner"
                                                    *ngIf="isTranslatingStylePrompt"></i>
                                             </button>
@@ -206,7 +206,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="model">Model:</label>
+                                <label for="model">{{ 'songGenerator.modelLabel' | translate }}</label>
                                 <select id="model" formControlName="model" required [disabled]="isLoading"
                                         class="model-select">
                                     <option value="auto">Auto</option>
@@ -223,19 +223,19 @@
                                         class="create-button">
                                     <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
                                     <i class="fas fa-music" *ngIf="!isLoading"></i>
-                                    {{ isLoading ? 'Creating...' : (isInstrumentalMode ? 'Create Instrumental' : 'Create Song') }}
+                                    {{ isLoading ? ('songGenerator.creating' | translate) : (isInstrumentalMode ? ('songGenerator.createInstrumental' | translate) : ('songGenerator.createButton' | translate)) }}
                                 </button>
                                 <button type="button" (click)="resetForm()"
                                         [disabled]="isLoading || isImprovingPrompt || isTranslatingLyrics || isGeneratingLyrics || isTranslatingStylePrompt || isGeneratingTitle"
                                         class="reset-button">
-                                    <i class="fas fa-rotate-left"></i> Reset
+                                    <i class="fas fa-rotate-left"></i> {{ 'songGenerator.resetButton' | translate }}
                                 </button>
                             </div>
 
                             <div *ngIf="isLoading && loadingMessage" class="loading-status">
                                 <small class="loading-text">
                                     <i class="fas fa-info-circle"></i>
-                                    {{ loadingMessage }} - This may take several minutes
+                                    {{ loadingMessage }} - {{ 'songGenerator.loadingMessage' | translate }}
                                 </small>
                             </div>
                         </form>
@@ -244,7 +244,7 @@
                 <mat-card-actions align="end">
                     <p class="cost-info">
                         <i class="fas fa-info-circle"></i>
-                        Song generation: ~$0.15 each
+                        {{ 'songGenerator.costInfo' | translate }}
                     </p>
                 </mat-card-actions>
             </mat-card>
@@ -264,7 +264,7 @@
                         [isGenerating]="isLoading"
                         title=""
                         [showMetaInfo]="['job_id', 'model', 'status', 'created', 'completed']"
-                        placeholderText="Your generated song will appear here"
+                        [placeholderText]="'songView.placeholderText' | translate"
                         [currentlyPlayingId]="currentlyPlaying"
                         (titleChanged)="onTitleChanged($event)"
                         (tagsChanged)="onTagsChanged($event)"
@@ -302,11 +302,11 @@
 
                                 <!-- Player Controls -->
                                 <div class="player-controls">
-                                    <button type="button" class="control-btn" (click)="stopAudio()" title="Stop">
+                                    <button type="button" class="control-btn" (click)="stopAudio()" [title]="'songGenerator.player.stop' | translate">
                                         <i class="fas fa-stop"></i>
                                     </button>
                                     <button type="button" class="control-btn play-btn" (click)="playPauseAudio()"
-                                            title="Play/Pause">
+                                            [title]="'songGenerator.player.playPause' | translate">
                                         <i class="fas" [class.fa-play]="!isPlaying" [class.fa-pause]="isPlaying"></i>
                                     </button>
                                 </div>
@@ -328,7 +328,7 @@
                                 <!-- Volume Controls -->
                                 <div class="volume-controls">
                                     <button type="button" class="control-btn volume-btn" (click)="toggleMute()"
-                                            title="Mute/Unmute">
+                                            [title]="'songGenerator.player.muteUnmute' | translate">
                                         <i class="fas" [class.fa-volume-high]="volume > 0.5 && !isMuted"
                                            [class.fa-volume-low]="volume <= 0.5 && volume > 0 && !isMuted"
                                            [class.fa-volume-xmark]="isMuted || volume === 0"></i>
@@ -345,7 +345,7 @@
 
                             <div class="no-audio-message" *ngIf="!audioUrl">
                                 <i class="fas fa-music"></i>
-                                <span>Select a song to play audio</span>
+                                <span>{{ 'songGenerator.player.selectSongToPlay' | translate }}</span>
                             </div>
                         </div>
                     </div>

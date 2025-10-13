@@ -1,418 +1,390 @@
 {
-  "common": {
-    "save": "Speichern",
-    "cancel": "Abbrechen",
-    "delete": "Löschen",
-    "edit": "Bearbeiten",
-    "create": "Erstellen",
-    "reset": "Zurücksetzen",
-    "refresh": "Aktualisieren",
-    "loading": "Laden...",
-    "search": "Suchen",
-    "filter": "Filtern",
-    "actions": "Aktionen",
-    "close": "Schließen",
-    "confirm": "Bestätigen",
-    "download": "Herunterladen",
-    "copy": "Kopieren",
-    "play": "Abspielen",
-    "pause": "Pause",
-    "stop": "Stopp"
-  },
-  "sideMenu": {
-    "brandName": "thWelly's AI Toolbox",
-    "aiChat": "AI Chat",
-    "ollamaChat": "Ollama Chat",
-    "openaiChat": "OpenAI Chat",
-    "picture": "Bild",
-    "gallery": "Galerie",
-    "createImage": "Erstellen",
-    "music": "Musik",
-    "library": "Bibliothek",
-    "createSong": "Erstellen",
-    "external": "Extern",
-    "aiUsage": "AI Nutzung",
-    "humanize": "Humanisieren",
-    "settings": "Einstellungen",
-    "promptTemplates": "Prompt Vorlagen",
-    "profile": "Profil",
-    "logout": "Abmelden",
-    "login": "Anmelden"
-  },
-  "songGenerator": {
-    "title": "Song erstellen",
-    "withLyrics": "Mit Text",
-    "instrumental": "Instrumental",
-    "titleLabel": "Titel:",
-    "titlePlaceholder": "Song-Titel eingeben (max. 50 Zeichen)...",
-    "lyricsLabel": "Songtext:",
-    "lyricsPlaceholder": "Gib deinen Songtext oder eine Song-Idee ein...",
-    "musicStyleLabel": "Musikstil Prompt:",
-    "musicStylePlaceholder": "Beschreibe den Musikstil (z.B. fröhlicher Pop, melancholische Ballade, Rock-Hymne)...",
-    "modelLabel": "Modell:",
-    "createButton": "Song erstellen",
-    "createInstrumental": "Instrumental erstellen",
-    "creating": "Erstelle...",
-    "resetButton": "Zurücksetzen",
-    "costInfo": "Song-Erstellung: ~$0.15 pro Stück",
-    "titleActions": "Titel-Aktionen",
-    "generateTitle": "Titel generieren",
-    "lyricsActions": "Text-Aktionen",
-    "lyricArchitecture": "Text-Struktur",
-    "createLyrics": "Text erstellen",
-    "translateToEnglish": "Ins Englische übersetzen",
-    "musicStyleActions": "Musikstil-Aktionen",
-    "styleChooser": "Stil-Auswahl",
-    "enhanceStylePrompt": "Stil-Prompt verbessern",
-    "instrumentalNotice": "Songtexte sind für Instrumentals deaktiviert",
-    "charactersCount": "Zeichen",
-    "loadingMessage": "Dies kann mehrere Minuten dauern",
-    "charCounter": "{{count}}/50"
-  },
-  "songView": {
-    "title": "Song-Bibliothek",
-    "library": {
-      "header": "Verfügbare Songs",
-      "songsCount": "{{count}} Songs",
-      "searchPlaceholder": "Suche in Titel, Text & Tags...",
-      "clearSearch": "Suche löschen"
-    },
-    "filters": {
-      "all": "Alle",
-      "inUse": "In Verwendung",
-      "onWork": "In Arbeit",
-      "notUsed": "Nicht verwendet"
-    },
-    "table": {
-      "title": "Titel",
-      "model": "Modell",
-      "status": "Status",
-      "workflow": "Workflow",
-      "rating": "Bewertung",
-      "created": "Erstellt",
-      "actions": "Aktionen"
-    },
-    "actions": {
-      "playAudio": "Audio abspielen",
-      "downloadFlac": "FLAC herunterladen",
-      "downloadMp3": "MP3 herunterladen",
-      "downloadStems": "Stems herunterladen",
-      "copyLyrics": "Text kopieren",
-      "delete": "Löschen",
-      "selectAll": "Alle auswählen",
-      "deselectAll": "Alle abwählen",
-      "deleteCount": "Löschen ({{count}})",
-      "refresh": "Aktualisieren",
-      "selectMode": "Auswahlmodus",
-      "exitSelect": "Auswahl beenden",
-      "stop": "Stopp",
-      "playPause": "Abspielen/Pause",
-      "copyAll": "Alles kopieren",
-      "close": "Schließen"
-    },
-    "messages": {
-      "noSongsInDb": "Keine Songs in der Datenbank gefunden.",
-      "noSearchResults": "Keine Songs entsprechen deinen Suchkriterien.",
-      "adjustSearch": "Versuche deinen Suchbegriff anzupassen oder lösche die Suche, um alle Songs zu sehen.",
-      "loadingSongs": "Lade Songs...",
-      "noLyrics": "Kein Songtext",
-      "noLyricsAvailable": "Kein Songtext verfügbar",
-      "noStylePrompt": "Kein Stil-Prompt verfügbar",
-      "noTags": "Keine Tags",
-      "untitledSong": "Unbenannter Song",
-      "untitled": "Unbenannt",
-      "unknownSong": "Unbekannter Song",
-      "noSongSelected": "Kein Song ausgewählt",
-      "selectSongPlaceholder": "Wähle einen Song aus der Liste, um Details anzuzeigen"
-    },
-    "dialogs": {
-      "lyricsTitle": "Songtext - {{title}}",
-      "stylePromptTitle": "Stil-Prompt - {{title}}"
-    },
-    "errors": {
-      "loadingSongs": "Fehler beim Laden der Songs: {{error}}",
-      "loadingMore": "Fehler beim Laden weiterer Songs: {{error}}",
-      "updatingTitle": "Fehler beim Aktualisieren des Titels: {{error}}",
-      "updatingTags": "Fehler beim Aktualisieren der Tags: {{error}}",
-      "updatingWorkflow": "Fehler beim Aktualisieren des Workflows: {{error}}",
-      "updatingRating": "Fehler beim Aktualisieren der Bewertung: {{error}}",
-      "deletingSongs": "Fehler beim Löschen der Songs: {{error}}",
-      "copyFailed": "Fehler beim Kopieren in die Zwischenablage",
-      "copyLyricsFailed": "Fehler beim Kopieren des Songtextes in die Zwischenablage",
-      "noSongsSelected": "Keine Songs zum Löschen ausgewählt",
-      "cannotSelectProtected": "Songs mit {{workflow}}-Workflow können nicht zum Löschen ausgewählt werden",
-      "cannotDeleteProtected": "Songs mit {{workflow}}-Workflow können nicht gelöscht werden: {{songs}}"
-    },
-    "tooltips": {
-      "inUseNoDelete": "Dieser Song ist in Verwendung und kann nicht gelöscht werden",
-      "onWorkNoDelete": "Dieser Song ist in Arbeit und kann nicht gelöscht werden",
-      "cannotDeleteInUse": "Songs mit In Verwendung-Workflow können nicht gelöscht werden",
-      "cannotDeleteOnWork": "Songs mit In Arbeit-Workflow können nicht gelöscht werden",
-      "cannotDelete": "Dieser Song kann nicht gelöscht werden",
-      "instrumental": "Instrumental",
-      "withVocals": "Mit Gesang"
-    },
-    "confirmations": {
-      "bulkDelete": "Möchtest du wirklich {{count}} ausgewählte(n) Song(s) löschen?"
-    },
-    "bulkDelete": {
-      "completed": "Massenlöschung abgeschlossen: {{deleted}} gelöscht",
-      "notFound": "{{count}} nicht gefunden",
-      "errors": "{{count}} Fehler"
-    },
-    "placeholderText": "Dein generierter Song erscheint hier",
-    "noSongs": "Keine Songs gefunden",
-    "pagination": {
-      "itemsPerPage": "Einträge pro Seite:",
-      "of": "von"
-    }
-  },
-  "imageGenerator": {
-    "title": "Bild erstellen",
-    "promptLabel": "Bild Prompt:",
-    "promptPlaceholder": "Beschreibe das Bild, das du erstellen möchtest...",
-    "sizeLabel": "Größe:",
-    "modelLabel": "Modell:",
-    "createButton": "Bild erstellen",
-    "creating": "Erstelle...",
-    "resetButton": "Zurücksetzen",
-    "costInfo": "Bild-Erstellung: ~$0.05 pro Stück"
-  },
-  "imageView": {
-    "title": "Bild-Galerie",
-    "gallery": {
-      "header": "Verfügbare Bilder",
-      "itemsCount": "{{count}} Einträge",
-      "searchPlaceholder": "Suche in Titel und Prompts...",
-      "clearSearch": "Suche löschen"
-    },
-    "table": {
-      "preview": "Vorschau",
-      "title": "Titel",
-      "model": "Modell",
-      "size": "Größe",
-      "status": "Status",
-      "created": "Erstellt",
-      "actions": "Aktionen"
-    },
-    "actions": {
-      "view": "Ansehen",
-      "download": "Herunterladen",
-      "delete": "Löschen",
-      "selectAll": "Alle auswählen",
-      "deselectAll": "Alle abwählen",
-      "deleteCount": "Löschen ({{count}})",
-      "refresh": "Aktualisieren",
-      "selectMode": "Auswahlmodus",
-      "exitSelect": "Auswahl beenden",
-      "downloadOriginal": "Original herunterladen",
-      "fullSize": "Vollbildansicht"
-    },
-    "messages": {
-      "noImagesInDb": "Keine Bilder in der Datenbank gefunden.",
-      "noSearchResults": "Keine Bilder entsprechen deinen Suchkriterien.",
-      "adjustSearch": "Versuche deinen Suchbegriff anzupassen oder lösche die Suche, um alle Bilder zu sehen.",
-      "loadingImages": "Lade Bilder...",
-      "selectImagePlaceholder": "Wähle ein Bild aus der Liste, um Details anzuzeigen"
-    },
-    "errors": {
-      "loadingImages": "Fehler beim Laden der Bilder: {{error}}",
-      "deletingImages": "Fehler beim Löschen der Bilder: {{error}}",
-      "updatingTitle": "Fehler beim Aktualisieren des Titels: {{error}}",
-      "noImagesSelected": "Keine Bilder zum Löschen ausgewählt"
-    },
-    "confirmations": {
-      "bulkDelete": "Möchtest du wirklich {{count}} ausgewählte(s) Bild(er) löschen?"
-    },
-    "bulkDelete": {
-      "completed": "Massenlöschung abgeschlossen: {{deleted}} gelöscht",
-      "notFound": "{{count}} nicht gefunden",
-      "errors": "{{count}} Fehler"
-    },
-    "noImages": "Keine Bilder gefunden",
-    "placeholderText": "Dein generiertes Bild erscheint hier"
-  },
-  "userProfile": {
-    "title": "Benutzerprofil",
-    "accountInfo": "Kontoinformationen",
-    "memberSince": "Mitglied seit:",
-    "lastLogin": "Letzter Login:",
-    "active": "Aktiv",
-    "inactive": "Inaktiv",
-    "verified": "Verifiziert",
-    "notVerified": "Nicht verifiziert",
-    "firstName": "Vorname",
-    "firstNamePlaceholder": "Vorname eingeben",
-    "lastName": "Nachname",
-    "lastNamePlaceholder": "Nachname eingeben",
-    "email": "E-Mail",
-    "emailHint": "E-Mail kann nicht geändert werden",
-    "userSettings": "Benutzereinstellungen",
-    "songsPerPage": "Songs pro Seite",
-    "songsPerPageHint": "5-100 Songs pro Seite",
-    "imagesPerPage": "Bilder pro Seite",
-    "imagesPerPageHint": "5-100 Bilder pro Seite",
-    "language": "Sprache",
-    "languageHint": "Wähle deine bevorzugte Sprache",
-    "resetToDefaults": "Auf Standard zurücksetzen",
-    "changePassword": "Passwort ändern",
-    "saveButton": "Speichern",
-    "saving": "Speichere...",
-    "editButton": "Bearbeiten",
-    "cancelButton": "Abbrechen",
-    "loadingProfile": "Profil wird geladen...",
-    "murekaAccount": "Mureka-Konto",
-    "refreshButton": "Aktualisieren"
-  },
-  "auth": {
-    "loginTitle": "Anmelden",
-    "logoutConfirm": "Möchtest du dich wirklich abmelden?",
-    "email": "E-Mail",
-    "password": "Passwort",
-    "loginButton": "Anmelden",
-    "loggingIn": "Melde an..."
-  },
   "aiChat": {
-    "title": "Ollama Chat (Intern)",
-    "sidebar": {
-      "showActive": "Aktive Chats anzeigen",
-      "showArchive": "Archiv anzeigen",
-      "newChat": "Neuer Chat",
-      "noConversations": "Noch keine Unterhaltungen",
-      "getStarted": "Erstelle eine, um loszulegen!",
-      "messagesCount": "{{count}} Nachrichten"
-    },
-    "form": {
-      "title": "Titel",
-      "titlePlaceholder": "Chat-Titel",
-      "model": "Modell",
-      "systemContext": "System-Kontext",
-      "systemContextOptional": "System-Kontext (Optional)",
-      "systemContextPlaceholder": "Systemverhalten festlegen...",
-      "systemContextHint": "Wird automatisch im Browser gespeichert",
-      "clearSystemContext": "System-Kontext löschen"
-    },
-    "conversation": {
-      "noSelection": "Keine Unterhaltung ausgewählt",
-      "noSelectionHint": "Wähle eine Unterhaltung aus der Liste aus oder erstelle eine neue",
-      "conversationTitle": "Unterhaltungs-Titel",
-      "tokens": "Tokens",
-      "editTitle": "Titel bearbeiten"
-    },
     "actions": {
+      "archive": "Archivieren",
+      "delete": "Unterhaltung löschen",
       "export": "Exportieren",
       "exportChat": "Chat exportieren",
       "exportWithHistory": "Exportieren (mit Verlauf)",
-      "archive": "Archivieren",
-      "unarchive": "Aus Archiv holen",
-      "delete": "Unterhaltung löschen"
-    },
-    "messages": {
-      "thinking": "Denke nach...",
-      "copyPlainText": "Als reinen Text kopieren",
-      "copyMarkdown": "Als Markdown kopieren",
-      "sendPlaceholder": "Schreibe deine Nachricht... (Enter zum Senden, Shift+Enter für neue Zeile)",
-      "send": "Senden",
-      "archived": "Diese Unterhaltung ist archiviert. Nachrichten können nicht gesendet werden."
+      "unarchive": "Aus Archiv holen"
     },
     "compression": {
-      "compressing": "Komprimiere Unterhaltung... Erstelle KI-Zusammenfassung...",
-      "memoryLow": "Speicher wird knapp ({{percent}}%)!",
       "compressChat": "Chat komprimieren",
-      "contextFull": "Kontext-Fenster fast voll ({{percent}}%)! Älteste Nachrichten gehen möglicherweise verloren.",
       "compressNow": "Jetzt komprimieren",
-      "confirmMessage": "Ältere Nachrichten werden archiviert und durch eine KI-Zusammenfassung ersetzt.\n\n✓ Chat kann fortgesetzt werden\n✓ Export enthält vollständigen Verlauf\n✓ System-Kontext bleibt erhalten"
+      "compressing": "Komprimiere Unterhaltung... Erstelle KI-Zusammenfassung...",
+      "confirmMessage": "Ältere Nachrichten werden archiviert und durch eine KI-Zusammenfassung ersetzt.\n\n✓ Chat kann fortgesetzt werden\n✓ Export enthält vollständigen Verlauf\n✓ System-Kontext bleibt erhalten",
+      "contextFull": "Kontext-Fenster fast voll ({{percent}}%)! Älteste Nachrichten gehen möglicherweise verloren.",
+      "memoryLow": "Speicher wird knapp ({{percent}}%)!"
+    },
+    "conversation": {
+      "conversationTitle": "Unterhaltungs-Titel",
+      "editTitle": "Titel bearbeiten",
+      "noSelection": "Keine Unterhaltung ausgewählt",
+      "noSelectionHint": "Wähle eine Unterhaltung aus der Liste aus oder erstelle eine neue",
+      "tokens": "Tokens"
+    },
+    "form": {
+      "clearSystemContext": "System-Kontext löschen",
+      "model": "Modell",
+      "systemContext": "System-Kontext",
+      "systemContextHint": "Wird automatisch im Browser gespeichert",
+      "systemContextOptional": "System-Kontext (Optional)",
+      "systemContextPlaceholder": "Systemverhalten festlegen...",
+      "title": "Titel",
+      "titlePlaceholder": "Chat-Titel"
+    },
+    "messages": {
+      "archived": "Diese Unterhaltung ist archiviert. Nachrichten können nicht gesendet werden.",
+      "copyMarkdown": "Als Markdown kopieren",
+      "copyPlainText": "Als reinen Text kopieren",
+      "send": "Senden",
+      "sendPlaceholder": "Schreibe deine Nachricht... (Enter zum Senden, Shift+Enter für neue Zeile)",
+      "thinking": "Denke nach..."
+    },
+    "notifications": {
+      "archiveFailed": "Fehler beim Archivieren der Unterhaltung",
+      "archived": "Unterhaltung archiviert",
+      "compressed": "Chat komprimiert: {{count}} Nachrichten archiviert",
+      "compressionFailed": "Komprimierung fehlgeschlagen",
+      "conversationFailed": "Fehler beim Laden der Unterhaltung",
+      "conversationsFailed": "Fehler beim Laden der Unterhaltungen",
+      "copiedMarkdown": "Als Markdown kopiert",
+      "copiedPlainText": "Als reiner Text kopiert",
+      "copyFailed": "Fehler beim Kopieren in die Zwischenablage",
+      "createFailed": "Fehler beim Erstellen der Unterhaltung",
+      "deleteConfirm": "Unterhaltung \"{{title}}\" löschen?",
+      "deleteFailed": "Fehler beim Löschen der Unterhaltung",
+      "exportFailed": "Fehler beim Exportieren des Chats",
+      "exportFullFailed": "Fehler beim Exportieren des vollständigen Chat-Verlaufs",
+      "exported": "Chat als Markdown exportiert",
+      "exportedFull": "Vollständiger Chat-Verlauf als Markdown exportiert",
+      "modelsFailed": "Fehler beim Laden der Modelle",
+      "sendFailed": "Fehler beim Senden der Nachricht",
+      "titleModelRequired": "Bitte gib einen Titel ein und wähle ein Modell",
+      "titleUpdateFailed": "Fehler beim Aktualisieren des Titels",
+      "unarchiveFailed": "Fehler beim Entarchivieren der Unterhaltung",
+      "unarchived": "Unterhaltung aus Archiv geholt"
+    },
+    "sidebar": {
+      "getStarted": "Erstelle eine, um loszulegen!",
+      "messagesCount": "{{count}} Nachrichten",
+      "newChat": "Neuer Chat",
+      "noConversations": "Noch keine Unterhaltungen",
+      "showActive": "Aktive Chats anzeigen",
+      "showArchive": "Archiv anzeigen"
     },
     "time": {
       "justNow": "gerade eben",
       "minAgo": "vor {{min}} Min",
       "yesterday": "Gestern"
     },
-    "notifications": {
-      "modelsFailed": "Fehler beim Laden der Modelle",
-      "conversationsFailed": "Fehler beim Laden der Unterhaltungen",
-      "conversationFailed": "Fehler beim Laden der Unterhaltung",
-      "titleModelRequired": "Bitte gib einen Titel ein und wähle ein Modell",
-      "createFailed": "Fehler beim Erstellen der Unterhaltung",
-      "deleteConfirm": "Unterhaltung \"{{title}}\" löschen?",
-      "deleteFailed": "Fehler beim Löschen der Unterhaltung",
-      "sendFailed": "Fehler beim Senden der Nachricht",
-      "titleUpdateFailed": "Fehler beim Aktualisieren des Titels",
-      "copiedPlainText": "Als reiner Text kopiert",
-      "copiedMarkdown": "Als Markdown kopiert",
-      "copyFailed": "Fehler beim Kopieren in die Zwischenablage",
-      "exported": "Chat als Markdown exportiert",
-      "exportFailed": "Fehler beim Exportieren des Chats",
-      "exportedFull": "Vollständiger Chat-Verlauf als Markdown exportiert",
-      "exportFullFailed": "Fehler beim Exportieren des vollständigen Chat-Verlaufs",
-      "compressed": "Chat komprimiert: {{count}} Nachrichten archiviert",
-      "compressionFailed": "Komprimierung fehlgeschlagen",
-      "archived": "Unterhaltung archiviert",
-      "unarchived": "Unterhaltung aus Archiv geholt",
-      "archiveFailed": "Fehler beim Archivieren der Unterhaltung",
-      "unarchiveFailed": "Fehler beim Entarchivieren der Unterhaltung"
-    }
+    "title": "Ollama Chat (Intern)"
+  },
+  "auth": {
+    "email": "E-Mail",
+    "loggingIn": "Melde an...",
+    "loginButton": "Anmelden",
+    "loginTitle": "Anmelden",
+    "logoutConfirm": "Möchtest du dich wirklich abmelden?",
+    "password": "Passwort"
+  },
+  "authInterceptor": {
+    "sessionExpired": "Sitzung abgelaufen. Bitte melde dich erneut an.",
+    "sessionTimeout": "Zeitüberschreitung bei der Sitzungsvalidierung. Bitte melde dich erneut an."
+  },
+  "common": {
+    "actions": "Aktionen",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "copy": "Kopieren",
+    "create": "Erstellen",
+    "delete": "Löschen",
+    "download": "Herunterladen",
+    "edit": "Bearbeiten",
+    "filter": "Filtern",
+    "loading": "Laden...",
+    "pause": "Pause",
+    "play": "Abspielen",
+    "refresh": "Aktualisieren",
+    "reset": "Zurücksetzen",
+    "save": "Speichern",
+    "search": "Suchen",
+    "stop": "Stopp"
+  },
+  "detailPanel": {
+    "addTag": "Tag hinzufügen...",
+    "completed": "Abgeschlossen",
+    "created": "Erstellt",
+    "imageDetails": "Bild-Details",
+    "jobId": "Job-ID",
+    "lyrics": "Songtext",
+    "model": "Modell",
+    "noLyrics": "Kein Songtext verfügbar",
+    "noTags": "Keine Tags",
+    "prompt": "Prompt",
+    "rating": "Bewertung",
+    "songDetails": "Song-Details",
+    "status": "Status",
+    "tags": "Tags",
+    "title": "Titel",
+    "workflow": "Workflow"
+  },
+  "errors": {
+    "loadingError": "Fehler beim Laden der Daten",
+    "maxLength": "Darf maximal {{length}} Zeichen lang sein",
+    "minLength": "Muss mindestens {{length}} Zeichen lang sein",
+    "networkError": "Netzwerkfehler aufgetreten",
+    "required": "Dieses Feld ist erforderlich",
+    "savingError": "Fehler beim Speichern der Daten"
+  },
+  "imageDetailPanel": {
+    "actions": {
+      "download": "Original herunterladen",
+      "fullSize": "Vollbildansicht"
+    },
+    "alt": {
+      "image": "Generiertes Bild"
+    },
+    "errors": {
+      "failedToLoad": "Fehler beim Laden des Bildes",
+      "loadImage": "Fehler beim Laden der Bild-Details",
+      "updateTitle": "Fehler beim Aktualisieren des Titels"
+    },
+    "loading": "Lade Bild-Details...",
+    "placeholder": "Wähle ein Bild aus der Liste, um Details anzuzeigen",
+    "prompt": {
+      "label": "Prompt:"
+    },
+    "title": "Bild-Details",
+    "untitled": "Unbenanntes Bild"
+  },
+  "imageGenerator": {
+    "charCounter": "{{count}}/50",
+    "costInfo": "Bild-Erstellung: ~$0.05 pro Stück",
+    "createButton": "Bild erstellen",
+    "creating": "Erstelle...",
+    "enhancePrompt": "Prompt verbessern",
+    "errors": {
+      "promptRequired": "Bitte gib zuerst einen Prompt ein"
+    },
+    "generateTitle": "Titel generieren",
+    "generateTitleFallback": "Erstelle einen kreativen Bild-Titel",
+    "loadingMessage": "Erstelle dein Bild - dies dauert normalerweise 10-30 Sekunden",
+    "modelLabel": "Modell:",
+    "picturePromptActions": "Bild-Prompt-Aktionen",
+    "progress": {
+      "enhancing": "Verbessere Prompt...",
+      "enhancinghint": "KI verbessert deinen Bild-Prompt",
+      "generatingTitle": "Erstelle Titel...",
+      "generatingTitleHint": "KI erstellt einen Bild-Titel für dich",
+      "translating": "Übersetze Prompt...",
+      "translatingHint": "KI übersetzt deinen Prompt ins Englische"
+    },
+    "promptLabel": "Prompt:",
+    "promptPlaceholder": "Beschreibe das Bild, das du erstellen möchtest...",
+    "resetButton": "Zurücksetzen",
+    "sizeLabel": "Bildgröße:",
+    "title": "Bild erstellen",
+    "titleActions": "Titel-Aktionen",
+    "titleLabel": "Titel:",
+    "titlePlaceholder": "Bild-Titel eingeben (optional, max. 50 Zeichen)...",
+    "translateToEnglish": "Ins Englische übersetzen"
+  },
+  "imageView": {
+    "actions": {
+      "delete": "Löschen",
+      "deleteCount": "Löschen ({{count}})",
+      "deselectAll": "Alle abwählen",
+      "download": "Herunterladen",
+      "downloadOriginal": "Original herunterladen",
+      "exitSelect": "Auswahl beenden",
+      "fullSize": "Vollbildansicht",
+      "refresh": "Aktualisieren",
+      "selectAll": "Alle auswählen",
+      "selectMode": "Auswahlmodus",
+      "view": "Ansehen"
+    },
+    "bulkDelete": {
+      "completed": "Massenlöschung abgeschlossen: {{deleted}} gelöscht",
+      "errors": "{{count}} Fehler",
+      "notFound": "{{count}} nicht gefunden"
+    },
+    "confirmations": {
+      "bulkDelete": "Möchtest du wirklich {{count}} ausgewählte(s) Bild(er) löschen?"
+    },
+    "errors": {
+      "deletingImages": "Fehler beim Löschen der Bilder: {{error}}",
+      "loadingImages": "Fehler beim Laden der Bilder: {{error}}",
+      "noImagesSelected": "Keine Bilder zum Löschen ausgewählt",
+      "updatingTitle": "Fehler beim Aktualisieren des Titels: {{error}}"
+    },
+    "gallery": {
+      "clearSearch": "Suche löschen",
+      "header": "Verfügbare Bilder",
+      "itemsCount": "{{count}} Einträge",
+      "searchPlaceholder": "Suche in Titel und Prompts..."
+    },
+    "messages": {
+      "adjustSearch": "Versuche deinen Suchbegriff anzupassen oder lösche die Suche, um alle Bilder zu sehen.",
+      "loadingImages": "Lade Bilder...",
+      "noImagesInDb": "Keine Bilder in der Datenbank gefunden.",
+      "noSearchResults": "Keine Bilder entsprechen deinen Suchkriterien.",
+      "selectImagePlaceholder": "Wähle ein Bild aus der Liste, um Details anzuzeigen"
+    },
+    "noImages": "Keine Bilder gefunden",
+    "placeholderText": "Dein generiertes Bild erscheint hier",
+    "table": {
+      "actions": "Aktionen",
+      "created": "Erstellt",
+      "model": "Modell",
+      "preview": "Vorschau",
+      "size": "Größe",
+      "status": "Status",
+      "title": "Titel"
+    },
+    "title": "Bild-Galerie"
+  },
+  "lyricArchitect": {
+    "buttons": {
+      "apply": "Architektur anwenden",
+      "reset": "Zurücksetzen"
+    },
+    "messages": {
+      "removeError": "Fehler beim Entfernen des Abschnitts: {{message}}",
+      "resetSuccess": "Song-Architektur auf Standard zurückgesetzt",
+      "saveError": "Fehler beim Speichern der Konfiguration: {{message}}",
+      "updateError": "Fehler beim Aktualisieren der Konfiguration: {{message}}"
+    },
+    "panels": {
+      "availableSections": "Verfügbare Abschnitte",
+      "songStructure": "Song-Struktur"
+    },
+    "preview": {
+      "label": "Vorschau:"
+    },
+    "sections": {
+      "alreadyAdded": "Bereits hinzugefügt",
+      "usedMultiple": "{{count}} Mal verwendet",
+      "usedOnce": "{{count}} Mal verwendet"
+    },
+    "structure": {
+      "empty": "Ziehe Abschnitte hierher, um deine Song-Struktur zu erstellen",
+      "removeSection": "Abschnitt entfernen"
+    },
+    "title": "Songtext-Architektur"
+  },
+  "musicStyleChooser": {
+    "buttons": {
+      "apply": "Stile anwenden",
+      "reset": "Zurücksetzen",
+      "resetTitle": "Alle Auswahlen zurücksetzen"
+    },
+    "categories": {
+      "instruments": "INSTRUMENTE (mehrere auswählbar)",
+      "styles": "STILE (mehrere auswählbar)",
+      "themes": "THEMEN (mehrere auswählbar)"
+    },
+    "messages": {
+      "resetSuccess": "Musikstil-Auswahl zurückgesetzt",
+      "saveError": "Fehler beim Speichern der Konfiguration: {{message}}",
+      "voiceRequired": "Bitte wähle entweder männliche oder weibliche Stimme für den Text-Modus"
+    },
+    "preview": {
+      "empty": "Keine Stile, Instrumente oder Themen ausgewählt",
+      "title": "Vorschau"
+    },
+    "summary": {
+      "empty": "Keine Auswahl",
+      "instrument": "Instrument",
+      "instruments": "Instrumente",
+      "selected": "ausgewählt",
+      "style": "Stil",
+      "styles": "Stile",
+      "theme": "Thema",
+      "themes": "Themen"
+    },
+    "title": "Musikstil-Auswahl"
+  },
+  "notifications": {
+    "copied": "In Zwischenablage kopiert",
+    "deleted": "Erfolgreich gelöscht",
+    "error": "Fehler",
+    "imageCreated": "Bild erfolgreich erstellt",
+    "info": "Info",
+    "passwordChanged": "Passwort erfolgreich geändert",
+    "profileUpdated": "Profil erfolgreich aktualisiert",
+    "settingsUpdated": "Einstellungen erfolgreich aktualisiert",
+    "songCreated": "Song erfolgreich erstellt",
+    "success": "Erfolg",
+    "warning": "Warnung"
   },
   "openaiChat": {
     "title": "OpenAI Chat (Extern)"
   },
   "passwordChangeModal": {
-    "title": "Passwort ändern",
-    "fields": {
-      "currentPassword": "Aktuelles Passwort",
-      "newPassword": "Neues Passwort",
-      "confirmPassword": "Passwort bestätigen"
-    },
-    "placeholders": {
-      "currentPassword": "Gib dein aktuelles Passwort ein",
-      "newPassword": "Gib dein neues Passwort ein",
-      "confirmPassword": "Wiederhole dein neues Passwort"
+    "actions": {
+      "changePassword": "Passwort ändern",
+      "changing": "Ändere..."
     },
     "aria": {
-      "showPassword": "Passwort anzeigen",
-      "hidePassword": "Passwort verbergen"
+      "hidePassword": "Passwort verbergen",
+      "showPassword": "Passwort anzeigen"
     },
     "errors": {
-      "required": "{{field}} ist erforderlich",
       "minLength": "{{field}} muss mindestens 6 Zeichen lang sein",
-      "passwordMismatch": "Passwörter stimmen nicht überein"
+      "passwordMismatch": "Passwörter stimmen nicht überein",
+      "required": "{{field}} ist erforderlich"
+    },
+    "fields": {
+      "confirmPassword": "Passwort bestätigen",
+      "currentPassword": "Aktuelles Passwort",
+      "newPassword": "Neues Passwort"
     },
     "info": {
       "requirement": "Passwort muss mindestens 6 Zeichen lang sein."
     },
-    "actions": {
-      "changing": "Ändere...",
-      "changePassword": "Passwort ändern"
-    },
     "notifications": {
-      "success": "Passwort erfolgreich geändert",
-      "error": "Fehler beim Ändern des Passworts"
-    }
-  },
-  "songProfile": {
-    "title": "Profil-Steuerung",
-    "actions": {
-      "refresh": "Kontoinformationen aktualisieren"
+      "error": "Fehler beim Ändern des Passworts",
+      "success": "Passwort erfolgreich geändert"
     },
-    "account": {
-      "title": "Kontoinformationen",
-      "murekaAccount": "Mureka-Konto",
-      "currentBalance": "Aktuelles Guthaben",
-      "totalSpending": "Gesamtausgaben",
-      "totalRecharge": "Gesamtaufladung",
-      "requestLimit": "Anfragelimit",
-      "concurrentRequests": "gleichzeitige Anfragen"
+    "placeholders": {
+      "confirmPassword": "Wiederhole dein neues Passwort",
+      "currentPassword": "Gib dein aktuelles Passwort ein",
+      "newPassword": "Gib dein neues Passwort ein"
     },
-    "empty": {
-      "title": "Keine Kontoinformationen verfügbar",
-      "description": "Kontoinformationen konnten nicht geladen werden. Bitte aktualisiere die Seite oder überprüfe deine Verbindung."
-    },
-    "notifications": {
-      "loadError": "Fehler beim Laden der Rechnungsinformationen"
-    }
+    "title": "Passwort ändern"
   },
   "promptTemplates": {
-    "title": "Prompt Vorlagen",
+    "actions": {
+      "cancel": "Abbrechen",
+      "edit": "Bearbeiten",
+      "save": "Speichern"
+    },
+    "detail": {
+      "aiParameters": "KI-Parameter",
+      "defaults": {
+        "maxTokens": "Standard (2048)",
+        "model": "Standard (llama3.2:3b)",
+        "noDescription": "Keine Beschreibung",
+        "temperature": "Standard (0.7)"
+      },
+      "fields": {
+        "description": "Beschreibung",
+        "maxTokens": "Max. Token",
+        "model": "Modell",
+        "postCondition": "Nachbedingung",
+        "preCondition": "Vorbedingung",
+        "temperature": "Temperatur"
+      },
+      "noSelection": "Wähle eine Vorlage um Details anzuzeigen",
+      "placeholders": {
+        "description": "Beschreibung eingeben...",
+        "postCondition": "Nachbedingung eingeben...",
+        "preCondition": "Vorbedingung eingeben..."
+      },
+      "tokensHint": "(ca. {{words}} Wörter)"
+    },
     "list": {
       "count": "{{count}} Vorlagen",
       "noTemplates": "Keine Vorlagen verfügbar",
@@ -422,236 +394,349 @@
         "inactive": "Inaktiv"
       }
     },
-    "detail": {
-      "noSelection": "Wähle eine Vorlage um Details anzuzeigen",
-      "aiParameters": "KI-Parameter",
-      "tokensHint": "(ca. {{words}} Wörter)",
-      "fields": {
-        "description": "Beschreibung",
-        "model": "Modell",
-        "temperature": "Temperatur",
-        "maxTokens": "Max. Token",
-        "preCondition": "Vorbedingung",
-        "postCondition": "Nachbedingung"
-      },
-      "defaults": {
-        "noDescription": "Keine Beschreibung",
-        "model": "Standard (llama3.2:3b)",
-        "temperature": "Standard (0.7)",
-        "maxTokens": "Standard (2048)"
-      },
-      "placeholders": {
-        "description": "Beschreibung eingeben...",
-        "preCondition": "Vorbedingung eingeben...",
-        "postCondition": "Nachbedingung eingeben..."
-      }
-    },
-    "actions": {
-      "edit": "Bearbeiten",
-      "save": "Speichern",
-      "cancel": "Abbrechen"
-    },
     "notifications": {
-      "loading": "Lade Prompt Vorlagen...",
-      "saving": "Speichere Vorlage...",
       "loadError": "Fehler beim Laden der Vorlagen: {{message}}",
-      "saveError": "Fehler beim Speichern der Vorlage: {{message}}"
-    }
+      "loading": "Lade Prompt Vorlagen...",
+      "saveError": "Fehler beim Speichern der Vorlage: {{message}}",
+      "saving": "Speichere Vorlage..."
+    },
+    "title": "Prompt Vorlagen"
   },
-  "musicStyleChooser": {
-    "title": "Musikstil-Auswahl",
-    "categories": {
-      "styles": "STILE (mehrere auswählbar)",
-      "instruments": "INSTRUMENTE (mehrere auswählbar)",
-      "themes": "THEMEN (mehrere auswählbar)"
-    },
-    "preview": {
-      "title": "Vorschau",
-      "empty": "Keine Stile, Instrumente oder Themen ausgewählt"
-    },
-    "summary": {
-      "empty": "Keine Auswahl",
-      "selected": "ausgewählt",
-      "style": "Stil",
-      "styles": "Stile",
-      "instrument": "Instrument",
-      "instruments": "Instrumente",
-      "theme": "Thema",
-      "themes": "Themen"
-    },
-    "buttons": {
-      "reset": "Zurücksetzen",
-      "resetTitle": "Alle Auswahlen zurücksetzen",
-      "apply": "Stile anwenden"
-    },
-    "messages": {
-      "resetSuccess": "Musikstil-Auswahl zurückgesetzt",
-      "voiceRequired": "Bitte wähle entweder männliche oder weibliche Stimme für den Text-Modus",
-      "saveError": "Fehler beim Speichern der Konfiguration: {{message}}"
-    }
-  },
-  "lyricArchitect": {
-    "title": "Songtext-Architektur",
-    "panels": {
-      "songStructure": "Song-Struktur",
-      "availableSections": "Verfügbare Abschnitte"
-    },
-    "preview": {
-      "label": "Vorschau:"
-    },
-    "structure": {
-      "empty": "Ziehe Abschnitte hierher, um deine Song-Struktur zu erstellen",
-      "removeSection": "Abschnitt entfernen"
-    },
-    "sections": {
-      "alreadyAdded": "Bereits hinzugefügt",
-      "usedOnce": "{{count}} Mal verwendet",
-      "usedMultiple": "{{count}} Mal verwendet"
-    },
-    "buttons": {
-      "reset": "Zurücksetzen",
-      "apply": "Architektur anwenden"
-    },
-    "messages": {
-      "resetSuccess": "Song-Architektur auf Standard zurückgesetzt",
-      "removeError": "Fehler beim Entfernen des Abschnitts: {{message}}",
-      "saveError": "Fehler beim Speichern der Konfiguration: {{message}}",
-      "updateError": "Fehler beim Aktualisieren der Konfiguration: {{message}}"
-    }
-  },
-  "detailPanel": {
-    "songDetails": "Song-Details",
-    "imageDetails": "Bild-Details",
-    "title": "Titel",
-    "lyrics": "Songtext",
-    "prompt": "Prompt",
-    "model": "Modell",
-    "status": "Status",
-    "workflow": "Workflow",
-    "rating": "Bewertung",
-    "jobId": "Job-ID",
-    "created": "Erstellt",
-    "completed": "Abgeschlossen",
-    "tags": "Tags",
-    "addTag": "Tag hinzufügen...",
-    "noLyrics": "Kein Songtext verfügbar",
-    "noTags": "Keine Tags"
+  "sideMenu": {
+    "aiChat": "AI Chat",
+    "aiUsage": "AI Nutzung",
+    "brandName": "thWelly's AI Toolbox",
+    "createImage": "Erstellen",
+    "createSong": "Erstellen",
+    "external": "Extern",
+    "gallery": "Galerie",
+    "humanize": "Humanisieren",
+    "library": "Bibliothek",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "music": "Musik",
+    "ollamaChat": "Ollama Chat",
+    "openaiChat": "OpenAI Chat",
+    "picture": "Bild",
+    "profile": "Profil",
+    "promptTemplates": "Prompt Vorlagen",
+    "settings": "Einstellungen"
   },
   "songDetailPanel": {
-    "loading": "Lade Song-Details...",
-    "selectSong": "Wähle einen Song aus der Liste, um Details anzuzeigen",
-    "untitled": "Unbenannter Song",
-    "title": {
-      "edit": "Bearbeiten",
-      "save": "Speichern",
-      "cancel": "Abbrechen"
-    },
-    "tags": {
-      "label": "Tags:",
-      "noTags": "Keine Tags",
-      "editTitle": "Tags bearbeiten:",
-      "styleCategory": "Stil",
-      "themeCategory": "Thema"
-    },
-    "workflow": {
-      "label": "Workflow:",
-      "editTitle": "Workflow bearbeiten:",
-      "noWorkflow": "Kein Workflow",
-      "inUse": "In Verwendung",
-      "onWork": "In Arbeit",
-      "notUsed": "Nicht verwendet"
-    },
     "choices": {
-      "title": "Song-Auswahl:",
-      "noChoices": "Für diesen Song sind keine Song-Auswahl verfügbar.",
+      "downloadFlac": "FLAC herunterladen",
+      "downloadStems": "Stems herunterladen",
       "duration": "Dauer",
       "flacFile": "FLAC-Datei",
-      "mp3File": "MP3-Datei",
-      "stemGeneration": "Stem-Erzeugung",
-      "rating": "Bewertung",
-      "downloadFlac": "FLAC herunterladen",
-      "play": "Abspielen",
-      "playing": "Spielt ab",
       "generateStems": "Stems erzeugen",
       "generating": "Erzeuge...",
-      "downloadStems": "Stems herunterladen",
+      "mp3File": "MP3-Datei",
+      "noChoices": "Für diesen Song sind keine Song-Auswahl verfügbar.",
       "notAvailable": "N/V",
+      "play": "Abspielen",
+      "playing": "Spielt ab",
+      "rating": "Bewertung",
+      "stemGeneration": "Stem-Erzeugung",
+      "thumbsDown": "Daumen runter",
       "thumbsUp": "Daumen hoch",
-      "thumbsDown": "Daumen runter"
+      "title": "Song-Auswahl:"
     },
+    "errors": {
+      "generateStem": "Fehler beim Erzeugen der Stems",
+      "loadSong": "Fehler beim Laden des Songs",
+      "loadSongDetails": "Fehler beim Laden der Song-Details",
+      "stemFailed": "Stem-Erzeugung fehlgeschlagen oder unvollständig.",
+      "stemTimeout": "Zeitüberschreitung nach 2 Minuten",
+      "updateRating": "Fehler beim Aktualisieren der Bewertung",
+      "updateTags": "Fehler beim Aktualisieren der Tags",
+      "updateTitle": "Fehler beim Aktualisieren des Titels",
+      "updateWorkflow": "Fehler beim Aktualisieren des Workflows"
+    },
+    "loading": "Lade Song-Details...",
     "lyrics": {
-      "label": "Songtext:",
-      "showButton": "Songtext anzeigen",
-      "dialogTitle": "Songtext - {{title}}",
+      "characters": "Zeichen",
       "copyAll": "Alles kopieren",
-      "characters": "Zeichen"
+      "dialogTitle": "Songtext - {{title}}",
+      "label": "Songtext:",
+      "showButton": "Songtext anzeigen"
     },
     "prompt": {
       "label": "Stil-Prompt:"
+    },
+    "selectSong": "Wähle einen Song aus der Liste, um Details anzuzeigen",
+    "tags": {
+      "editTitle": "Tags bearbeiten:",
+      "label": "Tags:",
+      "noTags": "Keine Tags",
+      "styleCategory": "Stil",
+      "themeCategory": "Thema"
+    },
+    "title": {
+      "cancel": "Abbrechen",
+      "edit": "Bearbeiten",
+      "save": "Speichern"
     },
     "type": {
       "instrumental": "Instrumental",
       "withVocals": "Mit Gesang"
     },
-    "errors": {
-      "updateTitle": "Fehler beim Aktualisieren des Titels",
-      "updateTags": "Fehler beim Aktualisieren der Tags",
-      "updateWorkflow": "Fehler beim Aktualisieren des Workflows",
-      "generateStem": "Fehler beim Erzeugen der Stems",
-      "stemFailed": "Stem-Erzeugung fehlgeschlagen oder unvollständig.",
-      "stemTimeout": "Zeitüberschreitung nach 2 Minuten",
-      "updateRating": "Fehler beim Aktualisieren der Bewertung",
-      "loadSong": "Fehler beim Laden des Songs",
-      "loadSongDetails": "Fehler beim Laden der Song-Details"
+    "untitled": "Unbenannter Song",
+    "workflow": {
+      "editTitle": "Workflow bearbeiten:",
+      "inUse": "In Verwendung",
+      "label": "Workflow:",
+      "noWorkflow": "Kein Workflow",
+      "notUsed": "Nicht verwendet",
+      "onWork": "In Arbeit"
     }
   },
-  "imageDetailPanel": {
-    "title": "Bild-Details",
-    "placeholder": "Wähle ein Bild aus der Liste, um Details anzuzeigen",
-    "loading": "Lade Bild-Details...",
-    "untitled": "Unbenanntes Bild",
-    "prompt": {
-      "label": "Prompt:"
+  "songGenerator": {
+    "charCounter": "{{count}}/50",
+    "charactersCount": "Zeichen",
+    "costInfo": "Song-Erstellung: ~$0.15 pro Stück",
+    "createButton": "Song erstellen",
+    "createInstrumental": "Instrumental erstellen",
+    "createLyrics": "Text erstellen",
+    "creating": "Erstelle...",
+    "enhanceStylePrompt": "Stil-Prompt verbessern",
+    "errors": {
+      "errorFetchingStatus": "Fehler beim Abrufen des Status",
+      "errorInitInstrumental": "Fehler beim Initiieren der Instrumental-Erstellung.",
+      "errorInitSong": "Fehler beim Initiieren der Song-Erstellung.",
+      "generationFailed": "Song-Erstellung fehlgeschlagen",
+      "instrumentalFailed": "Instrumental-Erstellung fehlgeschlagen",
+      "lyricsRequired": "Bitte gib zuerst einen Songtext ein",
+      "promptRequired": "Bitte gib zuerst einen Musikstil-Prompt ein",
+      "textRequired": "Bitte gib zuerst einen Text ein"
     },
-    "alt": {
-      "image": "Generiertes Bild"
+    "generateTitle": "Titel generieren",
+    "generateTitleFallback": "Erstelle einen kreativen Song-Titel",
+    "instrumental": "Instrumental",
+    "instrumentalNotice": "Songtexte sind für Instrumentals deaktiviert",
+    "loadingMessage": "Dies kann mehrere Minuten dauern",
+    "lyricArchitecture": "Text-Struktur",
+    "lyricsActions": "Text-Aktionen",
+    "lyricsLabel": "Songtext:",
+    "lyricsPlaceholder": "Gib deinen Songtext oder eine Song-Idee ein...",
+    "modelLabel": "Modell:",
+    "musicStyleActions": "Musikstil-Aktionen",
+    "musicStyleLabel": "Musikstil Prompt:",
+    "musicStylePlaceholder": "Beschreibe den Musikstil (z.B. fröhlicher Pop, melancholische Ballade, Rock-Hymne)...",
+    "player": {
+      "muteUnmute": "Stumm/Laut",
+      "playPause": "Abspielen/Pause",
+      "selectSongToPlay": "Wähle einen Song zum Abspielen aus",
+      "stop": "Stopp"
+    },
+    "progress": {
+      "enhancing": "Verbessere Stil-Prompt...",
+      "enhancinghint": "KI verbessert deine Musikstil-Beschreibung",
+      "generatingLyrics": "Erstelle Text...",
+      "generatingLyricsHint": "KI generiert Song-Text aus deinem Text",
+      "generatingTitle": "Erstelle Titel...",
+      "generatingTitleHint": "KI erstellt einen Song-Titel für dich",
+      "translatingLyrics": "Übersetze Text...",
+      "translatingLyricsHint": "KI übersetzt deinen Text ins Englische",
+      "translatingPrompt": "Übersetze Stil-Prompt...",
+      "translatingPromptHint": "KI übersetzt deine Musikstil-Beschreibung ins Englische"
+    },
+    "resetButton": "Zurücksetzen",
+    "status": {
+      "acquiring": "Erfasse Mureka Slot",
+      "generatingAi": "Erstelle Song mit KI",
+      "initializing": "Initialisiere Anfrage",
+      "polling": "Verarbeite mit Mureka",
+      "preparing": "Bereite Song-Erstellung vor",
+      "processing": "Verarbeite",
+      "processingRequest": "Verarbeite Anfrage",
+      "queued": "In Warteschlange",
+      "starting": "Starte Song-Erstellung",
+      "timeout": "Verarbeite (Timeout-Behandlung)"
+    },
+    "styleChooser": "Stil-Auswahl",
+    "success": {
+      "architectureUpdated": "Song-Architektur erfolgreich aktualisiert",
+      "styleApplied": "Musikstil-Auswahl erfolgreich angewandt"
+    },
+    "title": "Song erstellen",
+    "titleActions": "Titel-Aktionen",
+    "titleLabel": "Titel:",
+    "titlePlaceholder": "Song-Titel eingeben (max. 50 Zeichen)...",
+    "titleRequired": "*",
+    "translateToEnglish": "Ins Englische übersetzen",
+    "withLyrics": "Mit Text"
+  },
+  "songProfile": {
+    "account": {
+      "concurrentRequests": "gleichzeitige Anfragen",
+      "currentBalance": "Aktuelles Guthaben",
+      "murekaAccount": "Mureka-Konto",
+      "requestLimit": "Anfragelimit",
+      "title": "Kontoinformationen",
+      "totalRecharge": "Gesamtaufladung",
+      "totalSpending": "Gesamtausgaben"
     },
     "actions": {
-      "download": "Original herunterladen",
-      "fullSize": "Vollbildansicht"
+      "refresh": "Kontoinformationen aktualisieren"
+    },
+    "empty": {
+      "description": "Kontoinformationen konnten nicht geladen werden. Bitte aktualisiere die Seite oder überprüfe deine Verbindung.",
+      "title": "Keine Kontoinformationen verfügbar"
+    },
+    "notifications": {
+      "loadError": "Fehler beim Laden der Rechnungsinformationen"
+    },
+    "title": "Profil-Steuerung"
+  },
+  "songView": {
+    "actions": {
+      "close": "Schließen",
+      "copyAll": "Alles kopieren",
+      "copyLyrics": "Text kopieren",
+      "delete": "Löschen",
+      "deleteCount": "Löschen ({{count}})",
+      "deselectAll": "Alle abwählen",
+      "downloadFlac": "FLAC herunterladen",
+      "downloadMp3": "MP3 herunterladen",
+      "downloadStems": "Stems herunterladen",
+      "exitSelect": "Auswahl beenden",
+      "playAudio": "Audio abspielen",
+      "playPause": "Abspielen/Pause",
+      "refresh": "Aktualisieren",
+      "selectAll": "Alle auswählen",
+      "selectMode": "Auswahlmodus",
+      "stop": "Stopp"
+    },
+    "bulkDelete": {
+      "completed": "Massenlöschung abgeschlossen: {{deleted}} gelöscht",
+      "errors": "{{count}} Fehler",
+      "notFound": "{{count}} nicht gefunden"
+    },
+    "confirmations": {
+      "bulkDelete": "Möchtest du wirklich {{count}} ausgewählte(n) Song(s) löschen?"
+    },
+    "dialogs": {
+      "lyricsTitle": "Songtext - {{title}}",
+      "stylePromptTitle": "Stil-Prompt - {{title}}"
     },
     "errors": {
-      "updateTitle": "Fehler beim Aktualisieren des Titels",
-      "loadImage": "Fehler beim Laden der Bild-Details",
-      "failedToLoad": "Fehler beim Laden des Bildes"
+      "cannotDeleteProtected": "Songs mit {{workflow}}-Workflow können nicht gelöscht werden: {{songs}}",
+      "cannotSelectProtected": "Songs mit {{workflow}}-Workflow können nicht zum Löschen ausgewählt werden",
+      "copyFailed": "Fehler beim Kopieren in die Zwischenablage",
+      "copyLyricsFailed": "Fehler beim Kopieren des Songtextes in die Zwischenablage",
+      "deletingSongs": "Fehler beim Löschen der Songs: {{error}}",
+      "loadingMore": "Fehler beim Laden weiterer Songs: {{error}}",
+      "loadingSongs": "Fehler beim Laden der Songs: {{error}}",
+      "noSongsSelected": "Keine Songs zum Löschen ausgewählt",
+      "updatingRating": "Fehler beim Aktualisieren der Bewertung: {{error}}",
+      "updatingTags": "Fehler beim Aktualisieren der Tags: {{error}}",
+      "updatingTitle": "Fehler beim Aktualisieren des Titels: {{error}}",
+      "updatingWorkflow": "Fehler beim Aktualisieren des Workflows: {{error}}"
+    },
+    "filters": {
+      "all": "Alle",
+      "inUse": "In Verwendung",
+      "notUsed": "Nicht verwendet",
+      "onWork": "In Arbeit"
+    },
+    "library": {
+      "clearSearch": "Suche löschen",
+      "header": "Verfügbare Songs",
+      "searchPlaceholder": "Suche in Titel, Text & Tags...",
+      "songsCount": "{{count}} Songs"
+    },
+    "messages": {
+      "adjustSearch": "Versuche deinen Suchbegriff anzupassen oder lösche die Suche, um alle Songs zu sehen.",
+      "loadingSongs": "Lade Songs...",
+      "noLyrics": "Kein Songtext",
+      "noLyricsAvailable": "Kein Songtext verfügbar",
+      "noSearchResults": "Keine Songs entsprechen deinen Suchkriterien.",
+      "noSongSelected": "Kein Song ausgewählt",
+      "noSongsInDb": "Keine Songs in der Datenbank gefunden.",
+      "noStylePrompt": "Kein Stil-Prompt verfügbar",
+      "noTags": "Keine Tags",
+      "selectSongPlaceholder": "Wähle einen Song aus der Liste, um Details anzuzeigen",
+      "unknownSong": "Unbekannter Song",
+      "untitled": "Unbenannt",
+      "untitledSong": "Unbenannter Song"
+    },
+    "noSongs": "Keine Songs gefunden",
+    "pagination": {
+      "itemsPerPage": "Einträge pro Seite:",
+      "of": "von"
+    },
+    "placeholderText": "Dein generierter Song erscheint hier",
+    "table": {
+      "actions": "Aktionen",
+      "created": "Erstellt",
+      "model": "Modell",
+      "rating": "Bewertung",
+      "status": "Status",
+      "title": "Titel",
+      "workflow": "Workflow"
+    },
+    "title": "Song-Bibliothek",
+    "tooltips": {
+      "cannotDelete": "Dieser Song kann nicht gelöscht werden",
+      "cannotDeleteInUse": "Songs mit In Verwendung-Workflow können nicht gelöscht werden",
+      "cannotDeleteOnWork": "Songs mit In Arbeit-Workflow können nicht gelöscht werden",
+      "inUseNoDelete": "Dieser Song ist in Verwendung und kann nicht gelöscht werden",
+      "instrumental": "Instrumental",
+      "onWorkNoDelete": "Dieser Song ist in Arbeit und kann nicht gelöscht werden",
+      "withVocals": "Mit Gesang"
     }
+  },
+  "userProfile": {
+    "accountInfo": "Kontoinformationen",
+    "active": "Aktiv",
+    "cancelButton": "Abbrechen",
+    "changePassword": "Passwort ändern",
+    "editButton": "Bearbeiten",
+    "email": "E-Mail",
+    "emailHint": "E-Mail kann nicht geändert werden",
+    "errors": {
+      "errorLoadingProfile": "Fehler beim Laden des Profils",
+      "errorUpdatingProfile": "Fehler beim Aktualisieren des Profils",
+      "minLength": "{{field}} muss mindestens {{length}} Zeichen lang sein",
+      "required": "{{field}} ist erforderlich"
+    },
+    "fieldNames": {
+      "firstName": "Vorname",
+      "lastName": "Nachname"
+    },
+    "firstName": "Vorname",
+    "firstNamePlaceholder": "Vorname eingeben",
+    "imagesPerPage": "Bilder pro Seite",
+    "imagesPerPageHint": "5-100 Bilder pro Seite",
+    "inactive": "Inaktiv",
+    "language": "Sprache",
+    "languageHint": "Wähle deine bevorzugte Sprache",
+    "lastLogin": "Letzter Login:",
+    "lastName": "Nachname",
+    "lastNamePlaceholder": "Nachname eingeben",
+    "loadingProfile": "Profil wird geladen...",
+    "memberSince": "Mitglied seit:",
+    "murekaAccount": "Mureka-Konto",
+    "notVerified": "Nicht verifiziert",
+    "notifications": {
+      "imageListLimitUpdated": "Bild-Listen-Limit aktualisiert",
+      "languageUpdated": "Sprache aktualisiert",
+      "settingsReset": "Einstellungen auf Standard zurückgesetzt",
+      "songListLimitUpdated": "Song-Listen-Limit aktualisiert"
+    },
+    "refreshButton": "Aktualisieren",
+    "resetToDefaults": "Auf Standard zurücksetzen",
+    "saveButton": "Speichern",
+    "saving": "Speichere...",
+    "songsPerPage": "Songs pro Seite",
+    "songsPerPageHint": "5-100 Songs pro Seite",
+    "title": "Benutzerprofil",
+    "unknown": "Unbekannt",
+    "unknownUser": "Unbekannter Benutzer",
+    "userSettings": "Benutzereinstellungen",
+    "verified": "Verifiziert"
   },
   "versionCheck": {
     "newVersion": "Neue Version {{version}} verfügbar!\nDie Anwendung wird jetzt neu geladen."
-  },
-  "authInterceptor": {
-    "sessionExpired": "Sitzung abgelaufen. Bitte melde dich erneut an.",
-    "sessionTimeout": "Zeitüberschreitung bei der Sitzungsvalidierung. Bitte melde dich erneut an."
-  },
-  "notifications": {
-    "success": "Erfolg",
-    "error": "Fehler",
-    "warning": "Warnung",
-    "info": "Info",
-    "songCreated": "Song erfolgreich erstellt",
-    "imageCreated": "Bild erfolgreich erstellt",
-    "settingsUpdated": "Einstellungen erfolgreich aktualisiert",
-    "profileUpdated": "Profil erfolgreich aktualisiert",
-    "passwordChanged": "Passwort erfolgreich geändert",
-    "copied": "In Zwischenablage kopiert",
-    "deleted": "Erfolgreich gelöscht"
-  },
-  "errors": {
-    "required": "Dieses Feld ist erforderlich",
-    "minLength": "Muss mindestens {{length}} Zeichen lang sein",
-    "maxLength": "Darf maximal {{length}} Zeichen lang sein",
-    "loadingError": "Fehler beim Laden der Daten",
-    "savingError": "Fehler beim Speichern der Daten",
-    "networkError": "Netzwerkfehler aufgetreten"
   }
 }
