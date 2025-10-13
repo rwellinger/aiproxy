@@ -16,16 +16,16 @@
         <div class="nav-group">
             <span class="group-label">
                 <i class="fas fa-robot"></i>
-                AI Chat
+                {{ 'sideMenu.aiChat' | translate }}
             </span>
             <div class="group-items">
                 <a routerLink="/ai-chat" routerLinkActive="active">
                     <i class="fas fa-server"></i>
-                    Ollama Chat
+                    {{ 'sideMenu.ollamaChat' | translate }}
                 </a>
                 <a routerLink="/openai-chat" routerLinkActive="active">
                     <i class="fas fa-cloud"></i>
-                    OpenAI Chat
+                    {{ 'sideMenu.openaiChat' | translate }}
                 </a>
             </div>
         </div>
@@ -33,16 +33,16 @@
         <div class="nav-group">
             <span class="group-label">
                 <i class="fas fa-image"></i>
-                Picture
+                {{ 'sideMenu.picture' | translate }}
             </span>
             <div class="group-items">
                 <a routerLink="/imageview" routerLinkActive="active">
                     <i class="fas fa-images"></i>
-                    Gallery
+                    {{ 'sideMenu.gallery' | translate }}
                 </a>
                 <a routerLink="/imagegen" routerLinkActive="active">
                     <i class="fas fa-plus"></i>
-                    Create
+                    {{ 'sideMenu.createImage' | translate }}
                 </a>
             </div>
         </div>
@@ -50,16 +50,16 @@
         <div class="nav-group">
             <span class="group-label">
                 <i class="fas fa-music"></i>
-                Music
+                {{ 'sideMenu.music' | translate }}
             </span>
             <div class="group-items">
                 <a routerLink="/songview" routerLinkActive="active">
                     <i class="fas fa-list"></i>
-                    Library
+                    {{ 'sideMenu.library' | translate }}
                 </a>
                 <a routerLink="/songgen" routerLinkActive="active">
                     <i class="fas fa-plus"></i>
-                    Create
+                    {{ 'sideMenu.createSong' | translate }}
                 </a>
             </div>
         </div>
@@ -67,16 +67,16 @@
         <div class="nav-group">
             <span class="group-label">
                 <i class="fas fa-external-link-alt"></i>
-                External
+                {{ 'sideMenu.external' | translate }}
             </span>
             <div class="group-items">
                 <a href="https://platform.openai.com/usage" class="external-link" target="_blank">
                     <i class="fas fa-chart-line"></i>
-                    AI Usage
+                    {{ 'sideMenu.aiUsage' | translate }}
                 </a>
                 <a href="https://www.paraphrasetool.ai/humanize-ai-text" class="external-link" target="_blank">
                     <i class="fas fa-user-edit"></i>
-                    Humanize
+                    {{ 'sideMenu.humanize' | translate }}
                 </a>
             </div>
         </div>
@@ -84,12 +84,12 @@
         <div class="nav-group">
             <span class="group-label">
                 <i class="fas fa-cogs"></i>
-                Settings
+                {{ 'sideMenu.settings' | translate }}
             </span>
             <div class="group-items">
                 <a routerLink="/prompt-templates" routerLinkActive="active">
                     <i class="fas fa-file-text"></i>
-                    Prompt Templates
+                    {{ 'sideMenu.promptTemplates' | translate }}
                 </a>
             </div>
         </div>
@@ -102,11 +102,11 @@
             <div class="group-items">
                 <a routerLink="/profile" routerLinkActive="active">
                     <i class="fas fa-user-circle"></i>
-                    Profile
+                    {{ 'sideMenu.profile' | translate }}
                 </a>
                 <a href="javascript:void(0)" (click)="onLogout()" class="logout-link">
                     <i class="fas fa-sign-out-alt"></i>
-                    Logout
+                    {{ 'sideMenu.logout' | translate }}
                 </a>
             </div>
         </div>
@@ -115,7 +115,7 @@
         <div class="auth-section" *ngIf="authState && !authState.isAuthenticated">
             <a routerLink="/login" class="login-button">
                 <i class="fas fa-sign-in-alt"></i>
-                Login
+                {{ 'sideMenu.login' | translate }}
             </a>
         </div>
     </nav>

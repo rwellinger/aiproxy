@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { UserSettings, DEFAULT_USER_SETTINGS } from '../models/user-settings.model';
+import { UserSettings, DEFAULT_USER_SETTINGS, Language } from '../models/user-settings.model';
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +32,10 @@ export class UserSettingsService {
 
   updateImageListLimit(limit: number): void {
     this.updateSettings({ imageListLimit: limit });
+  }
+
+  updateLanguage(language: Language): void {
+    this.updateSettings({ language });
   }
 
   resetToDefaults(): void {

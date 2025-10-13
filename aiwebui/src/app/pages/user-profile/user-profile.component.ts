@@ -8,6 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSelectModule } from '@angular/material/select';
+import { TranslateModule } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -18,8 +20,9 @@ import { UserService } from '../../services/business/user.service';
 import { AuthService } from '../../services/business/auth.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import { UserSettingsService } from '../../services/user-settings.service';
+import { LanguageService } from '../../services/language.service';
 import { User } from '../../models/user.model';
-import { UserSettings } from '../../models/user-settings.model';
+import { UserSettings, Language } from '../../models/user-settings.model';
 
 @Component({
   selector: 'app-user-profile',
@@ -33,6 +36,8 @@ import { UserSettings } from '../../models/user-settings.model';
     MatCardModule,
     MatIconModule,
     MatSnackBarModule,
+    MatSelectModule,
+    TranslateModule,
     SongProfileComponent
   ],
   templateUrl: './user-profile.component.html',
@@ -55,6 +60,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private settingsService = inject(UserSettingsService);
+  private languageService = inject(LanguageService);
 
   constructor() {
     this.userForm = this.fb.group({
@@ -64,7 +70,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     this.settingsForm = this.fb.group({
       songListLimit: [10, [Validators.required, Validators.min(5), Validators.max(100)]],
-      imageListLimit: [10, [Validators.required, Validators.min(5), Validators.max(100)]]
+      imageListLimit: [10, [Validators.required, Validators.min(5), Validators.max(100)]],
+      language: ['en', [Validators.required]]
     });
   }
 
@@ -307,5 +314,30 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   public resetSettingsToDefaults(): void {
     this.settingsService.resetToDefaults();
     this.notificationService.success('Settings reset to defaults');
+  }
+
+  /**
+   * Update language setting
+   */
+  public updateLanguage(): void {
+    const value = this.settingsForm.get('language')?.value as Language;
+    if (value) {
+      this.languageService.changeLanguage(value);
+      this.notificationService.success('Language updated');
+    }
+  }
+
+  /**
+   * Get available languages
+   */
+  public getAvailableLanguages(): {code: Language, name: string}[] {
+    return this.languageService.getAvailableLanguages();
+  }
+
+  /**
+   * Get current language
+   */
+  public getCurrentLanguage(): Language {
+    return this.languageService.getCurrentLanguage();
   }
 }

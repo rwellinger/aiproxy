@@ -27,6 +27,8 @@
     "@angular/platform-browser": "^18.2.13",
     "@angular/platform-browser-dynamic": "^18.2.13",
     "@angular/router": "^18.2.13",
+    "@ngx-translate/core": "^17.0.0",
+    "@ngx-translate/http-loader": "^17.0.0",
     "compromise": "^14.14.4",
     "highlight.js": "^11.11.1",
     "marked": "^16.4.0",
