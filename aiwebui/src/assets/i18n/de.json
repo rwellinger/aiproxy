@@ -357,6 +357,67 @@
       "saveError": "Fehler beim Speichern der Vorlage: {{message}}"
     }
   },
+  "musicStyleChooser": {
+    "title": "Musikstil-Auswahl",
+    "categories": {
+      "styles": "STILE (mehrere auswählbar)",
+      "instruments": "INSTRUMENTE (mehrere auswählbar)",
+      "themes": "THEMEN (mehrere auswählbar)"
+    },
+    "preview": {
+      "title": "Vorschau",
+      "empty": "Keine Stile, Instrumente oder Themen ausgewählt"
+    },
+    "summary": {
+      "empty": "Keine Auswahl",
+      "selected": "ausgewählt",
+      "style": "Stil",
+      "styles": "Stile",
+      "instrument": "Instrument",
+      "instruments": "Instrumente",
+      "theme": "Thema",
+      "themes": "Themen"
+    },
+    "buttons": {
+      "reset": "Zurücksetzen",
+      "resetTitle": "Alle Auswahlen zurücksetzen",
+      "apply": "Stile anwenden"
+    },
+    "messages": {
+      "resetSuccess": "Musikstil-Auswahl zurückgesetzt",
+      "voiceRequired": "Bitte wähle entweder männliche oder weibliche Stimme für den Text-Modus",
+      "saveError": "Fehler beim Speichern der Konfiguration: {{message}}"
+    }
+  },
+  "lyricArchitect": {
+    "title": "Songtext-Architektur",
+    "panels": {
+      "songStructure": "Song-Struktur",
+      "availableSections": "Verfügbare Abschnitte"
+    },
+    "preview": {
+      "label": "Vorschau:"
+    },
+    "structure": {
+      "empty": "Ziehe Abschnitte hierher, um deine Song-Struktur zu erstellen",
+      "removeSection": "Abschnitt entfernen"
+    },
+    "sections": {
+      "alreadyAdded": "Bereits hinzugefügt",
+      "usedOnce": "{{count}} Mal verwendet",
+      "usedMultiple": "{{count}} Mal verwendet"
+    },
+    "buttons": {
+      "reset": "Zurücksetzen",
+      "apply": "Architektur anwenden"
+    },
+    "messages": {
+      "resetSuccess": "Song-Architektur auf Standard zurückgesetzt",
+      "removeError": "Fehler beim Entfernen des Abschnitts: {{message}}",
+      "saveError": "Fehler beim Speichern der Konfiguration: {{message}}",
+      "updateError": "Fehler beim Aktualisieren der Konfiguration: {{message}}"
+    }
+  },
   "detailPanel": {
     "songDetails": "Song-Details",
     "imageDetails": "Bild-Details",

@@ -357,6 +357,67 @@
       "saveError": "Error saving template: {{message}}"
     }
   },
+  "musicStyleChooser": {
+    "title": "Music Style Chooser",
+    "categories": {
+      "styles": "STYLES (select multiple)",
+      "instruments": "INSTRUMENTS (select multiple)",
+      "themes": "THEMES (select multiple)"
+    },
+    "preview": {
+      "title": "Preview",
+      "empty": "No styles, instruments, or themes selected"
+    },
+    "summary": {
+      "empty": "No selection",
+      "selected": "selected",
+      "style": "style",
+      "styles": "styles",
+      "instrument": "instrument",
+      "instruments": "instruments",
+      "theme": "theme",
+      "themes": "themes"
+    },
+    "buttons": {
+      "reset": "Reset",
+      "resetTitle": "Reset all selections",
+      "apply": "Apply Styles"
+    },
+    "messages": {
+      "resetSuccess": "Music style selection reset",
+      "voiceRequired": "Please select either male or female voice for lyrics mode",
+      "saveError": "Error saving configuration: {{message}}"
+    }
+  },
+  "lyricArchitect": {
+    "title": "Lyric Architecture",
+    "panels": {
+      "songStructure": "Song Structure",
+      "availableSections": "Available Sections"
+    },
+    "preview": {
+      "label": "Preview:"
+    },
+    "structure": {
+      "empty": "Drag sections here to build your song structure",
+      "removeSection": "Remove section"
+    },
+    "sections": {
+      "alreadyAdded": "Already added",
+      "usedOnce": "Used {{count}} time",
+      "usedMultiple": "Used {{count}} times"
+    },
+    "buttons": {
+      "reset": "Reset",
+      "apply": "Apply Architecture"
+    },
+    "messages": {
+      "resetSuccess": "Song architecture reset to default",
+      "removeError": "Error removing section: {{message}}",
+      "saveError": "Error saving configuration: {{message}}",
+      "updateError": "Error updating configuration: {{message}}"
+    }
+  },
   "detailPanel": {
     "songDetails": "Song Details",
     "imageDetails": "Image Details",
