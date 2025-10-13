@@ -525,6 +525,9 @@
       "failedToLoad": "Fehler beim Laden des Bildes"
     }
   },
+  "versionCheck": {
+    "newVersion": "Neue Version {{version}} verfügbar!\nDie Anwendung wird jetzt neu geladen."
+  },
   "notifications": {
     "success": "Erfolg",
     "error": "Fehler",

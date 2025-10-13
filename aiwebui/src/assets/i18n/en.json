@@ -525,6 +525,9 @@
       "failedToLoad": "Failed to load image"
     }
   },
+  "versionCheck": {
+    "newVersion": "New version {{version}} available!\nThe application will now reload."
+  },
   "notifications": {
     "success": "Success",
     "error": "Error",

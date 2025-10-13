@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { interval, Observable } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
 
 export interface AppVersion {
   version: string;
@@ -17,6 +18,7 @@ export class VersionCheckService {
   private readonly CHECK_INTERVAL = 15 * 60 * 1000; // 15 minutes
 
   private http = inject(HttpClient);
+  private translate = inject(TranslateService);
 
   /**
    * Initialisiert den Version-Check beim App-Start
@@ -79,8 +81,7 @@ export class VersionCheckService {
 
     // Optional: User-Warnung mit Countdown (auskommentiert für stillen Reload)
     // const confirmed = confirm(
-    //   `Neue Version ${newVersion.version} verfügbar!\n` +
-    //   `Die Anwendung wird jetzt neu geladen.`
+    //   this.translate.instant('versionCheck.newVersion', { version: newVersion.version })
     // );
 
     // Automatischer Reload nach kurzer Verzögerung
