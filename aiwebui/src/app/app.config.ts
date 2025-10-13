@@ -1,4 +1,4 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, APP_INITIALIZER } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { LanguageService } from './services/language.service';
 
 // Custom TranslateLoader implementation
 export class CustomTranslateLoader implements TranslateLoader {
@@ -17,6 +18,11 @@ export class CustomTranslateLoader implements TranslateLoader {
   getTranslation(lang: string): Observable<any> {
     return this.http.get(`${this.prefix}${lang}${this.suffix}`);
   }
+}
+
+// Factory function for APP_INITIALIZER to load translations before app starts
+export function initializeApp(languageService: LanguageService): () => Promise<void> {
+  return () => languageService.initialize();
 }
 
 export const appConfig: ApplicationConfig = {
@@ -32,6 +38,12 @@ export const appConfig: ApplicationConfig = {
         useFactory: (http: HttpClient) => new CustomTranslateLoader(http),
         deps: [HttpClient]
       }
-    })
+    }),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeApp,
+      deps: [LanguageService],
+      multi: true
+    }
   ]
 };
