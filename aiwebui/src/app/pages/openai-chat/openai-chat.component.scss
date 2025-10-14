@@ -540,6 +540,25 @@
     border-top: 1px solid #e0e0e0;
     background: #fff;
 
+    .cost-info-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      color: #1565c0;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+
+      mat-icon {
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+
     .archived-notice {
       display: flex;
       align-items: center;

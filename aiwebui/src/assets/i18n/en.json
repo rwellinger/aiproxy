@@ -320,6 +320,7 @@
     "warning": "Warning"
   },
   "openaiChat": {
+    "costInfo": "Pay-per-use: costs vary by model (~$0.001-0.06 per 1K tokens)",
     "title": "OpenAI Chat (External)"
   },
   "passwordChangeModal": {
