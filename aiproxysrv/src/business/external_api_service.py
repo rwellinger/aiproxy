@@ -1,15 +1,14 @@
 """External API Service - Handles third-party API integrations"""
-import os
-import logging
-import requests
-from typing import Dict, Any
-from config.settings import OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_IMAGE_MODEL
 
-logger = logging.getLogger(__name__)
+import requests
+
+from config.settings import CHAT_DEBUG_LOGGING, OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_IMAGE_MODEL
+from utils.logger import logger
 
 
 class OpenAIAPIError(Exception):
     """Custom exception for OpenAI API errors"""
+
     pass
 
 
@@ -35,40 +34,46 @@ class OpenAIService:
         Raises:
             OpenAIAPIError: If API call fails
         """
-        headers = {
-            'Authorization': f'Bearer {self.api_key}',
-            'Content-Type': 'application/json'
-        }
+        headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
 
-        payload = {
-            'model': self.model,
-            'prompt': prompt,
-            'size': size,
-            'n': 1
-        }
+        payload = {"model": self.model, "prompt": prompt, "size": size, "n": 1}
 
         api_url = f"{self.base_url}/images/generations"
-        logger.info(f"Calling OpenAI Image API: {api_url}")
+
+        # Conditional logging based on CHAT_DEBUG_LOGGING
+        if CHAT_DEBUG_LOGGING:
+            logger.debug(
+                "OpenAI Image API Request",
+                api_url=api_url,
+                model=self.model,
+                prompt=prompt,
+                size=size,
+                full_payload=payload,
+            )
+        else:
+            logger.info("OpenAI image request", model=self.model, size=size, prompt_length=len(prompt))
 
         try:
-            response = requests.post(
-                api_url,
-                headers=headers,
-                json=payload,
-                timeout=30
-            )
-            logger.info(f"OpenAI API Response Status: {response.status_code}")
+            response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+
+            if CHAT_DEBUG_LOGGING:
+                logger.debug("OpenAI Image API response received", status_code=response.status_code)
+            else:
+                logger.info("OpenAI image response", status_code=response.status_code)
+
             response.raise_for_status()
 
         except requests.exceptions.RequestException as e:
-            logger.error(f"OpenAI API Network Error: {type(e).__name__}: {e}")
+            logger.error("OpenAI Image API Network Error", error_type=type(e).__name__, error=str(e))
             raise OpenAIAPIError(f"Network Error: {e}") from e
         except Exception as e:
-            logger.error(f"Unexpected OpenAI API error: {type(e).__name__}: {e}")
+            logger.error("Unexpected OpenAI Image API error", error_type=type(e).__name__, error=str(e))
             raise OpenAIAPIError(f"API Error: {e}") from e
 
         if response.status_code != 200:
-            logger.error(f"OpenAI API Error Response: {response.text}")
+            logger.error(
+                "OpenAI Image API Error Response", status_code=response.status_code, response_text=response.text
+            )
             try:
                 error_data = response.json()
                 raise OpenAIAPIError(f"API Error: {error_data}")
@@ -77,13 +82,22 @@ class OpenAIService:
 
         try:
             response_json = response.json()
-            image_url = response_json['data'][0]['url']
-            logger.info("OpenAI API image URL received successfully")
+            image_url = response_json["data"][0]["url"]
+
+            if CHAT_DEBUG_LOGGING:
+                logger.debug(
+                    "OpenAI Image API Response Details",
+                    image_url=image_url,
+                    response_data_count=len(response_json.get("data", [])),
+                    full_response=response_json,
+                )
+            else:
+                logger.info("OpenAI image generated", url_received=True)
+
             return image_url
 
         except (KeyError, IndexError, ValueError) as e:
-            logger.error(f"Error parsing OpenAI API response: {e}")
-            logger.error(f"Response content: {response.text}")
+            logger.error("Error parsing OpenAI Image API response", error=str(e), response_text=response.text)
             raise OpenAIAPIError(f"Invalid API response format: {e}") from e
 
     def validate_api_key(self) -> bool:

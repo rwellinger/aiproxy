@@ -1,9 +1,12 @@
 """OpenAI Chat Controller - Handles business logic for OpenAI Chat API operations."""
+
 import traceback
+from typing import Any
+
 import requests
-from typing import Tuple, Dict, Any, List
+
+from config.settings import CHAT_DEBUG_LOGGING, OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_TIMEOUT
 from utils.logger import logger
-from config.settings import OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_TIMEOUT
 
 
 class OpenAIChatController:
@@ -15,12 +18,8 @@ class OpenAIChatController:
         self.timeout = OPENAI_TIMEOUT
 
     def send_chat_message(
-        self,
-        model: str,
-        messages: List[Dict[str, str]],
-        temperature: float = 0.7,
-        max_tokens: int = None
-    ) -> Tuple[str, int, int]:
+        self, model: str, messages: list[dict[str, str]], temperature: float = 0.7, max_tokens: int = None
+    ) -> tuple[str, int, int]:
         """
         Send chat message to OpenAI API.
 
@@ -57,31 +56,29 @@ class OpenAIChatController:
             payload["max_tokens"] = max_tokens
 
         # Set headers with API key
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
+        headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
 
-        # Debug: Log complete request details
-        logger.debug(
-            f"OpenAI Chat API Request | "
-            f"URL: {api_url} | "
-            f"Model: {model} | "
-            f"Temperature: {'temperature' in payload} | "
-            f"Messages: {len(messages)} | "
-            f"Payload: {payload}"
-        )
+        # Conditional logging based on CHAT_DEBUG_LOGGING
+        if CHAT_DEBUG_LOGGING:
+            logger.debug(
+                "OpenAI Chat API Request",
+                url=api_url,
+                model=model,
+                temperature=payload.get("temperature", "default"),
+                max_tokens=payload.get("max_tokens", "unlimited"),
+                message_count=len(messages),
+                messages=messages,
+                full_payload=payload,
+            )
+        else:
+            logger.info("OpenAI Chat request", model=model, message_count=len(messages))
 
         try:
-            resp = requests.post(
-                api_url,
-                headers=headers,
-                json=payload,
-                timeout=self.timeout
-            )
+            resp = requests.post(api_url, headers=headers, json=payload, timeout=self.timeout)
 
-            # Log response details before raising for status
-            logger.debug(f"OpenAI API Response Status: {resp.status_code}")
+            # Log response status
+            if CHAT_DEBUG_LOGGING:
+                logger.debug("OpenAI API Response received", status_code=resp.status_code)
 
             # Check for HTTP errors
             if resp.status_code != 200:
@@ -89,19 +86,21 @@ class OpenAIChatController:
                 logger.error(
                     "OpenAI API HTTP Error",
                     status_code=resp.status_code,
-                    response_body=error_body[:500]  # First 500 chars
+                    response_body=error_body[:500],  # First 500 chars
                 )
                 raise OpenAIAPIError(f"HTTP {resp.status_code}: {error_body[:200]}")
 
             resp_json = resp.json()
 
-            # Debug: Log response details
-            logger.debug(
-                f"OpenAI Chat API Response | "
-                f"Response Model: {resp_json.get('model')} | "
-                f"Choices: {len(resp_json.get('choices', []))} | "
-                f"Usage: {resp_json.get('usage')}"
-            )
+            # Debug: Log complete response details
+            if CHAT_DEBUG_LOGGING:
+                logger.debug(
+                    "OpenAI Chat API Response",
+                    response_model=resp_json.get("model"),
+                    choice_count=len(resp_json.get("choices", [])),
+                    usage=resp_json.get("usage"),
+                    full_response=resp_json,
+                )
 
             # Extract assistant message and token counts
             if "choices" in resp_json and len(resp_json["choices"]) > 0:
@@ -113,11 +112,13 @@ class OpenAIChatController:
                 prompt_tokens = usage.get("prompt_tokens", 0)
                 completion_tokens = usage.get("completion_tokens", 0)
 
-                logger.debug(
-                    "Token counts extracted",
-                    prompt_tokens=prompt_tokens,
-                    completion_tokens=completion_tokens
-                )
+                if CHAT_DEBUG_LOGGING:
+                    logger.debug(
+                        "Token counts extracted",
+                        prompt_tokens=prompt_tokens,
+                        completion_tokens=completion_tokens,
+                        content_length=len(content),
+                    )
 
                 return content, prompt_tokens, completion_tokens
             else:
@@ -132,11 +133,11 @@ class OpenAIChatController:
                 "Unexpected OpenAI API error",
                 error_type=type(e).__name__,
                 error=str(e),
-                stacktrace=traceback.format_exc()
+                stacktrace=traceback.format_exc(),
             )
             raise OpenAIAPIError(f"Unexpected Error: {e}")
 
-    def get_available_models(self) -> List[Dict[str, Any]]:
+    def get_available_models(self) -> list[dict[str, Any]]:
         """
         Get list of available OpenAI Chat models from configuration.
 
@@ -173,14 +174,17 @@ class OpenAIChatController:
 
         models = []
         for model_name in model_names:
-            models.append({
-                "name": model_name,
-                "context_window": context_windows.get(model_name, 8192)  # Default to 8k
-            })
+            models.append(
+                {
+                    "name": model_name,
+                    "context_window": context_windows.get(model_name, 8192),  # Default to 8k
+                }
+            )
 
         return models
 
 
 class OpenAIAPIError(Exception):
     """Custom exception for OpenAI API errors."""
+
     pass
