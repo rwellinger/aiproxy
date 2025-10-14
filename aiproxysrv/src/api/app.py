@@ -102,7 +102,17 @@ def create_app():
                 SongJobInfoResponse, ForceCompleteResponse, QueueStatusResponse, TaskCancelResponse,
                 InstrumentalGenerateRequest, InstrumentalGenerateResponse
             )
-            from schemas.chat_schemas import ChatRequest, ChatResponse
+            from schemas.chat_schemas import (
+                ChatRequest, ChatResponse, UnifiedChatRequest, ChatErrorResponse
+            )
+            from schemas.conversation_schemas import (
+                ConversationCreate, ConversationResponse, ConversationListResponse,
+                ConversationDetailResponse, ConversationUpdate, MessageCreate,
+                MessageResponse, SendMessageRequest, SendMessageResponse
+            )
+            from schemas.openai_chat_schemas import (
+                OpenAIChatRequest, OpenAIChatResponse, OpenAIModelsListResponse
+            )
             from schemas.prompt_schemas import (
                 PromptTemplateCreate, PromptTemplateUpdate, PromptTemplateResponse,
                 PromptTemplateListResponse, PromptCategoryResponse, PromptTemplatesGroupedResponse
@@ -156,6 +166,22 @@ def create_app():
                 # Chat schemas
                 ("ChatRequest", ChatRequest),
                 ("ChatResponse", ChatResponse),
+                ("UnifiedChatRequest", UnifiedChatRequest),
+                ("ChatErrorResponse", ChatErrorResponse),
+                # Conversation schemas
+                ("ConversationCreate", ConversationCreate),
+                ("ConversationResponse", ConversationResponse),
+                ("ConversationListResponse", ConversationListResponse),
+                ("ConversationDetailResponse", ConversationDetailResponse),
+                ("ConversationUpdate", ConversationUpdate),
+                ("MessageCreate", MessageCreate),
+                ("MessageResponse", MessageResponse),
+                ("SendMessageRequest", SendMessageRequest),
+                ("SendMessageResponse", SendMessageResponse),
+                # OpenAI Chat schemas
+                ("OpenAIChatRequest", OpenAIChatRequest),
+                ("OpenAIChatResponse", OpenAIChatResponse),
+                ("OpenAIModelsListResponse", OpenAIModelsListResponse),
                 # Prompt schemas
                 ("PromptTemplateCreate", PromptTemplateCreate),
                 ("PromptTemplateUpdate", PromptTemplateUpdate),
