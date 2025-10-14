@@ -262,6 +262,12 @@
             </div>
 
             <div class="message-input-container">
+                <!-- Cost Info Banner -->
+                <div class="cost-info-banner">
+                    <mat-icon>info</mat-icon>
+                    <span>{{ 'openaiChat.costInfo' | translate }}</span>
+                </div>
+
                 @if (currentConversation.archived) {
                     <div class="archived-notice">
                         <mat-icon>archive</mat-icon>

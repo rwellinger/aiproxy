@@ -372,35 +372,6 @@
     font-size: $font-sm;
 }
 
-.title-col {
-    width: 60%;
-    max-width: none;
-    word-break: break-word;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-th.size-col,
-td.size-col {
-    width: 18%;
-    min-width: 80px;
-    text-align: left !important;
-    vertical-align: middle;
-    font-family: monospace;
-    font-size: $font-sm;
-}
-
-.result-table button {
-    @include button-success('sm');
-    margin: 0 !important;
-    padding: 4px $spacing-sm !important;
-}
-
-.result-table button.active {
-    @include button-primary('sm');
-}
-
 /* ===== PAGINATION ===== */
 .pagination-container {
     @include pagination-pills-styling();
@@ -623,19 +594,25 @@ td.size-col {
 /* ===== ENHANCED TABLE STYLING ===== */
 
 /* Enhanced hover effects and animations */
+/* Base table (Level 1) */
 .result-table {
     border-collapse: separate;
     border-spacing: 0;
     position: relative;
+    table-layout: fixed;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
-.result-table tbody tr {
+/* Row styles (Level 2) */
+.result-table tr {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     cursor: pointer;
 }
 
-.result-table tbody tr:hover {
+.result-table tr:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0,123,255,0.15),
                 0 3px 10px rgba(0,0,0,0.1);
@@ -643,10 +620,6 @@ td.size-col {
                 rgba(255,255,255,0.9) 0%,
                 rgba(248,249,250,0.95) 100%) !important;
     z-index: 10;
-}
-
-.result-table tbody tr:hover td {
-    border-color: rgba(0,123,255,0.2) !important;
 }
 
 /* Enhanced selection state */
@@ -667,18 +640,18 @@ td.size-col {
 }
 
 /* Zebra striping with enhanced colors */
-.result-table tbody tr:nth-child(even) {
+.result-table tr:nth-child(even) {
     background: linear-gradient(135deg,
                 rgba(248,249,250,0.5) 0%,
                 rgba(248,249,250,0.8) 100%);
 }
 
-.result-table tbody tr:nth-child(odd) {
+.result-table tr:nth-child(odd) {
     background: rgba(255,255,255,0.8);
 }
 
-/* Enhanced header styling */
-.result-table thead th {
+/* Header cell styles (Level 2) */
+.result-table th {
     background: linear-gradient(135deg,
                 rgba(0,123,255,0.95) 0%,
                 rgba(0,123,255,1) 100%);
@@ -690,13 +663,16 @@ td.size-col {
     z-index: 100;
     backdrop-filter: blur(10px);
     box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+    height: 44px;
+    padding: 8px 12px;
+    vertical-align: middle;
 }
 
-.result-table thead th:first-child {
+.result-table th:first-child {
     border-radius: $border-radius-lg 0 0 0;
 }
 
-.result-table thead th:last-child {
+.result-table th:last-child {
     border-radius: 0 $border-radius-lg 0 0;
 }
 
@@ -722,20 +698,91 @@ td.size-col {
     transform: scale(1.2);
 }
 
-/* Enhanced cell styling */
+/* Cell styles (Level 2) */
 .result-table td {
     transition: all 0.3s ease;
     border-bottom: 1px solid rgba(222,226,230,0.6);
     vertical-align: middle;
 }
 
+/* Column widths - Normal Mode (without checkbox) - Default */
+.result-table th.title-col,
+.result-table td.title-col {
+    width: 58% !important;
+    max-width: 58% !important;
+    word-break: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result-table th.size-col,
+.result-table td.size-col {
+    width: 18% !important;
+    max-width: 18% !important;
+    min-width: 80px;
+    text-align: left !important;
+    vertical-align: middle;
+    font-family: monospace;
+    font-size: $font-sm;
+}
+
+.result-table th:nth-child(3),
+.result-table td:nth-child(3) {
+    width: 14% !important;
+    max-width: 14% !important;
+}
+
+/* Sum Normal Mode: 58% + 18% + 14% = 90% ≈ 100% ✓ */
+
+/* Column widths - Selection Mode (with checkbox) - Override when checkbox present */
+.result-table th:nth-child(1),
+.result-table td:nth-child(1) {
+    width: 35px !important;
+    max-width: 35px !important;
+}
+
+/* When checkbox column exists, title is 2nd child */
+.result-table th:nth-child(2):not(.size-col),
+.result-table td:nth-child(2):not(.size-col) {
+    width: 52% !important;
+    max-width: 52% !important;
+}
+
+/* When checkbox column exists, size is 3rd child */
+.result-table th:nth-child(3).size-col,
+.result-table td:nth-child(3).size-col {
+    width: 16% !important;
+    max-width: 16% !important;
+}
+
+/* When checkbox column exists, created is 4th child */
+.result-table th:nth-child(4),
+.result-table td:nth-child(4) {
+    width: 12% !important;
+    max-width: 12% !important;
+}
+
+/* Sum Selection Mode: 35px + 52% + 16% + 12% = 35px + 80% ≈ 100% ✓ */
+
+/* Table Button Styles */
+.result-table button {
+    @include button-success('sm');
+    margin: 0 !important;
+    padding: 4px $spacing-sm !important;
+}
+
+.result-table button.active {
+    @include button-primary('sm');
+}
+
 /* Loading state animation */
-.result-table.loading tbody tr {
+.result-table.loading tr {
     opacity: 0.6;
     pointer-events: none;
 }
 
-.result-table.loading tbody tr td {
+.result-table.loading td {
     background: linear-gradient(90deg,
                 rgba(248,249,250,0.8) 25%,
                 rgba(233,236,239,0.8) 50%,
