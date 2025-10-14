@@ -1,17 +1,25 @@
 """
 Celery Tasks für Song-Generierung
 """
-import traceback
+
 import time
+import traceback
+
 from celery.exceptions import SoftTimeLimitExceeded
 from requests import HTTPError
 
-from .celery_config import celery_app
-from .slot_manager import wait_for_mureka_slot, release_mureka_slot
-from mureka import start_mureka_generation, wait_for_mureka_completion, start_mureka_instrumental_generation, wait_for_mureka_instrumental_completion
-from mureka.handlers import handle_http_error
 from db.song_service import song_service
+from mureka import (
+    start_mureka_generation,
+    start_mureka_instrumental_generation,
+    wait_for_mureka_completion,
+    wait_for_mureka_instrumental_completion,
+)
+from mureka.handlers import handle_http_error
 from utils.logger import logger
+
+from .celery_config import celery_app
+from .slot_manager import release_mureka_slot, wait_for_mureka_slot
 
 
 @celery_app.task(bind=True, max_retries=3, default_retry_delay=60)
@@ -28,16 +36,13 @@ def generate_song_task(self, payload: dict) -> dict:
             raise self.retry(exc=Exception("No available MUREKA slot"), countdown=60)
 
         # Slot acquired - update status
-        self.update_state(
-            state='PROGRESS',
-            meta={'status': 'SLOT_ACQUIRED', 'message': 'Acquired MUREKA slot'}
-        )
-        
+        self.update_state(state="PROGRESS", meta={"status": "SLOT_ACQUIRED", "message": "Acquired MUREKA slot"})
+
         # Update song status in database
         song_service.update_song_status(
             task_id=task_id,
-            status='PROGRESS',
-            progress_info={'status': 'SLOT_ACQUIRED', 'message': 'Acquired MUREKA slot'}
+            status="PROGRESS",
+            progress_info={"status": "SLOT_ACQUIRED", "message": "Acquired MUREKA slot"},
         )
 
         logger.info("Slot acquired, starting MUREKA generation", extra={"task_id": task_id})
@@ -52,22 +57,22 @@ def generate_song_task(self, payload: dict) -> dict:
 
         # Warte auf Completion
         self.update_state(
-            state='PROGRESS',
+            state="PROGRESS",
             meta={
-                'status': 'GENERATION_STARTED',
-                'job_id': job_id,
-            }
+                "status": "GENERATION_STARTED",
+                "job_id": job_id,
+            },
         )
-        
+
         # Update song status in database with job_id
         song_service.update_song_status(
             task_id=task_id,
-            status='PROGRESS',
+            status="PROGRESS",
             progress_info={
-                'status': 'GENERATION_STARTED',
-                'job_id': job_id,
+                "status": "GENERATION_STARTED",
+                "job_id": job_id,
             },
-            job_id=job_id
+            job_id=job_id,
         )
 
         logger.info("Waiting for completion", extra={"task_id": task_id, "job_id": job_id})
@@ -75,16 +80,16 @@ def generate_song_task(self, payload: dict) -> dict:
 
         # Erfolgreich abgeschlossen
         logger.info("Completed successfully", extra={"task_id": task_id, "job_id": job_id})
-        
+
         # Prepare success result
         success_result = {
             "status": "SUCCESS",
             "task_id": task_id,
             "job_id": job_id,
             "result": final_result,
-            "completed_at": time.time()
+            "completed_at": time.time(),
         }
-        
+
         # Update song result in database
         if song_service.update_song_result(task_id, success_result):
             logger.info("Successfully updated song result in database", extra={"task_id": task_id, "job_id": job_id})
@@ -92,7 +97,7 @@ def generate_song_task(self, payload: dict) -> dict:
             song_service.cleanup_redis_data(task_id)
         else:
             logger.error("Failed to update song result in database", extra={"task_id": task_id, "job_id": job_id})
-        
+
         return success_result
 
     except SoftTimeLimitExceeded:
@@ -102,19 +107,14 @@ def generate_song_task(self, payload: dict) -> dict:
         # Update song error in database
         error_msg = "Task timeout exceeded"
         song_service.update_song_error(task_id, error_msg)
-        
-        return {
-            "status": "ERROR",
-            "message": error_msg,
-            "task_id": task_id
-        }
+
+        return {"status": "ERROR", "message": error_msg, "task_id": task_id}
 
     except HTTPError as e:
-        logger.error("HTTP error occurred", extra={
-            "task_id": task_id,
-            "error": str(e),
-            "response": e.response.text if e.response else 'No response'
-        })
+        logger.error(
+            "HTTP error occurred",
+            extra={"task_id": task_id, "error": str(e), "response": e.response.text if e.response else "No response"},
+        )
         release_mureka_slot(task_id)
 
         if e.response.status_code == 429:
@@ -126,9 +126,10 @@ def generate_song_task(self, payload: dict) -> dict:
                 error_message = e.response.text or e.response.reason
 
             from mureka.handlers import analyze_429_error_type
+
             error_type = analyze_429_error_type(error_message)
 
-            if error_type == 'quota':
+            if error_type == "quota":
                 # Quota exceeded - don't retry, update song with error
                 error_msg = f"Quota exceeded: {error_message}"
                 song_service.update_song_error(task_id, error_msg)
@@ -136,7 +137,7 @@ def generate_song_task(self, payload: dict) -> dict:
                 return handle_http_error(self, e)
             else:
                 # Rate limit - retry with backoff
-                retry_after = int(e.response.headers.get('Retry-After', 60))
+                retry_after = int(e.response.headers.get("Retry-After", 60))
                 logger.warning("Rate limited, retrying", extra={"task_id": task_id, "retry_after": retry_after})
                 raise self.retry(exc=e, countdown=retry_after)
         else:
@@ -146,12 +147,15 @@ def generate_song_task(self, payload: dict) -> dict:
             return handle_http_error(self, e)
 
     except Exception as exc:
-        logger.error("Unexpected error occurred", extra={
-            "task_id": task_id,
-            "error_type": type(exc).__name__,
-            "error": str(exc),
-            "stacktrace": traceback.format_exc()
-        })
+        logger.error(
+            "Unexpected error occurred",
+            extra={
+                "task_id": task_id,
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+                "stacktrace": traceback.format_exc(),
+            },
+        )
         release_mureka_slot(task_id)
 
         # Update song error in database for unexpected errors
@@ -182,15 +186,15 @@ def generate_instrumental_task(self, payload: dict) -> dict:
 
         # Slot acquired - update status
         self.update_state(
-            state='PROGRESS',
-            meta={'status': 'SLOT_ACQUIRED', 'message': 'Acquired MUREKA slot for instrumental generation'}
+            state="PROGRESS",
+            meta={"status": "SLOT_ACQUIRED", "message": "Acquired MUREKA slot for instrumental generation"},
         )
 
         # Update song status in database - mark as instrumental
         song_service.update_song_status(
             task_id=task_id,
-            status='PROGRESS',
-            progress_info={'status': 'SLOT_ACQUIRED', 'message': 'Acquired MUREKA slot for instrumental generation'}
+            status="PROGRESS",
+            progress_info={"status": "SLOT_ACQUIRED", "message": "Acquired MUREKA slot for instrumental generation"},
         )
 
         logger.info("Slot acquired, starting MUREKA instrumental generation", extra={"task_id": task_id})
@@ -205,27 +209,20 @@ def generate_instrumental_task(self, payload: dict) -> dict:
 
         # Warte auf Completion
         self.update_state(
-            state='PROGRESS',
-            meta={
-                'status': 'GENERATION_STARTED',
-                'job_id': job_id,
-                'type': 'instrumental'
-            }
+            state="PROGRESS", meta={"status": "GENERATION_STARTED", "job_id": job_id, "type": "instrumental"}
         )
 
         # Update song status in database with job_id and instrumental flag
         song_service.update_song_status(
             task_id=task_id,
-            status='PROGRESS',
-            progress_info={
-                'status': 'GENERATION_STARTED',
-                'job_id': job_id,
-                'type': 'instrumental'
-            },
-            job_id=job_id
+            status="PROGRESS",
+            progress_info={"status": "GENERATION_STARTED", "job_id": job_id, "type": "instrumental"},
+            job_id=job_id,
         )
 
-        logger.info("Waiting for instrumental completion", extra={"task_id": task_id, "job_id": job_id, "type": "instrumental"})
+        logger.info(
+            "Waiting for instrumental completion", extra={"task_id": task_id, "job_id": job_id, "type": "instrumental"}
+        )
         final_result = wait_for_mureka_instrumental_completion(self, job_id)
 
         # Erfolgreich abgeschlossen
@@ -238,16 +235,21 @@ def generate_instrumental_task(self, payload: dict) -> dict:
             "job_id": job_id,
             "result": final_result,
             "completed_at": time.time(),
-            "is_instrumental": True
+            "is_instrumental": True,
         }
 
         # Update song result in database with instrumental flag
         if song_service.update_song_result(task_id, success_result):
-            logger.info("Successfully updated instrumental song result in database", extra={"task_id": task_id, "job_id": job_id})
+            logger.info(
+                "Successfully updated instrumental song result in database",
+                extra={"task_id": task_id, "job_id": job_id},
+            )
             # Clean up Redis data after successful DB storage
             song_service.cleanup_redis_data(task_id)
         else:
-            logger.error("Failed to update instrumental song result in database", extra={"task_id": task_id, "job_id": job_id})
+            logger.error(
+                "Failed to update instrumental song result in database", extra={"task_id": task_id, "job_id": job_id}
+            )
 
         return success_result
 
@@ -259,19 +261,13 @@ def generate_instrumental_task(self, payload: dict) -> dict:
         error_msg = "Instrumental task timeout exceeded"
         song_service.update_song_error(task_id, error_msg)
 
-        return {
-            "status": "ERROR",
-            "message": error_msg,
-            "task_id": task_id,
-            "is_instrumental": True
-        }
+        return {"status": "ERROR", "message": error_msg, "task_id": task_id, "is_instrumental": True}
 
     except HTTPError as e:
-        logger.error("Instrumental HTTP error occurred", extra={
-            "task_id": task_id,
-            "error": str(e),
-            "response": e.response.text if e.response else 'No response'
-        })
+        logger.error(
+            "Instrumental HTTP error occurred",
+            extra={"task_id": task_id, "error": str(e), "response": e.response.text if e.response else "No response"},
+        )
         release_mureka_slot(task_id)
 
         if e.response.status_code == 429:
@@ -283,18 +279,24 @@ def generate_instrumental_task(self, payload: dict) -> dict:
                 error_message = e.response.text or e.response.reason
 
             from mureka.handlers import analyze_429_error_type
+
             error_type = analyze_429_error_type(error_message)
 
-            if error_type == 'quota':
+            if error_type == "quota":
                 # Quota exceeded - don't retry, update song with error
                 error_msg = f"Instrumental quota exceeded: {error_message}"
                 song_service.update_song_error(task_id, error_msg)
-                logger.error("Instrumental quota exceeded, not retrying", extra={"task_id": task_id, "error_message": error_message})
+                logger.error(
+                    "Instrumental quota exceeded, not retrying",
+                    extra={"task_id": task_id, "error_message": error_message},
+                )
                 return handle_http_error(self, e)
             else:
                 # Rate limit - retry with backoff
-                retry_after = int(e.response.headers.get('Retry-After', 60))
-                logger.warning("Instrumental rate limited, retrying", extra={"task_id": task_id, "retry_after": retry_after})
+                retry_after = int(e.response.headers.get("Retry-After", 60))
+                logger.warning(
+                    "Instrumental rate limited, retrying", extra={"task_id": task_id, "retry_after": retry_after}
+                )
                 raise self.retry(exc=e, countdown=retry_after)
         else:
             # Update song error in database for non-retry HTTP errors
@@ -303,12 +305,15 @@ def generate_instrumental_task(self, payload: dict) -> dict:
             return handle_http_error(self, e)
 
     except Exception as exc:
-        logger.error("Unexpected instrumental error occurred", extra={
-            "task_id": task_id,
-            "error_type": type(exc).__name__,
-            "error": str(exc),
-            "stacktrace": traceback.format_exc()
-        })
+        logger.error(
+            "Unexpected instrumental error occurred",
+            extra={
+                "task_id": task_id,
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+                "stacktrace": traceback.format_exc(),
+            },
+        )
         release_mureka_slot(task_id)
 
         # Update song error in database for unexpected errors

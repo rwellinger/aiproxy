@@ -1,15 +1,17 @@
 """Compression Controller - Handles chat compression with archival."""
+
 import traceback
 import uuid
 from datetime import datetime
-from typing import Tuple, Dict, Any, List
+from typing import Any
+
+import requests
 from sqlalchemy.orm import Session
 
+from api.controllers.openai_chat_controller import OpenAIChatController
+from config.settings import OLLAMA_TIMEOUT, OLLAMA_URL
 from db.models import Conversation, Message, MessageArchive
 from utils.logger import logger
-from api.controllers.openai_chat_controller import OpenAIChatController
-from config.settings import OLLAMA_URL, OLLAMA_TIMEOUT
-import requests
 
 
 class CompressionController:
@@ -17,7 +19,7 @@ class CompressionController:
 
     def compress_conversation(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID, keep_recent: int = 2
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Compress a conversation by archiving old messages and creating an AI summary.
 
@@ -68,7 +70,7 @@ class CompressionController:
             if len(compressible_messages) <= keep_recent:
                 return {
                     "message": "No compression needed",
-                    "details": f"Only {len(compressible_messages)} compressible messages"
+                    "details": f"Only {len(compressible_messages)} compressible messages",
                 }, 200
 
             # Split into old (to archive) and recent (to keep)
@@ -86,9 +88,7 @@ class CompressionController:
 
             # Create AI summary of old messages
             summary_content, summary_token_count = self._create_ai_summary(
-                old_messages,
-                conversation.model,
-                conversation.provider
+                old_messages, conversation.model, conversation.provider
             )
 
             # Create summary message as 'assistant' (not 'system') so it can be compressed later
@@ -122,16 +122,11 @@ class CompressionController:
             )
 
             # Build message list for token count verification
-            verification_messages = [
-                {"role": msg.role, "content": msg.content}
-                for msg in remaining_messages
-            ]
+            verification_messages = [{"role": msg.role, "content": msg.content} for msg in remaining_messages]
 
             # Get actual token count from the model
             actual_token_count = self._get_actual_token_count(
-                verification_messages,
-                conversation.model,
-                conversation.provider
+                verification_messages, conversation.model, conversation.provider
             )
 
             conversation.current_token_count = actual_token_count
@@ -151,7 +146,7 @@ class CompressionController:
                 "archived_messages": archived_count,
                 "summary_created": True,
                 "new_token_count": actual_token_count,
-                "token_percentage": (actual_token_count / conversation.context_window_size) * 100
+                "token_percentage": (actual_token_count / conversation.context_window_size) * 100,
             }, 200
 
         except Exception as e:
@@ -165,9 +160,7 @@ class CompressionController:
             )
             return {"error": f"Failed to compress conversation: {e}"}, 500
 
-    def _create_ai_summary(
-        self, messages: List[Message], model: str, provider: str
-    ) -> Tuple[str, int]:
+    def _create_ai_summary(self, messages: list[Message], model: str, provider: str) -> tuple[str, int]:
         """
         Create AI summary of messages using the conversation's model.
 
@@ -184,10 +177,12 @@ class CompressionController:
         """
         # Build prompt for summarization (keep it very brief to reduce tokens)
         # Include all messages, but with variable detail level
-        conversation_text = "\n".join([
-            f"{msg.role}: {msg.content[:500 if i < 5 else 150]}"  # First 5 messages: 500 chars, rest: 150 chars
-            for i, msg in enumerate(messages[:20])  # Include up to 20 messages
-        ])
+        conversation_text = "\n".join(
+            [
+                f"{msg.role}: {msg.content[: 500 if i < 5 else 150]}"  # First 5 messages: 500 chars, rest: 150 chars
+                for i, msg in enumerate(messages[:20])  # Include up to 20 messages
+            ]
+        )
 
         summary_prompt = f"""Summarize this conversation in MAX 5 bullet points (max 50 words total):
 
@@ -197,7 +192,7 @@ Brief summary:"""
 
         summary_messages = [
             {"role": "system", "content": "You are a helpful assistant that creates concise conversation summaries."},
-            {"role": "user", "content": summary_prompt}
+            {"role": "user", "content": summary_prompt},
         ]
 
         try:
@@ -205,8 +200,7 @@ Brief summary:"""
                 # Use OpenAI
                 openai_controller = OpenAIChatController()
                 content, prompt_tokens, completion_tokens = openai_controller.send_chat_message(
-                    model=model,
-                    messages=summary_messages
+                    model=model, messages=summary_messages
                 )
                 # For OpenAI, we only care about completion tokens (the summary itself)
                 token_count = completion_tokens
@@ -241,17 +235,14 @@ Brief summary:"""
                 stacktrace=traceback.format_exc(),
             )
             # Fallback: Create simple text summary
-            fallback_summary = f"Summary of {len(messages)} messages:\n" + "\n".join([
-                f"- {msg.role}: {msg.content[:100]}..."
-                for msg in messages[:5]
-            ])
+            fallback_summary = f"Summary of {len(messages)} messages:\n" + "\n".join(
+                [f"- {msg.role}: {msg.content[:100]}..." for msg in messages[:5]]
+            )
             # Rough token estimate for fallback
             fallback_token_count = len(fallback_summary.split())
             return fallback_summary, fallback_token_count
 
-    def _get_actual_token_count(
-        self, messages: List[Dict[str, str]], model: str, provider: str
-    ) -> int:
+    def _get_actual_token_count(self, messages: list[dict[str, str]], model: str, provider: str) -> int:
         """
         Get actual token count by making a test call to the model.
 
@@ -276,11 +267,7 @@ Brief summary:"""
                 total_chars = sum(len(msg.get("content", "")) for msg in messages)
                 # Rough OpenAI estimate: ~4 chars per token
                 estimated_tokens = int(total_chars / 4)
-                logger.info(
-                    "Token count estimated for OpenAI",
-                    estimated_tokens=estimated_tokens,
-                    provider=provider
-                )
+                logger.info("Token count estimated for OpenAI", estimated_tokens=estimated_tokens, provider=provider)
                 return estimated_tokens
             else:
                 # Use Ollama - get prompt_eval_count without generating response
@@ -303,9 +290,7 @@ Brief summary:"""
                 prompt_eval_count = resp_json.get("prompt_eval_count", 0)
 
                 logger.info(
-                    "Actual token count retrieved from Ollama",
-                    prompt_eval_count=prompt_eval_count,
-                    provider=provider
+                    "Actual token count retrieved from Ollama", prompt_eval_count=prompt_eval_count, provider=provider
                 )
 
                 return prompt_eval_count
@@ -315,7 +300,7 @@ Brief summary:"""
                 "Failed to get actual token count, using fallback",
                 error=str(e),
                 provider=provider,
-                stacktrace=traceback.format_exc()
+                stacktrace=traceback.format_exc(),
             )
             # Fallback: sum of individual message token counts (if available)
             total_chars = sum(len(msg.get("content", "")) for msg in messages)
@@ -323,9 +308,7 @@ Brief summary:"""
             estimated_tokens = int(total_chars / 4)
             return estimated_tokens
 
-    def _archive_messages(
-        self, db: Session, messages: List[Message], summary_id: uuid.UUID
-    ) -> int:
+    def _archive_messages(self, db: Session, messages: list[Message], summary_id: uuid.UUID) -> int:
         """
         Archive messages by moving them to messages_archive table.
 
@@ -361,7 +344,7 @@ Brief summary:"""
 
     def restore_archive(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Restore archived messages for a conversation (optional feature).
 
@@ -427,11 +410,7 @@ Brief summary:"""
                     db.delete(summary_msg)
 
             # Recalculate token count
-            all_messages = (
-                db.query(Message)
-                .filter(Message.conversation_id == conversation_id)
-                .all()
-            )
+            all_messages = db.query(Message).filter(Message.conversation_id == conversation_id).all()
             total_tokens = sum([m.token_count or 0 for m in all_messages])
             conversation.current_token_count = total_tokens
             conversation.updated_at = datetime.utcnow()

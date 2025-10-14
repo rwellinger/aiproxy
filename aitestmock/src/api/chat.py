@@ -1,7 +1,6 @@
 """
 Mock Chat API - Simulates Ollama/Chat functionality for testing
 """
-import time
 from flask import Blueprint, request, jsonify
 
 api_chat_mock = Blueprint("api_chat_mock", __name__, url_prefix="/api/v1/ollama/chat")

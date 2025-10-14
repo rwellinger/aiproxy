@@ -1,23 +1,43 @@
 """
 Flask App mit allen Blueprints + OpenAPI/Swagger Integration
 """
+
+import contextlib
 import traceback
+from pathlib import Path
+
+import tomli
 import yaml
-from flask import Flask, jsonify, Blueprint, render_template_string, Response
+from apispec import APISpec
+from flask import Blueprint, Flask, Response, jsonify
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
-from apispec import APISpec
+
 from utils.logger import logger
-from .routes.image_routes import api_image_v1
-from .routes.song_routes import api_song_v1, api_song_task_v1
-from .routes.instrumental_routes import api_instrumental_v1, api_instrumental_task_v1
-from .routes.redis_routes import api_redis_v1
+
 from .routes.chat_routes import api_chat_v1
-from .routes.prompt_routes import api_prompt_v1
-from .routes.user_routes import api_user_v1
 from .routes.conversation_routes import api_conversation_v1
+from .routes.image_routes import api_image_v1
+from .routes.instrumental_routes import api_instrumental_task_v1, api_instrumental_v1
 from .routes.ollama_routes import api_ollama_v1
 from .routes.openai_chat_routes import api_openai_chat_v1
+from .routes.prompt_routes import api_prompt_v1
+from .routes.redis_routes import api_redis_v1
+from .routes.song_routes import api_song_task_v1, api_song_v1
+from .routes.user_routes import api_user_v1
+
+
+def get_version() -> str:
+    """Read version from pyproject.toml"""
+    try:
+        # Path from src/api/app.py to aiproxysrv root (2 levels up)
+        pyproject_path = Path(__file__).parents[2] / "pyproject.toml"
+        with open(pyproject_path, "rb") as f:
+            pyproject_data = tomli.load(f)
+            return pyproject_data.get("project", {}).get("version", "unknown")
+    except Exception as e:
+        logger.warning("Failed to read version from pyproject.toml", error=str(e))
+        return "unknown"
 
 
 def create_app():
@@ -29,6 +49,7 @@ def create_app():
 
     # Monkey patch json.dumps to handle ValueError serialization globally
     import json
+
     original_dumps = json.dumps
 
     def patched_dumps(obj, **kwargs):
@@ -54,23 +75,19 @@ def create_app():
     json.dumps = patched_dumps
 
     # Configure CORS to allow requests from Angular frontend
-    CORS(app,
-         origins="*",
-         methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
+    CORS(app, origins="*", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
 
     # OpenAPI/Swagger Configuration
     spec = APISpec(
-        title='thWellys AI-Proxy API',
-        version='1.6.4',
-        openapi_version='3.0.2',
-        info=dict(
-            description='API für AI-Services: Bildgenerierung, Musikgenerierung und Chat-Integration',
-            contact=dict(name='Rob'),
-            email=dict(name='rob.wellinger@gmail.com'),
-        ),
-        servers=[
-            dict(url='http://localhost:5050/api/v1', description='Development Server')
-        ]
+        title="thWellys AI-Proxy API",
+        version=get_version(),
+        openapi_version="3.0.2",
+        info={
+            "description": "API für AI-Services: Bildgenerierung, Musikgenerierung und Chat-Integration",
+            "contact": {"name": "Rob"},
+            "email": {"name": "rob.wellinger@gmail.com"},
+        },
+        servers=[{"url": "http://localhost:5050/api/v1", "description": "Development Server"}],
     )
 
     # Global API Blueprint
@@ -80,6 +97,7 @@ def create_app():
     def health():
         """Health check endpoint"""
         from schemas.common_schemas import HealthResponse
+
         response = HealthResponse()
         return jsonify(response.model_dump()), 200
 
@@ -88,44 +106,85 @@ def create_app():
         """OpenAPI JSON specification endpoint"""
         try:
             # Import and register schemas
-            from schemas.image_schemas import (
-                ImageGenerateRequest, ImageResponse, ImageGenerateResponse,
-                ImageListRequest, ImageListResponse, ImageUpdateRequest,
-                ImageUpdateResponse, ImageDeleteResponse
-            )
-            from schemas.song_schemas import (
-                SongGenerateRequest, SongResponse, SongGenerateResponse,
-                SongListRequest, SongListResponse, SongUpdateRequest, SongUpdateResponse,
-                StemGenerateRequest, StemGenerateResponse, SongHealthResponse,
-                SongTaskStatusResponse, SongDeleteResponse, ChoiceRatingUpdateRequest,
-                ChoiceRatingUpdateResponse, MurekaAccountResponse, CeleryHealthResponse,
-                SongJobInfoResponse, ForceCompleteResponse, QueueStatusResponse, TaskCancelResponse,
-                InstrumentalGenerateRequest, InstrumentalGenerateResponse
-            )
-            from schemas.chat_schemas import (
-                ChatRequest, ChatResponse, UnifiedChatRequest, ChatErrorResponse
+            from schemas.chat_schemas import ChatErrorResponse, ChatRequest, ChatResponse, UnifiedChatRequest
+            from schemas.common_schemas import (
+                BulkDeleteRequest,
+                BulkDeleteResponse,
+                ErrorResponse,
+                HealthResponse,
+                RedisKeyListResponse,
+                RedisTaskListResponse,
+                RedisTaskResponse,
             )
             from schemas.conversation_schemas import (
-                ConversationCreate, ConversationResponse, ConversationListResponse,
-                ConversationDetailResponse, ConversationUpdate, MessageCreate,
-                MessageResponse, SendMessageRequest, SendMessageResponse
+                ConversationCreate,
+                ConversationDetailResponse,
+                ConversationListResponse,
+                ConversationResponse,
+                ConversationUpdate,
+                MessageCreate,
+                MessageResponse,
+                SendMessageRequest,
+                SendMessageResponse,
             )
-            from schemas.openai_chat_schemas import (
-                OpenAIChatRequest, OpenAIChatResponse, OpenAIModelsListResponse
+            from schemas.image_schemas import (
+                ImageDeleteResponse,
+                ImageGenerateRequest,
+                ImageGenerateResponse,
+                ImageListRequest,
+                ImageListResponse,
+                ImageResponse,
+                ImageUpdateRequest,
+                ImageUpdateResponse,
             )
+            from schemas.openai_chat_schemas import OpenAIChatRequest, OpenAIChatResponse, OpenAIModelsListResponse
             from schemas.prompt_schemas import (
-                PromptTemplateCreate, PromptTemplateUpdate, PromptTemplateResponse,
-                PromptTemplateListResponse, PromptCategoryResponse, PromptTemplatesGroupedResponse
+                PromptCategoryResponse,
+                PromptTemplateCreate,
+                PromptTemplateListResponse,
+                PromptTemplateResponse,
+                PromptTemplatesGroupedResponse,
+                PromptTemplateUpdate,
             )
-            from schemas.common_schemas import (
-                ErrorResponse, HealthResponse, BulkDeleteRequest, BulkDeleteResponse,
-                RedisTaskResponse, RedisTaskListResponse, RedisKeyListResponse
+            from schemas.song_schemas import (
+                CeleryHealthResponse,
+                ChoiceRatingUpdateRequest,
+                ChoiceRatingUpdateResponse,
+                ForceCompleteResponse,
+                InstrumentalGenerateRequest,
+                InstrumentalGenerateResponse,
+                MurekaAccountResponse,
+                QueueStatusResponse,
+                SongDeleteResponse,
+                SongGenerateRequest,
+                SongGenerateResponse,
+                SongHealthResponse,
+                SongJobInfoResponse,
+                SongListRequest,
+                SongListResponse,
+                SongResponse,
+                SongTaskStatusResponse,
+                SongUpdateRequest,
+                SongUpdateResponse,
+                StemGenerateRequest,
+                StemGenerateResponse,
+                TaskCancelResponse,
             )
             from schemas.user_schemas import (
-                UserCreateRequest, UserCreateResponse, LoginRequest, LoginResponse,
-                UserUpdateRequest, UserUpdateResponse, PasswordChangeRequest, PasswordChangeResponse,
-                PasswordResetRequest, PasswordResetResponse, UserResponse, UserListResponse,
-                LogoutResponse, TokenValidationResponse
+                LoginRequest,
+                LoginResponse,
+                LogoutResponse,
+                PasswordChangeRequest,
+                PasswordChangeResponse,
+                PasswordResetRequest,
+                PasswordResetResponse,
+                TokenValidationResponse,
+                UserCreateRequest,
+                UserCreateResponse,
+                UserListResponse,
+                UserResponse,
+                UserUpdateRequest,
+                UserUpdateResponse,
             )
 
             # Register schemas with APISpec (only if not already registered)
@@ -216,11 +275,9 @@ def create_app():
 
             # Only register schemas that aren't already registered
             for schema_name, schema_class in schemas_to_register:
-                try:
+                with contextlib.suppress(Exception):
+                    # Schema already registered, skip silently
                     spec.components.schema(schema_name, schema=schema_class)
-                except Exception:
-                    # Schema already registered, skip
-                    pass
 
             # Automatic route discovery and OpenAPI generation
             def generate_paths_from_routes():
@@ -229,29 +286,43 @@ def create_app():
 
                 # Tag mapping for cleaner organization
                 tag_mapping = {
-                    'api_image_v1': 'Images',
-                    'api_song_v1': 'Songs',
-                    'api_song_task_v1': 'Song Tasks',
-                    'api_instrumental_v1': 'Instrumentals',
-                    'api_instrumental_task_v1': 'Instrumental Tasks',
-                    'api_prompt_v1': 'Prompt Templates',
-                    'api_redis_v1': 'Redis/Celery',
-                    'api_chat_v1': 'Chat',
-                    'api_conversation_v1': 'Conversations',
-                    'api_user_v1': 'User Management',
-                    'api_ollama_v1': 'Ollama',
-                    'api_v1': 'System'
+                    "api_image_v1": "Images",
+                    "api_song_v1": "Songs",
+                    "api_song_task_v1": "Song Tasks",
+                    "api_instrumental_v1": "Instrumentals",
+                    "api_instrumental_task_v1": "Instrumental Tasks",
+                    "api_prompt_v1": "Prompt Templates",
+                    "api_redis_v1": "Redis/Celery",
+                    "api_chat_v1": "Chat",
+                    "api_conversation_v1": "Conversations",
+                    "api_user_v1": "User Management",
+                    "api_ollama_v1": "Ollama",
+                    "api_v1": "System",
                 }
 
-                current_paths = set(spec.to_dict().get('paths', {}).keys())
+                current_paths = set(spec.to_dict().get("paths", {}).keys())
 
                 for rule in app.url_map.iter_rules():
                     # Only process API routes
-                    if not rule.endpoint.startswith(('api_image_v1', 'api_song_v1', 'api_instrumental_v1', 'api_instrumental_task_v1', 'api_prompt_v1', 'api_redis_v1', 'api_chat_v1', 'api_conversation_v1', 'api_user_v1', 'api_ollama_v1', 'api_v1')):
+                    if not rule.endpoint.startswith(
+                        (
+                            "api_image_v1",
+                            "api_song_v1",
+                            "api_instrumental_v1",
+                            "api_instrumental_task_v1",
+                            "api_prompt_v1",
+                            "api_redis_v1",
+                            "api_chat_v1",
+                            "api_conversation_v1",
+                            "api_user_v1",
+                            "api_ollama_v1",
+                            "api_v1",
+                        )
+                    ):
                         continue
 
                     # Skip if already added
-                    route_path = rule.rule.replace('/api/v1', '')
+                    route_path = rule.rule.replace("/api/v1", "")
                     if route_path in current_paths:
                         continue
 
@@ -262,8 +333,12 @@ def create_app():
                             continue
 
                         # Extract blueprint name for tagging
-                        blueprint_name = rule.endpoint.split('.')[0] if '.' in rule.endpoint else rule.endpoint.split('_')[0] + '_' + rule.endpoint.split('_')[1] + '_v1'
-                        tag = tag_mapping.get(blueprint_name, 'API')
+                        blueprint_name = (
+                            rule.endpoint.split(".")[0]
+                            if "." in rule.endpoint
+                            else rule.endpoint.split("_")[0] + "_" + rule.endpoint.split("_")[1] + "_v1"
+                        )
+                        tag = tag_mapping.get(blueprint_name, "API")
 
                         # Get function signature for parameter detection
                         sig = inspect.signature(view_func)
@@ -271,7 +346,7 @@ def create_app():
                         # Build operations for each HTTP method
                         operations = {}
                         for method in rule.methods:
-                            if method in ['OPTIONS', 'HEAD']:
+                            if method in ["OPTIONS", "HEAD"]:
                                 continue
 
                             operation = {
@@ -281,11 +356,7 @@ def create_app():
                                 "responses": {
                                     "200": {
                                         "description": "Success",
-                                        "content": {
-                                            "application/json": {
-                                                "schema": {"type": "object"}
-                                            }
-                                        }
+                                        "content": {"application/json": {"schema": {"type": "object"}}},
                                     },
                                     "400": {
                                         "description": "Bad Request",
@@ -293,16 +364,16 @@ def create_app():
                                             "application/json": {
                                                 "schema": {"$ref": "#/components/schemas/ErrorResponse"}
                                             }
-                                        }
-                                    }
-                                }
+                                        },
+                                    },
+                                },
                             }
 
                             # Add request body for POST/PUT methods with Pydantic models
-                            if method.lower() in ['post', 'put']:
+                            if method.lower() in ["post", "put"]:
                                 # Try to detect Pydantic model from function signature
                                 for param_name, param in sig.parameters.items():
-                                    if param_name == 'body' and hasattr(param.annotation, '__name__'):
+                                    if param_name == "body" and hasattr(param.annotation, "__name__"):
                                         schema_name = param.annotation.__name__
                                         operation["requestBody"] = {
                                             "required": True,
@@ -310,22 +381,24 @@ def create_app():
                                                 "application/json": {
                                                     "schema": {"$ref": f"#/components/schemas/{schema_name}"}
                                                 }
-                                            }
+                                            },
                                         }
                                         break
 
                             # Add path parameters
-                            if '<' in rule.rule:
+                            if "<" in rule.rule:
                                 operation["parameters"] = []
                                 for arg in rule.arguments:
                                     # noinspection PyTypeChecker
-                                    operation["parameters"].append({
-                                        "name": arg,
-                                        "in": "path",
-                                        "required": True,
-                                        "schema": {"type": "string"},
-                                        "description": f"Path parameter: {arg}"
-                                    })
+                                    operation["parameters"].append(
+                                        {
+                                            "name": arg,
+                                            "in": "path",
+                                            "required": True,
+                                            "schema": {"type": "string"},
+                                            "description": f"Path parameter: {arg}",
+                                        }
+                                    )
 
                             operations[method.lower()] = operation
 
@@ -351,7 +424,6 @@ def create_app():
         """OpenAPI YAML specification endpoint"""
         try:
             # Get the JSON spec
-            from flask import url_for, request
             with app.test_request_context():
                 json_response = openapi_spec()
                 if json_response.status_code != 200:
@@ -362,8 +434,8 @@ def create_app():
 
                 return Response(
                     yaml_content,
-                    mimetype='application/x-yaml',
-                    headers={'Content-Disposition': 'inline; filename="openapi.yaml"'}
+                    mimetype="application/x-yaml",
+                    headers={"Content-Disposition": 'inline; filename="openapi.yaml"'},
                 )
         except Exception as e:
             logger.error("OpenAPI YAML spec generation failed", error=str(e), stacktrace=traceback.format_exc())
@@ -423,17 +495,14 @@ def create_app():
         # Extract field-specific error messages
         error_details = []
         for err in error.errors():
-            field = '.'.join(str(x) for x in err['loc'])
-            message = err['msg']
+            field = ".".join(str(x) for x in err["loc"])
+            message = err["msg"]
             error_details.append(f"{field}: {message}")
 
         logger.error("Pydantic validation error", error=str(error), fields=error_details)
 
         error_message = "; ".join(error_details) if error_details else str(error)
-        return jsonify({
-            "error": error_message,
-            "validation_errors": error.errors()
-        }), 400
+        return jsonify({"error": error_message, "validation_errors": error.errors()}), 400
 
     @app.errorhandler(ValueError)
     def handle_value_error(error):
@@ -441,7 +510,7 @@ def create_app():
         error_str = str(error)
 
         # Check if this is likely a validation error from our Pydantic validators
-        validation_keywords = ['must be one of', 'must be a valid', 'must be either', 'Field required']
+        validation_keywords = ["must be one of", "must be a valid", "must be either", "Field required"]
         if any(keyword in error_str for keyword in validation_keywords):
             logger.error("Pydantic validator error", error=error_str)
             return jsonify({"error": error_str}), 400
@@ -453,10 +522,9 @@ def create_app():
     @app.errorhandler(Exception)
     def handle_general_exception(error):
         """Handle all other exceptions with HTTP 500"""
-        logger.error("Unhandled exception",
-                    error_type=type(error).__name__,
-                    error=str(error),
-                    stacktrace=traceback.format_exc())
+        logger.error(
+            "Unhandled exception", error_type=type(error).__name__, error=str(error), stacktrace=traceback.format_exc()
+        )
         return jsonify({"error": "An unexpected error occurred"}), 500
 
     # Register Blueprints

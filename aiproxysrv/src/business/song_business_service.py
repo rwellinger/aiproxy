@@ -1,22 +1,33 @@
 """Song Business Service - Handles song management business logic"""
+
 import logging
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any
+
 from db.song_service import song_service
+
 
 logger = logging.getLogger(__name__)
 
 
 class SongBusinessError(Exception):
     """Base exception for song business logic errors"""
+
     pass
 
 
 class SongBusinessService:
     """Business logic service for song operations"""
 
-    def get_songs_with_pagination(self, limit: int = 20, offset: int = 0, status: str = None,
-                                search: str = '', sort_by: str = 'created_at',
-                                sort_direction: str = 'desc', workflow: str = None) -> Dict[str, Any]:
+    def get_songs_with_pagination(
+        self,
+        limit: int = 20,
+        offset: int = 0,
+        status: str = None,
+        search: str = "",
+        sort_by: str = "created_at",
+        sort_direction: str = "desc",
+        workflow: str = None,
+    ) -> dict[str, Any]:
         """
         Get paginated list of songs with search and filtering
 
@@ -40,13 +51,9 @@ class SongBusinessService:
                 search=search,
                 sort_by=sort_by,
                 sort_direction=sort_direction,
-                workflow=workflow
+                workflow=workflow,
             )
-            total_count = song_service.get_total_songs_count(
-                status=status,
-                search=search,
-                workflow=workflow
-            )
+            total_count = song_service.get_total_songs_count(status=status, search=search, workflow=workflow)
 
             # Transform to API response format
             songs_list = [self._transform_song_to_list_format(song) for song in songs]
@@ -57,15 +64,15 @@ class SongBusinessService:
                     "total": total_count,
                     "limit": limit,
                     "offset": offset,
-                    "has_more": offset + limit < total_count
-                }
+                    "has_more": offset + limit < total_count,
+                },
             }
 
         except Exception as e:
             logger.error(f"Error retrieving songs: {e}")
             raise SongBusinessError(f"Failed to retrieve songs: {e}") from e
 
-    def get_song_details(self, song_id: str) -> Optional[Dict[str, Any]]:
+    def get_song_details(self, song_id: str) -> dict[str, Any] | None:
         """
         Get detailed information for a single song with all choices
 
@@ -86,7 +93,7 @@ class SongBusinessService:
             logger.error(f"Error retrieving song {song_id}: {e}")
             raise SongBusinessError(f"Failed to retrieve song: {e}") from e
 
-    def update_song_metadata(self, song_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def update_song_metadata(self, song_id: str, update_data: dict[str, Any]) -> dict[str, Any] | None:
         """
         Update song metadata with validation
 
@@ -104,7 +111,7 @@ class SongBusinessService:
                 return None
 
             # Validate and filter allowed fields
-            allowed_fields = ['title', 'tags', 'workflow']
+            allowed_fields = ["title", "tags", "workflow"]
             filtered_data = {k: v for k, v in update_data.items() if k in allowed_fields}
 
             if not filtered_data:
@@ -121,7 +128,7 @@ class SongBusinessService:
                 "title": updated_song.title,
                 "tags": updated_song.tags,
                 "workflow": updated_song.workflow,
-                "updated_at": updated_song.updated_at.isoformat() if updated_song.updated_at else None
+                "updated_at": updated_song.updated_at.isoformat() if updated_song.updated_at else None,
             }
 
         except Exception as e:
@@ -154,7 +161,7 @@ class SongBusinessService:
             logger.error(f"Error deleting song {song_id}: {type(e).__name__}: {e}")
             raise SongBusinessError(f"Failed to delete song: {e}") from e
 
-    def bulk_delete_songs(self, song_ids: List[str]) -> Dict[str, Any]:
+    def bulk_delete_songs(self, song_ids: list[str]) -> dict[str, Any]:
         """
         Delete multiple songs with detailed results
 
@@ -170,11 +177,7 @@ class SongBusinessService:
         if len(song_ids) > 100:
             raise SongBusinessError("Too many songs (max 100 per request)")
 
-        results = {
-            "deleted": [],
-            "not_found": [],
-            "errors": []
-        }
+        results = {"deleted": [], "not_found": [], "errors": []}
 
         for song_id in song_ids:
             try:
@@ -199,16 +202,13 @@ class SongBusinessService:
             "total_requested": len(song_ids),
             "deleted": len(results["deleted"]),
             "not_found": len(results["not_found"]),
-            "errors": len(results["errors"])
+            "errors": len(results["errors"]),
         }
 
         logger.info(f"Bulk delete completed: {summary}")
-        return {
-            "summary": summary,
-            "results": results
-        }
+        return {"summary": summary, "results": results}
 
-    def update_choice_rating(self, choice_id: str, rating: Optional[int]) -> Optional[Dict[str, Any]]:
+    def update_choice_rating(self, choice_id: str, rating: int | None) -> dict[str, Any] | None:
         """
         Update rating for a song choice
 
@@ -235,17 +235,13 @@ class SongBusinessService:
                 raise SongBusinessError("Failed to update choice rating")
 
             logger.info(f"Choice {choice_id} rating updated to {rating}")
-            return {
-                "id": choice_id,
-                "rating": rating,
-                "message": "Rating updated successfully"
-            }
+            return {"id": choice_id, "rating": rating, "message": "Rating updated successfully"}
 
         except Exception as e:
             logger.error(f"Error updating choice rating {choice_id}: {e}")
             raise SongBusinessError(f"Failed to update choice rating: {e}") from e
 
-    def _transform_song_to_list_format(self, song) -> Dict[str, Any]:
+    def _transform_song_to_list_format(self, song) -> dict[str, Any]:
         """Transform song object to list display format"""
         return {
             "id": str(song.id),
@@ -257,7 +253,7 @@ class SongBusinessService:
             "created_at": song.created_at.isoformat() if song.created_at else None,
         }
 
-    def _transform_song_to_detail_format(self, song) -> Dict[str, Any]:
+    def _transform_song_to_detail_format(self, song) -> dict[str, Any]:
         """Transform song object to detailed format with choices"""
         # Format choices
         choices_list = []
@@ -277,7 +273,7 @@ class SongBusinessService:
                 "tags": choice.tags,
                 "rating": choice.rating,
                 "formattedDuration": self._format_duration_from_ms(choice.duration) if choice.duration else None,
-                "created_at": choice.created_at.isoformat() if choice.created_at else None
+                "created_at": choice.created_at.isoformat() if choice.created_at else None,
             }
             choices_list.append(choice_data)
 
@@ -302,7 +298,7 @@ class SongBusinessService:
             "choices": choices_list,
             "created_at": song.created_at.isoformat() if song.created_at else None,
             "updated_at": song.updated_at.isoformat() if song.updated_at else None,
-            "completed_at": song.completed_at.isoformat() if song.completed_at else None
+            "completed_at": song.completed_at.isoformat() if song.completed_at else None,
         }
 
     def _format_duration_from_ms(self, duration_ms: float) -> str:

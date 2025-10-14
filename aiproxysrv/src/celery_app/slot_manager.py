@@ -1,8 +1,11 @@
 """
 Simple Slot Management für MUREKA API
 """
+
 import time
+
 from utils.logger import logger
+
 
 # Global state - in Produktion sollte dies über Redis/DB laufen
 current_requests = 0
@@ -55,5 +58,5 @@ def get_slot_status() -> dict:
         "current_requests": current_requests,
         "max_concurrent": 1,
         "active_tasks": len(active_tasks),
-        "available": current_requests < 1
+        "available": current_requests < 1,
     }

@@ -1,31 +1,40 @@
 """Conversation Controller - Handles business logic for AI chat conversations."""
+
 import traceback
 import uuid
 from datetime import datetime
-from typing import Tuple, Dict, Any, List
-import requests
-from sqlalchemy.orm import Session
-from sqlalchemy import func
+from typing import Any
 
+import requests
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from api.controllers.openai_chat_controller import OpenAIAPIError as OpenAIError
+from api.controllers.openai_chat_controller import OpenAIChatController
+from config.model_context_windows import get_context_window_size
+from config.settings import OLLAMA_TIMEOUT, OLLAMA_URL
 from db.models import Conversation, Message, MessageArchive
 from schemas.conversation_schemas import (
     ConversationCreate,
-    ConversationUpdate,
     ConversationResponse,
+    ConversationUpdate,
     MessageResponse,
 )
 from utils.logger import logger
-from config.settings import OLLAMA_URL, OLLAMA_TIMEOUT
-from config.model_context_windows import get_context_window_size
-from api.controllers.openai_chat_controller import OpenAIChatController, OpenAIAPIError as OpenAIError
 
 
 class ConversationController:
     """Controller for managing AI chat conversations."""
 
     def list_conversations(
-        self, db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20, provider: str = None, archived: bool = None
-    ) -> Tuple[Dict[str, Any], int]:
+        self,
+        db: Session,
+        user_id: uuid.UUID,
+        skip: int = 0,
+        limit: int = 20,
+        provider: str = None,
+        archived: bool = None,
+    ) -> tuple[dict[str, Any], int]:
         """
         List all conversations for a user.
 
@@ -43,10 +52,7 @@ class ConversationController:
         try:
             # Get conversations with message count
             query = (
-                db.query(
-                    Conversation,
-                    func.count(Message.id).label("message_count")
-                )
+                db.query(Conversation, func.count(Message.id).label("message_count"))
                 .outerjoin(Message, Conversation.id == Message.conversation_id)
                 .filter(Conversation.user_id == user_id)
             )
@@ -61,10 +67,10 @@ class ConversationController:
             # False = all conversations (no filter)
             if archived is None:
                 # Default: show only non-archived conversations
-                query = query.filter(Conversation.archived == False)
+                query = query.filter(Conversation.archived == False)  # noqa: E712
             elif archived is True:
                 # Show only archived conversations
-                query = query.filter(Conversation.archived == True)
+                query = query.filter(Conversation.archived == True)  # noqa: E712
             # If archived is False, no filter is applied (show all)
 
             query = query.group_by(Conversation.id).order_by(Conversation.updated_at.desc())
@@ -97,7 +103,7 @@ class ConversationController:
 
     def get_conversation(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Get conversation with messages.
 
@@ -132,9 +138,9 @@ class ConversationController:
             )
 
             # Check if conversation has archived messages
-            has_archived = db.query(MessageArchive).filter(
-                MessageArchive.conversation_id == conversation_id
-            ).first() is not None
+            has_archived = (
+                db.query(MessageArchive).filter(MessageArchive.conversation_id == conversation_id).first() is not None
+            )
 
             # Build conversation response
             conv_response = ConversationResponse.from_orm(conversation).dict()
@@ -157,7 +163,7 @@ class ConversationController:
 
     def get_conversation_with_archive(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Get conversation with messages including archived messages (for export).
 
@@ -208,20 +214,22 @@ class ConversationController:
             for msg in active_messages:
                 if msg.is_summary and msg.id:
                     # Replace summary with archived messages
-                    related_archived = [
-                        a for a in archived_messages if a.summary_message_id == msg.id
-                    ]
+                    related_archived = [a for a in archived_messages if a.summary_message_id == msg.id]
                     # Add archived messages as dict (with original timestamps)
                     for archive in related_archived:
-                        all_messages.append({
-                            "id": str(archive.original_message_id),
-                            "conversation_id": str(archive.conversation_id),
-                            "role": archive.role,
-                            "content": archive.content,
-                            "token_count": archive.token_count,
-                            "created_at": archive.original_created_at.isoformat() if archive.original_created_at else None,
-                            "is_archived": True,
-                        })
+                        all_messages.append(
+                            {
+                                "id": str(archive.original_message_id),
+                                "conversation_id": str(archive.conversation_id),
+                                "role": archive.role,
+                                "content": archive.content,
+                                "token_count": archive.token_count,
+                                "created_at": archive.original_created_at.isoformat()
+                                if archive.original_created_at
+                                else None,
+                                "is_archived": True,
+                            }
+                        )
                 else:
                     # Add regular message (convert created_at to ISO string for consistent sorting)
                     msg_dict = MessageResponse.from_orm(msg).dict()
@@ -250,7 +258,7 @@ class ConversationController:
 
     def create_conversation(
         self, db: Session, user_id: uuid.UUID, data: ConversationCreate
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Create a new conversation.
 
@@ -314,7 +322,7 @@ class ConversationController:
 
     def update_conversation(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID, data: ConversationUpdate
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Update a conversation (title only).
 
@@ -372,7 +380,7 @@ class ConversationController:
 
     def delete_conversation(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Delete a conversation.
 
@@ -398,15 +406,11 @@ class ConversationController:
                 return {"error": "Conversation not found"}, 404
 
             # Delete archived messages first (foreign key constraint)
-            archived_count = db.query(MessageArchive).filter(
-                MessageArchive.conversation_id == conversation_id
-            ).delete()
+            archived_count = db.query(MessageArchive).filter(MessageArchive.conversation_id == conversation_id).delete()
 
             if archived_count > 0:
                 logger.debug(
-                    "Deleted archived messages",
-                    conversation_id=str(conversation_id),
-                    archived_count=archived_count
+                    "Deleted archived messages", conversation_id=str(conversation_id), archived_count=archived_count
                 )
 
             # Now delete conversation (cascade will delete regular messages)
@@ -434,7 +438,7 @@ class ConversationController:
 
     def send_message(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID, content: str
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Send a message and get AI response.
 
@@ -499,7 +503,9 @@ class ConversationController:
                     )
             except (OllamaAPIError, OpenAIError) as e:
                 db.rollback()
-                logger.error("Chat API Error", error=str(e), provider=conversation.provider, stacktrace=traceback.format_exc())
+                logger.error(
+                    "Chat API Error", error=str(e), provider=conversation.provider, stacktrace=traceback.format_exc()
+                )
                 return {"error": f"Chat API Error: {e}"}, 500
 
             # Calculate user message token count (part of prompt_eval_count)
@@ -550,7 +556,7 @@ class ConversationController:
             )
             return {"error": f"Failed to send message: {e}"}, 500
 
-    def _call_ollama_chat_api(self, model: str, messages: List[Dict[str, str]]) -> Tuple[str, int, int]:
+    def _call_ollama_chat_api(self, model: str, messages: list[dict[str, str]]) -> tuple[str, int, int]:
         """
         Call Ollama chat API.
 
@@ -590,11 +596,7 @@ class ConversationController:
                 prompt_eval_count = resp_json.get("prompt_eval_count", 0)
                 eval_count = resp_json.get("eval_count", 0)
 
-                logger.debug(
-                    "Token counts extracted",
-                    prompt_tokens=prompt_eval_count,
-                    response_tokens=eval_count
-                )
+                logger.debug("Token counts extracted", prompt_tokens=prompt_eval_count, response_tokens=eval_count)
 
                 return content, prompt_eval_count, eval_count
             else:
@@ -612,8 +614,7 @@ class ConversationController:
             )
             raise OllamaAPIError(f"Unexpected Error: {e}")
 
-
-    def _call_openai_chat_api(self, model: str, messages: List[Dict[str, str]]) -> Tuple[str, int, int]:
+    def _call_openai_chat_api(self, model: str, messages: list[dict[str, str]]) -> tuple[str, int, int]:
         """
         Call OpenAI chat API.
 
@@ -632,15 +633,10 @@ class ConversationController:
 
         try:
             content, prompt_tokens, completion_tokens = openai_controller.send_chat_message(
-                model=model,
-                messages=messages
+                model=model, messages=messages
             )
 
-            logger.debug(
-                "Token counts extracted",
-                prompt_tokens=prompt_tokens,
-                completion_tokens=completion_tokens
-            )
+            logger.debug("Token counts extracted", prompt_tokens=prompt_tokens, completion_tokens=completion_tokens)
 
             return content, prompt_tokens, completion_tokens
 

@@ -1,75 +1,81 @@
 """Song Controller - Orchestrates specialized song controllers"""
+
 import logging
-from typing import Tuple, Dict, Any, List
+from typing import Any
+
+from business.song_business_service import SongBusinessError, SongBusinessService
+
+from .song_account_controller import SongAccountController
 from .song_creation_controller import SongCreationController
 from .song_task_controller import SongTaskController
-from .song_account_controller import SongAccountController
-from business.song_business_service import SongBusinessService, SongBusinessError
+
 
 logger = logging.getLogger(__name__)
 
 
 class SongController:
     """Main controller that orchestrates specialized song controllers"""
-    
+
     def __init__(self):
         self.creation_controller = SongCreationController()
         self.task_controller = SongTaskController()
         self.account_controller = SongAccountController()
         self.business_service = SongBusinessService()
-    
-    def get_celery_health(self) -> Tuple[Dict[str, Any], int]:
+
+    def get_celery_health(self) -> tuple[dict[str, Any], int]:
         """Check Celery Worker Status"""
         return self.task_controller.get_celery_health()
-    
-    def get_mureka_account(self) -> Tuple[Dict[str, Any], int]:
+
+    def get_mureka_account(self) -> tuple[dict[str, Any], int]:
         """Get MUREKA Account Information"""
         return self.account_controller.get_mureka_account()
-    
-    def generate_song(self, payload: Dict[str, Any], host_url: str) -> Tuple[Dict[str, Any], int]:
-        """Start Song Generation"""
-        return self.creation_controller.generate_song(
-            payload, host_url, self.account_controller.check_balance
-        )
 
-    def generate_instrumental(self, payload: Dict[str, Any], host_url: str) -> Tuple[Dict[str, Any], int]:
+    def generate_song(self, payload: dict[str, Any], host_url: str) -> tuple[dict[str, Any], int]:
+        """Start Song Generation"""
+        return self.creation_controller.generate_song(payload, host_url, self.account_controller.check_balance)
+
+    def generate_instrumental(self, payload: dict[str, Any], host_url: str) -> tuple[dict[str, Any], int]:
         """Start Instrumental Generation"""
-        return self.creation_controller.generate_instrumental(
-            payload, host_url, self.account_controller.check_balance
-        )
-    
-    def generate_stems(self, payload: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
+        return self.creation_controller.generate_instrumental(payload, host_url, self.account_controller.check_balance)
+
+    def generate_stems(self, payload: dict[str, Any]) -> tuple[dict[str, Any], int]:
         """Generate stems from MP3"""
-        return self.creation_controller.generate_stems(
-            payload, self.account_controller.check_balance
-        )
-    
-    def get_song_info(self, job_id: str) -> Tuple[Dict[str, Any], int]:
+        return self.creation_controller.generate_stems(payload, self.account_controller.check_balance)
+
+    def get_song_info(self, job_id: str) -> tuple[dict[str, Any], int]:
         """Get Song structure direct from MUREKA again who was generated successfully"""
         return self.creation_controller.get_song_info(job_id)
-    
-    def force_complete_task(self, job_id: str) -> Tuple[Dict[str, Any], int]:
+
+    def force_complete_task(self, job_id: str) -> tuple[dict[str, Any], int]:
         """Force Completion of a Task"""
         return self.task_controller.force_complete_task(job_id)
-    
-    def get_song_status(self, task_id: str) -> Tuple[Dict[str, Any], int]:
+
+    def get_song_status(self, task_id: str) -> tuple[dict[str, Any], int]:
         """Check Status of Song Generation"""
         return self.task_controller.get_song_status(task_id)
-    
-    def cancel_task(self, task_id: str) -> Tuple[Dict[str, Any], int]:
+
+    def cancel_task(self, task_id: str) -> tuple[dict[str, Any], int]:
         """Cancel a Task"""
         return self.task_controller.cancel_task(task_id)
-    
-    def delete_task_result(self, task_id: str) -> Tuple[Dict[str, Any], int]:
+
+    def delete_task_result(self, task_id: str) -> tuple[dict[str, Any], int]:
         """Delete Task Result"""
         return self.task_controller.delete_task_result(task_id)
-    
-    def get_queue_status(self) -> Tuple[Dict[str, Any], int]:
+
+    def get_queue_status(self) -> tuple[dict[str, Any], int]:
         """Get Queue Status"""
         return self.task_controller.get_queue_status()
-    
-    def get_songs(self, limit: int = 20, offset: int = 0, status: str = None, search: str = '',
-                  sort_by: str = 'created_at', sort_direction: str = 'desc', workflow: str = None) -> Tuple[Dict[str, Any], int]:
+
+    def get_songs(
+        self,
+        limit: int = 20,
+        offset: int = 0,
+        status: str = None,
+        search: str = "",
+        sort_by: str = "created_at",
+        sort_direction: str = "desc",
+        workflow: str = None,
+    ) -> tuple[dict[str, Any], int]:
         """
         Get list of songs with pagination, search and sorting
 
@@ -93,7 +99,7 @@ class SongController:
                 search=search,
                 sort_by=sort_by,
                 sort_direction=sort_direction,
-                workflow=workflow
+                workflow=workflow,
             )
             return result, 200
 
@@ -103,8 +109,8 @@ class SongController:
         except Exception as e:
             logger.error(f"Unexpected error retrieving songs: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
-    
-    def get_song_by_id(self, song_id: str) -> Tuple[Dict[str, Any], int]:
+
+    def get_song_by_id(self, song_id: str) -> tuple[dict[str, Any], int]:
         """
         Get single song by ID with all choices
 
@@ -129,7 +135,7 @@ class SongController:
             logger.error(f"Unexpected error retrieving song {song_id}: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-    def update_song(self, song_id: str, update_data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
+    def update_song(self, song_id: str, update_data: dict[str, Any]) -> tuple[dict[str, Any], int]:
         """
         Update song by ID
 
@@ -155,7 +161,7 @@ class SongController:
             logger.error(f"Unexpected error updating song {song_id}: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-    def delete_song(self, song_id: str) -> Tuple[Dict[str, Any], int]:
+    def delete_song(self, song_id: str) -> tuple[dict[str, Any], int]:
         """
         Delete song by ID including all choices
 
@@ -180,7 +186,7 @@ class SongController:
             logger.error(f"Unexpected error deleting song {song_id}: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-    def bulk_delete_songs(self, song_ids: List[str]) -> Tuple[Dict[str, Any], int]:
+    def bulk_delete_songs(self, song_ids: list[str]) -> tuple[dict[str, Any], int]:
         """
         Delete multiple songs by IDs including all choices
 
@@ -217,8 +223,7 @@ class SongController:
             logger.error(f"Unexpected error in bulk delete: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-
-    def update_choice_rating(self, choice_id: str, rating_data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
+    def update_choice_rating(self, choice_id: str, rating_data: dict[str, Any]) -> tuple[dict[str, Any], int]:
         """
         Update rating for a specific song choice
 
@@ -230,7 +235,7 @@ class SongController:
             Tuple of (response_data, status_code)
         """
         try:
-            rating = rating_data.get('rating')
+            rating = rating_data.get("rating")
             result = self.business_service.update_choice_rating(choice_id, rating)
 
             if result is None:
@@ -246,4 +251,3 @@ class SongController:
         except Exception as e:
             logger.error(f"Unexpected error updating choice rating {choice_id}: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
-

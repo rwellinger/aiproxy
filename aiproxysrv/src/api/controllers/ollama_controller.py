@@ -1,15 +1,18 @@
 """Ollama Controller - Proxy for Ollama API calls."""
+
+from typing import Any
+
 import requests
-from typing import Tuple, Dict, Any
+
+from config.settings import OLLAMA_TIMEOUT, OLLAMA_URL
 from utils.logger import logger
-from config.settings import OLLAMA_URL, OLLAMA_TIMEOUT
 
 
 class OllamaController:
     """Controller for proxying Ollama API requests."""
 
     @staticmethod
-    def get_models() -> Tuple[Dict[str, Any], int]:
+    def get_models() -> tuple[dict[str, Any], int]:
         """
         Get available Ollama models.
 

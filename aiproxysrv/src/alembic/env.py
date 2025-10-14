@@ -1,13 +1,23 @@
-from logging.config import fileConfig
 import os
+from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
 from db.database import Base
-from db.models import *  # Import all models
+
+# Import all models so Alembic can detect them for autogenerate
+from db.models import (  # noqa: F401
+    Conversation,
+    GeneratedImage,
+    Message,
+    MessageArchive,
+    PromptTemplate,
+    Song,
+    SongChoice,
+    User,
+)
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -15,9 +25,9 @@ config = context.config
 
 # Override sqlalchemy.url with DATABASE_URL from environment if available
 # This allows running migrations in Docker without hardcoded credentials
-database_url = os.getenv('DATABASE_URL')
+database_url = os.getenv("DATABASE_URL")
 if database_url:
-    config.set_main_option('sqlalchemy.url', database_url)
+    config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -72,9 +82,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

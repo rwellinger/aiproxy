@@ -1,14 +1,13 @@
 """API routes for prompt template management"""
-from flask import Blueprint, request, jsonify
-from sqlalchemy.orm import Session
-from db.database import get_db
-from api.controllers.prompt_controller import PromptController
-from api.auth_middleware import jwt_required
-from schemas.prompt_schemas import (
-    PromptTemplateCreate,
-    PromptTemplateUpdate
-)
+
+from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
+from sqlalchemy.orm import Session
+
+from api.auth_middleware import jwt_required
+from api.controllers.prompt_controller import PromptController
+from db.database import get_db
+from schemas.prompt_schemas import PromptTemplateCreate, PromptTemplateUpdate
 
 
 api_prompt_v1 = Blueprint("api_prompt_v1", __name__, url_prefix="/api/v1/prompts")

@@ -3,25 +3,28 @@
 Script to create initial user account
 Usage: python create_initial_user.py
 """
-import sys
+
 import os
+import sys
+
 
 # Add the src directory to the Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
-from sqlalchemy.orm import Session
-from db.database import SessionLocal, engine
-from db.models import User
-import bcrypt
 import uuid
 from datetime import datetime
+
+import bcrypt
+
+from db.database import SessionLocal
+from db.models import User
 
 
 def hash_password(password: str) -> str:
     """Hash a password using bcrypt"""
     salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed.decode('utf-8')
+    hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+    return hashed.decode("utf-8")
 
 
 def create_initial_user():
@@ -30,14 +33,16 @@ def create_initial_user():
     import os
 
     # Get credentials from environment or prompt
-    email = os.getenv('INITIAL_USER_EMAIL')
-    password = os.getenv('INITIAL_USER_PASSWORD')
-    first_name = os.getenv('INITIAL_USER_FIRST_NAME', 'Admin')
-    last_name = os.getenv('INITIAL_USER_LAST_NAME', 'User')
+    email = os.getenv("INITIAL_USER_EMAIL")
+    password = os.getenv("INITIAL_USER_PASSWORD")
+    first_name = os.getenv("INITIAL_USER_FIRST_NAME", "Admin")
+    last_name = os.getenv("INITIAL_USER_LAST_NAME", "User")
 
     if not email or not password:
         print("Error: INITIAL_USER_EMAIL and INITIAL_USER_PASSWORD environment variables must be set")
-        print("Example: INITIAL_USER_EMAIL=admin@example.com INITIAL_USER_PASSWORD=your_secure_password python create_initial_user.py")
+        print(
+            "Example: INITIAL_USER_EMAIL=admin@example.com INITIAL_USER_PASSWORD=your_secure_password python create_initial_user.py"
+        )
         return
 
     # Create database session
@@ -62,7 +67,7 @@ def create_initial_user():
             last_name=last_name,
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
 
         # Add to database
@@ -70,11 +75,11 @@ def create_initial_user():
         db.commit()
         db.refresh(user)
 
-        print(f"✓ Initial user created successfully!")
+        print("✓ Initial user created successfully!")
         print(f"  ID: {user.id}")
         print(f"  Email: {user.email}")
         print(f"  Name: {user.first_name} {user.last_name}")
-        print(f"  Password: secret (hashed)")
+        print("  Password: secret (hashed)")
         print(f"  Active: {user.is_active}")
         print(f"  Created: {user.created_at}")
 

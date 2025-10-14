@@ -1,7 +1,10 @@
 """Image Controller - Handles HTTP requests for image operations"""
+
 import logging
-from typing import Tuple, Dict, Any, List, Optional
+from typing import Any
+
 from business.image_business_service import ImageBusinessService, ImageGenerationError
+
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +15,7 @@ class ImageController:
     def __init__(self):
         self.business_service = ImageBusinessService()
 
-    def generate_image(self, prompt: str, size: str, title: Optional[str] = None) -> Tuple[Dict[str, Any], int]:
+    def generate_image(self, prompt: str, size: str, title: str | None = None) -> tuple[dict[str, Any], int]:
         """
         Generate image via business service
 
@@ -39,8 +42,14 @@ class ImageController:
             logger.error(f"Unexpected error in image generation: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-    def get_images(self, limit: int = 20, offset: int = 0, search: str = '',
-                   sort_by: str = 'created_at', sort_direction: str = 'desc') -> Tuple[Dict[str, Any], int]:
+    def get_images(
+        self,
+        limit: int = 20,
+        offset: int = 0,
+        search: str = "",
+        sort_by: str = "created_at",
+        sort_direction: str = "desc",
+    ) -> tuple[dict[str, Any], int]:
         """
         Get list of generated images with pagination, search and sorting
 
@@ -56,11 +65,7 @@ class ImageController:
         """
         try:
             result = self.business_service.get_images_with_pagination(
-                limit=limit,
-                offset=offset,
-                search=search,
-                sort_by=sort_by,
-                sort_direction=sort_direction
+                limit=limit, offset=offset, search=search, sort_by=sort_by, sort_direction=sort_direction
             )
             return result, 200
 
@@ -71,7 +76,7 @@ class ImageController:
             logger.error(f"Unexpected error retrieving images: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-    def get_image_by_id(self, image_id: str) -> Tuple[Dict[str, Any], int]:
+    def get_image_by_id(self, image_id: str) -> tuple[dict[str, Any], int]:
         """
         Get single image by ID
 
@@ -96,7 +101,7 @@ class ImageController:
             logger.error(f"Unexpected error retrieving image {image_id}: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-    def delete_image(self, image_id: str) -> Tuple[Dict[str, Any], int]:
+    def delete_image(self, image_id: str) -> tuple[dict[str, Any], int]:
         """
         Delete image by ID
 
@@ -121,7 +126,7 @@ class ImageController:
             logger.error(f"Unexpected error deleting image {image_id}: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-    def bulk_delete_images(self, image_ids: List[str]) -> Tuple[Dict[str, Any], int]:
+    def bulk_delete_images(self, image_ids: list[str]) -> tuple[dict[str, Any], int]:
         """
         Delete multiple images by IDs
 
@@ -158,7 +163,7 @@ class ImageController:
             logger.error(f"Unexpected error in bulk delete: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-    def update_image_metadata(self, image_id: str, title: str = None, tags: str = None) -> Tuple[Dict[str, Any], int]:
+    def update_image_metadata(self, image_id: str, title: str = None, tags: str = None) -> tuple[dict[str, Any], int]:
         """
         Update image metadata (title and/or tags)
 

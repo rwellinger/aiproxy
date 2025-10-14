@@ -4,11 +4,14 @@ Script to add the new "titel/generate" prompt template to the database.
 This script inserts the title generation template for AI-powered song title creation.
 """
 
-import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+import sys
+
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from sqlalchemy.orm import Session
+
 from db.database import get_db
 from db.models import PromptTemplate
 
@@ -23,7 +26,7 @@ TITLE_TEMPLATE = {
     "version": "1.0",
     "model": "llama3.2:3b",
     "temperature": 1.5,
-    "max_tokens": 10
+    "max_tokens": 10,
 }
 
 
@@ -33,13 +36,16 @@ def add_title_template():
 
     try:
         # Check if template already exists
-        existing = db.query(PromptTemplate).filter(
-            PromptTemplate.category == TITLE_TEMPLATE["category"],
-            PromptTemplate.action == TITLE_TEMPLATE["action"]
-        ).first()
+        existing = (
+            db.query(PromptTemplate)
+            .filter(
+                PromptTemplate.category == TITLE_TEMPLATE["category"], PromptTemplate.action == TITLE_TEMPLATE["action"]
+            )
+            .first()
+        )
 
         if existing:
-            print(f"Template 'titel/generate' already exists, updating...")
+            print("Template 'titel/generate' already exists, updating...")
             # Update existing template
             existing.pre_condition = TITLE_TEMPLATE["pre_condition"]
             existing.post_condition = TITLE_TEMPLATE["post_condition"]
@@ -51,7 +57,7 @@ def add_title_template():
             existing.active = True
             operation = "updated"
         else:
-            print(f"Creating new template 'titel/generate'...")
+            print("Creating new template 'titel/generate'...")
             # Create new template
             new_template = PromptTemplate(
                 category=TITLE_TEMPLATE["category"],
@@ -63,7 +69,7 @@ def add_title_template():
                 model=TITLE_TEMPLATE["model"],
                 temperature=TITLE_TEMPLATE["temperature"],
                 max_tokens=TITLE_TEMPLATE["max_tokens"],
-                active=True
+                active=True,
             )
             db.add(new_template)
             operation = "created"
@@ -74,7 +80,9 @@ def add_title_template():
         print(f"\n✅ Title template successfully {operation}!")
         print(f"   Category: {TITLE_TEMPLATE['category']}")
         print(f"   Action: {TITLE_TEMPLATE['action']}")
-        print(f"   Model: {TITLE_TEMPLATE['model']} (temp: {TITLE_TEMPLATE['temperature']}, max_tokens: {TITLE_TEMPLATE['max_tokens']})")
+        print(
+            f"   Model: {TITLE_TEMPLATE['model']} (temp: {TITLE_TEMPLATE['temperature']}, max_tokens: {TITLE_TEMPLATE['max_tokens']})"
+        )
         print(f"   Description: {TITLE_TEMPLATE['description']}")
 
         return True
@@ -93,14 +101,16 @@ def verify_template():
     db: Session = next(get_db())
 
     try:
-        template = db.query(PromptTemplate).filter(
-            PromptTemplate.category == "titel",
-            PromptTemplate.action == "generate",
-            PromptTemplate.active == True
-        ).first()
+        template = (
+            db.query(PromptTemplate)
+            .filter(
+                PromptTemplate.category == "titel", PromptTemplate.action == "generate", PromptTemplate.active
+            )
+            .first()
+        )
 
         if template:
-            print(f"\n📊 Verification successful:")
+            print("\n📊 Verification successful:")
             print(f"   Template ID: {template.id}")
             print(f"   Category/Action: {template.category}/{template.action}")
             print(f"   Pre-condition: {template.pre_condition}")
@@ -111,7 +121,7 @@ def verify_template():
             print(f"   Active: {template.active}")
             return True
         else:
-            print(f"\n❌ Verification failed: Template not found in database")
+            print("\n❌ Verification failed: Template not found in database")
             return False
 
     except Exception as e:

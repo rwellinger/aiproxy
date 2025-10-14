@@ -1,19 +1,28 @@
 """
 User Controller for handling user authentication and management
 """
-from typing import Tuple, Dict, Any, Optional
+
 from datetime import datetime, timedelta
+from typing import Any
+
 from db.database import SessionLocal
 from db.user_service import UserService
-from schemas.user_schemas import (
-    UserCreateRequest, UserCreateResponse,
-    LoginRequest, LoginResponse,
-    UserUpdateRequest, UserUpdateResponse,
-    PasswordChangeRequest, PasswordChangeResponse,
-    PasswordResetRequest, PasswordResetResponse,
-    UserResponse, UserListResponse, LogoutResponse
-)
 from schemas.common_schemas import ErrorResponse
+from schemas.user_schemas import (
+    LoginRequest,
+    LoginResponse,
+    LogoutResponse,
+    PasswordChangeRequest,
+    PasswordChangeResponse,
+    PasswordResetRequest,
+    PasswordResetResponse,
+    UserCreateRequest,
+    UserCreateResponse,
+    UserListResponse,
+    UserResponse,
+    UserUpdateRequest,
+    UserUpdateResponse,
+)
 from utils.logger import logger
 
 
@@ -27,16 +36,16 @@ class UserController:
         """Get database session"""
         return SessionLocal()
 
-    def _format_error_response(self, message: str, status_code: int = 400) -> Tuple[Dict[str, Any], int]:
+    def _format_error_response(self, message: str, status_code: int = 400) -> tuple[dict[str, Any], int]:
         """Format error response"""
         error_response = ErrorResponse(error=message)
         return error_response.model_dump(), status_code
 
-    def _format_success_response(self, response_model, status_code: int = 200) -> Tuple[Dict[str, Any], int]:
+    def _format_success_response(self, response_model, status_code: int = 200) -> tuple[dict[str, Any], int]:
         """Format success response"""
         return response_model.model_dump(), status_code
 
-    def create_user(self, request: UserCreateRequest) -> Tuple[Dict[str, Any], int]:
+    def create_user(self, request: UserCreateRequest) -> tuple[dict[str, Any], int]:
         """Create a new user"""
         db = self._get_db()
         try:
@@ -46,17 +55,14 @@ class UserController:
                 email=request.email,
                 password=request.password,
                 first_name=request.first_name,
-                last_name=request.last_name
+                last_name=request.last_name,
             )
 
             if not user:
                 return self._format_error_response("Failed to create user", 500)
 
             response = UserCreateResponse(
-                success=True,
-                message="User created successfully",
-                user_id=user.id,
-                email=user.email
+                success=True, message="User created successfully", user_id=user.id, email=user.email
             )
             return self._format_success_response(response, 201)
 
@@ -68,16 +74,12 @@ class UserController:
         finally:
             db.close()
 
-    def login(self, request: LoginRequest) -> Tuple[Dict[str, Any], int]:
+    def login(self, request: LoginRequest) -> tuple[dict[str, Any], int]:
         """Authenticate user and return JWT token"""
         db = self._get_db()
         try:
             # Authenticate user
-            user = self.user_service.authenticate_user(
-                db=db,
-                email=request.email,
-                password=request.password
-            )
+            user = self.user_service.authenticate_user(db=db, email=request.email, password=request.password)
 
             if not user:
                 return self._format_error_response("Invalid email or password", 401)
@@ -90,11 +92,7 @@ class UserController:
             expires_at = datetime.utcnow() + timedelta(hours=self.user_service.jwt_expiration_hours)
 
             response = LoginResponse(
-                success=True,
-                message="Login successful",
-                token=token,
-                user=user_response,
-                expires_at=expires_at
+                success=True, message="Login successful", token=token, user=user_response, expires_at=expires_at
             )
             return self._format_success_response(response, 200)
 
@@ -104,15 +102,12 @@ class UserController:
         finally:
             db.close()
 
-    def logout(self) -> Tuple[Dict[str, Any], int]:
+    def logout(self) -> tuple[dict[str, Any], int]:
         """Logout user (token invalidation would happen on frontend)"""
-        response = LogoutResponse(
-            success=True,
-            message="Logout successful"
-        )
+        response = LogoutResponse(success=True, message="Logout successful")
         return self._format_success_response(response, 200)
 
-    def get_user_profile(self, user_id: str) -> Tuple[Dict[str, Any], int]:
+    def get_user_profile(self, user_id: str) -> tuple[dict[str, Any], int]:
         """Get user profile by ID"""
         db = self._get_db()
         try:
@@ -130,26 +125,19 @@ class UserController:
         finally:
             db.close()
 
-    def update_user(self, user_id: str, request: UserUpdateRequest) -> Tuple[Dict[str, Any], int]:
+    def update_user(self, user_id: str, request: UserUpdateRequest) -> tuple[dict[str, Any], int]:
         """Update user information"""
         db = self._get_db()
         try:
             user = self.user_service.update_user(
-                db=db,
-                user_id=user_id,
-                first_name=request.first_name,
-                last_name=request.last_name
+                db=db, user_id=user_id, first_name=request.first_name, last_name=request.last_name
             )
 
             if not user:
                 return self._format_error_response("User not found", 404)
 
             user_response = UserResponse.model_validate(user)
-            response = UserUpdateResponse(
-                success=True,
-                message="User updated successfully",
-                user=user_response
-            )
+            response = UserUpdateResponse(success=True, message="User updated successfully", user=user_response)
             return self._format_success_response(response, 200)
 
         except Exception as e:
@@ -158,24 +146,18 @@ class UserController:
         finally:
             db.close()
 
-    def change_password(self, user_id: str, request: PasswordChangeRequest) -> Tuple[Dict[str, Any], int]:
+    def change_password(self, user_id: str, request: PasswordChangeRequest) -> tuple[dict[str, Any], int]:
         """Change user password"""
         db = self._get_db()
         try:
             success = self.user_service.change_password(
-                db=db,
-                user_id=user_id,
-                old_password=request.old_password,
-                new_password=request.new_password
+                db=db, user_id=user_id, old_password=request.old_password, new_password=request.new_password
             )
 
             if not success:
                 return self._format_error_response("Invalid current password or user not found", 400)
 
-            response = PasswordChangeResponse(
-                success=True,
-                message="Password changed successfully"
-            )
+            response = PasswordChangeResponse(success=True, message="Password changed successfully")
             return self._format_success_response(response, 200)
 
         except Exception as e:
@@ -184,23 +166,16 @@ class UserController:
         finally:
             db.close()
 
-    def reset_password(self, request: PasswordResetRequest) -> Tuple[Dict[str, Any], int]:
+    def reset_password(self, request: PasswordResetRequest) -> tuple[dict[str, Any], int]:
         """Reset user password (admin function)"""
         db = self._get_db()
         try:
-            success = self.user_service.reset_password(
-                db=db,
-                email=request.email,
-                new_password=request.new_password
-            )
+            success = self.user_service.reset_password(db=db, email=request.email, new_password=request.new_password)
 
             if not success:
                 return self._format_error_response("User not found", 404)
 
-            response = PasswordResetResponse(
-                success=True,
-                message="Password reset successfully"
-            )
+            response = PasswordResetResponse(success=True, message="Password reset successfully")
             return self._format_success_response(response, 200)
 
         except Exception as e:
@@ -209,7 +184,7 @@ class UserController:
         finally:
             db.close()
 
-    def list_users(self, skip: int = 0, limit: int = 100) -> Tuple[Dict[str, Any], int]:
+    def list_users(self, skip: int = 0, limit: int = 100) -> tuple[dict[str, Any], int]:
         """List all users (admin function)"""
         db = self._get_db()
         try:
@@ -217,10 +192,7 @@ class UserController:
 
             users_response = [UserResponse.model_validate(user) for user in users]
             response = UserListResponse(
-                success=True,
-                message="Users retrieved successfully",
-                users=users_response,
-                total=len(users_response)
+                success=True, message="Users retrieved successfully", users=users_response, total=len(users_response)
             )
             return self._format_success_response(response, 200)
 
@@ -230,7 +202,7 @@ class UserController:
         finally:
             db.close()
 
-    def validate_token(self, token: str) -> Optional[Dict[str, Any]]:
+    def validate_token(self, token: str) -> dict[str, Any] | None:
         """Validate JWT token and return user info (with database check)"""
         db = self._get_db()
         try:
@@ -239,30 +211,24 @@ class UserController:
                 return None
 
             # Verify user still exists in database
-            user = self.user_service.get_user_by_id(db, payload.get('user_id'))
+            user = self.user_service.get_user_by_id(db, payload.get("user_id"))
             if not user:
-                logger.warning("Token valid but user not found in database", user_id=payload.get('user_id'))
+                logger.warning("Token valid but user not found in database", user_id=payload.get("user_id"))
                 return None
 
-            return {
-                'user_id': payload.get('user_id'),
-                'email': payload.get('email')
-            }
+            return {"user_id": payload.get("user_id"), "email": payload.get("email")}
         except Exception as e:
             logger.error("Error validating token", error=str(e))
             return None
         finally:
             db.close()
 
-    def validate_token_light(self, token: str) -> Optional[Dict[str, Any]]:
+    def validate_token_light(self, token: str) -> dict[str, Any] | None:
         """Lightweight JWT token validation (no database check)"""
         try:
             payload = self.user_service.verify_jwt_token(token)
             if payload:
-                return {
-                    'user_id': payload.get('user_id'),
-                    'email': payload.get('email')
-                }
+                return {"user_id": payload.get("user_id"), "email": payload.get("email")}
             return None
         except Exception as e:
             logger.error("Error validating token (light)", error=str(e))

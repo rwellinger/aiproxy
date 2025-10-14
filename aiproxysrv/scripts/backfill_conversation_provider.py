@@ -4,8 +4,11 @@ Backfill provider field for existing conversations.
 Sets all existing conversations to 'internal' (Ollama).
 Run this once after adding the provider field to conversations table.
 """
+
 import sys
-sys.path.insert(0, 'src')
+
+
+sys.path.insert(0, "src")
 
 from db.database import SessionLocal
 from db.models import Conversation
@@ -23,16 +26,11 @@ def backfill_provider():
 
         for conv in conversations:
             # Set provider to 'internal' if not already set or if default
-            if not conv.provider or conv.provider == 'internal':
-                conv.provider = 'internal'
+            if not conv.provider or conv.provider == "internal":
+                conv.provider = "internal"
                 updated_count += 1
 
-                logger.info(
-                    f"Updated conversation {conv.id}",
-                    title=conv.title,
-                    model=conv.model,
-                    provider='internal'
-                )
+                logger.info(f"Updated conversation {conv.id}", title=conv.title, model=conv.model, provider="internal")
 
         db.commit()
 

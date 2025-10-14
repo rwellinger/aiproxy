@@ -4,11 +4,14 @@ Seeding script for migrating existing prompt templates to the database.
 This script reads the current templates from the TypeScript service and inserts them into the DB.
 """
 
-import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+import sys
+
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from sqlalchemy.orm import Session
+
 from db.database import get_db
 from db.models import PromptTemplate
 
@@ -21,15 +24,15 @@ TEMPLATES = {
             "post_condition": "Only respond with the prompt.",
             "description": "Enhances image generation prompts for DALL-E",
             "version": "1.0",
-            "model_hint": "llama3"
+            "model_hint": "llama3",
         },
         "translate": {
             "pre_condition": "Translate this image prompt to english:",
             "post_condition": "Only respond with the translation.",
             "description": "Translates image prompts to English",
             "version": "1.0",
-            "model_hint": "gpt-oss"
-        }
+            "model_hint": "gpt-oss",
+        },
     },
     "music": {
         "enhance": {
@@ -37,15 +40,15 @@ TEMPLATES = {
             "post_condition": "Only respond with the prompt.",
             "description": "Enhances music style prompts for Suno without artist references",
             "version": "1.0",
-            "model_hint": "llama3"
+            "model_hint": "llama3",
         },
         "translate": {
             "pre_condition": "Translate this music style description to english:",
             "post_condition": "Only respond with the translation.",
             "description": "Translates music style descriptions to English",
             "version": "1.0",
-            "model_hint": "gpt-oss"
-        }
+            "model_hint": "gpt-oss",
+        },
     },
     "lyrics": {
         "generate": {
@@ -53,16 +56,16 @@ TEMPLATES = {
             "post_condition": "Only respond with the lyrics.",
             "description": "Generates song lyrics from input text",
             "version": "1.0",
-            "model_hint": "llama3"
+            "model_hint": "llama3",
         },
         "translate": {
             "pre_condition": "By a britisch songwriter and translate this lyric text to britisch english:",
             "post_condition": "Only respond with the translation.",
             "description": "Translates lyrics to British English",
             "version": "1.0",
-            "model_hint": "gpt-oss"
-        }
-    }
+            "model_hint": "gpt-oss",
+        },
+    },
 }
 
 
@@ -82,13 +85,14 @@ def seed_prompt_templates():
                 print(f"  Processing action: {action}")
 
                 # Check if template already exists
-                existing = db.query(PromptTemplate).filter(
-                    PromptTemplate.category == category,
-                    PromptTemplate.action == action
-                ).first()
+                existing = (
+                    db.query(PromptTemplate)
+                    .filter(PromptTemplate.category == category, PromptTemplate.action == action)
+                    .first()
+                )
 
                 if existing:
-                    print(f"    Template exists, updating...")
+                    print("    Template exists, updating...")
                     # Update existing template
                     existing.pre_condition = template_data["pre_condition"]
                     existing.post_condition = template_data["post_condition"]
@@ -98,7 +102,7 @@ def seed_prompt_templates():
                     existing.active = True
                     updated_count += 1
                 else:
-                    print(f"    Creating new template...")
+                    print("    Creating new template...")
                     # Create new template
                     new_template = PromptTemplate(
                         category=category,
@@ -108,7 +112,7 @@ def seed_prompt_templates():
                         description=template_data["description"],
                         version=template_data["version"],
                         model_hint=template_data["model_hint"],
-                        active=True
+                        active=True,
                     )
                     db.add(new_template)
                     inserted_count += 1
@@ -116,7 +120,7 @@ def seed_prompt_templates():
         # Commit all changes
         db.commit()
 
-        print(f"\n✅ Seeding completed successfully!")
+        print("\n✅ Seeding completed successfully!")
         print(f"   - Inserted: {inserted_count} new templates")
         print(f"   - Updated:  {updated_count} existing templates")
         print(f"   - Total:    {inserted_count + updated_count} templates processed")
@@ -137,9 +141,9 @@ def verify_templates():
     db: Session = next(get_db())
 
     try:
-        templates = db.query(PromptTemplate).filter(PromptTemplate.active == True).all()
+        templates = db.query(PromptTemplate).filter(PromptTemplate.active).all()
 
-        print(f"\n📊 Verification Results:")
+        print("\n📊 Verification Results:")
         print(f"   Total active templates in DB: {len(templates)}")
 
         # Group by category for display

@@ -1,36 +1,38 @@
 """
 DALL-E Image Generation Routes with Pydantic validation
 """
+
 import traceback
-from flask import Blueprint, request, jsonify, send_from_directory
+
+from flask import Blueprint, jsonify, request, send_from_directory
 from flask_pydantic import validate
-from config.settings import IMAGES_DIR
-from api.controllers.image_controller import ImageController
+
 from api.auth_middleware import jwt_required
-from schemas.image_schemas import (
-    ImageGenerateRequest, ImageGenerateResponse,
-    ImageListRequest, ImageListResponse,
-    ImageUpdateRequest, ImageUpdateResponse,
-    ImageDeleteResponse
-)
+from api.controllers.image_controller import ImageController
+from config.settings import IMAGES_DIR
 from schemas.common_schemas import ErrorResponse
+from schemas.image_schemas import (
+    ImageGenerateRequest,
+    ImageListRequest,
+    ImageUpdateRequest,
+)
 from utils.logger import logger
+
 
 api_image_v1 = Blueprint("api_image_v1", __name__, url_prefix="/api/v1/image")
 
 # Controller instance
 image_controller = ImageController()
 
-@api_image_v1.route('/generate', methods=['POST'])
+
+@api_image_v1.route("/generate", methods=["POST"])
 @jwt_required
 @validate()
 def generate(body: ImageGenerateRequest):
     """Generate image with DALL-E"""
     try:
         response_data, status_code = image_controller.generate_image(
-            prompt=body.prompt,
-            size=body.size,
-            title=body.title
+            prompt=body.prompt, size=body.size, title=body.title
         )
         return jsonify(response_data), status_code
     except Exception as e:
@@ -38,18 +40,14 @@ def generate(body: ImageGenerateRequest):
         return jsonify(error_response.dict()), 500
 
 
-@api_image_v1.route('/list', methods=['GET'])
+@api_image_v1.route("/list", methods=["GET"])
 @jwt_required
 @validate()
 def list_images(query: ImageListRequest):
     """Get list of generated images with pagination, search and sorting"""
     try:
         response_data, status_code = image_controller.get_images(
-            limit=query.limit,
-            offset=query.offset,
-            search=query.search,
-            sort_by=query.sort,
-            sort_direction=query.order
+            limit=query.limit, offset=query.offset, search=query.search, sort_by=query.sort, sort_direction=query.order
         )
         return jsonify(response_data), status_code
     except Exception as e:
@@ -57,8 +55,7 @@ def list_images(query: ImageListRequest):
         return jsonify(error_response.dict()), 500
 
 
-
-@api_image_v1.route('/<path:filename>')
+@api_image_v1.route("/<path:filename>")
 @jwt_required
 def serve_image(filename):
     """Serve stored images"""
@@ -66,11 +63,17 @@ def serve_image(filename):
         logger.debug("Serving image", filename=filename)
         return send_from_directory(IMAGES_DIR, filename)
     except Exception as e:
-        logger.error("Error serving image", filename=filename, error=str(e), error_type=type(e).__name__, stacktrace=traceback.format_exc())
+        logger.error(
+            "Error serving image",
+            filename=filename,
+            error=str(e),
+            error_type=type(e).__name__,
+            stacktrace=traceback.format_exc(),
+        )
         return jsonify({"error": "Image not found"}), 404
 
 
-@api_image_v1.route('/id/<string:image_id>', methods=['GET'])
+@api_image_v1.route("/id/<string:image_id>", methods=["GET"])
 @jwt_required
 def get_image(image_id):
     """Get single image by ID"""
@@ -79,7 +82,7 @@ def get_image(image_id):
     return jsonify(response_data), status_code
 
 
-@api_image_v1.route('/id/<string:image_id>', methods=['DELETE'])
+@api_image_v1.route("/id/<string:image_id>", methods=["DELETE"])
 @jwt_required
 def delete_image(image_id):
     """Delete image by ID"""
@@ -88,7 +91,7 @@ def delete_image(image_id):
     return jsonify(response_data), status_code
 
 
-@api_image_v1.route('/bulk-delete', methods=['DELETE'])
+@api_image_v1.route("/bulk-delete", methods=["DELETE"])
 @jwt_required
 def bulk_delete_images():
     """Delete multiple images by IDs"""
@@ -97,7 +100,7 @@ def bulk_delete_images():
     if not raw_json:
         return jsonify({"error": "No JSON provided"}), 400
 
-    image_ids = raw_json.get('ids', [])
+    image_ids = raw_json.get("ids", [])
 
     if not isinstance(image_ids, list):
         return jsonify({"error": "ids must be an array"}), 400
@@ -107,17 +110,14 @@ def bulk_delete_images():
     return jsonify(response_data), status_code
 
 
-@api_image_v1.route('/id/<string:image_id>', methods=['PUT'])
+@api_image_v1.route("/id/<string:image_id>", methods=["PUT"])
 @jwt_required
 @validate()
 def update_image_metadata(image_id: str, body: ImageUpdateRequest):
     """Update image metadata (title and/or tags)"""
     try:
-        response_data, status_code = image_controller.update_image_metadata(
-            image_id, body.title, body.tags
-        )
+        response_data, status_code = image_controller.update_image_metadata(image_id, body.title, body.tags)
         return jsonify(response_data), status_code
     except Exception as e:
         error_response = ErrorResponse(error=str(e))
         return jsonify(error_response.dict()), 500
-
