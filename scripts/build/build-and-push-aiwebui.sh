@@ -118,7 +118,7 @@ build_image() {
     print_info "Building $APP_IMAGE..."
     print_warning "This may take a while (Angular build + npm install)..."
 
-    docker build -f dockerfile --target production \
+    docker build -f Dockerfile --target production \
         -t "$APP_IMAGE:local" \
         -t "$APP_IMAGE:$VERSION" \
         -t "$REGISTRY/$APP_IMAGE:$VERSION" \
