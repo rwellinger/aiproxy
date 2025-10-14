@@ -5,7 +5,18 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from db.database import Base
-from db.models import *  # Import all models
+
+# Import all models so Alembic can detect them for autogenerate
+from db.models import (  # noqa: F401
+    Conversation,
+    GeneratedImage,
+    Message,
+    MessageArchive,
+    PromptTemplate,
+    Song,
+    SongChoice,
+    User,
+)
 
 
 # this is the Alembic Config object, which provides

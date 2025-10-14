@@ -61,13 +61,13 @@ def _configure_loguru_for_celery():
 
 # Celery Logging auf loguru umleiten (wird beim Worker-Start aufgerufen)
 @setup_logging.connect
-def configure_celery_logging(**kwargs):
+def configure_celery_logging(**_kwargs):
     """Celery's logging komplett auf loguru umleiten"""
     _configure_loguru_for_celery()
 
 
 # Wird bei jedem Worker-Process aufgerufen (wichtig für prefork)
 @worker_process_init.connect
-def configure_worker_logging(**kwargs):
+def configure_worker_logging(**_kwargs):
     """Configure logging for each worker process"""
     _configure_loguru_for_celery()
