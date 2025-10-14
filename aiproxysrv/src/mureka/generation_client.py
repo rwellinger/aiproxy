@@ -1,22 +1,21 @@
 """
 MUREKA Generation Client - Standard song generation
 """
-import logging
 import time
-from typing import Dict, Any
+from typing import Any
+
 from requests import HTTPError
-from config.settings import (
-    MUREKA_GENERATE_ENDPOINT,
-    MUREKA_STATUS_ENDPOINT
-)
-from .base_client import MurekaBaseClient
+
+from config.settings import MUREKA_GENERATE_ENDPOINT, MUREKA_STATUS_ENDPOINT
 from utils.logger import logger
+
+from .base_client import MurekaBaseClient
 
 
 class MurekaGenerationClient(MurekaBaseClient):
     """Client for standard MUREKA song generation"""
 
-    def start_generation(self, payload: dict) -> Dict[str, Any]:
+    def start_generation(self, payload: dict) -> dict[str, Any]:
         """Start a MUREKA song generation"""
         headers = self._get_headers()
 
@@ -38,7 +37,7 @@ class MurekaGenerationClient(MurekaBaseClient):
         logger.info("MUREKA generation started successfully", job_id=job_id)
         return response_data
 
-    def check_status(self, job_id: str) -> Dict[str, Any]:
+    def check_status(self, job_id: str) -> dict[str, Any]:
         """Check the status of a MUREKA generation"""
         headers = self._get_headers()
         status_url = f"{MUREKA_STATUS_ENDPOINT}/{job_id}"
@@ -51,7 +50,7 @@ class MurekaGenerationClient(MurekaBaseClient):
         logger.debug("MUREKA status response", job_id=job_id, status=status_data.get('status'))
         return status_data
 
-    def wait_for_completion(self, task, job_id: str) -> Dict[str, Any]:
+    def wait_for_completion(self, task, job_id: str) -> dict[str, Any]:
         """Wait for the completion of a MUREKA generation"""
         start_time = time.time()
 
@@ -108,14 +107,14 @@ class MurekaGenerationClient(MurekaBaseClient):
 # Convenience functions for backward compatibility
 _client = MurekaGenerationClient()
 
-def start_mureka_generation(payload: dict) -> Dict[str, Any]:
+def start_mureka_generation(payload: dict) -> dict[str, Any]:
     """Backward compatibility function"""
     return _client.start_generation(payload)
 
-def check_mureka_status(job_id: str) -> Dict[str, Any]:
+def check_mureka_status(job_id: str) -> dict[str, Any]:
     """Backward compatibility function"""
     return _client.check_status(job_id)
 
-def wait_for_mureka_completion(task, job_id: str) -> Dict[str, Any]:
+def wait_for_mureka_completion(task, job_id: str) -> dict[str, Any]:
     """Backward compatibility function"""
     return _client.wait_for_completion(task, job_id)

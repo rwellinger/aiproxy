@@ -10,13 +10,18 @@ This script safely updates:
 - Logs all changes for transparency
 """
 
-import sys
 import os
+import sys
+
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from db.database import get_db
-from sqlalchemy import text
 import logging
+
+from sqlalchemy import text
+
+from db.database import get_db
+
 
 # Configure logging
 logging.basicConfig(

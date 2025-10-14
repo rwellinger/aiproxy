@@ -1,19 +1,21 @@
 """Pydantic schemas for Song API validation"""
+from datetime import datetime
+from typing import Any
+
 from pydantic import BaseModel, Field, validator
 from pydantic.types import UUID4
-from typing import Optional, List, Dict, Any
-from datetime import datetime
-from .common_schemas import BaseResponse, PaginationResponse, StatusEnum
+
+from .common_schemas import BaseResponse, PaginationResponse
 
 
 class SongGenerateRequest(BaseModel):
     """Schema for song generation requests"""
     prompt: str = Field(..., min_length=1, max_length=500, description="Song generation prompt")
-    lyrics: Optional[str] = Field(None, max_length=10000, description="Custom lyrics (optional)")
-    title: Optional[str] = Field(None, min_length=1, max_length=50, description="Optional title for the song")
+    lyrics: str | None = Field(None, max_length=10000, description="Custom lyrics (optional)")
+    title: str | None = Field(None, min_length=1, max_length=50, description="Optional title for the song")
     model: str = Field("auto", description="Model to use for generation")
-    style: Optional[str] = Field(None, max_length=100, description="Music style/genre")
-    duration: Optional[int] = Field(30, ge=15, le=120, description="Song duration in seconds")
+    style: str | None = Field(None, max_length=100, description="Music style/genre")
+    duration: int | None = Field(30, ge=15, le=120, description="Song duration in seconds")
 
     @validator('model')
     def validate_model(cls, v):
@@ -38,22 +40,22 @@ class SongGenerateRequest(BaseModel):
 class SongResponse(BaseModel):
     """Schema for single song response"""
     id: str = Field(..., description="Unique song ID")
-    title: Optional[str] = Field(None, description="Song title")
+    title: str | None = Field(None, description="Song title")
     prompt: str = Field(..., description="Generation prompt used")
-    lyrics: Optional[str] = Field(None, description="Song lyrics")
-    style: Optional[str] = Field(None, description="Music style/genre")
+    lyrics: str | None = Field(None, description="Song lyrics")
+    style: str | None = Field(None, description="Music style/genre")
     status: str = Field(..., description="Generation status")
-    job_id: Optional[str] = Field(None, description="External API job ID")
-    audio_url: Optional[str] = Field(None, description="Audio file URL")
-    flac_url: Optional[str] = Field(None, description="FLAC file URL")
-    mp3_url: Optional[str] = Field(None, description="MP3 file URL")
-    stems_url: Optional[str] = Field(None, description="Stems ZIP file URL")
-    workflow: Optional[str] = Field("notUsed", description="Workflow status")
-    rating: Optional[int] = Field(None, ge=1, le=5, description="User rating")
-    is_instrumental: Optional[bool] = Field(False, description="True if this is an instrumental song")
+    job_id: str | None = Field(None, description="External API job ID")
+    audio_url: str | None = Field(None, description="Audio file URL")
+    flac_url: str | None = Field(None, description="FLAC file URL")
+    mp3_url: str | None = Field(None, description="MP3 file URL")
+    stems_url: str | None = Field(None, description="Stems ZIP file URL")
+    workflow: str | None = Field("notUsed", description="Workflow status")
+    rating: int | None = Field(None, ge=1, le=5, description="User rating")
+    is_instrumental: bool | None = Field(False, description="True if this is an instrumental song")
     created_at: datetime = Field(..., description="Creation timestamp")
-    completed_at: Optional[datetime] = Field(None, description="Completion timestamp")
-    tags: Optional[List[str]] = Field(None, description="Song tags")
+    completed_at: datetime | None = Field(None, description="Completion timestamp")
+    tags: list[str] | None = Field(None, description="Song tags")
 
     @validator('workflow')
     def validate_workflow(cls, v):
@@ -87,18 +89,18 @@ class SongResponse(BaseModel):
 class SongGenerateResponse(BaseResponse):
     """Schema for song generation response"""
     data: SongResponse = Field(..., description="Generated song data")
-    task_id: Optional[str] = Field(None, description="Celery task ID for tracking")
+    task_id: str | None = Field(None, description="Celery task ID for tracking")
 
 
 class SongListRequest(BaseModel):
     """Schema for song list request parameters"""
-    limit: Optional[int] = Field(20, ge=1, le=100, description="Number of items to return")
-    offset: Optional[int] = Field(0, ge=0, description="Number of items to skip")
-    search: Optional[str] = Field(None, max_length=100, description="Search query for title/prompt/lyrics")
-    status: Optional[str] = Field(None, description="Filter by status")
-    workflow: Optional[str] = Field(None, description="Filter by workflow")
-    sort: Optional[str] = Field("created_at", description="Sort field")
-    order: Optional[str] = Field("desc", description="Sort order")
+    limit: int | None = Field(20, ge=1, le=100, description="Number of items to return")
+    offset: int | None = Field(0, ge=0, description="Number of items to skip")
+    search: str | None = Field(None, max_length=100, description="Search query for title/prompt/lyrics")
+    status: str | None = Field(None, description="Filter by status")
+    workflow: str | None = Field(None, description="Filter by workflow")
+    sort: str | None = Field("created_at", description="Sort field")
+    order: str | None = Field("desc", description="Sort order")
 
     @validator('status')
     def validate_status(cls, v):
@@ -127,15 +129,15 @@ class SongListRequest(BaseModel):
 
 class SongListResponse(PaginationResponse):
     """Schema for song list response"""
-    data: List[SongResponse] = Field(..., description="List of songs")
+    data: list[SongResponse] = Field(..., description="List of songs")
 
 
 class SongUpdateRequest(BaseModel):
     """Schema for song update requests"""
-    title: Optional[str] = Field(None, max_length=255, description="New song title")
-    workflow: Optional[str] = Field(None, description="Workflow status")
-    rating: Optional[int] = Field(None, ge=1, le=5, description="User rating")
-    tags: Optional[List[str]] = Field(None, description="Song tags")
+    title: str | None = Field(None, max_length=255, description="New song title")
+    workflow: str | None = Field(None, description="Workflow status")
+    rating: int | None = Field(None, ge=1, le=5, description="User rating")
+    tags: list[str] | None = Field(None, description="Song tags")
 
     @validator('workflow')
     def validate_workflow(cls, v):
@@ -174,14 +176,14 @@ class StemGenerateRequest(BaseModel):
 class StemGenerateResponse(BaseResponse):
     """Schema for stems generation response"""
     data: dict = Field(..., description="Stems generation data")
-    task_id: Optional[str] = Field(None, description="Celery task ID for tracking")
+    task_id: str | None = Field(None, description="Celery task ID for tracking")
 
 
 class SongHealthResponse(BaseModel):
     """Schema for song service health check"""
     celery_status: str = Field(..., description="Celery worker status")
-    mureka_account: Optional[Dict[str, Any]] = Field(None, description="Mureka account info")
-    slot_status: Optional[Dict[str, Any]] = Field(None, description="Mureka slot status")
+    mureka_account: dict[str, Any] | None = Field(None, description="Mureka account info")
+    slot_status: dict[str, Any] | None = Field(None, description="Mureka slot status")
 
 
 class SongTaskStatusRequest(BaseModel):
@@ -191,7 +193,7 @@ class SongTaskStatusRequest(BaseModel):
 
 class SongTaskStatusResponse(BaseResponse):
     """Schema for task status response"""
-    data: Dict[str, Any] = Field(..., description="Task status information")
+    data: dict[str, Any] = Field(..., description="Task status information")
 
 
 class SongDeleteResponse(BaseResponse):
@@ -213,37 +215,37 @@ class ChoiceRatingUpdateRequest(BaseModel):
 
 class ChoiceRatingUpdateResponse(BaseResponse):
     """Schema for choice rating update response"""
-    data: Dict[str, Any] = Field(..., description="Updated choice data")
+    data: dict[str, Any] = Field(..., description="Updated choice data")
 
 
 class MurekaAccountResponse(BaseResponse):
     """Schema for Mureka account information"""
-    data: Dict[str, Any] = Field(..., description="Mureka account data")
+    data: dict[str, Any] = Field(..., description="Mureka account data")
 
 
 class CeleryHealthResponse(BaseResponse):
     """Schema for Celery health check"""
-    data: Dict[str, str] = Field(..., description="Celery status information")
+    data: dict[str, str] = Field(..., description="Celery status information")
 
 
 class SongJobInfoResponse(BaseResponse):
     """Schema for Mureka job information"""
-    data: Dict[str, Any] = Field(..., description="MUREKA job information")
+    data: dict[str, Any] = Field(..., description="MUREKA job information")
 
 
 class ForceCompleteResponse(BaseResponse):
     """Schema for force complete task response"""
-    data: Dict[str, Any] = Field(..., description="Force completion result")
+    data: dict[str, Any] = Field(..., description="Force completion result")
 
 
 class QueueStatusResponse(BaseResponse):
     """Schema for queue status response"""
-    data: Dict[str, Any] = Field(..., description="Queue status information")
+    data: dict[str, Any] = Field(..., description="Queue status information")
 
 
 class TaskCancelResponse(BaseResponse):
     """Schema for task cancellation response"""
-    data: Dict[str, Any] = Field(..., description="Cancellation result")
+    data: dict[str, Any] = Field(..., description="Cancellation result")
 
 
 class InstrumentalGenerateRequest(BaseModel):
@@ -251,8 +253,8 @@ class InstrumentalGenerateRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=50, description="Title for the instrumental song")
     prompt: str = Field(..., min_length=1, max_length=500, description="Instrumental generation prompt")
     model: str = Field("auto", description="Model to use for generation")
-    style: Optional[str] = Field(None, max_length=100, description="Music style/genre")
-    duration: Optional[int] = Field(30, ge=15, le=120, description="Instrumental duration in seconds")
+    style: str | None = Field(None, max_length=100, description="Music style/genre")
+    duration: int | None = Field(30, ge=15, le=120, description="Instrumental duration in seconds")
 
     @validator('model')
     def validate_model(cls, v):
@@ -276,4 +278,4 @@ class InstrumentalGenerateRequest(BaseModel):
 class InstrumentalGenerateResponse(BaseResponse):
     """Schema for instrumental generation response"""
     data: SongResponse = Field(..., description="Generated instrumental data")
-    task_id: Optional[str] = Field(None, description="Celery task ID for tracking")
+    task_id: str | None = Field(None, description="Celery task ID for tracking")

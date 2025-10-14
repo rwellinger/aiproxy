@@ -2,7 +2,9 @@
 Simple Slot Management für MUREKA API
 """
 import time
+
 from utils.logger import logger
+
 
 # Global state - in Produktion sollte dies über Redis/DB laufen
 current_requests = 0

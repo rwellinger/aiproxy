@@ -2,6 +2,7 @@
 Error Handler für MUREKA API
 """
 from requests import HTTPError
+
 from utils.logger import logger
 
 

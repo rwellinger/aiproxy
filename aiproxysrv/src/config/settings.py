@@ -2,7 +2,9 @@
 Zentrale Konfiguration für alle Module
 """
 import os
+
 from dotenv import load_dotenv
+
 
 load_dotenv()
 

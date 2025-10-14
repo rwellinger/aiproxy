@@ -2,22 +2,24 @@
 import traceback
 import uuid
 from datetime import datetime
-from typing import Tuple, Dict, Any, List
-import requests
-from sqlalchemy.orm import Session
-from sqlalchemy import func
+from typing import Any
 
+import requests
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from api.controllers.openai_chat_controller import OpenAIAPIError as OpenAIError
+from api.controllers.openai_chat_controller import OpenAIChatController
+from config.model_context_windows import get_context_window_size
+from config.settings import OLLAMA_TIMEOUT, OLLAMA_URL
 from db.models import Conversation, Message, MessageArchive
 from schemas.conversation_schemas import (
     ConversationCreate,
-    ConversationUpdate,
     ConversationResponse,
+    ConversationUpdate,
     MessageResponse,
 )
 from utils.logger import logger
-from config.settings import OLLAMA_URL, OLLAMA_TIMEOUT
-from config.model_context_windows import get_context_window_size
-from api.controllers.openai_chat_controller import OpenAIChatController, OpenAIAPIError as OpenAIError
 
 
 class ConversationController:
@@ -25,7 +27,7 @@ class ConversationController:
 
     def list_conversations(
         self, db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20, provider: str = None, archived: bool = None
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         List all conversations for a user.
 
@@ -97,7 +99,7 @@ class ConversationController:
 
     def get_conversation(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Get conversation with messages.
 
@@ -157,7 +159,7 @@ class ConversationController:
 
     def get_conversation_with_archive(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Get conversation with messages including archived messages (for export).
 
@@ -250,7 +252,7 @@ class ConversationController:
 
     def create_conversation(
         self, db: Session, user_id: uuid.UUID, data: ConversationCreate
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Create a new conversation.
 
@@ -314,7 +316,7 @@ class ConversationController:
 
     def update_conversation(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID, data: ConversationUpdate
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Update a conversation (title only).
 
@@ -372,7 +374,7 @@ class ConversationController:
 
     def delete_conversation(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Delete a conversation.
 
@@ -434,7 +436,7 @@ class ConversationController:
 
     def send_message(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID, content: str
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Send a message and get AI response.
 
@@ -550,7 +552,7 @@ class ConversationController:
             )
             return {"error": f"Failed to send message: {e}"}, 500
 
-    def _call_ollama_chat_api(self, model: str, messages: List[Dict[str, str]]) -> Tuple[str, int, int]:
+    def _call_ollama_chat_api(self, model: str, messages: list[dict[str, str]]) -> tuple[str, int, int]:
         """
         Call Ollama chat API.
 
@@ -613,7 +615,7 @@ class ConversationController:
             raise OllamaAPIError(f"Unexpected Error: {e}")
 
 
-    def _call_openai_chat_api(self, model: str, messages: List[Dict[str, str]]) -> Tuple[str, int, int]:
+    def _call_openai_chat_api(self, model: str, messages: list[dict[str, str]]) -> tuple[str, int, int]:
         """
         Call OpenAI chat API.
 

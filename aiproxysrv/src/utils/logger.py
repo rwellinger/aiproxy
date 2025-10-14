@@ -2,11 +2,13 @@
 Centralized logging configuration using loguru.
 Replaces all print() statements with structured logging.
 """
-import sys
 import logging
+import sys
+
 from loguru import logger
 
 from config.settings import LOG_LEVEL
+
 
 # Remove default logger
 logger.remove()

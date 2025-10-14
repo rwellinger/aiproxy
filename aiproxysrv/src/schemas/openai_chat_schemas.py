@@ -1,5 +1,4 @@
 """OpenAI Chat API schemas for request/response validation."""
-from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
 
@@ -14,12 +13,12 @@ class OpenAIChatRequest(BaseModel):
     """Schema for OpenAI Chat API request."""
 
     model: str = Field(..., min_length=1, description="OpenAI model name (e.g., gpt-4o)")
-    messages: List[OpenAIChatMessage] = Field(..., min_items=1, description="Conversation messages")
-    temperature: Optional[float] = Field(0.7, ge=0.0, le=2.0, description="Sampling temperature")
-    max_tokens: Optional[int] = Field(None, ge=1, description="Maximum tokens to generate")
-    top_p: Optional[float] = Field(1.0, ge=0.0, le=1.0, description="Nucleus sampling")
-    frequency_penalty: Optional[float] = Field(0.0, ge=-2.0, le=2.0, description="Frequency penalty")
-    presence_penalty: Optional[float] = Field(0.0, ge=-2.0, le=2.0, description="Presence penalty")
+    messages: list[OpenAIChatMessage] = Field(..., min_items=1, description="Conversation messages")
+    temperature: float | None = Field(0.7, ge=0.0, le=2.0, description="Sampling temperature")
+    max_tokens: int | None = Field(None, ge=1, description="Maximum tokens to generate")
+    top_p: float | None = Field(1.0, ge=0.0, le=1.0, description="Nucleus sampling")
+    frequency_penalty: float | None = Field(0.0, ge=-2.0, le=2.0, description="Frequency penalty")
+    presence_penalty: float | None = Field(0.0, ge=-2.0, le=2.0, description="Presence penalty")
 
 
 class OpenAIChatChoice(BaseModel):
@@ -27,7 +26,7 @@ class OpenAIChatChoice(BaseModel):
 
     index: int
     message: OpenAIChatMessage
-    finish_reason: Optional[str] = None
+    finish_reason: str | None = None
 
 
 class OpenAIChatUsage(BaseModel):
@@ -45,7 +44,7 @@ class OpenAIChatResponse(BaseModel):
     object: str = "chat.completion"
     created: int
     model: str
-    choices: List[OpenAIChatChoice]
+    choices: list[OpenAIChatChoice]
     usage: OpenAIChatUsage
 
 
@@ -59,4 +58,4 @@ class OpenAIModelInfo(BaseModel):
 class OpenAIModelsListResponse(BaseModel):
     """Schema for list of available OpenAI models."""
 
-    models: List[OpenAIModelInfo]
+    models: list[OpenAIModelInfo]

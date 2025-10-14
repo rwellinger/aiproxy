@@ -1,12 +1,15 @@
 """
 WSGI Entry Point für Gunicorn (PRODUCTION)
 """
-import tomli
-from utils.logger import logger, LoguruHandler
-from pathlib import Path
-from api.app import create_app
-from config.settings import FLASK_SERVER_PORT, FLASK_SERVER_HOST, DEBUG, LOG_LEVEL
 import logging
+from pathlib import Path
+
+import tomli
+
+from api.app import create_app
+from config.settings import DEBUG, FLASK_SERVER_HOST, FLASK_SERVER_PORT, LOG_LEVEL
+from utils.logger import LoguruHandler, logger
+
 
 # Read version from pyproject.toml
 try:

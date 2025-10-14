@@ -4,11 +4,14 @@ Seeding script for migrating existing prompt templates to the database.
 This script reads the current templates from the TypeScript service and inserts them into the DB.
 """
 
-import sys
 import os
+import sys
+
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from sqlalchemy.orm import Session
+
 from db.database import get_db
 from db.models import PromptTemplate
 
@@ -88,7 +91,7 @@ def seed_prompt_templates():
                 ).first()
 
                 if existing:
-                    print(f"    Template exists, updating...")
+                    print("    Template exists, updating...")
                     # Update existing template
                     existing.pre_condition = template_data["pre_condition"]
                     existing.post_condition = template_data["post_condition"]
@@ -98,7 +101,7 @@ def seed_prompt_templates():
                     existing.active = True
                     updated_count += 1
                 else:
-                    print(f"    Creating new template...")
+                    print("    Creating new template...")
                     # Create new template
                     new_template = PromptTemplate(
                         category=category,
@@ -116,7 +119,7 @@ def seed_prompt_templates():
         # Commit all changes
         db.commit()
 
-        print(f"\n✅ Seeding completed successfully!")
+        print("\n✅ Seeding completed successfully!")
         print(f"   - Inserted: {inserted_count} new templates")
         print(f"   - Updated:  {updated_count} existing templates")
         print(f"   - Total:    {inserted_count + updated_count} templates processed")
@@ -139,7 +142,7 @@ def verify_templates():
     try:
         templates = db.query(PromptTemplate).filter(PromptTemplate.active == True).all()
 
-        print(f"\n📊 Verification Results:")
+        print("\n📊 Verification Results:")
         print(f"   Total active templates in DB: {len(templates)}")
 
         # Group by category for display

@@ -1,14 +1,16 @@
 """Song Account Controller - Handles MUREKA account operations"""
+from typing import Any
+
 import requests
-from typing import Tuple, Dict, Any
+
 from config.settings import MUREKA_API_KEY, MUREKA_BILLING_URL
 from utils.logger import logger
 
 
 class SongAccountController:
     """Controller for MUREKA account operations"""
-    
-    def get_mureka_account(self) -> Tuple[Dict[str, Any], int]:
+
+    def get_mureka_account(self) -> tuple[dict[str, Any], int]:
         """Get MUREKA Account Information"""
         if not MUREKA_API_KEY:
             return {"error": "MUREKA_API_KEY not configured"}, 500
@@ -38,7 +40,7 @@ class SongAccountController:
                 "status": "error",
                 "message": f"Unexpected error: {str(e)}"
             }, 500
-    
+
     def check_balance(self) -> bool:
         """Check Balance"""
         try:

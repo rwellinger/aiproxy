@@ -1,7 +1,9 @@
 """Prompt template processing utilities with fallback logic"""
 import logging
-from typing import Optional, Dict, Any
+from typing import Any
+
 from db.models import PromptTemplate
+
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -15,7 +17,7 @@ class PromptProcessor:
     """Utility class for processing prompt templates with fallback logic"""
 
     @staticmethod
-    def resolve_ai_parameters(template: PromptTemplate) -> Dict[str, Any]:
+    def resolve_ai_parameters(template: PromptTemplate) -> dict[str, Any]:
         """
         Resolve AI parameters for a template with fallback to defaults.
         Logs which values are used for transparency.
@@ -77,7 +79,7 @@ class PromptProcessor:
         return complete_prompt
 
     @staticmethod
-    def process_template(template: PromptTemplate, user_input: str) -> Dict[str, Any]:
+    def process_template(template: PromptTemplate, user_input: str) -> dict[str, Any]:
         """
         Complete template processing: resolve AI parameters and build prompt.
 

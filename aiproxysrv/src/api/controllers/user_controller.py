@@ -1,19 +1,27 @@
 """
 User Controller for handling user authentication and management
 """
-from typing import Tuple, Dict, Any, Optional
 from datetime import datetime, timedelta
+from typing import Any
+
 from db.database import SessionLocal
 from db.user_service import UserService
-from schemas.user_schemas import (
-    UserCreateRequest, UserCreateResponse,
-    LoginRequest, LoginResponse,
-    UserUpdateRequest, UserUpdateResponse,
-    PasswordChangeRequest, PasswordChangeResponse,
-    PasswordResetRequest, PasswordResetResponse,
-    UserResponse, UserListResponse, LogoutResponse
-)
 from schemas.common_schemas import ErrorResponse
+from schemas.user_schemas import (
+    LoginRequest,
+    LoginResponse,
+    LogoutResponse,
+    PasswordChangeRequest,
+    PasswordChangeResponse,
+    PasswordResetRequest,
+    PasswordResetResponse,
+    UserCreateRequest,
+    UserCreateResponse,
+    UserListResponse,
+    UserResponse,
+    UserUpdateRequest,
+    UserUpdateResponse,
+)
 from utils.logger import logger
 
 
@@ -27,16 +35,16 @@ class UserController:
         """Get database session"""
         return SessionLocal()
 
-    def _format_error_response(self, message: str, status_code: int = 400) -> Tuple[Dict[str, Any], int]:
+    def _format_error_response(self, message: str, status_code: int = 400) -> tuple[dict[str, Any], int]:
         """Format error response"""
         error_response = ErrorResponse(error=message)
         return error_response.model_dump(), status_code
 
-    def _format_success_response(self, response_model, status_code: int = 200) -> Tuple[Dict[str, Any], int]:
+    def _format_success_response(self, response_model, status_code: int = 200) -> tuple[dict[str, Any], int]:
         """Format success response"""
         return response_model.model_dump(), status_code
 
-    def create_user(self, request: UserCreateRequest) -> Tuple[Dict[str, Any], int]:
+    def create_user(self, request: UserCreateRequest) -> tuple[dict[str, Any], int]:
         """Create a new user"""
         db = self._get_db()
         try:
@@ -68,7 +76,7 @@ class UserController:
         finally:
             db.close()
 
-    def login(self, request: LoginRequest) -> Tuple[Dict[str, Any], int]:
+    def login(self, request: LoginRequest) -> tuple[dict[str, Any], int]:
         """Authenticate user and return JWT token"""
         db = self._get_db()
         try:
@@ -104,7 +112,7 @@ class UserController:
         finally:
             db.close()
 
-    def logout(self) -> Tuple[Dict[str, Any], int]:
+    def logout(self) -> tuple[dict[str, Any], int]:
         """Logout user (token invalidation would happen on frontend)"""
         response = LogoutResponse(
             success=True,
@@ -112,7 +120,7 @@ class UserController:
         )
         return self._format_success_response(response, 200)
 
-    def get_user_profile(self, user_id: str) -> Tuple[Dict[str, Any], int]:
+    def get_user_profile(self, user_id: str) -> tuple[dict[str, Any], int]:
         """Get user profile by ID"""
         db = self._get_db()
         try:
@@ -130,7 +138,7 @@ class UserController:
         finally:
             db.close()
 
-    def update_user(self, user_id: str, request: UserUpdateRequest) -> Tuple[Dict[str, Any], int]:
+    def update_user(self, user_id: str, request: UserUpdateRequest) -> tuple[dict[str, Any], int]:
         """Update user information"""
         db = self._get_db()
         try:
@@ -158,7 +166,7 @@ class UserController:
         finally:
             db.close()
 
-    def change_password(self, user_id: str, request: PasswordChangeRequest) -> Tuple[Dict[str, Any], int]:
+    def change_password(self, user_id: str, request: PasswordChangeRequest) -> tuple[dict[str, Any], int]:
         """Change user password"""
         db = self._get_db()
         try:
@@ -184,7 +192,7 @@ class UserController:
         finally:
             db.close()
 
-    def reset_password(self, request: PasswordResetRequest) -> Tuple[Dict[str, Any], int]:
+    def reset_password(self, request: PasswordResetRequest) -> tuple[dict[str, Any], int]:
         """Reset user password (admin function)"""
         db = self._get_db()
         try:
@@ -209,7 +217,7 @@ class UserController:
         finally:
             db.close()
 
-    def list_users(self, skip: int = 0, limit: int = 100) -> Tuple[Dict[str, Any], int]:
+    def list_users(self, skip: int = 0, limit: int = 100) -> tuple[dict[str, Any], int]:
         """List all users (admin function)"""
         db = self._get_db()
         try:
@@ -230,7 +238,7 @@ class UserController:
         finally:
             db.close()
 
-    def validate_token(self, token: str) -> Optional[Dict[str, Any]]:
+    def validate_token(self, token: str) -> dict[str, Any] | None:
         """Validate JWT token and return user info (with database check)"""
         db = self._get_db()
         try:
@@ -254,7 +262,7 @@ class UserController:
         finally:
             db.close()
 
-    def validate_token_light(self, token: str) -> Optional[Dict[str, Any]]:
+    def validate_token_light(self, token: str) -> dict[str, Any] | None:
         """Lightweight JWT token validation (no database check)"""
         try:
             payload = self.user_service.verify_jwt_token(token)

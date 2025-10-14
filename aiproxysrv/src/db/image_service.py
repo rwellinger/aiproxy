@@ -1,6 +1,6 @@
 """Image database service layer"""
-from typing import Optional, List
-from sqlalchemy.orm import Session
+
+
 from db.database import SessionLocal
 from db.models import GeneratedImage
 from utils.logger import logger
@@ -8,7 +8,7 @@ from utils.logger import logger
 
 class ImageService:
     """Service class for image database operations"""
-    
+
     @staticmethod
     def save_generated_image(
         prompt: str,
@@ -18,8 +18,8 @@ class ImageService:
         local_url: str,
         model_used: str,
         prompt_hash: str,
-        title: Optional[str] = None
-    ) -> Optional[GeneratedImage]:
+        title: str | None = None
+    ) -> GeneratedImage | None:
         """
         Save generated image metadata to database
         
@@ -50,42 +50,42 @@ class ImageService:
             return None
         finally:
             db.close()
-    
+
     @staticmethod
-    def get_image_by_filename(filename: str) -> Optional[GeneratedImage]:
+    def get_image_by_filename(filename: str) -> GeneratedImage | None:
         """Get image metadata by filename"""
         db = SessionLocal()
         try:
             return db.query(GeneratedImage).filter(GeneratedImage.filename == filename).first()
         finally:
             db.close()
-    
+
     @staticmethod
-    def get_images_by_prompt_hash(prompt_hash: str) -> List[GeneratedImage]:
+    def get_images_by_prompt_hash(prompt_hash: str) -> list[GeneratedImage]:
         """Get all images with the same prompt hash"""
         db = SessionLocal()
         try:
             return db.query(GeneratedImage).filter(GeneratedImage.prompt_hash == prompt_hash).all()
         finally:
             db.close()
-    
+
     @staticmethod
-    def get_recent_images(limit: int = 10) -> List[GeneratedImage]:
+    def get_recent_images(limit: int = 10) -> list[GeneratedImage]:
         """Get most recently generated images"""
         db = SessionLocal()
         try:
             return db.query(GeneratedImage).order_by(GeneratedImage.created_at.desc()).limit(limit).all()
         finally:
             db.close()
-    
+
     @staticmethod
-    def get_recent_images_paginated(limit: int = 20, offset: int = 0) -> List[GeneratedImage]:
+    def get_recent_images_paginated(limit: int = 20, offset: int = 0) -> list[GeneratedImage]:
         """Get most recently generated images with pagination (deprecated - use get_images_paginated)"""
         return ImageService.get_images_paginated(limit=limit, offset=offset)
 
     @staticmethod
     def get_images_paginated(limit: int = 20, offset: int = 0, search: str = '',
-                           sort_by: str = 'created_at', sort_direction: str = 'desc') -> List[GeneratedImage]:
+                           sort_by: str = 'created_at', sort_direction: str = 'desc') -> list[GeneratedImage]:
         """Get images with pagination, search and sorting"""
         db = SessionLocal()
         try:
@@ -123,7 +123,7 @@ class ImageService:
             return query.limit(limit).offset(offset).all()
         finally:
             db.close()
-    
+
     @staticmethod
     def get_total_images_count(search: str = '') -> int:
         """Get total count of generated images with optional search filter"""
@@ -145,16 +145,16 @@ class ImageService:
             return query.count()
         finally:
             db.close()
-    
+
     @staticmethod
-    def get_image_by_id(image_id: str) -> Optional[GeneratedImage]:
+    def get_image_by_id(image_id: str) -> GeneratedImage | None:
         """Get image metadata by ID"""
         db = SessionLocal()
         try:
             return db.query(GeneratedImage).filter(GeneratedImage.id == image_id).first()
         finally:
             db.close()
-    
+
     @staticmethod
     def delete_image_metadata(image_id: str) -> bool:
         """Delete image metadata by ID"""

@@ -1,11 +1,12 @@
 """Conversation Routes - AI Chat Conversation Management."""
 import uuid
-from flask import Blueprint, request, jsonify
+
+from flask import Blueprint, jsonify, request
 from flask_pydantic import validate
 
-from api.auth_middleware import jwt_required, get_current_user_id
-from api.controllers.conversation_controller import ConversationController
+from api.auth_middleware import get_current_user_id, jwt_required
 from api.controllers.compression_controller import CompressionController
+from api.controllers.conversation_controller import ConversationController
 from db.database import get_db
 from schemas.conversation_schemas import (
     ConversationCreate,
@@ -13,6 +14,7 @@ from schemas.conversation_schemas import (
     SendMessageRequest,
 )
 from utils.logger import logger
+
 
 api_conversation_v1 = Blueprint(
     "api_conversation_v1", __name__, url_prefix="/api/v1/conversations"

@@ -1,5 +1,6 @@
 """OpenAI Chat Routes - Provides endpoints for OpenAI model information."""
 from flask import Blueprint, jsonify
+
 from api.auth_middleware import jwt_required
 from api.controllers.openai_chat_controller import OpenAIChatController
 from utils.logger import logger

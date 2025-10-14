@@ -1,28 +1,30 @@
 """Song Service - Database operations for song management"""
 import json
-import redis
 import traceback
 from datetime import datetime
-from typing import Optional, Dict, Any, List
-from sqlalchemy.orm import Session, joinedload
+from typing import Any
+
+import redis
 from sqlalchemy.exc import SQLAlchemyError
-from db.models import Song, SongChoice, SongStatus
-from db.database import get_db
+from sqlalchemy.orm import joinedload
+
 from config.settings import CELERY_BROKER_URL
+from db.database import get_db
+from db.models import Song, SongChoice, SongStatus
 from utils.logger import logger
 
 
 class SongService:
     """Service for song database operations"""
-    
+
     def __init__(self):
         self.redis_url = CELERY_BROKER_URL
-    
+
     def _get_redis_connection(self) -> redis.Redis:
         """Get Redis connection"""
         return redis.from_url(self.redis_url)
-    
-    def create_song(self, task_id: str, lyrics: str, prompt: str, model: str = "auto", is_instrumental: bool = False, title: str = None) -> Optional[Song]:
+
+    def create_song(self, task_id: str, lyrics: str, prompt: str, model: str = "auto", is_instrumental: bool = False, title: str = None) -> Song | None:
         """Create a new song record in the database"""
         try:
             db = next(get_db())
@@ -36,7 +38,7 @@ class SongService:
                     is_instrumental=is_instrumental,
                     title=title
                 )
-                
+
                 db.add(song)
                 db.commit()
                 db.refresh(song)
@@ -54,8 +56,8 @@ class SongService:
         except Exception as e:
             logger.error("song_creation_failed", task_id=task_id, error=str(e), error_type=type(e).__name__)
             return None
-    
-    def get_song_by_task_id(self, task_id: str) -> Optional[Song]:
+
+    def get_song_by_task_id(self, task_id: str) -> Song | None:
         """Get song by task_id with choices loaded"""
         try:
             db = next(get_db())
@@ -71,8 +73,8 @@ class SongService:
         except Exception as e:
             logger.error("error_getting_song_by_task_id", task_id=task_id, error=str(e), error_type=type(e).__name__)
             return None
-    
-    def get_song_by_job_id(self, job_id: str) -> Optional[Song]:
+
+    def get_song_by_job_id(self, job_id: str) -> Song | None:
         """Get song by job_id (MUREKA job ID) with choices loaded"""
         try:
             db = next(get_db())
@@ -88,8 +90,8 @@ class SongService:
         except Exception as e:
             logger.error("error_getting_song_by_job_id", job_id=job_id, error=str(e), error_type=type(e).__name__)
             return None
-    
-    def update_song_status(self, task_id: str, status: str, progress_info: Optional[Dict[str, Any]] = None, job_id: Optional[str] = None) -> bool:
+
+    def update_song_status(self, task_id: str, status: str, progress_info: dict[str, Any] | None = None, job_id: str | None = None) -> bool:
         """Update song status and progress information"""
         try:
             db = next(get_db())
@@ -119,8 +121,8 @@ class SongService:
         except Exception as e:
             logger.error("song_status_update_failed", task_id=task_id, error=str(e), error_type=type(e).__name__)
             return False
-    
-    def update_song_result(self, task_id: str, result_data: Dict[str, Any]) -> bool:
+
+    def update_song_result(self, task_id: str, result_data: dict[str, Any]) -> bool:
         """Update song with completion results and create choices"""
         try:
             db = next(get_db())
@@ -183,7 +185,7 @@ class SongService:
         except Exception as e:
             logger.error("song_result_update_failed", task_id=task_id, error=str(e), error_type=type(e).__name__, stacktrace=traceback.format_exc())
             return False
-    
+
     def update_song_error(self, task_id: str, error_message: str) -> bool:
         """Update song with error information"""
         try:
@@ -211,12 +213,12 @@ class SongService:
         except Exception as e:
             logger.error("song_error_update_failed", task_id=task_id, error=str(e), error_type=type(e).__name__)
             return False
-    
+
     def cleanup_redis_data(self, task_id: str) -> bool:
         """Clean up Redis data after successful DB storage"""
         try:
             r = self._get_redis_connection()
-            
+
             # Delete Celery task metadata
             celery_key = f"celery-task-meta-{task_id}"
             deleted = r.delete(celery_key)
@@ -234,8 +236,8 @@ class SongService:
         except Exception as e:
             logger.error("redis_cleanup_failed", task_id=task_id, error=str(e), error_type=type(e).__name__, stacktrace=traceback.format_exc())
             return False
-    
-    def bulk_cleanup_completed_songs(self, limit: int = 100) -> Dict[str, Any]:
+
+    def bulk_cleanup_completed_songs(self, limit: int = 100) -> dict[str, Any]:
         """Bulk cleanup Redis data for completed songs in database"""
         try:
             db = next(get_db())
@@ -244,14 +246,14 @@ class SongService:
                 completed_songs = db.query(Song).filter(
                     Song.status == SongStatus.SUCCESS.value
                 ).limit(limit).all()
-                
+
                 cleanup_results = {
                     "cleaned": 0,
                     "errors": 0,
                     "not_found": 0,
                     "task_ids": []
                 }
-                
+
                 for song in completed_songs:
                     success = self.cleanup_redis_data(song.task_id)
                     if success:
@@ -269,8 +271,8 @@ class SongService:
         except Exception as e:
             logger.error("bulk_cleanup_failed", error=str(e), error_type=type(e).__name__, stacktrace=traceback.format_exc())
             return {"error": str(e)}
-    
-    def get_song_choices(self, song_id) -> List[SongChoice]:
+
+    def get_song_choices(self, song_id) -> list[SongChoice]:
         """Get all choices for a specific song"""
         try:
             db = next(get_db())
@@ -283,8 +285,8 @@ class SongService:
         except Exception as e:
             logger.error("error_getting_song_choices", song_id=str(song_id), error=str(e), error_type=type(e).__name__)
             return []
-    
-    def get_choice_by_mureka_id(self, mureka_choice_id: str) -> Optional[SongChoice]:
+
+    def get_choice_by_mureka_id(self, mureka_choice_id: str) -> SongChoice | None:
         """Get a specific choice by MUREKA choice ID"""
         try:
             db = next(get_db())
@@ -300,9 +302,9 @@ class SongService:
         except Exception as e:
             logger.error("error_getting_choice_by_mureka_id", mureka_choice_id=mureka_choice_id, error=str(e), error_type=type(e).__name__)
             return None
-    
+
     def get_songs_paginated(self, limit: int = 20, offset: int = 0, status: str = None, search: str = '',
-                           sort_by: str = 'created_at', sort_direction: str = 'desc', workflow: str = None) -> List[Song]:
+                           sort_by: str = 'created_at', sort_direction: str = 'desc', workflow: str = None) -> list[Song]:
         """
         Get songs with pagination, search and sorting
 
@@ -370,7 +372,7 @@ class SongService:
         except Exception as e:
             logger.error("error_getting_paginated_songs", error=str(e), error_type=type(e).__name__, stacktrace=traceback.format_exc())
             return []
-    
+
     def get_total_songs_count(self, status: str = None, search: str = '', workflow: str = None) -> int:
         """
         Get total count of songs with optional search and workflow filter
@@ -415,8 +417,8 @@ class SongService:
         except Exception as e:
             logger.error("error_getting_total_songs_count", error=str(e), error_type=type(e).__name__)
             return 0
-    
-    def get_song_by_id(self, song_id) -> Optional[Song]:
+
+    def get_song_by_id(self, song_id) -> Song | None:
         """
         Get song by ID with loaded choices
         
@@ -443,8 +445,8 @@ class SongService:
         except Exception as e:
             logger.error("error_getting_song_by_id", song_id=str(song_id), error=str(e), error_type=type(e).__name__)
             return None
-    
-    def get_recent_songs(self, limit: int = 10) -> List[Song]:
+
+    def get_recent_songs(self, limit: int = 10) -> list[Song]:
         """
         Get most recently created songs
         
@@ -469,7 +471,7 @@ class SongService:
         except Exception as e:
             logger.error("error_getting_recent_songs", error=str(e), error_type=type(e).__name__)
             return []
-    
+
     def delete_song_by_id(self, song_id) -> bool:
         """
         Delete song and all its choices by ID
@@ -501,7 +503,7 @@ class SongService:
             logger.error("song_deletion_failed", song_id=str(song_id), error=str(e), error_type=type(e).__name__, stacktrace=traceback.format_exc())
             return False
 
-    def update_song(self, song_id: str, update_data: Dict[str, Any]) -> Optional[Song]:
+    def update_song(self, song_id: str, update_data: dict[str, Any]) -> Song | None:
         """
         Update song fields by ID
 
@@ -566,7 +568,7 @@ class SongService:
             logger.error("song_update_failed", song_id=str(song_id), error=str(e), error_type=type(e).__name__, stacktrace=traceback.format_exc())
             return None
 
-    def update_choice_rating(self, choice_id: str, rating: Optional[int]) -> bool:
+    def update_choice_rating(self, choice_id: str, rating: int | None) -> bool:
         """
         Update rating for a specific song choice
 
@@ -608,7 +610,7 @@ class SongService:
             logger.error("choice_rating_update_failed", choice_id=str(choice_id), error=str(e), error_type=type(e).__name__, stacktrace=traceback.format_exc())
             return False
 
-    def get_choice_by_id(self, choice_id: str) -> Optional[SongChoice]:
+    def get_choice_by_id(self, choice_id: str) -> SongChoice | None:
         """
         Get a specific choice by ID
 

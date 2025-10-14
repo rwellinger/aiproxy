@@ -3,18 +3,20 @@
 Script to create initial user account
 Usage: python create_initial_user.py
 """
-import sys
 import os
+import sys
+
 
 # Add the src directory to the Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from sqlalchemy.orm import Session
-from db.database import SessionLocal, engine
-from db.models import User
-import bcrypt
 import uuid
 from datetime import datetime
+
+import bcrypt
+
+from db.database import SessionLocal
+from db.models import User
 
 
 def hash_password(password: str) -> str:
@@ -70,11 +72,11 @@ def create_initial_user():
         db.commit()
         db.refresh(user)
 
-        print(f"✓ Initial user created successfully!")
+        print("✓ Initial user created successfully!")
         print(f"  ID: {user.id}")
         print(f"  Email: {user.email}")
         print(f"  Name: {user.first_name} {user.last_name}")
-        print(f"  Password: secret (hashed)")
+        print("  Password: secret (hashed)")
         print(f"  Active: {user.is_active}")
         print(f"  Created: {user.created_at}")
 

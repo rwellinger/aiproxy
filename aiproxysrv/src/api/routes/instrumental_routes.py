@@ -1,15 +1,14 @@
 """
 Instrumental Generation Routes mit MUREKA + Pydantic validation
 """
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_pydantic import validate
-from api.controllers.song_controller import SongController
+
 from api.auth_middleware import jwt_required
-from schemas.song_schemas import (
-    InstrumentalGenerateRequest, InstrumentalGenerateResponse,
-    SongHealthResponse
-)
+from api.controllers.song_controller import SongController
 from schemas.common_schemas import ErrorResponse
+from schemas.song_schemas import InstrumentalGenerateRequest
+
 
 api_instrumental_v1 = Blueprint("api_instrumental_v1", __name__, url_prefix="/api/v1/instrumental")
 

@@ -2,22 +2,25 @@
 Flask App mit allen Blueprints + OpenAPI/Swagger Integration
 """
 import traceback
+
 import yaml
-from flask import Flask, jsonify, Blueprint, render_template_string, Response
+from apispec import APISpec
+from flask import Blueprint, Flask, Response, jsonify
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
-from apispec import APISpec
+
 from utils.logger import logger
-from .routes.image_routes import api_image_v1
-from .routes.song_routes import api_song_v1, api_song_task_v1
-from .routes.instrumental_routes import api_instrumental_v1, api_instrumental_task_v1
-from .routes.redis_routes import api_redis_v1
+
 from .routes.chat_routes import api_chat_v1
-from .routes.prompt_routes import api_prompt_v1
-from .routes.user_routes import api_user_v1
 from .routes.conversation_routes import api_conversation_v1
+from .routes.image_routes import api_image_v1
+from .routes.instrumental_routes import api_instrumental_task_v1, api_instrumental_v1
 from .routes.ollama_routes import api_ollama_v1
 from .routes.openai_chat_routes import api_openai_chat_v1
+from .routes.prompt_routes import api_prompt_v1
+from .routes.redis_routes import api_redis_v1
+from .routes.song_routes import api_song_task_v1, api_song_v1
+from .routes.user_routes import api_user_v1
 
 
 def create_app():
@@ -88,44 +91,85 @@ def create_app():
         """OpenAPI JSON specification endpoint"""
         try:
             # Import and register schemas
-            from schemas.image_schemas import (
-                ImageGenerateRequest, ImageResponse, ImageGenerateResponse,
-                ImageListRequest, ImageListResponse, ImageUpdateRequest,
-                ImageUpdateResponse, ImageDeleteResponse
-            )
-            from schemas.song_schemas import (
-                SongGenerateRequest, SongResponse, SongGenerateResponse,
-                SongListRequest, SongListResponse, SongUpdateRequest, SongUpdateResponse,
-                StemGenerateRequest, StemGenerateResponse, SongHealthResponse,
-                SongTaskStatusResponse, SongDeleteResponse, ChoiceRatingUpdateRequest,
-                ChoiceRatingUpdateResponse, MurekaAccountResponse, CeleryHealthResponse,
-                SongJobInfoResponse, ForceCompleteResponse, QueueStatusResponse, TaskCancelResponse,
-                InstrumentalGenerateRequest, InstrumentalGenerateResponse
-            )
-            from schemas.chat_schemas import (
-                ChatRequest, ChatResponse, UnifiedChatRequest, ChatErrorResponse
+            from schemas.chat_schemas import ChatErrorResponse, ChatRequest, ChatResponse, UnifiedChatRequest
+            from schemas.common_schemas import (
+                BulkDeleteRequest,
+                BulkDeleteResponse,
+                ErrorResponse,
+                HealthResponse,
+                RedisKeyListResponse,
+                RedisTaskListResponse,
+                RedisTaskResponse,
             )
             from schemas.conversation_schemas import (
-                ConversationCreate, ConversationResponse, ConversationListResponse,
-                ConversationDetailResponse, ConversationUpdate, MessageCreate,
-                MessageResponse, SendMessageRequest, SendMessageResponse
+                ConversationCreate,
+                ConversationDetailResponse,
+                ConversationListResponse,
+                ConversationResponse,
+                ConversationUpdate,
+                MessageCreate,
+                MessageResponse,
+                SendMessageRequest,
+                SendMessageResponse,
             )
-            from schemas.openai_chat_schemas import (
-                OpenAIChatRequest, OpenAIChatResponse, OpenAIModelsListResponse
+            from schemas.image_schemas import (
+                ImageDeleteResponse,
+                ImageGenerateRequest,
+                ImageGenerateResponse,
+                ImageListRequest,
+                ImageListResponse,
+                ImageResponse,
+                ImageUpdateRequest,
+                ImageUpdateResponse,
             )
+            from schemas.openai_chat_schemas import OpenAIChatRequest, OpenAIChatResponse, OpenAIModelsListResponse
             from schemas.prompt_schemas import (
-                PromptTemplateCreate, PromptTemplateUpdate, PromptTemplateResponse,
-                PromptTemplateListResponse, PromptCategoryResponse, PromptTemplatesGroupedResponse
+                PromptCategoryResponse,
+                PromptTemplateCreate,
+                PromptTemplateListResponse,
+                PromptTemplateResponse,
+                PromptTemplatesGroupedResponse,
+                PromptTemplateUpdate,
             )
-            from schemas.common_schemas import (
-                ErrorResponse, HealthResponse, BulkDeleteRequest, BulkDeleteResponse,
-                RedisTaskResponse, RedisTaskListResponse, RedisKeyListResponse
+            from schemas.song_schemas import (
+                CeleryHealthResponse,
+                ChoiceRatingUpdateRequest,
+                ChoiceRatingUpdateResponse,
+                ForceCompleteResponse,
+                InstrumentalGenerateRequest,
+                InstrumentalGenerateResponse,
+                MurekaAccountResponse,
+                QueueStatusResponse,
+                SongDeleteResponse,
+                SongGenerateRequest,
+                SongGenerateResponse,
+                SongHealthResponse,
+                SongJobInfoResponse,
+                SongListRequest,
+                SongListResponse,
+                SongResponse,
+                SongTaskStatusResponse,
+                SongUpdateRequest,
+                SongUpdateResponse,
+                StemGenerateRequest,
+                StemGenerateResponse,
+                TaskCancelResponse,
             )
             from schemas.user_schemas import (
-                UserCreateRequest, UserCreateResponse, LoginRequest, LoginResponse,
-                UserUpdateRequest, UserUpdateResponse, PasswordChangeRequest, PasswordChangeResponse,
-                PasswordResetRequest, PasswordResetResponse, UserResponse, UserListResponse,
-                LogoutResponse, TokenValidationResponse
+                LoginRequest,
+                LoginResponse,
+                LogoutResponse,
+                PasswordChangeRequest,
+                PasswordChangeResponse,
+                PasswordResetRequest,
+                PasswordResetResponse,
+                TokenValidationResponse,
+                UserCreateRequest,
+                UserCreateResponse,
+                UserListResponse,
+                UserResponse,
+                UserUpdateRequest,
+                UserUpdateResponse,
             )
 
             # Register schemas with APISpec (only if not already registered)
@@ -351,7 +395,6 @@ def create_app():
         """OpenAPI YAML specification endpoint"""
         try:
             # Get the JSON spec
-            from flask import url_for, request
             with app.test_request_context():
                 json_response = openapi_spec()
                 if json_response.status_code != 200:

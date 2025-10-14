@@ -5,30 +5,31 @@ Revises: aaef2a47784e
 Create Date: 2025-09-12 15:05:59.099228
 
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
+
+from alembic import op
 
 
 # revision identifiers, used by Alembic.
 revision: str = '3cc5ed08a974'
-down_revision: Union[str, Sequence[str], None] = 'aaef2a47784e'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = 'aaef2a47784e'
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
     """Upgrade schema."""
     # Add UUID extension
     op.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
-    
+
     # Drop existing tables and recreate with UUIDs (since data can be deleted)
     op.drop_table('song_choices')
     op.drop_table('songs')
     op.drop_table('generated_images')
-    
+
     # Recreate songs table with UUID
     op.create_table('songs',
         sa.Column('id', UUID(as_uuid=True), primary_key=True, nullable=False),
@@ -46,7 +47,7 @@ def upgrade() -> None:
         sa.Column('updated_at', sa.DateTime(timezone=True), onupdate=sa.func.now()),
         sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True)
     )
-    
+
     # Recreate song_choices table with UUID
     op.create_table('song_choices',
         sa.Column('id', UUID(as_uuid=True), primary_key=True, nullable=False),
@@ -64,7 +65,7 @@ def upgrade() -> None:
         sa.Column('updated_at', sa.DateTime(timezone=True), onupdate=sa.func.now()),
         sa.ForeignKeyConstraint(['song_id'], ['songs.id'])
     )
-    
+
     # Recreate generated_images table with UUID
     op.create_table('generated_images',
         sa.Column('id', UUID(as_uuid=True), primary_key=True, nullable=False),
@@ -78,7 +79,7 @@ def upgrade() -> None:
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True), onupdate=sa.func.now())
     )
-    
+
     # Recreate indexes
     op.create_index('ix_songs_id', 'songs', ['id'])
     op.create_index('ix_songs_task_id', 'songs', ['task_id'])
@@ -92,9 +93,9 @@ def downgrade() -> None:
     """Downgrade schema."""
     # Drop tables with UUID IDs
     op.drop_table('song_choices')
-    op.drop_table('songs') 
+    op.drop_table('songs')
     op.drop_table('generated_images')
-    
+
     # Recreate tables with Integer IDs (original structure)
     op.create_table('songs',
         sa.Column('id', sa.Integer, primary_key=True),
@@ -112,7 +113,7 @@ def downgrade() -> None:
         sa.Column('updated_at', sa.DateTime(timezone=True), onupdate=sa.func.now()),
         sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True)
     )
-    
+
     op.create_table('song_choices',
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('song_id', sa.Integer, nullable=False),
@@ -129,7 +130,7 @@ def downgrade() -> None:
         sa.Column('updated_at', sa.DateTime(timezone=True), onupdate=sa.func.now()),
         sa.ForeignKeyConstraint(['song_id'], ['songs.id'])
     )
-    
+
     op.create_table('generated_images',
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('prompt', sa.Text, nullable=False),

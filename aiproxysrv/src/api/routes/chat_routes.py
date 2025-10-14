@@ -1,20 +1,17 @@
 """
 Chat Generation Routes - Ollama Integration with Pydantic validation
 """
-import traceback
 import logging
-from flask import Blueprint, request, jsonify
+
+from flask import Blueprint, jsonify
 from flask_pydantic import validate
-from sqlalchemy.orm import Session
-from api.controllers.chat_controller import ChatController
+
 from api.auth_middleware import jwt_required
-from api.controllers.prompt_controller import PromptController
-from db.database import get_db
-from utils.prompt_processor import PromptProcessor
-from schemas.chat_schemas import ChatRequest, ChatResponse, ChatErrorResponse, UnifiedChatRequest
-from schemas.common_schemas import ErrorResponse
+from api.controllers.chat_controller import ChatController
 from config.settings import CHAT_DEBUG_LOGGING
+from schemas.chat_schemas import ChatErrorResponse, ChatRequest, UnifiedChatRequest
 from utils.logger import logger
+
 
 api_chat_v1 = Blueprint("api_chat_v1", __name__, url_prefix="/api/v1/ollama/chat")
 

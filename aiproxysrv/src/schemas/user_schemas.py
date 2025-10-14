@@ -1,10 +1,11 @@
 """
 User management Pydantic schemas for OpenAPI integration
 """
-from pydantic import BaseModel, Field, EmailStr, validator
-from typing import Optional
 from datetime import datetime
 from uuid import UUID
+
+from pydantic import BaseModel, EmailStr, Field, validator
+
 from schemas.common_schemas import BaseResponse
 
 
@@ -12,8 +13,8 @@ from schemas.common_schemas import BaseResponse
 class UserBase(BaseModel):
     """Base user schema with common fields"""
     email: EmailStr = Field(..., description="User email address")
-    first_name: Optional[str] = Field(None, max_length=100, description="User first name")
-    last_name: Optional[str] = Field(None, max_length=100, description="User last name")
+    first_name: str | None = Field(None, max_length=100, description="User first name")
+    last_name: str | None = Field(None, max_length=100, description="User last name")
 
 
 # User Creation
@@ -58,13 +59,13 @@ class UserResponse(BaseModel):
     """User information response schema"""
     id: UUID = Field(..., description="User ID")
     email: str = Field(..., description="User email address")
-    first_name: Optional[str] = Field(None, description="User first name")
-    last_name: Optional[str] = Field(None, description="User last name")
+    first_name: str | None = Field(None, description="User first name")
+    last_name: str | None = Field(None, description="User last name")
     is_active: bool = Field(..., description="User active status")
     is_verified: bool = Field(..., description="User verification status")
     created_at: datetime = Field(..., description="User creation timestamp")
-    updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
-    last_login: Optional[datetime] = Field(None, description="Last login timestamp")
+    updated_at: datetime | None = Field(None, description="Last update timestamp")
+    last_login: datetime | None = Field(None, description="Last login timestamp")
 
     class Config:
         from_attributes = True  # For SQLAlchemy model conversion
@@ -73,8 +74,8 @@ class UserResponse(BaseModel):
 # User Update
 class UserUpdateRequest(BaseModel):
     """Schema for updating user information"""
-    first_name: Optional[str] = Field(None, max_length=100, description="Updated first name")
-    last_name: Optional[str] = Field(None, max_length=100, description="Updated last name")
+    first_name: str | None = Field(None, max_length=100, description="Updated first name")
+    last_name: str | None = Field(None, max_length=100, description="Updated last name")
 
 
 class UserUpdateResponse(BaseResponse):
@@ -128,8 +129,8 @@ class UserListResponse(BaseResponse):
 class TokenValidationResponse(BaseModel):
     """Response for token validation"""
     valid: bool = Field(..., description="Token validity status")
-    user_id: Optional[UUID] = Field(None, description="User ID if token is valid")
-    email: Optional[str] = Field(None, description="User email if token is valid")
+    user_id: UUID | None = Field(None, description="User ID if token is valid")
+    email: str | None = Field(None, description="User email if token is valid")
 
 
 # Update forward references

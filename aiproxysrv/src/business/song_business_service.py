@@ -1,7 +1,9 @@
 """Song Business Service - Handles song management business logic"""
 import logging
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any
+
 from db.song_service import song_service
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +18,7 @@ class SongBusinessService:
 
     def get_songs_with_pagination(self, limit: int = 20, offset: int = 0, status: str = None,
                                 search: str = '', sort_by: str = 'created_at',
-                                sort_direction: str = 'desc', workflow: str = None) -> Dict[str, Any]:
+                                sort_direction: str = 'desc', workflow: str = None) -> dict[str, Any]:
         """
         Get paginated list of songs with search and filtering
 
@@ -65,7 +67,7 @@ class SongBusinessService:
             logger.error(f"Error retrieving songs: {e}")
             raise SongBusinessError(f"Failed to retrieve songs: {e}") from e
 
-    def get_song_details(self, song_id: str) -> Optional[Dict[str, Any]]:
+    def get_song_details(self, song_id: str) -> dict[str, Any] | None:
         """
         Get detailed information for a single song with all choices
 
@@ -86,7 +88,7 @@ class SongBusinessService:
             logger.error(f"Error retrieving song {song_id}: {e}")
             raise SongBusinessError(f"Failed to retrieve song: {e}") from e
 
-    def update_song_metadata(self, song_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def update_song_metadata(self, song_id: str, update_data: dict[str, Any]) -> dict[str, Any] | None:
         """
         Update song metadata with validation
 
@@ -154,7 +156,7 @@ class SongBusinessService:
             logger.error(f"Error deleting song {song_id}: {type(e).__name__}: {e}")
             raise SongBusinessError(f"Failed to delete song: {e}") from e
 
-    def bulk_delete_songs(self, song_ids: List[str]) -> Dict[str, Any]:
+    def bulk_delete_songs(self, song_ids: list[str]) -> dict[str, Any]:
         """
         Delete multiple songs with detailed results
 
@@ -208,7 +210,7 @@ class SongBusinessService:
             "results": results
         }
 
-    def update_choice_rating(self, choice_id: str, rating: Optional[int]) -> Optional[Dict[str, Any]]:
+    def update_choice_rating(self, choice_id: str, rating: int | None) -> dict[str, Any] | None:
         """
         Update rating for a song choice
 
@@ -245,7 +247,7 @@ class SongBusinessService:
             logger.error(f"Error updating choice rating {choice_id}: {e}")
             raise SongBusinessError(f"Failed to update choice rating: {e}") from e
 
-    def _transform_song_to_list_format(self, song) -> Dict[str, Any]:
+    def _transform_song_to_list_format(self, song) -> dict[str, Any]:
         """Transform song object to list display format"""
         return {
             "id": str(song.id),
@@ -257,7 +259,7 @@ class SongBusinessService:
             "created_at": song.created_at.isoformat() if song.created_at else None,
         }
 
-    def _transform_song_to_detail_format(self, song) -> Dict[str, Any]:
+    def _transform_song_to_detail_format(self, song) -> dict[str, Any]:
         """Transform song object to detailed format with choices"""
         # Format choices
         choices_list = []

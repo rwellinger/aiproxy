@@ -1,21 +1,23 @@
 """Song Creation Controller - Handles song and stem generation logic"""
-import requests
 import time
 from datetime import datetime
-from typing import Tuple, Dict, Any
-from utils.logger import logger
+from typing import Any
+
+import requests
+
+from api.json_helpers import prune
+from celery_app import generate_instrumental_task, generate_song_task
 from config.settings import MUREKA_API_KEY, MUREKA_STATUS_ENDPOINT, MUREKA_STEM_GENERATE_ENDPOINT
-from celery_app import generate_song_task, generate_instrumental_task
-from db.song_service import song_service
 from db.database import get_db
 from db.models import SongChoice
-from api.json_helpers import prune
+from db.song_service import song_service
+from utils.logger import logger
 
 
 class SongCreationController:
     """Controller for song and stem creation operations"""
-    
-    def generate_song(self, payload: Dict[str, Any], host_url: str, check_balance_func) -> Tuple[Dict[str, Any], int]:
+
+    def generate_song(self, payload: dict[str, Any], host_url: str, check_balance_func) -> tuple[dict[str, Any], int]:
         """Start Song Generation"""
         if not payload.get("lyrics") or not payload.get("prompt") or not payload.get("model"):
             return {
@@ -40,9 +42,9 @@ class SongCreationController:
             lyrics=payload.get('lyrics', ''),
             prompt=payload.get('prompt', ''),
             model=payload.get('model', 'auto'),
-            title=payload.get('title', None)
+            title=payload.get('title')
         )
-        
+
         if not song:
             logger.warning("Failed to create song record in database", task_id=task.id)
             # Continue anyway - fallback to Redis-only mode
@@ -59,7 +61,7 @@ class SongCreationController:
             "status_url": f"{host_url}api/v1/song/status/{task.id}"
         }, 202
 
-    def generate_instrumental(self, payload: Dict[str, Any], host_url: str, check_balance_func) -> Tuple[Dict[str, Any], int]:
+    def generate_instrumental(self, payload: dict[str, Any], host_url: str, check_balance_func) -> tuple[dict[str, Any], int]:
         """Start Instrumental Generation"""
         if not payload.get("prompt") or not payload.get("model"):
             return {
@@ -84,7 +86,7 @@ class SongCreationController:
             prompt=payload.get('prompt', ''),
             model=payload.get('model', 'auto'),
             is_instrumental=True,
-            title=payload.get('title', None)
+            title=payload.get('title')
         )
 
         if not song:
@@ -102,10 +104,10 @@ class SongCreationController:
             "song_id": str(song.id),
             "status_url": f"{host_url}api/v1/instrumental/task/status/{task.id}"
         }, 202
-    
-    def generate_stems(self, payload: Dict[str, Any], check_balance_func) -> Tuple[Dict[str, Any], int]:
+
+    def generate_stems(self, payload: dict[str, Any], check_balance_func) -> tuple[dict[str, Any], int]:
         """Generate stems from MP3"""
-        choice_id = payload.get("choice_id", None)
+        choice_id = payload.get("choice_id")
         if not choice_id:
             return {
                 "error": "Missing required field: 'choice_id' is required"
@@ -164,8 +166,8 @@ class SongCreationController:
             return {"error": str(e)}, 500
         finally:
             db.close()
-    
-    def get_song_info(self, job_id: str) -> Tuple[Dict[str, Any], int]:
+
+    def get_song_info(self, job_id: str) -> tuple[dict[str, Any], int]:
         """Get Song structure direct from MUREKA again who was generated successfully"""
         try:
             headers = {"Authorization": f"Bearer {MUREKA_API_KEY}"}

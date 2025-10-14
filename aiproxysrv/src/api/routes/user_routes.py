@@ -1,13 +1,18 @@
 """
 User Authentication and Management Routes
 """
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_pydantic import validate
+
 from api.controllers.user_controller import UserController
 from schemas.user_schemas import (
-    UserCreateRequest, LoginRequest, UserUpdateRequest,
-    PasswordChangeRequest, PasswordResetRequest
+    LoginRequest,
+    PasswordChangeRequest,
+    PasswordResetRequest,
+    UserCreateRequest,
+    UserUpdateRequest,
 )
+
 
 # Create blueprint
 api_user_v1 = Blueprint("api_user_v1", __name__, url_prefix="/api/v1/user")

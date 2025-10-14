@@ -1,28 +1,30 @@
 """Controller for prompt template management"""
-from sqlalchemy.orm import Session
+from typing import Any
+
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
 from db.models import PromptTemplate
 from schemas.prompt_schemas import (
-    PromptTemplateCreate,
-    PromptTemplateUpdate,
-    PromptTemplateResponse,
     PromptCategoryResponse,
-    PromptTemplatesGroupedResponse
+    PromptTemplateCreate,
+    PromptTemplateResponse,
+    PromptTemplatesGroupedResponse,
+    PromptTemplateUpdate,
 )
-from typing import Dict, Any, Optional, Tuple
 
 
 class PromptController:
     """Controller for prompt template operations"""
 
     @staticmethod
-    def get_all_templates(db: Session) -> Tuple[Dict[str, Any], int]:
+    def get_all_templates(db: Session) -> tuple[dict[str, Any], int]:
         """Get all prompt templates grouped by category and action"""
         try:
             templates = db.query(PromptTemplate).filter(PromptTemplate.active == True).all()
 
             # Group by category and action
-            grouped: Dict[str, Dict[str, Any]] = {}
+            grouped: dict[str, dict[str, Any]] = {}
             for template in templates:
                 if template.category not in grouped:
                     grouped[template.category] = {}
@@ -37,7 +39,7 @@ class PromptController:
             return {"error": f"Failed to retrieve templates: {str(e)}"}, 500
 
     @staticmethod
-    def get_category_templates(db: Session, category: str) -> Tuple[Dict[str, Any], int]:
+    def get_category_templates(db: Session, category: str) -> tuple[dict[str, Any], int]:
         """Get all templates for a specific category"""
         try:
             templates = db.query(PromptTemplate).filter(
@@ -49,7 +51,7 @@ class PromptController:
                 return {"error": f"No templates found for category '{category}'"}, 404
 
             # Group by action
-            templates_by_action: Dict[str, PromptTemplateResponse] = {}
+            templates_by_action: dict[str, PromptTemplateResponse] = {}
             for template in templates:
                 template_data = PromptTemplateResponse.model_validate(template)
                 templates_by_action[template.action] = template_data
@@ -64,7 +66,7 @@ class PromptController:
             return {"error": f"Failed to retrieve category templates: {str(e)}"}, 500
 
     @staticmethod
-    def get_specific_template(db: Session, category: str, action: str) -> Tuple[Dict[str, Any], int]:
+    def get_specific_template(db: Session, category: str, action: str) -> tuple[dict[str, Any], int]:
         """Get a specific template by category and action"""
         try:
             template = db.query(PromptTemplate).filter(
@@ -83,7 +85,7 @@ class PromptController:
             return {"error": f"Failed to retrieve template: {str(e)}"}, 500
 
     @staticmethod
-    def update_template(db: Session, category: str, action: str, update_data: PromptTemplateUpdate) -> Tuple[Dict[str, Any], int]:
+    def update_template(db: Session, category: str, action: str, update_data: PromptTemplateUpdate) -> tuple[dict[str, Any], int]:
         """Update an existing template with automatic version increment"""
         try:
             template = db.query(PromptTemplate).filter(
@@ -121,7 +123,7 @@ class PromptController:
             return {"error": f"Failed to update template: {str(e)}"}, 500
 
     @staticmethod
-    def create_template(db: Session, template_data: PromptTemplateCreate) -> Tuple[Dict[str, Any], int]:
+    def create_template(db: Session, template_data: PromptTemplateCreate) -> tuple[dict[str, Any], int]:
         """Create a new prompt template"""
         try:
             # Check if template already exists
@@ -150,7 +152,7 @@ class PromptController:
             return {"error": f"Failed to create template: {str(e)}"}, 500
 
     @staticmethod
-    def delete_template(db: Session, category: str, action: str) -> Tuple[Dict[str, Any], int]:
+    def delete_template(db: Session, category: str, action: str) -> tuple[dict[str, Any], int]:
         """Soft delete a template (set active=False)"""
         try:
             template = db.query(PromptTemplate).filter(

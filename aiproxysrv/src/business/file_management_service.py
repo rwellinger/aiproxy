@@ -1,9 +1,10 @@
 """File Management Service - Handles file operations for the application"""
-import os
 import logging
-import requests
+import os
 from pathlib import Path
-from typing import Optional
+
+import requests
+
 
 logger = logging.getLogger(__name__)
 
@@ -47,14 +48,14 @@ class FileManagementService:
         except requests.exceptions.RequestException as e:
             logger.error(f"Download failed for {url}: {e}")
             raise FileDownloadError(f"Download failed: {e}") from e
-        except IOError as e:
+        except OSError as e:
             logger.error(f"File save failed for {file_path}: {e}")
             raise FileDownloadError(f"Save failed: {e}") from e
         except Exception as e:
             logger.error(f"Unexpected error downloading {url}: {e}")
             raise FileDownloadError(f"Unexpected error: {e}") from e
 
-    def delete_file_if_exists(self, file_path: Optional[str]) -> bool:
+    def delete_file_if_exists(self, file_path: str | None) -> bool:
         """
         Delete file if it exists
 
@@ -95,7 +96,7 @@ class FileManagementService:
         """
         return os.path.exists(file_path) if file_path else False
 
-    def get_file_size(self, file_path: str) -> Optional[int]:
+    def get_file_size(self, file_path: str) -> int | None:
         """
         Get file size in bytes
 

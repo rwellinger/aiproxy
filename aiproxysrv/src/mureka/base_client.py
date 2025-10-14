@@ -1,22 +1,22 @@
 """
 MUREKA Base Client - Shared HTTP and utilities logic
 """
-import sys
-import traceback
 import logging
+import traceback
+
 import requests
-import time
-from typing import Dict, Any, Optional
 from requests import HTTPError
+
+from api.json_helpers import prune
 from config.settings import (
     MUREKA_API_KEY,
-    MUREKA_TIMEOUT,
-    MUREKA_POLL_INTERVAL_SHORT,
-    MUREKA_POLL_INTERVAL_MEDIUM,
+    MUREKA_MAX_POLL_ATTEMPTS,
     MUREKA_POLL_INTERVAL_LONG,
-    MUREKA_MAX_POLL_ATTEMPTS
+    MUREKA_POLL_INTERVAL_MEDIUM,
+    MUREKA_POLL_INTERVAL_SHORT,
+    MUREKA_TIMEOUT,
 )
-from api.json_helpers import prune
+
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class MurekaBaseClient:
         self.timeout = MUREKA_TIMEOUT
         self.max_poll_attempts = MUREKA_MAX_POLL_ATTEMPTS
 
-    def _get_headers(self, content_type: str = "application/json") -> Dict[str, str]:
+    def _get_headers(self, content_type: str = "application/json") -> dict[str, str]:
         """Get standard headers for MUREKA API requests"""
         return {
             "Authorization": f"Bearer {self.api_key}",
@@ -70,7 +70,7 @@ class MurekaBaseClient:
         else:  # 5+ minutes
             return MUREKA_POLL_INTERVAL_LONG
 
-    def _handle_polling_error(self, error: HTTPError, elapsed_time: float) -> Optional[int]:
+    def _handle_polling_error(self, error: HTTPError, elapsed_time: float) -> int | None:
         """
         Handle polling errors and return wait time or None to stop polling
 

@@ -1,15 +1,16 @@
 """Pydantic schemas for Image API validation"""
-from pydantic import BaseModel, Field, validator
-from typing import Optional, List
 from datetime import datetime
-from .common_schemas import BaseResponse, PaginationResponse, StatusEnum
+
+from pydantic import BaseModel, Field, validator
+
+from .common_schemas import BaseResponse, PaginationResponse
 
 
 class ImageGenerateRequest(BaseModel):
     """Schema for image generation requests"""
     prompt: str = Field(..., min_length=1, max_length=500, description="Image generation prompt")
-    size: Optional[str] = Field("1024x1024", description="Image size")
-    title: Optional[str] = Field(None, max_length=255, description="Image title")
+    size: str | None = Field("1024x1024", description="Image size")
+    title: str | None = Field(None, max_length=255, description="Image title")
 
     @validator('size')
     def validate_size(cls, v):
@@ -30,14 +31,14 @@ class ImageGenerateRequest(BaseModel):
 class ImageResponse(BaseModel):
     """Schema for single image response"""
     id: str = Field(..., description="Unique image ID")
-    title: Optional[str] = Field(None, description="Image title")
+    title: str | None = Field(None, description="Image title")
     prompt: str = Field(..., description="Generation prompt used")
-    size: Optional[str] = Field(None, description="Image dimensions")
+    size: str | None = Field(None, description="Image dimensions")
     status: str = Field(..., description="Generation status")
-    url: Optional[str] = Field(None, description="Image URL if completed")
+    url: str | None = Field(None, description="Image URL if completed")
     created_at: datetime = Field(..., description="Creation timestamp")
-    completed_at: Optional[datetime] = Field(None, description="Completion timestamp")
-    tags: Optional[List[str]] = Field(None, description="Image tags")
+    completed_at: datetime | None = Field(None, description="Completion timestamp")
+    tags: list[str] | None = Field(None, description="Image tags")
 
     class Config:
         from_attributes = True
@@ -63,11 +64,11 @@ class ImageGenerateResponse(BaseResponse):
 
 class ImageListRequest(BaseModel):
     """Schema for image list request parameters"""
-    limit: Optional[int] = Field(20, ge=1, le=100, description="Number of items to return")
-    offset: Optional[int] = Field(0, ge=0, description="Number of items to skip")
-    search: Optional[str] = Field(None, max_length=100, description="Search query for title/prompt")
-    sort: Optional[str] = Field("created_at", description="Sort field")
-    order: Optional[str] = Field("desc", description="Sort order")
+    limit: int | None = Field(20, ge=1, le=100, description="Number of items to return")
+    offset: int | None = Field(0, ge=0, description="Number of items to skip")
+    search: str | None = Field(None, max_length=100, description="Search query for title/prompt")
+    sort: str | None = Field("created_at", description="Sort field")
+    order: str | None = Field("desc", description="Sort order")
 
     @validator('sort')
     def validate_sort(cls, v):
@@ -84,13 +85,13 @@ class ImageListRequest(BaseModel):
 
 class ImageListResponse(PaginationResponse):
     """Schema for image list response"""
-    data: List[ImageResponse] = Field(..., description="List of images")
+    data: list[ImageResponse] = Field(..., description="List of images")
 
 
 class ImageUpdateRequest(BaseModel):
     """Schema for image update requests"""
-    title: Optional[str] = Field(None, max_length=255, description="New image title")
-    tags: Optional[List[str]] = Field(None, description="Image tags")
+    title: str | None = Field(None, max_length=255, description="New image title")
+    tags: list[str] | None = Field(None, description="Image tags")
 
     class Config:
         json_schema_extra = {

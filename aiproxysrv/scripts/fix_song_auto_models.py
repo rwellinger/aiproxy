@@ -7,13 +7,18 @@ When users select 'auto', Mureka uses the latest model (mureka-7).
 This script updates the database to reflect the actual model used.
 """
 
-import sys
 import os
+import sys
+
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from db.database import get_db
-from sqlalchemy import text
 import logging
+
+from sqlalchemy import text
+
+from db.database import get_db
+
 
 # Configure logging
 logging.basicConfig(
@@ -32,7 +37,7 @@ def fix_auto_model_values():
         result = db.execute(text("SELECT model, COUNT(*) FROM songs GROUP BY model ORDER BY model;"))
         rows = result.fetchall()
 
-        logger.info(f"Current model distribution:")
+        logger.info("Current model distribution:")
         total_songs = 0
         auto_count = 0
         for row in rows:

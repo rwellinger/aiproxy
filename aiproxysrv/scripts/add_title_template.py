@@ -4,11 +4,14 @@ Script to add the new "titel/generate" prompt template to the database.
 This script inserts the title generation template for AI-powered song title creation.
 """
 
-import sys
 import os
+import sys
+
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from sqlalchemy.orm import Session
+
 from db.database import get_db
 from db.models import PromptTemplate
 
@@ -39,7 +42,7 @@ def add_title_template():
         ).first()
 
         if existing:
-            print(f"Template 'titel/generate' already exists, updating...")
+            print("Template 'titel/generate' already exists, updating...")
             # Update existing template
             existing.pre_condition = TITLE_TEMPLATE["pre_condition"]
             existing.post_condition = TITLE_TEMPLATE["post_condition"]
@@ -51,7 +54,7 @@ def add_title_template():
             existing.active = True
             operation = "updated"
         else:
-            print(f"Creating new template 'titel/generate'...")
+            print("Creating new template 'titel/generate'...")
             # Create new template
             new_template = PromptTemplate(
                 category=TITLE_TEMPLATE["category"],
@@ -100,7 +103,7 @@ def verify_template():
         ).first()
 
         if template:
-            print(f"\n📊 Verification successful:")
+            print("\n📊 Verification successful:")
             print(f"   Template ID: {template.id}")
             print(f"   Category/Action: {template.category}/{template.action}")
             print(f"   Pre-condition: {template.pre_condition}")
@@ -111,7 +114,7 @@ def verify_template():
             print(f"   Active: {template.active}")
             return True
         else:
-            print(f"\n❌ Verification failed: Template not found in database")
+            print("\n❌ Verification failed: Template not found in database")
             return False
 
     except Exception as e:

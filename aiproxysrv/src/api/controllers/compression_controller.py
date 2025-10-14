@@ -2,14 +2,15 @@
 import traceback
 import uuid
 from datetime import datetime
-from typing import Tuple, Dict, Any, List
+from typing import Any
+
+import requests
 from sqlalchemy.orm import Session
 
+from api.controllers.openai_chat_controller import OpenAIChatController
+from config.settings import OLLAMA_TIMEOUT, OLLAMA_URL
 from db.models import Conversation, Message, MessageArchive
 from utils.logger import logger
-from api.controllers.openai_chat_controller import OpenAIChatController
-from config.settings import OLLAMA_URL, OLLAMA_TIMEOUT
-import requests
 
 
 class CompressionController:
@@ -17,7 +18,7 @@ class CompressionController:
 
     def compress_conversation(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID, keep_recent: int = 2
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Compress a conversation by archiving old messages and creating an AI summary.
 
@@ -166,8 +167,8 @@ class CompressionController:
             return {"error": f"Failed to compress conversation: {e}"}, 500
 
     def _create_ai_summary(
-        self, messages: List[Message], model: str, provider: str
-    ) -> Tuple[str, int]:
+        self, messages: list[Message], model: str, provider: str
+    ) -> tuple[str, int]:
         """
         Create AI summary of messages using the conversation's model.
 
@@ -250,7 +251,7 @@ Brief summary:"""
             return fallback_summary, fallback_token_count
 
     def _get_actual_token_count(
-        self, messages: List[Dict[str, str]], model: str, provider: str
+        self, messages: list[dict[str, str]], model: str, provider: str
     ) -> int:
         """
         Get actual token count by making a test call to the model.
@@ -324,7 +325,7 @@ Brief summary:"""
             return estimated_tokens
 
     def _archive_messages(
-        self, db: Session, messages: List[Message], summary_id: uuid.UUID
+        self, db: Session, messages: list[Message], summary_id: uuid.UUID
     ) -> int:
         """
         Archive messages by moving them to messages_archive table.
@@ -361,7 +362,7 @@ Brief summary:"""
 
     def restore_archive(
         self, db: Session, conversation_id: uuid.UUID, user_id: uuid.UUID
-    ) -> Tuple[Dict[str, Any], int]:
+    ) -> tuple[dict[str, Any], int]:
         """
         Restore archived messages for a conversation (optional feature).
 

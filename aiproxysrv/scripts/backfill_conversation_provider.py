@@ -5,6 +5,8 @@ Sets all existing conversations to 'internal' (Ollama).
 Run this once after adding the provider field to conversations table.
 """
 import sys
+
+
 sys.path.insert(0, 'src')
 
 from db.database import SessionLocal

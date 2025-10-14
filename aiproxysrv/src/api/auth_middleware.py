@@ -2,7 +2,9 @@
 JWT Authentication Middleware for Flask API
 """
 from functools import wraps
-from flask import request, jsonify, g
+
+from flask import g, jsonify, request
+
 from db.user_service import UserService
 
 

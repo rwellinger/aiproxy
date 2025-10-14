@@ -1,8 +1,9 @@
+
 from flask import Blueprint, jsonify
-import sys
-import traceback
-from api.controllers.redis_controller import RedisController
+
 from api.auth_middleware import jwt_required
+from api.controllers.redis_controller import RedisController
+
 
 api_redis_v1 = Blueprint("api_redis_v1",__name__, url_prefix="/api/v1/redis")
 

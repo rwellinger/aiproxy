@@ -1,17 +1,20 @@
 """Database configuration and engine setup"""
 import re
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
 from config.settings import (
-    DATABASE_URL,
     DATABASE_ECHO,
-    DATABASE_POOL_SIZE,
     DATABASE_MAX_OVERFLOW,
     DATABASE_POOL_PRE_PING,
-    DATABASE_POOL_RECYCLE
+    DATABASE_POOL_RECYCLE,
+    DATABASE_POOL_SIZE,
+    DATABASE_URL,
 )
 from utils.logger import logger  # Direct import to avoid circular dependency with utils.__init__
+
 
 def sanitize_url_for_logging(url):
     """Remove password from URL for safe logging"""

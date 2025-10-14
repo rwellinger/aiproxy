@@ -3,7 +3,6 @@ Mock OpenAI Chat API - Simulates OpenAI Chat Completions for testing
 """
 import time
 from flask import Blueprint, request, jsonify
-from datetime import datetime
 
 api_openai_chat_mock = Blueprint("api_openai_chat_mock", __name__, url_prefix="/api/v1/openai/chat")
 

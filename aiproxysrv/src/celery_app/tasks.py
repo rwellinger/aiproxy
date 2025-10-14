@@ -1,17 +1,24 @@
 """
 Celery Tasks für Song-Generierung
 """
-import traceback
 import time
+import traceback
+
 from celery.exceptions import SoftTimeLimitExceeded
 from requests import HTTPError
 
-from .celery_config import celery_app
-from .slot_manager import wait_for_mureka_slot, release_mureka_slot
-from mureka import start_mureka_generation, wait_for_mureka_completion, start_mureka_instrumental_generation, wait_for_mureka_instrumental_completion
-from mureka.handlers import handle_http_error
 from db.song_service import song_service
+from mureka import (
+    start_mureka_generation,
+    start_mureka_instrumental_generation,
+    wait_for_mureka_completion,
+    wait_for_mureka_instrumental_completion,
+)
+from mureka.handlers import handle_http_error
 from utils.logger import logger
+
+from .celery_config import celery_app
+from .slot_manager import release_mureka_slot, wait_for_mureka_slot
 
 
 @celery_app.task(bind=True, max_retries=3, default_retry_delay=60)
@@ -32,7 +39,7 @@ def generate_song_task(self, payload: dict) -> dict:
             state='PROGRESS',
             meta={'status': 'SLOT_ACQUIRED', 'message': 'Acquired MUREKA slot'}
         )
-        
+
         # Update song status in database
         song_service.update_song_status(
             task_id=task_id,
@@ -58,7 +65,7 @@ def generate_song_task(self, payload: dict) -> dict:
                 'job_id': job_id,
             }
         )
-        
+
         # Update song status in database with job_id
         song_service.update_song_status(
             task_id=task_id,
@@ -75,7 +82,7 @@ def generate_song_task(self, payload: dict) -> dict:
 
         # Erfolgreich abgeschlossen
         logger.info("Completed successfully", extra={"task_id": task_id, "job_id": job_id})
-        
+
         # Prepare success result
         success_result = {
             "status": "SUCCESS",
@@ -84,7 +91,7 @@ def generate_song_task(self, payload: dict) -> dict:
             "result": final_result,
             "completed_at": time.time()
         }
-        
+
         # Update song result in database
         if song_service.update_song_result(task_id, success_result):
             logger.info("Successfully updated song result in database", extra={"task_id": task_id, "job_id": job_id})
@@ -92,7 +99,7 @@ def generate_song_task(self, payload: dict) -> dict:
             song_service.cleanup_redis_data(task_id)
         else:
             logger.error("Failed to update song result in database", extra={"task_id": task_id, "job_id": job_id})
-        
+
         return success_result
 
     except SoftTimeLimitExceeded:
@@ -102,7 +109,7 @@ def generate_song_task(self, payload: dict) -> dict:
         # Update song error in database
         error_msg = "Task timeout exceeded"
         song_service.update_song_error(task_id, error_msg)
-        
+
         return {
             "status": "ERROR",
             "message": error_msg,

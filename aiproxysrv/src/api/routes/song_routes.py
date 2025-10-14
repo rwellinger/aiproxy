@@ -1,16 +1,17 @@
 """
 Song Generation Routes mit MUREKA + Pydantic validation
 """
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_pydantic import validate
-from api.controllers.song_controller import SongController
+
 from api.auth_middleware import jwt_required
-from schemas.song_schemas import (
-    SongGenerateRequest, SongGenerateResponse,
-    StemGenerateRequest, StemGenerateResponse,
-    SongHealthResponse
-)
+from api.controllers.song_controller import SongController
 from schemas.common_schemas import ErrorResponse
+from schemas.song_schemas import (
+    SongGenerateRequest,
+    StemGenerateRequest,
+)
+
 
 api_song_v1 = Blueprint("api_song_v1", __name__, url_prefix="/api/v1/song")
 
@@ -73,7 +74,7 @@ def stems_generator(body: StemGenerateRequest):
 def song_info(job_id):
     """Get Song structure direct from MUREKA again who was generated successfully"""
     response_data, status_code = song_controller.get_song_info(job_id)
-    
+
     return jsonify(response_data), status_code
 
 
@@ -82,7 +83,7 @@ def song_info(job_id):
 def force_complete_task(job_id):
     """Erzwingt Completion eines Tasks"""
     response_data, status_code = song_controller.force_complete_task(job_id)
-    
+
     return jsonify(response_data), status_code
 
 
@@ -204,7 +205,7 @@ api_song_task_v1 = Blueprint("api_song_task_v1", __name__, url_prefix="/api/v1/s
 def song_status(task_id):
     """Überprüft Status einer Song-Generierung"""
     response_data, status_code = song_controller.get_song_status(task_id)
-    
+
     return jsonify(response_data), status_code
 
 
@@ -213,7 +214,7 @@ def song_status(task_id):
 def cancel_task(task_id):
     """Cancelt einen Task"""
     response_data, status_code = song_controller.cancel_task(task_id)
-    
+
     return jsonify(response_data), status_code
 
 
@@ -222,7 +223,7 @@ def cancel_task(task_id):
 def delete_task_result(task_id):
     """Löscht Task-Ergebnis"""
     response_data, status_code = song_controller.delete_task_result(task_id)
-    
+
     return jsonify(response_data), status_code
 
 
@@ -231,5 +232,5 @@ def delete_task_result(task_id):
 def queue_status():
     """Gibt Queue-Status zurück"""
     response_data, status_code = song_controller.get_queue_status()
-    
+
     return jsonify(response_data), status_code

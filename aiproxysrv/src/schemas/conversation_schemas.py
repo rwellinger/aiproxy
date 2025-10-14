@@ -1,9 +1,8 @@
 """Conversation and Message schemas for AI chat functionality."""
 from datetime import datetime
-from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 
 class MessageCreate(BaseModel):
@@ -20,8 +19,8 @@ class MessageResponse(BaseModel):
     conversation_id: UUID
     role: str
     content: str
-    token_count: Optional[int] = None
-    is_summary: Optional[bool] = None
+    token_count: int | None = None
+    is_summary: bool | None = None
     created_at: datetime
 
     class Config:
@@ -35,8 +34,8 @@ class ConversationCreate(BaseModel):
 
     title: str = Field(..., min_length=1, max_length=255, description="Conversation title")
     model: str = Field(..., min_length=1, max_length=100, description="AI model name")
-    provider: Optional[str] = Field("internal", pattern="^(internal|external)$", description="Provider type: internal (Ollama) or external (OpenAI)")
-    system_context: Optional[str] = Field(None, description="System context/prompt")
+    provider: str | None = Field("internal", pattern="^(internal|external)$", description="Provider type: internal (Ollama) or external (OpenAI)")
+    system_context: str | None = Field(None, description="System context/prompt")
 
 
 class ConversationResponse(BaseModel):
@@ -47,14 +46,14 @@ class ConversationResponse(BaseModel):
     title: str
     model: str
     provider: str = "internal"
-    system_context: Optional[str]
+    system_context: str | None
     archived: bool = False
     context_window_size: int = 2048
     current_token_count: int = 0
     has_archived_messages: bool = False
     created_at: datetime
-    updated_at: Optional[datetime]
-    message_count: Optional[int] = None
+    updated_at: datetime | None
+    message_count: int | None = None
 
     class Config:
         """Pydantic config."""
@@ -65,7 +64,7 @@ class ConversationResponse(BaseModel):
 class ConversationListResponse(BaseModel):
     """Schema for list of conversations."""
 
-    conversations: List[ConversationResponse]
+    conversations: list[ConversationResponse]
     total: int
     skip: int
     limit: int
@@ -75,7 +74,7 @@ class ConversationDetailResponse(BaseModel):
     """Schema for conversation detail with messages."""
 
     conversation: ConversationResponse
-    messages: List[MessageResponse]
+    messages: list[MessageResponse]
 
 
 class SendMessageRequest(BaseModel):
@@ -94,7 +93,7 @@ class SendMessageResponse(BaseModel):
 class ConversationUpdate(BaseModel):
     """Schema for updating a conversation."""
 
-    title: Optional[str] = Field(None, min_length=1, max_length=255)
-    model: Optional[str] = Field(None, min_length=1, max_length=100)
-    system_context: Optional[str] = None
-    archived: Optional[bool] = None
+    title: str | None = Field(None, min_length=1, max_length=255)
+    model: str | None = Field(None, min_length=1, max_length=100)
+    system_context: str | None = None
+    archived: bool | None = None

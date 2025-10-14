@@ -8,12 +8,14 @@ Usage:
     python scripts/init_prompt_templates.py
 """
 
-import sys
 import os
+import sys
+
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+
 from db.database import get_db
 from db.models import PromptTemplate
 
@@ -136,7 +138,7 @@ def init_prompt_templates():
                     existing.active = template_data["active"]
                     updated_count += 1
                 else:
-                    print(f"    Creating new template...")
+                    print("    Creating new template...")
                     # Create new template
                     new_template = PromptTemplate(
                         category=category,
@@ -156,7 +158,7 @@ def init_prompt_templates():
         # Commit all changes
         db.commit()
 
-        print(f"\n✅ Initialization completed successfully!")
+        print("\n✅ Initialization completed successfully!")
         print(f"   - Inserted: {inserted_count} new templates")
         print(f"   - Updated:  {updated_count} existing templates")
         print(f"   - Total:    {inserted_count + updated_count} templates processed")
@@ -181,7 +183,7 @@ def verify_templates():
     try:
         templates = db.query(PromptTemplate).filter(PromptTemplate.active == True).all()
 
-        print(f"\n📊 Verification Results:")
+        print("\n📊 Verification Results:")
         print(f"   Total active templates in DB: {len(templates)}")
 
         if len(templates) == 0:

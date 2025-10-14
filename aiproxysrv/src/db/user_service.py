@@ -1,17 +1,16 @@
 """
 User Service for database operations and authentication logic
 """
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from typing import Optional, List
-from db.models import User
-import bcrypt
 import uuid
-from datetime import datetime
-import jwt
 from datetime import datetime, timedelta
-import os
-from config.settings import JWT_SECRET_KEY, JWT_ALGORITHM, JWT_EXPIRATION_HOURS
+
+import bcrypt
+import jwt
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
+from config.settings import JWT_ALGORITHM, JWT_EXPIRATION_HOURS, JWT_SECRET_KEY
+from db.models import User
 
 
 class UserService:
@@ -46,7 +45,7 @@ class UserService:
         }
         return jwt.encode(payload, self.jwt_secret, algorithm=self.jwt_algorithm)
 
-    def verify_jwt_token(self, token: str) -> Optional[dict]:
+    def verify_jwt_token(self, token: str) -> dict | None:
         """Verify JWT token and return payload if valid"""
         try:
             payload = jwt.decode(token, self.jwt_secret, algorithms=[self.jwt_algorithm])
@@ -56,7 +55,7 @@ class UserService:
         except jwt.InvalidTokenError:
             return None
 
-    def create_user(self, db: Session, email: str, password: str, first_name: str = None, last_name: str = None) -> Optional[User]:
+    def create_user(self, db: Session, email: str, password: str, first_name: str = None, last_name: str = None) -> User | None:
         """Create a new user"""
         try:
             # Check if user already exists
@@ -91,7 +90,7 @@ class UserService:
             db.rollback()
             raise e
 
-    def authenticate_user(self, db: Session, email: str, password: str) -> Optional[User]:
+    def authenticate_user(self, db: Session, email: str, password: str) -> User | None:
         """Authenticate a user with email and password"""
         user = db.query(User).filter(User.email == email, User.is_active == True).first()
 
@@ -106,7 +105,7 @@ class UserService:
 
         return None
 
-    def get_user_by_id(self, db: Session, user_id: str) -> Optional[User]:
+    def get_user_by_id(self, db: Session, user_id: str) -> User | None:
         """Get user by ID"""
         try:
             user_uuid = uuid.UUID(user_id)
@@ -114,11 +113,11 @@ class UserService:
         except (ValueError, TypeError):
             return None
 
-    def get_user_by_email(self, db: Session, email: str) -> Optional[User]:
+    def get_user_by_email(self, db: Session, email: str) -> User | None:
         """Get user by email"""
         return db.query(User).filter(User.email == email, User.is_active == True).first()
 
-    def update_user(self, db: Session, user_id: str, first_name: str = None, last_name: str = None) -> Optional[User]:
+    def update_user(self, db: Session, user_id: str, first_name: str = None, last_name: str = None) -> User | None:
         """Update user information"""
         try:
             user_uuid = uuid.UUID(user_id)
@@ -206,6 +205,6 @@ class UserService:
             db.rollback()
             raise e
 
-    def list_users(self, db: Session, skip: int = 0, limit: int = 100) -> List[User]:
+    def list_users(self, db: Session, skip: int = 0, limit: int = 100) -> list[User]:
         """List all active users"""
         return db.query(User).filter(User.is_active == True).offset(skip).limit(limit).all()

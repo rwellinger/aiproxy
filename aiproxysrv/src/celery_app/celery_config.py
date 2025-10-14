@@ -2,12 +2,15 @@
 Celery Konfiguration - Zentraler Import-Point für Celery
 """
 import logging
+
 from celery import Celery
 from celery.signals import setup_logging, worker_process_init
+
 from config.settings import CELERY_BROKER_URL, CELERY_RESULT_BACKEND, LOG_LEVEL
 
 # IMPORTANT: Import logger FIRST to initialize loguru before Celery sets up its logging
 from utils.logger import CeleryInterceptHandler, logger
+
 
 # Celery App erstellen
 celery_app = Celery(
