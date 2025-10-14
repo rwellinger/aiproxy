@@ -93,6 +93,7 @@ ignore = [
     "B904",   # Use raise from within except
     "ARG002", # Unused method argument (common in overrides)
     "N805",   # First argument should be self/cls (pydantic validators)
+    "SIM208", # Use ternary operator - DISABLED: breaks SQLAlchemy expressions (not X → X == False)
 ]
 
 # Allow autofix for all enabled rules

@@ -67,10 +67,10 @@ class ConversationController:
             # False = all conversations (no filter)
             if archived is None:
                 # Default: show only non-archived conversations
-                query = query.filter(not Conversation.archived)
+                query = query.filter(Conversation.archived == False)  # noqa: E712
             elif archived is True:
                 # Show only archived conversations
-                query = query.filter(Conversation.archived)
+                query = query.filter(Conversation.archived == True)  # noqa: E712
             # If archived is False, no filter is applied (show all)
 
             query = query.group_by(Conversation.id).order_by(Conversation.updated_at.desc())
