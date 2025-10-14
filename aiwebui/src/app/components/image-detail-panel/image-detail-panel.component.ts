@@ -177,8 +177,16 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
     });
   }
 
-  onImageError(event: any) {
-    console.error('Image failed to load:', event);
+  onImageError(event: Event) {
+    const target = event.target as HTMLImageElement;
+    if (target && !target.complete) {
+      console.error('Image failed to load:', {
+        src: target.src,
+        alt: target.alt,
+        error: event
+      });
+      this.loadingError = this.translate.instant('imageDetailPanel.errors.failedToLoad');
+    }
   }
 
   shouldShowMetaInfo(type: string): boolean {
