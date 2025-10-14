@@ -358,7 +358,7 @@ def create_app():
             <script src="https://unpkg.com/swagger-ui-dist@3.25.0/swagger-ui-bundle.js"></script>
             <script>
                 SwaggerUIBundle({
-                    url: '/api/openapi.json',
+                    url: '../openapi.json',
                     dom_id: '#swagger-ui',
                     presets: [
                         SwaggerUIBundle.presets.apis,
