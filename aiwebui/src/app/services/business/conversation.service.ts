@@ -7,7 +7,8 @@ import {
   ConversationDetailResponse,
   SendMessageResponse,
   ConversationCreateRequest,
-  OllamaModel
+  OllamaModel,
+  OllamaChatModel
 } from '../../models/conversation.model';
 import { ApiConfigService } from '../config/api-config.service';
 import { ModelCacheService } from '../config/model-cache.service';
@@ -89,6 +90,14 @@ export class ConversationService {
    */
   public getModels(): Observable<OllamaModel[]> {
     return this.modelCache.getOllamaModels();
+  }
+
+  /**
+   * Get available Ollama chat models (via cache)
+   * Returns models based on OLLAMA_CHAT_MODELS configuration
+   */
+  public getChatModels(): Observable<OllamaChatModel[]> {
+    return this.modelCache.getOllamaChatModels();
   }
 
   /**

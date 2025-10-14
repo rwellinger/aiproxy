@@ -103,9 +103,7 @@ def verify_template():
     try:
         template = (
             db.query(PromptTemplate)
-            .filter(
-                PromptTemplate.category == "titel", PromptTemplate.action == "generate", PromptTemplate.active
-            )
+            .filter(PromptTemplate.category == "titel", PromptTemplate.action == "generate", PromptTemplate.active)
             .first()
         )
 

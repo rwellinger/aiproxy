@@ -44,9 +44,7 @@ class PromptController:
         """Get all templates for a specific category"""
         try:
             templates = (
-                db.query(PromptTemplate)
-                .filter(PromptTemplate.category == category, PromptTemplate.active)
-                .all()
+                db.query(PromptTemplate).filter(PromptTemplate.category == category, PromptTemplate.active).all()
             )
 
             if not templates:
@@ -70,9 +68,7 @@ class PromptController:
         try:
             template = (
                 db.query(PromptTemplate)
-                .filter(
-                    PromptTemplate.category == category, PromptTemplate.action == action, PromptTemplate.active
-                )
+                .filter(PromptTemplate.category == category, PromptTemplate.action == action, PromptTemplate.active)
                 .first()
             )
 

@@ -21,7 +21,7 @@ import {ChatExportService} from '../../services/business/chat-export.service';
 import {
     Conversation,
     Message,
-    OllamaModel,
+    OllamaChatModel,
     ConversationDetailResponse
 } from '../../models/conversation.model';
 import {MessageContentPipe} from '../../pipes/message-content.pipe';
@@ -62,7 +62,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
     conversations: Conversation[] = [];
     currentConversation: Conversation | null = null;
     messages: Message[] = [];
-    models: OllamaModel[] = [];
+    models: OllamaChatModel[] = [];
 
     // UI State
     isLoading = false;
@@ -102,7 +102,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Load available Ollama models (via cache)
+     * Load available Ollama chat models (via cache)
      */
     private loadModels(): void {
         // Skip if models already loaded
@@ -112,14 +112,16 @@ export class AiChatComponent implements OnInit, OnDestroy {
 
         this.isLoadingModels = true;
         this.conversationService
-            .getModels()
+            .getChatModels()
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (models) => {
                     this.models = models || [];
                     // Set default model if available
                     if (this.models.length > 0 && !this.selectedModel) {
-                        this.selectedModel = this.models[0].name;
+                        // Find default model or use first
+                        const defaultModel = this.models.find(m => m.is_default);
+                        this.selectedModel = defaultModel ? defaultModel.name : this.models[0].name;
                     }
                 },
                 error: (error) => {

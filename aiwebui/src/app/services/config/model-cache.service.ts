@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { OllamaModel, OpenAIModel } from '../../models/conversation.model';
+import { OllamaModel, OllamaChatModel, OpenAIModel } from '../../models/conversation.model';
 import { ApiConfigService } from './api-config.service';
 
 interface CacheEntry<T> {
@@ -26,14 +26,17 @@ export class ModelCacheService {
 
   // BehaviorSubjects for reactive model data
   private ollamaModels$ = new BehaviorSubject<OllamaModel[]>([]);
+  private ollamaChatModels$ = new BehaviorSubject<OllamaChatModel[]>([]);
   private openaiModels$ = new BehaviorSubject<OpenAIModel[]>([]);
 
   // Cache entries
   private ollamaCache: CacheEntry<OllamaModel[]> | null = null;
+  private ollamaChatCache: CacheEntry<OllamaChatModel[]> | null = null;
   private openaiCache: CacheEntry<OpenAIModel[]> | null = null;
 
   // Loading states
   private isLoadingOllama = false;
+  private isLoadingOllamaChat = false;
   private isLoadingOpenAI = false;
 
   /**
@@ -51,6 +54,23 @@ export class ModelCacheService {
     }
 
     return this.ollamaModels$.asObservable();
+  }
+
+  /**
+   * Get Ollama chat models (from cache or API)
+   */
+  public getOllamaChatModels(): Observable<OllamaChatModel[]> {
+    // Check if cache is valid
+    if (this.isCacheValid(this.ollamaChatCache)) {
+      return this.ollamaChatModels$.asObservable();
+    }
+
+    // Load from API if not already loading
+    if (!this.isLoadingOllamaChat) {
+      this.loadOllamaChatModels();
+    }
+
+    return this.ollamaChatModels$.asObservable();
   }
 
   /**
@@ -79,6 +99,14 @@ export class ModelCacheService {
   }
 
   /**
+   * Manually invalidate Ollama chat cache (force reload)
+   */
+  public invalidateOllamaChatCache(): void {
+    this.ollamaChatCache = null;
+    this.loadOllamaChatModels();
+  }
+
+  /**
    * Manually invalidate OpenAI cache (force reload)
    */
   public invalidateOpenAICache(): void {
@@ -91,8 +119,10 @@ export class ModelCacheService {
    */
   public clearCache(): void {
     this.ollamaCache = null;
+    this.ollamaChatCache = null;
     this.openaiCache = null;
     this.ollamaModels$.next([]);
+    this.ollamaChatModels$.next([]);
     this.openaiModels$.next([]);
   }
 
@@ -122,6 +152,35 @@ export class ModelCacheService {
       // Keep old cache on error
     } finally {
       this.isLoadingOllama = false;
+    }
+  }
+
+  /**
+   * Load Ollama chat models from API
+   */
+  private async loadOllamaChatModels(): Promise<void> {
+    this.isLoadingOllamaChat = true;
+
+    try {
+      const response = await firstValueFrom(
+        this.http.get<{ models: OllamaChatModel[] }>(this.apiConfig.endpoints.ollama.chatModels)
+      );
+
+      const models = response.models || [];
+
+      // Update cache
+      this.ollamaChatCache = {
+        data: models,
+        timestamp: Date.now()
+      };
+
+      // Emit new data
+      this.ollamaChatModels$.next(models);
+    } catch (error) {
+      console.error('Error loading Ollama chat models:', error);
+      // Keep old cache on error
+    } finally {
+      this.isLoadingOllamaChat = false;
     }
   }
 

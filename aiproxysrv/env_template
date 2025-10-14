@@ -53,6 +53,14 @@ MUREKA_MAX_POLL_ATTEMPTS=360
 OLLAMA_URL=http://10.0.1.120:11434
 OLLAMA_TIMEOUT=360
 
+# Ollama Chat Models (comma-separated list, empty = all models from server)
+# Example: llama3.2:3b,llama3.1:8b,mistral:7b,gemma2:9b
+# Leave empty to automatically show all models installed on Ollama server
+OLLAMA_CHAT_MODELS=
+
+# Default Ollama Chat Model (must be in OLLAMA_CHAT_MODELS if set)
+OLLAMA_DEFAULT_MODEL=llama3.2:3b
+
 # ==================================================
 # REDIS CONFIGURATION
 # ==================================================

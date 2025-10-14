@@ -91,6 +91,8 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 # --------------------------------------------------
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://10.0.1.120:11434")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "60"))
+OLLAMA_CHAT_MODELS = os.getenv("OLLAMA_CHAT_MODELS", "")
+OLLAMA_DEFAULT_MODEL = os.getenv("OLLAMA_DEFAULT_MODEL", "llama3.2:3b")
 
 # --------------------------------------------------
 # JWT Authentication Config

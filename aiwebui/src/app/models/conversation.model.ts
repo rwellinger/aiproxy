@@ -39,6 +39,12 @@ export interface OllamaModel {
   };
 }
 
+export interface OllamaChatModel {
+  name: string;
+  context_window: number;
+  is_default: boolean;
+}
+
 export interface ConversationListResponse {
   conversations: Conversation[];
   total: number;
