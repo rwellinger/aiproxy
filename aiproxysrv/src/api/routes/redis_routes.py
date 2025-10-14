@@ -1,14 +1,14 @@
-
 from flask import Blueprint, jsonify
 
 from api.auth_middleware import jwt_required
 from api.controllers.redis_controller import RedisController
 
 
-api_redis_v1 = Blueprint("api_redis_v1",__name__, url_prefix="/api/v1/redis")
+api_redis_v1 = Blueprint("api_redis_v1", __name__, url_prefix="/api/v1/redis")
 
 # Controller instance
 redis_controller = RedisController()
+
 
 @api_redis_v1.route("/list", methods=["GET"])
 @jwt_required

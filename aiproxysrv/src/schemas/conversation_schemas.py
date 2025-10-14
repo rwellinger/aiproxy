@@ -1,4 +1,5 @@
 """Conversation and Message schemas for AI chat functionality."""
+
 from datetime import datetime
 from uuid import UUID
 
@@ -34,7 +35,9 @@ class ConversationCreate(BaseModel):
 
     title: str = Field(..., min_length=1, max_length=255, description="Conversation title")
     model: str = Field(..., min_length=1, max_length=100, description="AI model name")
-    provider: str | None = Field("internal", pattern="^(internal|external)$", description="Provider type: internal (Ollama) or external (OpenAI)")
+    provider: str | None = Field(
+        "internal", pattern="^(internal|external)$", description="Provider type: internal (Ollama) or external (OpenAI)"
+    )
     system_context: str | None = Field(None, description="System context/prompt")
 
 

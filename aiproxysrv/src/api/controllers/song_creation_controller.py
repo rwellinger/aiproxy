@@ -1,4 +1,5 @@
 """Song Creation Controller - Handles song and stem generation logic"""
+
 import time
 from datetime import datetime
 from typing import Any
@@ -20,123 +21,104 @@ class SongCreationController:
     def generate_song(self, payload: dict[str, Any], host_url: str, check_balance_func) -> tuple[dict[str, Any], int]:
         """Start Song Generation"""
         if not payload.get("lyrics") or not payload.get("prompt") or not payload.get("model"):
-            return {
-                "error": "Missing required fields: 'lyrics', 'prompt' and model are required"
-            }, 400
+            return {"error": "Missing required fields: 'lyrics', 'prompt' and model are required"}, 400
 
         if not check_balance_func():
-            return {
-                "error": "Insufficient MUREKA balance"
-            }, 402  # Payment Required
+            return {"error": "Insufficient MUREKA balance"}, 402  # Payment Required
 
-        logger.info("Starting song generation",
-                   lyrics_length=len(payload.get('lyrics', '')),
-                   prompt=payload.get('prompt', ''),
-                   model=payload.get('model', ''))
+        logger.info(
+            "Starting song generation",
+            lyrics_length=len(payload.get("lyrics", "")),
+            prompt=payload.get("prompt", ""),
+            model=payload.get("model", ""),
+        )
 
         task = generate_song_task.delay(payload)
 
         # Create song record in database
         song = song_service.create_song(
             task_id=task.id,
-            lyrics=payload.get('lyrics', ''),
-            prompt=payload.get('prompt', ''),
-            model=payload.get('model', 'auto'),
-            title=payload.get('title')
+            lyrics=payload.get("lyrics", ""),
+            prompt=payload.get("prompt", ""),
+            model=payload.get("model", "auto"),
+            title=payload.get("title"),
         )
 
         if not song:
             logger.warning("Failed to create song record in database", task_id=task.id)
             # Continue anyway - fallback to Redis-only mode
-            return {
-                "task_id": task.id,
-                "status_url": f"{host_url}api/v1/song/status/{task.id}"
-            }, 202
+            return {"task_id": task.id, "status_url": f"{host_url}api/v1/song/status/{task.id}"}, 202
         else:
             logger.info("Created song record in database", song_id=song.id, task_id=task.id)
 
         return {
             "task_id": task.id,
             "song_id": str(song.id),
-            "status_url": f"{host_url}api/v1/song/status/{task.id}"
+            "status_url": f"{host_url}api/v1/song/status/{task.id}",
         }, 202
 
-    def generate_instrumental(self, payload: dict[str, Any], host_url: str, check_balance_func) -> tuple[dict[str, Any], int]:
+    def generate_instrumental(
+        self, payload: dict[str, Any], host_url: str, check_balance_func
+    ) -> tuple[dict[str, Any], int]:
         """Start Instrumental Generation"""
         if not payload.get("prompt") or not payload.get("model"):
-            return {
-                "error": "Missing required field: 'prompt' and 'model' is required"
-            }, 400
+            return {"error": "Missing required field: 'prompt' and 'model' is required"}, 400
 
         if not check_balance_func():
-            return {
-                "error": "Insufficient MUREKA balance"
-            }, 402  # Payment Required
+            return {"error": "Insufficient MUREKA balance"}, 402  # Payment Required
 
-        logger.info("Starting instrumental generation",
-                   prompt=payload.get('prompt', ''),
-                   model=payload.get('model', ''))
+        logger.info(
+            "Starting instrumental generation", prompt=payload.get("prompt", ""), model=payload.get("model", "")
+        )
 
         task = generate_instrumental_task.delay(payload)
 
         # Create song record in database with instrumental flag
         song = song_service.create_song(
             task_id=task.id,
-            lyrics='',  # Empty for instrumental
-            prompt=payload.get('prompt', ''),
-            model=payload.get('model', 'auto'),
+            lyrics="",  # Empty for instrumental
+            prompt=payload.get("prompt", ""),
+            model=payload.get("model", "auto"),
             is_instrumental=True,
-            title=payload.get('title')
+            title=payload.get("title"),
         )
 
         if not song:
             logger.warning("Failed to create instrumental song record in database", task_id=task.id)
             # Continue anyway - fallback to Redis-only mode
-            return {
-                "task_id": task.id,
-                "status_url": f"{host_url}api/v1/instrumental/task/status/{task.id}"
-            }, 202
+            return {"task_id": task.id, "status_url": f"{host_url}api/v1/instrumental/task/status/{task.id}"}, 202
         else:
             logger.info("Created instrumental song record in database", song_id=song.id, task_id=task.id)
 
         return {
             "task_id": task.id,
             "song_id": str(song.id),
-            "status_url": f"{host_url}api/v1/instrumental/task/status/{task.id}"
+            "status_url": f"{host_url}api/v1/instrumental/task/status/{task.id}",
         }, 202
 
     def generate_stems(self, payload: dict[str, Any], check_balance_func) -> tuple[dict[str, Any], int]:
         """Generate stems from MP3"""
         choice_id = payload.get("choice_id")
         if not choice_id:
-            return {
-                "error": "Missing required field: 'choice_id' is required"
-            }, 400
+            return {"error": "Missing required field: 'choice_id' is required"}, 400
 
         if not check_balance_func():
-            return {
-                "error": "Insufficient MUREKA balance"
-            }, 402  # Payment Required
+            return {"error": "Insufficient MUREKA balance"}, 402  # Payment Required
 
         # Query song_choices table to get mp3_url
         db = next(get_db())
         try:
             choice = db.query(SongChoice).filter(SongChoice.id == choice_id).first()
             if not choice:
-                return {
-                    "error": f"Choice with ID {choice_id} not found"
-                }, 404
+                return {"error": f"Choice with ID {choice_id} not found"}, 404
 
             if not choice.mp3_url:
-                return {
-                    "error": f"Choice {choice_id} has no MP3 URL"
-                }, 400
+                return {"error": f"Choice {choice_id} has no MP3 URL"}, 400
 
             mp3_url = choice.mp3_url
-            logger.info("Starting stem generation",
-                       choice_id=choice_id,
-                       endpoint=MUREKA_STEM_GENERATE_ENDPOINT,
-                       mp3_url=mp3_url)
+            logger.info(
+                "Starting stem generation", choice_id=choice_id, endpoint=MUREKA_STEM_GENERATE_ENDPOINT, mp3_url=mp3_url
+            )
 
             # Prepare payload for MUREKA API
             mureka_payload = {"url": mp3_url}
@@ -144,22 +126,20 @@ class SongCreationController:
             headers = {"Authorization": f"Bearer {MUREKA_API_KEY}"}
 
             # Creating stems can take a while. 5 minutes (300) timeout therefore
-            response = requests.post(MUREKA_STEM_GENERATE_ENDPOINT, headers=headers, timeout=(10, 300), json=mureka_payload)
+            response = requests.post(
+                MUREKA_STEM_GENERATE_ENDPOINT, headers=headers, timeout=(10, 300), json=mureka_payload
+            )
             response.raise_for_status()
             result = response.json()
 
             # Save stem URL to database if generation was successful
-            if result and result.get('zip_url'):
-                choice.stem_url = result['zip_url']
+            if result and result.get("zip_url"):
+                choice.stem_url = result["zip_url"]
                 choice.stem_generated_at = datetime.utcnow()
                 db.commit()
-                logger.info("Saved stem URL to database", choice_id=choice_id, stem_url=result['zip_url'])
+                logger.info("Saved stem URL to database", choice_id=choice_id, stem_url=result["zip_url"])
 
-            return {
-                "status": "SUCCESS",
-                "result": result,
-                "completed_at": time.time()
-            }, 200
+            return {"status": "SUCCESS", "result": result, "completed_at": time.time()}, 200
 
         except Exception as e:
             logger.error("Error on create stem", error=str(e))
@@ -186,7 +166,7 @@ class SongCreationController:
                 "task_id": job_id,
                 "job_id": job_id,
                 "result": cleaned_json,
-                "completed_at": time.time()
+                "completed_at": time.time(),
             }, 200
 
         except Exception as e:

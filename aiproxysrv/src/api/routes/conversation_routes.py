@@ -1,4 +1,5 @@
 """Conversation Routes - AI Chat Conversation Management."""
+
 import uuid
 
 from flask import Blueprint, jsonify, request
@@ -16,9 +17,7 @@ from schemas.conversation_schemas import (
 from utils.logger import logger
 
 
-api_conversation_v1 = Blueprint(
-    "api_conversation_v1", __name__, url_prefix="/api/v1/conversations"
-)
+api_conversation_v1 = Blueprint("api_conversation_v1", __name__, url_prefix="/api/v1/conversations")
 
 # Controller instances
 conversation_controller = ConversationController()
@@ -67,9 +66,7 @@ def create_conversation(body: ConversationCreate):
         user_id = get_current_user_id()
         db = next(get_db())
 
-        response_data, status_code = conversation_controller.create_conversation(
-            db=db, user_id=user_id, data=body
-        )
+        response_data, status_code = conversation_controller.create_conversation(db=db, user_id=user_id, data=body)
 
         return jsonify(response_data), status_code
 

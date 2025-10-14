@@ -1,6 +1,7 @@
 """
 User Service for database operations and authentication logic
 """
+
 import uuid
 from datetime import datetime, timedelta
 
@@ -25,23 +26,23 @@ class UserService:
     def hash_password(self, password: str) -> str:
         """Hash a password using bcrypt"""
         salt = bcrypt.gensalt()
-        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-        return hashed.decode('utf-8')
+        hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+        return hashed.decode("utf-8")
 
     def verify_password(self, password: str, hashed_password: str) -> bool:
         """Verify a password against its hash"""
         try:
-            return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+            return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
         except Exception:
             return False
 
     def generate_jwt_token(self, user_id: str, email: str) -> str:
         """Generate JWT token for user authentication"""
         payload = {
-            'user_id': str(user_id),
-            'email': email,
-            'iat': datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(hours=self.jwt_expiration_hours)
+            "user_id": str(user_id),
+            "email": email,
+            "iat": datetime.utcnow(),
+            "exp": datetime.utcnow() + timedelta(hours=self.jwt_expiration_hours),
         }
         return jwt.encode(payload, self.jwt_secret, algorithm=self.jwt_algorithm)
 
@@ -55,7 +56,9 @@ class UserService:
         except jwt.InvalidTokenError:
             return None
 
-    def create_user(self, db: Session, email: str, password: str, first_name: str = None, last_name: str = None) -> User | None:
+    def create_user(
+        self, db: Session, email: str, password: str, first_name: str = None, last_name: str = None
+    ) -> User | None:
         """Create a new user"""
         try:
             # Check if user already exists
@@ -75,7 +78,7 @@ class UserService:
                 last_name=last_name,
                 is_active=True,
                 is_verified=False,  # Initially not verified
-                created_at=datetime.utcnow()
+                created_at=datetime.utcnow(),
             )
 
             db.add(user)
@@ -92,7 +95,7 @@ class UserService:
 
     def authenticate_user(self, db: Session, email: str, password: str) -> User | None:
         """Authenticate a user with email and password"""
-        user = db.query(User).filter(User.email == email, User.is_active == True).first()
+        user = db.query(User).filter(User.email == email, User.is_active).first()
 
         if not user or not user.password_hash:
             return None
@@ -109,19 +112,19 @@ class UserService:
         """Get user by ID"""
         try:
             user_uuid = uuid.UUID(user_id)
-            return db.query(User).filter(User.id == user_uuid, User.is_active == True).first()
+            return db.query(User).filter(User.id == user_uuid, User.is_active).first()
         except (ValueError, TypeError):
             return None
 
     def get_user_by_email(self, db: Session, email: str) -> User | None:
         """Get user by email"""
-        return db.query(User).filter(User.email == email, User.is_active == True).first()
+        return db.query(User).filter(User.email == email, User.is_active).first()
 
     def update_user(self, db: Session, user_id: str, first_name: str = None, last_name: str = None) -> User | None:
         """Update user information"""
         try:
             user_uuid = uuid.UUID(user_id)
-            user = db.query(User).filter(User.id == user_uuid, User.is_active == True).first()
+            user = db.query(User).filter(User.id == user_uuid, User.is_active).first()
 
             if not user:
                 return None
@@ -147,7 +150,7 @@ class UserService:
         """Change user password"""
         try:
             user_uuid = uuid.UUID(user_id)
-            user = db.query(User).filter(User.id == user_uuid, User.is_active == True).first()
+            user = db.query(User).filter(User.id == user_uuid, User.is_active).first()
 
             if not user or not user.password_hash:
                 return False
@@ -171,7 +174,7 @@ class UserService:
     def reset_password(self, db: Session, email: str, new_password: str) -> bool:
         """Reset password (admin function)"""
         try:
-            user = db.query(User).filter(User.email == email, User.is_active == True).first()
+            user = db.query(User).filter(User.email == email, User.is_active).first()
 
             if not user:
                 return False
@@ -207,4 +210,4 @@ class UserService:
 
     def list_users(self, db: Session, skip: int = 0, limit: int = 100) -> list[User]:
         """List all active users"""
-        return db.query(User).filter(User.is_active == True).offset(skip).limit(limit).all()
+        return db.query(User).filter(User.is_active).offset(skip).limit(limit).all()

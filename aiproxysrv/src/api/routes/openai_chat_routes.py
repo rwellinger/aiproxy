@@ -1,4 +1,5 @@
 """OpenAI Chat Routes - Provides endpoints for OpenAI model information."""
+
 from flask import Blueprint, jsonify
 
 from api.auth_middleware import jwt_required
@@ -6,9 +7,7 @@ from api.controllers.openai_chat_controller import OpenAIChatController
 from utils.logger import logger
 
 
-api_openai_chat_v1 = Blueprint(
-    "api_openai_chat_v1", __name__, url_prefix="/api/v1/openai/chat"
-)
+api_openai_chat_v1 = Blueprint("api_openai_chat_v1", __name__, url_prefix="/api/v1/openai/chat")
 
 # Controller instance
 openai_chat_controller = OpenAIChatController()

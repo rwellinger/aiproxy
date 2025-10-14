@@ -1,6 +1,7 @@
 """
 Instrumental Generation Routes mit MUREKA + Pydantic validation
 """
+
 from flask import Blueprint, jsonify, request
 from flask_pydantic import validate
 
@@ -15,6 +16,7 @@ api_instrumental_v1 = Blueprint("api_instrumental_v1", __name__, url_prefix="/ap
 # Controller instance (reuse existing song controller)
 song_controller = SongController()
 
+
 @api_instrumental_v1.route("/generate", methods=["POST"])
 @jwt_required
 @validate()
@@ -25,13 +27,10 @@ def instrumental_generate(body: InstrumentalGenerateRequest):
         payload = body.dict()
 
         # Add empty lyrics and mark as instrumental
-        payload['lyrics'] = ""
-        payload['is_instrumental'] = True
+        payload["lyrics"] = ""
+        payload["is_instrumental"] = True
 
-        response_data, status_code = song_controller.generate_instrumental(
-            payload=payload,
-            host_url=request.host_url
-        )
+        response_data, status_code = song_controller.generate_instrumental(payload=payload, host_url=request.host_url)
         return jsonify(response_data), status_code
     except Exception as e:
         error_response = ErrorResponse(error=str(e))
@@ -55,6 +54,7 @@ def mureka_account():
 
 # Task routes (reuse existing ones with task_id)
 api_instrumental_task_v1 = Blueprint("api_instrumental_task_v1", __name__, url_prefix="/api/v1/instrumental/task")
+
 
 @api_instrumental_task_v1.route("/status/<task_id>", methods=["GET"])
 def instrumental_status(task_id):

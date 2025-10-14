@@ -1,6 +1,7 @@
 """
 Zentrale Konfiguration für alle Module
 """
+
 import os
 
 from dotenv import load_dotenv
@@ -39,7 +40,9 @@ MUREKA_POLL_INTERVAL_LONG = int(os.getenv("MUREKA_POLL_INTERVAL_LONG", "30"))
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
 OPENAI_IMAGE_MODEL = os.getenv("OPENAI_IMAGE_MODEL", "dall-e-3")
-OPENAI_CHAT_MODELS = os.getenv("OPENAI_CHAT_MODELS", "gpt-5,gpt-5-mini,gpt-5-nano,gpt-4o,gpt-4o-mini,gpt-4.1,gpt-4.1-mini")
+OPENAI_CHAT_MODELS = os.getenv(
+    "OPENAI_CHAT_MODELS", "gpt-5,gpt-5-mini,gpt-5-nano,gpt-4o,gpt-4o-mini,gpt-4.1,gpt-4.1-mini"
+)
 OPENAI_TIMEOUT = int(os.getenv("OPENAI_TIMEOUT", "60"))
 
 # Backwards compatibility (deprecated - use OPENAI_BASE_URL + endpoints)
@@ -62,7 +65,6 @@ DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 # loguru
 # --------------------------------------------------
 LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG" if DEBUG else "WARNING")
-
 
 
 # --------------------------------------------------
@@ -100,9 +102,11 @@ JWT_EXPIRATION_HOURS = 24
 # --------------------------------------------------
 # Database Config
 # --------------------------------------------------
-DATABASE_URL = os.getenv("DATABASE_URL",
-    "postgresql://aiproxy:aiproxy123@localhost:5432/aiproxysrv" if DEBUG else
-    "postgresql://aiproxy:aiproxy123@postgres:5432/aiproxysrv"
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://aiproxy:aiproxy123@localhost:5432/aiproxysrv"
+    if DEBUG
+    else "postgresql://aiproxy:aiproxy123@postgres:5432/aiproxysrv",
 )
 DATABASE_ECHO = os.getenv("DATABASE_ECHO", "false").lower() == "true"
 

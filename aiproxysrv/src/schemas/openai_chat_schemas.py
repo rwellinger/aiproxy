@@ -1,4 +1,5 @@
 """OpenAI Chat API schemas for request/response validation."""
+
 from pydantic import BaseModel, Field
 
 

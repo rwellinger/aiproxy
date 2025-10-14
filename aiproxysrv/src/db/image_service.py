@@ -1,6 +1,5 @@
 """Image database service layer"""
 
-
 from db.database import SessionLocal
 from db.models import GeneratedImage
 from utils.logger import logger
@@ -18,11 +17,11 @@ class ImageService:
         local_url: str,
         model_used: str,
         prompt_hash: str,
-        title: str | None = None
+        title: str | None = None,
     ) -> GeneratedImage | None:
         """
         Save generated image metadata to database
-        
+
         Returns:
             GeneratedImage instance if successful, None if failed
         """
@@ -36,17 +35,25 @@ class ImageService:
                 local_url=local_url,
                 model_used=model_used,
                 prompt_hash=prompt_hash,
-                title=title
+                title=title,
             )
             db.add(generated_image)
             db.commit()
             db.refresh(generated_image)
-            logger.info("image_metadata_saved", image_id=str(generated_image.id), filename=filename, model=model_used, size=size)
+            logger.info(
+                "image_metadata_saved", image_id=str(generated_image.id), filename=filename, model=model_used, size=size
+            )
             return generated_image
         except Exception as e:
             db.rollback()
             import traceback
-            logger.error("image_metadata_save_failed", error=str(e), error_type=type(e).__name__, stacktrace=traceback.format_exc())
+
+            logger.error(
+                "image_metadata_save_failed",
+                error=str(e),
+                error_type=type(e).__name__,
+                stacktrace=traceback.format_exc(),
+            )
             return None
         finally:
             db.close()
@@ -84,8 +91,9 @@ class ImageService:
         return ImageService.get_images_paginated(limit=limit, offset=offset)
 
     @staticmethod
-    def get_images_paginated(limit: int = 20, offset: int = 0, search: str = '',
-                           sort_by: str = 'created_at', sort_direction: str = 'desc') -> list[GeneratedImage]:
+    def get_images_paginated(
+        limit: int = 20, offset: int = 0, search: str = "", sort_by: str = "created_at", sort_direction: str = "desc"
+    ) -> list[GeneratedImage]:
         """Get images with pagination, search and sorting"""
         db = SessionLocal()
         try:
@@ -95,27 +103,25 @@ class ImageService:
             if search:
                 search_term = f"%{search}%"
                 from sqlalchemy import or_
+
                 query = query.filter(
-                    or_(
-                        GeneratedImage.title.ilike(search_term),
-                        GeneratedImage.prompt.ilike(search_term)
-                    )
+                    or_(GeneratedImage.title.ilike(search_term), GeneratedImage.prompt.ilike(search_term))
                 )
 
             # Apply sorting
-            if sort_by == 'title':
+            if sort_by == "title":
                 # Handle null titles by treating them as empty strings for sorting
-                if sort_direction == 'desc':
+                if sort_direction == "desc":
                     query = query.order_by(GeneratedImage.title.desc().nullslast())
                 else:
                     query = query.order_by(GeneratedImage.title.asc().nullsfirst())
-            elif sort_by == 'prompt':
-                if sort_direction == 'desc':
+            elif sort_by == "prompt":
+                if sort_direction == "desc":
                     query = query.order_by(GeneratedImage.prompt.desc())
                 else:
                     query = query.order_by(GeneratedImage.prompt.asc())
             else:  # default to created_at
-                if sort_direction == 'desc':
+                if sort_direction == "desc":
                     query = query.order_by(GeneratedImage.created_at.desc())
                 else:
                     query = query.order_by(GeneratedImage.created_at.asc())
@@ -125,7 +131,7 @@ class ImageService:
             db.close()
 
     @staticmethod
-    def get_total_images_count(search: str = '') -> int:
+    def get_total_images_count(search: str = "") -> int:
         """Get total count of generated images with optional search filter"""
         db = SessionLocal()
         try:
@@ -135,11 +141,9 @@ class ImageService:
             if search:
                 search_term = f"%{search}%"
                 from sqlalchemy import or_
+
                 query = query.filter(
-                    or_(
-                        GeneratedImage.title.ilike(search_term),
-                        GeneratedImage.prompt.ilike(search_term)
-                    )
+                    or_(GeneratedImage.title.ilike(search_term), GeneratedImage.prompt.ilike(search_term))
                 )
 
             return query.count()
@@ -171,7 +175,14 @@ class ImageService:
         except Exception as e:
             db.rollback()
             import traceback
-            logger.error("image_metadata_deletion_failed", image_id=str(image_id), error=str(e), error_type=type(e).__name__, stacktrace=traceback.format_exc())
+
+            logger.error(
+                "image_metadata_deletion_failed",
+                image_id=str(image_id),
+                error=str(e),
+                error_type=type(e).__name__,
+                stacktrace=traceback.format_exc(),
+            )
             return False
         finally:
             db.close()
@@ -192,12 +203,24 @@ class ImageService:
                 image.tags = tags.strip() if tags.strip() else None
 
             db.commit()
-            logger.info("image_metadata_updated", image_id=str(image_id), title_updated=title is not None, tags_updated=tags is not None)
+            logger.info(
+                "image_metadata_updated",
+                image_id=str(image_id),
+                title_updated=title is not None,
+                tags_updated=tags is not None,
+            )
             return True
         except Exception as e:
             db.rollback()
             import traceback
-            logger.error("image_metadata_update_failed", image_id=str(image_id), error=str(e), error_type=type(e).__name__, stacktrace=traceback.format_exc())
+
+            logger.error(
+                "image_metadata_update_failed",
+                image_id=str(image_id),
+                error=str(e),
+                error_type=type(e).__name__,
+                stacktrace=traceback.format_exc(),
+            )
             return False
         finally:
             db.close()

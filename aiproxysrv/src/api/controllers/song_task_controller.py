@@ -1,4 +1,5 @@
 """Song Task Controller - Handles task management logic"""
+
 import json
 import time
 from typing import Any
@@ -39,7 +40,7 @@ class SongTaskController:
                 "task_id": task_id,
                 "status": song.status,
                 "created_at": song.created_at.isoformat() if song.created_at else None,
-                "updated_at": song.updated_at.isoformat() if song.updated_at else None
+                "updated_at": song.updated_at.isoformat() if song.updated_at else None,
             }
 
             # Add job_id if available
@@ -87,7 +88,7 @@ class SongTaskController:
                     if choice.title:
                         choice_data["title"] = choice.title
                     if choice.tags:
-                        choice_data["tags"] = choice.tags.split(',') if choice.tags else []
+                        choice_data["tags"] = choice.tags.split(",") if choice.tags else []
 
                     choices_data.append(choice_data)
 
@@ -109,86 +110,59 @@ class SongTaskController:
         logger.debug("Song not found in database, checking Celery", task_id=task_id)
         result = celery_app.AsyncResult(task_id)
 
-        if result.state == 'PENDING':
+        if result.state == "PENDING":
             logger.debug("Task is pending", task_id=task_id)
-            return {
-                "task_id": task_id,
-                "status": "PENDING",
-                "message": "Task is waiting for execution"
-            }, 200
+            return {"task_id": task_id, "status": "PENDING", "message": "Task is waiting for execution"}, 200
 
-        elif result.state == 'PROGRESS':
+        elif result.state == "PROGRESS":
             logger.debug("Task in progress", task_id=task_id)
             progress_info = result.info if isinstance(result.info, dict) else {}
-            return {
-                "task_id": task_id,
-                "status": "PROGRESS",
-                "progress": progress_info
-            }, 200
+            return {"task_id": task_id, "status": "PROGRESS", "progress": progress_info}, 200
 
-        elif result.state == 'SUCCESS':
+        elif result.state == "SUCCESS":
             logger.debug("Task completed successfully", task_id=task_id)
             task_result = result.result
-            return {
-                "task_id": task_id,
-                "status": "SUCCESS",
-                "result": task_result
-            }, 200
+            return {"task_id": task_id, "status": "SUCCESS", "result": task_result}, 200
 
-        elif result.state == 'FAILURE':
+        elif result.state == "FAILURE":
             logger.debug("Task failed", task_id=task_id)
             return {
                 "task_id": task_id,
                 "status": "FAILURE",
-                "error": str(result.result) if result.result else "Unknown error occurred"
+                "error": str(result.result) if result.result else "Unknown error occurred",
             }, 200
 
         else:
             logger.debug("Unknown task state", task_id=task_id, state=result.state)
-            return {
-                "task_id": task_id,
-                "status": result.state,
-                "message": "Unknown task state"
-            }, 200
+            return {"task_id": task_id, "status": result.state, "message": "Unknown task state"}, 200
 
     def cancel_task(self, task_id: str) -> tuple[dict[str, Any], int]:
         """Cancel a Task"""
         try:
             result = celery_app.AsyncResult(task_id)
 
-            if result.state in ['PENDING', 'PROGRESS']:
+            if result.state in ["PENDING", "PROGRESS"]:
                 result.revoke(terminate=True)
-                return {
-                    "task_id": task_id,
-                    "status": "CANCELLED",
-                    "message": "Task cancellation requested"
-                }, 200
+                return {"task_id": task_id, "status": "CANCELLED", "message": "Task cancellation requested"}, 200
             else:
                 return {
                     "task_id": task_id,
                     "status": result.state,
-                    "message": "Task cannot be cancelled in current state"
+                    "message": "Task cannot be cancelled in current state",
                 }, 400
 
         except Exception as e:
             logger.error("Error cancelling task", task_id=task_id, error=str(e))
-            return {
-                "error": f"Failed to cancel task: {str(e)}"
-            }, 500
+            return {"error": f"Failed to cancel task: {str(e)}"}, 500
 
     def delete_task_result(self, task_id: str) -> tuple[dict[str, Any], int]:
         """Delete Task Result"""
         try:
             celery_app.AsyncResult(task_id).forget()
-            return {
-                "task_id": task_id,
-                "message": "Task result deleted successfully"
-            }, 200
+            return {"task_id": task_id, "message": "Task result deleted successfully"}, 200
         except Exception as e:
             logger.error("Error deleting task result", task_id=task_id, error=str(e))
-            return {
-                "error": f"Failed to delete task result: {str(e)}"
-            }, 500
+            return {"error": f"Failed to delete task result: {str(e)}"}, 500
 
     def force_complete_task(self, job_id: str) -> tuple[dict[str, Any], int]:
         """Force Completion of a Task"""
@@ -202,6 +176,7 @@ class SongTaskController:
             mureka_result = response.json()
 
             from celery.result import AsyncResult
+
             result = AsyncResult(job_id)
 
             success_payload = {
@@ -209,7 +184,7 @@ class SongTaskController:
                 "task_id": job_id,
                 "job_id": job_id,
                 "result": mureka_result,
-                "completed_at": time.time()
+                "completed_at": time.time(),
             }
 
             result.backend.store_result(result.id, success_payload, "SUCCESS")
@@ -218,7 +193,7 @@ class SongTaskController:
                 "task_id": job_id,
                 "status": "FORCED_COMPLETION",
                 "mureka_status": mureka_result.get("status"),
-                "message": "Task manually completed with MUREKA result"
+                "message": "Task manually completed with MUREKA result",
             }, 200
 
         except Exception as e:

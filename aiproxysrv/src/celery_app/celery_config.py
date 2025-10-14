@@ -1,6 +1,7 @@
 """
 Celery Konfiguration - Zentraler Import-Point für Celery
 """
+
 import logging
 
 from celery import Celery
@@ -27,11 +28,10 @@ celery_app.conf.update(
     worker_concurrency=1,
     worker_prefetch_multiplier=1,
     task_acks_late=True,
-
     # Tasks automatisch entdecken
-    include=['celery_app.tasks'],
+    include=["celery_app.tasks"],
     # Tasks auch explizit importieren beim App-Start
-    imports=['celery_app.tasks']
+    imports=["celery_app.tasks"],
 )
 
 
@@ -40,13 +40,13 @@ def _configure_loguru_for_celery():
     log_level = getattr(logging, LOG_LEVEL.upper(), logging.INFO)
 
     # Celery Root Logger
-    celery_logger = logging.getLogger('celery')
+    celery_logger = logging.getLogger("celery")
     celery_logger.handlers = [CeleryInterceptHandler()]
     celery_logger.setLevel(log_level)
     celery_logger.propagate = False
 
     # Celery Task Logger
-    task_logger = logging.getLogger('celery.task')
+    task_logger = logging.getLogger("celery.task")
     task_logger.handlers = [CeleryInterceptHandler()]
     task_logger.setLevel(log_level)
     task_logger.propagate = False

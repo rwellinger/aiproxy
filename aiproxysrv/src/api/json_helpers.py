@@ -1,6 +1,8 @@
 """
 Json Helpers
 """
+
+
 def prune(data, keys):
     """
     Entfernt sämtliche Vorkommen der Keys aus einem verschachtelten dict/list.

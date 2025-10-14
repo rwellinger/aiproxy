@@ -1,4 +1,5 @@
 """Controller for prompt template management"""
+
 from typing import Any
 
 from sqlalchemy.exc import IntegrityError
@@ -21,7 +22,7 @@ class PromptController:
     def get_all_templates(db: Session) -> tuple[dict[str, Any], int]:
         """Get all prompt templates grouped by category and action"""
         try:
-            templates = db.query(PromptTemplate).filter(PromptTemplate.active == True).all()
+            templates = db.query(PromptTemplate).filter(PromptTemplate.active).all()
 
             # Group by category and action
             grouped: dict[str, dict[str, Any]] = {}
@@ -42,10 +43,11 @@ class PromptController:
     def get_category_templates(db: Session, category: str) -> tuple[dict[str, Any], int]:
         """Get all templates for a specific category"""
         try:
-            templates = db.query(PromptTemplate).filter(
-                PromptTemplate.category == category,
-                PromptTemplate.active == True
-            ).all()
+            templates = (
+                db.query(PromptTemplate)
+                .filter(PromptTemplate.category == category, PromptTemplate.active)
+                .all()
+            )
 
             if not templates:
                 return {"error": f"No templates found for category '{category}'"}, 404
@@ -56,10 +58,7 @@ class PromptController:
                 template_data = PromptTemplateResponse.model_validate(template)
                 templates_by_action[template.action] = template_data
 
-            response = PromptCategoryResponse(
-                category=category,
-                templates=templates_by_action
-            )
+            response = PromptCategoryResponse(category=category, templates=templates_by_action)
             return response.model_dump(), 200
 
         except Exception as e:
@@ -69,11 +68,13 @@ class PromptController:
     def get_specific_template(db: Session, category: str, action: str) -> tuple[dict[str, Any], int]:
         """Get a specific template by category and action"""
         try:
-            template = db.query(PromptTemplate).filter(
-                PromptTemplate.category == category,
-                PromptTemplate.action == action,
-                PromptTemplate.active == True
-            ).first()
+            template = (
+                db.query(PromptTemplate)
+                .filter(
+                    PromptTemplate.category == category, PromptTemplate.action == action, PromptTemplate.active
+                )
+                .first()
+            )
 
             if not template:
                 return {"error": f"Template not found for category '{category}' and action '{action}'"}, 404
@@ -85,13 +86,16 @@ class PromptController:
             return {"error": f"Failed to retrieve template: {str(e)}"}, 500
 
     @staticmethod
-    def update_template(db: Session, category: str, action: str, update_data: PromptTemplateUpdate) -> tuple[dict[str, Any], int]:
+    def update_template(
+        db: Session, category: str, action: str, update_data: PromptTemplateUpdate
+    ) -> tuple[dict[str, Any], int]:
         """Update an existing template with automatic version increment"""
         try:
-            template = db.query(PromptTemplate).filter(
-                PromptTemplate.category == category,
-                PromptTemplate.action == action
-            ).first()
+            template = (
+                db.query(PromptTemplate)
+                .filter(PromptTemplate.category == category, PromptTemplate.action == action)
+                .first()
+            )
 
             if not template:
                 return {"error": f"Template not found for category '{category}' and action '{action}'"}, 404
@@ -127,13 +131,18 @@ class PromptController:
         """Create a new prompt template"""
         try:
             # Check if template already exists
-            existing = db.query(PromptTemplate).filter(
-                PromptTemplate.category == template_data.category,
-                PromptTemplate.action == template_data.action
-            ).first()
+            existing = (
+                db.query(PromptTemplate)
+                .filter(
+                    PromptTemplate.category == template_data.category, PromptTemplate.action == template_data.action
+                )
+                .first()
+            )
 
             if existing:
-                return {"error": f"Template already exists for category '{template_data.category}' and action '{template_data.action}'"}, 409
+                return {
+                    "error": f"Template already exists for category '{template_data.category}' and action '{template_data.action}'"
+                }, 409
 
             # Create new template
             new_template = PromptTemplate(**template_data.model_dump())
@@ -155,10 +164,11 @@ class PromptController:
     def delete_template(db: Session, category: str, action: str) -> tuple[dict[str, Any], int]:
         """Soft delete a template (set active=False)"""
         try:
-            template = db.query(PromptTemplate).filter(
-                PromptTemplate.category == category,
-                PromptTemplate.action == action
-            ).first()
+            template = (
+                db.query(PromptTemplate)
+                .filter(PromptTemplate.category == category, PromptTemplate.action == action)
+                .first()
+            )
 
             if not template:
                 return {"error": f"Template not found for category '{category}' and action '{action}'"}, 404

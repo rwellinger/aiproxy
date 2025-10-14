@@ -12,7 +12,7 @@ import os
 import sys
 
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from sqlalchemy.orm import Session
 
@@ -31,7 +31,7 @@ TEMPLATES = {
             "model": "llama3.2:3b",
             "temperature": 1.5,
             "max_tokens": 13,
-            "active": True
+            "active": True,
         },
         "translate": {
             "pre_condition": "Translate this image prompt to english",
@@ -41,8 +41,8 @@ TEMPLATES = {
             "model": "gpt-oss:20b",
             "temperature": 0.5,
             "max_tokens": 256,
-            "active": True
-        }
+            "active": True,
+        },
     },
     "lyrics": {
         "generate": {
@@ -53,7 +53,7 @@ TEMPLATES = {
             "model": "gpt-oss:20b",
             "temperature": 0.7,
             "max_tokens": 2048,
-            "active": True
+            "active": True,
         },
         "translate": {
             "pre_condition": "Be a British songwriter. Translate the following lyrics into fluent, natural British English with good lyrical flow. Keep the emotional tone, adapt for rhythm and rhyme where needed, and make it sound like it was written by a native English-speaking artist. Lyrics",
@@ -63,8 +63,8 @@ TEMPLATES = {
             "model": "gpt-oss:20b",
             "temperature": 0.5,
             "max_tokens": 2048,
-            "active": True
-        }
+            "active": True,
+        },
     },
     "music": {
         "enhance": {
@@ -75,7 +75,7 @@ TEMPLATES = {
             "model": "llama3.2:3b",
             "temperature": 0.7,
             "max_tokens": 512,
-            "active": True
+            "active": True,
         },
         "translate": {
             "pre_condition": "Translate this music style description to english",
@@ -85,8 +85,8 @@ TEMPLATES = {
             "model": "gpt-oss:20b",
             "temperature": 0.5,
             "max_tokens": 512,
-            "active": True
-        }
+            "active": True,
+        },
     },
     "titel": {
         "generate": {
@@ -97,9 +97,9 @@ TEMPLATES = {
             "model": "llama3.2:3b",
             "temperature": 0.7,
             "max_tokens": 20,
-            "active": True
+            "active": True,
         }
-    }
+    },
 }
 
 
@@ -120,10 +120,11 @@ def init_prompt_templates():
                 print(f"  Processing action: {action}")
 
                 # Check if template already exists
-                existing = db.query(PromptTemplate).filter(
-                    PromptTemplate.category == category,
-                    PromptTemplate.action == action
-                ).first()
+                existing = (
+                    db.query(PromptTemplate)
+                    .filter(PromptTemplate.category == category, PromptTemplate.action == action)
+                    .first()
+                )
 
                 if existing:
                     print(f"    Template exists (ID: {existing.id}), updating...")
@@ -150,7 +151,7 @@ def init_prompt_templates():
                         model=template_data["model"],
                         temperature=template_data["temperature"],
                         max_tokens=template_data["max_tokens"],
-                        active=template_data["active"]
+                        active=template_data["active"],
                     )
                     db.add(new_template)
                     inserted_count += 1
@@ -168,6 +169,7 @@ def init_prompt_templates():
     except Exception as e:
         print(f"\n❌ Error during initialization: {str(e)}")
         import traceback
+
         traceback.print_exc()
         db.rollback()
         return False
@@ -181,7 +183,7 @@ def verify_templates():
     db: Session = next(get_db())
 
     try:
-        templates = db.query(PromptTemplate).filter(PromptTemplate.active == True).all()
+        templates = db.query(PromptTemplate).filter(PromptTemplate.active).all()
 
         print("\n📊 Verification Results:")
         print(f"   Total active templates in DB: {len(templates)}")
@@ -195,16 +197,14 @@ def verify_templates():
         for template in templates:
             if template.category not in by_category:
                 by_category[template.category] = []
-            by_category[template.category].append({
-                'action': template.action,
-                'model': template.model,
-                'version': template.version
-            })
+            by_category[template.category].append(
+                {"action": template.action, "model": template.model, "version": template.version}
+            )
 
         print("\n   Templates by category:")
         for category, actions in sorted(by_category.items()):
             print(f"\n   {category}:")
-            for action_data in sorted(actions, key=lambda x: x['action']):
+            for action_data in sorted(actions, key=lambda x: x["action"]):
                 print(f"     - {action_data['action']} (v{action_data['version']}, {action_data['model']})")
 
         # Check if we have the expected number of templates
@@ -219,6 +219,7 @@ def verify_templates():
     except Exception as e:
         print(f"\n❌ Error during verification: {str(e)}")
         import traceback
+
         traceback.print_exc()
         return False
 

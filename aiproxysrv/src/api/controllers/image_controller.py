@@ -1,4 +1,5 @@
 """Image Controller - Handles HTTP requests for image operations"""
+
 import logging
 from typing import Any
 
@@ -41,8 +42,14 @@ class ImageController:
             logger.error(f"Unexpected error in image generation: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-    def get_images(self, limit: int = 20, offset: int = 0, search: str = '',
-                   sort_by: str = 'created_at', sort_direction: str = 'desc') -> tuple[dict[str, Any], int]:
+    def get_images(
+        self,
+        limit: int = 20,
+        offset: int = 0,
+        search: str = "",
+        sort_by: str = "created_at",
+        sort_direction: str = "desc",
+    ) -> tuple[dict[str, Any], int]:
         """
         Get list of generated images with pagination, search and sorting
 
@@ -58,11 +65,7 @@ class ImageController:
         """
         try:
             result = self.business_service.get_images_with_pagination(
-                limit=limit,
-                offset=offset,
-                search=search,
-                sort_by=sort_by,
-                sort_direction=sort_direction
+                limit=limit, offset=offset, search=search, sort_by=sort_by, sort_direction=sort_direction
             )
             return result, 200
 

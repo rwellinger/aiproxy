@@ -1,4 +1,5 @@
 """Song Controller - Orchestrates specialized song controllers"""
+
 import logging
 from typing import Any
 
@@ -31,21 +32,15 @@ class SongController:
 
     def generate_song(self, payload: dict[str, Any], host_url: str) -> tuple[dict[str, Any], int]:
         """Start Song Generation"""
-        return self.creation_controller.generate_song(
-            payload, host_url, self.account_controller.check_balance
-        )
+        return self.creation_controller.generate_song(payload, host_url, self.account_controller.check_balance)
 
     def generate_instrumental(self, payload: dict[str, Any], host_url: str) -> tuple[dict[str, Any], int]:
         """Start Instrumental Generation"""
-        return self.creation_controller.generate_instrumental(
-            payload, host_url, self.account_controller.check_balance
-        )
+        return self.creation_controller.generate_instrumental(payload, host_url, self.account_controller.check_balance)
 
     def generate_stems(self, payload: dict[str, Any]) -> tuple[dict[str, Any], int]:
         """Generate stems from MP3"""
-        return self.creation_controller.generate_stems(
-            payload, self.account_controller.check_balance
-        )
+        return self.creation_controller.generate_stems(payload, self.account_controller.check_balance)
 
     def get_song_info(self, job_id: str) -> tuple[dict[str, Any], int]:
         """Get Song structure direct from MUREKA again who was generated successfully"""
@@ -71,8 +66,16 @@ class SongController:
         """Get Queue Status"""
         return self.task_controller.get_queue_status()
 
-    def get_songs(self, limit: int = 20, offset: int = 0, status: str = None, search: str = '',
-                  sort_by: str = 'created_at', sort_direction: str = 'desc', workflow: str = None) -> tuple[dict[str, Any], int]:
+    def get_songs(
+        self,
+        limit: int = 20,
+        offset: int = 0,
+        status: str = None,
+        search: str = "",
+        sort_by: str = "created_at",
+        sort_direction: str = "desc",
+        workflow: str = None,
+    ) -> tuple[dict[str, Any], int]:
         """
         Get list of songs with pagination, search and sorting
 
@@ -96,7 +99,7 @@ class SongController:
                 search=search,
                 sort_by=sort_by,
                 sort_direction=sort_direction,
-                workflow=workflow
+                workflow=workflow,
             )
             return result, 200
 
@@ -220,7 +223,6 @@ class SongController:
             logger.error(f"Unexpected error in bulk delete: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-
     def update_choice_rating(self, choice_id: str, rating_data: dict[str, Any]) -> tuple[dict[str, Any], int]:
         """
         Update rating for a specific song choice
@@ -233,7 +235,7 @@ class SongController:
             Tuple of (response_data, status_code)
         """
         try:
-            rating = rating_data.get('rating')
+            rating = rating_data.get("rating")
             result = self.business_service.update_choice_rating(choice_id, rating)
 
             if result is None:
@@ -249,4 +251,3 @@ class SongController:
         except Exception as e:
             logger.error(f"Unexpected error updating choice rating {choice_id}: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
-

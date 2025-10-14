@@ -1,6 +1,7 @@
 """
 MUREKA Instrumental Client - Instrumental generation
 """
+
 import time
 from typing import Any
 
@@ -23,15 +24,14 @@ class MurekaInstrumentalClient(MurekaBaseClient):
         allowed_params = ["prompt", "model"]
         mureka_payload = self._clean_payload(payload, allowed_params)
 
-        logger.info("Starting MUREKA instrumental generation",
-                   endpoint=MUREKA_INSTRUMENTAL_GENERATE_ENDPOINT,
-                   payload=mureka_payload)
+        logger.info(
+            "Starting MUREKA instrumental generation",
+            endpoint=MUREKA_INSTRUMENTAL_GENERATE_ENDPOINT,
+            payload=mureka_payload,
+        )
 
         response = self._make_request(
-            "POST",
-            MUREKA_INSTRUMENTAL_GENERATE_ENDPOINT,
-            headers=headers,
-            json=mureka_payload
+            "POST", MUREKA_INSTRUMENTAL_GENERATE_ENDPOINT, headers=headers, json=mureka_payload
         )
 
         response_data = response.json()
@@ -49,7 +49,7 @@ class MurekaInstrumentalClient(MurekaBaseClient):
         response = self._make_request("GET", status_url, headers=headers)
 
         status_data = response.json()
-        logger.debug("MUREKA instrumental status response", job_id=job_id, status=status_data.get('status'))
+        logger.debug("MUREKA instrumental status response", job_id=job_id, status=status_data.get("status"))
         return status_data
 
     def wait_for_instrumental_completion(self, task, job_id: str) -> dict[str, Any]:
@@ -65,8 +65,7 @@ class MurekaInstrumentalClient(MurekaBaseClient):
                 current_status = status_response.get("status", "unknown")
 
                 self._update_task_state(
-                    task, job_id, attempt + 1, status_response,
-                    elapsed_time, poll_interval, "instrumental"
+                    task, job_id, attempt + 1, status_response, elapsed_time, poll_interval, "instrumental"
                 )
 
                 if current_status == "succeeded":
@@ -96,26 +95,33 @@ class MurekaInstrumentalClient(MurekaBaseClient):
                     raise
 
             except Exception as e:
-                logger.error("Unexpected error in MUREKA instrumental polling",
-                           error_type=type(e).__name__,
-                           error=str(e),
-                           job_id=job_id)
+                logger.error(
+                    "Unexpected error in MUREKA instrumental polling",
+                    error_type=type(e).__name__,
+                    error=str(e),
+                    job_id=job_id,
+                )
                 raise
 
         total_elapsed = time.time() - start_time
-        raise Exception(f"Instrumental timeout after {self.max_poll_attempts} polling attempts ({int(total_elapsed)} seconds elapsed)")
+        raise Exception(
+            f"Instrumental timeout after {self.max_poll_attempts} polling attempts ({int(total_elapsed)} seconds elapsed)"
+        )
 
 
 # Convenience functions for backward compatibility
 _client = MurekaInstrumentalClient()
 
+
 def start_mureka_instrumental_generation(payload: dict) -> dict[str, Any]:
     """Backward compatibility function"""
     return _client.start_instrumental_generation(payload)
 
+
 def check_mureka_instrumental_status(job_id: str) -> dict[str, Any]:
     """Backward compatibility function"""
     return _client.check_instrumental_status(job_id)
+
 
 def wait_for_mureka_instrumental_completion(task, job_id: str) -> dict[str, Any]:
     """Backward compatibility function"""

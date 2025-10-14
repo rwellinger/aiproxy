@@ -1,4 +1,5 @@
 """Pydantic schemas for Song API validation"""
+
 from datetime import datetime
 from typing import Any
 
@@ -10,6 +11,7 @@ from .common_schemas import BaseResponse, PaginationResponse
 
 class SongGenerateRequest(BaseModel):
     """Schema for song generation requests"""
+
     prompt: str = Field(..., min_length=1, max_length=500, description="Song generation prompt")
     lyrics: str | None = Field(None, max_length=10000, description="Custom lyrics (optional)")
     title: str | None = Field(None, min_length=1, max_length=50, description="Optional title for the song")
@@ -17,11 +19,11 @@ class SongGenerateRequest(BaseModel):
     style: str | None = Field(None, max_length=100, description="Music style/genre")
     duration: int | None = Field(30, ge=15, le=120, description="Song duration in seconds")
 
-    @validator('model')
+    @validator("model")
     def validate_model(cls, v):
-        allowed_models = ['auto', 'mureka-7.5', 'mureka-7', 'mureka-6', 'mureka-o1']
+        allowed_models = ["auto", "mureka-7.5", "mureka-7", "mureka-6", "mureka-o1"]
         if v not in allowed_models:
-            raise ValueError(f'model must be one of: {", ".join(allowed_models)}')
+            raise ValueError(f"model must be one of: {', '.join(allowed_models)}")
         return v
 
     class Config:
@@ -32,13 +34,14 @@ class SongGenerateRequest(BaseModel):
                 "title": "Summer Vacation Anthem",
                 "model": "auto",
                 "style": "pop",
-                "duration": 30
+                "duration": 30,
             }
         }
 
 
 class SongResponse(BaseModel):
     """Schema for single song response"""
+
     id: str = Field(..., description="Unique song ID")
     title: str | None = Field(None, description="Song title")
     prompt: str = Field(..., description="Generation prompt used")
@@ -57,10 +60,10 @@ class SongResponse(BaseModel):
     completed_at: datetime | None = Field(None, description="Completion timestamp")
     tags: list[str] | None = Field(None, description="Song tags")
 
-    @validator('workflow')
+    @validator("workflow")
     def validate_workflow(cls, v):
-        if v and v not in ['inUse', 'onWork', 'notUsed']:
-            raise ValueError('workflow must be one of: inUse, onWork, notUsed')
+        if v and v not in ["inUse", "onWork", "notUsed"]:
+            raise ValueError("workflow must be one of: inUse, onWork, notUsed")
         return v
 
     class Config:
@@ -81,19 +84,21 @@ class SongResponse(BaseModel):
                 "rating": 4,
                 "created_at": "2024-01-01T12:00:00Z",
                 "completed_at": "2024-01-01T12:02:30Z",
-                "tags": ["pop", "summer", "upbeat"]
+                "tags": ["pop", "summer", "upbeat"],
             }
         }
 
 
 class SongGenerateResponse(BaseResponse):
     """Schema for song generation response"""
+
     data: SongResponse = Field(..., description="Generated song data")
     task_id: str | None = Field(None, description="Celery task ID for tracking")
 
 
 class SongListRequest(BaseModel):
     """Schema for song list request parameters"""
+
     limit: int | None = Field(20, ge=1, le=100, description="Number of items to return")
     offset: int | None = Field(0, ge=0, description="Number of items to skip")
     search: str | None = Field(None, max_length=100, description="Search query for title/prompt/lyrics")
@@ -102,47 +107,49 @@ class SongListRequest(BaseModel):
     sort: str | None = Field("created_at", description="Sort field")
     order: str | None = Field("desc", description="Sort order")
 
-    @validator('status')
+    @validator("status")
     def validate_status(cls, v):
-        if v and v not in ['pending', 'processing', 'progress', 'completed', 'failed']:
-            raise ValueError('status must be one of: pending, processing, progress, completed, failed')
+        if v and v not in ["pending", "processing", "progress", "completed", "failed"]:
+            raise ValueError("status must be one of: pending, processing, progress, completed, failed")
         return v
 
-    @validator('workflow')
+    @validator("workflow")
     def validate_workflow(cls, v):
-        if v and v not in ['inUse', 'onWork', 'notUsed']:
-            raise ValueError('workflow must be one of: inUse, onWork, notUsed')
+        if v and v not in ["inUse", "onWork", "notUsed"]:
+            raise ValueError("workflow must be one of: inUse, onWork, notUsed")
         return v
 
-    @validator('sort')
+    @validator("sort")
     def validate_sort(cls, v):
-        if v and v not in ['created_at', 'completed_at', 'title', 'rating']:
-            raise ValueError('sort must be one of: created_at, completed_at, title, rating')
+        if v and v not in ["created_at", "completed_at", "title", "rating"]:
+            raise ValueError("sort must be one of: created_at, completed_at, title, rating")
         return v
 
-    @validator('order')
+    @validator("order")
     def validate_order(cls, v):
-        if v and v not in ['asc', 'desc']:
-            raise ValueError('order must be either asc or desc')
+        if v and v not in ["asc", "desc"]:
+            raise ValueError("order must be either asc or desc")
         return v
 
 
 class SongListResponse(PaginationResponse):
     """Schema for song list response"""
+
     data: list[SongResponse] = Field(..., description="List of songs")
 
 
 class SongUpdateRequest(BaseModel):
     """Schema for song update requests"""
+
     title: str | None = Field(None, max_length=255, description="New song title")
     workflow: str | None = Field(None, description="Workflow status")
     rating: int | None = Field(None, ge=1, le=5, description="User rating")
     tags: list[str] | None = Field(None, description="Song tags")
 
-    @validator('workflow')
+    @validator("workflow")
     def validate_workflow(cls, v):
-        if v and v not in ['inUse', 'onWork', 'notUsed']:
-            raise ValueError('workflow must be one of: inUse, onWork, notUsed')
+        if v and v not in ["inUse", "onWork", "notUsed"]:
+            raise ValueError("workflow must be one of: inUse, onWork, notUsed")
         return v
 
     class Config:
@@ -151,36 +158,36 @@ class SongUpdateRequest(BaseModel):
                 "title": "Amazing Summer Song",
                 "workflow": "inUse",
                 "rating": 5,
-                "tags": ["pop", "summer", "upbeat", "vacation"]
+                "tags": ["pop", "summer", "upbeat", "vacation"],
             }
         }
 
 
 class SongUpdateResponse(BaseResponse):
     """Schema for song update response"""
+
     data: SongResponse = Field(..., description="Updated song data")
 
 
 class StemGenerateRequest(BaseModel):
     """Schema for stems generation requests"""
+
     choice_id: UUID4 = Field(..., description="Choice ID to generate stems for")
 
     class Config:
-        json_schema_extra = {
-            "example": {
-                "choice_id": "1e6cd76e-d574-4058-9eec-9a2dc38dd737"
-            }
-        }
+        json_schema_extra = {"example": {"choice_id": "1e6cd76e-d574-4058-9eec-9a2dc38dd737"}}
 
 
 class StemGenerateResponse(BaseResponse):
     """Schema for stems generation response"""
+
     data: dict = Field(..., description="Stems generation data")
     task_id: str | None = Field(None, description="Celery task ID for tracking")
 
 
 class SongHealthResponse(BaseModel):
     """Schema for song service health check"""
+
     celery_status: str = Field(..., description="Celery worker status")
     mureka_account: dict[str, Any] | None = Field(None, description="Mureka account info")
     slot_status: dict[str, Any] | None = Field(None, description="Mureka slot status")
@@ -188,79 +195,87 @@ class SongHealthResponse(BaseModel):
 
 class SongTaskStatusRequest(BaseModel):
     """Schema for task status query"""
+
     task_id: str = Field(..., description="Celery task ID")
 
 
 class SongTaskStatusResponse(BaseResponse):
     """Schema for task status response"""
+
     data: dict[str, Any] = Field(..., description="Task status information")
 
 
 class SongDeleteResponse(BaseResponse):
     """Schema for song deletion response"""
+
     data: dict = Field({"deleted": True}, description="Deletion confirmation")
 
 
 class ChoiceRatingUpdateRequest(BaseModel):
     """Schema for updating song choice rating"""
+
     rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5")
 
     class Config:
-        json_schema_extra = {
-            "example": {
-                "rating": 4
-            }
-        }
+        json_schema_extra = {"example": {"rating": 4}}
 
 
 class ChoiceRatingUpdateResponse(BaseResponse):
     """Schema for choice rating update response"""
+
     data: dict[str, Any] = Field(..., description="Updated choice data")
 
 
 class MurekaAccountResponse(BaseResponse):
     """Schema for Mureka account information"""
+
     data: dict[str, Any] = Field(..., description="Mureka account data")
 
 
 class CeleryHealthResponse(BaseResponse):
     """Schema for Celery health check"""
+
     data: dict[str, str] = Field(..., description="Celery status information")
 
 
 class SongJobInfoResponse(BaseResponse):
     """Schema for Mureka job information"""
+
     data: dict[str, Any] = Field(..., description="MUREKA job information")
 
 
 class ForceCompleteResponse(BaseResponse):
     """Schema for force complete task response"""
+
     data: dict[str, Any] = Field(..., description="Force completion result")
 
 
 class QueueStatusResponse(BaseResponse):
     """Schema for queue status response"""
+
     data: dict[str, Any] = Field(..., description="Queue status information")
 
 
 class TaskCancelResponse(BaseResponse):
     """Schema for task cancellation response"""
+
     data: dict[str, Any] = Field(..., description="Cancellation result")
 
 
 class InstrumentalGenerateRequest(BaseModel):
     """Schema for instrumental generation requests"""
+
     title: str = Field(..., min_length=1, max_length=50, description="Title for the instrumental song")
     prompt: str = Field(..., min_length=1, max_length=500, description="Instrumental generation prompt")
     model: str = Field("auto", description="Model to use for generation")
     style: str | None = Field(None, max_length=100, description="Music style/genre")
     duration: int | None = Field(30, ge=15, le=120, description="Instrumental duration in seconds")
 
-    @validator('model')
+    @validator("model")
     def validate_model(cls, v):
-        allowed_models = ['auto', 'mureka-7.5', 'mureka-7', 'mureka-6', 'mureka-o1']
+        allowed_models = ["auto", "mureka-7.5", "mureka-7", "mureka-6", "mureka-o1"]
         if v not in allowed_models:
-            raise ValueError(f'model must be one of: {", ".join(allowed_models)}')
+            raise ValueError(f"model must be one of: {', '.join(allowed_models)}")
         return v
 
     class Config:
@@ -270,12 +285,13 @@ class InstrumentalGenerateRequest(BaseModel):
                 "prompt": "r&b, slow, passionate",
                 "model": "auto",
                 "style": "r&b",
-                "duration": 30
+                "duration": 30,
             }
         }
 
 
 class InstrumentalGenerateResponse(BaseResponse):
     """Schema for instrumental generation response"""
+
     data: SongResponse = Field(..., description="Generated instrumental data")
     task_id: str | None = Field(None, description="Celery task ID for tracking")

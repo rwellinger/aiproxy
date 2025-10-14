@@ -1,4 +1,5 @@
 """API routes for prompt template management"""
+
 from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
 from sqlalchemy.orm import Session

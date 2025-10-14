@@ -1,6 +1,7 @@
 """
 MUREKA Base Client - Shared HTTP and utilities logic
 """
+
 import logging
 import traceback
 
@@ -87,9 +88,10 @@ class MurekaBaseClient:
                 error_message = error.response.text or error.response.reason
 
             from mureka.handlers import analyze_429_error_type
+
             error_type = analyze_429_error_type(error_message)
 
-            if error_type == 'quota':
+            if error_type == "quota":
                 # Quota exceeded - stop polling immediately
                 logger.error(f"MUREKA quota exceeded: {error_message}")
                 raise Exception(f"Quota exceeded: {error_message}")
@@ -119,19 +121,27 @@ class MurekaBaseClient:
         keys_to_remove = {"lyrics_sections"}
         return prune(response_data, keys_to_remove)
 
-    def _update_task_state(self, task, job_id: str, attempt: int, status_response: dict,
-                          elapsed_time: float, poll_interval: int, job_type: str = "standard"):
+    def _update_task_state(
+        self,
+        task,
+        job_id: str,
+        attempt: int,
+        status_response: dict,
+        elapsed_time: float,
+        poll_interval: int,
+        job_type: str = "standard",
+    ):
         """Update Celery task state with progress information"""
         task.update_state(
-            state='PROGRESS',
+            state="PROGRESS",
             meta={
-                'status': 'POLLING',
-                'job_id': job_id,
-                'attempt': attempt,
-                'mureka_status': status_response.get("status", "unknown"),
-                'progress': status_response.get("progress", 0),
-                'elapsed_time': int(elapsed_time),
-                'poll_interval': poll_interval,
-                'type': job_type
-            }
+                "status": "POLLING",
+                "job_id": job_id,
+                "attempt": attempt,
+                "mureka_status": status_response.get("status", "unknown"),
+                "progress": status_response.get("progress", 0),
+                "elapsed_time": int(elapsed_time),
+                "poll_interval": poll_interval,
+                "type": job_type,
+            },
         )

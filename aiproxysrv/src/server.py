@@ -1,6 +1,7 @@
 """
 Flask Server Starter (DEVELOPMENT)
 """
+
 import logging
 from pathlib import Path
 
@@ -19,7 +20,7 @@ try:
 except Exception:
     version = "unknown"
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = create_app()
 
     flask_logger = logging.getLogger("werkzeug")

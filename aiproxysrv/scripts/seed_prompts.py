@@ -8,7 +8,7 @@ import os
 import sys
 
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from sqlalchemy.orm import Session
 
@@ -24,15 +24,15 @@ TEMPLATES = {
             "post_condition": "Only respond with the prompt.",
             "description": "Enhances image generation prompts for DALL-E",
             "version": "1.0",
-            "model_hint": "llama3"
+            "model_hint": "llama3",
         },
         "translate": {
             "pre_condition": "Translate this image prompt to english:",
             "post_condition": "Only respond with the translation.",
             "description": "Translates image prompts to English",
             "version": "1.0",
-            "model_hint": "gpt-oss"
-        }
+            "model_hint": "gpt-oss",
+        },
     },
     "music": {
         "enhance": {
@@ -40,15 +40,15 @@ TEMPLATES = {
             "post_condition": "Only respond with the prompt.",
             "description": "Enhances music style prompts for Suno without artist references",
             "version": "1.0",
-            "model_hint": "llama3"
+            "model_hint": "llama3",
         },
         "translate": {
             "pre_condition": "Translate this music style description to english:",
             "post_condition": "Only respond with the translation.",
             "description": "Translates music style descriptions to English",
             "version": "1.0",
-            "model_hint": "gpt-oss"
-        }
+            "model_hint": "gpt-oss",
+        },
     },
     "lyrics": {
         "generate": {
@@ -56,16 +56,16 @@ TEMPLATES = {
             "post_condition": "Only respond with the lyrics.",
             "description": "Generates song lyrics from input text",
             "version": "1.0",
-            "model_hint": "llama3"
+            "model_hint": "llama3",
         },
         "translate": {
             "pre_condition": "By a britisch songwriter and translate this lyric text to britisch english:",
             "post_condition": "Only respond with the translation.",
             "description": "Translates lyrics to British English",
             "version": "1.0",
-            "model_hint": "gpt-oss"
-        }
-    }
+            "model_hint": "gpt-oss",
+        },
+    },
 }
 
 
@@ -85,10 +85,11 @@ def seed_prompt_templates():
                 print(f"  Processing action: {action}")
 
                 # Check if template already exists
-                existing = db.query(PromptTemplate).filter(
-                    PromptTemplate.category == category,
-                    PromptTemplate.action == action
-                ).first()
+                existing = (
+                    db.query(PromptTemplate)
+                    .filter(PromptTemplate.category == category, PromptTemplate.action == action)
+                    .first()
+                )
 
                 if existing:
                     print("    Template exists, updating...")
@@ -111,7 +112,7 @@ def seed_prompt_templates():
                         description=template_data["description"],
                         version=template_data["version"],
                         model_hint=template_data["model_hint"],
-                        active=True
+                        active=True,
                     )
                     db.add(new_template)
                     inserted_count += 1
@@ -140,7 +141,7 @@ def verify_templates():
     db: Session = next(get_db())
 
     try:
-        templates = db.query(PromptTemplate).filter(PromptTemplate.active == True).all()
+        templates = db.query(PromptTemplate).filter(PromptTemplate.active).all()
 
         print("\n📊 Verification Results:")
         print(f"   Total active templates in DB: {len(templates)}")

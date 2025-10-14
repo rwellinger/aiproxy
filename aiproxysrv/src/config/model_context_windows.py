@@ -11,33 +11,27 @@ Default: 2048 tokens
 
 MODEL_CONTEXT_WINDOWS = {
     # OpenAI Models (External) - GPT-5 Series
-    "gpt-5": 200000,              # GPT-5 base (estimated 200k)
-    "gpt-5-pro": 200000,          # GPT-5 Pro
-    "gpt-5-mini": 200000,         # GPT-5 Mini
-    "gpt-5-nano": 200000,         # GPT-5 Nano
-    "gpt-5-codex": 200000,        # GPT-5 Codex
+    "gpt-5": 200000,  # GPT-5 base (estimated 200k)
+    "gpt-5-pro": 200000,  # GPT-5 Pro
+    "gpt-5-mini": 200000,  # GPT-5 Mini
+    "gpt-5-nano": 200000,  # GPT-5 Nano
+    "gpt-5-codex": 200000,  # GPT-5 Codex
     "gpt-5-chat-latest": 200000,  # GPT-5 Chat Latest
-
     # OpenAI Models - GPT-4.1 Series
-    "gpt-4.1": 128000,            # GPT-4.1 base
-    "gpt-4.1-mini": 128000,       # GPT-4.1 Mini
-    "gpt-4.1-nano": 128000,       # GPT-4.1 Nano
-
+    "gpt-4.1": 128000,  # GPT-4.1 base
+    "gpt-4.1-mini": 128000,  # GPT-4.1 Mini
+    "gpt-4.1-nano": 128000,  # GPT-4.1 Nano
     # OpenAI Models - GPT-4o Series
     "gpt-4o": 128000,
     "gpt-4o-mini": 128000,
-
     # OpenAI Models - GPT-4 Series
     "gpt-4-turbo": 128000,
     "gpt-4": 8192,
-
     # OpenAI Models - GPT-3.5 Series
     "gpt-3.5-turbo": 16385,
     "gpt-3.5-turbo-16k": 16385,
-
     # GPT-OSS Models (Ollama)
     "gpt-oss:20b": 8192,
-
     # LLaMA Models
     "llama2:7b": 4096,
     "llama2:13b": 4096,
@@ -48,34 +42,28 @@ MODEL_CONTEXT_WINDOWS = {
     "llama3.1:70b": 131072,  # 128k context
     "llama3.2:1b": 131072,  # 128k context
     "llama3.2:3b": 131072,  # 128k context
-
     # Mistral Models
     "mistral:7b": 8192,
     "mistral:instruct": 8192,
     "mixtral:8x7b": 32768,  # 32k context
-
     # Gemma Models
     "gemma:2b": 8192,
     "gemma:7b": 8192,
     "gemma2:9b": 8192,
     "gemma2:27b": 8192,
-
     # CodeLlama Models
     "codellama:7b": 16384,  # 16k context
     "codellama:13b": 16384,
     "codellama:34b": 16384,
-
     # Phi Models
     "phi3:mini": 4096,
     "phi3:medium": 4096,
-
     # Qwen Models
     "qwen:7b": 8192,
     "qwen:14b": 8192,
     "qwen2:7b": 32768,  # 32k context
-
     # Default fallback
-    "default": 2048
+    "default": 2048,
 }
 
 

@@ -1,4 +1,5 @@
 """Conversation Controller - Handles business logic for AI chat conversations."""
+
 import traceback
 import uuid
 from datetime import datetime
@@ -26,7 +27,13 @@ class ConversationController:
     """Controller for managing AI chat conversations."""
 
     def list_conversations(
-        self, db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20, provider: str = None, archived: bool = None
+        self,
+        db: Session,
+        user_id: uuid.UUID,
+        skip: int = 0,
+        limit: int = 20,
+        provider: str = None,
+        archived: bool = None,
     ) -> tuple[dict[str, Any], int]:
         """
         List all conversations for a user.
@@ -45,10 +52,7 @@ class ConversationController:
         try:
             # Get conversations with message count
             query = (
-                db.query(
-                    Conversation,
-                    func.count(Message.id).label("message_count")
-                )
+                db.query(Conversation, func.count(Message.id).label("message_count"))
                 .outerjoin(Message, Conversation.id == Message.conversation_id)
                 .filter(Conversation.user_id == user_id)
             )
@@ -63,10 +67,10 @@ class ConversationController:
             # False = all conversations (no filter)
             if archived is None:
                 # Default: show only non-archived conversations
-                query = query.filter(Conversation.archived == False)
+                query = query.filter(not Conversation.archived)
             elif archived is True:
                 # Show only archived conversations
-                query = query.filter(Conversation.archived == True)
+                query = query.filter(Conversation.archived)
             # If archived is False, no filter is applied (show all)
 
             query = query.group_by(Conversation.id).order_by(Conversation.updated_at.desc())
@@ -134,9 +138,9 @@ class ConversationController:
             )
 
             # Check if conversation has archived messages
-            has_archived = db.query(MessageArchive).filter(
-                MessageArchive.conversation_id == conversation_id
-            ).first() is not None
+            has_archived = (
+                db.query(MessageArchive).filter(MessageArchive.conversation_id == conversation_id).first() is not None
+            )
 
             # Build conversation response
             conv_response = ConversationResponse.from_orm(conversation).dict()
@@ -210,20 +214,22 @@ class ConversationController:
             for msg in active_messages:
                 if msg.is_summary and msg.id:
                     # Replace summary with archived messages
-                    related_archived = [
-                        a for a in archived_messages if a.summary_message_id == msg.id
-                    ]
+                    related_archived = [a for a in archived_messages if a.summary_message_id == msg.id]
                     # Add archived messages as dict (with original timestamps)
                     for archive in related_archived:
-                        all_messages.append({
-                            "id": str(archive.original_message_id),
-                            "conversation_id": str(archive.conversation_id),
-                            "role": archive.role,
-                            "content": archive.content,
-                            "token_count": archive.token_count,
-                            "created_at": archive.original_created_at.isoformat() if archive.original_created_at else None,
-                            "is_archived": True,
-                        })
+                        all_messages.append(
+                            {
+                                "id": str(archive.original_message_id),
+                                "conversation_id": str(archive.conversation_id),
+                                "role": archive.role,
+                                "content": archive.content,
+                                "token_count": archive.token_count,
+                                "created_at": archive.original_created_at.isoformat()
+                                if archive.original_created_at
+                                else None,
+                                "is_archived": True,
+                            }
+                        )
                 else:
                     # Add regular message (convert created_at to ISO string for consistent sorting)
                     msg_dict = MessageResponse.from_orm(msg).dict()
@@ -400,15 +406,11 @@ class ConversationController:
                 return {"error": "Conversation not found"}, 404
 
             # Delete archived messages first (foreign key constraint)
-            archived_count = db.query(MessageArchive).filter(
-                MessageArchive.conversation_id == conversation_id
-            ).delete()
+            archived_count = db.query(MessageArchive).filter(MessageArchive.conversation_id == conversation_id).delete()
 
             if archived_count > 0:
                 logger.debug(
-                    "Deleted archived messages",
-                    conversation_id=str(conversation_id),
-                    archived_count=archived_count
+                    "Deleted archived messages", conversation_id=str(conversation_id), archived_count=archived_count
                 )
 
             # Now delete conversation (cascade will delete regular messages)
@@ -501,7 +503,9 @@ class ConversationController:
                     )
             except (OllamaAPIError, OpenAIError) as e:
                 db.rollback()
-                logger.error("Chat API Error", error=str(e), provider=conversation.provider, stacktrace=traceback.format_exc())
+                logger.error(
+                    "Chat API Error", error=str(e), provider=conversation.provider, stacktrace=traceback.format_exc()
+                )
                 return {"error": f"Chat API Error: {e}"}, 500
 
             # Calculate user message token count (part of prompt_eval_count)
@@ -592,11 +596,7 @@ class ConversationController:
                 prompt_eval_count = resp_json.get("prompt_eval_count", 0)
                 eval_count = resp_json.get("eval_count", 0)
 
-                logger.debug(
-                    "Token counts extracted",
-                    prompt_tokens=prompt_eval_count,
-                    response_tokens=eval_count
-                )
+                logger.debug("Token counts extracted", prompt_tokens=prompt_eval_count, response_tokens=eval_count)
 
                 return content, prompt_eval_count, eval_count
             else:
@@ -613,7 +613,6 @@ class ConversationController:
                 stacktrace=traceback.format_exc(),
             )
             raise OllamaAPIError(f"Unexpected Error: {e}")
-
 
     def _call_openai_chat_api(self, model: str, messages: list[dict[str, str]]) -> tuple[str, int, int]:
         """
@@ -634,15 +633,10 @@ class ConversationController:
 
         try:
             content, prompt_tokens, completion_tokens = openai_controller.send_chat_message(
-                model=model,
-                messages=messages
+                model=model, messages=messages
             )
 
-            logger.debug(
-                "Token counts extracted",
-                prompt_tokens=prompt_tokens,
-                completion_tokens=completion_tokens
-            )
+            logger.debug("Token counts extracted", prompt_tokens=prompt_tokens, completion_tokens=completion_tokens)
 
             return content, prompt_tokens, completion_tokens
 

@@ -1,6 +1,7 @@
 """
 User Controller for handling user authentication and management
 """
+
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -54,17 +55,14 @@ class UserController:
                 email=request.email,
                 password=request.password,
                 first_name=request.first_name,
-                last_name=request.last_name
+                last_name=request.last_name,
             )
 
             if not user:
                 return self._format_error_response("Failed to create user", 500)
 
             response = UserCreateResponse(
-                success=True,
-                message="User created successfully",
-                user_id=user.id,
-                email=user.email
+                success=True, message="User created successfully", user_id=user.id, email=user.email
             )
             return self._format_success_response(response, 201)
 
@@ -81,11 +79,7 @@ class UserController:
         db = self._get_db()
         try:
             # Authenticate user
-            user = self.user_service.authenticate_user(
-                db=db,
-                email=request.email,
-                password=request.password
-            )
+            user = self.user_service.authenticate_user(db=db, email=request.email, password=request.password)
 
             if not user:
                 return self._format_error_response("Invalid email or password", 401)
@@ -98,11 +92,7 @@ class UserController:
             expires_at = datetime.utcnow() + timedelta(hours=self.user_service.jwt_expiration_hours)
 
             response = LoginResponse(
-                success=True,
-                message="Login successful",
-                token=token,
-                user=user_response,
-                expires_at=expires_at
+                success=True, message="Login successful", token=token, user=user_response, expires_at=expires_at
             )
             return self._format_success_response(response, 200)
 
@@ -114,10 +104,7 @@ class UserController:
 
     def logout(self) -> tuple[dict[str, Any], int]:
         """Logout user (token invalidation would happen on frontend)"""
-        response = LogoutResponse(
-            success=True,
-            message="Logout successful"
-        )
+        response = LogoutResponse(success=True, message="Logout successful")
         return self._format_success_response(response, 200)
 
     def get_user_profile(self, user_id: str) -> tuple[dict[str, Any], int]:
@@ -143,21 +130,14 @@ class UserController:
         db = self._get_db()
         try:
             user = self.user_service.update_user(
-                db=db,
-                user_id=user_id,
-                first_name=request.first_name,
-                last_name=request.last_name
+                db=db, user_id=user_id, first_name=request.first_name, last_name=request.last_name
             )
 
             if not user:
                 return self._format_error_response("User not found", 404)
 
             user_response = UserResponse.model_validate(user)
-            response = UserUpdateResponse(
-                success=True,
-                message="User updated successfully",
-                user=user_response
-            )
+            response = UserUpdateResponse(success=True, message="User updated successfully", user=user_response)
             return self._format_success_response(response, 200)
 
         except Exception as e:
@@ -171,19 +151,13 @@ class UserController:
         db = self._get_db()
         try:
             success = self.user_service.change_password(
-                db=db,
-                user_id=user_id,
-                old_password=request.old_password,
-                new_password=request.new_password
+                db=db, user_id=user_id, old_password=request.old_password, new_password=request.new_password
             )
 
             if not success:
                 return self._format_error_response("Invalid current password or user not found", 400)
 
-            response = PasswordChangeResponse(
-                success=True,
-                message="Password changed successfully"
-            )
+            response = PasswordChangeResponse(success=True, message="Password changed successfully")
             return self._format_success_response(response, 200)
 
         except Exception as e:
@@ -196,19 +170,12 @@ class UserController:
         """Reset user password (admin function)"""
         db = self._get_db()
         try:
-            success = self.user_service.reset_password(
-                db=db,
-                email=request.email,
-                new_password=request.new_password
-            )
+            success = self.user_service.reset_password(db=db, email=request.email, new_password=request.new_password)
 
             if not success:
                 return self._format_error_response("User not found", 404)
 
-            response = PasswordResetResponse(
-                success=True,
-                message="Password reset successfully"
-            )
+            response = PasswordResetResponse(success=True, message="Password reset successfully")
             return self._format_success_response(response, 200)
 
         except Exception as e:
@@ -225,10 +192,7 @@ class UserController:
 
             users_response = [UserResponse.model_validate(user) for user in users]
             response = UserListResponse(
-                success=True,
-                message="Users retrieved successfully",
-                users=users_response,
-                total=len(users_response)
+                success=True, message="Users retrieved successfully", users=users_response, total=len(users_response)
             )
             return self._format_success_response(response, 200)
 
@@ -247,15 +211,12 @@ class UserController:
                 return None
 
             # Verify user still exists in database
-            user = self.user_service.get_user_by_id(db, payload.get('user_id'))
+            user = self.user_service.get_user_by_id(db, payload.get("user_id"))
             if not user:
-                logger.warning("Token valid but user not found in database", user_id=payload.get('user_id'))
+                logger.warning("Token valid but user not found in database", user_id=payload.get("user_id"))
                 return None
 
-            return {
-                'user_id': payload.get('user_id'),
-                'email': payload.get('email')
-            }
+            return {"user_id": payload.get("user_id"), "email": payload.get("email")}
         except Exception as e:
             logger.error("Error validating token", error=str(e))
             return None
@@ -267,10 +228,7 @@ class UserController:
         try:
             payload = self.user_service.verify_jwt_token(token)
             if payload:
-                return {
-                    'user_id': payload.get('user_id'),
-                    'email': payload.get('email')
-                }
+                return {"user_id": payload.get("user_id"), "email": payload.get("email")}
             return None
         except Exception as e:
             logger.error("Error validating token (light)", error=str(e))

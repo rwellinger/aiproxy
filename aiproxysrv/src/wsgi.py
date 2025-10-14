@@ -1,6 +1,7 @@
 """
 WSGI Entry Point für Gunicorn (PRODUCTION)
 """
+
 import logging
 from pathlib import Path
 
@@ -24,7 +25,6 @@ except Exception:
 app = create_app()
 
 if __name__ == "__main__":
-
     flask_logger = logging.getLogger("werkzeug")
     flask_logger.handlers = [LoguruHandler()]
     flask_logger.setLevel(LOG_LEVEL)

@@ -1,4 +1,5 @@
 """Database models"""
+
 import uuid
 from enum import Enum
 
@@ -12,6 +13,7 @@ from db.database import Base
 
 class SongStatus(str, Enum):
     """Enum for song generation status"""
+
     PENDING = "PENDING"
     PROGRESS = "PROGRESS"
     SUCCESS = "SUCCESS"
@@ -21,8 +23,9 @@ class SongStatus(str, Enum):
 
 class Song(Base):
     """Model for storing song generation data and results"""
+
     __tablename__ = "songs"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = {"extend_existing": True}
 
     # Primary identifiers
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
@@ -46,7 +49,9 @@ class Song(Base):
     error_message = Column(Text, nullable=True)
 
     # Relation to song choices (1:n)
-    choices = relationship("SongChoice", back_populates="song", cascade="all, delete-orphan", order_by="SongChoice.choice_index")
+    choices = relationship(
+        "SongChoice", back_populates="song", cascade="all, delete-orphan", order_by="SongChoice.choice_index"
+    )
 
     # MUREKA response data
     mureka_response = Column(Text, nullable=True)  # JSON string der kompletten MUREKA Response
@@ -63,8 +68,9 @@ class Song(Base):
 
 class SongChoice(Base):
     """Model for storing individual song choice results from MUREKA"""
+
     __tablename__ = "song_choices"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = {"extend_existing": True}
 
     # Primary identifiers
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
@@ -101,8 +107,9 @@ class SongChoice(Base):
 
 class GeneratedImage(Base):
     """Model for storing generated image metadata"""
+
     __tablename__ = "generated_images"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = {"extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     prompt = Column(Text, nullable=False)
@@ -123,8 +130,9 @@ class GeneratedImage(Base):
 
 class PromptTemplate(Base):
     """Model for storing AI prompt templates for different categories and actions"""
+
     __tablename__ = "prompt_templates"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     category = Column(String(50), nullable=False)
@@ -141,13 +149,16 @@ class PromptTemplate(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     def __repr__(self):
-        return f"<PromptTemplate(id={self.id}, category='{self.category}', action='{self.action}', active={self.active})>"
+        return (
+            f"<PromptTemplate(id={self.id}, category='{self.category}', action='{self.action}', active={self.active})>"
+        )
 
 
 class User(Base):
     """Model for user authentication and management with OAuth2 preparation"""
+
     __tablename__ = "users"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = {"extend_existing": True}
 
     # Primary identifier
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
@@ -182,8 +193,9 @@ class User(Base):
 
 class Conversation(Base):
     """Model for storing AI chat conversations"""
+
     __tablename__ = "conversations"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = {"extend_existing": True}
 
     # Primary identifier
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
@@ -192,7 +204,9 @@ class Conversation(Base):
     # Conversation metadata
     title = Column(String(255), nullable=False)
     model = Column(String(100), nullable=False)  # Model name (Ollama or OpenAI)
-    provider = Column(String(50), nullable=False, server_default="internal", index=True)  # 'internal' (Ollama) or 'external' (OpenAI, DeepSeek)
+    provider = Column(
+        String(50), nullable=False, server_default="internal", index=True
+    )  # 'internal' (Ollama) or 'external' (OpenAI, DeepSeek)
     system_context = Column(Text, nullable=True)  # System prompt/context
     archived = Column(Boolean, nullable=False, server_default="false")  # Archive status
 
@@ -206,7 +220,9 @@ class Conversation(Base):
 
     # Relationships
     user = relationship("User", back_populates="conversations")
-    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan", order_by="Message.created_at")
+    messages = relationship(
+        "Message", back_populates="conversation", cascade="all, delete-orphan", order_by="Message.created_at"
+    )
 
     def __repr__(self):
         return f"<Conversation(id={self.id}, title='{self.title}', model='{self.model}', provider='{self.provider}', messages={len(self.messages) if self.messages else 0})>"
@@ -214,8 +230,9 @@ class Conversation(Base):
 
 class Message(Base):
     """Model for storing individual messages in a conversation"""
+
     __tablename__ = "messages"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = {"extend_existing": True}
 
     # Primary identifier
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
@@ -243,8 +260,9 @@ class Message(Base):
 
 class MessageArchive(Base):
     """Model for storing archived messages - used for compression without data loss"""
+
     __tablename__ = "messages_archive"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = {"extend_existing": True}
 
     # Primary identifier
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)

@@ -1,6 +1,7 @@
 """
 Error Handler für MUREKA API
 """
+
 from requests import HTTPError
 
 from utils.logger import logger
@@ -19,17 +20,17 @@ def analyze_429_error_type(error_message: str) -> str:
     message_lower = error_message.lower()
 
     # Check for quota-related keywords
-    quota_keywords = ['quota', 'exceeded', 'credits', 'billing']
+    quota_keywords = ["quota", "exceeded", "credits", "billing"]
     if any(keyword in message_lower for keyword in quota_keywords):
-        return 'quota'
+        return "quota"
 
     # Check for rate limit keywords
-    rate_limit_keywords = ['rate limit', 'too quickly', 'pace your requests']
+    rate_limit_keywords = ["rate limit", "too quickly", "pace your requests"]
     if any(keyword in message_lower for keyword in rate_limit_keywords):
-        return 'rate_limit'
+        return "rate_limit"
 
     # Default to rate_limit for unknown 429 cases (safer for retry)
-    return 'rate_limit'
+    return "rate_limit"
 
 
 def handle_http_error(task, error: HTTPError) -> dict:

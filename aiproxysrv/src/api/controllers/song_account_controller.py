@@ -1,4 +1,5 @@
 """Song Account Controller - Handles MUREKA account operations"""
+
 from typing import Any
 
 import requests
@@ -16,30 +17,19 @@ class SongAccountController:
             return {"error": "MUREKA_API_KEY not configured"}, 500
 
         try:
-            headers = {
-                "Authorization": f"Bearer {MUREKA_API_KEY}"
-            }
+            headers = {"Authorization": f"Bearer {MUREKA_API_KEY}"}
 
             logger.debug("Fetching MUREKA account info", url=MUREKA_BILLING_URL)
             response = requests.get(MUREKA_BILLING_URL, headers=headers, timeout=10)
             response.raise_for_status()
 
             account_data = response.json()
-            return {
-                "status": "success",
-                "account_info": account_data
-            }, 200
+            return {"status": "success", "account_info": account_data}, 200
 
         except requests.exceptions.RequestException as e:
-            return {
-                "status": "error",
-                "message": f"Failed to fetch MUREKA account info: {str(e)}"
-            }, 500
+            return {"status": "error", "message": f"Failed to fetch MUREKA account info: {str(e)}"}, 500
         except Exception as e:
-            return {
-                "status": "error",
-                "message": f"Unexpected error: {str(e)}"
-            }, 500
+            return {"status": "error", "message": f"Unexpected error: {str(e)}"}, 500
 
     def check_balance(self) -> bool:
         """Check Balance"""

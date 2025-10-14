@@ -1,6 +1,7 @@
 """
 Simple Slot Management für MUREKA API
 """
+
 import time
 
 from utils.logger import logger
@@ -57,5 +58,5 @@ def get_slot_status() -> dict:
         "current_requests": current_requests,
         "max_concurrent": 1,
         "active_tasks": len(active_tasks),
-        "available": current_requests < 1
+        "available": current_requests < 1,
     }

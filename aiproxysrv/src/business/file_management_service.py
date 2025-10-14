@@ -1,4 +1,5 @@
 """File Management Service - Handles file operations for the application"""
+
 import logging
 import os
 from pathlib import Path
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class FileDownloadError(Exception):
     """Custom exception for file download errors"""
+
     pass
 
 
@@ -38,7 +40,7 @@ class FileManagementService:
             file_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Save file
-            with open(file_path, 'wb') as f:
+            with open(file_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     if chunk:
                         f.write(chunk)

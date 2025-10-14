@@ -2,6 +2,7 @@
 Centralized logging configuration using loguru.
 Replaces all print() statements with structured logging.
 """
+
 import logging
 import sys
 
@@ -12,6 +13,7 @@ from config.settings import LOG_LEVEL
 
 # Remove default logger
 logger.remove()
+
 
 # Custom formatter function to handle extra fields
 def format_record(record):
@@ -42,14 +44,16 @@ def format_record(record):
             format_str += "\n  <yellow>└─ Stacktrace:</yellow>\n<red>{extra[stacktrace]}</red>"
 
         # Show other extra fields if present (except the ones we already handled)
-        other_extras = {k: v for k, v in extra.items()
-                       if k not in ("error_type", "error", "stacktrace") and not k.startswith("_")}
+        other_extras = {
+            k: v for k, v in extra.items() if k not in ("error_type", "error", "stacktrace") and not k.startswith("_")
+        }
         if other_extras:
-            for key, value in other_extras.items():
+            for key, _value in other_extras.items():
                 format_str += f"\n  <yellow>└─ {key}:</yellow> {{extra[{key}]}}"
 
     format_str += "\n"
     return format_str
+
 
 # Console handler: INFO and above with colors
 logger.add(
@@ -58,6 +62,7 @@ logger.add(
     format=format_record,
     colorize=True,
 )
+
 
 # Flask-Logging auf loguru umleiten
 class LoguruHandler(logging.Handler):
@@ -76,6 +81,7 @@ class LoguruHandler(logging.Handler):
 
         logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
+
 # Celery-Logging auf loguru umleiten
 class CeleryInterceptHandler(logging.Handler):
     def emit(self, record):
@@ -85,6 +91,7 @@ class CeleryInterceptHandler(logging.Handler):
             level = record.levelno
 
         logger.opt(depth=6, exception=record.exc_info).log(level, record.getMessage())
+
 
 # Export configured logger
 __all__ = ["logger"]

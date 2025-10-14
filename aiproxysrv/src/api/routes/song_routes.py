@@ -1,6 +1,7 @@
 """
 Song Generation Routes mit MUREKA + Pydantic validation
 """
+
 from flask import Blueprint, jsonify, request
 from flask_pydantic import validate
 
@@ -17,6 +18,7 @@ api_song_v1 = Blueprint("api_song_v1", __name__, url_prefix="/api/v1/song")
 
 # Controller instance
 song_controller = SongController()
+
 
 @api_song_v1.route("/celery-health", methods=["GET"])
 def celery_health():
@@ -42,15 +44,11 @@ def song_generate(body: SongGenerateRequest):
         # Convert Pydantic model to dict for controller
         payload = body.dict()
 
-        response_data, status_code = song_controller.generate_song(
-            payload=payload,
-            host_url=request.host_url
-        )
+        response_data, status_code = song_controller.generate_song(payload=payload, host_url=request.host_url)
         return jsonify(response_data), status_code
     except Exception as e:
         error_response = ErrorResponse(error=str(e))
         return jsonify(error_response.dict()), 500
-
 
 
 @api_song_v1.route("/stem/generate", methods=["POST"])
@@ -93,8 +91,8 @@ def list_songs():
     """Get list of songs with pagination, search and sorting"""
     # Parse query parameters
     try:
-        limit = int(request.args.get('limit', 20))
-        offset = int(request.args.get('offset', 0))
+        limit = int(request.args.get("limit", 20))
+        offset = int(request.args.get("offset", 0))
 
         # Validate parameters
         if limit <= 0 or limit > 100:
@@ -106,18 +104,18 @@ def list_songs():
         return jsonify({"error": "Invalid limit or offset parameter"}), 400
 
     # Parse search and sort parameters
-    status = request.args.get('status', None)  # Optional status filter
-    search = request.args.get('search', '').strip()
-    sort_by = request.args.get('sort_by', 'created_at')
-    sort_direction = request.args.get('sort_direction', 'desc')
-    workflow = request.args.get('workflow', None)  # Optional workflow filter
+    status = request.args.get("status", None)  # Optional status filter
+    search = request.args.get("search", "").strip()
+    sort_by = request.args.get("sort_by", "created_at")
+    sort_direction = request.args.get("sort_direction", "desc")
+    workflow = request.args.get("workflow", None)  # Optional workflow filter
 
     # Validate sort parameters
-    valid_sort_fields = ['created_at', 'title', 'lyrics']
+    valid_sort_fields = ["created_at", "title", "lyrics"]
     if sort_by not in valid_sort_fields:
         return jsonify({"error": f"Invalid sort_by field. Must be one of: {valid_sort_fields}"}), 400
 
-    if sort_direction not in ['asc', 'desc']:
+    if sort_direction not in ["asc", "desc"]:
         return jsonify({"error": "Invalid sort_direction. Must be 'asc' or 'desc'"}), 400
 
     response_data, status_code = song_controller.get_songs(
@@ -127,7 +125,7 @@ def list_songs():
         search=search,
         sort_by=sort_by,
         sort_direction=sort_direction,
-        workflow=workflow
+        workflow=workflow,
     )
 
     return jsonify(response_data), status_code
@@ -174,7 +172,7 @@ def bulk_delete_songs():
     if not payload:
         return jsonify({"error": "No JSON provided"}), 400
 
-    song_ids = payload.get('ids', [])
+    song_ids = payload.get("ids", [])
 
     if not isinstance(song_ids, list):
         return jsonify({"error": "ids must be an array"}), 400
@@ -199,6 +197,7 @@ def update_choice_rating(choice_id):
 
 
 api_song_task_v1 = Blueprint("api_song_task_v1", __name__, url_prefix="/api/v1/song/task")
+
 
 @api_song_task_v1.route("/status/<task_id>", methods=["GET"])
 @jwt_required

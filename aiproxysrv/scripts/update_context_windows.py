@@ -3,10 +3,11 @@
 Update existing conversations with correct context window sizes.
 Run this once after adding token tracking.
 """
+
 import sys
 
 
-sys.path.insert(0, 'src')
+sys.path.insert(0, "src")
 
 from config.model_context_windows import get_context_window_size
 from db.database import SessionLocal
@@ -31,10 +32,7 @@ def update_context_windows():
                 updated_count += 1
 
                 logger.info(
-                    f"Updated conversation {conv.id}",
-                    model=conv.model,
-                    old_size=old_size,
-                    new_size=correct_size
+                    f"Updated conversation {conv.id}", model=conv.model, old_size=old_size, new_size=correct_size
                 )
 
         db.commit()

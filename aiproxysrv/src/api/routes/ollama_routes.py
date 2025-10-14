@@ -1,4 +1,5 @@
 """Ollama Routes - Proxy routes for Ollama API."""
+
 from flask import Blueprint, jsonify
 
 from api.auth_middleware import jwt_required

@@ -14,7 +14,7 @@ import os
 import sys
 
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import logging
 
@@ -24,11 +24,9 @@ from db.database import get_db
 
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 def update_model_values():
     """Update existing model values to match new validation"""
@@ -37,7 +35,7 @@ def update_model_values():
     try:
         # First, check what we have
         logger.info("Checking current prompt template model values...")
-        result = db.execute(text('SELECT id, category, action, model FROM prompt_templates ORDER BY id;'))
+        result = db.execute(text("SELECT id, category, action, model FROM prompt_templates ORDER BY id;"))
         rows = result.fetchall()
 
         logger.info(f"Found {len(rows)} prompt templates:")
@@ -45,10 +43,7 @@ def update_model_values():
             logger.info(f"  ID: {row[0]}, Category: {row[1]}, Action: {row[2]}, Model: '{row[3]}'")
 
         # Define the mapping
-        model_mapping = {
-            'gpt-oss': 'gpt-oss:20b',
-            'llama3': 'llama3.2:3b'
-        }
+        model_mapping = {"gpt-oss": "gpt-oss:20b", "llama3": "llama3.2:3b"}
 
         # Check which updates are needed
         updates_needed = []
@@ -67,22 +62,21 @@ def update_model_values():
         # Ask for confirmation in interactive mode
         if sys.stdin.isatty():
             response = input("Proceed with updates? (y/N): ").lower().strip()
-            if response != 'y':
+            if response != "y":
                 logger.info("Operation cancelled by user")
                 return False
 
         # Perform the updates
         logger.info("Performing updates...")
         for template_id, old_value, new_value in updates_needed:
-            db.execute(text("""
+            db.execute(
+                text("""
                 UPDATE prompt_templates
                 SET model = :new_value
                 WHERE id = :template_id AND model = :old_value
-            """), {
-                'new_value': new_value,
-                'template_id': template_id,
-                'old_value': old_value
-            })
+            """),
+                {"new_value": new_value, "template_id": template_id, "old_value": old_value},
+            )
             logger.info(f"✓ Updated template ID {template_id}: '{old_value}' → '{new_value}'")
 
         # Commit all changes
@@ -91,7 +85,7 @@ def update_model_values():
 
         # Verify the updates
         logger.info("Verifying updates...")
-        result = db.execute(text('SELECT id, category, action, model FROM prompt_templates ORDER BY id;'))
+        result = db.execute(text("SELECT id, category, action, model FROM prompt_templates ORDER BY id;"))
         rows = result.fetchall()
 
         logger.info("Final state:")
@@ -107,6 +101,7 @@ def update_model_values():
     finally:
         db.close()
 
+
 def main():
     """Main function"""
     logger.info("=== Prompt Template Model Update Script ===")
@@ -121,6 +116,7 @@ def main():
     else:
         logger.error("=== Update failed ===")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

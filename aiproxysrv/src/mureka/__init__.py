@@ -24,14 +24,14 @@ from .instrumental_client import (
 # Preserve the original function imports from client.py
 __all__ = [
     # Original client.py functions (backward compatibility)
-    'start_mureka_generation',
-    'check_mureka_status',
-    'wait_for_mureka_completion',
-    'start_mureka_instrumental_generation',
-    'check_mureka_instrumental_status',
-    'wait_for_mureka_instrumental_completion',
+    "start_mureka_generation",
+    "check_mureka_status",
+    "wait_for_mureka_completion",
+    "start_mureka_instrumental_generation",
+    "check_mureka_instrumental_status",
+    "wait_for_mureka_instrumental_completion",
     # New client classes
-    'MurekaBaseClient',
-    'MurekaGenerationClient',
-    'MurekaInstrumentalClient'
+    "MurekaBaseClient",
+    "MurekaGenerationClient",
+    "MurekaInstrumentalClient",
 ]

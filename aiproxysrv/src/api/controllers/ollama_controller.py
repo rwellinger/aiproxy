@@ -1,4 +1,5 @@
 """Ollama Controller - Proxy for Ollama API calls."""
+
 from typing import Any
 
 import requests
