@@ -11,7 +11,7 @@
 }
 
 .lyric-creation-card {
-  max-width: 1200px;
+  max-width: 1600px;
   width: 100%;
   height: calc(100vh - 2rem);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
@@ -240,6 +240,195 @@
   }
 }
 
+// Section Editor Styles
+.section-editor-container {
+  display: flex;
+  gap: $spacing-md;
+  height: 100%;
+  overflow: hidden;
+}
+
+.section-navigator {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid $border-light;
+  padding-right: $spacing-md;
+  overflow: hidden;
+
+  .navigator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: $spacing-sm;
+    border-bottom: 2px solid $primary-color;
+    margin-bottom: $spacing-md;
+
+    h3 {
+      margin: 0;
+      font-size: $font-lg;
+      color: $text-primary;
+    }
+
+    .section-count {
+      background: $primary-color;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: $font-sm;
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  .section-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+  }
+}
+
+.section-card {
+  padding: $spacing-sm;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  transition: $transition-fast;
+  background: $background-white;
+
+  &:hover {
+    border-color: $primary-color;
+    background: $background-light;
+    transform: translateX(4px);
+  }
+
+  &.active {
+    border-color: $primary-color;
+    background: lighten($primary-color, 45%);
+    box-shadow: 0 2px 8px rgba($primary-color, 0.2);
+
+    .section-label {
+      color: $primary-color;
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+    margin-bottom: $spacing-xs;
+
+    i {
+      color: $ai-color;
+      font-size: $font-sm;
+    }
+  }
+
+  .section-preview {
+    font-size: $font-sm;
+    color: $text-muted;
+    line-height: $line-height-relaxed;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.section-workspace {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .workspace-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: $spacing-sm;
+    border-bottom: 2px solid $primary-color;
+    margin-bottom: $spacing-md;
+
+    h3 {
+      margin: 0;
+      font-size: $font-lg;
+      color: $text-primary;
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+
+      i {
+        color: $primary-color;
+      }
+    }
+
+    .workspace-actions {
+      display: flex;
+      gap: $spacing-xs;
+    }
+  }
+
+  .workspace-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-bottom: $spacing-md;
+  }
+
+  .section-textarea {
+    flex: 1;
+    width: 100%;
+    padding: $spacing-md;
+    border: 1px solid $border-light;
+    border-radius: $border-radius-lg;
+    font-size: $font-base;
+    font-family: $font-family-base;
+    resize: none;
+    overflow-y: auto;
+    line-height: $line-height-relaxed;
+
+    &:focus {
+      @include input-focus-state($primary-color);
+    }
+
+    &:disabled {
+      background: $background-light;
+      color: $text-muted;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  .section-char-count {
+    font-size: $font-sm;
+    color: $text-muted;
+    text-align: right;
+    margin-top: $spacing-xs;
+    font-style: italic;
+  }
+
+  .section-ai-actions {
+    display: flex;
+    gap: $spacing-sm;
+    padding-top: $spacing-md;
+    border-top: 1px solid $border-light;
+  }
+}
+
+.cancel-button {
+  @include button-secondary('base');
+  font-weight: $font-weight-medium !important;
+}
+
+.apply-button {
+  @include button-primary('base');
+  font-weight: $font-weight-medium !important;
+}
+
 @media (max-width: 768px) {
   .lyric-creation-container {
     padding: $spacing-xs;
@@ -278,5 +467,23 @@
     .clear-button {
       width: 100%;
     }
+  }
+
+  // Section Editor Mobile
+  .section-editor-container {
+    flex-direction: column;
+  }
+
+  .section-navigator,
+  .section-workspace {
+    width: 100%;
+  }
+
+  .section-navigator {
+    border-right: none;
+    border-bottom: 1px solid $border-light;
+    padding-right: 0;
+    padding-bottom: $spacing-md;
+    max-height: 40vh;
   }
 }

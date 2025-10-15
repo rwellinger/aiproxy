@@ -297,6 +297,26 @@
       "textRequired": "Please enter text first",
       "lyricsRequired": "Please enter lyrics first",
       "noArchitecture": "No lyric architecture defined. Please configure architecture first."
+    },
+    "sectionEditor": {
+      "toggle": "Section Editor",
+      "sections": "Sections",
+      "apply": "Apply Changes",
+      "placeholder": "Edit this section...",
+      "improve": "Improve Section",
+      "rewrite": "Rewrite Section",
+      "extend": "Extend Section",
+      "activated": "Section Editor activated",
+      "applied": "Sections applied successfully",
+      "cancelled": "Changes cancelled",
+      "noStructure": "No sections found. Apply structure first?",
+      "parseFailed": "Failed to parse sections. Check lyric structure.",
+      "improving": "Improving Section...",
+      "improvingHint": "AI is improving this section",
+      "rewriting": "Rewriting Section...",
+      "rewritingHint": "AI is rewriting this section",
+      "extending": "Extending Section...",
+      "extendingHint": "AI is adding more lines to this section"
     }
   },
   "musicStyleChooser": {
