@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import {
   MusicStyleChooserConfig,
   DEFAULT_STYLE_CHOOSER_CONFIG,
@@ -10,8 +11,7 @@ import {
 })
 export class MusicStyleChooserService {
   private readonly STORAGE_KEY = 'music-style-chooser-config';
-
-  constructor() {}
+  private translate = inject(TranslateService);
 
   getConfig(): MusicStyleChooserConfig {
     const stored = localStorage.getItem(this.STORAGE_KEY);
@@ -110,12 +110,24 @@ export class MusicStyleChooserService {
       return '';
     }
 
+    // Get current language
+    const currentLang = this.translate.currentLang || 'en';
+    const isGerman = currentLang === 'de';
+
+    // i18n strings
+    const i18n = {
+      music: isGerman ? 'Musik' : 'music',
+      with: isGerman ? 'mit' : 'with',
+      withThemesOf: isGerman ? 'mit Themen von' : 'with themes of',
+      vocals: isGerman ? 'Gesang' : 'vocals'
+    };
+
     let prompt = '';
 
     if (styles.length > 0) {
-      prompt = styles.join(', ') + ' music';
+      prompt = styles.join(', ') + ' ' + i18n.music;
     } else {
-      prompt = 'music';
+      prompt = i18n.music;
     }
 
     if (instruments.length > 0) {
@@ -124,21 +136,24 @@ export class MusicStyleChooserService {
       const otherInstruments = instruments.filter(i => i !== 'male-voice' && i !== 'female-voice');
 
       if (otherInstruments.length > 0) {
-        prompt += ' with ' + otherInstruments.join(', ');
+        prompt += ' ' + i18n.with + ' ' + otherInstruments.join(', ');
       }
 
       if (voiceInstruments.length > 0) {
-        const voice = voiceInstruments[0].replace('-voice', ' vocals');
+        const voiceType = voiceInstruments[0].replace('-voice', '');
+        const voiceLabel = isGerman
+          ? (voiceType === 'male' ? 'männlicher' : 'weiblicher') + ' ' + i18n.vocals
+          : voiceType + ' ' + i18n.vocals;
         if (otherInstruments.length > 0) {
-          prompt += ', ' + voice;
+          prompt += ', ' + voiceLabel;
         } else {
-          prompt += ' with ' + voice;
+          prompt += ' ' + i18n.with + ' ' + voiceLabel;
         }
       }
     }
 
     if (themes.length > 0) {
-      prompt += ' with themes of ' + themes.join(', ');
+      prompt += ' ' + i18n.withThemesOf + ' ' + themes.join(', ');
     }
 
     return prompt;

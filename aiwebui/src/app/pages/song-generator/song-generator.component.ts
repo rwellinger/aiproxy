@@ -553,6 +553,16 @@ export class SongGeneratorComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe(result => {
             if (result && result.stylePrompt) {
+                const currentPrompt = this.songForm.get('prompt')?.value?.trim();
+
+                // Warn if textarea is filled - ONLY when user confirms the dialog
+                if (currentPrompt) {
+                    const confirmOverwrite = confirm(this.translate.instant('songGenerator.styleChooserOverwriteWarning'));
+                    if (!confirmOverwrite) {
+                        return;
+                    }
+                }
+
                 // Apply the generated style prompt to the form
                 this.songForm.patchValue({
                     prompt: result.stylePrompt

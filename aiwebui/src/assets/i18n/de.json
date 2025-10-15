@@ -601,6 +601,7 @@
       "timeout": "Verarbeite (Timeout-Behandlung)"
     },
     "styleChooser": "Stil-Auswahl",
+    "styleChooserOverwriteWarning": "Bestehender Stil-Prompt wird überschrieben. Fortfahren?",
     "success": {
       "architectureUpdated": "Song-Architektur erfolgreich aktualisiert",
       "styleApplied": "Musikstil-Auswahl erfolgreich angewandt"

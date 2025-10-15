@@ -168,7 +168,8 @@ export class LyricCreationComponent implements OnInit {
 
     get hasSections(): boolean {
         const lyrics = this.lyricForm.get('lyrics')?.value || '';
-        return /^(Intro|Verse\d+|Chorus|Bridge|Outro|Pre[-_]?chorus|Post[-_]?chorus):/mi.test(lyrics);
+        // Match both formats: **Label** (Markdown) and Label: (classic)
+        return /^(\*\*\s*(Intro|Verse\s*\d+|Chorus|Bridge|Outro|Pre[-_\s]?chorus|Post[-_\s]?chorus)\s*\*\*|(Intro|Verse\d+|Chorus|Bridge|Outro|Pre[-_]?chorus|Post[-_]?chorus):)/mi.test(lyrics);
     }
 
     toggleTextToolsDropdown() {
@@ -277,12 +278,12 @@ export class LyricCreationComponent implements OnInit {
             return;
         }
 
-        // Apply structure: 1:1 mapping with format "Label:\nText"
+        // Apply structure: 1:1 mapping with Markdown bold format "**Label**\nText"
         const structured = paragraphs.map((para: string, i: number) => {
             if (i < sections.length) {
                 // Capitalize properly (e.g., VERSE1 -> Verse1, PRE-CHORUS -> Pre-Chorus)
                 const label = this.capitalizeLabel(sections[i]);
-                return `${label}:\n${para.trim()}`;
+                return `**${label}**\n${para.trim()}`;
             }
             return para.trim();
         }).join('\n\n');
@@ -307,8 +308,10 @@ export class LyricCreationComponent implements OnInit {
 
     private parseLyrics(text: string): LyricSection[] {
         const sections: LyricSection[] = [];
-        // Regex to match section labels: Label:
-        const sectionRegex = /^(Intro|Verse\d+|Chorus|Bridge|Outro|Pre[-_]?chorus|Post[-_]?chorus):\s*$/gmi;
+        // Regex to match section labels in both formats:
+        // 1. **Label** (Markdown bold) - with optional spaces: **Verse 1**, **INTRO**, **Pre-Chorus**
+        // 2. Label: (classic) - Verse1:, Intro:, Pre-Chorus:
+        const sectionRegex = /^(\*\*\s*(Intro|Verse\s*\d+|Chorus|Bridge|Outro|Pre[-_\s]?chorus|Post[-_\s]?chorus)\s*\*\*|(Intro|Verse\d+|Chorus|Bridge|Outro|Pre[-_]?chorus|Post[-_]?chorus):)\s*$/gmi;
         const lines = text.split('\n');
         let currentSection: LyricSection | null = null;
         let order = 0;
@@ -323,8 +326,18 @@ export class LyricCreationComponent implements OnInit {
                     sections.push(currentSection);
                 }
 
+                // Extract label from either format
+                // match[2] = Markdown format (inside **...** )
+                // match[3] = Classic format (before :)
+                let rawLabel = match[2] || match[3];
+
+                // Normalize: Remove spaces before numbers (Verse 1 -> Verse1)
+                rawLabel = rawLabel.replace(/\s+(\d+)/g, '$1');
+                // Normalize: Convert underscores to hyphens (Pre_Chorus -> Pre-Chorus)
+                rawLabel = rawLabel.replace(/_/g, '-');
+
                 // Start new section - normalize label with proper capitalization
-                const label = this.capitalizeLabel(match[1]);
+                const label = this.capitalizeLabel(rawLabel);
                 currentSection = {
                     id: `section-${order}-${Date.now()}`,
                     label: label,
@@ -360,7 +373,7 @@ export class LyricCreationComponent implements OnInit {
     private rebuildLyrics(sections: LyricSection[]): string {
         return sections
             .sort((a, b) => a.order - b.order)
-            .map(section => `${section.label}:\n${section.content}`)
+            .map(section => `**${section.label}**\n${section.content}`)
             .join('\n\n');
     }
 

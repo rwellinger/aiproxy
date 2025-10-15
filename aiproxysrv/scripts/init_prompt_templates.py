@@ -2,7 +2,7 @@
 """
 Initial load script for prompt templates.
 This script loads all current production prompt templates into the database.
-Based on actual Test-DB data as of 2025-10-12.
+Exported from production DB on 2025-10-15 23:46:02.
 
 Usage:
     python scripts/init_prompt_templates.py
@@ -20,24 +20,24 @@ from db.database import get_db
 from db.models import PromptTemplate
 
 
-# Current production templates from Test-DB (2025-10-12)
+# Production templates exported from 10.0.1.120 (2025-10-15)
 TEMPLATES = {
     "image": {
         "enhance": {
-            "pre_condition": "One-sentence DALL-E prompt",
-            "post_condition": "Only respond with the prompt.",
+            "pre_condition": """You are a fact‑based DALL‑E 3 prompt enhancer. Create a single, concise prompt. No introduction, no commentary. Avoid any content that violates DALL‑E 3 usage policies. Use the following input text as inspiration and answer in the language of this input text.""",
+            "post_condition": """Return only the prompt. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.""",
             "description": "Enhances image generation prompts for DALL-E3",
-            "version": "2.4",
-            "model": "llama3.2:3b",
-            "temperature": 1.5,
-            "max_tokens": 13,
+            "version": "4.1",
+            "model": "gpt-oss:20b",
+            "temperature": 0.9,
+            "max_tokens": 125,
             "active": True,
         },
         "translate": {
-            "pre_condition": "Translate this image prompt to english",
-            "post_condition": "Only respond with the translation.",
+            "pre_condition": """You are a professional English translator. Your task is to translate the provided image prompt into clear and concise language optimized for DALL-E 3. Use only words permitted in a DALL-E 3 prompt.""",
+            "post_condition": """Only respond with the translation.""",
             "description": "Translates image prompts to English",
-            "version": "1.7",
+            "version": "2.0",
             "model": "gpt-oss:20b",
             "temperature": 0.5,
             "max_tokens": 256,
@@ -45,21 +45,85 @@ TEMPLATES = {
         },
     },
     "lyrics": {
+        "extend-section": {
+            "pre_condition": """You are a professional song lyricist. Your task is to extend the given song section by adding more lines. The extension should:
+- Match the existing rhyme scheme and rhythm
+- Continue the thematic development
+- Maintain consistent imagery and tone
+- Flow naturally from the existing content
+- Add depth without being repetitive
+
+Build upon what is already there to create a longer, more developed section.""",
+            "post_condition": """Return the COMPLETE extended section (original + new lines) as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.""",
+            "description": "Extends a lyric section by adding more lines that match style and theme",
+            "version": "1.3",
+            "model": "gpt-oss:20b",
+            "temperature": 0.7,
+            "max_tokens": 512,
+            "active": True,
+        },
         "generate": {
-            "pre_condition": "Be a songwriter and write a song with the given conditions and input text.",
-            "post_condition": "Only output completely original lyrics with each section as a single paragraph. Ensure all content is your own creation and not copied from existing songs. Do not include any explanations, notes, or introductions.",
+            "pre_condition": """You are a professional song lyricist and songwriter. Your task is to completely write the given song idea with fresh perspectives while keeping similar themes. Feel free to:
+- Use metaphors and imagery
+- Explore angles on the same topic
+- Vary the rhythm and structure
+- Add creative wordplay
+- Make the phrases fluent
+
+The new lyric should feel like a new take on the same emotional core.""",
+            "post_condition": """Only output completely original lyrics with each section as a single paragraph. Ensure all content is your own creation and not copied from existing songs. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, in your output. Make sure every section has his correct section label.""",
             "description": "Generates song lyrics from input text",
-            "version": "2.3",
+            "version": "2.6",
             "model": "gpt-oss:20b",
             "temperature": 0.7,
             "max_tokens": 2048,
             "active": True,
         },
+        "improve-section": {
+            "pre_condition": """You are a professional song lyricist and songwriter. Your task is to improve the given song section while maintaining its core message and style. Consider:
+- Rhyme scheme and rhythm
+- Imagery and metaphors
+- Emotional impact
+- Word choice and clarity
+- Flow and pacing
+- Fluent language
+
+Keep the same general length and structure. Only improve the quality, do not change the fundamental meaning or add new concepts.""",
+            "post_condition": """Return ONLY the improved section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name (like "Verse1:") in your output. Keep all lines together as one continuous block of text.""",
+            "description": "Improves a specific lyric section while maintaining context and style",
+            "version": "1.4",
+            "model": "gpt-oss:20b",
+            "temperature": 0.7,
+            "max_tokens": 256,
+            "active": True,
+        },
+        "rewrite-section": {
+            "pre_condition": """You are a professional song lyricist and songwriter. Your task is to completely rewrite the given song section with fresh perspectives while keeping similar themes. Feel free to:
+- Use different metaphors and imagery
+- Change the rhyme scheme
+- Explore new angles on the same topic
+- Vary the rhythm and structure
+- Add creative wordplay
+- Fluent language
+
+The rewritten section should feel like a new take on the same emotional core.""",
+            "post_condition": """Return ONLY the rewritten section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.""",
+            "description": "Completely rewrites a lyric section with fresh creative perspectives",
+            "version": "1.5",
+            "model": "gpt-oss:20b",
+            "temperature": 0.8,
+            "max_tokens": 256,
+            "active": True,
+        },
         "translate": {
-            "pre_condition": "Be a British songwriter. Translate the following lyrics into fluent, natural British English with good lyrical flow. Keep the emotional tone, adapt for rhythm and rhyme where needed, and make it sound like it was written by a native English-speaking artist. Lyrics",
-            "post_condition": "Only output the translated lyrics. Do not include any explanations, notes, or introductions.",
+            "pre_condition": """You are a professional native English lyricist and songwriter. Your task is to fully translate the provided song lyrics. You may:
+* Use different metaphors and imagery
+* Adjust the rhythm and structure
+* Employ fluent and natural English expressions
+Ensure the translated lyrics convey the original meaning while sounding as though crafted by an English songwriter for a global audience.""",
+            "post_condition": """Only output the translated lyrics. Do not include explanations or comments in your output.""",
             "description": "Translates lyrics to British English",
-            "version": "1.6",
+            "version": "2.0",
             "model": "gpt-oss:20b",
             "temperature": 0.5,
             "max_tokens": 2048,
@@ -68,18 +132,21 @@ TEMPLATES = {
     },
     "music": {
         "enhance": {
-            "pre_condition": "One-sentence Suno Music Style prompt without artist names or band names",
-            "post_condition": "Only respond with the prompt.",
+            "pre_condition": """You are a professional Mureka or Suno music style prompt enhancer. Your task is to refine the input text into an ideal prompt by:  
+• Including the specified instruments
+• Ensuring any provided vocal phrases are prioritized and accurately represented; if no vocals are present, omit mention
+• Keeping the prompt concise, with a maximum of 400 characters""",
+            "post_condition": """Only output the enhanced prompt. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, in your output.""",
             "description": "Enhances music style prompts for Mureka without artist references",
-            "version": "1.7",
-            "model": "llama3.2:3b",
-            "temperature": 0.7,
+            "version": "2.5",
+            "model": "gpt-oss:20b",
+            "temperature": 0.9,
             "max_tokens": 512,
             "active": True,
         },
         "translate": {
-            "pre_condition": "Translate this music style description to english",
-            "post_condition": "Only respond with the translation.",
+            "pre_condition": """Translate this music style description to english""",
+            "post_condition": """Only respond with the translation.""",
             "description": "Translates music style descriptions to English",
             "version": "1.7",
             "model": "gpt-oss:20b",
@@ -90,15 +157,21 @@ TEMPLATES = {
     },
     "titel": {
         "generate": {
-            "pre_condition": "Generate a short, creative, and engaging title in the same language as the input text. The title should:\n  - Capture the main subject, theme, or essence described\n  - Be memorable and impactful\n  - Match the style and context of the content (visual for images, artistic for songs/lyrics)\n  - Be concise (2-8 words) and suitable for the intended medium\n  - Avoid using commas, colons, or other punctuation marks\n  - Feel natural and relevant to the given input",
-            "post_condition": "Respond only with the title, maximum 50 characters. Do not include any explanations, notes, or introductions.",
+            "pre_condition": """Generate a short, creative, and engaging title in the same language as the input text. The title should:
+  - Capture the main subject, theme, or essence described
+  - Be memorable and impactful
+  - Match the style and context of the content (visual for images, artistic for songs/lyrics)
+  - Be concise (2-8 words) and suitable for the intended medium
+  - Avoid using commas, colons, or other punctuation marks
+  - Feel natural and relevant to the given input""",
+            "post_condition": """Respond only with the title, maximum 50 characters. Do not include any explanations, notes, or introductions.""",
             "description": "Generates song titles from various inputs (title, lyrics, style, or default)",
             "version": "3.4",
             "model": "llama3.2:3b",
             "temperature": 0.7,
             "max_tokens": 20,
             "active": True,
-        }
+        },
     },
 }
 

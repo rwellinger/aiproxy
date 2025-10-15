@@ -601,6 +601,7 @@
       "timeout": "Processing (timeout handling)"
     },
     "styleChooser": "Style Chooser",
+    "styleChooserOverwriteWarning": "Existing style prompt will be overwritten. Continue?",
     "success": {
       "architectureUpdated": "Song architecture updated successfully",
       "styleApplied": "Music style selection applied successfully"
