@@ -487,7 +487,7 @@ Nach jeder Phase durchführen:
 
 ### Docker Tests
 
-- [ ] `docker build` erfolgreich (beide Targets)
+- [X] `docker build` erfolgreich (beide Targets)
 - [ ] Container startet ohne Errors
 - [ ] Health Checks grün
 - [ ] Volumes gemountet
