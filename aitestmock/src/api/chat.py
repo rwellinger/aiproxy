@@ -1,12 +1,14 @@
 """
 Mock Chat API - Simulates Ollama/Chat functionality for testing
 """
-from flask import Blueprint, request, jsonify
+
+from flask import Blueprint, jsonify, request
+
 
 api_chat_mock = Blueprint("api_chat_mock", __name__, url_prefix="/api/v1/ollama/chat")
 
 
-@api_chat_mock.route('/generate-llama3-simple', methods=['POST'])
+@api_chat_mock.route("/generate-llama3-simple", methods=["POST"])
 def generate_llama3_simple():
     """Mock llama3 simple generation"""
     raw_json = request.get_json(silent=True)
@@ -14,7 +16,7 @@ def generate_llama3_simple():
     if not raw_json:
         return jsonify({"error": "No JSON provided"}), 400
 
-    prompt = raw_json.get('prompt', '')
+    prompt = raw_json.get("prompt", "")
 
     # Test scenarios based on prompt content
     if "0002" in prompt:
@@ -32,13 +34,13 @@ def generate_llama3_simple():
         "prompt_eval_count": 10,
         "prompt_eval_duration": 200000000,
         "eval_count": 15,
-        "eval_duration": 300000000
+        "eval_duration": 300000000,
     }
 
     return jsonify(response), 200
 
 
-@api_chat_mock.route('/generate-gpt-oss-simple', methods=['POST'])
+@api_chat_mock.route("/generate-gpt-oss-simple", methods=["POST"])
 def generate_gpt_oss_simple():
     """Mock gpt-oss simple generation"""
     raw_json = request.get_json(silent=True)
@@ -46,7 +48,7 @@ def generate_gpt_oss_simple():
     if not raw_json:
         return jsonify({"error": "No JSON provided"}), 400
 
-    prompt = raw_json.get('prompt', '')
+    prompt = raw_json.get("prompt", "")
 
     # Test scenarios based on prompt content
     if "0002" in prompt:
@@ -64,13 +66,13 @@ def generate_gpt_oss_simple():
         "prompt_eval_count": 20,
         "prompt_eval_duration": 400000000,
         "eval_count": 30,
-        "eval_duration": 600000000
+        "eval_duration": 600000000,
     }
 
     return jsonify(response), 200
 
 
-@api_chat_mock.route('/generate-lyrics', methods=['POST'])
+@api_chat_mock.route("/generate-lyrics", methods=["POST"])
 def generate_lyrics():
     """Mock lyrics generation"""
     raw_json = request.get_json(silent=True)
@@ -78,7 +80,7 @@ def generate_lyrics():
     if not raw_json:
         return jsonify({"error": "No JSON provided"}), 400
 
-    input_text = raw_json.get('input_text', '')
+    input_text = raw_json.get("input_text", "")
 
     # Test scenarios based on input text
     if "0002" in input_text:
@@ -122,7 +124,7 @@ Love and music never wait"""
         "prompt_eval_count": 25,
         "prompt_eval_duration": 500000000,
         "eval_count": 80,
-        "eval_duration": 1200000000
+        "eval_duration": 1200000000,
     }
 
     return jsonify(response), 200

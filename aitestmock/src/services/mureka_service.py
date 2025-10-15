@@ -1,13 +1,12 @@
 import json
+import random
 import re
 import time
-import random
 from datetime import datetime
 from pathlib import Path
 
 
 class MurekaService:
-
     def __init__(self):
         # In-memory storage for async song generation jobs
         self._song_jobs = {}
@@ -31,7 +30,7 @@ class MurekaService:
                 "test_number": test_number,
                 "start_time": datetime.now(),
                 "duration_seconds": duration_seconds,
-                "completed": False
+                "completed": False,
             }
 
         return response
@@ -55,10 +54,20 @@ class MurekaService:
             if elapsed >= job["duration_seconds"]:
                 if not job["completed"]:
                     job["completed"] = True
-                return self._load_mock_data("mureka", job["test_number"], "query_song_status_suceeded", job_id=job_id)
+                return self._load_mock_data(
+                    "mureka",
+                    job["test_number"],
+                    "query_song_status_suceeded",
+                    job_id=job_id,
+                )
             else:
                 # Still running, return running status
-                return self._load_mock_data("mureka", job["test_number"], "query_song_status_running", job_id=job_id)
+                return self._load_mock_data(
+                    "mureka",
+                    job["test_number"],
+                    "query_song_status_running",
+                    job_id=job_id,
+                )
 
         # Fallback for unknown job_id - extract test number and return completed
         test_number = self._extract_test_number(job_id)
@@ -75,7 +84,9 @@ class MurekaService:
         duration_seconds = self._extract_duration(prompt, default_seconds=10)
 
         # Load initial response
-        response = self._load_mock_data("mureka", test_number, "generate_instrumental", subdirectory="instrumental")
+        response = self._load_mock_data(
+            "mureka", test_number, "generate_instrumental", subdirectory="instrumental"
+        )
 
         # If successful, store job info for async simulation
         if "id" in response:
@@ -84,7 +95,7 @@ class MurekaService:
                 "test_number": test_number,
                 "start_time": datetime.now(),
                 "duration_seconds": duration_seconds,
-                "completed": False
+                "completed": False,
             }
 
         return response
@@ -99,17 +110,31 @@ class MurekaService:
             if elapsed >= job["duration_seconds"]:
                 if not job["completed"]:
                     job["completed"] = True
-                return self._load_mock_data("mureka", job["test_number"], "query_instrument_succeeded",
-                                          subdirectory="instrumental", job_id=job_id)
+                return self._load_mock_data(
+                    "mureka",
+                    job["test_number"],
+                    "query_instrument_succeeded",
+                    subdirectory="instrumental",
+                    job_id=job_id,
+                )
             else:
                 # Still running, return running status
-                return self._load_mock_data("mureka", job["test_number"], "query_instrument_running",
-                                          subdirectory="instrumental", job_id=job_id)
+                return self._load_mock_data(
+                    "mureka",
+                    job["test_number"],
+                    "query_instrument_running",
+                    subdirectory="instrumental",
+                    job_id=job_id,
+                )
 
         # Fallback for unknown job_id - extract test number and return completed
         test_number = self._extract_test_number(job_id)
-        return self._load_mock_data("mureka", test_number, "query_instrument_succeeded",
-                                  subdirectory="instrumental")
+        return self._load_mock_data(
+            "mureka",
+            test_number,
+            "query_instrument_succeeded",
+            subdirectory="instrumental",
+        )
 
     def _extract_test_number(self, text, default="0001"):
         if not text:
@@ -117,11 +142,11 @@ class MurekaService:
 
         # Look for 4-digit pattern that's likely a test number (not port numbers like 3080)
         # Try to find patterns like "0001", "0002" in filenames or after specific markers
-        matches = re.findall(r'\b(\d{4})\b', str(text))
+        matches = re.findall(r"\b(\d{4})\b", str(text))
 
         # Filter out common port numbers and prefer test-like numbers (starting with 0)
         for match in matches:
-            if match.startswith('0') or match not in ['3080', '8080', '5000', '8000']:
+            if match.startswith("0") or match not in ["3080", "8080", "5000", "8000"]:
                 return match
 
         return matches[0] if matches else default
@@ -131,13 +156,12 @@ class MurekaService:
         if not text:
             return default_seconds
 
-        match = re.search(r'(\d+)s\b', str(text))
+        match = re.search(r"(\d+)s\b", str(text))
         return int(match.group(1)) if match else default_seconds
 
     def _generate_random_id(self):
         """Generate a random ID in the format similar to '94608690380802'"""
         return str(random.randint(10000000000000, 99999999999999))
-
 
     def _apply_timestamp_replacements(self, data, endpoint, job_id=None):
         """Apply dynamic timestamp replacements and random ID generation to mock data"""
@@ -224,21 +248,32 @@ class MurekaService:
 
         return data
 
-    def _load_mock_data(self, service, test_number, endpoint, subdirectory=None, job_id=None):
+    def _load_mock_data(
+        self, service, test_number, endpoint, subdirectory=None, job_id=None
+    ):
         base_dir = Path(__file__).parent.parent.parent
         if subdirectory:
-            data_path = base_dir / "data" / service / subdirectory / test_number / f"{endpoint}.json"
+            data_path = (
+                base_dir
+                / "data"
+                / service
+                / subdirectory
+                / test_number
+                / f"{endpoint}.json"
+            )
         else:
-            data_path = base_dir / "data" / service / "songs" / test_number / f"{endpoint}.json"
+            data_path = (
+                base_dir / "data" / service / "songs" / test_number / f"{endpoint}.json"
+            )
 
         if not data_path.exists():
             return {
                 "error": f"Mock data not found for {service}/{test_number}/{endpoint}",
-                "code": "mock_not_found"
+                "code": "mock_not_found",
             }
 
         try:
-            with open(data_path, 'r') as f:
+            with open(data_path) as f:
                 data = json.load(f)
 
             # Apply dynamic timestamp replacements
@@ -248,5 +283,5 @@ class MurekaService:
         except Exception as e:
             return {
                 "error": f"Failed to load mock data: {str(e)}",
-                "code": "mock_load_error"
+                "code": "mock_load_error",
             }

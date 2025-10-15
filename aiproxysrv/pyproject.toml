@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aiproxysrv"
-version = "2.1.16"
+version = "2.2.0"
 dependencies = [
     "Flask>=3.1.2",
     "Flask-CORS>=4.0.0",
@@ -48,7 +48,7 @@ where = ["src"]
 # ===================================
 [tool.ruff]
 # Python version target
-target-version = "py311"
+target-version = "py312"
 
 # Line length (same as Black default)
 line-length = 120
