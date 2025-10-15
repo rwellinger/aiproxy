@@ -466,18 +466,18 @@ Nach jeder Phase durchführen:
 
 ### Development Tests
 
-- [ ] `ruff check .` - Keine Errors
-- [ ] `ruff format . --check` - Code formatiert
-- [ ] `python src/server.py` - Server startet
-- [ ] `python src/worker.py` - Worker startet
-- [ ] `alembic upgrade head` - Migrations laufen
-- [ ] Health Endpoint erreichbar (`/api/v1/health`)
-- [ ] PostgreSQL Connection funktioniert
-- [ ] Redis Connection funktioniert
+- [X] `ruff check .` - Keine Errors
+- [X] `ruff format . --check` - Code formatiert
+- [X] `python src/server.py` - Server startet
+- [X] `python src/worker.py` - Worker startet
+- [X] `alembic upgrade head` - Migrations laufen
+- [X] Health Endpoint erreichbar (`/api/v1/health`)
+- [X] PostgreSQL Connection funktioniert
+- [X] Redis Connection funktioniert
 
 ### Integration Tests
 
-- [ ] Image-Generation (OpenAI/aitestmock)
+- [X] Image-Generation (OpenAI/aitestmock)
 - [ ] Song-Generation (Mureka/aitestmock)
 - [ ] Chat (Ollama/OpenAI)
 - [ ] Prompt Templates CRUD
