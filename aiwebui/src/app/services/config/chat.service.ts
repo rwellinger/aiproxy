@@ -179,4 +179,84 @@ export class ChatService {
   async generateTitle(inputText: string): Promise<string> {
     return this.validateAndCallUnified('titel', 'generate', inputText);
   }
+
+  async improveLyricSection(
+    sectionLabel: string,
+    sectionContent: string,
+    fullContext: string
+  ): Promise<string> {
+    const template = await firstValueFrom(this.promptConfig.getPromptTemplateAsync('lyrics', 'improve-section'));
+    if (!template) {
+      throw new Error('Template lyrics/improve-section not found in database');
+    }
+
+    // Validate template has all required parameters
+    if (!template.model) {
+      throw new Error('Template lyrics/improve-section is missing model parameter');
+    }
+    if (template.temperature === undefined || template.temperature === null) {
+      throw new Error('Template lyrics/improve-section is missing temperature parameter');
+    }
+    if (!template.max_tokens) {
+      throw new Error('Template lyrics/improve-section is missing max_tokens parameter');
+    }
+
+    // Enhance pre_condition with section label and full context
+    let enhancedPreCondition = template.pre_condition || '';
+    enhancedPreCondition = `You are improving only the "${sectionLabel}" section.\n\nFull song context:\n${fullContext}\n\n${enhancedPreCondition}`;
+
+    const request: UnifiedChatRequest = {
+      pre_condition: enhancedPreCondition,
+      post_condition: template.post_condition || '',
+      input_text: sectionContent,
+      temperature: template.temperature,
+      max_tokens: template.max_tokens,
+      model: template.model
+    };
+
+    const data: ChatResponse = await firstValueFrom(
+      this.http.post<ChatResponse>(this.apiConfig.endpoints.ollama.chatGenerateUnified, request)
+    );
+    return data.response;
+  }
+
+  async rewriteLyricSection(sectionContent: string): Promise<string> {
+    return this.validateAndCallUnified('lyrics', 'rewrite-section', sectionContent);
+  }
+
+  async extendLyricSection(sectionContent: string, lines: number): Promise<string> {
+    const template = await firstValueFrom(this.promptConfig.getPromptTemplateAsync('lyrics', 'extend-section'));
+    if (!template) {
+      throw new Error('Template lyrics/extend-section not found in database');
+    }
+
+    // Validate template has all required parameters
+    if (!template.model) {
+      throw new Error('Template lyrics/extend-section is missing model parameter');
+    }
+    if (template.temperature === undefined || template.temperature === null) {
+      throw new Error('Template lyrics/extend-section is missing temperature parameter');
+    }
+    if (!template.max_tokens) {
+      throw new Error('Template lyrics/extend-section is missing max_tokens parameter');
+    }
+
+    // Enhance pre_condition with line count instruction
+    let enhancedPreCondition = template.pre_condition || '';
+    enhancedPreCondition = `Add ${lines} more lines to this section.\n\n${enhancedPreCondition}`;
+
+    const request: UnifiedChatRequest = {
+      pre_condition: enhancedPreCondition,
+      post_condition: template.post_condition || '',
+      input_text: sectionContent,
+      temperature: template.temperature,
+      max_tokens: template.max_tokens,
+      model: template.model
+    };
+
+    const data: ChatResponse = await firstValueFrom(
+      this.http.post<ChatResponse>(this.apiConfig.endpoints.ollama.chatGenerateUnified, request)
+    );
+    return data.response;
+  }
 }

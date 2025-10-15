@@ -297,6 +297,26 @@
       "textRequired": "Bitte gib zuerst einen Text ein",
       "lyricsRequired": "Bitte gib zuerst einen Songtext ein",
       "noArchitecture": "Keine Text-Architektur definiert. Bitte konfiguriere zuerst die Architektur."
+    },
+    "sectionEditor": {
+      "toggle": "Abschnitts-Editor",
+      "sections": "Abschnitte",
+      "apply": "Änderungen anwenden",
+      "placeholder": "Diesen Abschnitt bearbeiten...",
+      "improve": "Abschnitt verbessern",
+      "rewrite": "Abschnitt umschreiben",
+      "extend": "Abschnitt erweitern",
+      "activated": "Abschnitts-Editor aktiviert",
+      "applied": "Abschnitte erfolgreich angewendet",
+      "cancelled": "Änderungen verworfen",
+      "noStructure": "Keine Abschnitte gefunden. Struktur zuerst anwenden?",
+      "parseFailed": "Fehler beim Parsen der Abschnitte. Überprüfe die Text-Struktur.",
+      "improving": "Verbessere Abschnitt...",
+      "improvingHint": "KI verbessert diesen Abschnitt",
+      "rewriting": "Schreibe Abschnitt um...",
+      "rewritingHint": "KI schreibt diesen Abschnitt um",
+      "extending": "Erweitere Abschnitt...",
+      "extendingHint": "KI fügt diesem Abschnitt mehr Zeilen hinzu"
     }
   },
   "musicStyleChooser": {
