@@ -48,7 +48,7 @@ where = ["src"]
 # ===================================
 [tool.ruff]
 # Python version target
-target-version = "py311"
+target-version = "py312"
 
 # Line length (same as Black default)
 line-length = 120
