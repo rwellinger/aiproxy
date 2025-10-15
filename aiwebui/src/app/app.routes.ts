@@ -28,6 +28,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/song-view/song-view.component').then(m => m.SongViewComponent)
     },
     {
+        path: 'lyriccreation',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/lyric-creation/lyric-creation.component').then(m => m.LyricCreationComponent)
+    },
+    {
         path: 'imagegen',
         canActivate: [AuthGuard],
         loadComponent: () => import('./pages/image-generator/image-generator.component').then(m => m.ImageGeneratorComponent)

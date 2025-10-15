@@ -274,6 +274,22 @@
     },
     "title": "Songtext-Architektur"
   },
+  "lyricCreation": {
+    "title": "Songtext Editor",
+    "lyricsLabel": "Songtext:",
+    "lyricsPlaceholder": "Schreibe deinen Songtext hier...",
+    "charactersCount": "Zeichen",
+    "lyricsActions": "Text-Aktionen",
+    "createLyrics": "Text erstellen",
+    "translateToEnglish": "Ins Englische übersetzen",
+    "lyricArchitecture": "Text-Struktur",
+    "resetButton": "Löschen",
+    "autoSaved": "Automatisch zum Song Generator gespeichert",
+    "errors": {
+      "textRequired": "Bitte gib zuerst einen Text ein",
+      "lyricsRequired": "Bitte gib zuerst einen Songtext ein"
+    }
+  },
   "musicStyleChooser": {
     "buttons": {
       "apply": "Stile anwenden",
@@ -415,6 +431,7 @@
     "library": "Bibliothek",
     "login": "Anmelden",
     "logout": "Abmelden",
+    "lyricCreation": "Songtext Editor",
     "music": "Musik",
     "ollamaChat": "Ollama Chat",
     "openaiChat": "OpenAI Chat",

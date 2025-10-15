@@ -274,6 +274,22 @@
     },
     "title": "Lyric Architecture"
   },
+  "lyricCreation": {
+    "title": "Lyric Creation",
+    "lyricsLabel": "Lyrics:",
+    "lyricsPlaceholder": "Write your song lyrics here...",
+    "charactersCount": "characters",
+    "lyricsActions": "Lyrics actions",
+    "createLyrics": "Create Lyrics",
+    "translateToEnglish": "Translate to English",
+    "lyricArchitecture": "Lyric Architecture",
+    "resetButton": "Clear",
+    "autoSaved": "Auto-saved to song generator",
+    "errors": {
+      "textRequired": "Please enter text first",
+      "lyricsRequired": "Please enter lyrics first"
+    }
+  },
   "musicStyleChooser": {
     "buttons": {
       "apply": "Apply Styles",
@@ -415,6 +431,7 @@
     "library": "Library",
     "login": "Login",
     "logout": "Logout",
+    "lyricCreation": "Lyric Creation",
     "music": "Music",
     "ollamaChat": "Ollama Chat",
     "openaiChat": "OpenAI Chat",
