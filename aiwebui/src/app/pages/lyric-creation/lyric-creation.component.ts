@@ -11,6 +11,7 @@ import {MatCardModule} from '@angular/material/card';
 import {ProgressService} from '../../services/ui/progress.service';
 import {LyricArchitectModalComponent} from '../../components/lyric-architect-modal/lyric-architect-modal.component';
 import {LyricArchitectureService} from '../../services/lyric-architecture.service';
+import {SongSection, SongSectionItem} from '../../models/lyric-architecture.model';
 
 interface LyricSection {
     id: string;
@@ -180,7 +181,7 @@ export class LyricCreationComponent implements OnInit {
         this.showTextToolsDropdown = false;
     }
 
-    selectTextToolAction(action: 'cleanup' | 'structure' | 'undo' | 'sectionEditor') {
+    selectTextToolAction(action: 'cleanup' | 'structure' | 'undo' | 'sectionEditor' | 'rebuild') {
         this.closeTextToolsDropdown();
 
         if (action === 'cleanup') {
@@ -191,6 +192,8 @@ export class LyricCreationComponent implements OnInit {
             this.undoLastChange();
         } else if (action === 'sectionEditor') {
             this.toggleSectionEditor();
+        } else if (action === 'rebuild') {
+            this.rebuildFromLyricText();
         }
     }
 
@@ -499,6 +502,126 @@ export class LyricCreationComponent implements OnInit {
         } finally {
             this.isExtendingSection = false;
         }
+    }
+
+    rebuildFromLyricText(): void {
+        const lyrics = this.lyricForm.get('lyrics')?.value || '';
+        if (!lyrics.trim()) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.lyricsRequired'));
+            return;
+        }
+
+        // Parse existing lyrics
+        const sections = this.parseLyrics(lyrics);
+
+        if (sections.length === 0) {
+            this.notificationService.error(this.translate.instant('lyricCreation.rebuildFailed'));
+            return;
+        }
+
+        // Confirm before overwriting architecture
+        const confirmed = confirm(this.translate.instant('lyricCreation.confirmRebuild'));
+        if (!confirmed) {
+            return;
+        }
+
+        // Map parsed sections to SongSection enum
+        const architectureSections: SongSectionItem[] = [];
+        let hasWarnings = false;
+
+        for (const section of sections) {
+            const mapped = this.mapLabelToSongSection(section.label);
+
+            if (!mapped) {
+                // Unknown section type - log warning but continue
+                console.warn(`Unknown section label: ${section.label} - skipping`);
+                hasWarnings = true;
+                continue;
+            }
+
+            architectureSections.push(mapped);
+        }
+
+        if (architectureSections.length === 0) {
+            this.notificationService.error(this.translate.instant('lyricCreation.rebuildFailed'));
+            return;
+        }
+
+        // Update architecture service
+        this.architectureService.saveConfig({
+            sections: architectureSections,
+            lastModified: new Date()
+        });
+
+        // Show success notification
+        if (hasWarnings) {
+            this.notificationService.success(
+                this.translate.instant('lyricCreation.rebuildSuccessWithWarnings', {count: architectureSections.length})
+            );
+        } else {
+            this.notificationService.success(
+                this.translate.instant('lyricCreation.rebuildSuccess', {count: architectureSections.length})
+            );
+        }
+    }
+
+    private mapLabelToSongSection(label: string): SongSectionItem | null {
+        // Normalize label: lowercase and remove spaces/hyphens/underscores
+        const normalized = label.toLowerCase().replace(/[\s_-]/g, '');
+
+        // Extract base type and number (e.g., "verse1" -> "verse", "1")
+        const match = normalized.match(/^([a-z]+)(\d*)$/);
+        if (!match) {
+            return null;
+        }
+
+        const [, baseType, number] = match;
+        let section: SongSection | null = null;
+        let displayName: string;
+
+        // Map to SongSection enum
+        switch (baseType) {
+            case 'intro':
+                section = SongSection.INTRO;
+                displayName = 'INTRO';
+                break;
+            case 'verse':
+                section = SongSection.VERSE;
+                displayName = number ? `VERSE${number}` : 'VERSE1';
+                break;
+            case 'prechorus':
+                section = SongSection.PRE_CHORUS;
+                displayName = 'PRE_CHORUS';
+                break;
+            case 'chorus':
+                section = SongSection.CHORUS;
+                displayName = number ? `CHORUS${number}` : 'CHORUS';
+                break;
+            case 'bridge':
+                section = SongSection.BRIDGE;
+                displayName = number ? `BRIDGE${number}` : 'BRIDGE';
+                break;
+            case 'outro':
+                section = SongSection.OUTRO;
+                displayName = 'OUTRO';
+                break;
+            case 'postchorus':
+                // POST_CHORUS is not in the enum - log warning
+                console.warn('POST_CHORUS detected but not supported in architecture - skipping');
+                return null;
+            default:
+                return null;
+        }
+
+        return {
+            id: this.generateSectionId(),
+            section,
+            displayName
+        };
+    }
+
+    private generateSectionId(): string {
+        return `section_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
 
     @HostListener('document:click', ['$event'])

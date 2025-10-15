@@ -187,7 +187,7 @@
   border: 1px solid $border-light;
   border-radius: $border-radius-lg;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 220px;
+  min-width: 280px;
   z-index: 1000;
   overflow: hidden;
   animation: dropdown-fade-up 0.15s ease-out;
@@ -227,6 +227,12 @@
     flex: 1;
     font-weight: $font-weight-medium;
   }
+}
+
+.dropdown-separator {
+  height: 1px;
+  background: $border-light;
+  margin: $spacing-xs 0;
 }
 
 @keyframes dropdown-fade-up {
