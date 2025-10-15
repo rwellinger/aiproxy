@@ -1,0 +1,111 @@
+<div class="lyric-creation-container">
+    <mat-card class="lyric-creation-card">
+        <mat-card-content>
+            <div class="lyric-header">
+                <div class="lyric-title">
+                    <h2>{{ 'lyricCreation.title' | translate }}</h2>
+                </div>
+            </div>
+
+            <form [formGroup]="lyricForm">
+                <div class="form-group">
+                    <textarea
+                            id="lyrics"
+                            formControlName="lyrics"
+                            [placeholder]="'lyricCreation.lyricsPlaceholder' | translate"
+                            [disabled]="isGeneratingLyrics || isTranslatingLyrics"
+                            class="lyrics-textarea">
+                    </textarea>
+                    <div class="lyrics-char-count" *ngIf="characterCount > 0">
+                        {{ characterCount }} {{ 'lyricCreation.charactersCount' | translate }}
+                    </div>
+                </div>
+
+                <div class="info-notice">
+                    <i class="fas fa-info-circle"></i>
+                    {{ 'lyricCreation.autoSaved' | translate }}
+                </div>
+
+                <div class="action-section">
+                    <div class="ai-actions">
+                        <button
+                                type="button"
+                                (click)="openLyricArchitectModal()"
+                                [disabled]="isGeneratingLyrics || isTranslatingLyrics"
+                                class="ai-action-button">
+                            <i class="fas fa-layer-group"></i>
+                            <span>{{ 'lyricCreation.lyricArchitecture' | translate }}</span>
+                        </button>
+                        <button
+                                type="button"
+                                (click)="generateLyrics()"
+                                [disabled]="isGeneratingLyrics || isTranslatingLyrics || !lyricForm.get('lyrics')?.value?.trim()"
+                                class="ai-action-button">
+                            <i class="fas fa-music" *ngIf="!isGeneratingLyrics"></i>
+                            <i class="fas fa-spinner fa-spin" *ngIf="isGeneratingLyrics"></i>
+                            <span>{{ 'lyricCreation.createLyrics' | translate }}</span>
+                        </button>
+                        <button
+                                type="button"
+                                (click)="translateLyrics()"
+                                [disabled]="isGeneratingLyrics || isTranslatingLyrics || !lyricForm.get('lyrics')?.value?.trim()"
+                                class="ai-action-button">
+                            <i class="fas fa-language" *ngIf="!isTranslatingLyrics"></i>
+                            <i class="fas fa-spinner fa-spin" *ngIf="isTranslatingLyrics"></i>
+                            <span>{{ 'lyricCreation.translateToEnglish' | translate }}</span>
+                        </button>
+                        <div class="text-tools-dropdown-container">
+                            <button
+                                    type="button"
+                                    (click)="toggleTextToolsDropdown()"
+                                    [disabled]="isGeneratingLyrics || isTranslatingLyrics || !characterCount"
+                                    class="ai-action-button"
+                                    [title]="'lyricCreation.textTools' | translate">
+                                <i class="fas fa-tools"></i>
+                                <span>{{ 'lyricCreation.textTools' | translate }}</span>
+                                <i class="fas fa-chevron-down dropdown-chevron"></i>
+                            </button>
+                            <div class="dropdown-menu" *ngIf="showTextToolsDropdown"
+                                 (click)="$event.stopPropagation()">
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isGeneratingLyrics || isTranslatingLyrics"
+                                        (click)="selectTextToolAction('cleanup')">
+                                    <i class="fas fa-broom"></i>
+                                    <span>{{ 'lyricCreation.cleanupLyrics' | translate }}</span>
+                                </button>
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isGeneratingLyrics || isTranslatingLyrics"
+                                        (click)="selectTextToolAction('structure')">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>{{ 'lyricCreation.applyStructure' | translate }}</span>
+                                </button>
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isGeneratingLyrics || isTranslatingLyrics || !canUndo"
+                                        (click)="selectTextToolAction('undo')">
+                                    <i class="fas fa-undo"></i>
+                                    <span>{{ 'lyricCreation.undoLastChange' | translate }}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="utility-actions">
+                        <button
+                                type="button"
+                                (click)="clearLyrics()"
+                                [disabled]="isGeneratingLyrics || isTranslatingLyrics || !characterCount"
+                                class="clear-button">
+                            <i class="fas fa-trash-alt"></i> {{ 'lyricCreation.resetButton' | translate }}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

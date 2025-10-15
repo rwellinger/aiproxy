@@ -1,0 +1,284 @@
+import {Component, OnInit, ViewEncapsulation, inject, HostListener} from '@angular/core';
+import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {CommonModule} from '@angular/common';
+import {MatDialog} from '@angular/material/dialog';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
+import {SongService} from '../../services/business/song.service';
+import {NotificationService} from '../../services/ui/notification.service';
+import {ChatService} from '../../services/config/chat.service';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatCardModule} from '@angular/material/card';
+import {ProgressService} from '../../services/ui/progress.service';
+import {LyricArchitectModalComponent} from '../../components/lyric-architect-modal/lyric-architect-modal.component';
+import {LyricArchitectureService} from '../../services/lyric-architecture.service';
+
+@Component({
+    selector: 'app-lyric-creation',
+    standalone: true,
+    imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, TranslateModule],
+    templateUrl: './lyric-creation.component.html',
+    styleUrl: './lyric-creation.component.scss',
+    encapsulation: ViewEncapsulation.None
+})
+export class LyricCreationComponent implements OnInit {
+    lyricForm!: FormGroup;
+    isGeneratingLyrics = false;
+    isTranslatingLyrics = false;
+    showTextToolsDropdown = false;
+    lastCleanupState: string | null = null;
+    lastStructureState: string | null = null;
+
+    private fb = inject(FormBuilder);
+    private songService = inject(SongService);
+    private notificationService = inject(NotificationService);
+    private chatService = inject(ChatService);
+    private progressService = inject(ProgressService);
+    private dialog = inject(MatDialog);
+    private architectureService = inject(LyricArchitectureService);
+    private translate = inject(TranslateService);
+
+    ngOnInit() {
+        this.lyricForm = this.fb.group({
+            lyrics: ['']
+        });
+
+        // Load saved lyrics from song generator storage
+        const savedData = this.songService.loadFormData();
+        if (savedData.lyrics) {
+            this.lyricForm.patchValue({lyrics: savedData.lyrics});
+        }
+
+        // Auto-save lyrics on changes
+        this.lyricForm.valueChanges.subscribe(value => {
+            this.saveLyrics(value.lyrics);
+        });
+    }
+
+    private saveLyrics(lyrics: string): void {
+        // Load existing song generator data and update only lyrics
+        const existingData = this.songService.loadFormData();
+        this.songService.saveFormData({
+            ...existingData,
+            lyrics: lyrics
+        });
+    }
+
+    clearLyrics(): void {
+        this.lyricForm.patchValue({lyrics: ''});
+        this.notificationService.success(this.translate.instant('lyricCreation.autoSaved'));
+    }
+
+    async generateLyrics() {
+        const currentText = this.lyricForm.get('lyrics')?.value?.trim();
+        if (!currentText) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.textRequired'));
+            return;
+        }
+
+        this.isGeneratingLyrics = true;
+        try {
+            const generatedLyrics = await this.progressService.executeWithProgress(
+                () => this.chatService.generateLyrics(currentText),
+                this.translate.instant('songGenerator.progress.generatingLyrics'),
+                this.translate.instant('songGenerator.progress.generatingLyricsHint')
+            );
+            this.lyricForm.patchValue({lyrics: this.removeQuotes(generatedLyrics)});
+        } catch (error: any) {
+            this.notificationService.error(`Error generating lyrics: ${error.message}`);
+        } finally {
+            this.isGeneratingLyrics = false;
+        }
+    }
+
+    async translateLyrics() {
+        const currentLyrics = this.lyricForm.get('lyrics')?.value?.trim();
+        if (!currentLyrics) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.lyricsRequired'));
+            return;
+        }
+
+        this.isTranslatingLyrics = true;
+        try {
+            const translatedLyrics = await this.progressService.executeWithProgress(
+                () => this.chatService.translateLyric(currentLyrics),
+                this.translate.instant('songGenerator.progress.translatingLyrics'),
+                this.translate.instant('songGenerator.progress.translatingLyricsHint')
+            );
+            this.lyricForm.patchValue({lyrics: this.removeQuotes(translatedLyrics)});
+        } catch (error: any) {
+            this.notificationService.error(`Error translating lyrics: ${error.message}`);
+        } finally {
+            this.isTranslatingLyrics = false;
+        }
+    }
+
+    openLyricArchitectModal(): void {
+        const dialogRef = this.dialog.open(LyricArchitectModalComponent, {
+            width: '800px',
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            disableClose: false,
+            autoFocus: true
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result && result.architectureString) {
+                this.notificationService.success(this.translate.instant('songGenerator.success.architectureUpdated'));
+            }
+        });
+    }
+
+    private removeQuotes(text: string): string {
+        if (!text) return text;
+        return text.replace(/^["']|["']$/g, '').trim();
+    }
+
+    get characterCount(): number {
+        return this.lyricForm.get('lyrics')?.value?.length || 0;
+    }
+
+    get canUndo(): boolean {
+        return this.lastCleanupState !== null || this.lastStructureState !== null;
+    }
+
+    toggleTextToolsDropdown() {
+        this.showTextToolsDropdown = !this.showTextToolsDropdown;
+    }
+
+    closeTextToolsDropdown() {
+        this.showTextToolsDropdown = false;
+    }
+
+    selectTextToolAction(action: 'cleanup' | 'structure' | 'undo') {
+        this.closeTextToolsDropdown();
+
+        if (action === 'cleanup') {
+            this.cleanupLyrics();
+        } else if (action === 'structure') {
+            this.applyStructure();
+        } else if (action === 'undo') {
+            this.undoLastChange();
+        }
+    }
+
+    cleanupLyrics(): void {
+        let lyrics = this.lyricForm.get('lyrics')?.value || '';
+        if (!lyrics.trim()) {
+            return;
+        }
+
+        // Save current state before cleanup
+        this.lastCleanupState = lyrics;
+
+        // 1. Remove trailing spaces from each line
+        lyrics = lyrics.replace(/\s+$/gm, '');
+
+        // 2. Normalize non-ASCII characters
+        const replacements: Record<string, string> = {
+            '\u201C': '"', '\u201D': '"', '\u2018': "'", '\u2019': "'",
+            '\u2014': '--', '\u2013': '-', '\u2026': '...'
+        };
+        Object.keys(replacements).forEach(char => {
+            lyrics = lyrics.replace(new RegExp(char, 'g'), replacements[char]);
+        });
+
+        // 3. Clean up multiple consecutive blank lines (keep max 2 newlines = 1 blank line)
+        // This preserves paragraph separation but removes excessive spacing
+        lyrics = lyrics.replace(/\n{3,}/g, '\n\n');
+
+        this.lyricForm.patchValue({lyrics: lyrics.trim()});
+        this.notificationService.success(this.translate.instant('lyricCreation.cleanupComplete'));
+    }
+
+    applyStructure(): void {
+        let lyrics = this.lyricForm.get('lyrics')?.value || '';
+        if (!lyrics.trim()) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.lyricsRequired'));
+            return;
+        }
+
+        // Check if labels already exist (various formats: Label:, [Label], **LABEL**, etc.)
+        const hasLabels = /^(\w+:|[*[\]]).*$/m.test(lyrics);
+        if (hasLabels) {
+            const confirmed = confirm(this.translate.instant('lyricCreation.confirmApplyStructure'));
+            if (!confirmed) {
+                return;
+            }
+        }
+
+        // Get architecture from service
+        const architectureString = this.architectureService.generateArchitectureString();
+        if (!architectureString || !architectureString.trim()) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.noArchitecture'));
+            return;
+        }
+
+        // Parse architecture: Extract only the elements (INTRO, VERSE1, etc.)
+        // Format is: "Song structure: INTRO - VERSE1 - CHORUS - ..."
+        const match = architectureString.match(/song structure:\s*(.+)/i);
+        if (!match) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.noArchitecture'));
+            return;
+        }
+
+        // Split by " - " and clean up
+        const sections = match[1].split('-').map((s: string) => s.trim()).filter((s: string) => s);
+        if (sections.length === 0) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.noArchitecture'));
+            return;
+        }
+
+        // Save current state before applying structure
+        this.lastStructureState = lyrics;
+
+        // Remove existing labels from lyrics (various formats)
+        lyrics = lyrics.replace(/^(\w+:|[*[\]].*|)$/gm, '');
+        lyrics = lyrics.replace(/^\*{2}[A-Z\s-]+\*{2}\s*/gm, '');
+        lyrics = lyrics.replace(/^[A-Z][a-z]*\d*:\s*/gm, '');
+
+        // Split into paragraphs (separated by blank lines)
+        const paragraphs = lyrics.split(/\n\s*\n/).filter((p: string) => p.trim());
+
+        if (paragraphs.length === 0) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.lyricsRequired'));
+            return;
+        }
+
+        // Apply structure: 1:1 mapping with format "Label:\nText"
+        const structured = paragraphs.map((para: string, i: number) => {
+            if (i < sections.length) {
+                // Capitalize first letter, rest lowercase (e.g., VERSE1 -> Verse1)
+                const label = sections[i].charAt(0).toUpperCase() + sections[i].slice(1).toLowerCase();
+                return `${label}:\n${para.trim()}`;
+            }
+            return para.trim();
+        }).join('\n\n');
+
+        this.lyricForm.patchValue({lyrics: structured});
+        this.notificationService.success(this.translate.instant('lyricCreation.structureApplied'));
+    }
+
+    undoLastChange(): void {
+        if (this.lastStructureState !== null) {
+            // Undo structure change (most recent)
+            this.lyricForm.patchValue({lyrics: this.lastStructureState});
+            this.lastStructureState = null;
+            this.notificationService.success(this.translate.instant('lyricCreation.undoApplied'));
+        } else if (this.lastCleanupState !== null) {
+            // Undo cleanup change
+            this.lyricForm.patchValue({lyrics: this.lastCleanupState});
+            this.lastCleanupState = null;
+            this.notificationService.success(this.translate.instant('lyricCreation.undoApplied'));
+        }
+    }
+
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: Event) {
+        const target = event.target as HTMLElement;
+        const dropdown = target.closest('.text-tools-dropdown-container');
+
+        if (!dropdown && this.showTextToolsDropdown) {
+            this.closeTextToolsDropdown();
+        }
+    }
+}
