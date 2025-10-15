@@ -169,6 +169,77 @@
   }
 }
 
+.text-tools-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-chevron {
+  margin-left: 4px;
+  font-size: 0.75rem;
+}
+
+.dropdown-menu {
+  position: absolute;
+  bottom: calc(100% + $spacing-xs);
+  right: 0;
+  background: $background-white;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-lg;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 220px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: dropdown-fade-up 0.15s ease-out;
+}
+
+.dropdown-item {
+  width: 100%;
+  padding: $spacing-10 $spacing-15;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: $spacing-10;
+  font-size: $font-base;
+  font-family: $font-family-base;
+  color: $text-primary;
+  cursor: pointer;
+  transition: $transition-fast;
+  text-align: left;
+
+  &:hover:not(:disabled) {
+    background-color: $background-light;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  i {
+    width: 16px;
+    flex-shrink: 0;
+    color: $ai-color;
+  }
+
+  span {
+    flex: 1;
+    font-weight: $font-weight-medium;
+  }
+}
+
+@keyframes dropdown-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 768px) {
   .lyric-creation-container {
     padding: $spacing-xs;

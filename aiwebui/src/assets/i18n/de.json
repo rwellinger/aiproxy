@@ -285,9 +285,18 @@
     "lyricArchitecture": "Text-Struktur",
     "resetButton": "Löschen",
     "autoSaved": "Automatisch zum Song Generator gespeichert",
+    "textTools": "Text-Werkzeuge",
+    "cleanupLyrics": "Text bereinigen",
+    "applyStructure": "Struktur anwenden",
+    "undoLastChange": "Letzte Änderung rückgängig",
+    "confirmApplyStructure": "Vorhandene Abschnitts-Marker erkannt. Alle durch Struktur aus Text-Architektur ersetzen?",
+    "structureApplied": "Struktur erfolgreich angewendet",
+    "cleanupComplete": "Text erfolgreich bereinigt",
+    "undoApplied": "Änderung erfolgreich rückgängig gemacht",
     "errors": {
       "textRequired": "Bitte gib zuerst einen Text ein",
-      "lyricsRequired": "Bitte gib zuerst einen Songtext ein"
+      "lyricsRequired": "Bitte gib zuerst einen Songtext ein",
+      "noArchitecture": "Keine Text-Architektur definiert. Bitte konfiguriere zuerst die Architektur."
     }
   },
   "musicStyleChooser": {

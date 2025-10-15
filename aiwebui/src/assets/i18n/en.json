@@ -285,9 +285,18 @@
     "lyricArchitecture": "Lyric Architecture",
     "resetButton": "Clear",
     "autoSaved": "Auto-saved to song generator",
+    "textTools": "Text Tools",
+    "cleanupLyrics": "Cleanup Lyrics",
+    "applyStructure": "Apply Structure",
+    "undoLastChange": "Undo Last Change",
+    "confirmApplyStructure": "Existing section labels detected. Replace all with structure from Lyric Architecture?",
+    "structureApplied": "Structure applied successfully",
+    "cleanupComplete": "Lyrics cleaned up successfully",
+    "undoApplied": "Change reverted successfully",
     "errors": {
       "textRequired": "Please enter text first",
-      "lyricsRequired": "Please enter lyrics first"
+      "lyricsRequired": "Please enter lyrics first",
+      "noArchitecture": "No lyric architecture defined. Please configure architecture first."
     }
   },
   "musicStyleChooser": {

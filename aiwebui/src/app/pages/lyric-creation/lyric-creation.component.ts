@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewEncapsulation, inject} from '@angular/core';
+import {Component, OnInit, ViewEncapsulation, inject, HostListener} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {MatDialog} from '@angular/material/dialog';
@@ -24,6 +24,9 @@ export class LyricCreationComponent implements OnInit {
     lyricForm!: FormGroup;
     isGeneratingLyrics = false;
     isTranslatingLyrics = false;
+    showTextToolsDropdown = false;
+    lastCleanupState: string | null = null;
+    lastStructureState: string | null = null;
 
     private fb = inject(FormBuilder);
     private songService = inject(SongService);
@@ -132,5 +135,150 @@ export class LyricCreationComponent implements OnInit {
 
     get characterCount(): number {
         return this.lyricForm.get('lyrics')?.value?.length || 0;
+    }
+
+    get canUndo(): boolean {
+        return this.lastCleanupState !== null || this.lastStructureState !== null;
+    }
+
+    toggleTextToolsDropdown() {
+        this.showTextToolsDropdown = !this.showTextToolsDropdown;
+    }
+
+    closeTextToolsDropdown() {
+        this.showTextToolsDropdown = false;
+    }
+
+    selectTextToolAction(action: 'cleanup' | 'structure' | 'undo') {
+        this.closeTextToolsDropdown();
+
+        if (action === 'cleanup') {
+            this.cleanupLyrics();
+        } else if (action === 'structure') {
+            this.applyStructure();
+        } else if (action === 'undo') {
+            this.undoLastChange();
+        }
+    }
+
+    cleanupLyrics(): void {
+        let lyrics = this.lyricForm.get('lyrics')?.value || '';
+        if (!lyrics.trim()) {
+            return;
+        }
+
+        // Save current state before cleanup
+        this.lastCleanupState = lyrics;
+
+        // 1. Remove trailing spaces from each line
+        lyrics = lyrics.replace(/\s+$/gm, '');
+
+        // 2. Normalize non-ASCII characters
+        const replacements: Record<string, string> = {
+            '\u201C': '"', '\u201D': '"', '\u2018': "'", '\u2019': "'",
+            '\u2014': '--', '\u2013': '-', '\u2026': '...'
+        };
+        Object.keys(replacements).forEach(char => {
+            lyrics = lyrics.replace(new RegExp(char, 'g'), replacements[char]);
+        });
+
+        // 3. Clean up multiple consecutive blank lines (keep max 2 newlines = 1 blank line)
+        // This preserves paragraph separation but removes excessive spacing
+        lyrics = lyrics.replace(/\n{3,}/g, '\n\n');
+
+        this.lyricForm.patchValue({lyrics: lyrics.trim()});
+        this.notificationService.success(this.translate.instant('lyricCreation.cleanupComplete'));
+    }
+
+    applyStructure(): void {
+        let lyrics = this.lyricForm.get('lyrics')?.value || '';
+        if (!lyrics.trim()) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.lyricsRequired'));
+            return;
+        }
+
+        // Check if labels already exist (various formats: Label:, [Label], **LABEL**, etc.)
+        const hasLabels = /^(\w+:|[*[\]]).*$/m.test(lyrics);
+        if (hasLabels) {
+            const confirmed = confirm(this.translate.instant('lyricCreation.confirmApplyStructure'));
+            if (!confirmed) {
+                return;
+            }
+        }
+
+        // Get architecture from service
+        const architectureString = this.architectureService.generateArchitectureString();
+        if (!architectureString || !architectureString.trim()) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.noArchitecture'));
+            return;
+        }
+
+        // Parse architecture: Extract only the elements (INTRO, VERSE1, etc.)
+        // Format is: "Song structure: INTRO - VERSE1 - CHORUS - ..."
+        const match = architectureString.match(/song structure:\s*(.+)/i);
+        if (!match) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.noArchitecture'));
+            return;
+        }
+
+        // Split by " - " and clean up
+        const sections = match[1].split('-').map((s: string) => s.trim()).filter((s: string) => s);
+        if (sections.length === 0) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.noArchitecture'));
+            return;
+        }
+
+        // Save current state before applying structure
+        this.lastStructureState = lyrics;
+
+        // Remove existing labels from lyrics (various formats)
+        lyrics = lyrics.replace(/^(\w+:|[*[\]].*|)$/gm, '');
+        lyrics = lyrics.replace(/^\*{2}[A-Z\s-]+\*{2}\s*/gm, '');
+        lyrics = lyrics.replace(/^[A-Z][a-z]*\d*:\s*/gm, '');
+
+        // Split into paragraphs (separated by blank lines)
+        const paragraphs = lyrics.split(/\n\s*\n/).filter((p: string) => p.trim());
+
+        if (paragraphs.length === 0) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.lyricsRequired'));
+            return;
+        }
+
+        // Apply structure: 1:1 mapping with format "Label:\nText"
+        const structured = paragraphs.map((para: string, i: number) => {
+            if (i < sections.length) {
+                // Capitalize first letter, rest lowercase (e.g., VERSE1 -> Verse1)
+                const label = sections[i].charAt(0).toUpperCase() + sections[i].slice(1).toLowerCase();
+                return `${label}:\n${para.trim()}`;
+            }
+            return para.trim();
+        }).join('\n\n');
+
+        this.lyricForm.patchValue({lyrics: structured});
+        this.notificationService.success(this.translate.instant('lyricCreation.structureApplied'));
+    }
+
+    undoLastChange(): void {
+        if (this.lastStructureState !== null) {
+            // Undo structure change (most recent)
+            this.lyricForm.patchValue({lyrics: this.lastStructureState});
+            this.lastStructureState = null;
+            this.notificationService.success(this.translate.instant('lyricCreation.undoApplied'));
+        } else if (this.lastCleanupState !== null) {
+            // Undo cleanup change
+            this.lyricForm.patchValue({lyrics: this.lastCleanupState});
+            this.lastCleanupState = null;
+            this.notificationService.success(this.translate.instant('lyricCreation.undoApplied'));
+        }
+    }
+
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: Event) {
+        const target = event.target as HTMLElement;
+        const dropdown = target.closest('.text-tools-dropdown-container');
+
+        if (!dropdown && this.showTextToolsDropdown) {
+            this.closeTextToolsDropdown();
+        }
     }
 }
