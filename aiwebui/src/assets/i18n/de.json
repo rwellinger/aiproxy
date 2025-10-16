@@ -437,9 +437,11 @@
       "tokensHint": "(ca. {{words}} Wörter)"
     },
     "list": {
+      "clearSearch": "Suche löschen",
       "count": "{{count}} Vorlagen",
       "noTemplates": "Keine Vorlagen verfügbar",
       "refresh": "Aktualisieren",
+      "searchPlaceholder": "Suche in Category und Action...",
       "status": {
         "active": "Aktiv",
         "inactive": "Inaktiv"

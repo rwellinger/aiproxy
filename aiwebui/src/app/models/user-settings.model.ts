@@ -10,6 +10,6 @@ export interface UserSettings {
 export const DEFAULT_USER_SETTINGS: UserSettings = {
   songListLimit: 10,
   imageListLimit: 10,
-  promptListLimit: 10,
+  promptListLimit: 8,
   language: 'en'
 };

@@ -28,7 +28,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     // Pagination
     pagination = {
         total: 0,
-        limit: 10, // Will be overridden by user settings
+        limit: 8, // Will be overridden by user settings
         offset: 0
     };
 
@@ -139,10 +139,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
             const term = this.searchTerm.toLowerCase();
             this.filteredTemplates = this.templates.filter(template =>
                 template.category.toLowerCase().includes(term) ||
-                template.action.toLowerCase().includes(term) ||
-                template.description?.toLowerCase().includes(term) ||
-                template.pre_condition.toLowerCase().includes(term) ||
-                template.post_condition.toLowerCase().includes(term)
+                template.action.toLowerCase().includes(term)
             );
         }
 

@@ -437,9 +437,11 @@
       "tokensHint": "(approx. {{words}} words)"
     },
     "list": {
+      "clearSearch": "Clear search",
       "count": "{{count}} templates",
       "noTemplates": "No templates available",
       "refresh": "Refresh",
+      "searchPlaceholder": "Search in category and action...",
       "status": {
         "active": "Active",
         "inactive": "Inactive"
