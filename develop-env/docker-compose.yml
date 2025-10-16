@@ -1,15 +1,15 @@
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     container_name: postgres
     restart: unless-stopped
     ports:
       - "5432:5432"
-    env_file: .env-dev
+    env_file: .env
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - webui-net
+      - thwelly-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U aiproxy -d aiproxysrv"]
       interval: 10s
@@ -22,10 +22,11 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+    env_file: .env
     volumes:
       - redis-data:/data
     networks:
-      - webui-net
+      - thwelly-net
     command: redis-server --appendonly yes
     healthcheck:
         test: ["CMD", "redis-cli", "ping"]
@@ -38,6 +39,6 @@ volumes:
   redis-data:
 
 networks:
-  webui-net:
+  thwelly-net:
     external: true
-    name: webui-network
+    name: thwelly-net
