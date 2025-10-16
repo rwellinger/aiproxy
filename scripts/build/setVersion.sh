@@ -141,12 +141,20 @@ main() {
     update_docker_compose "$FORWARDPROXY_COMPOSE" "$NEW_VERSION" "aiwebui-app"
 
     echo ""
+
+    # Write VERSION file in scripts directory
+    VERSION_FILE="$SCRIPT_DIR/VERSION"
+    echo "v${NEW_VERSION}" > "$VERSION_FILE"
+    echo -e "${GREEN}✓${NC} Created $VERSION_FILE"
+    echo -e "  Content: ${GREEN}v${NEW_VERSION}${NC}"
+
+    echo ""
     echo -e "${GREEN}✓ Successfully updated all version files to ${NEW_VERSION}${NC}"
     echo ""
     echo -e "${YELLOW}Next steps:${NC}"
     echo "  1. Review changes: git diff"
     echo "  2. Commit changes: git add . && git commit -m \"Bump version to v${NEW_VERSION}\""
-    echo "  3. Create tag: git tag -a v${NEW_VERSION} -m \"Release v${NEW_VERSION}\""
+    echo "  3. Create release: cd scripts/build && ./create_release.sh"
     echo ""
 }
 

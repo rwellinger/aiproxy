@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Create a new release with version tagging
-# Usage: ./create_release.sh <VERSION>
-# Example: ./create_release.sh v2.1.6
+# Usage: ./create_release.sh
+# Note: Reads version from scripts/VERSION file (created by setVersion.sh)
 
 set -e
 
@@ -36,26 +36,37 @@ print_header() {
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}\n"
 }
 
-# Check arguments
-if [ -z "$1" ]; then
-    print_error "Keine Version angegeben"
-    echo "Usage: $0 <VERSION>"
-    echo "Example: $0 v2.1.6"
+# Get script directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Check if VERSION file exists
+VERSION_FILE="$SCRIPT_DIR/VERSION"
+if [ ! -f "$VERSION_FILE" ]; then
+    print_error "VERSION File nicht gefunden: $VERSION_FILE"
+    echo ""
+    echo "Bitte zuerst Version setzen:"
+    echo "  ${YELLOW}cd $SCRIPT_DIR${NC}"
+    echo "  ${YELLOW}./setVersion.sh <VERSION>${NC}"
+    echo ""
+    echo "Beispiel:"
+    echo "  ${YELLOW}./setVersion.sh 2.2.3${NC}"
+    echo ""
     exit 1
 fi
 
-VERSION="$1"
+# Read version from file
+VERSION=$(cat "$VERSION_FILE" | tr -d '[:space:]')
 
 # Validate version format (vX.Y.Z)
 if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    print_error "Ungültiges Versionsformat. Erwarte Format: vX.Y.Z (z.B. v2.1.6)"
+    print_error "Ungültiges Versionsformat in $VERSION_FILE: $VERSION"
+    print_error "Erwarte Format: vX.Y.Z (z.B. v2.1.6)"
     exit 1
 fi
 
 print_header "Release ${VERSION} erstellen"
 
-# Get project root directory
-PROJECT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$PROJECT_DIR"
 
 git fetch

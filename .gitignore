@@ -2,6 +2,7 @@
 .vscode
 .claude
 .DS_Store
+VERSION
 package-lock.json
 package.json
 node_modules
@@ -35,5 +36,4 @@ dump.rdb
 /aitestmock/static/images/*
 /aitestmock/static/audio/*
 /docs/*.pdf
-
 /develop-env/.env-dev
