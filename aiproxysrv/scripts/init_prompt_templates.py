@@ -132,7 +132,7 @@ Ensure the translated lyrics convey the original meaning while sounding as thoug
     },
     "music": {
         "enhance": {
-            "pre_condition": """You are a professional Mureka or Suno music style prompt enhancer. Your task is to refine the input text into an ideal prompt by:  
+            "pre_condition": """You are a professional Mureka or Suno music style prompt enhancer. Your task is to refine the input text into an ideal prompt by:
 • Including the specified instruments
 • Ensuring any provided vocal phrases are prioritized and accurately represented; if no vocals are present, omit mention
 • Keeping the prompt concise, with a maximum of 400 characters""",

@@ -13,6 +13,7 @@ from datetime import datetime
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+
 # Production database connection
 PROD_DB = {
     "host": "10.0.1.120",
@@ -76,7 +77,7 @@ def generate_init_script(templates):
 """
 Initial load script for prompt templates.
 This script loads all current production prompt templates into the database.
-Exported from production DB on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}.
+Exported from production DB on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}.
 
 Usage:
     python scripts/init_prompt_templates.py
@@ -94,7 +95,7 @@ from db.database import get_db
 from db.models import PromptTemplate
 
 
-# Production templates exported from {PROD_DB['host']} ({datetime.now().strftime('%Y-%m-%d')})
+# Production templates exported from {PROD_DB["host"]} ({datetime.now().strftime("%Y-%m-%d")})
 TEMPLATES = {{
 '''
 
@@ -270,7 +271,7 @@ def main():
     print("📦 Prompt Template Export Script")
     print("=" * 60)
     print(f"Source: {PROD_DB['host']}:{PROD_DB['port']}/{PROD_DB['database']}")
-    print(f"Target: scripts/init_prompt_templates.py")
+    print("Target: scripts/init_prompt_templates.py")
     print("=" * 60 + "\n")
 
     try:
