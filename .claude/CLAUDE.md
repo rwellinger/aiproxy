@@ -608,3 +608,108 @@ GET  /api/account/status       # Mureka account status
 **Security:** CORS, Token Management, Input Validation, Environment Variables, Proxy Pattern
 
 **Workflow:** Hot Reload, Build Pipeline, Linting, Type Checking, DB Migrations, Docker Compose
+
+---
+
+# CI/CD - GitHub Actions
+
+## Setup
+
+- **Platform:** GitHub Actions (hosted)
+- **Trigger:** Git tag push (`v*.*.*`)
+- **Workflow:** `.github/workflows/release.yml`
+- **Registry:** GitHub Container Registry (GHCR)
+- **Architecture:** ARM64 only (linux/arm64)
+
+## Build Triggers
+
+### Automatic
+- **Tag Push:** `v*.*.*` → Full build & push to GHCR
+- Triggered by: `./scripts/build/create_release.sh v2.2.6`
+
+### Manual
+- GitHub UI: Actions → "Build & Release" → "Run workflow"
+- Or: Re-run failed builds
+
+## Pipeline Steps
+
+1. **Checkout:** Clone repository
+2. **QEMU Setup:** Enable ARM64 emulation
+3. **Buildx:** Multi-platform Docker builds
+4. **Login GHCR:** Automatic via `GITHUB_TOKEN`
+5. **Build Images:** Parallel builds with layer caching
+   - `aiproxysrv-app` (backend)
+   - `celery-worker-app` (worker)
+   - `aiwebui-app` (frontend)
+6. **Lint:** ESLint on Angular code (parallel job)
+
+## Build Time
+
+- **Expected:** ~10-12 minutes
+- **First build:** ~15 minutes (no cache)
+- **Subsequent:** ~8-10 minutes (with cache)
+
+## Secrets
+
+**Automatically available (no configuration needed):**
+- `GITHUB_TOKEN` - Auto-generated for GHCR push access
+
+## Cost
+
+**Free Tier:**
+- 2000 minutes/month for private repos
+- Linux runners: 1x multiplier
+- ~10-12 min/build = **~166 builds/month free**
+
+## Monitoring
+
+**Build Status:**
+```bash
+# Via GitHub UI
+https://github.com/rwellinger/thwelly_ai_tools/actions
+
+# Via gh CLI
+gh run list --repo rwellinger/thwelly_ai_tools
+gh run watch --repo rwellinger/thwelly_ai_tools
+
+# Badge in README
+[![Build Status](https://github.com/rwellinger/thwelly_ai_tools/actions/workflows/release.yml/badge.svg)](https://github.com/rwellinger/thwelly_ai_tools/actions)
+```
+
+## Troubleshooting
+
+### Build schlägt fehl
+
+```bash
+# Check logs in GitHub UI
+https://github.com/rwellinger/thwelly_ai_tools/actions
+
+# Or via CLI
+gh run view --repo rwellinger/thwelly_ai_tools
+
+# Re-run failed build
+gh run rerun <RUN_ID> --repo rwellinger/thwelly_ai_tools
+```
+
+### Images nicht in GHCR
+
+```bash
+# Check GHCR packages
+https://github.com/rwellinger?tab=packages
+
+# Verify GITHUB_TOKEN permissions
+# Actions → Workflow → Settings → Permissions
+# Ensure "Read and write permissions" for packages
+```
+
+### Fallback: Manuelle Builds
+
+```bash
+# Falls GitHub Actions nicht verfügbar
+./scripts/build/build-and-push-aiproxysrv.sh v2.2.6
+./scripts/build/build-and-push-aiwebui.sh v2.2.6
+```
+
+## Workflow File Location
+
+`.github/workflows/release.yml`

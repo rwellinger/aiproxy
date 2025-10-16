@@ -39,11 +39,12 @@ A full-stack platform for AI-powered image and music generation with Python back
 
 ## Build Status
 
-[![Build Status](http://10.0.1.120:8080/api/badges/rwellinger/thwelly_ai_tools/status.svg)](http://10.0.1.120:8080/rwellinger/thwelly_ai_tools)
+[![Build Status](https://github.com/rwellinger/thwelly_ai_tools/actions/workflows/release.yml/badge.svg)](https://github.com/rwellinger/thwelly_ai_tools/actions)
 
-- **CI/CD:** Drone CI
-- **Build Server:** Mac Studio M1 Max
+- **CI/CD:** GitHub Actions
+- **Build Server:** GitHub Hosted Runners
 - **Registry:** GitHub Container Registry (GHCR)
+- **Architecture:** ARM64 (linux/arm64)
 
 ---
 
@@ -108,9 +109,70 @@ The release process is automated with scripts that handle versioning, git taggin
 - ✅ Creates git tag with message
 - ✅ Pushes commit and tag to remote
 
-#### 2. Build & Push Docker Images
+#### 2. Automated Build via GitHub Actions
 
-After creating the release, build and push Docker images:
+After pushing the tag, **GitHub Actions automatically builds and pushes** Docker images:
+
+**What happens automatically:**
+- ✅ GitHub Actions triggered by tag push
+- ✅ Builds 3 Docker images in parallel:
+  - `ghcr.io/rwellinger/aiproxysrv-app` (Backend API)
+  - `ghcr.io/rwellinger/celery-worker-app` (Async Worker)
+  - `ghcr.io/rwellinger/aiwebui-app` (Frontend)
+- ✅ Tags: `vX.Y.Z` + `latest`
+- ✅ Pushes to GitHub Container Registry (GHCR)
+- ✅ ~10-12 minutes build time
+
+**Monitor build status:**
+```bash
+# Via GitHub UI
+https://github.com/rwellinger/thwelly_ai_tools/actions
+
+# Via gh CLI
+gh run watch --repo rwellinger/thwelly_ai_tools
+```
+
+#### 3. Re-run Failed Builds
+
+If a specific job fails (e.g., frontend build error), you can re-run only that job:
+
+**GitHub UI:**
+1. Go to: https://github.com/rwellinger/thwelly_ai_tools/actions
+2. Click on the failed run (e.g., "Build & Release #42")
+3. You'll see 4 jobs:
+   ```
+   ✅ build-backend      (aiproxysrv-app)
+   ✅ build-worker       (celery-worker-app)
+   ❌ build-frontend     (aiwebui-app)        ← Failed!
+   ✅ lint-frontend
+   ```
+4. Click on the failed job (e.g., `build-frontend`)
+5. Click **"Re-run job"** (top right)
+6. Only that job will rebuild (~5-6 minutes)
+
+**GitHub CLI:**
+```bash
+# Find the run ID
+gh run list --repo rwellinger/thwelly_ai_tools
+
+# Re-run only the failed job
+gh run rerun <RUN_ID> --job build-frontend --repo rwellinger/thwelly_ai_tools
+
+# Or re-run all jobs
+gh run rerun <RUN_ID> --repo rwellinger/thwelly_ai_tools
+```
+
+**Build Jobs:**
+- `build-backend` - Backend API (~4-5 min)
+- `build-worker` - Celery Worker (~3-4 min)
+- `build-frontend` - Angular UI (~5-6 min)
+- `lint-frontend` - ESLint check (~1-2 min)
+
+All jobs run in **parallel**. Total time = longest job (~5-6 min).
+
+#### Optional: Manual Build (Fallback)
+
+If GitHub Actions is unavailable, use manual scripts:
 
 ```bash
 # Build and push backend images (aiproxysrv-app + celery-worker-app)
@@ -118,24 +180,8 @@ After creating the release, build and push Docker images:
 
 # Build and push frontend image (aiwebui-app)
 ./scripts/build/build-and-push-aiwebui.sh
-```
 
-**What these do:**
-- ✅ Read version from VERSION files automatically
-- ✅ Build Docker images with correct tags (`vX.Y.Z` + `latest`)
-- ✅ Check if version already exists in registry
-- ✅ Push to GitHub Container Registry (`ghcr.io/rwellinger/*`)
-- ✅ Support `--force` flag to skip confirmation
-
-**Available Docker Images:**
-- `ghcr.io/rwellinger/aiproxysrv-app:vX.Y.Z` (Backend API)
-- `ghcr.io/rwellinger/celery-worker-app:vX.Y.Z` (Async Worker)
-- `ghcr.io/rwellinger/aiwebui-app:vX.Y.Z` (Frontend)
-
-#### Optional: Force Push (Overwrite Existing Tags)
-
-```bash
-# Build and push with force (skip confirmation)
+# Force push (skip confirmation)
 ./scripts/build/build-and-push-aiproxysrv.sh --force
 ./scripts/build/build-and-push-aiwebui.sh --force
 ```
