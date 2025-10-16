@@ -457,13 +457,11 @@
   },
   "sideMenu": {
     "aiChat": "AI Chat",
-    "aiUsage": "AI Nutzung",
     "brandName": "thWelly's AI Toolbox",
     "createImage": "Erstellen",
     "createSong": "Erstellen",
     "external": "Extern",
     "gallery": "Galerie",
-    "humanize": "Humanisieren",
     "library": "Bibliothek",
     "login": "Anmelden",
     "logout": "Abmelden",
@@ -474,7 +472,10 @@
     "picture": "Bild",
     "profile": "Profil",
     "promptTemplates": "Prompt Vorlagen",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "custom1": "AI Nutzung",
+    "custom2": "Claude Code",
+    "custom3": "Claude Code API"
   },
   "songDetailPanel": {
     "choices": {
