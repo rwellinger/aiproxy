@@ -58,7 +58,7 @@ jobs:
         working-directory: aiproxysrv
         run: |
           pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,test]"
 
       - name: Run Ruff (Linter)
         working-directory: aiproxysrv
