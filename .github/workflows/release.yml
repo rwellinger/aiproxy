@@ -47,7 +47,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./aiproxysrv
-          file: ./aiproxysrv/dockerfile
+          file: ./aiproxysrv/Dockerfile
           target: app
           platforms: linux/arm64
           push: true
@@ -100,7 +100,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./aiproxysrv
-          file: ./aiproxysrv/dockerfile
+          file: ./aiproxysrv/Dockerfile
           target: worker
           platforms: linux/arm64
           push: true
@@ -153,7 +153,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./aiwebui
-          file: ./aiwebui/dockerfile
+          file: ./aiwebui/Dockerfile
           target: production
           platforms: linux/arm64
           push: true
