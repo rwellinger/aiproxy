@@ -10,7 +10,7 @@ __pycache__
 *.pyc
 *.pyo
 *.bak
-/docs/ARC42_Architecture_Documentation.pdf
+*.pdf
 aiproxysrv/images
 aiproxysrv/backup
 aiproxysrv/alembic.ini
@@ -35,5 +35,4 @@ dump.rdb
 
 /aitestmock/static/images/*
 /aitestmock/static/audio/*
-/docs/*.pdf
 /develop-env/.env-dev
