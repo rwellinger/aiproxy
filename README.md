@@ -12,6 +12,13 @@ A full-stack platform for AI-powered image and music generation with Python back
   - Configurable system context for AI behavior customization
   - Token usage tracking with context window visualization
   - Message formatting with markdown support
+- **Lyric Creation Editor** - Professional songwriting tool with AI assistance
+  - Interactive section-based editor (Verse, Chorus, Bridge, etc.)
+  - Song architecture builder with drag & drop reordering
+  - AI-powered lyric improvement, rewriting, and extension
+  - Text tools: cleanup, structure application, undo functionality
+  - Character counter and section navigation
+  - Auto-save integration with song generator
 - **Image Generation** via DALL·E 3 (OpenAI)
 - **Song Generation** via Mureka API (asynchronous with Celery)
 - **PostgreSQL** database for persistent storage

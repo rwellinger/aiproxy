@@ -23,6 +23,7 @@
    - [6.1 Image Generation (Synchronous)](#61-image-generation-synchronous)
    - [6.2 Music Generation (Asynchronous)](#62-music-generation-asynchronous)
    - [6.3 AI Chat Conversation (Persistent)](#63-ai-chat-conversation-persistent)
+   - [6.4 Lyric Creation Workflow](#64-lyric-creation-workflow)
 7. [Deployment View](#7-deployment-view)
    - [7.1 Development Environment](#71-development-environment)
    - [7.2 Production Environment](#72-production-environment)
@@ -74,6 +75,11 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
 - **AI Chat Conversations** - Interactive conversational AI via Ollama with persistent conversation history
   - Integrated chat UI as part of thWelly Toolbox (replaced Open WebUI dependency)
   - Direct Ollama integration with full conversation management
+- **Lyric Creation Editor** - Professional songwriting tool with AI-powered assistance
+  - Section-based editing (Intro, Verse, Pre-Chorus, Chorus, Bridge, Outro)
+  - Song architecture builder with drag & drop reordering
+  - AI-powered section improvement, rewriting, and extension via Ollama
+  - Text tools: cleanup, structure application, section navigation, undo functionality
 - **Image Generation** via DALL-E 3 (OpenAI API)
 - **Music Generation** via Mureka API
 - **Asynchronous Processing** for time-intensive generation processes
@@ -176,8 +182,10 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   ```
   src/app/
   ├── components/    # Shared Components
+  │   └── lyric-architect-modal/  # Song architecture builder with drag & drop
   ├── pages/         # Feature Pages
   │   ├── ai-chat/            # AI Chat conversation interface
+  │   ├── lyric-creation/     # Lyric editor with section-based editing & AI tools
   │   ├── image-generator/    # UI for image generation
   │   ├── image-view/         # Display of generated images
   │   ├── song-generator/     # UI for music generation
@@ -187,9 +195,11 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   │   └── prompt-templates/   # Template management for prompts
   ├── services/      # API Services & Business Logic
   │   ├── business/           # ConversationService for chat management
-  │   └── config/             # ChatService, ApiConfigService
+  │   ├── config/             # ChatService, ApiConfigService
+  │   └── lyric-architecture.service.ts  # Song structure management & persistence
   ├── models/        # TypeScript Interfaces & Models
-  │   └── conversation.model.ts  # Conversation, Message, OllamaModel
+  │   ├── conversation.model.ts  # Conversation, Message, OllamaModel
+  │   └── lyric-architecture.model.ts  # SongSection, SongSectionItem, Architecture config
   ├── pipes/         # Custom Angular Pipes
   │   └── message-content.pipe.ts  # Markdown & link formatting
   ├── guards/        # Route Guards
@@ -289,6 +299,7 @@ src/assets/i18n/
 **Existing Translation Categories**:
 - `common.*` - Shared UI elements (buttons, labels, etc.)
 - `chat.*` - AI Chat interface
+- `lyricCreation.*` - Lyric editor and section-based editing (40+ keys)
 - `imageGenerator.*` - Image generation page
 - `imageView.*` - Image gallery and details
 - `songGenerator.*` - Song generation page (50+ keys)
@@ -376,6 +387,88 @@ Users can change the language in **User Profile → Settings → Language**. The
 - **Message History**: Full conversation context sent to Ollama for coherent responses
 - **CRUD Operations**: Create, read, update (title), delete conversations
 - **Markdown Support**: Messages rendered with markdown formatting and clickable links
+
+### 6.4 Lyric Creation Workflow
+
+**Overview**: The Lyric Creation Editor provides a comprehensive songwriting tool with AI-powered assistance for creating, structuring, and refining song lyrics.
+
+**Key Components:**
+
+1. **Lyric Editor Page** (`lyric-creation.component.ts`)
+   - Main editing interface with textarea and toolbar
+   - Auto-save integration with song generator (localStorage)
+   - Character counter and visual feedback
+   - Text tools dropdown for structure operations
+
+2. **Architecture Builder Modal** (`lyric-architect-modal.component.ts`)
+   - Visual song structure designer with drag & drop
+   - Available sections: INTRO, VERSE, PRE_CHORUS, CHORUS, BRIDGE, OUTRO
+   - Section reordering and dynamic verse numbering
+   - Persistence in localStorage via `LyricArchitectureService`
+
+3. **Section Editor Mode**
+   - Split-view interface for section-by-section editing
+   - Active section highlighting with navigation
+   - Per-section AI operations (improve, rewrite, extend)
+   - Full context awareness for coherent improvements
+
+**Workflow Steps:**
+
+1. **Text Input**
+   - User enters or pastes raw lyric text
+   - Auto-save to localStorage on every change
+   - Character count displayed in real-time
+
+2. **Architecture Definition**
+   - User opens architecture builder modal
+   - Drags sections from palette to structure list
+   - Reorders sections via drag & drop
+   - Saves architecture (e.g., "VERSE1 - CHORUS - VERSE2 - CHORUS - BRIDGE - CHORUS")
+
+3. **Structure Application**
+   - User clicks "Apply Structure" in text tools
+   - System splits text into paragraphs (separated by blank lines)
+   - Maps paragraphs 1:1 to architecture sections
+   - Applies Markdown bold labels: `**Verse1**\nLyric text...`
+
+4. **Section-Based Editing** (Optional)
+   - User activates Section Editor mode
+   - System parses structured lyrics into section objects
+   - Split-view: section list (left) + active section editor (right)
+   - User selects section to edit
+
+5. **AI-Powered Improvements**
+   - **Improve Section**: Ollama analyzes section in full song context, suggests improvements
+   - **Rewrite Section**: Complete rewrite while maintaining theme and style
+   - **Extend Section**: Adds additional lines (e.g., +4 lines) to section
+
+6. **Text Tools**
+   - **Cleanup**: Removes trailing spaces, normalizes characters, fixes blank lines
+   - **Undo**: Reverts last cleanup or structure application
+   - **Rebuild Architecture**: Reverse-engineers architecture from structured lyrics
+
+7. **Integration with Song Generator**
+   - Lyrics persist in localStorage under song generator key
+   - User navigates to Song Generator page
+   - Lyrics pre-filled, ready for Mureka generation
+
+**Technical Details:**
+
+- **AI Integration**: All AI operations use `ChatService` with prompt templates (category: "lyrics")
+- **State Management**: Local component state with undo buffers (`lastCleanupState`, `lastStructureState`, `lastSectionState`)
+- **Parsing Logic**: Regex-based section detection supports both `**Label**` and `Label:` formats
+- **Architecture Storage**: JSON in localStorage with `LyricArchitectureConfig` model
+- **Performance**: Progress overlay with `ProgressService` for all AI operations
+- **Internationalization**: Full i18n support via `lyricCreation.*` translation keys
+
+**User Experience Flow:**
+
+```
+[Lyric Editor] → Enter Text → [Architecture Modal] → Define Structure →
+[Apply Structure] → Structured Lyrics → [Section Editor] →
+Edit Individual Sections → [AI Tools] → Improve/Rewrite/Extend →
+[Apply & Save] → [Song Generator] → Generate Song
+```
 
 ---
 
@@ -543,6 +636,7 @@ services:
 - **Image Generation**: < 30s for DALL-E 3 calls
 - **Song Generation**: 2-5 minutes (depending on Mureka)
 - **AI Chat Response**: 1-5 seconds (depending on Ollama model and context size)
+- **Lyric AI Operations**: 2-8 seconds (improve/rewrite/extend via Ollama)
 - **Concurrent Users**: 1 (personal use)
 
 ### 11.2 Security
@@ -582,6 +676,11 @@ services:
 | **Settings**   | Frontend component for system configuration and user preferences                |
 | **Entity-Relationship** | Database schema with 6 tables (including conversations, messages)         |
 | **aitestmock** | Mock server for OpenAI and Mureka APIs for cost reduction in development/testing |
+| **Lyric Editor** | Integrated songwriting tool with section-based editing and AI assistance        |
+| **Song Architecture** | Structured song layout definition (INTRO, VERSE, CHORUS, BRIDGE, OUTRO, etc.) |
+| **Section Editor** | Split-view interface for editing individual lyric sections with AI tools        |
+| **Lyric Architecture Service** | Frontend service managing song structure persistence in localStorage    |
+| **Text Tools** | Cleanup, structure application, and undo operations for lyric text              |
 
 ---
 
@@ -733,6 +832,6 @@ cd src && alembic current
 ---
 
 *Document created: 01.09.2025*
-*Last updated: 09.10.2025*
-*Version: 1.6*
+*Last updated: 16.10.2025*
+*Version: 1.7*
 *Author: Rob (rob.wellinger@gmail.com)*
