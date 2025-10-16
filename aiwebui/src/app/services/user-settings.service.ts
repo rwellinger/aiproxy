@@ -34,6 +34,10 @@ export class UserSettingsService {
     this.updateSettings({ imageListLimit: limit });
   }
 
+  updatePromptListLimit(limit: number): void {
+    this.updateSettings({ promptListLimit: limit });
+  }
+
   updateLanguage(language: Language): void {
     this.updateSettings({ language });
   }

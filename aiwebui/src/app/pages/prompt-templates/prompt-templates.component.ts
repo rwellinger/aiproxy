@@ -5,6 +5,7 @@ import {Subject, debounceTime, distinctUntilChanged, takeUntil} from 'rxjs';
 import {PromptTemplate, PromptTemplateUpdate} from '../../models/prompt-template.model';
 import {PromptTemplateService} from '../../services/config/prompt-template.service';
 import {NotificationService} from '../../services/ui/notification.service';
+import {UserSettingsService} from '../../services/user-settings.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
@@ -21,7 +22,15 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     // Template data
     templates: PromptTemplate[] = [];
     filteredTemplates: PromptTemplate[] = [];
+    paginatedTemplates: PromptTemplate[] = [];
     selectedTemplate: PromptTemplate | null = null;
+
+    // Pagination
+    pagination = {
+        total: 0,
+        limit: 10, // Will be overridden by user settings
+        offset: 0
+    };
 
     // UI state
     isLoading = false;
@@ -31,6 +40,9 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     searchTerm: string = '';
     private searchSubject = new Subject<string>();
     private destroy$ = new Subject<void>();
+
+    // Make Math available in template
+    Math = Math;
 
     // Editing state
     editingTemplate: PromptTemplate | null = null;
@@ -62,6 +74,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
 
     private promptService = inject(PromptTemplateService);
     private notificationService = inject(NotificationService);
+    private settingsService = inject(UserSettingsService);
     private translate = inject(TranslateService);
 
     constructor() {
@@ -81,7 +94,16 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.loadTemplates();
+        this.loadUserSettings();
+    }
+
+    private loadUserSettings(): void {
+        this.settingsService.getSettings()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(settings => {
+                this.pagination.limit = settings.promptListLimit;
+                this.loadTemplates();
+            });
     }
 
     ngOnDestroy(): void {
@@ -122,6 +144,24 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
                 template.pre_condition.toLowerCase().includes(term) ||
                 template.post_condition.toLowerCase().includes(term)
             );
+        }
+
+        // Update pagination after filtering
+        this.pagination.total = this.filteredTemplates.length;
+        this.pagination.offset = 0; // Reset to first page
+        this.updatePaginatedTemplates();
+    }
+
+    private updatePaginatedTemplates(): void {
+        const start = this.pagination.offset;
+        const end = start + this.pagination.limit;
+        this.paginatedTemplates = this.filteredTemplates.slice(start, end);
+
+        // Auto-select first template if available and none selected
+        if (this.paginatedTemplates.length > 0 && !this.selectedTemplate) {
+            this.selectTemplate(this.paginatedTemplates[0]);
+        } else if (this.paginatedTemplates.length === 0) {
+            this.selectedTemplate = null;
         }
     }
 
@@ -242,5 +282,68 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
         // Rough estimation: 1 token ≈ 0.75 words
         const words = Math.round(tokens * 0.75);
         return this.translate.instant('promptTemplates.detail.tokensHint', { words });
+    }
+
+    // Pagination methods
+    getVisiblePages(): (number | string)[] {
+        const totalPages = Math.ceil(this.pagination.total / this.pagination.limit);
+        const current = Math.floor(this.pagination.offset / this.pagination.limit) + 1;
+        const pages: (number | string)[] = [];
+
+        if (totalPages <= 7) {
+            // Show all pages if 7 or less
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Smart pagination with ellipsis
+            if (current <= 4) {
+                // Show: 1 2 3 4 5 ... last
+                for (let i = 1; i <= 5; i++) pages.push(i);
+                pages.push('...');
+                pages.push(totalPages);
+            } else if (current >= totalPages - 3) {
+                // Show: 1 ... n-4 n-3 n-2 n-1 n
+                pages.push(1);
+                pages.push('...');
+                for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+            } else {
+                // Show: 1 ... current-1 current current+1 ... last
+                pages.push(1);
+                pages.push('...');
+                for (let i = current - 1; i <= current + 1; i++) pages.push(i);
+                pages.push('...');
+                pages.push(totalPages);
+            }
+        }
+
+        return pages;
+    }
+
+    goToPage(pageIndex: number): void {
+        const totalPages = Math.ceil(this.pagination.total / this.pagination.limit);
+        if (pageIndex >= 0 && pageIndex < totalPages) {
+            this.pagination.offset = pageIndex * this.pagination.limit;
+            this.updatePaginatedTemplates();
+        }
+    }
+
+    nextPage(): void {
+        const totalPages = Math.ceil(this.pagination.total / this.pagination.limit);
+        const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+        if (currentPage < totalPages - 1) {
+            this.goToPage(currentPage + 1);
+        }
+    }
+
+    previousPage(): void {
+        const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+        if (currentPage > 0) {
+            this.goToPage(currentPage - 1);
+        }
+    }
+
+    trackByPage(index: number, page: number | string): number | string {
+        return page;
     }
 }

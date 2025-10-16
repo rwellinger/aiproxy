@@ -130,6 +130,19 @@
 
                                 <div class="form-row">
                                     <mat-form-field appearance="outline" class="half-width">
+                                        <mat-label>{{ 'userProfile.promptsPerPage' | translate }}</mat-label>
+                                        <input
+                                                matInput
+                                                type="number"
+                                                formControlName="promptListLimit"
+                                                (blur)="updatePromptListLimit()"
+                                                min="5"
+                                                max="100"
+                                                [placeholder]="'userProfile.promptsPerPageHint' | translate">
+                                        <mat-hint>{{ 'userProfile.promptsPerPageHint' | translate }}</mat-hint>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="half-width">
                                         <mat-label>{{ 'userProfile.language' | translate }}</mat-label>
                                         <mat-select
                                                 formControlName="language"

@@ -22,9 +22,9 @@
                                 </div>
                             </div>
 
-                            <div class="template-list" *ngIf="templates.length > 0">
+                            <div class="template-list" *ngIf="paginatedTemplates.length > 0">
                                 <div class="template-item"
-                                     *ngFor="let template of templates; trackBy: trackByTemplate"
+                                     *ngFor="let template of paginatedTemplates; trackBy: trackByTemplate"
                                      [class.selected]="selectedTemplate?.category === template.category && selectedTemplate?.action === template.action"
                                      (click)="selectTemplate(template)">
 
@@ -53,6 +53,41 @@
                             <div class="no-templates" *ngIf="templates.length === 0 && !isLoading">
                                 <i class="fas fa-file-alt"></i>
                                 <p>{{ 'promptTemplates.list.noTemplates' | translate }}</p>
+                            </div>
+
+                            <!-- Pagination Controls -->
+                            <div class="pagination-container" *ngIf="pagination.total > pagination.limit">
+                                <div class="modern-pagination">
+                                    <div class="pagination-pills">
+                                        <button type="button"
+                                                class="pagination-pill prev"
+                                                (click)="previousPage()"
+                                                [disabled]="pagination.offset === 0 || isLoading"
+                                                [class.disabled]="pagination.offset === 0 || isLoading">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+
+                                        <ng-container *ngFor="let page of getVisiblePages(); trackBy: trackByPage">
+                                            <button type="button"
+                                                    *ngIf="page !== '...'"
+                                                    class="pagination-pill page-number"
+                                                    [class.active]="page === Math.floor(pagination.offset / pagination.limit) + 1"
+                                                    (click)="goToPage(+page - 1)"
+                                                    [disabled]="isLoading">
+                                                {{ page }}
+                                            </button>
+                                            <span *ngIf="page === '...'" class="pagination-ellipsis">⋯</span>
+                                        </ng-container>
+
+                                        <button type="button"
+                                                class="pagination-pill next"
+                                                (click)="nextPage()"
+                                                [disabled]="pagination.offset + pagination.limit >= pagination.total || isLoading"
+                                                [class.disabled]="pagination.offset + pagination.limit >= pagination.total || isLoading">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

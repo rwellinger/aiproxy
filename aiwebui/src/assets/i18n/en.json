@@ -763,6 +763,8 @@
     "imagesPerPageHint": "5-100 images per page",
     "inactive": "Inactive",
     "language": "Language",
+    "promptsPerPage": "Prompts per page",
+    "promptsPerPageHint": "5-100 prompts per page",
     "languageHint": "Select your preferred language",
     "lastLogin": "Last login:",
     "lastName": "Last Name",
@@ -774,6 +776,7 @@
     "notifications": {
       "imageListLimitUpdated": "Image list limit updated",
       "languageUpdated": "Language updated",
+      "promptListLimitUpdated": "Prompt list limit updated",
       "settingsReset": "Settings reset to defaults",
       "songListLimitUpdated": "Song list limit updated"
     },
