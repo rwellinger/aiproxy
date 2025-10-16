@@ -390,16 +390,6 @@
         }
     }
 
-    .save-btn {
-        border-color: $success-color;
-        color: $success-color;
-
-        &:hover:not(:disabled) {
-            background-color: $success-color;
-            color: $background-white;
-        }
-    }
-
     .cancel-btn {
         border-color: $text-muted;
         color: $text-muted;

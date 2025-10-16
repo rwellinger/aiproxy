@@ -431,7 +431,7 @@
 }
 
 .apply-button {
-  @include button-primary('base');
+  @include button-ai('base');
   font-weight: $font-weight-medium !important;
 }
 

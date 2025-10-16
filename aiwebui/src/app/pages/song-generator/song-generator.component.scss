@@ -54,7 +54,6 @@
       height: calc(100vh - 2rem);
       display: flex;
       flex-direction: column;
-      min-height: 450px;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
       border-radius: 12px;
       overflow: hidden;
@@ -82,7 +81,8 @@
 
       mat-card-content {
         padding: 1rem;
-        min-height: 350px;
+        flex: 1;
+        overflow-y: auto;
       }
 
       mat-card-actions {

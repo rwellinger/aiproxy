@@ -504,11 +504,6 @@
 
 .save-btn {
     @include button-primary('base');
-    background: $success-color;
-
-    &:hover:not(:disabled) {
-        background: darken($success-color, 10%);
-    }
 }
 
 .cancel-btn {

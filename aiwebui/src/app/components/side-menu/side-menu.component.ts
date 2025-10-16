@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../services/business/auth.service';
@@ -20,18 +20,29 @@ export class SideMenuComponent implements OnInit, OnDestroy {
   authState: AuthState | null = null;
   currentUser: User | null = null;
   firstName = 'Guest'; // Computed property to avoid method calls in template
+  currentLang = 'EN'; // Current language code
 
   private destroy$ = new Subject<void>();
   private authService = inject(AuthService);
   private router = inject(Router);
+  private translate = inject(TranslateService);
 
   ngOnInit(): void {
+    // Subscribe to auth state changes
     this.authService.authState$
       .pipe(takeUntil(this.destroy$))
       .subscribe(authState => {
         this.authState = authState;
         this.currentUser = authState.user;
         this.updateFirstName(); // Update computed property
+      });
+
+    // Subscribe to language changes
+    this.currentLang = this.translate.currentLang?.toUpperCase() || 'EN';
+    this.translate.onLangChange
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        this.currentLang = event.lang?.toUpperCase() || 'EN';
       });
   }
 

@@ -190,7 +190,7 @@ select {
 }
 
 form button[type="submit"] {
-    @include button-success('lg');
+    @include button-primary('lg');
 }
 
 /* Form buttons - neutral by default, AI-buttons excluded */
