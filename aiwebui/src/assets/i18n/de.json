@@ -285,6 +285,10 @@
     "lyricArchitecture": "Text-Struktur",
     "resetButton": "Löschen",
     "autoSaved": "Automatisch zum Song Generator gespeichert",
+    "edit": "Bearbeiten",
+    "tools": "Werkzeuge",
+    "searchReplace": "Suchen & Ersetzen",
+    "finalizeLyrics": "Text finalisieren",
     "textTools": "Text-Werkzeuge",
     "cleanupLyrics": "Text bereinigen",
     "applyStructure": "Struktur anwenden",
@@ -294,10 +298,21 @@
     "confirmRebuild": "Erkannte Struktur wird Text-Architektur überschreiben. Fortfahren?",
     "structureApplied": "Struktur erfolgreich angewendet",
     "cleanupComplete": "Text erfolgreich bereinigt",
+    "finalizeComplete": "Text erfolgreich finalisiert (Bereinigung + Struktur angewendet)",
     "undoApplied": "Änderung erfolgreich rückgängig gemacht",
     "rebuildSuccess": "Architektur rekonstruiert: {{count}} Abschnitte erkannt",
     "rebuildSuccessWithWarnings": "Architektur rekonstruiert: {{count}} Abschnitte erkannt (einige Abschnitte übersprungen)",
     "rebuildFailed": "Struktur unklar, Rekonstruktion nicht möglich",
+    "searchReplaceDialog": {
+      "title": "Suchen & Ersetzen",
+      "searchLabel": "Suchen nach:",
+      "searchPlaceholder": "Suchtext eingeben...",
+      "replaceLabel": "Ersetzen durch:",
+      "replacePlaceholder": "Ersetzungstext eingeben...",
+      "matchesFound": "{{count}} Treffer gefunden",
+      "noMatches": "Keine Treffer gefunden",
+      "applied": "{{count}} Vorkommen ersetzt"
+    },
     "errors": {
       "textRequired": "Bitte gib zuerst einen Text ein",
       "lyricsRequired": "Bitte gib zuerst einen Songtext ein",
@@ -466,6 +481,7 @@
     "login": "Anmelden",
     "logout": "Abmelden",
     "lyricCreation": "Songtext Editor",
+    "lyricParsingRules": "Songtext-Parsing-Regeln",
     "music": "Musik",
     "ollamaChat": "Ollama Chat",
     "openaiChat": "OpenAI Chat",
@@ -794,6 +810,77 @@
     "unknownUser": "Unbekannter Benutzer",
     "userSettings": "Benutzereinstellungen",
     "verified": "Verifiziert"
+  },
+  "lyricParsingRules": {
+    "title": "Songtext-Parsing-Regeln",
+    "table": {
+      "name": "Name",
+      "pattern": "Muster",
+      "replacement": "Ersetzung",
+      "type": "Typ",
+      "active": "Aktiv",
+      "order": "Reihenfolge",
+      "actions": "Aktionen"
+    },
+    "types": {
+      "cleanup": "Bereinigung",
+      "section": "Abschnitt"
+    },
+    "actions": {
+      "add": "Regel hinzufügen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "moveUp": "Nach oben",
+      "moveDown": "Nach unten",
+      "test": "Regel testen"
+    },
+    "dialog": {
+      "createTitle": "Neue Regel erstellen",
+      "editTitle": "Regel bearbeiten",
+      "deleteTitle": "Regel löschen",
+      "deleteConfirm": "Möchtest du diese Regel wirklich löschen?"
+    },
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "Regelnamen eingeben...",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Beschreibung eingeben (optional)...",
+      "pattern": "Regex-Muster",
+      "patternPlaceholder": "Regex-Muster eingeben...",
+      "replacement": "Ersetzung",
+      "replacementPlaceholder": "Ersetzungstext eingeben...",
+      "type": "Typ",
+      "active": "Aktiv",
+      "order": "Reihenfolge"
+    },
+    "preview": {
+      "title": "Live-Vorschau",
+      "input": "Eingabetext",
+      "inputPlaceholder": "Text zum Testen der Regel eingeben...",
+      "output": "Ausgabe",
+      "diff": "Diff-Ansicht (Gelöscht / Hinzugefügt)",
+      "matchFound": "Treffer gefunden",
+      "matchesFound": "Treffer gefunden",
+      "noMatches": "Keine Treffer gefunden"
+    },
+    "notifications": {
+      "created": "Regel erfolgreich erstellt",
+      "updated": "Regel erfolgreich aktualisiert",
+      "deleted": "Regel erfolgreich gelöscht",
+      "reordered": "Regeln erfolgreich neu angeordnet",
+      "loadError": "Fehler beim Laden der Regeln: {{message}}",
+      "saveError": "Fehler beim Speichern der Regel: {{message}}",
+      "deleteError": "Fehler beim Löschen der Regel: {{message}}",
+      "reorderError": "Fehler beim Neuanordnen der Regeln: {{message}}"
+    },
+    "errors": {
+      "invalidPattern": "Ungültiges Regex-Muster",
+      "required": "Dieses Feld ist erforderlich"
+    },
+    "messages": {
+      "noRules": "Noch keine Parsing-Regeln definiert",
+      "loading": "Lade Parsing-Regeln..."
+    }
   },
   "versionCheck": {
     "newVersion": "Neue Version {{version}} verfügbar!\nDie Anwendung wird jetzt neu geladen."

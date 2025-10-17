@@ -19,6 +19,7 @@ from .routes.chat_routes import api_chat_v1
 from .routes.conversation_routes import api_conversation_v1
 from .routes.image_routes import api_image_v1
 from .routes.instrumental_routes import api_instrumental_task_v1, api_instrumental_v1
+from .routes.lyric_parsing_rule_routes import api_lyric_parsing_rule_v1
 from .routes.ollama_routes import api_ollama_v1
 from .routes.openai_chat_routes import api_openai_chat_v1
 from .routes.prompt_routes import api_prompt_v1
@@ -137,6 +138,13 @@ def create_app():
                 ImageUpdateRequest,
                 ImageUpdateResponse,
             )
+            from schemas.lyric_parsing_rule_schemas import (
+                LyricParsingRuleCreate,
+                LyricParsingRuleListResponse,
+                LyricParsingRuleReorderRequest,
+                LyricParsingRuleResponse,
+                LyricParsingRuleUpdate,
+            )
             from schemas.openai_chat_schemas import OpenAIChatRequest, OpenAIChatResponse, OpenAIModelsListResponse
             from schemas.prompt_schemas import (
                 PromptCategoryResponse,
@@ -241,6 +249,12 @@ def create_app():
                 ("OpenAIChatRequest", OpenAIChatRequest),
                 ("OpenAIChatResponse", OpenAIChatResponse),
                 ("OpenAIModelsListResponse", OpenAIModelsListResponse),
+                # Lyric Parsing Rule schemas
+                ("LyricParsingRuleCreate", LyricParsingRuleCreate),
+                ("LyricParsingRuleUpdate", LyricParsingRuleUpdate),
+                ("LyricParsingRuleResponse", LyricParsingRuleResponse),
+                ("LyricParsingRuleListResponse", LyricParsingRuleListResponse),
+                ("LyricParsingRuleReorderRequest", LyricParsingRuleReorderRequest),
                 # Prompt schemas
                 ("PromptTemplateCreate", PromptTemplateCreate),
                 ("PromptTemplateUpdate", PromptTemplateUpdate),
@@ -291,6 +305,7 @@ def create_app():
                     "api_song_task_v1": "Song Tasks",
                     "api_instrumental_v1": "Instrumentals",
                     "api_instrumental_task_v1": "Instrumental Tasks",
+                    "api_lyric_parsing_rule_v1": "Lyric Parsing Rules",
                     "api_prompt_v1": "Prompt Templates",
                     "api_redis_v1": "Redis/Celery",
                     "api_chat_v1": "Chat",
@@ -310,6 +325,7 @@ def create_app():
                             "api_song_v1",
                             "api_instrumental_v1",
                             "api_instrumental_task_v1",
+                            "api_lyric_parsing_rule_v1",
                             "api_prompt_v1",
                             "api_redis_v1",
                             "api_chat_v1",
@@ -534,6 +550,7 @@ def create_app():
     app.register_blueprint(api_song_task_v1)
     app.register_blueprint(api_instrumental_v1)
     app.register_blueprint(api_instrumental_task_v1)
+    app.register_blueprint(api_lyric_parsing_rule_v1)
     app.register_blueprint(api_redis_v1)
     app.register_blueprint(api_chat_v1)
     app.register_blueprint(api_prompt_v1)

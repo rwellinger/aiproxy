@@ -88,6 +88,20 @@ export class ApiConfigService {
         },
         openai: {
             models: `${this.baseUrl}/api/v1/openai/chat/models`
+        },
+        lyricParsingRule: {
+            list: (ruleType?: string, activeOnly?: boolean) => {
+                const params = new URLSearchParams();
+                if (ruleType) params.append('rule_type', ruleType);
+                if (activeOnly !== undefined) params.append('active_only', activeOnly.toString());
+                const query = params.toString();
+                return `${this.baseUrl}/api/v1/lyric-parsing-rules${query ? '?' + query : ''}`;
+            },
+            detail: (id: number) => `${this.baseUrl}/api/v1/lyric-parsing-rules/${id}`,
+            create: `${this.baseUrl}/api/v1/lyric-parsing-rules`,
+            update: (id: number) => `${this.baseUrl}/api/v1/lyric-parsing-rules/${id}`,
+            delete: (id: number) => `${this.baseUrl}/api/v1/lyric-parsing-rules/${id}`,
+            reorder: `${this.baseUrl}/api/v1/lyric-parsing-rules/reorder`
         }
     };
 

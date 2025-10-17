@@ -193,8 +193,8 @@ form button[type="submit"] {
     @include button-primary('lg');
 }
 
-/* Form buttons - neutral by default, AI-buttons excluded */
-form button[type="button"]:not(.magic-icon-button):not(.dropdown-item) {
+/* Form buttons - neutral by default, AI-buttons and Material components excluded */
+form button[type="button"]:not(.magic-icon-button):not(.dropdown-item):not(.mdc-switch__icon) {
     @include button-secondary('lg');
 }
 
@@ -263,6 +263,23 @@ form button[type="button"].btn-danger {
 .info-snackbar .mat-mdc-snack-bar-label,
 .loading-snackbar .mat-mdc-snack-bar-label {
     color: white !important;
+}
+
+/* ===== ANGULAR MATERIAL SLIDE TOGGLE - GLOBAL GREEN OVERRIDE ===== */
+/* Force all slide toggles to be green when active */
+.mat-mdc-slide-toggle.mat-accent,
+.mat-mdc-slide-toggle {
+  --mdc-switch-selected-track-color: #4caf50 !important;
+  --mdc-switch-selected-focus-track-color: #4caf50 !important;
+  --mdc-switch-selected-hover-track-color: #66bb6a !important;
+  --mdc-switch-selected-pressed-track-color: #66bb6a !important;
+
+  --mdc-switch-selected-handle-color: #ffffff !important;
+  --mdc-switch-selected-focus-handle-color: #ffffff !important;
+  --mdc-switch-selected-hover-handle-color: #ffffff !important;
+  --mdc-switch-selected-pressed-handle-color: #ffffff !important;
+
+  --mdc-switch-selected-icon-color: #4caf50 !important;
 }
 
 // Audio & Media Komponenten werden durch _components.scss abgedeckt

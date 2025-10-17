@@ -19,6 +19,10 @@ A full-stack platform for AI-powered image and music generation with Python back
   - Text tools: cleanup, structure application, undo functionality
   - Character counter and section navigation
   - Auto-save integration with song generator
+  - **Configurable Lyric Parsing Rules** - Regex-based cleanup and section detection
+    - Cleanup rules: Line breaks, smart quotes, trailing spaces, em dashes, etc.
+    - Section detection: Markdown-style labels (**Intro**, **Verse1**, **Chorus**, etc.)
+    - Database-driven configuration with execution order control
 - **Image Generation** via DALL·E 3 (OpenAI)
 - **Song Generation** via Mureka API (asynchronous with Celery)
 - **PostgreSQL** database for persistent storage
@@ -290,6 +294,10 @@ python src/worker.py
 # Database migrations
 cd src && alembic upgrade head
 cd src && alembic revision --autogenerate -m "description"
+
+# Seed scripts
+python scripts/seed_prompts.py                    # Seed prompt templates
+python scripts/seed_lyric_parsing_rules.py        # Seed lyric parsing rules
 
 # Docker (Production)
 cd aiproxysrv

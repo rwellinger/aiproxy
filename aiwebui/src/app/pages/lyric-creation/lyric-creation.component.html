@@ -157,25 +157,59 @@
                             <i class="fas fa-spinner fa-spin" *ngIf="isTranslatingLyrics"></i>
                             <span>{{ 'lyricCreation.translateToEnglish' | translate }}</span>
                         </button>
-                        <div class="text-tools-dropdown-container">
+                        <!-- Edit Dropdown -->
+                        <div class="edit-dropdown-container">
                             <button
                                     type="button"
-                                    (click)="toggleTextToolsDropdown()"
+                                    (click)="toggleEditDropdown()"
                                     [disabled]="isGeneratingLyrics || isTranslatingLyrics || sectionEditorMode || !characterCount"
                                     class="ai-action-button"
-                                    [title]="'lyricCreation.textTools' | translate">
-                                <i class="fas fa-tools"></i>
-                                <span>{{ 'lyricCreation.textTools' | translate }}</span>
+                                    [title]="'lyricCreation.edit' | translate">
+                                <i class="fas fa-edit"></i>
+                                <span>{{ 'lyricCreation.edit' | translate }}</span>
                                 <i class="fas fa-chevron-down dropdown-chevron"></i>
                             </button>
-                            <div class="dropdown-menu" *ngIf="showTextToolsDropdown"
+                            <div class="dropdown-menu" *ngIf="showEditDropdown"
+                                 (click)="$event.stopPropagation()">
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isGeneratingLyrics || isTranslatingLyrics"
+                                        (click)="selectEditAction('searchReplace')">
+                                    <i class="fas fa-search"></i>
+                                    <span>{{ 'lyricCreation.searchReplace' | translate }}</span>
+                                </button>
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isGeneratingLyrics || isTranslatingLyrics || !canUndo"
+                                        (click)="selectEditAction('undo')">
+                                    <i class="fas fa-undo"></i>
+                                    <span>{{ 'lyricCreation.undoLastChange' | translate }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Tools Dropdown -->
+                        <div class="tools-dropdown-container">
+                            <button
+                                    type="button"
+                                    (click)="toggleToolsDropdown()"
+                                    [disabled]="isGeneratingLyrics || isTranslatingLyrics || sectionEditorMode || !characterCount"
+                                    class="ai-action-button"
+                                    [title]="'lyricCreation.tools' | translate">
+                                <i class="fas fa-tools"></i>
+                                <span>{{ 'lyricCreation.tools' | translate }}</span>
+                                <i class="fas fa-chevron-down dropdown-chevron"></i>
+                            </button>
+                            <div class="dropdown-menu" *ngIf="showToolsDropdown"
                                  (click)="$event.stopPropagation()">
                                 <button
                                         type="button"
                                         class="dropdown-item"
                                         [disabled]="isGeneratingLyrics || isTranslatingLyrics || !hasSections"
                                         [title]="hasSections ? ('lyricCreation.sectionEditor.toggle' | translate) : ('lyricCreation.sectionEditor.noStructure' | translate)"
-                                        (click)="selectTextToolAction('sectionEditor')">
+                                        (click)="selectToolsAction('sectionEditor')">
                                     <i class="fas fa-pen-square"></i>
                                     <span>{{ 'lyricCreation.sectionEditor.toggle' | translate }}</span>
                                 </button>
@@ -184,7 +218,16 @@
                                         type="button"
                                         class="dropdown-item"
                                         [disabled]="isGeneratingLyrics || isTranslatingLyrics"
-                                        (click)="selectTextToolAction('cleanup')">
+                                        (click)="selectToolsAction('structure')">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>{{ 'lyricCreation.applyStructure' | translate }}</span>
+                                </button>
+                                <div class="dropdown-separator"></div>
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isGeneratingLyrics || isTranslatingLyrics"
+                                        (click)="selectToolsAction('cleanup')">
                                     <i class="fas fa-broom"></i>
                                     <span>{{ 'lyricCreation.cleanupLyrics' | translate }}</span>
                                 </button>
@@ -192,26 +235,9 @@
                                         type="button"
                                         class="dropdown-item"
                                         [disabled]="isGeneratingLyrics || isTranslatingLyrics"
-                                        (click)="selectTextToolAction('structure')">
-                                    <i class="fas fa-layer-group"></i>
-                                    <span>{{ 'lyricCreation.applyStructure' | translate }}</span>
-                                </button>
-                                <button
-                                        type="button"
-                                        class="dropdown-item"
-                                        [disabled]="isGeneratingLyrics || isTranslatingLyrics || !canUndo"
-                                        (click)="selectTextToolAction('undo')">
-                                    <i class="fas fa-undo"></i>
-                                    <span>{{ 'lyricCreation.undoLastChange' | translate }}</span>
-                                </button>
-                                <div class="dropdown-separator"></div>
-                                <button
-                                        type="button"
-                                        class="dropdown-item"
-                                        [disabled]="isGeneratingLyrics || isTranslatingLyrics"
-                                        (click)="selectTextToolAction('rebuild')">
-                                    <i class="fas fa-sync"></i>
-                                    <span>{{ 'lyricCreation.rebuildFromText' | translate }}</span>
+                                        (click)="selectToolsAction('finalize')">
+                                    <i class="fas fa-check-double"></i>
+                                    <span>{{ 'lyricCreation.finalizeLyrics' | translate }}</span>
                                 </button>
                             </div>
                         </div>

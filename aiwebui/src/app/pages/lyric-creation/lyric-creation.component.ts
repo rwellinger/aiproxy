@@ -12,6 +12,7 @@ import {ProgressService} from '../../services/ui/progress.service';
 import {LyricArchitectModalComponent} from '../../components/lyric-architect-modal/lyric-architect-modal.component';
 import {LyricArchitectureService} from '../../services/lyric-architecture.service';
 import {SongSection, SongSectionItem} from '../../models/lyric-architecture.model';
+import {LyricParsingRuleService} from '../../services/config/lyric-parsing-rule.service';
 
 interface LyricSection {
     id: string;
@@ -32,9 +33,11 @@ export class LyricCreationComponent implements OnInit {
     lyricForm!: FormGroup;
     isGeneratingLyrics = false;
     isTranslatingLyrics = false;
-    showTextToolsDropdown = false;
+    showEditDropdown = false;
+    showToolsDropdown = false;
     lastCleanupState: string | null = null;
     lastStructureState: string | null = null;
+    lastSearchReplaceState: string | null = null;
 
     // Section Editor State
     sectionEditorMode = false;
@@ -45,6 +48,9 @@ export class LyricCreationComponent implements OnInit {
     isRewritingSection = false;
     isExtendingSection = false;
 
+    // Section Detection Rules (loaded from API)
+    private sectionDetectionPattern: RegExp | null = null;
+
     private fb = inject(FormBuilder);
     private songService = inject(SongService);
     private notificationService = inject(NotificationService);
@@ -53,6 +59,7 @@ export class LyricCreationComponent implements OnInit {
     private dialog = inject(MatDialog);
     private architectureService = inject(LyricArchitectureService);
     private translate = inject(TranslateService);
+    private lyricParsingRuleService = inject(LyricParsingRuleService);
 
     ngOnInit() {
         this.lyricForm = this.fb.group({
@@ -68,6 +75,38 @@ export class LyricCreationComponent implements OnInit {
         // Auto-save lyrics on changes
         this.lyricForm.valueChanges.subscribe(value => {
             this.saveLyrics(value.lyrics);
+        });
+
+        // Load section detection rules from API
+        this.loadSectionDetectionRules();
+    }
+
+    private loadSectionDetectionRules(): void {
+        this.lyricParsingRuleService.getAllRules('section', true).subscribe({
+            next: (rules) => {
+                if (rules.length === 0) {
+                    const errorMsg = 'No active section detection rules found in database. Please add section rules in Lyric Parsing Rules settings.';
+                    console.error(errorMsg);
+                    this.notificationService.error(errorMsg);
+                    return;
+                }
+
+                // Combine all section rule patterns with OR logic
+                const patterns = rules.map(rule => `(${rule.pattern})`).join('|');
+                try {
+                    this.sectionDetectionPattern = new RegExp(patterns, 'gmi');
+                    console.log('Section detection pattern loaded from', rules.length, 'rules');
+                } catch (error) {
+                    const errorMsg = `Failed to compile section detection patterns: ${error}`;
+                    console.error(errorMsg);
+                    this.notificationService.error(errorMsg);
+                }
+            },
+            error: (error) => {
+                const errorMsg = `Failed to load section detection rules from API: ${error.message}`;
+                console.error(errorMsg);
+                this.notificationService.error(errorMsg);
+            }
         });
     }
 
@@ -164,34 +203,62 @@ export class LyricCreationComponent implements OnInit {
     }
 
     get canUndo(): boolean {
-        return this.lastCleanupState !== null || this.lastStructureState !== null;
+        return this.lastSearchReplaceState !== null || this.lastCleanupState !== null || this.lastStructureState !== null;
     }
 
     get hasSections(): boolean {
+        if (!this.sectionDetectionPattern) {
+            return false;
+        }
+
         const lyrics = this.lyricForm.get('lyrics')?.value || '';
-        // Match both formats: **Label** (Markdown) and Label: (classic)
-        return /^(\*\*\s*(Intro|Verse\s*\d+|Chorus|Bridge|Outro|Pre[-_\s]?chorus|Post[-_\s]?chorus)\s*\*\*|(Intro|Verse\d+|Chorus|Bridge|Outro|Pre[-_]?chorus|Post[-_]?chorus):)/mi.test(lyrics);
+        this.sectionDetectionPattern.lastIndex = 0;
+        return this.sectionDetectionPattern.test(lyrics);
     }
 
-    toggleTextToolsDropdown() {
-        this.showTextToolsDropdown = !this.showTextToolsDropdown;
+    toggleEditDropdown() {
+        this.showEditDropdown = !this.showEditDropdown;
+        if (this.showEditDropdown) {
+            this.showToolsDropdown = false;
+        }
     }
 
-    closeTextToolsDropdown() {
-        this.showTextToolsDropdown = false;
+    closeEditDropdown() {
+        this.showEditDropdown = false;
     }
 
-    selectTextToolAction(action: 'cleanup' | 'structure' | 'undo' | 'sectionEditor' | 'rebuild') {
-        this.closeTextToolsDropdown();
+    toggleToolsDropdown() {
+        this.showToolsDropdown = !this.showToolsDropdown;
+        if (this.showToolsDropdown) {
+            this.showEditDropdown = false;
+        }
+    }
 
-        if (action === 'cleanup') {
-            this.cleanupLyrics();
-        } else if (action === 'structure') {
-            this.applyStructure();
+    closeToolsDropdown() {
+        this.showToolsDropdown = false;
+    }
+
+    selectEditAction(action: 'searchReplace' | 'undo') {
+        this.closeEditDropdown();
+
+        if (action === 'searchReplace') {
+            this.openSearchReplaceDialog();
         } else if (action === 'undo') {
             this.undoLastChange();
-        } else if (action === 'sectionEditor') {
+        }
+    }
+
+    selectToolsAction(action: 'sectionEditor' | 'structure' | 'cleanup' | 'finalize' | 'rebuild') {
+        this.closeToolsDropdown();
+
+        if (action === 'sectionEditor') {
             this.toggleSectionEditor();
+        } else if (action === 'structure') {
+            this.applyStructure();
+        } else if (action === 'cleanup') {
+            this.cleanupLyrics();
+        } else if (action === 'finalize') {
+            this.finalizeLyrics();
         } else if (action === 'rebuild') {
             this.rebuildFromLyricText();
         }
@@ -206,28 +273,33 @@ export class LyricCreationComponent implements OnInit {
         // Save current state before cleanup
         this.lastCleanupState = lyrics;
 
-        // 1. Remove trailing spaces from each line
-        lyrics = lyrics.replace(/\s+$/gm, '');
+        // Load cleanup rules from API and apply them
+        this.lyricParsingRuleService.getAllRules('cleanup', true).subscribe({
+            next: (rules) => {
+                // Apply each rule in order (rules are already sorted by order field from API)
+                rules.forEach(rule => {
+                    try {
+                        const regex = new RegExp(rule.pattern, 'gm');
+                        // Interpret common escape sequences in replacement string
+                        const replacement = rule.replacement
+                            .replace(/\\n/g, '\n')
+                            .replace(/\\t/g, '\t')
+                            .replace(/\\r/g, '\r')
+                            .replace(/\\\\/g, '\\');
+                        lyrics = lyrics.replace(regex, replacement);
+                    } catch (error) {
+                        console.error(`Failed to apply rule "${rule.name}":`, error);
+                    }
+                });
 
-        // 2. Normalize non-ASCII characters
-        const replacements: Record<string, string> = {
-            '\u201C': '"', '\u201D': '"', '\u2018': "'", '\u2019': "'",
-            '\u2014': ' - ', '\u2013': ' - ', '\u2026': '...'
-        };
-        Object.keys(replacements).forEach(char => {
-            lyrics = lyrics.replace(new RegExp(char, 'g'), replacements[char]);
+                this.lyricForm.patchValue({lyrics: lyrics.trim()});
+                this.notificationService.success(this.translate.instant('lyricCreation.cleanupComplete'));
+            },
+            error: (error) => {
+                console.error('Failed to load lyric parsing rules:', error);
+                this.notificationService.error('Failed to load cleanup rules');
+            }
         });
-
-        // 3. Add line breaks after commas and periods
-        lyrics = lyrics.replace(/,\s+/g, ',\n');
-        lyrics = lyrics.replace(/\.\s+/g, '.\n');
-
-        // 4. Clean up multiple consecutive blank lines (keep max 2 newlines = 1 blank line)
-        // This preserves paragraph separation but removes excessive spacing
-        lyrics = lyrics.replace(/\n{3,}/g, '\n\n');
-
-        this.lyricForm.patchValue({lyrics: lyrics.trim()});
-        this.notificationService.success(this.translate.instant('lyricCreation.cleanupComplete'));
     }
 
     applyStructure(): void {
@@ -300,8 +372,14 @@ export class LyricCreationComponent implements OnInit {
     }
 
     undoLastChange(): void {
-        if (this.lastStructureState !== null) {
-            // Undo structure change (most recent)
+        // Priority: SearchReplace → Structure → Cleanup
+        if (this.lastSearchReplaceState !== null) {
+            // Undo search/replace change (highest priority)
+            this.lyricForm.patchValue({lyrics: this.lastSearchReplaceState});
+            this.lastSearchReplaceState = null;
+            this.notificationService.success(this.translate.instant('lyricCreation.undoApplied'));
+        } else if (this.lastStructureState !== null) {
+            // Undo structure change
             this.lyricForm.patchValue({lyrics: this.lastStructureState});
             this.lastStructureState = null;
             this.notificationService.success(this.translate.instant('lyricCreation.undoApplied'));
@@ -314,36 +392,49 @@ export class LyricCreationComponent implements OnInit {
     }
 
     private parseLyrics(text: string): LyricSection[] {
+        if (!this.sectionDetectionPattern) {
+            const errorMsg = 'Section detection pattern not loaded. Cannot parse lyrics.';
+            console.error(errorMsg);
+            this.notificationService.error(errorMsg);
+            return [];
+        }
+
         const sections: LyricSection[] = [];
-        // Regex to match section labels in both formats:
-        // 1. **Label** (Markdown bold) - with optional spaces: **Verse 1**, **INTRO**, **Pre-Chorus**
-        // 2. Label: (classic) - Verse1:, Intro:, Pre-Chorus:
-        const sectionRegex = /^(\*\*\s*(Intro|Verse\s*\d+|Chorus|Bridge|Outro|Pre[-_\s]?chorus|Post[-_\s]?chorus)\s*\*\*|(Intro|Verse\d+|Chorus|Bridge|Outro|Pre[-_]?chorus|Post[-_]?chorus):)\s*$/gmi;
         const lines = text.split('\n');
         let currentSection: LyricSection | null = null;
         let order = 0;
 
+        // Clone regex to avoid lastIndex issues
+        const sectionRegex = new RegExp(this.sectionDetectionPattern.source, this.sectionDetectionPattern.flags);
+
         for (const line of lines) {
+            sectionRegex.lastIndex = 0;
             const match = sectionRegex.exec(line);
 
             if (match) {
                 // Found a section label
                 if (currentSection) {
-                    // Save previous section
                     sections.push(currentSection);
                 }
 
-                // Extract label from either format
-                // match[2] = Markdown format (inside **...** )
-                // match[3] = Classic format (before :)
-                let rawLabel = match[2] || match[3];
+                // Extract label - try to find the actual label text from match groups
+                let rawLabel = '';
+                for (let i = 1; i < match.length; i++) {
+                    if (match[i] && match[i].trim()) {
+                        rawLabel = match[i].trim();
+                        break;
+                    }
+                }
+
+                // Clean up label: remove ** markers and trailing :
+                rawLabel = rawLabel.replace(/^\*\*\s*|\s*\*\*$|:$/g, '');
 
                 // Normalize: Remove spaces before numbers (Verse 1 -> Verse1)
                 rawLabel = rawLabel.replace(/\s+(\d+)/g, '$1');
                 // Normalize: Convert underscores to hyphens (Pre_Chorus -> Pre-Chorus)
                 rawLabel = rawLabel.replace(/_/g, '-');
 
-                // Start new section - normalize label with proper capitalization
+                // Start new section
                 const label = this.capitalizeLabel(rawLabel);
                 currentSection = {
                     id: `section-${order}-${Date.now()}`,
@@ -351,9 +442,6 @@ export class LyricCreationComponent implements OnInit {
                     content: '',
                     order: order++
                 };
-
-                // Reset regex lastIndex for next iteration
-                sectionRegex.lastIndex = 0;
             } else if (currentSection) {
                 // Add line to current section content
                 if (currentSection.content) {
@@ -631,10 +719,107 @@ export class LyricCreationComponent implements OnInit {
     @HostListener('document:click', ['$event'])
     onDocumentClick(event: Event) {
         const target = event.target as HTMLElement;
-        const dropdown = target.closest('.text-tools-dropdown-container');
+        const editDropdown = target.closest('.edit-dropdown-container');
+        const toolsDropdown = target.closest('.tools-dropdown-container');
 
-        if (!dropdown && this.showTextToolsDropdown) {
-            this.closeTextToolsDropdown();
+        if (!editDropdown && this.showEditDropdown) {
+            this.closeEditDropdown();
+        }
+        if (!toolsDropdown && this.showToolsDropdown) {
+            this.closeToolsDropdown();
+        }
+    }
+
+    openSearchReplaceDialog(): void {
+        const SearchReplaceDialogComponent = import('../../components/search-replace-dialog/search-replace-dialog.component')
+            .then(m => m.SearchReplaceDialogComponent);
+
+        SearchReplaceDialogComponent.then(component => {
+            const dialogRef = this.dialog.open(component, {
+                width: '500px',
+                maxWidth: '90vw',
+                disableClose: false,
+                autoFocus: true
+            });
+
+            dialogRef.afterClosed().subscribe(result => {
+                if (result && result.searchText) {
+                    this.performSearchReplace(result.searchText, result.replaceText);
+                }
+            });
+        });
+    }
+
+    private performSearchReplace(searchText: string, replaceText: string): void {
+        const currentLyrics = this.lyricForm.get('lyrics')?.value || '';
+        if (!currentLyrics.trim()) {
+            return;
+        }
+
+        // Save state for undo
+        this.lastSearchReplaceState = currentLyrics;
+
+        // Perform replacement
+        const updatedLyrics = currentLyrics.replaceAll(searchText, replaceText);
+
+        // Calculate number of replacements
+        const occurrences = (currentLyrics.match(new RegExp(this.escapeRegExp(searchText), 'g')) || []).length;
+
+        // Update form
+        this.lyricForm.patchValue({lyrics: updatedLyrics});
+
+        // Show success notification
+        this.notificationService.success(
+            this.translate.instant('lyricCreation.searchReplaceDialog.applied', {count: occurrences})
+        );
+    }
+
+    private escapeRegExp(text: string): string {
+        return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    async finalizeLyrics(): Promise<void> {
+        let lyrics = this.lyricForm.get('lyrics')?.value || '';
+        if (!lyrics.trim()) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.lyricsRequired'));
+            return;
+        }
+
+        // Save current state before finalize
+        this.lastCleanupState = lyrics;
+
+        try {
+            // Step 1: Cleanup
+            const rules = await this.lyricParsingRuleService.getAllRules('cleanup', true).toPromise();
+
+            if (rules) {
+                // Apply each cleanup rule in order
+                rules.forEach(rule => {
+                    try {
+                        const regex = new RegExp(rule.pattern, 'gm');
+                        const replacement = rule.replacement
+                            .replace(/\\n/g, '\n')
+                            .replace(/\\t/g, '\t')
+                            .replace(/\\r/g, '\r')
+                            .replace(/\\\\/g, '\\');
+                        lyrics = lyrics.replace(regex, replacement);
+                    } catch (error) {
+                        console.error(`Failed to apply rule "${rule.name}":`, error);
+                    }
+                });
+
+                // Update form with cleaned lyrics
+                this.lyricForm.patchValue({lyrics: lyrics.trim()});
+            }
+
+            // Step 2: Apply Structure
+            this.applyStructure();
+
+            // Success notification
+            this.notificationService.success(this.translate.instant('lyricCreation.finalizeComplete'));
+        } catch (error) {
+            console.error('Failed to finalize lyrics:', error);
+            this.notificationService.error('Failed to finalize lyrics');
         }
     }
 }
