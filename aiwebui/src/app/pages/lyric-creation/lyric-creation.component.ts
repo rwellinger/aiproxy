@@ -212,13 +212,17 @@ export class LyricCreationComponent implements OnInit {
         // 2. Normalize non-ASCII characters
         const replacements: Record<string, string> = {
             '\u201C': '"', '\u201D': '"', '\u2018': "'", '\u2019': "'",
-            '\u2014': '--', '\u2013': '-', '\u2026': '...'
+            '\u2014': ' - ', '\u2013': ' - ', '\u2026': '...'
         };
         Object.keys(replacements).forEach(char => {
             lyrics = lyrics.replace(new RegExp(char, 'g'), replacements[char]);
         });
 
-        // 3. Clean up multiple consecutive blank lines (keep max 2 newlines = 1 blank line)
+        // 3. Add line breaks after commas and periods
+        lyrics = lyrics.replace(/,\s+/g, ',\n');
+        lyrics = lyrics.replace(/\.\s+/g, '.\n');
+
+        // 4. Clean up multiple consecutive blank lines (keep max 2 newlines = 1 blank line)
         // This preserves paragraph separation but removes excessive spacing
         lyrics = lyrics.replace(/\n{3,}/g, '\n\n');
 
