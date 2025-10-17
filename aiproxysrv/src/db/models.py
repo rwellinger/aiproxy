@@ -21,6 +21,13 @@ class SongStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
+class RuleType(str, Enum):
+    """Enum for lyric parsing rule types"""
+
+    CLEANUP = "cleanup"
+    SECTION = "section"
+
+
 class Song(Base):
     """Model for storing song generation data and results"""
 
@@ -288,3 +295,33 @@ class MessageArchive(Base):
 
     def __repr__(self):
         return f"<MessageArchive(id={self.id}, original_id={self.original_message_id}, role='{self.role}')>"
+
+
+class LyricParsingRule(Base):
+    """Model for storing configurable lyric parsing rules (cleanup and section detection)"""
+
+    __tablename__ = "lyric_parsing_rules"
+    __table_args__ = {"extend_existing": True}
+
+    # Primary identifier
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Rule metadata
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+
+    # Rule logic
+    pattern = Column(Text, nullable=False)  # Regex pattern (JSON-escaped)
+    replacement = Column(Text, nullable=False)  # Replacement string
+    rule_type = Column(String(50), nullable=False, index=True)  # cleanup, section
+
+    # Control
+    active = Column(Boolean, default=True, nullable=False, index=True)
+    order = Column(Integer, nullable=False, default=0, index=True)  # Execution order
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    def __repr__(self):
+        return f"<LyricParsingRule(id={self.id}, name='{self.name}', type='{self.rule_type}', active={self.active}, order={self.order})>"

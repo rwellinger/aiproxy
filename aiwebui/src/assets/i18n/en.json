@@ -285,6 +285,10 @@
     "lyricArchitecture": "Lyric Architecture",
     "resetButton": "Clear",
     "autoSaved": "Auto-saved to song generator",
+    "edit": "Edit",
+    "tools": "Tools",
+    "searchReplace": "Search & Replace",
+    "finalizeLyrics": "Finalize Lyrics",
     "textTools": "Text Tools",
     "cleanupLyrics": "Cleanup Lyrics",
     "applyStructure": "Apply Structure",
@@ -294,10 +298,21 @@
     "confirmRebuild": "Detected structure will overwrite Lyric Architecture. Continue?",
     "structureApplied": "Structure applied successfully",
     "cleanupComplete": "Lyrics cleaned up successfully",
+    "finalizeComplete": "Lyrics finalized successfully (Cleanup + Structure applied)",
     "undoApplied": "Change reverted successfully",
     "rebuildSuccess": "Architecture rebuilt: {{count}} sections detected",
     "rebuildSuccessWithWarnings": "Architecture rebuilt: {{count}} sections detected (some sections skipped)",
     "rebuildFailed": "Structure unclear, re-engineering not possible",
+    "searchReplaceDialog": {
+      "title": "Search & Replace",
+      "searchLabel": "Search for:",
+      "searchPlaceholder": "Enter text to search...",
+      "replaceLabel": "Replace with:",
+      "replacePlaceholder": "Enter replacement text...",
+      "matchesFound": "{{count}} matches found",
+      "noMatches": "No matches found",
+      "applied": "Replaced {{count}} occurrences"
+    },
     "errors": {
       "textRequired": "Please enter text first",
       "lyricsRequired": "Please enter lyrics first",
@@ -466,6 +481,7 @@
     "login": "Login",
     "logout": "Logout",
     "lyricCreation": "Lyric Creation",
+    "lyricParsingRules": "Lyric Parsing Rules",
     "music": "Music",
     "ollamaChat": "Ollama Chat",
     "openaiChat": "OpenAI Chat",
@@ -794,6 +810,77 @@
     "unknownUser": "Unknown User",
     "userSettings": "User Settings",
     "verified": "Verified"
+  },
+  "lyricParsingRules": {
+    "title": "Lyric Parsing Rules",
+    "table": {
+      "name": "Name",
+      "pattern": "Pattern",
+      "replacement": "Replacement",
+      "type": "Type",
+      "active": "Active",
+      "order": "Order",
+      "actions": "Actions"
+    },
+    "types": {
+      "cleanup": "Cleanup",
+      "section": "Section"
+    },
+    "actions": {
+      "add": "Add Rule",
+      "edit": "Edit",
+      "delete": "Delete",
+      "moveUp": "Move Up",
+      "moveDown": "Move Down",
+      "test": "Test Rule"
+    },
+    "dialog": {
+      "createTitle": "Create New Rule",
+      "editTitle": "Edit Rule",
+      "deleteTitle": "Delete Rule",
+      "deleteConfirm": "Are you sure you want to delete this rule?"
+    },
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "Enter rule name...",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter description (optional)...",
+      "pattern": "Regex Pattern",
+      "patternPlaceholder": "Enter regex pattern...",
+      "replacement": "Replacement",
+      "replacementPlaceholder": "Enter replacement string...",
+      "type": "Type",
+      "active": "Active",
+      "order": "Order"
+    },
+    "preview": {
+      "title": "Live Preview",
+      "input": "Input Text",
+      "inputPlaceholder": "Enter text to test rule...",
+      "output": "Output",
+      "diff": "Diff View (Deleted / Inserted)",
+      "matchFound": "match found",
+      "matchesFound": "matches found",
+      "noMatches": "No matches found"
+    },
+    "notifications": {
+      "created": "Rule created successfully",
+      "updated": "Rule updated successfully",
+      "deleted": "Rule deleted successfully",
+      "reordered": "Rules reordered successfully",
+      "loadError": "Error loading rules: {{message}}",
+      "saveError": "Error saving rule: {{message}}",
+      "deleteError": "Error deleting rule: {{message}}",
+      "reorderError": "Error reordering rules: {{message}}"
+    },
+    "errors": {
+      "invalidPattern": "Invalid regex pattern",
+      "required": "This field is required"
+    },
+    "messages": {
+      "noRules": "No parsing rules defined yet",
+      "loading": "Loading parsing rules..."
+    }
   },
   "versionCheck": {
     "newVersion": "New version {{version}} available!\nThe application will now reload."

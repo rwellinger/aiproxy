@@ -35,6 +35,8 @@
 
 - **Image Generation**: AI-powered via DALL-E/OpenAI API
 - **Song Generation**: AI music via Mureka API (Lyrics/Instrumental, FLAC/MP3, Stems)
+- **Lyric Creation**: AI-assisted lyric editor with section detection, cleanup rules, and structure management
+- **Lyric Parsing Rules**: Configurable regex-based cleanup (line breaks, smart quotes, etc.) and section detection (Markdown-style labels)
 - **Chat**: Ollama (local) & OpenAI (external) integration
 - **Prompt Management**: Template system for reusable prompts
 - **User Profiles**: Settings, language preferences (EN/DE)
@@ -328,6 +330,10 @@ python src/server.py           # Dev server (PyCharm)
 cd src && alembic upgrade head                          # Apply migrations
 cd src && alembic revision --autogenerate -m "message"  # Create migration
 
+# Seed Scripts
+python scripts/seed_prompts.py                          # Seed prompt templates
+python scripts/seed_lyric_parsing_rules.py              # Seed lyric parsing rules
+
 # Celery Worker
 python src/worker.py           # Start worker
 celery -A src.worker flower    # Monitor tasks (http://localhost:5555)
@@ -552,10 +558,14 @@ lsof -i :5432  # PostgreSQL
 ## Database Tables
 
 - `songs` - Generated songs (title, lyrics, status, job_id, flac_url, mp3_url, stems_url)
+- `song_choices` - Individual song variations from MUREKA (mp3_url, flac_url, stem_url, duration, rating)
 - `images` - Generated images (title, prompt, status, job_id, url)
-- `prompt_templates` - Reusable prompts (name, category, template)
-- `users` - User accounts & settings
-- `chats` - Chat conversations
+- `prompt_templates` - Reusable AI prompts (category, action, pre_condition, post_condition, model)
+- `lyric_parsing_rules` - Configurable regex rules for lyric cleanup and section detection (pattern, replacement, rule_type, order)
+- `users` - User accounts & settings (email, password_hash, is_active)
+- `conversations` - Chat conversations (title, model, provider, token_count)
+- `messages` - Individual chat messages (role, content, token_count)
+- `messages_archive` - Archived messages from compression
 
 ## Key API Endpoints
 

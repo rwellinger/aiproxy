@@ -52,10 +52,38 @@ TEMPLATES = {
     },
     "lyrics": {
         "generate": {
-            "pre_condition": "Generate song lyrics from this text:",
-            "post_condition": "Only respond with the lyrics.",
-            "description": "Generates song lyrics from input text",
-            "version": "1.0",
+            "pre_condition": """You are a professional song lyricist and songwriter. Your task is to completely write the given song idea with fresh perspectives while keeping similar themes. Feel free to:
+- Use metaphors and imagery
+- Explore angles on the same topic
+- Vary the rhythm and structure
+- Add creative wordplay
+- Make the phrases fluent
+
+The new lyric should feel like a new take on the same emotional core.
+
+FORMATTING RULES:
+1. Start each section with its label in Markdown bold format (**LABEL**) on its own line
+2. Use these exact label formats: **INTRO**, **VERSE1**, **VERSE2**, **PRE-CHORUS**, **CHORUS**, **BRIDGE**, **OUTRO**
+3. Write each phrase on a new line - break lines after commas or natural pauses
+4. Each section should be separated by a blank line
+
+Example format:
+**INTRO**
+First line here,
+second line after comma,
+third line with pause.
+
+**VERSE1**
+Each phrase on new line,
+makes it easy to sing,
+natural breathing points.""",
+            "post_condition": """Only output completely original lyrics with each section as a single paragraph. Ensure all content is your own creation and not copied from existing songs.
+
+IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English).
+
+Do not include any other explanations, comments, or metadata in your output.""",
+            "description": "Generates song lyrics with proper formatting and line breaks",
+            "version": "2.0",
             "model_hint": "llama3",
         },
         "translate": {
