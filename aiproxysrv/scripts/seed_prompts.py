@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
-Seeding script for migrating existing prompt templates to the database.
-This script reads the current templates from the TypeScript service and inserts them into the DB.
+Seeding script for prompt templates.
+Exported from Dev-DB on 2025-10-17.
+This script seeds the database with the current production prompt templates.
+
+Usage:
+    python scripts/seed_prompts.py
 """
 
 import os
@@ -16,41 +20,48 @@ from db.database import get_db
 from db.models import PromptTemplate
 
 
-# Templates from the current TypeScript service
+# Current production templates from Dev-DB (2025-10-17)
 TEMPLATES = {
     "image": {
         "enhance": {
-            "pre_condition": "One-sentence DALL-E prompt:",
-            "post_condition": "Only respond with the prompt.",
-            "description": "Enhances image generation prompts for DALL-E",
-            "version": "1.0",
-            "model_hint": "llama3",
+            "pre_condition": "You are a fact‑based DALL‑E 3 prompt enhancer. Create a single, concise prompt. No introduction, no commentary. Avoid any content that violates DALL‑E 3 usage policies. Use the following input text as inspiration and answer in the language of this input text.",
+            "post_condition": "Return only the prompt. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.",
+            "description": "Enhances image generation prompts for DALL-E3",
+            "version": "4.1",
+            "model": "gpt-oss:20b",
+            "temperature": 0.9,
+            "max_tokens": 125,
+            "active": True,
         },
         "translate": {
-            "pre_condition": "Translate this image prompt to english:",
+            "pre_condition": "You are a professional English translator. Your task is to translate the provided image prompt into clear and concise language optimized for DALL-E 3. Use only words permitted in a DALL-E 3 prompt.",
             "post_condition": "Only respond with the translation.",
             "description": "Translates image prompts to English",
-            "version": "1.0",
-            "model_hint": "gpt-oss",
-        },
-    },
-    "music": {
-        "enhance": {
-            "pre_condition": "One-sentence Suno Music Style prompt without artist names or band names:",
-            "post_condition": "Only respond with the prompt.",
-            "description": "Enhances music style prompts for Suno without artist references",
-            "version": "1.0",
-            "model_hint": "llama3",
-        },
-        "translate": {
-            "pre_condition": "Translate this music style description to english:",
-            "post_condition": "Only respond with the translation.",
-            "description": "Translates music style descriptions to English",
-            "version": "1.0",
-            "model_hint": "gpt-oss",
+            "version": "2.0",
+            "model": "gpt-oss:20b",
+            "temperature": 0.5,
+            "max_tokens": 256,
+            "active": True,
         },
     },
     "lyrics": {
+        "extend-section": {
+            "pre_condition": """You are a professional song lyricist. Your task is to extend the given song section by adding more lines. The extension should:
+- Match the existing rhyme scheme and rhythm
+- Continue the thematic development
+- Maintain consistent imagery and tone
+- Flow naturally from the existing content
+- Add depth without being repetitive
+
+Build upon what is already there to create a longer, more developed section.""",
+            "post_condition": "Return the COMPLETE extended section (original + new lines) as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.",
+            "description": "Extends a lyric section by adding more lines that match style and theme",
+            "version": "1.3",
+            "model": "gpt-oss:20b",
+            "temperature": 0.7,
+            "max_tokens": 512,
+            "active": True,
+        },
         "generate": {
             "pre_condition": """You are a professional song lyricist and songwriter. Your task is to completely write the given song idea with fresh perspectives while keeping similar themes. Feel free to:
 - Use metaphors and imagery
@@ -59,55 +70,163 @@ TEMPLATES = {
 - Add creative wordplay
 - Make the phrases fluent
 
-The new lyric should feel like a new take on the same emotional core.
-
-FORMATTING RULES:
-1. Start each section with its label in Markdown bold format (**LABEL**) on its own line
-2. Use these exact label formats: **INTRO**, **VERSE1**, **VERSE2**, **PRE-CHORUS**, **CHORUS**, **BRIDGE**, **OUTRO**
-3. Write each phrase on a new line - break lines after commas or natural pauses
-4. Each section should be separated by a blank line
-
-Example format:
-**INTRO**
-First line here,
-second line after comma,
-third line with pause.
-
-**VERSE1**
-Each phrase on new line,
-makes it easy to sing,
-natural breathing points.""",
+The new lyric should feel like a new take on the same emotional core.""",
             "post_condition": """Only output completely original lyrics with each section as a single paragraph. Ensure all content is your own creation and not copied from existing songs.
 
 IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English).
 
+FORMAT REQUIREMENT: Start each section with its label in Markdown bold format (**LABEL**) on its own line, followed by the lyrics text. Use these exact label formats:
+  - **INTRO**
+  - **VERSE1**, **VERSE2**, etc.
+  - **PRE-CHORUS**
+  - **CHORUS**
+  - **BRIDGE**
+  - **OUTRO**
+
+  Example format:
+  **INTRO**
+  First lines of intro here...
+
+  **VERSE1**
+  First verse lyrics here...
+
+  **CHORUS**
+  Chorus lyrics here...
+
 Do not include any other explanations, comments, or metadata in your output.""",
-            "description": "Generates song lyrics with proper formatting and line breaks",
-            "version": "2.0",
-            "model_hint": "llama3",
+            "description": "Generates song lyrics from input text",
+            "version": "2.8",
+            "model": "gpt-oss:20b",
+            "temperature": 0.7,
+            "max_tokens": 2048,
+            "active": True,
+        },
+        "improve-section": {
+            "pre_condition": """You are a professional song lyricist and songwriter. Your task is to improve the given song section while maintaining its core message and style. Consider:
+- Rhyme scheme and rhythm
+- Imagery and metaphors
+- Emotional impact
+- Word choice and clarity
+- Flow and pacing
+- Fluent language
+
+Keep the same general length and structure. Only improve the quality, do not change the fundamental meaning or add new concepts.""",
+            "post_condition": "Return ONLY the improved section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name (like \"Verse1:\") in your output. Keep all lines together as one continuous block of text.",
+            "description": "Improves a specific lyric section while maintaining context and style",
+            "version": "1.4",
+            "model": "gpt-oss:20b",
+            "temperature": 0.7,
+            "max_tokens": 256,
+            "active": True,
+        },
+        "rewrite-section": {
+            "pre_condition": """You are a professional song lyricist and songwriter. Your task is to completely rewrite the given song section with fresh perspectives while keeping similar themes. Feel free to:
+- Use different metaphors and imagery
+- Change the rhyme scheme
+- Explore new angles on the same topic
+- Vary the rhythm and structure
+- Add creative wordplay
+- Fluent language
+
+The rewritten section should feel like a new take on the same emotional core.""",
+            "post_condition": "Return ONLY the rewritten section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.",
+            "description": "Completely rewrites a lyric section with fresh creative perspectives",
+            "version": "1.7",
+            "model": "gpt-oss:20b",
+            "temperature": 0.8,
+            "max_tokens": 256,
+            "active": True,
         },
         "translate": {
-            "pre_condition": "By a britisch songwriter and translate this lyric text to britisch english:",
-            "post_condition": "Only respond with the translation.",
+            "pre_condition": """You are a professional native English lyricist and songwriter. Your task is to fully translate the provided song lyrics. You may:
+* Use different metaphors and imagery
+* Adjust the rhythm and structure
+* Employ fluent and natural English expressions
+Ensure the translated lyrics convey the original meaning while sounding as though crafted by an English songwriter for a global audience.""",
+            "post_condition": "Only output the translated lyrics. Do not include explanations or comments in your output.",
             "description": "Translates lyrics to British English",
-            "version": "1.0",
-            "model_hint": "gpt-oss",
+            "version": "2.0",
+            "model": "gpt-oss:20b",
+            "temperature": 0.5,
+            "max_tokens": 2048,
+            "active": True,
+        },
+    },
+    "music": {
+        "enhance": {
+            "pre_condition": """You are a professional Mureka or Suno music style prompt enhancer. Your task is to refine the input text into an ideal prompt by:
+  • Including the specified instruments
+  • Keeping the prompt concise, with a maximum of 400 characters
+  • Describing without using names of bands or singers
+  • Respecting the copyrights terms of Mureka/Suno
+  • CRITICAL: If vocals are mentioned, make them the FIRST element in your output and add descriptive adjectives (e.g., "strong male vocals", "powerful female voice", "energetic male singer")""",
+            "post_condition": """Only output the enhanced prompt.
+
+CRITICAL VOCAL HANDLING:
+  1. ALWAYS place the vocal description at the very beginning of the output prompt
+  2. ALWAYS add a descriptive adjective to vocals (e.g., "strong **male vocals**", "powerful **male voice**", "energetic **male vocals**", "smooth **female vocals**")
+  3. If the input mentions vocals, mention them at least TWICE in the output (beginning + middle/end)
+  4. ALWAYS wrap vocal descriptions in Markdown bold (**...**)
+
+Examples:
+    - Input: "male vocals" → Output: "Strong **male vocals** lead this energetic pop-rock track... driven by powerful **male voice**"
+    - Input: "female vocals" → Output: "Smooth **female vocals** soar over... featuring expressive **female voice**"
+    - Input: "männlicher Gesang" → Output: "Kraftvoller **männlicher Gesang** führt... mit energischem **männlichem Gesang**"
+
+IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English).
+
+Do not include labels, explanations, comments, or any other formatting in your output.""",
+            "description": "Enhances music style prompts for Mureka without artist references",
+            "version": "3.1",
+            "model": "gpt-oss:20b",
+            "temperature": 0.9,
+            "max_tokens": 512,
+            "active": True,
+        },
+        "translate": {
+            "pre_condition": "Translate this music style description to english",
+            "post_condition": "Only respond with the translation.",
+            "description": "Translates music style descriptions to English",
+            "version": "1.7",
+            "model": "gpt-oss:20b",
+            "temperature": 0.5,
+            "max_tokens": 512,
+            "active": True,
+        },
+    },
+    "titel": {
+        "generate": {
+            "pre_condition": """Generate a short, creative, and engaging title in the same language as the input text. The title should:
+  - Capture the main subject, theme, or essence described
+  - Be memorable and impactful
+  - Match the style and context of the content (visual for images, artistic for songs/lyrics)
+  - Be concise (2-8 words) and suitable for the intended medium
+  - Avoid using commas, colons, or other punctuation marks
+  - Feel natural and relevant to the given input""",
+            "post_condition": "Respond only with the title, maximum 50 characters. Do not include any explanations, notes, or introductions.",
+            "description": "Generates song titles from various inputs (title, lyrics, style, or default)",
+            "version": "3.4",
+            "model": "llama3.2:3b",
+            "temperature": 0.7,
+            "max_tokens": 20,
+            "active": True,
         },
     },
 }
 
 
 def seed_prompt_templates():
-    """Seed the database with initial prompt templates"""
+    """Seed the database with current prompt templates"""
     db: Session = next(get_db())
 
     try:
-        # Track what we're inserting
         inserted_count = 0
         updated_count = 0
 
+        print("Starting prompt template seeding...\n")
+
         for category, actions in TEMPLATES.items():
-            print(f"\nProcessing category: {category}")
+            print(f"Processing category: {category}")
 
             for action, template_data in actions.items():
                 print(f"  Processing action: {action}")
@@ -120,14 +239,16 @@ def seed_prompt_templates():
                 )
 
                 if existing:
-                    print("    Template exists, updating...")
-                    # Update existing template
+                    print(f"    Template exists (ID: {existing.id}), updating...")
+                    # Update existing template with all fields
                     existing.pre_condition = template_data["pre_condition"]
                     existing.post_condition = template_data["post_condition"]
                     existing.description = template_data["description"]
                     existing.version = template_data["version"]
-                    existing.model_hint = template_data["model_hint"]
-                    existing.active = True
+                    existing.model = template_data["model"]
+                    existing.temperature = template_data["temperature"]
+                    existing.max_tokens = template_data["max_tokens"]
+                    existing.active = template_data["active"]
                     updated_count += 1
                 else:
                     print("    Creating new template...")
@@ -139,8 +260,10 @@ def seed_prompt_templates():
                         post_condition=template_data["post_condition"],
                         description=template_data["description"],
                         version=template_data["version"],
-                        model_hint=template_data["model_hint"],
-                        active=True,
+                        model=template_data["model"],
+                        temperature=template_data["temperature"],
+                        max_tokens=template_data["max_tokens"],
+                        active=template_data["active"],
                     )
                     db.add(new_template)
                     inserted_count += 1
@@ -157,6 +280,9 @@ def seed_prompt_templates():
 
     except Exception as e:
         print(f"\n❌ Error during seeding: {str(e)}")
+        import traceback
+
+        traceback.print_exc()
         db.rollback()
         return False
 
@@ -174,20 +300,39 @@ def verify_templates():
         print("\n📊 Verification Results:")
         print(f"   Total active templates in DB: {len(templates)}")
 
+        if len(templates) == 0:
+            print("   ⚠️  WARNING: No templates found in database!")
+            return False
+
         # Group by category for display
         by_category = {}
         for template in templates:
             if template.category not in by_category:
                 by_category[template.category] = []
-            by_category[template.category].append(template.action)
+            by_category[template.category].append(
+                {"action": template.action, "model": template.model, "version": template.version}
+            )
 
-        for category, actions in by_category.items():
-            print(f"   {category}: {', '.join(sorted(actions))}")
+        print("\n   Templates by category:")
+        for category, actions in sorted(by_category.items()):
+            print(f"\n   {category}:")
+            for action_data in sorted(actions, key=lambda x: x["action"]):
+                print(f"     - {action_data['action']} (v{action_data['version']}, {action_data['model']})")
 
-        return True
+        # Check if we have the expected number of templates
+        expected_count = sum(len(actions) for actions in TEMPLATES.values())
+        if len(templates) >= expected_count:
+            print(f"\n   ✅ All {expected_count} expected templates are present")
+            return True
+        else:
+            print(f"\n   ⚠️  Expected {expected_count} templates, but found {len(templates)}")
+            return False
 
     except Exception as e:
         print(f"\n❌ Error during verification: {str(e)}")
+        import traceback
+
+        traceback.print_exc()
         return False
 
     finally:
@@ -195,11 +340,18 @@ def verify_templates():
 
 
 if __name__ == "__main__":
-    print("🌱 Starting prompt template seeding...")
+    print("🌱 Prompt Template Seeding Script")
+    print("=" * 60)
+    print("This script will seed/update all prompt templates")
+    print("=" * 60 + "\n")
 
     if seed_prompt_templates():
-        verify_templates()
-        print("\n🎉 All done!")
+        if verify_templates():
+            print("\n🎉 Seeding and verification completed successfully!")
+            sys.exit(0)
+        else:
+            print("\n⚠️  Templates seeded but verification has warnings!")
+            sys.exit(1)
     else:
         print("\n💥 Seeding failed!")
         sys.exit(1)

@@ -105,7 +105,7 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
 - **Hardware**: Apple Silicon (M1 Max, M4) architecture
 - **Operating System**: macOS
 - **Containerization**: Docker (via colima)
-- **Python Version**: Python 3 with miniconda3
+- **Python Version**: Python 3.12.12 with miniconda3
 - **Development Environment**: PyCharm Pro (ARM64)
 
 ### 2.2 Organizational Constraints
@@ -150,14 +150,15 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
 
 ### 4.2 Technology Stack
 - **Frontend**: Angular 18.2.13 + TypeScript + Angular Material + SCSS + RxJS
-- **Backend**: Python Flask 3.1.2 + SQLAlchemy 2.0 + Pydantic 2.0 + Alembic 1.13
-- **API Documentation**: Flask-APISpec + OpenAPI/Swagger
-- **Authentication**: Flask-CORS + PyJWT + BCrypt
+- **Backend**: Python 3.12.12 + FastAPI + SQLAlchemy 2.0 + Pydantic 2.0 + Alembic 1.13
+- **API Documentation**: OpenAPI/Swagger (auto-generated)
+- **Authentication**: PyJWT + BCrypt
 - **Async Processing**: Celery 5.4 + Redis 5.0
 - **Database**: PostgreSQL 15 + psycopg2-binary
-- **Web Server**: Gunicorn (Production), Flask Dev Server (Development)
+- **Web Server**: Gunicorn (Production), Uvicorn Dev Server (Development)
 - **Proxy**: Nginx 1.23.3 (Production)
 - **Container**: Docker + Docker Compose (Colima on macOS)
+- **Code Quality**: Ruff (linting & formatting), pytest (unit testing)
 
 ---
 
@@ -312,7 +313,7 @@ src/assets/i18n/
 Users can change the language in **User Profile → Settings → Language**. The selection is persisted in `UserSettings` and automatically applied on app startup.
 
 #### 5.2.2 aiproxysrv (Backend API)
-- **Technology**: Python Flask + SQLAlchemy + Pydantic
+- **Technology**: Python 3.12.12 + FastAPI + SQLAlchemy + Pydantic
 - **Struktur**:
   ```
   src/
@@ -797,17 +798,73 @@ services:
 | `conversation_id` | UUID | Foreign Key to conversations.id |
 | `role` | VARCHAR(20) | Message role: user, assistant, system |
 | `content` | TEXT | Message content |
+| `token_count` | INTEGER | Token count for this message |
 | `created_at` | TIMESTAMP | Creation timestamp |
+
+#### 13.2.7 messages_archive
+**Purpose**: Archived messages from conversation compression (1:N to conversations)
+
+| Column | Type | Description |
+|--------|-----|-------------|
+| `id` | UUID | Primary Key |
+| `original_message_id` | UUID | Original message ID before archiving |
+| `conversation_id` | UUID | Foreign Key to conversations.id |
+| `role` | VARCHAR(50) | Message role: user, assistant, system |
+| `content` | TEXT | Message content |
+| `token_count` | INTEGER | Token count for this message |
+| `original_created_at` | TIMESTAMP | Original creation timestamp |
+| `archived_at` | TIMESTAMP | Archiving timestamp |
+| `summary_message_id` | UUID | Reference to summary message (if applicable) |
+
+#### 13.2.8 users
+**Purpose**: User accounts and authentication
+
+| Column | Type | Description |
+|--------|-----|-------------|
+| `id` | UUID | Primary Key |
+| `email` | VARCHAR(255) | User email (unique) |
+| `password_hash` | VARCHAR(255) | BCrypt password hash |
+| `first_name` | VARCHAR(100) | First name |
+| `last_name` | VARCHAR(100) | Last name |
+| `oauth_provider` | VARCHAR(50) | OAuth provider (Google, GitHub, etc.) |
+| `oauth_id` | VARCHAR(255) | OAuth provider user ID |
+| `is_active` | BOOLEAN | Account is active |
+| `is_verified` | BOOLEAN | Email is verified |
+| `created_at` | TIMESTAMP | Creation timestamp |
+| `updated_at` | TIMESTAMP | Last update timestamp |
+| `last_login` | TIMESTAMP | Last login timestamp |
+
+#### 13.2.9 lyric_parsing_rules
+**Purpose**: Configurable regex-based rules for lyric cleanup and section detection
+
+| Column | Type | Description |
+|--------|-----|-------------|
+| `id` | INTEGER | Primary Key (auto-increment) |
+| `name` | VARCHAR(100) | Rule name |
+| `description` | TEXT | Rule description |
+| `pattern` | TEXT | Regex pattern to match |
+| `replacement` | TEXT | Replacement text |
+| `rule_type` | VARCHAR(50) | Rule type: cleanup, section |
+| `active` | BOOLEAN | Rule is active |
+| `order` | INTEGER | Execution order |
+| `created_at` | TIMESTAMP | Creation timestamp |
+| `updated_at` | TIMESTAMP | Last update timestamp |
 
 ### 13.3 Relationships and Constraints
 
 - **songs ↔ song_choices**: 1:N relationship with CASCADE DELETE
 - **conversations ↔ messages**: 1:N relationship with CASCADE DELETE
-- **Unique Constraints**: `songs.task_id`, `generated_images.filename`
-- **Indexes**: On `task_id`, `job_id`, `song_id`, `conversation_id` for performance
+- **conversations ↔ messages_archive**: 1:N relationship with CASCADE DELETE
+- **users ↔ conversations**: 1:N relationship (user_id references users.id)
+- **Unique Constraints**: `songs.task_id`, `generated_images.filename`, `users.email`
+- **Indexes**:
+  - Performance: `task_id`, `job_id`, `song_id`, `conversation_id`, `original_message_id`
+  - Lookup: `users.email`, `lyric_parsing_rules.active`, `lyric_parsing_rules.order`
 - **Foreign Keys**:
   - `song_choices.song_id` → `songs.id`
   - `messages.conversation_id` → `conversations.id`
+  - `messages_archive.conversation_id` → `conversations.id`
+  - `conversations.user_id` → `users.id`
 
 ### 13.4 Migration and Maintenance
 

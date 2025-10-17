@@ -34,7 +34,7 @@ A full-stack platform for AI-powered image and music generation with Python back
 ## 📋 System Requirements
 
 - **macOS** (Apple Silicon - M1/M4)
-- **Python 3.11+** (with Miniconda3)
+- **Python 3.12+** (with Miniconda3, current: 3.12.12)
 - **Node.js & npm** (for Angular 18)
 - **Docker** (via Colima for macOS)
 - **Git**
@@ -116,6 +116,8 @@ The release process is automated with scripts that handle versioning, git taggin
 #### 2. Automated Build via GitHub Actions
 
 After pushing the tag, **GitHub Actions automatically builds and pushes** Docker images:
+
+**Workflow:** `.github/workflows/release.yml`
 
 **What happens automatically:**
 - ✅ GitHub Actions triggered by tag push
@@ -298,6 +300,18 @@ cd src && alembic revision --autogenerate -m "description"
 # Seed scripts
 python scripts/seed_prompts.py                    # Seed prompt templates
 python scripts/seed_lyric_parsing_rules.py        # Seed lyric parsing rules
+
+# Code Quality & Linting (Ruff)
+ruff check .                   # Run linter
+ruff check . --fix             # Auto-fix issues
+ruff format .                  # Format code
+
+# Unit Testing (pytest)
+pytest                         # Run all tests
+pytest -v -s                   # Verbose output with print statements
+pytest tests/test_health.py    # Run specific test file
+pytest -k "test_name"          # Run tests matching pattern
+pytest --cov=src               # Run with coverage report
 
 # Docker (Production)
 cd aiproxysrv

@@ -88,5 +88,47 @@ erDiagram
         TIMESTAMP created_at "Creation timestamp"
     }
 
+    messages_archive {
+        UUID id PK "Primary Key"
+        UUID original_message_id "Original message ID before archiving"
+        UUID conversation_id FK "Foreign Key to conversations"
+        VARCHAR role "Message role: user, assistant, system"
+        TEXT content "Message content"
+        INTEGER token_count "Token count for this message"
+        TIMESTAMP original_created_at "Original creation timestamp"
+        TIMESTAMP archived_at "Archiving timestamp"
+        UUID summary_message_id "Reference to summary message"
+    }
+
+    users {
+        UUID id PK "Primary Key"
+        VARCHAR email UK "User email (unique)"
+        VARCHAR password_hash "BCrypt password hash"
+        VARCHAR first_name "First name"
+        VARCHAR last_name "Last name"
+        VARCHAR oauth_provider "OAuth provider (Google, GitHub, etc.)"
+        VARCHAR oauth_id "OAuth provider user ID"
+        BOOLEAN is_active "Account is active"
+        BOOLEAN is_verified "Email is verified"
+        TIMESTAMP created_at "Creation timestamp"
+        TIMESTAMP updated_at "Last update timestamp"
+        TIMESTAMP last_login "Last login timestamp"
+    }
+
+    lyric_parsing_rules {
+        INTEGER id PK "Primary Key (auto-increment)"
+        VARCHAR name "Rule name"
+        TEXT description "Rule description"
+        TEXT pattern "Regex pattern to match"
+        TEXT replacement "Replacement text"
+        VARCHAR rule_type "Rule type: cleanup, section"
+        BOOLEAN active "Rule is active"
+        INTEGER order "Execution order"
+        TIMESTAMP created_at "Creation timestamp"
+        TIMESTAMP updated_at "Last update timestamp"
+    }
+
     songs ||--o{ song_choices : "has choices"
+    users ||--o{ conversations : "owns conversations"
     conversations ||--o{ messages : "contains messages"
+    conversations ||--o{ messages_archive : "has archived messages"

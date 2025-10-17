@@ -1,11 +1,11 @@
 graph TB
     subgraph "Mac Studio M1 Max - Production (10.0.1.120)"
         subgraph "Docker Network: webui-network"
-            NGINX[Nginx Forward Proxy<br/>forward-proxy<br/>:80,:443]
+            NGINX[Nginx Forward Proxy<br/>forward-proxy<br/>:80,:443<br/>Image: GHCR aiwebui-app]
 
             subgraph "API Stack"
-                API_CONTAINER[AI Proxy Server<br/>aiproxysrv<br/>:5050]
-                WORKER_CONTAINER[Celery Worker<br/>celery-worker<br/>Health Check]
+                API_CONTAINER[AI Proxy Server<br/>aiproxysrv<br/>:5050<br/>Image: GHCR aiproxysrv-app]
+                WORKER_CONTAINER[Celery Worker<br/>celery-worker<br/>Image: GHCR celery-worker-app<br/>Health Check]
             end
 
             subgraph "Data Stack"

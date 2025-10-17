@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
 Seeding script for lyric parsing rules.
-This script seeds default cleanup and section detection rules into the database.
+Exported from Dev-DB on 2025-10-17.
+This script seeds the database with regex-based lyric cleanup and section detection rules.
+
+Usage:
+    python scripts/seed_lyric_parsing_rules.py
 """
 
 import os
@@ -16,9 +20,8 @@ from db.database import get_db
 from db.models import LyricParsingRule
 
 
-# Default lyric parsing rules
+# Current production lyric parsing rules from Dev-DB (2025-10-17)
 RULES = [
-    # Cleanup Rules
     {
         "name": "Comma Line Breaks",
         "description": "Add line break after comma if followed by 5+ words",
@@ -109,7 +112,6 @@ RULES = [
         "active": True,
         "order": 10,
     },
-    # Section Detection Rules
     {
         "name": "Section Label Detection",
         "description": "Detect Markdown-style section labels (Intro, Verse, Chorus, etc.)",
@@ -123,23 +125,28 @@ RULES = [
 
 
 def seed_lyric_parsing_rules():
-    """Seed the database with default lyric parsing rules"""
+    """Seed the database with lyric parsing rules"""
     db: Session = next(get_db())
 
     try:
-        # Track what we're inserting
         inserted_count = 0
         updated_count = 0
 
-        for rule_data in RULES:
-            print(f"\nProcessing rule: {rule_data['name']} ({rule_data['rule_type']})")
+        print("Starting lyric parsing rules seeding...\n")
 
-            # Check if rule already exists (by name)
-            existing = db.query(LyricParsingRule).filter(LyricParsingRule.name == rule_data["name"]).first()
+        for rule_data in RULES:
+            print(f"Processing rule: {rule_data['name']}")
+
+            # Check if rule already exists
+            existing = (
+                db.query(LyricParsingRule)
+                .filter(LyricParsingRule.name == rule_data["name"])
+                .first()
+            )
 
             if existing:
-                print("  Rule exists, updating...")
-                # Update existing rule
+                print(f"  Rule exists (ID: {existing.id}), updating...")
+                # Update existing rule with all fields
                 existing.description = rule_data["description"]
                 existing.pattern = rule_data["pattern"]
                 existing.replacement = rule_data["replacement"]
@@ -150,7 +157,15 @@ def seed_lyric_parsing_rules():
             else:
                 print("  Creating new rule...")
                 # Create new rule
-                new_rule = LyricParsingRule(**rule_data)
+                new_rule = LyricParsingRule(
+                    name=rule_data["name"],
+                    description=rule_data["description"],
+                    pattern=rule_data["pattern"],
+                    replacement=rule_data["replacement"],
+                    rule_type=rule_data["rule_type"],
+                    active=rule_data["active"],
+                    order=rule_data["order"],
+                )
                 db.add(new_rule)
                 inserted_count += 1
 
@@ -166,6 +181,9 @@ def seed_lyric_parsing_rules():
 
     except Exception as e:
         print(f"\n❌ Error during seeding: {str(e)}")
+        import traceback
+
+        traceback.print_exc()
         db.rollback()
         return False
 
@@ -178,17 +196,42 @@ def verify_rules():
     db: Session = next(get_db())
 
     try:
-        cleanup_rules = db.query(LyricParsingRule).filter(LyricParsingRule.rule_type == "cleanup").all()
-        section_rules = db.query(LyricParsingRule).filter(LyricParsingRule.rule_type == "section").all()
+        rules = db.query(LyricParsingRule).filter(LyricParsingRule.active).order_by(LyricParsingRule.order).all()
 
         print("\n📊 Verification Results:")
-        print(f"   Total cleanup rules: {len(cleanup_rules)} (active: {sum(1 for r in cleanup_rules if r.active)})")
-        print(f"   Total section rules: {len(section_rules)} (active: {sum(1 for r in section_rules if r.active)})")
+        print(f"   Total active rules in DB: {len(rules)}")
 
-        return True
+        if len(rules) == 0:
+            print("   ⚠️  WARNING: No rules found in database!")
+            return False
+
+        # Group by rule_type for display
+        by_type = {}
+        for rule in rules:
+            if rule.rule_type not in by_type:
+                by_type[rule.rule_type] = []
+            by_type[rule.rule_type].append({"name": rule.name, "order": rule.order})
+
+        print("\n   Rules by type:")
+        for rule_type, rule_list in sorted(by_type.items()):
+            print(f"\n   {rule_type}:")
+            for rule_info in sorted(rule_list, key=lambda x: x["order"]):
+                print(f"     [{rule_info['order']}] {rule_info['name']}")
+
+        # Check if we have the expected number of rules
+        expected_count = len(RULES)
+        if len(rules) >= expected_count:
+            print(f"\n   ✅ All {expected_count} expected rules are present")
+            return True
+        else:
+            print(f"\n   ⚠️  Expected {expected_count} rules, but found {len(rules)}")
+            return False
 
     except Exception as e:
         print(f"\n❌ Error during verification: {str(e)}")
+        import traceback
+
+        traceback.print_exc()
         return False
 
     finally:
@@ -196,11 +239,18 @@ def verify_rules():
 
 
 if __name__ == "__main__":
-    print("🌱 Starting lyric parsing rules seeding...")
+    print("🌱 Lyric Parsing Rules Seeding Script")
+    print("=" * 60)
+    print("This script will seed/update all lyric parsing rules")
+    print("=" * 60 + "\n")
 
     if seed_lyric_parsing_rules():
-        verify_rules()
-        print("\n🎉 All done!")
+        if verify_rules():
+            print("\n🎉 Seeding and verification completed successfully!")
+            sys.exit(0)
+        else:
+            print("\n⚠️  Rules seeded but verification has warnings!")
+            sys.exit(1)
     else:
         print("\n💥 Seeding failed!")
         sys.exit(1)
