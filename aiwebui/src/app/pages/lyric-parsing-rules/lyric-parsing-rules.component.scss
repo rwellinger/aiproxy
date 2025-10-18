@@ -20,6 +20,23 @@
     }
   }
 
+  .header__title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .rules-count-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #1976d2;
+    background-color: #e3f2fd;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+
   .table-card {
     padding: 0;
     overflow: hidden;

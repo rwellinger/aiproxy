@@ -1,4 +1,15 @@
 {
+  "app": {
+    "mobileWarning": {
+      "title": "Desktop Required",
+      "message": "This creative platform requires a larger screen for optimal experience.",
+      "hint": "Minimum screen width: 768px (Tablet/Desktop)",
+      "devices": {
+        "desktop": "Desktop / Laptop",
+        "tablet": "Tablet (iPad)"
+      }
+    }
+  },
   "aiChat": {
     "actions": {
       "archive": "Archive",
@@ -94,6 +105,7 @@
   },
   "common": {
     "actions": "Actions",
+    "apply": "Apply",
     "cancel": "Cancel",
     "close": "Close",
     "confirm": "Confirm",
@@ -293,6 +305,8 @@
     "cleanupLyrics": "Cleanup Lyrics",
     "optimizePhrasing": "AI-Optimized Formatting",
     "applyStructure": "Apply Structure",
+    "rebuildFromLyrics": "Rebuild from Lyrics",
+    "rebuildFromLyricsDisabled": "Structured lyrics required (e.g., [Verse], [Chorus])",
     "undoLastChange": "Undo Last Change",
     "rebuildFromText": "Rebuild from Lyric Text",
     "confirmApplyStructure": "Existing section labels detected. Replace all with structure from Lyric Architecture?",
@@ -829,6 +843,10 @@
   },
   "lyricParsingRules": {
     "title": "Lyric Parsing Rules",
+    "header": {
+      "countSingular": "{{count}} rule",
+      "countPlural": "{{count}} rules"
+    },
     "table": {
       "name": "Name",
       "pattern": "Pattern",

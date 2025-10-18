@@ -1,5 +1,25 @@
+<!-- Mobile Device Warning -->
+<div *ngIf="showMobileWarning" class="mobile-warning-screen">
+  <div class="mobile-warning-content">
+    <i class="fas fa-desktop mobile-warning-icon"></i>
+    <h1>{{ 'app.mobileWarning.title' | translate }}</h1>
+    <p class="warning-message">{{ 'app.mobileWarning.message' | translate }}</p>
+    <div class="supported-devices">
+      <div class="device-item">
+        <i class="fas fa-laptop"></i>
+        <span>{{ 'app.mobileWarning.devices.desktop' | translate }}</span>
+      </div>
+      <div class="device-item">
+        <i class="fas fa-tablet-alt"></i>
+        <span>{{ 'app.mobileWarning.devices.tablet' | translate }}</span>
+      </div>
+    </div>
+    <p class="hint">{{ 'app.mobileWarning.hint' | translate }}</p>
+  </div>
+</div>
 
-<div class="app-layout">
+<!-- Main App (Hidden on Mobile) -->
+<div *ngIf="!showMobileWarning" class="app-layout">
   <!-- Side Menu (20%) - Only show when authenticated -->
   <app-side-menu *ngIf="(authState$ | async)?.isAuthenticated"></app-side-menu>
 

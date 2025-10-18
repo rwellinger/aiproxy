@@ -1,3 +1,5 @@
+@import '../../../scss/variables';
+
 .search-replace-dialog {
   min-width: 400px;
 
@@ -18,6 +20,15 @@
       font-size: 14px;
       color: #666;
       text-align: center;
+    }
+  }
+
+  .apply-button {
+    background-color: $success-color !important;
+    color: white !important;
+
+    &:hover:not(:disabled) {
+      background-color: $success-hover !important;
     }
   }
 }

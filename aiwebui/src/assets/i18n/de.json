@@ -1,4 +1,15 @@
 {
+  "app": {
+    "mobileWarning": {
+      "title": "Desktop Erforderlich",
+      "message": "Diese Kreativ-Plattform benötigt einen größeren Bildschirm für optimale Nutzung.",
+      "hint": "Mindest-Bildschirmbreite: 768px (Tablet/Desktop)",
+      "devices": {
+        "desktop": "Desktop / Laptop",
+        "tablet": "Tablet (iPad)"
+      }
+    }
+  },
   "aiChat": {
     "actions": {
       "archive": "Archivieren",
@@ -94,6 +105,7 @@
   },
   "common": {
     "actions": "Aktionen",
+    "apply": "Anwenden",
     "cancel": "Abbrechen",
     "close": "Schließen",
     "confirm": "Bestätigen",
@@ -293,6 +305,8 @@
     "cleanupLyrics": "Text bereinigen",
     "optimizePhrasing": "KI-Optimierte Formatierung",
     "applyStructure": "Struktur anwenden",
+    "rebuildFromLyrics": "Aus Text neu aufbauen",
+    "rebuildFromLyricsDisabled": "Strukturierter Text erforderlich (z.B. [Verse], [Chorus])",
     "undoLastChange": "Letzte Änderung rückgängig",
     "rebuildFromText": "Struktur aus Text rekonstruieren",
     "confirmApplyStructure": "Vorhandene Abschnitts-Marker erkannt. Alle durch Struktur aus Text-Architektur ersetzen?",
@@ -829,6 +843,10 @@
   },
   "lyricParsingRules": {
     "title": "Songtext-Parsing-Regeln",
+    "header": {
+      "countSingular": "{{count}} Regel",
+      "countPlural": "{{count}} Regeln"
+    },
     "table": {
       "name": "Name",
       "pattern": "Muster",

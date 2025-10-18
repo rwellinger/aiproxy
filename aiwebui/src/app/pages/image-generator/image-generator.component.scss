@@ -218,9 +218,14 @@
 }
 
 .create-button {
-  @include button-primary('base');
+  @include button-ai('base');
+  background-color: $ai-color !important;
   flex: 1;
   font-weight: $font-weight-medium !important;
+
+  &:hover:not(:disabled) {
+    background-color: $ai-hover !important;
+  }
 }
 
 .reset-button {
