@@ -23,7 +23,7 @@ class LyricParsingRuleController:
     def _decode_replacement(replacement: str) -> str:
         """Decode Base64-encoded replacement string"""
         try:
-            return base64.b64decode(replacement.encode()).decode('utf-8')
+            return base64.b64decode(replacement.encode()).decode("utf-8")
         except Exception:
             # If decoding fails, return original (backward compatibility)
             return replacement
@@ -31,7 +31,7 @@ class LyricParsingRuleController:
     @staticmethod
     def _encode_replacement(replacement: str) -> str:
         """Encode replacement string to Base64"""
-        return base64.b64encode(replacement.encode('utf-8')).decode('ascii')
+        return base64.b64encode(replacement.encode("utf-8")).decode("ascii")
 
     @staticmethod
     def get_all_rules(
@@ -86,7 +86,7 @@ class LyricParsingRuleController:
         try:
             # Encode replacement before storing in DB
             rule_dict = rule_data.model_dump()
-            rule_dict['replacement'] = LyricParsingRuleController._encode_replacement(rule_dict['replacement'])
+            rule_dict["replacement"] = LyricParsingRuleController._encode_replacement(rule_dict["replacement"])
 
             # Create new rule
             new_rule = LyricParsingRule(**rule_dict)
@@ -120,8 +120,8 @@ class LyricParsingRuleController:
             update_dict = update_data.model_dump(exclude_unset=True)
 
             # Encode replacement if present in update
-            if 'replacement' in update_dict:
-                update_dict['replacement'] = LyricParsingRuleController._encode_replacement(update_dict['replacement'])
+            if "replacement" in update_dict:
+                update_dict["replacement"] = LyricParsingRuleController._encode_replacement(update_dict["replacement"])
 
             for field, value in update_dict.items():
                 setattr(rule, field, value)

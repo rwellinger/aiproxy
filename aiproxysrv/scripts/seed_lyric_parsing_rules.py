@@ -23,7 +23,7 @@ from db.models import LyricParsingRule
 
 def encode_replacement(text: str) -> str:
     """Encode replacement string to Base64 for safe storage"""
-    return base64.b64encode(text.encode('utf-8')).decode('ascii')
+    return base64.b64encode(text.encode("utf-8")).decode("ascii")
 
 
 # Current production lyric parsing rules from Dev-DB (2025-10-17)
