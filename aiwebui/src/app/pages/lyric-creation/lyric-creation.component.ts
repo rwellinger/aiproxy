@@ -319,21 +319,50 @@ export class LyricCreationComponent implements OnInit {
     }
 
     async optimizeLyricsPhrasing(): Promise<void> {
-        const lyrics = this.lyricForm.get('lyrics')?.value?.trim();
+        let lyrics = this.lyricForm.get('lyrics')?.value?.trim();
         if (!lyrics) {
             this.notificationService.error(this.translate.instant('lyricCreation.errors.lyricsRequired'));
             return;
         }
 
+        // Save current state for undo
+        this.lastCleanupState = lyrics;
+
         this.isOptimizingPhrasing = true;
         this.lyricForm.get('lyrics')?.disable();
         try {
+            // Step 1: AI-Optimize via Ollama
             const optimized = await this.progressService.executeWithProgress(
                 () => this.chatService.optimizeLyricPhrasing(lyrics),
                 this.translate.instant('lyricCreation.optimizing'),
                 this.translate.instant('lyricCreation.optimizingHint')
             );
-            this.lyricForm.patchValue({ lyrics: this.removeQuotes(optimized) });
+            lyrics = this.removeQuotes(optimized);
+
+            // Step 2: Apply Cleanup Rules (remove trailing spaces, normalize quotes, etc.)
+            const rules = await this.lyricParsingRuleService.getAllRules('cleanup', true).toPromise();
+            if (rules) {
+                rules.forEach(rule => {
+                    try {
+                        const regex = new RegExp(rule.pattern, 'gm');
+                        const replacement = rule.replacement
+                            .replace(/\\n/g, '\n')
+                            .replace(/\\t/g, '\t')
+                            .replace(/\\r/g, '\r')
+                            .replace(/\\\\/g, '\\');
+                        lyrics = lyrics.replace(regex, replacement);
+                    } catch (error) {
+                        console.error(`Failed to apply rule "${rule.name}":`, error);
+                    }
+                });
+            }
+
+            // Update form with cleaned lyrics
+            this.lyricForm.patchValue({ lyrics: lyrics.trim() });
+
+            // Step 3: Apply Structure (normalize section markers)
+            this.applyStructure();
+
             this.notificationService.success(this.translate.instant('lyricCreation.optimizingSuccess'));
         } catch (error: any) {
             this.notificationService.error(
@@ -646,12 +675,33 @@ export class LyricCreationComponent implements OnInit {
 
         this.isOptimizingSection = true;
         try {
+            // Step 1: AI-Optimize via Ollama
             const optimizedContent = await this.progressService.executeWithProgress(
                 () => this.chatService.optimizeLyricPhrasing(this.activeSection!.content),
                 this.translate.instant('lyricCreation.sectionEditor.optimizing'),
                 this.translate.instant('lyricCreation.sectionEditor.optimizingHint')
             );
-            this.activeSection.content = this.removeQuotes(optimizedContent);
+            let cleanedContent = this.removeQuotes(optimizedContent);
+
+            // Step 2: Apply Cleanup Rules (remove trailing spaces, normalize quotes, etc.)
+            const rules = await this.lyricParsingRuleService.getAllRules('cleanup', true).toPromise();
+            if (rules) {
+                rules.forEach(rule => {
+                    try {
+                        const regex = new RegExp(rule.pattern, 'gm');
+                        const replacement = rule.replacement
+                            .replace(/\\n/g, '\n')
+                            .replace(/\\t/g, '\t')
+                            .replace(/\\r/g, '\r')
+                            .replace(/\\\\/g, '\\');
+                        cleanedContent = cleanedContent.replace(regex, replacement);
+                    } catch (error) {
+                        console.error(`Failed to apply rule "${rule.name}":`, error);
+                    }
+                });
+            }
+
+            this.activeSection.content = cleanedContent.trim();
         } catch (error: any) {
             this.notificationService.error(
                 this.translate.instant('lyricCreation.errors.optimizingSection', { error: error.message })
