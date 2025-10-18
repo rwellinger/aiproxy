@@ -79,6 +79,9 @@ class UnifiedChatRequest(BaseModel):
     pre_condition: str = Field("", description="Text before user input")
     post_condition: str = Field("", description="Text after user input")
     input_text: str = Field(..., min_length=1, max_length=10000, description="Input text for generation")
+    user_instructions: str = Field(
+        "", description="Optional user-specific instructions (placed between input and post_condition)"
+    )
     temperature: float | None = Field(
         None, ge=0.0, le=2.0, description="Temperature for text generation (overrides template)"
     )
@@ -99,6 +102,7 @@ class UnifiedChatRequest(BaseModel):
                 "pre_condition": "You are a helpful AI assistant.",
                 "post_condition": "Keep your answer concise.",
                 "input_text": "Explain quantum computing",
+                "user_instructions": "Make it shorter and use simple language.",
                 "temperature": 0.7,
                 "max_tokens": 150,
                 "model": "llama3.2:3b",

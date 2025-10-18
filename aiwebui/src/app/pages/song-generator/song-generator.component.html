@@ -88,20 +88,17 @@
                                 formControlName="lyrics"
                                 [placeholder]="'songGenerator.lyricsPlaceholder' | translate"
                                 [required]="!isInstrumentalMode"
-                                [disabled]="isLoading || isInstrumentalMode || isAnyLyricOperationInProgress"
+                                [disabled]="isLoading || isInstrumentalMode"
                                 class="lyrics-input">
                         </textarea>
                                     <div class="lyrics-dropdown-container">
                                         <button
                                                 type="button"
                                                 (click)="toggleLyricsDropdown()"
-                                                [disabled]="isLoading || isAnyLyricOperationInProgress || isImprovingPrompt"
+                                                [disabled]="isLoading || isImprovingPrompt"
                                                 class="magic-icon-button"
                                                 [title]="'songGenerator.lyricsActions' | translate">
-                                            <i class="fas fa-ellipsis-vertical"
-                                               *ngIf="!isAnyLyricOperationInProgress"></i>
-                                            <i class="fas fa-spinner fa-spin"
-                                               *ngIf="isAnyLyricOperationInProgress"></i>
+                                            <i class="fas fa-ellipsis-vertical"></i>
                                         </button>
                                         <div class="dropdown-menu" *ngIf="showLyricsDropdown"
                                              (click)="$event.stopPropagation()">
@@ -109,43 +106,9 @@
                                                     type="button"
                                                     class="dropdown-item"
                                                     [disabled]="isLoading"
-                                                    (click)="selectLyricsAction('architecture')">
-                                                <i class="fas fa-layer-group"></i>
-                                                <span>{{ 'songGenerator.lyricArchitecture' | translate }}</span>
-                                            </button>
-                                            <div class="dropdown-divider" *ngIf="!isInstrumentalMode"></div>
-                                            <button
-                                                    type="button"
-                                                    class="dropdown-item"
-                                                    *ngIf="!isInstrumentalMode"
-                                                    [disabled]="isLoading || isGeneratingLyrics || isTranslatingLyrics || isImprovingPrompt || !songForm.get('lyrics')?.value?.trim()"
-                                                    (click)="selectLyricsAction('generate')">
-                                                <i class="fas fa-music"></i>
-                                                <span>{{ 'songGenerator.createLyrics' | translate }}</span>
-                                                <i class="fas fa-spinner fa-spin action-spinner"
-                                                   *ngIf="isGeneratingLyrics"></i>
-                                            </button>
-                                            <button
-                                                    type="button"
-                                                    class="dropdown-item"
-                                                    *ngIf="!isInstrumentalMode"
-                                                    [disabled]="isLoading || isGeneratingLyrics || isTranslatingLyrics || isImprovingPrompt || !songForm.get('lyrics')?.value?.trim()"
-                                                    (click)="selectLyricsAction('translate')">
-                                                <i class="fas fa-language"></i>
-                                                <span>{{ 'songGenerator.translateToEnglish' | translate }}</span>
-                                                <i class="fas fa-spinner fa-spin action-spinner"
-                                                   *ngIf="isTranslatingLyrics"></i>
-                                            </button>
-                                            <button
-                                                    type="button"
-                                                    class="dropdown-item"
-                                                    *ngIf="!isInstrumentalMode"
-                                                    [disabled]="isLoading || isAnyLyricOperationInProgress || isImprovingPrompt || !songForm.get('lyrics')?.value?.trim()"
-                                                    (click)="selectLyricsAction('optimize-phrasing')">
-                                                <i class="fas fa-align-left"></i>
-                                                <span>{{ 'songGenerator.optimizePhrasing' | translate }}</span>
-                                                <i class="fas fa-spinner fa-spin action-spinner"
-                                                   *ngIf="isOptimizingPhrasing"></i>
+                                                    (click)="selectLyricsAction('edit-in-creator')">
+                                                <i class="fas fa-pencil"></i>
+                                                <span>{{ 'songGenerator.editInLyricCreator' | translate }}</span>
                                             </button>
                                         </div>
                                     </div>
@@ -174,7 +137,7 @@
                                         <button
                                                 type="button"
                                                 (click)="toggleStyleDropdown()"
-                                                [disabled]="isLoading || isImprovingPrompt || isTranslatingLyrics || isGeneratingLyrics || isTranslatingStylePrompt"
+                                                [disabled]="isLoading || isImprovingPrompt || isTranslatingStylePrompt"
                                                 class="magic-icon-button"
                                                 [title]="'songGenerator.musicStyleActions' | translate">
                                             <i class="fas fa-ellipsis-vertical"
@@ -196,7 +159,7 @@
                                             <button
                                                     type="button"
                                                     class="dropdown-item"
-                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingLyrics || isGeneratingLyrics || isTranslatingStylePrompt || !songForm.get('prompt')?.value?.trim()"
+                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingStylePrompt || !songForm.get('prompt')?.value?.trim()"
                                                     (click)="selectStyleAction('enhance')">
                                                 <i class="fas fa-wand-magic-sparkles"></i>
                                                 <span>{{ 'songGenerator.enhanceStylePrompt' | translate }}</span>
@@ -206,7 +169,7 @@
                                             <button
                                                     type="button"
                                                     class="dropdown-item"
-                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingLyrics || isGeneratingLyrics || isTranslatingStylePrompt || !songForm.get('prompt')?.value?.trim()"
+                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingStylePrompt || !songForm.get('prompt')?.value?.trim()"
                                                     (click)="selectStyleAction('translate')">
                                                 <i class="fas fa-language"></i>
                                                 <span>{{ 'songGenerator.translateToEnglish' | translate }}</span>
@@ -235,14 +198,14 @@
 
                             <div class="button-group">
                                 <button type="submit"
-                                        [disabled]="songForm.invalid || isLoading || isImprovingPrompt || isTranslatingLyrics || isGeneratingLyrics || isTranslatingStylePrompt || isGeneratingTitle"
+                                        [disabled]="songForm.invalid || isLoading || isImprovingPrompt || isTranslatingStylePrompt || isGeneratingTitle"
                                         class="create-button">
                                     <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
                                     <i class="fas fa-music" *ngIf="!isLoading"></i>
                                     {{ isLoading ? ('songGenerator.creating' | translate) : (isInstrumentalMode ? ('songGenerator.createInstrumental' | translate) : ('songGenerator.createButton' | translate)) }}
                                 </button>
                                 <button type="button" (click)="resetForm()"
-                                        [disabled]="isLoading || isImprovingPrompt || isTranslatingLyrics || isGeneratingLyrics || isTranslatingStylePrompt || isGeneratingTitle"
+                                        [disabled]="isLoading || isImprovingPrompt || isTranslatingStylePrompt || isGeneratingTitle"
                                         class="reset-button">
                                     <i class="fas fa-rotate-left"></i> {{ 'songGenerator.resetButton' | translate }}
                                 </button>

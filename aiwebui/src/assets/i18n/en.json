@@ -345,7 +345,9 @@
       "extending": "Extending Section...",
       "extendingHint": "AI is adding more lines to this section",
       "optimizing": "Optimizing Phrasing...",
-      "optimizingHint": "AI is reformatting lyrics into short musical phrases"
+      "optimizingHint": "AI is reformatting lyrics into short musical phrases",
+      "aiInstructions": "AI Instructions (optional)",
+      "aiInstructionsPlaceholder": "e.g., 'Make it shorter', 'Add more rhymes', 'Change tone to upbeat'..."
     }
   },
   "musicStyleChooser": {
@@ -576,8 +578,8 @@
     "costInfo": "Song generation: ~$0.15 each",
     "createButton": "Create Song",
     "createInstrumental": "Create Instrumental",
-    "createLyrics": "Create Lyrics",
     "creating": "Creating...",
+    "editInLyricCreator": "Edit in Lyric Creator",
     "enhanceStylePrompt": "Enhance Style Prompt",
     "errors": {
       "errorFetchingStatus": "Error fetching status",

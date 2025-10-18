@@ -19,6 +19,7 @@ interface LyricSection {
     label: string;
     content: string;
     order: number;
+    aiInstructions?: string;
 }
 
 @Component({
@@ -604,7 +605,8 @@ export class LyricCreationComponent implements OnInit {
                 () => this.chatService.improveLyricSection(
                     this.activeSection!.label,
                     this.activeSection!.content,
-                    fullContext
+                    fullContext,
+                    this.activeSection!.aiInstructions
                 ),
                 this.translate.instant('lyricCreation.sectionEditor.improving'),
                 this.translate.instant('lyricCreation.sectionEditor.improvingHint')
@@ -625,7 +627,10 @@ export class LyricCreationComponent implements OnInit {
         this.isRewritingSection = true;
         try {
             const rewrittenContent = await this.progressService.executeWithProgress(
-                () => this.chatService.rewriteLyricSection(this.activeSection!.content),
+                () => this.chatService.rewriteLyricSection(
+                    this.activeSection!.content,
+                    this.activeSection!.aiInstructions
+                ),
                 this.translate.instant('lyricCreation.sectionEditor.rewriting'),
                 this.translate.instant('lyricCreation.sectionEditor.rewritingHint')
             );
@@ -645,7 +650,11 @@ export class LyricCreationComponent implements OnInit {
         this.isExtendingSection = true;
         try {
             const extendedContent = await this.progressService.executeWithProgress(
-                () => this.chatService.extendLyricSection(this.activeSection!.content, 4),
+                () => this.chatService.extendLyricSection(
+                    this.activeSection!.content,
+                    4,
+                    this.activeSection!.aiInstructions
+                ),
                 this.translate.instant('lyricCreation.sectionEditor.extending'),
                 this.translate.instant('lyricCreation.sectionEditor.extendingHint')
             );
@@ -666,7 +675,10 @@ export class LyricCreationComponent implements OnInit {
         try {
             // Step 1: AI-Optimize via Ollama
             const optimizedContent = await this.progressService.executeWithProgress(
-                () => this.chatService.optimizeLyricPhrasing(this.activeSection!.content),
+                () => this.chatService.optimizeLyricPhrasing(
+                    this.activeSection!.content,
+                    this.activeSection!.aiInstructions
+                ),
                 this.translate.instant('lyricCreation.sectionEditor.optimizing'),
                 this.translate.instant('lyricCreation.sectionEditor.optimizingHint')
             );
@@ -693,6 +705,36 @@ export class LyricCreationComponent implements OnInit {
         } finally {
             this.isOptimizingSection = false;
         }
+    }
+
+    cleanupSectionContent(): void {
+        if (!this.activeSection || !this.activeSection.content.trim()) {
+            return;
+        }
+
+        let content = this.activeSection.content;
+
+        // Load cleanup rules from API and apply them
+        this.lyricParsingRuleService.getAllRules('cleanup', true).subscribe({
+            next: (rules) => {
+                // Apply each rule in order (rules are already sorted by order field from API)
+                rules.forEach(rule => {
+                    try {
+                        const regex = new RegExp(rule.pattern, 'gm');
+                        content = content.replace(regex, rule.replacement);
+                    } catch (error) {
+                        console.error(`Failed to apply rule "${rule.name}":`, error);
+                    }
+                });
+
+                this.activeSection!.content = content.trim();
+                this.notificationService.success(this.translate.instant('lyricCreation.cleanupComplete'));
+            },
+            error: (error) => {
+                console.error('Failed to load lyric parsing rules:', error);
+                this.notificationService.error('Failed to load cleanup rules');
+            }
+        });
     }
 
     rebuildFromLyricText(): void {

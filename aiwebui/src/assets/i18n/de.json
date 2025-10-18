@@ -345,7 +345,9 @@
       "extending": "Erweitere Abschnitt...",
       "extendingHint": "KI fügt diesem Abschnitt mehr Zeilen hinzu",
       "optimizing": "Optimiere Phrasierung...",
-      "optimizingHint": "KI formatiert Text in kurze musikalische Phrasen"
+      "optimizingHint": "KI formatiert Text in kurze musikalische Phrasen",
+      "aiInstructions": "KI-Anweisungen (optional)",
+      "aiInstructionsPlaceholder": "z.B. 'Text kürzen', 'Mehr Reime hinzufügen', 'Ton fröhlicher machen'..."
     }
   },
   "musicStyleChooser": {
@@ -576,8 +578,8 @@
     "costInfo": "Song-Erstellung: ~$0.15 pro Stück",
     "createButton": "Song erstellen",
     "createInstrumental": "Instrumental erstellen",
-    "createLyrics": "Text erstellen",
     "creating": "Erstelle...",
+    "editInLyricCreator": "Im Lyric Creator bearbeiten",
     "enhanceStylePrompt": "Stil-Prompt verbessern",
     "errors": {
       "errorFetchingStatus": "Fehler beim Abrufen des Status",

@@ -83,8 +83,34 @@
                                         class="section-textarea">
                                 </textarea>
 
-                                <div class="section-char-count" *ngIf="activeSection">
-                                    {{ activeSection.content.length }} {{ 'lyricCreation.charactersCount' | translate }}
+                                <!-- Cleanup Button + Character Count Row -->
+                                <div class="section-footer-row" *ngIf="activeSection">
+                                    <button
+                                            type="button"
+                                            (click)="cleanupSectionContent()"
+                                            [disabled]="isAnySectionOperationInProgress || !activeSection.content.trim()"
+                                            class="cleanup-button">
+                                        <i class="fas fa-broom"></i>
+                                        {{ 'lyricCreation.cleanupLyrics' | translate }}
+                                    </button>
+                                    <div class="section-char-count">
+                                        {{ activeSection.content.length }} {{ 'lyricCreation.charactersCount' | translate }}
+                                    </div>
+                                </div>
+
+                                <!-- AI Instructions Textarea -->
+                                <div class="ai-instructions-group" *ngIf="activeSection">
+                                    <label for="aiInstructions" class="ai-instructions-label">
+                                        {{ 'lyricCreation.sectionEditor.aiInstructions' | translate }}
+                                    </label>
+                                    <textarea
+                                            id="aiInstructions"
+                                            [(ngModel)]="activeSection.aiInstructions"
+                                            [ngModelOptions]="{standalone: true}"
+                                            [placeholder]="'lyricCreation.sectionEditor.aiInstructionsPlaceholder' | translate"
+                                            [disabled]="isAnySectionOperationInProgress"
+                                            class="ai-instructions-textarea">
+                                    </textarea>
                                 </div>
                             </div>
 
@@ -250,6 +276,7 @@
                                     <i class="fas fa-spinner fa-spin action-spinner"
                                        *ngIf="isOptimizingPhrasing"></i>
                                 </button>
+                                <div class="dropdown-separator"></div>
                                 <button
                                         type="button"
                                         class="dropdown-item"

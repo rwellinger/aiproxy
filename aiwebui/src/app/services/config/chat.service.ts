@@ -9,6 +9,7 @@ interface UnifiedChatRequest {
   pre_condition: string;
   post_condition: string;
   input_text: string;
+  user_instructions?: string;
   temperature?: number;
   max_tokens?: number;
   model?: string;
@@ -141,7 +142,8 @@ export class ChatService {
   async improveLyricSection(
     sectionLabel: string,
     sectionContent: string,
-    fullContext: string
+    fullContext: string,
+    userInstructions?: string
   ): Promise<string> {
     const template = await firstValueFrom(this.promptConfig.getPromptTemplateAsync('lyrics', 'improve-section'));
     if (!template) {
@@ -167,6 +169,7 @@ export class ChatService {
       pre_condition: enhancedPreCondition,
       post_condition: template.post_condition || '',
       input_text: sectionContent,
+      user_instructions: userInstructions || '',
       temperature: template.temperature,
       max_tokens: template.max_tokens,
       model: template.model
@@ -178,15 +181,73 @@ export class ChatService {
     return data.response;
   }
 
-  async rewriteLyricSection(sectionContent: string): Promise<string> {
-    return this.validateAndCallUnified('lyrics', 'rewrite-section', sectionContent);
+  async rewriteLyricSection(sectionContent: string, userInstructions?: string): Promise<string> {
+    const template = await firstValueFrom(this.promptConfig.getPromptTemplateAsync('lyrics', 'rewrite-section'));
+    if (!template) {
+      throw new Error('Template lyrics/rewrite-section not found in database');
+    }
+
+    // Validate template has all required parameters
+    if (!template.model) {
+      throw new Error('Template lyrics/rewrite-section is missing model parameter');
+    }
+    if (template.temperature === undefined || template.temperature === null) {
+      throw new Error('Template lyrics/rewrite-section is missing temperature parameter');
+    }
+    if (!template.max_tokens) {
+      throw new Error('Template lyrics/rewrite-section is missing max_tokens parameter');
+    }
+
+    const request: UnifiedChatRequest = {
+      pre_condition: template.pre_condition || '',
+      post_condition: template.post_condition || '',
+      input_text: sectionContent,
+      user_instructions: userInstructions || '',
+      temperature: template.temperature,
+      max_tokens: template.max_tokens,
+      model: template.model
+    };
+
+    const data: ChatResponse = await firstValueFrom(
+      this.http.post<ChatResponse>(this.apiConfig.endpoints.ollama.chatGenerateUnified, request)
+    );
+    return data.response;
   }
 
-  async optimizeLyricPhrasing(lyricContent: string): Promise<string> {
-    return this.validateAndCallUnified('lyrics', 'optimize-phrasing', lyricContent);
+  async optimizeLyricPhrasing(lyricContent: string, userInstructions?: string): Promise<string> {
+    const template = await firstValueFrom(this.promptConfig.getPromptTemplateAsync('lyrics', 'optimize-phrasing'));
+    if (!template) {
+      throw new Error('Template lyrics/optimize-phrasing not found in database');
+    }
+
+    // Validate template has all required parameters
+    if (!template.model) {
+      throw new Error('Template lyrics/optimize-phrasing is missing model parameter');
+    }
+    if (template.temperature === undefined || template.temperature === null) {
+      throw new Error('Template lyrics/optimize-phrasing is missing temperature parameter');
+    }
+    if (!template.max_tokens) {
+      throw new Error('Template lyrics/optimize-phrasing is missing max_tokens parameter');
+    }
+
+    const request: UnifiedChatRequest = {
+      pre_condition: template.pre_condition || '',
+      post_condition: template.post_condition || '',
+      input_text: lyricContent,
+      user_instructions: userInstructions || '',
+      temperature: template.temperature,
+      max_tokens: template.max_tokens,
+      model: template.model
+    };
+
+    const data: ChatResponse = await firstValueFrom(
+      this.http.post<ChatResponse>(this.apiConfig.endpoints.ollama.chatGenerateUnified, request)
+    );
+    return data.response;
   }
 
-  async extendLyricSection(sectionContent: string, lines: number): Promise<string> {
+  async extendLyricSection(sectionContent: string, lines: number, userInstructions?: string): Promise<string> {
     const template = await firstValueFrom(this.promptConfig.getPromptTemplateAsync('lyrics', 'extend-section'));
     if (!template) {
       throw new Error('Template lyrics/extend-section not found in database');
@@ -211,6 +272,7 @@ export class ChatService {
       pre_condition: enhancedPreCondition,
       post_condition: template.post_condition || '',
       input_text: sectionContent,
+      user_instructions: userInstructions || '',
       temperature: template.temperature,
       max_tokens: template.max_tokens,
       model: template.model

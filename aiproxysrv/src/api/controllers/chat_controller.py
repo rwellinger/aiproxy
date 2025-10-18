@@ -20,6 +20,7 @@ class ChatController:
         post_condition: str,
         temperature: float = 0.3,
         max_tokens: int = 30,
+        user_instructions: str = "",
     ) -> tuple[dict[str, Any], int]:
         """
         Generate chat response with Ollama
@@ -31,6 +32,7 @@ class ChatController:
             post_condition: Text to append to prompt
             temperature: Sampling temperature (default 0.3)
             max_tokens: Maximum tokens to generate (default 30)
+            user_instructions: Optional user-specific instructions (placed between prompt and post_condition)
 
         Returns:
             Tuple of (response_data, status_code)
@@ -40,7 +42,9 @@ class ChatController:
             return {"error": "Missing model or prompt"}, 400
 
         # Build full prompt optimized for gpt-oss:20b with clear instruction separation
-        full_prompt = f"[INSTRUCTION] {pre_condition or ''} [USER] {prompt} [FORMAT] {post_condition or ''}"
+        # Structure: [INSTRUCTION] pre_condition [USER] prompt [ADDITIONAL] user_instructions [FORMAT] post_condition
+        user_part = f" [ADDITIONAL] {user_instructions}" if user_instructions.strip() else ""
+        full_prompt = f"[INSTRUCTION] {pre_condition or ''} [USER] {prompt}{user_part} [FORMAT] {post_condition or ''}"
 
         try:
             # Conditional logging based on CHAT_DEBUG_LOGGING
@@ -50,6 +54,7 @@ class ChatController:
                     model=model,
                     pre_condition=pre_condition,
                     prompt=prompt,
+                    user_instructions=user_instructions,
                     post_condition=post_condition,
                     full_prompt=full_prompt,
                     temperature=temperature,
