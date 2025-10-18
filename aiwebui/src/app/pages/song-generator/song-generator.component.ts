@@ -30,6 +30,7 @@ export class SongGeneratorComponent implements OnInit {
     isImprovingPrompt = false;
     isTranslatingLyrics = false;
     isGeneratingLyrics = false;
+    isOptimizingPhrasing = false;
     isTranslatingStylePrompt = false;
     isGeneratingTitle = false;
     showLyricsDropdown = false;
@@ -64,6 +65,10 @@ export class SongGeneratorComponent implements OnInit {
     private architectureService = inject(LyricArchitectureService);
     private musicStyleChooserService = inject(MusicStyleChooserService);
     private translate = inject(TranslateService);
+
+    get isAnyLyricOperationInProgress(): boolean {
+        return this.isGeneratingLyrics || this.isTranslatingLyrics || this.isOptimizingPhrasing;
+    }
 
     ngOnInit() {
         this.songForm = this.fb.group({
@@ -504,6 +509,31 @@ export class SongGeneratorComponent implements OnInit {
         }
     }
 
+    async optimizeLyricsPhrasing() {
+        const lyrics = this.songForm.get('lyrics')?.value?.trim();
+        if (!lyrics) {
+            this.notificationService.error(this.translate.instant('songGenerator.errors.lyricsRequired'));
+            return;
+        }
+
+        this.isOptimizingPhrasing = true;
+        try {
+            const optimized = await this.progressService.executeWithProgress(
+                () => this.chatService.optimizeLyricPhrasing(lyrics),
+                this.translate.instant('songGenerator.progress.optimizingPhrasing'),
+                this.translate.instant('songGenerator.progress.optimizingPhrasingHint')
+            );
+            this.songForm.patchValue({ lyrics: this.removeQuotes(optimized) });
+            this.notificationService.success(this.translate.instant('songGenerator.optimizingSuccess'));
+        } catch (error: any) {
+            this.notificationService.error(
+                this.translate.instant('songGenerator.errors.optimizingPhrasing', { error: error.message })
+            );
+        } finally {
+            this.isOptimizingPhrasing = false;
+        }
+    }
+
     toggleLyricsDropdown() {
         this.showLyricsDropdown = !this.showLyricsDropdown;
     }
@@ -512,13 +542,15 @@ export class SongGeneratorComponent implements OnInit {
         this.showLyricsDropdown = false;
     }
 
-    selectLyricsAction(action: 'generate' | 'translate' | 'architecture') {
+    selectLyricsAction(action: 'generate' | 'translate' | 'optimize-phrasing' | 'architecture') {
         this.closeLyricsDropdown();
 
         if (action === 'generate') {
             this.generateLyrics();
         } else if (action === 'translate') {
             this.translateLyrics();
+        } else if (action === 'optimize-phrasing') {
+            this.optimizeLyricsPhrasing();
         } else if (action === 'architecture') {
             this.openLyricArchitectModal();
         }

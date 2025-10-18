@@ -291,6 +291,7 @@
     "finalizeLyrics": "Finalize Lyrics",
     "textTools": "Text Tools",
     "cleanupLyrics": "Cleanup Lyrics",
+    "optimizePhrasing": "AI-Optimized Formatting",
     "applyStructure": "Apply Structure",
     "undoLastChange": "Undo Last Change",
     "rebuildFromText": "Rebuild from Lyric Text",
@@ -298,6 +299,9 @@
     "confirmRebuild": "Detected structure will overwrite Lyric Architecture. Continue?",
     "structureApplied": "Structure applied successfully",
     "cleanupComplete": "Lyrics cleaned up successfully",
+    "optimizing": "Optimizing Phrasing...",
+    "optimizingHint": "AI is reformatting lyrics into short musical phrases",
+    "optimizingSuccess": "Lyrics optimized for music generation",
     "finalizeComplete": "Lyrics finalized successfully (Cleanup + Structure applied)",
     "undoApplied": "Change reverted successfully",
     "rebuildSuccess": "Architecture rebuilt: {{count}} sections detected",
@@ -314,6 +318,8 @@
       "applied": "Replaced {{count}} occurrences"
     },
     "errors": {
+      "optimizingPhrasing": "Error optimizing phrasing: {{error}}",
+      "optimizingSection": "Error optimizing section: {{error}}",
       "textRequired": "Please enter text first",
       "lyricsRequired": "Please enter lyrics first",
       "noArchitecture": "No lyric architecture defined. Please configure architecture first."
@@ -326,6 +332,7 @@
       "improve": "Improve Section",
       "rewrite": "Rewrite Section",
       "extend": "Extend Section",
+      "optimize": "Optimize Phrasing",
       "activated": "Section Editor activated",
       "applied": "Sections applied successfully",
       "cancelled": "Changes cancelled",
@@ -336,7 +343,9 @@
       "rewriting": "Rewriting Section...",
       "rewritingHint": "AI is rewriting this section",
       "extending": "Extending Section...",
-      "extendingHint": "AI is adding more lines to this section"
+      "extendingHint": "AI is adding more lines to this section",
+      "optimizing": "Optimizing Phrasing...",
+      "optimizingHint": "AI is reformatting lyrics into short musical phrases"
     }
   },
   "musicStyleChooser": {
@@ -577,6 +586,7 @@
       "generationFailed": "Song generation failed",
       "instrumentalFailed": "Instrumental generation failed",
       "lyricsRequired": "Please enter lyrics first",
+      "optimizingPhrasing": "Error optimizing phrasing: {{error}}",
       "promptRequired": "Please enter a music style prompt first",
       "textRequired": "Please enter text first"
     },
@@ -593,6 +603,8 @@
     "musicStyleActions": "Music style actions",
     "musicStyleLabel": "Music Style Prompt:",
     "musicStylePlaceholder": "Describe the music style (e.g., upbeat pop, melancholic ballad, rock anthem)...",
+    "optimizePhrasing": "AI-Optimized Formatting",
+    "optimizingSuccess": "Lyrics optimized for music generation",
     "player": {
       "muteUnmute": "Mute/Unmute",
       "playPause": "Play/Pause",
@@ -606,6 +618,8 @@
       "generatingLyricsHint": "AI is generating song lyrics from your text",
       "generatingTitle": "Generating Title...",
       "generatingTitleHint": "AI is creating a song title for you",
+      "optimizingPhrasing": "Optimizing Phrasing...",
+      "optimizingPhrasingHint": "AI is reformatting lyrics into short musical phrases",
       "translatingLyrics": "Translating Lyrics...",
       "translatingLyricsHint": "AI is translating your lyrics to English",
       "translatingPrompt": "Translating Style Prompt...",

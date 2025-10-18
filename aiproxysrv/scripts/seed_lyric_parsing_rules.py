@@ -8,6 +8,7 @@ Usage:
     python scripts/seed_lyric_parsing_rules.py
 """
 
+import base64
 import os
 import sys
 
@@ -20,13 +21,19 @@ from db.database import get_db
 from db.models import LyricParsingRule
 
 
+def encode_replacement(text: str) -> str:
+    """Encode replacement string to Base64 for safe storage"""
+    return base64.b64encode(text.encode('utf-8')).decode('ascii')
+
+
 # Current production lyric parsing rules from Dev-DB (2025-10-17)
+# NOTE: All replacement values are Base64-encoded for safe storage
 RULES = [
     {
         "name": "Comma Line Breaks",
         "description": "Add line break after comma if followed by 5+ words",
         "pattern": r",\s+(?=(?:[^\s,]+\s*){5,})",
-        "replacement": ",\n",
+        "replacement": encode_replacement(",\n"),
         "rule_type": "cleanup",
         "active": True,
         "order": 0,
@@ -35,7 +42,7 @@ RULES = [
         "name": "Line Break After Comma + Capital",
         "description": "Add line break after comma when followed by capital letter",
         "pattern": r",\s+(?=[A-Z])",
-        "replacement": ",\n",
+        "replacement": encode_replacement(",\n"),
         "rule_type": "cleanup",
         "active": True,
         "order": 1,
@@ -44,7 +51,7 @@ RULES = [
         "name": "Remove Trailing Spaces",
         "description": "Remove whitespace at the end of each line",
         "pattern": r"\s+$",
-        "replacement": "",
+        "replacement": encode_replacement(""),
         "rule_type": "cleanup",
         "active": True,
         "order": 3,
@@ -53,7 +60,7 @@ RULES = [
         "name": "Normalize Smart Quotes (Double)",
         "description": "Convert curly double quotes to straight quotes",
         "pattern": r"[\u201C\u201D]",
-        "replacement": '"',
+        "replacement": encode_replacement('"'),
         "rule_type": "cleanup",
         "active": True,
         "order": 4,
@@ -62,7 +69,7 @@ RULES = [
         "name": "Normalize Smart Quotes (Single)",
         "description": "Convert curly single quotes to straight quotes",
         "pattern": r"[\u2018\u2019]",
-        "replacement": "'",
+        "replacement": encode_replacement("'"),
         "rule_type": "cleanup",
         "active": True,
         "order": 5,
@@ -71,7 +78,7 @@ RULES = [
         "name": "Line Break After Period + Capital",
         "description": "Add line break after period when followed by capital letter",
         "pattern": r"\.\s+(?=[A-Z])",
-        "replacement": ".\n",
+        "replacement": encode_replacement(".\n"),
         "rule_type": "cleanup",
         "active": True,
         "order": 6,
@@ -80,7 +87,7 @@ RULES = [
         "name": "Normalize Em Dash",
         "description": "Convert em dash to regular dash with spaces",
         "pattern": r"\u2014",
-        "replacement": " - ",
+        "replacement": encode_replacement(" - "),
         "rule_type": "cleanup",
         "active": True,
         "order": 7,
@@ -89,7 +96,7 @@ RULES = [
         "name": "Normalize Ellipsis",
         "description": "Convert ellipsis character to three periods",
         "pattern": r"\u2026",
-        "replacement": "...",
+        "replacement": encode_replacement("..."),
         "rule_type": "cleanup",
         "active": True,
         "order": 8,
@@ -98,7 +105,7 @@ RULES = [
         "name": "Normalize En Dash",
         "description": "Convert en dash to regular dash with spaces",
         "pattern": r"\u2013",
-        "replacement": " - ",
+        "replacement": encode_replacement(" - "),
         "rule_type": "cleanup",
         "active": True,
         "order": 9,
@@ -107,7 +114,7 @@ RULES = [
         "name": "Reduce Blank Lines",
         "description": "Remove excessive blank lines (max 1 blank line)",
         "pattern": r"\n{3,}",
-        "replacement": r"\n\n",
+        "replacement": encode_replacement("\n\n"),
         "rule_type": "cleanup",
         "active": True,
         "order": 10,
@@ -116,7 +123,7 @@ RULES = [
         "name": "Section Label Detection",
         "description": "Detect Markdown-style section labels (Intro, Verse, Chorus, etc.)",
         "pattern": r"^\*\*\s*(Intro|Verse\s*\d+|Chorus|Bridge|Outro|Pre[-_\s]?chorus|Post[-_\s]?chorus)\s*\*\*$",
-        "replacement": "",
+        "replacement": encode_replacement(""),
         "rule_type": "section",
         "active": True,
         "order": 2,
@@ -138,11 +145,7 @@ def seed_lyric_parsing_rules():
             print(f"Processing rule: {rule_data['name']}")
 
             # Check if rule already exists
-            existing = (
-                db.query(LyricParsingRule)
-                .filter(LyricParsingRule.name == rule_data["name"])
-                .first()
-            )
+            existing = db.query(LyricParsingRule).filter(LyricParsingRule.name == rule_data["name"]).first()
 
             if existing:
                 print(f"  Rule exists (ID: {existing.id}), updating...")
