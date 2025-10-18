@@ -296,13 +296,7 @@ export class LyricCreationComponent implements OnInit {
                 rules.forEach(rule => {
                     try {
                         const regex = new RegExp(rule.pattern, 'gm');
-                        // Interpret common escape sequences in replacement string
-                        const replacement = rule.replacement
-                            .replace(/\\n/g, '\n')
-                            .replace(/\\t/g, '\t')
-                            .replace(/\\r/g, '\r')
-                            .replace(/\\\\/g, '\\');
-                        lyrics = lyrics.replace(regex, replacement);
+                        lyrics = lyrics.replace(regex, rule.replacement);
                     } catch (error) {
                         console.error(`Failed to apply rule "${rule.name}":`, error);
                     }
@@ -345,12 +339,7 @@ export class LyricCreationComponent implements OnInit {
                 rules.forEach(rule => {
                     try {
                         const regex = new RegExp(rule.pattern, 'gm');
-                        const replacement = rule.replacement
-                            .replace(/\\n/g, '\n')
-                            .replace(/\\t/g, '\t')
-                            .replace(/\\r/g, '\r')
-                            .replace(/\\\\/g, '\\');
-                        lyrics = lyrics.replace(regex, replacement);
+                        lyrics = lyrics.replace(regex, rule.replacement);
                     } catch (error) {
                         console.error(`Failed to apply rule "${rule.name}":`, error);
                     }
@@ -689,12 +678,7 @@ export class LyricCreationComponent implements OnInit {
                 rules.forEach(rule => {
                     try {
                         const regex = new RegExp(rule.pattern, 'gm');
-                        const replacement = rule.replacement
-                            .replace(/\\n/g, '\n')
-                            .replace(/\\t/g, '\t')
-                            .replace(/\\r/g, '\r')
-                            .replace(/\\\\/g, '\\');
-                        cleanedContent = cleanedContent.replace(regex, replacement);
+                        cleanedContent = cleanedContent.replace(regex, rule.replacement);
                     } catch (error) {
                         console.error(`Failed to apply rule "${rule.name}":`, error);
                     }
@@ -912,12 +896,7 @@ export class LyricCreationComponent implements OnInit {
                 rules.forEach(rule => {
                     try {
                         const regex = new RegExp(rule.pattern, 'gm');
-                        const replacement = rule.replacement
-                            .replace(/\\n/g, '\n')
-                            .replace(/\\t/g, '\t')
-                            .replace(/\\r/g, '\r')
-                            .replace(/\\\\/g, '\\');
-                        lyrics = lyrics.replace(regex, replacement);
+                        lyrics = lyrics.replace(regex, rule.replacement);
                     } catch (error) {
                         console.error(`Failed to apply rule "${rule.name}":`, error);
                     }

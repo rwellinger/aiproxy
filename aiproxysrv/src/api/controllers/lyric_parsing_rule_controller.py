@@ -1,5 +1,6 @@
 """Controller for lyric parsing rule management"""
 
+import base64
 from typing import Any
 
 from sqlalchemy.exc import IntegrityError
@@ -19,6 +20,20 @@ class LyricParsingRuleController:
     """Controller for lyric parsing rule operations"""
 
     @staticmethod
+    def _decode_replacement(replacement: str) -> str:
+        """Decode Base64-encoded replacement string"""
+        try:
+            return base64.b64decode(replacement.encode()).decode('utf-8')
+        except Exception:
+            # If decoding fails, return original (backward compatibility)
+            return replacement
+
+    @staticmethod
+    def _encode_replacement(replacement: str) -> str:
+        """Encode replacement string to Base64"""
+        return base64.b64encode(replacement.encode('utf-8')).decode('ascii')
+
+    @staticmethod
     def get_all_rules(
         db: Session, rule_type: str | None = None, active_only: bool = False
     ) -> tuple[dict[str, Any], int]:
@@ -34,6 +49,10 @@ class LyricParsingRuleController:
 
             # Order by execution order
             rules = query.order_by(LyricParsingRule.order).all()
+
+            # Decode Base64-encoded replacements before returning
+            for rule in rules:
+                rule.replacement = LyricParsingRuleController._decode_replacement(rule.replacement)
 
             rules_data = [LyricParsingRuleResponse.model_validate(rule) for rule in rules]
             response = LyricParsingRuleListResponse(rules=rules_data, total=len(rules_data))
@@ -52,6 +71,9 @@ class LyricParsingRuleController:
             if not rule:
                 return {"error": f"Rule with ID {rule_id} not found"}, 404
 
+            # Decode Base64-encoded replacement before returning
+            rule.replacement = LyricParsingRuleController._decode_replacement(rule.replacement)
+
             response = LyricParsingRuleResponse.model_validate(rule)
             return response.model_dump(), 200
 
@@ -62,11 +84,18 @@ class LyricParsingRuleController:
     def create_rule(db: Session, rule_data: LyricParsingRuleCreate) -> tuple[dict[str, Any], int]:
         """Create a new lyric parsing rule"""
         try:
+            # Encode replacement before storing in DB
+            rule_dict = rule_data.model_dump()
+            rule_dict['replacement'] = LyricParsingRuleController._encode_replacement(rule_dict['replacement'])
+
             # Create new rule
-            new_rule = LyricParsingRule(**rule_data.model_dump())
+            new_rule = LyricParsingRule(**rule_dict)
             db.add(new_rule)
             db.commit()
             db.refresh(new_rule)
+
+            # Decode replacement before returning
+            new_rule.replacement = LyricParsingRuleController._decode_replacement(new_rule.replacement)
 
             response = LyricParsingRuleResponse.model_validate(new_rule)
             return response.model_dump(), 201
@@ -89,11 +118,19 @@ class LyricParsingRuleController:
 
             # Update only provided fields
             update_dict = update_data.model_dump(exclude_unset=True)
+
+            # Encode replacement if present in update
+            if 'replacement' in update_dict:
+                update_dict['replacement'] = LyricParsingRuleController._encode_replacement(update_dict['replacement'])
+
             for field, value in update_dict.items():
                 setattr(rule, field, value)
 
             db.commit()
             db.refresh(rule)
+
+            # Decode replacement before returning
+            rule.replacement = LyricParsingRuleController._decode_replacement(rule.replacement)
 
             response = LyricParsingRuleResponse.model_validate(rule)
             return response.model_dump(), 200

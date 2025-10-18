@@ -471,6 +471,103 @@ Edit Individual Sections → [AI Tools] → Improve/Rewrite/Extend →
 [Apply & Save] → [Song Generator] → Generate Song
 ```
 
+### 6.5 Lyric Parsing Rules Engine
+
+**Overview**: The Lyric Parsing Rules Engine provides configurable regex-based text processing for lyric cleanup and section detection. Rules are stored in the database and dynamically applied without hardcoded logic.
+
+**Problem Statement:**
+
+When storing regex replacement strings in a database, Python and JSON can corrupt special characters like newlines (`\n`) through string interpretation:
+
+```python
+# ❌ PROBLEM: Python interprets escape sequences
+replacement = ",\n"  # Python converts to: Comma + Newline (2 bytes: 0x2C 0x0A)
+# → DB stores: Binary newline (encoding-dependent)
+# → JSON transfer: May escape or corrupt data
+# → Frontend receives: Inconsistent results
+```
+
+**Why Pattern Doesn't Need Base64:**
+
+```python
+# Pattern uses raw strings and RegEx engine interpretation
+pattern = r"\n{3,}"  # Stored as: \ n { 3 , } (literal characters)
+# → DB: \n{3,} (literal)
+# → Frontend: new RegExp(pattern)
+# → **RegEx Engine** interprets "\n" as Newline ✅
+```
+
+**Why Replacement DOES Need Base64:**
+
+```javascript
+// JavaScript String.replace() does NOT interpret escape sequences
+const replacement = "\\n\\n";  // Literal: Backslash-n-Backslash-n (4 chars)
+lyrics.replace(regex, replacement);  // Copies "\\n\\n" literally ❌
+// Result: Text contains literal \n instead of newlines!
+```
+
+**Solution: Base64 Encoding as Safe Container:**
+
+```
+User Input → API → Base64 Encode → DB Storage → API → Base64 Decode → Frontend
+Plain Text       "CgoK" (ASCII)        Plain Text (transparent)
+```
+
+**Technical Implementation:**
+
+1. **Backend Controller** (`lyric_parsing_rule_controller.py`):
+   - `create_rule()`: Encodes `replacement` to Base64 before DB insert
+   - `update_rule()`: Encodes `replacement` if present in update payload
+   - `get_all_rules()`: Decodes `replacement` from Base64 before returning
+   - `get_rule_by_id()`: Decodes `replacement` from Base64 before returning
+
+2. **Database Storage** (`lyric_parsing_rules` table):
+   - `pattern`: Raw string (literal `\n` for RegEx engine)
+   - `replacement`: **Base64-encoded** (e.g., `"LA0K"` for `",\n"`)
+
+3. **Frontend** (transparent):
+   - Receives decoded plain text from API
+   - Applies directly: `lyrics.replace(regex, rule.replacement)`
+   - No Base64 handling needed - completely transparent
+
+4. **Migration** (`234ea0f4b6c3_base64_encode_lyric_parsing_rule_replacements.py`):
+   - Converts all existing `replacement` values to Base64
+   - Backward-compatible: Skips already encoded values
+   - Downgrade support for rollback
+
+**Why This Approach:**
+
+| Issue | Raw String | Normal String | Base64 |
+|-------|-----------|---------------|--------|
+| Python Interpretation | ❌ Literal `\n` (no newline) | ❌ Interpreted (corrupted) | ✅ ASCII-safe |
+| DB Storage | ⚠️ Depends on encoding | ⚠️ Binary data | ✅ Text (UTF-8) |
+| JSON Transfer | ⚠️ Escape issues | ⚠️ Escape issues | ✅ No escaping |
+| Frontend Usage | ❌ Literal `\n` | ⚠️ Inconsistent | ✅ Plain text |
+
+**Key Insight:**
+
+The fundamental difference is that **RegEx patterns have an interpreter (the RegEx engine)**, but **replacement strings do not** - they are copied literally. Therefore:
+
+- **Pattern**: Raw string OK → RegEx engine interprets `\n` later
+- **Replacement**: Base64 required → No interpreter, needs real newline
+
+**Example Workflow:**
+
+1. User creates rule in frontend: `",\n"` (plain text input)
+2. API receives: `",\n"`
+3. Controller encodes: `base64_encode(",\n")` → `"LA0K"`
+4. DB stores: `"LA0K"`
+5. Frontend requests rules
+6. Controller decodes: `base64_decode("LA0K")` → `",\n"`
+7. Frontend receives: `",\n"` (transparent!)
+8. Applies: `lyrics.replace(/,/g, ",\n")` ✅ Works!
+
+**Files Changed:**
+- `aiproxysrv/src/api/controllers/lyric_parsing_rule_controller.py` - Encode/decode logic
+- `aiproxysrv/scripts/seed_lyric_parsing_rules.py` - Base64-encoded seeds
+- `aiproxysrv/src/alembic/versions/234ea0f4b6c3_*.py` - Migration
+- `aiwebui/src/app/pages/lyric-creation/lyric-creation.component.ts` - Removed hardcoded escapes (4 locations)
+
 ---
 
 ## 7. Deployment View
@@ -889,6 +986,6 @@ cd src && alembic current
 ---
 
 *Document created: 01.09.2025*
-*Last updated: 16.10.2025*
-*Version: 1.7*
+*Last updated: 18.10.2025*
+*Version: 1.8*
 *Author: Rob (rob.wellinger@gmail.com)*
