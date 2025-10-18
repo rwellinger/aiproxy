@@ -21,7 +21,7 @@ class MurekaInstrumentalClient(MurekaBaseClient):
         headers = self._get_headers()
 
         # Clean payload - only send allowed parameters to MUREKA Instrumental API
-        allowed_params = ["prompt", "model"]
+        allowed_params = ["prompt", "model", "n"]
         mureka_payload = self._clean_payload(payload, allowed_params)
 
         logger.info(

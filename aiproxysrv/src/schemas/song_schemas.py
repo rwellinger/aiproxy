@@ -12,7 +12,7 @@ from .common_schemas import BaseResponse, PaginationResponse
 class SongGenerateRequest(BaseModel):
     """Schema for song generation requests"""
 
-    prompt: str = Field(..., min_length=1, max_length=500, description="Song generation prompt")
+    prompt: str = Field(..., min_length=1, max_length=1024, description="Song generation prompt (max 1024 chars)")
     lyrics: str | None = Field(None, max_length=10000, description="Custom lyrics (optional)")
     title: str | None = Field(None, min_length=1, max_length=50, description="Optional title for the song")
     model: str = Field("auto", description="Model to use for generation")
@@ -266,7 +266,9 @@ class InstrumentalGenerateRequest(BaseModel):
     """Schema for instrumental generation requests"""
 
     title: str = Field(..., min_length=1, max_length=50, description="Title for the instrumental song")
-    prompt: str = Field(..., min_length=1, max_length=500, description="Instrumental generation prompt")
+    prompt: str = Field(
+        ..., min_length=1, max_length=1024, description="Instrumental generation prompt (max 1024 chars)"
+    )
     model: str = Field("auto", description="Model to use for generation")
     style: str | None = Field(None, max_length=100, description="Music style/genre")
     duration: int | None = Field(30, ge=15, le=120, description="Instrumental duration in seconds")

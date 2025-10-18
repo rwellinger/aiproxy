@@ -8,6 +8,7 @@ import traceback
 from celery.exceptions import SoftTimeLimitExceeded
 from requests import HTTPError
 
+from config.settings import MUREKA_CHOICES
 from db.song_service import song_service
 from mureka import (
     start_mureka_generation,
@@ -46,6 +47,9 @@ def generate_song_task(self, payload: dict) -> dict:
         )
 
         logger.info("Slot acquired, starting MUREKA generation", extra={"task_id": task_id})
+
+        # Add MUREKA_CHOICES to payload
+        payload["n"] = MUREKA_CHOICES
 
         # Starte die Generierung bei MUREKA
         initial_response = start_mureka_generation(payload)
@@ -198,6 +202,9 @@ def generate_instrumental_task(self, payload: dict) -> dict:
         )
 
         logger.info("Slot acquired, starting MUREKA instrumental generation", extra={"task_id": task_id})
+
+        # Add MUREKA_CHOICES to payload
+        payload["n"] = MUREKA_CHOICES
 
         # Starte die Instrumental-Generierung bei MUREKA
         initial_response = start_mureka_instrumental_generation(payload)

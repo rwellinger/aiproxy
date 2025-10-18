@@ -34,6 +34,10 @@ MUREKA_POLL_INTERVAL_SHORT = int(os.getenv("MUREKA_POLL_INTERVAL_SHORT", "5"))
 MUREKA_POLL_INTERVAL_MEDIUM = int(os.getenv("MUREKA_POLL_INTERVAL_MEDIUM", "15"))
 MUREKA_POLL_INTERVAL_LONG = int(os.getenv("MUREKA_POLL_INTERVAL_LONG", "30"))
 
+# Number of song choices to generate (Mureka API 'n' parameter: min 1, max 3)
+_mureka_choices = int(os.getenv("MUREKA_CHOICES", "2"))
+MUREKA_CHOICES = max(1, min(3, _mureka_choices))  # Enforce min=1, max=3
+
 # --------------------------------------------------
 # OpenAI Config (Images + Chat)
 # --------------------------------------------------

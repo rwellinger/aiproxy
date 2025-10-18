@@ -21,7 +21,7 @@ class MurekaGenerationClient(MurekaBaseClient):
         headers = self._get_headers()
 
         # Clean payload - only send allowed parameters to MUREKA
-        allowed_params = ["lyrics", "prompt", "model"]
+        allowed_params = ["lyrics", "prompt", "model", "n"]
         mureka_payload = self._clean_payload(payload, allowed_params)
 
         logger.info("Starting MUREKA generation", endpoint=MUREKA_GENERATE_ENDPOINT, payload=mureka_payload)

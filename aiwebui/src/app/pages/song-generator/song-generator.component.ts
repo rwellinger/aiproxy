@@ -65,7 +65,7 @@ export class SongGeneratorComponent implements OnInit {
     ngOnInit() {
         this.songForm = this.fb.group({
             lyrics: ['', Validators.required],
-            prompt: ['', Validators.required],
+            prompt: ['', [Validators.required, Validators.maxLength(1024)]],
             model: ['auto', Validators.required],
             title: ['', [Validators.maxLength(50)]],
             isInstrumental: [false]

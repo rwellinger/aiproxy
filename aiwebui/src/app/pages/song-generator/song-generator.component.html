@@ -130,6 +130,7 @@
                                 formControlName="prompt"
                                 [placeholder]="'songGenerator.musicStylePlaceholder' | translate"
                                 required
+                                maxlength="1024"
                                 [disabled]="isLoading"
                                 class="prompt-input">
                         </textarea>
@@ -180,7 +181,7 @@
                                     </div>
                                 </div>
                                 <div class="lyrics-char-count" *ngIf="songForm.get('prompt')?.value">
-                                    {{ songForm.get('prompt')?.value?.length || 0 }} {{ 'songGenerator.charactersCount' | translate }}
+                                    {{ songForm.get('prompt')?.value?.length || 0 }} / 1024 {{ 'songGenerator.charactersCount' | translate }}
                                 </div>
                             </div>
 
