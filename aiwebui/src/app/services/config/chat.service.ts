@@ -182,6 +182,10 @@ export class ChatService {
     return this.validateAndCallUnified('lyrics', 'rewrite-section', sectionContent);
   }
 
+  async optimizeLyricPhrasing(lyricContent: string): Promise<string> {
+    return this.validateAndCallUnified('lyrics', 'optimize-phrasing', lyricContent);
+  }
+
   async extendLyricSection(sectionContent: string, lines: number): Promise<string> {
     const template = await firstValueFrom(this.promptConfig.getPromptTemplateAsync('lyrics', 'extend-section'));
     if (!template) {

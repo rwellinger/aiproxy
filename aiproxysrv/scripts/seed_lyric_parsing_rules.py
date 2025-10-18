@@ -138,11 +138,7 @@ def seed_lyric_parsing_rules():
             print(f"Processing rule: {rule_data['name']}")
 
             # Check if rule already exists
-            existing = (
-                db.query(LyricParsingRule)
-                .filter(LyricParsingRule.name == rule_data["name"])
-                .first()
-            )
+            existing = db.query(LyricParsingRule).filter(LyricParsingRule.name == rule_data["name"]).first()
 
             if existing:
                 print(f"  Rule exists (ID: {existing.id}), updating...")

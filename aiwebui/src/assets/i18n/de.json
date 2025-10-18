@@ -291,6 +291,7 @@
     "finalizeLyrics": "Text finalisieren",
     "textTools": "Text-Werkzeuge",
     "cleanupLyrics": "Text bereinigen",
+    "optimizePhrasing": "KI-Optimierte Formatierung",
     "applyStructure": "Struktur anwenden",
     "undoLastChange": "Letzte Änderung rückgängig",
     "rebuildFromText": "Struktur aus Text rekonstruieren",
@@ -298,6 +299,9 @@
     "confirmRebuild": "Erkannte Struktur wird Text-Architektur überschreiben. Fortfahren?",
     "structureApplied": "Struktur erfolgreich angewendet",
     "cleanupComplete": "Text erfolgreich bereinigt",
+    "optimizing": "Optimiere Phrasierung...",
+    "optimizingHint": "KI formatiert Text in kurze musikalische Phrasen",
+    "optimizingSuccess": "Songtext für Musikgenerierung optimiert",
     "finalizeComplete": "Text erfolgreich finalisiert (Bereinigung + Struktur angewendet)",
     "undoApplied": "Änderung erfolgreich rückgängig gemacht",
     "rebuildSuccess": "Architektur rekonstruiert: {{count}} Abschnitte erkannt",
@@ -314,6 +318,8 @@
       "applied": "{{count}} Vorkommen ersetzt"
     },
     "errors": {
+      "optimizingPhrasing": "Fehler beim Optimieren der Phrasierung: {{error}}",
+      "optimizingSection": "Fehler beim Optimieren des Abschnitts: {{error}}",
       "textRequired": "Bitte gib zuerst einen Text ein",
       "lyricsRequired": "Bitte gib zuerst einen Songtext ein",
       "noArchitecture": "Keine Text-Architektur definiert. Bitte konfiguriere zuerst die Architektur."
@@ -326,6 +332,7 @@
       "improve": "Abschnitt verbessern",
       "rewrite": "Abschnitt umschreiben",
       "extend": "Abschnitt erweitern",
+      "optimize": "Phrasierung optimieren",
       "activated": "Abschnitts-Editor aktiviert",
       "applied": "Abschnitte erfolgreich angewendet",
       "cancelled": "Änderungen verworfen",
@@ -336,7 +343,9 @@
       "rewriting": "Schreibe Abschnitt um...",
       "rewritingHint": "KI schreibt diesen Abschnitt um",
       "extending": "Erweitere Abschnitt...",
-      "extendingHint": "KI fügt diesem Abschnitt mehr Zeilen hinzu"
+      "extendingHint": "KI fügt diesem Abschnitt mehr Zeilen hinzu",
+      "optimizing": "Optimiere Phrasierung...",
+      "optimizingHint": "KI formatiert Text in kurze musikalische Phrasen"
     }
   },
   "musicStyleChooser": {
@@ -577,6 +586,7 @@
       "generationFailed": "Song-Erstellung fehlgeschlagen",
       "instrumentalFailed": "Instrumental-Erstellung fehlgeschlagen",
       "lyricsRequired": "Bitte gib zuerst einen Songtext ein",
+      "optimizingPhrasing": "Fehler beim Optimieren der Phrasierung: {{error}}",
       "promptRequired": "Bitte gib zuerst einen Musikstil-Prompt ein",
       "textRequired": "Bitte gib zuerst einen Text ein"
     },
@@ -593,6 +603,8 @@
     "musicStyleActions": "Musikstil-Aktionen",
     "musicStyleLabel": "Musikstil Prompt:",
     "musicStylePlaceholder": "Beschreibe den Musikstil (z.B. fröhlicher Pop, melancholische Ballade, Rock-Hymne)...",
+    "optimizePhrasing": "KI-Optimierte Formatierung",
+    "optimizingSuccess": "Songtext für Musikgenerierung optimiert",
     "player": {
       "muteUnmute": "Stumm/Laut",
       "playPause": "Abspielen/Pause",
@@ -606,6 +618,8 @@
       "generatingLyricsHint": "KI generiert Song-Text aus deinem Text",
       "generatingTitle": "Erstelle Titel...",
       "generatingTitleHint": "KI erstellt einen Song-Titel für dich",
+      "optimizingPhrasing": "Optimiere Phrasierung...",
+      "optimizingPhrasingHint": "KI formatiert Text in kurze musikalische Phrasen",
       "translatingLyrics": "Übersetze Text...",
       "translatingLyricsHint": "KI übersetzt deinen Text ins Englische",
       "translatingPrompt": "Übersetze Stil-Prompt...",

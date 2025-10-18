@@ -111,7 +111,7 @@ Do not include any other explanations, comments, or metadata in your output.""",
 - Fluent language
 
 Keep the same general length and structure. Only improve the quality, do not change the fundamental meaning or add new concepts.""",
-            "post_condition": "Return ONLY the improved section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name (like \"Verse1:\") in your output. Keep all lines together as one continuous block of text.",
+            "post_condition": 'Return ONLY the improved section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name (like "Verse1:") in your output. Keep all lines together as one continuous block of text.',
             "description": "Improves a specific lyric section while maintaining context and style",
             "version": "1.4",
             "model": "gpt-oss:20b",
@@ -146,6 +146,21 @@ Ensure the translated lyrics convey the original meaning while sounding as thoug
             "post_condition": "Only output the translated lyrics. Do not include explanations or comments in your output.",
             "description": "Translates lyrics to British English",
             "version": "2.0",
+            "model": "gpt-oss:20b",
+            "temperature": 0.5,
+            "max_tokens": 2048,
+            "active": True,
+        },
+        "optimize-phrasing": {
+            "pre_condition": """You are a professional music lyricist. Your task is to reformat the given lyrics into short, musical phrases (4-8 words per line) optimized for AI music generation.
+
+- Preserve the exact content and meaning
+- Only change line breaks for better musical phrasing
+- Allow for natural pauses, breathing, and emotional expression
+- If section labels (**VERSE1**, **CHORUS**, etc.) are present, preserve them""",
+            "post_condition": "Return ONLY the reformatted lyrics. Keep the same language as input. Preserve section labels if present. No explanations or comments.",
+            "description": "Optimizes lyric phrasing for music generation (4-8 words per line)",
+            "version": "1.0",
             "model": "gpt-oss:20b",
             "temperature": 0.5,
             "max_tokens": 2048,

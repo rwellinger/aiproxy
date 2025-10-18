@@ -33,6 +33,7 @@ export class LyricCreationComponent implements OnInit {
     lyricForm!: FormGroup;
     isGeneratingLyrics = false;
     isTranslatingLyrics = false;
+    isOptimizingPhrasing = false;
     showEditDropdown = false;
     showToolsDropdown = false;
     lastCleanupState: string | null = null;
@@ -47,6 +48,7 @@ export class LyricCreationComponent implements OnInit {
     isImprovingSection = false;
     isRewritingSection = false;
     isExtendingSection = false;
+    isOptimizingSection = false;
 
     // Section Detection Rules (loaded from API)
     private sectionDetectionPattern: RegExp | null = null;
@@ -60,6 +62,14 @@ export class LyricCreationComponent implements OnInit {
     private architectureService = inject(LyricArchitectureService);
     private translate = inject(TranslateService);
     private lyricParsingRuleService = inject(LyricParsingRuleService);
+
+    get isAnyLyricOperationInProgress(): boolean {
+        return this.isGeneratingLyrics || this.isTranslatingLyrics || this.isOptimizingPhrasing;
+    }
+
+    get isAnySectionOperationInProgress(): boolean {
+        return this.isImprovingSection || this.isRewritingSection || this.isExtendingSection || this.isOptimizingSection;
+    }
 
     ngOnInit() {
         this.lyricForm = this.fb.group({
@@ -132,6 +142,7 @@ export class LyricCreationComponent implements OnInit {
         }
 
         this.isGeneratingLyrics = true;
+        this.lyricForm.get('lyrics')?.disable();
         try {
             const generatedLyrics = await this.progressService.executeWithProgress(
                 () => this.chatService.generateLyrics(currentText),
@@ -143,6 +154,7 @@ export class LyricCreationComponent implements OnInit {
             this.notificationService.error(`Error generating lyrics: ${error.message}`);
         } finally {
             this.isGeneratingLyrics = false;
+            this.lyricForm.get('lyrics')?.enable();
         }
     }
 
@@ -154,6 +166,7 @@ export class LyricCreationComponent implements OnInit {
         }
 
         this.isTranslatingLyrics = true;
+        this.lyricForm.get('lyrics')?.disable();
         try {
             const translatedLyrics = await this.progressService.executeWithProgress(
                 () => this.chatService.translateLyric(currentLyrics),
@@ -165,6 +178,7 @@ export class LyricCreationComponent implements OnInit {
             this.notificationService.error(`Error translating lyrics: ${error.message}`);
         } finally {
             this.isTranslatingLyrics = false;
+            this.lyricForm.get('lyrics')?.enable();
         }
     }
 
@@ -248,7 +262,7 @@ export class LyricCreationComponent implements OnInit {
         }
     }
 
-    selectToolsAction(action: 'sectionEditor' | 'structure' | 'cleanup' | 'finalize' | 'rebuild') {
+    selectToolsAction(action: 'sectionEditor' | 'structure' | 'cleanup' | 'optimize-phrasing' | 'finalize' | 'rebuild') {
         this.closeToolsDropdown();
 
         if (action === 'sectionEditor') {
@@ -257,6 +271,8 @@ export class LyricCreationComponent implements OnInit {
             this.applyStructure();
         } else if (action === 'cleanup') {
             this.cleanupLyrics();
+        } else if (action === 'optimize-phrasing') {
+            this.optimizeLyricsPhrasing();
         } else if (action === 'finalize') {
             this.finalizeLyrics();
         } else if (action === 'rebuild') {
@@ -300,6 +316,33 @@ export class LyricCreationComponent implements OnInit {
                 this.notificationService.error('Failed to load cleanup rules');
             }
         });
+    }
+
+    async optimizeLyricsPhrasing(): Promise<void> {
+        const lyrics = this.lyricForm.get('lyrics')?.value?.trim();
+        if (!lyrics) {
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.lyricsRequired'));
+            return;
+        }
+
+        this.isOptimizingPhrasing = true;
+        this.lyricForm.get('lyrics')?.disable();
+        try {
+            const optimized = await this.progressService.executeWithProgress(
+                () => this.chatService.optimizeLyricPhrasing(lyrics),
+                this.translate.instant('lyricCreation.optimizing'),
+                this.translate.instant('lyricCreation.optimizingHint')
+            );
+            this.lyricForm.patchValue({ lyrics: this.removeQuotes(optimized) });
+            this.notificationService.success(this.translate.instant('lyricCreation.optimizingSuccess'));
+        } catch (error: any) {
+            this.notificationService.error(
+                this.translate.instant('lyricCreation.errors.optimizingPhrasing', { error: error.message })
+            );
+        } finally {
+            this.isOptimizingPhrasing = false;
+            this.lyricForm.get('lyrics')?.enable();
+        }
     }
 
     applyStructure(): void {
@@ -593,6 +636,28 @@ export class LyricCreationComponent implements OnInit {
             this.notificationService.error(`Error extending section: ${error.message}`);
         } finally {
             this.isExtendingSection = false;
+        }
+    }
+
+    async optimizeSectionAI(): Promise<void> {
+        if (!this.activeSection) {
+            return;
+        }
+
+        this.isOptimizingSection = true;
+        try {
+            const optimizedContent = await this.progressService.executeWithProgress(
+                () => this.chatService.optimizeLyricPhrasing(this.activeSection!.content),
+                this.translate.instant('lyricCreation.sectionEditor.optimizing'),
+                this.translate.instant('lyricCreation.sectionEditor.optimizingHint')
+            );
+            this.activeSection.content = this.removeQuotes(optimizedContent);
+        } catch (error: any) {
+            this.notificationService.error(
+                this.translate.instant('lyricCreation.errors.optimizingSection', { error: error.message })
+            );
+        } finally {
+            this.isOptimizingSection = false;
         }
     }
 
