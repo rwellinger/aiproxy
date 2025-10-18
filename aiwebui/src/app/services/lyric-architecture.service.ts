@@ -68,6 +68,36 @@ export class LyricArchitectureService {
     return config;
   }
 
+  addSectionAtIndex(section: SongSection, index: number): LyricArchitectureConfig {
+    const config = this.getConfig();
+
+    // Check if section allows multiple instances
+    const sectionDef = AVAILABLE_SECTIONS.find(s => s.section === section);
+    if (!sectionDef) {
+      throw new Error(`Unknown section: ${section}`);
+    }
+
+    // For single-instance sections, check if already exists
+    if (!sectionDef.allowMultiple) {
+      const exists = config.sections.some(s => s.section === section);
+      if (exists) {
+        throw new Error(`Section ${section} can only be added once`);
+      }
+    }
+
+    const newItem = this.createSectionItem(section, config.sections);
+
+    // Insert at specific index instead of pushing to end
+    const targetIndex = Math.max(0, Math.min(index, config.sections.length));
+    config.sections.splice(targetIndex, 0, newItem);
+
+    // Renumber verses after insertion
+    this.renumberVerses(config.sections);
+
+    this.saveConfig(config);
+    return config;
+  }
+
   removeSection(itemId: string): LyricArchitectureConfig {
     const config = this.getConfig();
     config.sections = config.sections.filter(s => s.id !== itemId);

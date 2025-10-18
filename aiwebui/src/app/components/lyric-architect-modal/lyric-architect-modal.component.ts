@@ -63,10 +63,10 @@ export class LyricArchitectModalComponent implements OnInit, OnDestroy {
       moveItemInArray(this.config.sections, event.previousIndex, event.currentIndex);
       this.updateConfig();
     } else {
-      // Adding new section from available sections
+      // Adding new section from available sections at specific position
       const sectionDef = event.previousContainer.data[event.previousIndex] as SongSectionDefinition;
       const sectionType = sectionDef.section;
-      this.addSection(sectionType);
+      this.addSectionAtIndex(sectionType, event.currentIndex);
     }
   }
 
@@ -82,6 +82,15 @@ export class LyricArchitectModalComponent implements OnInit, OnDestroy {
       this.config = this.architectureService.addSection(section);
     } catch (error: any) {
       console.error('Error adding section:', error);
+      this.notificationService.error(error.message);
+    }
+  }
+
+  addSectionAtIndex(section: SongSection, index: number): void {
+    try {
+      this.config = this.architectureService.addSectionAtIndex(section, index);
+    } catch (error: any) {
+      console.error('Error adding section at index:', error);
       this.notificationService.error(error.message);
     }
   }
