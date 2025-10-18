@@ -1,56 +1,61 @@
 #!/usr/bin/env python3
 """
-Export script for prompt templates from production database.
-Reads all prompt templates from production DB and generates init_prompt_templates.py
+Export script for prompt templates from local database.
+Reads all prompt templates from local db and generates init_prompt_templates.py
 
 Usage:
     python scripts/export_prompt_templates.py
 """
 
+import os
 import sys
 from datetime import datetime
 
-import psycopg2
-from psycopg2.extras import RealDictCursor
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
-# Production database connection
-PROD_DB = {
-    "host": "10.0.1.120",
-    "port": 5432,
-    "database": "aiproxysrv",
-    "user": "aiproxy",
-    "password": "aiproxy123",
-}
+from sqlalchemy.orm import Session
+
+from db.database import get_db
+from db.models import PromptTemplate
 
 
 def fetch_templates():
-    """Fetch all active templates from production database"""
-    print("Connecting to production database...")
-    conn = psycopg2.connect(**PROD_DB, cursor_factory=RealDictCursor)
-    cursor = conn.cursor()
+    """Fetch all active templates from local database"""
+    print("Connecting to local database...")
+    db: Session = next(get_db())
 
     try:
-        cursor.execute(
-            """
-            SELECT category, action, pre_condition, post_condition,
-                   description, version, model, temperature, max_tokens, active
-            FROM prompt_templates
-            ORDER BY category, action
-        """
-        )
+        templates = db.query(PromptTemplate).order_by(PromptTemplate.category, PromptTemplate.action).all()
 
-        templates = cursor.fetchall()
-        print(f"✅ Fetched {len(templates)} templates from production\n")
-        return templates
+        print(f"✅ Fetched {len(templates)} templates from local DB\n")
+
+        # Convert SQLAlchemy models to dict format
+        template_dicts = []
+        for t in templates:
+            template_dicts.append(
+                {
+                    "category": t.category,
+                    "action": t.action,
+                    "pre_condition": t.pre_condition,
+                    "post_condition": t.post_condition,
+                    "description": t.description,
+                    "version": t.version,
+                    "model": t.model,
+                    "temperature": t.temperature,
+                    "max_tokens": t.max_tokens,
+                    "active": t.active,
+                }
+            )
+
+        return template_dicts
 
     finally:
-        cursor.close()
-        conn.close()
+        db.close()
 
 
 def generate_init_script(templates):
-    """Generate the init_prompt_templates.py script with production data"""
+    """Generate the init_prompt_templates.py script with local DB data"""
 
     # Group templates by category
     by_category = {}
@@ -75,9 +80,9 @@ def generate_init_script(templates):
     # Generate Python code
     script_content = f'''#!/usr/bin/env python3
 """
-Initial load script for prompt templates.
-This script loads all current production prompt templates into the database.
-Exported from production DB on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}.
+Seeding script for prompt templates.
+Exported from Dev-DB on {datetime.now().strftime("%Y-%m-%d")}.
+This script seeds the database with all prompt templates.
 
 Usage:
     python scripts/init_prompt_templates.py
@@ -95,7 +100,7 @@ from db.database import get_db
 from db.models import PromptTemplate
 
 
-# Production templates exported from {PROD_DB["host"]} ({datetime.now().strftime("%Y-%m-%d")})
+# Prompt templates exported from Dev-DB ({datetime.now().strftime("%Y-%m-%d")})
 TEMPLATES = {{
 '''
 
@@ -121,15 +126,15 @@ TEMPLATES = {{
     script_content += '''}
 
 
-def init_prompt_templates():
-    """Initialize the database with production prompt templates"""
+def seed_prompt_templates():
+    """Seed the database with prompt templates"""
     db: Session = next(get_db())
 
     try:
         inserted_count = 0
         updated_count = 0
 
-        print("Starting prompt template initialization...\\n")
+        print("Starting prompt template seeding...\\\\n")
 
         for category, actions in TEMPLATES.items():
             print(f"Processing category: {category}")
@@ -177,7 +182,7 @@ def init_prompt_templates():
         # Commit all changes
         db.commit()
 
-        print("\\n✅ Initialization completed successfully!")
+        print("\\\\n✅ Seeding completed successfully!")
         print(f"   - Inserted: {inserted_count} new templates")
         print(f"   - Updated:  {updated_count} existing templates")
         print(f"   - Total:    {inserted_count + updated_count} templates processed")
@@ -185,7 +190,7 @@ def init_prompt_templates():
         return True
 
     except Exception as e:
-        print(f"\\n❌ Error during initialization: {str(e)}")
+        print(f"\\\\n❌ Error during seeding: {str(e)}")
         import traceback
 
         traceback.print_exc()
@@ -197,13 +202,13 @@ def init_prompt_templates():
 
 
 def verify_templates():
-    """Verify that all templates were initialized correctly"""
+    """Verify that all templates were seeded correctly"""
     db: Session = next(get_db())
 
     try:
         templates = db.query(PromptTemplate).filter(PromptTemplate.active).all()
 
-        print("\\n📊 Verification Results:")
+        print("\\\\n📊 Verification Results:")
         print(f"   Total active templates in DB: {len(templates)}")
 
         if len(templates) == 0:
@@ -219,23 +224,23 @@ def verify_templates():
                 {"action": template.action, "model": template.model, "version": template.version}
             )
 
-        print("\\n   Templates by category:")
+        print("\\\\n   Templates by category:")
         for category, actions in sorted(by_category.items()):
-            print(f"\\n   {category}:")
+            print(f"\\\\n   {category}:")
             for action_data in sorted(actions, key=lambda x: x["action"]):
                 print(f"     - {action_data['action']} (v{action_data['version']}, {action_data['model']})")
 
         # Check if we have the expected number of templates
         expected_count = sum(len(actions) for actions in TEMPLATES.values())
         if len(templates) >= expected_count:
-            print(f"\\n   ✅ All {expected_count} expected templates are present")
+            print(f"\\\\n   ✅ All {expected_count} expected templates are present")
             return True
         else:
-            print(f"\\n   ⚠️  Expected {expected_count} templates, but found {len(templates)}")
+            print(f"\\\\n   ⚠️  Expected {expected_count} templates, but found {len(templates)}")
             return False
 
     except Exception as e:
-        print(f"\\n❌ Error during verification: {str(e)}")
+        print(f"\\\\n❌ Error during verification: {str(e)}")
         import traceback
 
         traceback.print_exc()
@@ -246,20 +251,20 @@ def verify_templates():
 
 
 if __name__ == "__main__":
-    print("🌱 Prompt Template Initialization Script")
+    print("🌱 Prompt Template Seeding Script")
     print("=" * 60)
-    print("This script will load/update all production prompt templates")
-    print("=" * 60 + "\\n")
+    print("This script will seed/update all prompt templates")
+    print("=" * 60 + "\\\\n")
 
-    if init_prompt_templates():
+    if seed_prompt_templates():
         if verify_templates():
-            print("\\n🎉 Initialization and verification completed successfully!")
+            print("\\\\n🎉 Seeding and verification completed successfully!")
             sys.exit(0)
         else:
-            print("\\n⚠️  Templates loaded but verification has warnings!")
+            print("\\\\n⚠️  Templates seeded but verification has warnings!")
             sys.exit(1)
     else:
-        print("\\n💥 Initialization failed!")
+        print("\\\\n💥 Seeding failed!")
         sys.exit(1)
 '''
 
@@ -270,16 +275,16 @@ def main():
     """Main export function"""
     print("📦 Prompt Template Export Script")
     print("=" * 60)
-    print(f"Source: {PROD_DB['host']}:{PROD_DB['port']}/{PROD_DB['database']}")
+    print("Source: Local Dev-DB")
     print("Target: scripts/init_prompt_templates.py")
     print("=" * 60 + "\n")
 
     try:
-        # Fetch templates from production
+        # Fetch templates from local database
         templates = fetch_templates()
 
         if not templates:
-            print("❌ No templates found in production database!")
+            print("❌ No templates found in local database!")
             return False
 
         # Display fetched templates
@@ -315,7 +320,7 @@ def main():
         print("\nNext steps:")
         print("  1. Review the generated init_prompt_templates.py")
         print("  2. Run: python scripts/init_prompt_templates.py")
-        print("     to apply these templates to your local/dev database")
+        print("     to apply these templates to any target database")
 
         return True
 
