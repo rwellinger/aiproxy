@@ -169,30 +169,34 @@ Ensure the translated lyrics convey the original meaning while sounding as thoug
     },
     "music": {
         "enhance": {
-            "pre_condition": """You are a professional Mureka or Suno music style prompt enhancer. Your task is to refine the input text into an ideal prompt by:
-  • Including the specified instruments
-  • Keeping the prompt concise, with a maximum of 400 characters
-  • Describing without using names of bands or singers
-  • Respecting the copyrights terms of Mureka/Suno
-  • CRITICAL: If vocals are mentioned, make them the FIRST element in your output and add descriptive adjectives (e.g., "strong male vocals", "powerful female voice", "energetic male singer")""",
+            "pre_condition": """You are a professional music style prompt enhancer for Mureka and Suno AI.
+Refine the input into an ideal prompt by:
+  • Describing genre and subgenre precisely (e.g., "melodic death metal", "synthwave pop")
+  • Including mood and emotional quality (e.g., "melancholic", "uplifting", "dark")
+  • Specifying 3-4 main instruments and arrangement details
+  • Mentioning production style or era if relevant (e.g., "80s production", "lo-fi", "polished modern mix")
+  • Maximum 400 characters, concise and clear
+  • NO band/artist names (copyright compliance)
+  • Same language as input (German → German, English → English)""",
             "post_condition": """Only output the enhanced prompt.
 
-CRITICAL VOCAL HANDLING:
-  1. ALWAYS place the vocal description at the very beginning of the output prompt
-  2. ALWAYS add a descriptive adjective to vocals (e.g., "strong **male vocals**", "powerful **male voice**", "energetic **male vocals**", "smooth **female vocals**")
-  3. If the input mentions vocals, mention them at least TWICE in the output (beginning + middle/end)
-  4. ALWAYS wrap vocal descriptions in Markdown bold (**...**)
+AVOID these verbs (interpreted as audio effects):
+  • "echo", "fade", "distort", "layer", "compress", "saturate"
+
+SAFE verbs for describing music:
+  • drive, build, anchor, feature, center, blend, flow
+
+DO NOT:
+  • Include vocal descriptions (APIs handle this separately)
+  • Use Markdown formatting
+  • Add labels, explanations, or comments
+  • Exceed 1000 characters total
 
 Examples:
-    - Input: "male vocals" → Output: "Strong **male vocals** lead this energetic pop-rock track... driven by powerful **male voice**"
-    - Input: "female vocals" → Output: "Smooth **female vocals** soar over... featuring expressive **female voice**"
-    - Input: "männlicher Gesang" → Output: "Kraftvoller **männlicher Gesang** führt... mit energischem **männlichem Gesang**"
-
-IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English).
-
-Do not include labels, explanations, comments, or any other formatting in your output.""",
-            "description": "Enhances music style prompts for Mureka without artist references",
-            "version": "3.1",
+    - Input: "electronic music with guitar" → Output: "Upbeat electronic techno with driving synths, distorted electric guitar riffs, punchy drums. Modern polished production."
+    - Input: "traurige Ballade" → Output: "Melancholische Pop-Ballade mit Klavier, sanften Streichern, subtilen Drums. Emotionale, intime Stimmung.\"""",
+            "description": "Enhances music style prompts for Mureka and Suno (optimized for genre, mood, instruments, production)",
+            "version": "4.0",
             "model": "gpt-oss:20b",
             "temperature": 0.9,
             "max_tokens": 512,

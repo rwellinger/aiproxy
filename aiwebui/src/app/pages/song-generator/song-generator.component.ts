@@ -26,11 +26,9 @@ import {MusicStyleChooserService} from '../../services/music-style-chooser.servi
 export class SongGeneratorComponent implements OnInit {
     songForm!: FormGroup;
     isLoading = false;
-    isImprovingPrompt = false;
-    isTranslatingStylePrompt = false;
     isGeneratingTitle = false;
     showLyricsDropdown = false;
-    showStyleDropdown = false;
+    showPromptDropdown = false;
     showTitleDropdown = false;
     loadingMessage = '';
     result = '';
@@ -435,30 +433,12 @@ export class SongGeneratorComponent implements OnInit {
         // No-op: Shared component handles this
     }
 
-    async improvePrompt() {
-        const currentPrompt = this.songForm.get('prompt')?.value?.trim();
-        if (!currentPrompt) {
-            this.notificationService.error(this.translate.instant('songGenerator.errors.promptRequired'));
-            return;
-        }
-
-        this.isImprovingPrompt = true;
-        try {
-            const improvedPrompt = await this.progressService.executeWithProgress(
-                () => this.chatService.improveMusicStylePrompt(currentPrompt),
-                this.translate.instant('songGenerator.progress.enhancing'),
-                this.translate.instant('songGenerator.progress.enhancinghint')
-            );
-            this.songForm.patchValue({prompt: this.removeQuotes(improvedPrompt)});
-        } catch (error: any) {
-            this.notificationService.error(`Error improving prompt: ${error.message}`);
-        } finally {
-            this.isImprovingPrompt = false;
-        }
-    }
-
     navigateToLyricCreator() {
         this.router.navigate(['/lyriccreation']);
+    }
+
+    navigateToMusicStylePrompt() {
+        this.router.navigate(['/music-style-prompt']);
     }
 
     toggleLyricsDropdown() {
@@ -474,6 +454,22 @@ export class SongGeneratorComponent implements OnInit {
 
         if (action === 'edit-in-creator') {
             this.navigateToLyricCreator();
+        }
+    }
+
+    togglePromptDropdown() {
+        this.showPromptDropdown = !this.showPromptDropdown;
+    }
+
+    closePromptDropdown() {
+        this.showPromptDropdown = false;
+    }
+
+    selectPromptAction(action: 'edit-in-editor') {
+        this.closePromptDropdown();
+
+        if (action === 'edit-in-editor') {
+            this.navigateToMusicStylePrompt();
         }
     }
 
@@ -509,61 +505,19 @@ export class SongGeneratorComponent implements OnInit {
         });
     }
 
-    toggleStyleDropdown() {
-        this.showStyleDropdown = !this.showStyleDropdown;
-    }
-
-    closeStyleDropdown() {
-        this.showStyleDropdown = false;
-    }
-
-    selectStyleAction(action: 'enhance' | 'translate' | 'chooser') {
-        this.closeStyleDropdown();
-
-        if (action === 'enhance') {
-            this.improvePrompt();
-        } else if (action === 'translate') {
-            this.translateStylePrompt();
-        } else if (action === 'chooser') {
-            this.openMusicStyleChooserModal();
-        }
-    }
-
-    async translateStylePrompt() {
-        const currentPrompt = this.songForm.get('prompt')?.value?.trim();
-        if (!currentPrompt) {
-            this.notificationService.error(this.translate.instant('songGenerator.errors.promptRequired'));
-            return;
-        }
-
-        this.isTranslatingStylePrompt = true;
-        try {
-            const translatedPrompt = await this.progressService.executeWithProgress(
-                () => this.chatService.translateMusicStylePrompt(currentPrompt),
-                this.translate.instant('songGenerator.progress.translatingPrompt'),
-                this.translate.instant('songGenerator.progress.translatingPromptHint')
-            );
-            this.songForm.patchValue({prompt: this.removeQuotes(translatedPrompt)});
-        } catch (error: any) {
-            this.notificationService.error(`Error translating style prompt: ${error.message}`);
-        } finally {
-            this.isTranslatingStylePrompt = false;
-        }
-    }
-
     @HostListener('document:click', ['$event'])
     onDocumentClick(event: Event) {
         const target = event.target as HTMLElement;
         const lyricsDropdown = target.closest('.lyrics-dropdown-container');
-        const styleDropdown = target.closest('.style-dropdown-container');
+        const promptDropdown = target.closest('.prompt-actions-container');
         const titleDropdown = target.closest('.title-dropdown-container');
 
         if (!lyricsDropdown && this.showLyricsDropdown) {
             this.closeLyricsDropdown();
         }
 
-        if (!styleDropdown && this.showStyleDropdown) {
-            this.closeStyleDropdown();
+        if (!promptDropdown && this.showPromptDropdown) {
+            this.closePromptDropdown();
         }
 
         if (!titleDropdown && this.showTitleDropdown) {

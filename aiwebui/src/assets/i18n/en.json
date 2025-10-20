@@ -336,8 +336,11 @@
       "optimizingSection": "Error optimizing section: {{error}}",
       "textRequired": "Please enter text first",
       "lyricsRequired": "Please enter lyrics first",
-      "noArchitecture": "No lyric architecture defined. Please configure architecture first."
+      "noArchitecture": "No lyric architecture defined. Please configure architecture first.",
+      "copyFailed": "Failed to copy to clipboard"
     },
+    "copyToClipboard": "Copy to Clipboard",
+    "copiedToClipboard": "Copied to clipboard",
     "sectionEditor": {
       "toggle": "Section Editor",
       "sections": "Sections",
@@ -508,6 +511,7 @@
     "lyricCreation": "Lyric Creation",
     "lyricParsingRules": "Lyric Parsing Rules",
     "music": "Music",
+    "musicStylePrompt": "Music Style Prompt",
     "ollamaChat": "Ollama Chat",
     "openaiChat": "OpenAI Chat",
     "picture": "Picture",
@@ -594,6 +598,7 @@
     "createInstrumental": "Create Instrumental",
     "creating": "Creating...",
     "editInLyricCreator": "Edit in Lyric Creator",
+    "editInPromptEditor": "Edit in Prompt Editor",
     "enhanceStylePrompt": "Enhance Style Prompt",
     "errors": {
       "errorFetchingStatus": "Error fetching status",
@@ -619,6 +624,7 @@
     "musicStyleActions": "Music style actions",
     "musicStyleLabel": "Music Style Prompt:",
     "musicStylePlaceholder": "Describe the music style (e.g., upbeat pop, melancholic ballad, rock anthem)...",
+    "promptActions": "Prompt Actions",
     "optimizePhrasing": "AI-Optimized Formatting",
     "optimizingSuccess": "Lyrics optimized for music generation",
     "player": {
@@ -667,6 +673,46 @@
     "titleRequired": "*",
     "translateToEnglish": "Translate to English",
     "withLyrics": "With Lyrics"
+  },
+  "musicStylePrompt": {
+    "title": "Music Style Prompt",
+    "placeholder": "Describe the music style (e.g., 'energetic pop with synth, 120 BPM')...",
+    "charactersCount": "characters",
+    "autoSaved": "Changes are automatically saved to song generator",
+    "styleChooser": "Style Chooser",
+    "enhancePrompt": "Enhance Prompt",
+    "translateToEnglish": "Translate to English",
+    "resetButton": "Clear",
+    "edit": "Edit",
+    "searchReplace": "Search & Replace",
+    "copyToClipboard": "Copy to Clipboard",
+    "copiedToClipboard": "Copied to clipboard",
+    "undoLastChange": "Undo Last Change",
+    "undoApplied": "Change reverted successfully",
+    "errors": {
+      "promptRequired": "Please enter a music style prompt",
+      "copyFailed": "Failed to copy to clipboard"
+    },
+    "progress": {
+      "enhancing": "Enhancing prompt...",
+      "enhancingHint": "AI is improving your music style description",
+      "translating": "Translating prompt...",
+      "translatingHint": "AI is translating your prompt to English"
+    },
+    "success": {
+      "promptEnhanced": "Prompt successfully enhanced",
+      "promptTranslated": "Prompt successfully translated"
+    },
+    "searchReplaceDialog": {
+      "title": "Search & Replace",
+      "searchLabel": "Search for:",
+      "searchPlaceholder": "Enter text to search...",
+      "replaceLabel": "Replace with:",
+      "replacePlaceholder": "Enter replacement text...",
+      "matchesFound": "{{count}} matches found",
+      "noMatches": "No matches found",
+      "applied": "Replaced {{count}} occurrences"
+    }
   },
   "songProfile": {
     "account": {

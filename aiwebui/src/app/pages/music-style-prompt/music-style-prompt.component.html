@@ -1,0 +1,113 @@
+<div class="music-style-prompt-container">
+    <mat-card class="music-style-prompt-card">
+        <mat-card-content>
+            <div class="prompt-header">
+                <div class="prompt-title">
+                    <h2>{{ 'musicStylePrompt.title' | translate }}</h2>
+                </div>
+            </div>
+
+            <form [formGroup]="promptForm">
+                <div class="form-group">
+                    <textarea
+                            id="prompt"
+                            formControlName="prompt"
+                            [placeholder]="'musicStylePrompt.placeholder' | translate"
+                            maxlength="1024"
+                            [disabled]="isAnyOperationInProgress"
+                            class="prompt-textarea">
+                    </textarea>
+                    <div class="char-count" *ngIf="characterCount > 0">
+                        {{ characterCount }} / 1024 {{ 'musicStylePrompt.charactersCount' | translate }}
+                    </div>
+                </div>
+
+                <div class="info-notice">
+                    <i class="fas fa-info-circle"></i>
+                    {{ 'musicStylePrompt.autoSaved' | translate }}
+                </div>
+
+                <div class="action-section">
+                    <div class="ai-actions">
+                        <button
+                                type="button"
+                                (click)="openStyleChooser()"
+                                [disabled]="isAnyOperationInProgress"
+                                class="utility-button">
+                            <i class="fas fa-sliders"></i>
+                            <span>{{ 'musicStylePrompt.styleChooser' | translate }}</span>
+                        </button>
+                        <button
+                                type="button"
+                                (click)="enhancePrompt()"
+                                [disabled]="isAnyOperationInProgress || !promptForm.get('prompt')?.value?.trim()"
+                                class="ai-action-button">
+                            <i class="fas fa-wand-magic-sparkles" *ngIf="!isEnhancingPrompt"></i>
+                            <i class="fas fa-spinner fa-spin" *ngIf="isEnhancingPrompt"></i>
+                            <span>{{ 'musicStylePrompt.enhancePrompt' | translate }}</span>
+                        </button>
+                        <button
+                                type="button"
+                                (click)="translatePrompt()"
+                                [disabled]="isAnyOperationInProgress || !promptForm.get('prompt')?.value?.trim()"
+                                class="ai-action-button">
+                            <i class="fas fa-language" *ngIf="!isTranslatingPrompt"></i>
+                            <i class="fas fa-spinner fa-spin" *ngIf="isTranslatingPrompt"></i>
+                            <span>{{ 'musicStylePrompt.translateToEnglish' | translate }}</span>
+                        </button>
+                        <!-- Edit Dropdown -->
+                        <div class="edit-dropdown-container">
+                            <button
+                                    type="button"
+                                    (click)="toggleEditDropdown()"
+                                    [disabled]="isAnyOperationInProgress || !characterCount"
+                                    class="utility-button"
+                                    [title]="'musicStylePrompt.edit' | translate">
+                                <i class="fas fa-edit"></i>
+                                <span>{{ 'musicStylePrompt.edit' | translate }}</span>
+                                <i class="fas fa-chevron-down dropdown-chevron"></i>
+                            </button>
+                            <div class="dropdown-menu" *ngIf="showEditDropdown"
+                                 (click)="$event.stopPropagation()">
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isAnyOperationInProgress"
+                                        (click)="selectEditAction('searchReplace')">
+                                    <i class="fas fa-search"></i>
+                                    <span>{{ 'musicStylePrompt.searchReplace' | translate }}</span>
+                                </button>
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isAnyOperationInProgress || !characterCount"
+                                        (click)="copyPromptToClipboard(); showEditDropdown = false">
+                                    <i class="fas fa-copy"></i>
+                                    <span>{{ 'musicStylePrompt.copyToClipboard' | translate }}</span>
+                                </button>
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isAnyOperationInProgress || !canUndo"
+                                        (click)="selectEditAction('undo')">
+                                    <i class="fas fa-undo"></i>
+                                    <span>{{ 'musicStylePrompt.undoLastChange' | translate }}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="utility-actions">
+                        <button
+                                type="button"
+                                (click)="clearPrompt()"
+                                [disabled]="isAnyOperationInProgress || !characterCount"
+                                class="clear-button">
+                            <i class="fas fa-trash-alt"></i> {{ 'musicStylePrompt.resetButton' | translate }}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

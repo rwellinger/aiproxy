@@ -95,7 +95,7 @@
                                         <button
                                                 type="button"
                                                 (click)="toggleLyricsDropdown()"
-                                                [disabled]="isLoading || isImprovingPrompt"
+                                                [disabled]="isLoading"
                                                 class="magic-icon-button"
                                                 [title]="'songGenerator.lyricsActions' | translate">
                                             <i class="fas fa-ellipsis-vertical"></i>
@@ -134,48 +134,24 @@
                                 [disabled]="isLoading"
                                 class="prompt-input">
                         </textarea>
-                                    <div class="style-dropdown-container">
+                                    <div class="prompt-actions-container">
                                         <button
                                                 type="button"
-                                                (click)="toggleStyleDropdown()"
-                                                [disabled]="isLoading || isImprovingPrompt || isTranslatingStylePrompt"
+                                                (click)="togglePromptDropdown()"
+                                                [disabled]="isLoading"
                                                 class="magic-icon-button"
-                                                [title]="'songGenerator.musicStyleActions' | translate">
-                                            <i class="fas fa-ellipsis-vertical"
-                                               *ngIf="!isImprovingPrompt && !isTranslatingStylePrompt"></i>
-                                            <i class="fas fa-spinner fa-spin"
-                                               *ngIf="isImprovingPrompt || isTranslatingStylePrompt"></i>
+                                                [title]="'songGenerator.promptActions' | translate">
+                                            <i class="fas fa-ellipsis-vertical"></i>
                                         </button>
-                                        <div class="dropdown-menu" *ngIf="showStyleDropdown"
+                                        <div class="dropdown-menu" *ngIf="showPromptDropdown"
                                              (click)="$event.stopPropagation()">
                                             <button
                                                     type="button"
                                                     class="dropdown-item"
                                                     [disabled]="isLoading"
-                                                    (click)="selectStyleAction('chooser')">
-                                                <i class="fas fa-sliders"></i>
-                                                <span>{{ 'songGenerator.styleChooser' | translate }}</span>
-                                            </button>
-                                            <div class="dropdown-divider"></div>
-                                            <button
-                                                    type="button"
-                                                    class="dropdown-item"
-                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingStylePrompt || !songForm.get('prompt')?.value?.trim()"
-                                                    (click)="selectStyleAction('enhance')">
-                                                <i class="fas fa-wand-magic-sparkles"></i>
-                                                <span>{{ 'songGenerator.enhanceStylePrompt' | translate }}</span>
-                                                <i class="fas fa-spinner fa-spin action-spinner"
-                                                   *ngIf="isImprovingPrompt"></i>
-                                            </button>
-                                            <button
-                                                    type="button"
-                                                    class="dropdown-item"
-                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingStylePrompt || !songForm.get('prompt')?.value?.trim()"
-                                                    (click)="selectStyleAction('translate')">
-                                                <i class="fas fa-language"></i>
-                                                <span>{{ 'songGenerator.translateToEnglish' | translate }}</span>
-                                                <i class="fas fa-spinner fa-spin action-spinner"
-                                                   *ngIf="isTranslatingStylePrompt"></i>
+                                                    (click)="selectPromptAction('edit-in-editor')">
+                                                <i class="fas fa-pencil"></i>
+                                                <span>{{ 'songGenerator.editInPromptEditor' | translate }}</span>
                                             </button>
                                         </div>
                                     </div>
@@ -199,14 +175,14 @@
 
                             <div class="button-group">
                                 <button type="submit"
-                                        [disabled]="songForm.invalid || isLoading || isImprovingPrompt || isTranslatingStylePrompt || isGeneratingTitle"
+                                        [disabled]="songForm.invalid || isLoading || isGeneratingTitle"
                                         class="create-button">
                                     <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
                                     <i class="fas fa-music" *ngIf="!isLoading"></i>
                                     {{ isLoading ? ('songGenerator.creating' | translate) : (isInstrumentalMode ? ('songGenerator.createInstrumental' | translate) : ('songGenerator.createButton' | translate)) }}
                                 </button>
                                 <button type="button" (click)="resetForm()"
-                                        [disabled]="isLoading || isImprovingPrompt || isTranslatingStylePrompt || isGeneratingTitle"
+                                        [disabled]="isLoading || isGeneratingTitle"
                                         class="reset-button">
                                     <i class="fas fa-rotate-left"></i> {{ 'songGenerator.resetButton' | translate }}
                                 </button>

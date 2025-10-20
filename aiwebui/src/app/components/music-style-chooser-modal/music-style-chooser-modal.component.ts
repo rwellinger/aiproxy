@@ -78,13 +78,7 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
       // Show all instruments for normal mode
       this.availableInstruments = [...MUSIC_STYLE_CATEGORIES.instruments];
 
-      // Auto-select male-voice if no voice is selected yet
-      const hasMaleVoice = this.config.selectedInstruments.includes('male-voice');
-      const hasFemaleVoice = this.config.selectedInstruments.includes('female-voice');
-
-      if (!hasMaleVoice && !hasFemaleVoice) {
-        this.config.selectedInstruments.push('male-voice');
-      }
+      // Note: Auto-select male-voice removed - Mureka ignores voice selection anyway
     }
   }
 
@@ -147,16 +141,9 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
 
   save(): void {
     try {
-      // Validate voice selection for non-instrumental mode
-      if (!this.isInstrumental) {
-        const hasMaleVoice = this.isInstrumentSelected('male-voice');
-        const hasFemaleVoice = this.isInstrumentSelected('female-voice');
-
-        if (!hasMaleVoice && !hasFemaleVoice) {
-          this.notificationService.error(this.translateService.instant('musicStyleChooser.messages.voiceRequired'));
-          return;
-        }
-      }
+      // Note: Voice validation removed - Mureka ignores "no vocals" setting anyway
+      // and randomly selects voices regardless of the prompt instruction.
+      // Keeping this for future reference if Mureka fixes this behavior.
 
       this.styleChooserService.saveConfig(this.config);
       const stylePrompt = this.styleChooserService.generateStylePrompt(this.config, this.isInstrumental);
