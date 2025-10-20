@@ -41,9 +41,7 @@ class TestSketchControllerCreate:
 
         # Mock the global sketch_service instance's create_sketch method
         with patch("db.sketch_service.sketch_service.create_sketch", return_value=mock_sketch):
-            result, status_code = SketchController.create_sketch(
-                sketch_data=sketch_data, db=mock_db_session
-            )
+            result, status_code = SketchController.create_sketch(sketch_data=sketch_data, db=mock_db_session)
 
             assert status_code == 201
             assert "data" in result
@@ -63,15 +61,11 @@ class TestSketchControllerCreate:
 
     def test_create_sketch_business_layer_failure(self, mock_db_session):
         """Test sketch creation when business layer returns None"""
-        sketch_data = SketchCreateRequest(
-            title="Test Sketch", lyrics="Test lyrics", prompt="upbeat pop", tags="test"
-        )
+        sketch_data = SketchCreateRequest(title="Test Sketch", lyrics="Test lyrics", prompt="upbeat pop", tags="test")
 
         # Mock the global sketch_service instance's create_sketch method returning None (failure)
         with patch("db.sketch_service.sketch_service.create_sketch", return_value=None):
-            result, status_code = SketchController.create_sketch(
-                sketch_data=sketch_data, db=mock_db_session
-            )
+            result, status_code = SketchController.create_sketch(sketch_data=sketch_data, db=mock_db_session)
 
             assert status_code == 500
             assert "error" in result
