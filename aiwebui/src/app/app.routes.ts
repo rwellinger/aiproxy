@@ -33,6 +33,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/lyric-creation/lyric-creation.component').then(m => m.LyricCreationComponent)
     },
     {
+        path: 'music-style-prompt',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/music-style-prompt/music-style-prompt.component').then(m => m.MusicStylePromptComponent)
+    },
+    {
         path: 'imagegen',
         canActivate: [AuthGuard],
         loadComponent: () => import('./pages/image-generator/image-generator.component').then(m => m.ImageGeneratorComponent)

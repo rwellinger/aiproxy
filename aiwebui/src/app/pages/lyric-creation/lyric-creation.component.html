@@ -3,7 +3,10 @@
         <mat-card-content>
             <div class="lyric-header">
                 <div class="lyric-title">
-                    <h2>{{ 'lyricCreation.title' | translate }}</h2>
+                    <h2>
+                        <i class="fas fa-pen"></i>
+                        {{ 'lyricCreation.title' | translate }}
+                    </h2>
                 </div>
             </div>
 
@@ -213,6 +216,14 @@
                                         (click)="selectEditAction('searchReplace')">
                                     <i class="fas fa-search"></i>
                                     <span>{{ 'lyricCreation.searchReplace' | translate }}</span>
+                                </button>
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isAnyLyricOperationInProgress || !characterCount"
+                                        (click)="copyLyricsToClipboard(); showEditDropdown = false">
+                                    <i class="fas fa-copy"></i>
+                                    <span>{{ 'lyricCreation.copyToClipboard' | translate }}</span>
                                 </button>
                                 <button
                                         type="button"

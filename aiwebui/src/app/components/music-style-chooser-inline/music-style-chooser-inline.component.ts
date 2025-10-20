@@ -1,6 +1,5 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -14,36 +13,36 @@ import { MusicStyleChooserService } from '../../services/music-style-chooser.ser
 import { NotificationService } from '../../services/ui/notification.service';
 
 @Component({
-  selector: 'app-music-style-chooser-modal',
+  selector: 'app-music-style-chooser-inline',
   standalone: true,
   imports: [
     CommonModule,
     TranslateModule,
-    MatDialogModule,
     MatButtonModule,
     MatIconModule
   ],
-  templateUrl: './music-style-chooser-modal.component.html',
-  styleUrl: './music-style-chooser-modal.component.scss'
+  templateUrl: './music-style-chooser-inline.component.html',
+  styleUrl: './music-style-chooser-inline.component.scss'
 })
-export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
+export class MusicStyleChooserInlineComponent implements OnInit, OnDestroy {
+  @Input() mode: 'auto' | 'manual' = 'auto';
+  @Input() isInstrumental = false;
+  @Input() isCollapsed = false;
+  @Output() styleChanged = new EventEmitter<string>();
+  @Output() applyStyles = new EventEmitter<string>();
+  @Output() collapseToggled = new EventEmitter<boolean>();
+
   config: MusicStyleChooserConfig = { selectedStyles: [], selectedThemes: [], selectedInstruments: [], lastModified: new Date() };
   availableStyles: string[] = MUSIC_STYLE_CATEGORIES.style;
   availableThemes: string[] = MUSIC_STYLE_CATEGORIES.theme;
   availableInstruments: string[] = MUSIC_STYLE_CATEGORIES.instruments;
-  isInstrumental = false;
+  expandedCategory: 'styles' | 'instruments' | 'themes' | null = 'styles';
 
   private destroy$ = new Subject<void>();
 
   private styleChooserService = inject(MusicStyleChooserService);
   private notificationService = inject(NotificationService);
   private translateService = inject(TranslateService);
-  private dialogRef = inject(MatDialogRef<MusicStyleChooserModalComponent>);
-  private data = inject<{ isInstrumental?: boolean }>(MAT_DIALOG_DATA);
-
-  constructor() {
-    this.isInstrumental = this.data?.isInstrumental || false;
-  }
 
   ngOnInit(): void {
     this.loadConfig();
@@ -77,14 +76,13 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
     } else {
       // Show all instruments for normal mode
       this.availableInstruments = [...MUSIC_STYLE_CATEGORIES.instruments];
-
-      // Note: Auto-select male-voice removed - Mureka ignores voice selection anyway
     }
   }
 
   toggleStyle(style: string): void {
     try {
       this.config = this.styleChooserService.toggleStyle(style);
+      this.emitChange();
     } catch (error: any) {
       console.error('Error toggling style:', error);
       this.notificationService.error(error.message);
@@ -94,6 +92,7 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
   toggleTheme(theme: string): void {
     try {
       this.config = this.styleChooserService.toggleTheme(theme);
+      this.emitChange();
     } catch (error: any) {
       console.error('Error toggling theme:', error);
       this.notificationService.error(error.message);
@@ -116,10 +115,21 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
       }
 
       this.config = this.styleChooserService.toggleInstrument(instrument);
+      this.emitChange();
     } catch (error: any) {
       console.error('Error toggling instrument:', error);
       this.notificationService.error(error.message);
     }
+  }
+
+  private emitChange(): void {
+    const stylePrompt = this.styleChooserService.generateStylePrompt(this.config, this.isInstrumental);
+
+    if (this.mode === 'auto') {
+      // Auto-mode: Emit immediately
+      this.styleChanged.emit(stylePrompt);
+    }
+    // Manual-mode: Don't emit, just update preview
   }
 
   isStyleSelected(style: string): boolean {
@@ -137,28 +147,12 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
   reset(): void {
     this.config = this.styleChooserService.resetToDefault();
     this.notificationService.success(this.translateService.instant('musicStyleChooser.messages.resetSuccess'));
+    this.emitChange();
   }
 
-  save(): void {
-    try {
-      // Note: Voice validation removed - Mureka ignores "no vocals" setting anyway
-      // and randomly selects voices regardless of the prompt instruction.
-      // Keeping this for future reference if Mureka fixes this behavior.
-
-      this.styleChooserService.saveConfig(this.config);
-      const stylePrompt = this.styleChooserService.generateStylePrompt(this.config, this.isInstrumental);
-
-      this.dialogRef.close({
-        config: this.config,
-        stylePrompt: stylePrompt
-      });
-    } catch (error: any) {
-      this.notificationService.error(this.translateService.instant('musicStyleChooser.messages.saveError', { message: error.message }));
-    }
-  }
-
-  cancel(): void {
-    this.dialogRef.close();
+  applyStylesClick(): void {
+    const stylePrompt = this.styleChooserService.generateStylePrompt(this.config, this.isInstrumental);
+    this.applyStyles.emit(stylePrompt);
   }
 
   getPreviewText(): string {
@@ -190,5 +184,33 @@ export class MusicStyleChooserModalComponent implements OnInit, OnDestroy {
     }
 
     return parts.join(', ') + ' ' + this.translateService.instant('musicStyleChooser.summary.selected');
+  }
+
+  toggleCollapse(): void {
+    this.isCollapsed = !this.isCollapsed;
+    this.collapseToggled.emit(this.isCollapsed);
+  }
+
+  toggleCategory(category: 'styles' | 'instruments' | 'themes'): void {
+    if (this.expandedCategory === category) {
+      this.expandedCategory = null;
+    } else {
+      this.expandedCategory = category;
+    }
+  }
+
+  isCategoryExpanded(category: 'styles' | 'instruments' | 'themes'): boolean {
+    return this.expandedCategory === category;
+  }
+
+  getSelectedCount(category: 'styles' | 'instruments' | 'themes'): number {
+    switch (category) {
+      case 'styles':
+        return this.config.selectedStyles.length;
+      case 'instruments':
+        return this.config.selectedInstruments.length;
+      case 'themes':
+        return this.config.selectedThemes.length;
+    }
   }
 }

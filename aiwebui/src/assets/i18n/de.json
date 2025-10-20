@@ -336,8 +336,11 @@
       "optimizingSection": "Fehler beim Optimieren des Abschnitts: {{error}}",
       "textRequired": "Bitte gib zuerst einen Text ein",
       "lyricsRequired": "Bitte gib zuerst einen Songtext ein",
-      "noArchitecture": "Keine Text-Architektur definiert. Bitte konfiguriere zuerst die Architektur."
+      "noArchitecture": "Keine Text-Architektur definiert. Bitte konfiguriere zuerst die Architektur.",
+      "copyFailed": "Kopieren in Zwischenablage fehlgeschlagen"
     },
+    "copyToClipboard": "In Zwischenablage kopieren",
+    "copiedToClipboard": "In Zwischenablage kopiert",
     "sectionEditor": {
       "toggle": "Abschnitts-Editor",
       "sections": "Abschnitte",
@@ -508,6 +511,7 @@
     "lyricCreation": "Songtext Editor",
     "lyricParsingRules": "Songtext-Parsing-Regeln",
     "music": "Musik",
+    "musicStylePrompt": "Musikstil Prompt",
     "ollamaChat": "Ollama Chat",
     "openaiChat": "OpenAI Chat",
     "picture": "Bild",
@@ -594,6 +598,7 @@
     "createInstrumental": "Instrumental erstellen",
     "creating": "Erstelle...",
     "editInLyricCreator": "Im Lyric Creator bearbeiten",
+    "editInPromptEditor": "Im Prompt Editor bearbeiten",
     "enhanceStylePrompt": "Stil-Prompt verbessern",
     "errors": {
       "errorFetchingStatus": "Fehler beim Abrufen des Status",
@@ -619,6 +624,7 @@
     "musicStyleActions": "Musikstil-Aktionen",
     "musicStyleLabel": "Musikstil Prompt:",
     "musicStylePlaceholder": "Beschreibe den Musikstil (z.B. fröhlicher Pop, melancholische Ballade, Rock-Hymne)...",
+    "promptActions": "Prompt-Aktionen",
     "optimizePhrasing": "KI-Optimierte Formatierung",
     "optimizingSuccess": "Songtext für Musikgenerierung optimiert",
     "player": {
@@ -667,6 +673,62 @@
     "titleRequired": "*",
     "translateToEnglish": "Ins Englische übersetzen",
     "withLyrics": "Mit Text"
+  },
+  "musicStylePrompt": {
+    "title": "Music Style Prompt",
+    "placeholder": "Musikstil beschreiben (z.B. 'energetischer Pop mit Synth, 120 BPM')...",
+    "charactersCount": "Zeichen",
+    "autoSaved": "Änderungen werden automatisch im Song Generator gespeichert",
+    "cleared": "Prompt und Stil-Auswahl gelöscht",
+    "styleChooser": "Stil-Auswahl",
+    "enhancePrompt": "Prompt verbessern",
+    "translateToEnglish": "Ins Englische übersetzen",
+    "resetButton": "Löschen",
+    "edit": "Bearbeiten",
+    "searchReplace": "Suchen & Ersetzen",
+    "copyToClipboard": "In Zwischenablage kopieren",
+    "copiedToClipboard": "In Zwischenablage kopiert",
+    "undoLastChange": "Letzte Änderung rückgängig",
+    "undoApplied": "Änderung erfolgreich rückgängig gemacht",
+    "mode": {
+      "auto": "Auto-Modus",
+      "manual": "Manuell-Modus",
+      "switchToAuto": "Zu Auto-Modus wechseln",
+      "manualWarning": "Manuell-Modus aktiv: Stil-Änderungen überschreiben deinen bearbeiteten Prompt",
+      "applyConfirm": "Dies überschreibt deinen aktuellen Prompt. Fortfahren?",
+      "stylesApplied": "Musikstile angewandt und zu Auto-Modus gewechselt"
+    },
+    "styleChooser": {
+      "title": "Stil-Auswahl",
+      "preview": "Vorschau",
+      "applyButton": "Stile anwenden & zu Auto-Modus wechseln",
+      "collapse": "Einklappen",
+      "expand": "Ausklappen"
+    },
+    "errors": {
+      "promptRequired": "Bitte gib einen Musikstil-Prompt ein",
+      "copyFailed": "Kopieren in Zwischenablage fehlgeschlagen"
+    },
+    "progress": {
+      "enhancing": "Prompt wird verbessert...",
+      "enhancingHint": "KI verbessert deine Musikstilbeschreibung",
+      "translating": "Prompt wird übersetzt...",
+      "translatingHint": "KI übersetzt deinen Prompt ins Englische"
+    },
+    "success": {
+      "promptEnhanced": "Prompt erfolgreich verbessert",
+      "promptTranslated": "Prompt erfolgreich übersetzt"
+    },
+    "searchReplaceDialog": {
+      "title": "Suchen & Ersetzen",
+      "searchLabel": "Suchen nach:",
+      "searchPlaceholder": "Text zum Suchen eingeben...",
+      "replaceLabel": "Ersetzen durch:",
+      "replacePlaceholder": "Ersetzungstext eingeben...",
+      "matchesFound": "{{count}} Treffer gefunden",
+      "noMatches": "Keine Treffer gefunden",
+      "applied": "{{count}} Vorkommen ersetzt"
+    }
   },
   "songProfile": {
     "account": {

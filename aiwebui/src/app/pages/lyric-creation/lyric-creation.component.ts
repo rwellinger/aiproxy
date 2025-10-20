@@ -958,4 +958,25 @@ export class LyricCreationComponent implements OnInit {
             this.notificationService.error('Failed to finalize lyrics');
         }
     }
+
+    async copyLyricsToClipboard(): Promise<void> {
+        let lyrics = this.lyricForm.get('lyrics')?.value || '';
+        if (!lyrics.trim()) {
+            return;
+        }
+
+        // Remove Markdown formatting for plain text copy
+        // Remove **Label** format
+        lyrics = lyrics.replace(/\*\*([^*]+)\*\*/g, '$1');
+        // Remove [Label] format
+        lyrics = lyrics.replace(/\[([^\]]+)\]/g, '$1');
+
+        try {
+            await navigator.clipboard.writeText(lyrics);
+            this.notificationService.success(this.translate.instant('lyricCreation.copiedToClipboard'));
+        } catch (error) {
+            console.error('Failed to copy to clipboard:', error);
+            this.notificationService.error(this.translate.instant('lyricCreation.errors.copyFailed'));
+        }
+    }
 }
