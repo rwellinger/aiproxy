@@ -219,6 +219,17 @@ form .segment-control {
     }
 }
 
+// Readonly input styling
+.readonly-input {
+    background-color: $background-light !important;
+    cursor: default !important;
+
+    &:focus {
+        border-color: $border-light !important;
+        box-shadow: none !important;
+    }
+}
+
 .char-counter {
     font-size: $font-sm;
     color: $text-muted;
@@ -884,6 +895,65 @@ form .segment-control {
 
         .volume-controls {
             display: none;
+        }
+    }
+}
+
+/* ===== SKETCH SELECTION ===== */
+.sketch-select-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    .sketch-select {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid $border-standard;
+        border-radius: 8px;
+        font-size: $font-sm;
+        background-color: $background-white;
+        cursor: pointer;
+        transition: border-color 0.2s ease;
+
+        &:focus {
+            outline: none;
+            border-color: $primary-color;
+        }
+
+        &:disabled {
+            background-color: $background-light;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+    }
+
+    .clear-sketch-btn {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        border: 1px solid $border-standard;
+        background-color: $background-white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $text-muted;
+
+        i {
+            font-size: 0.9rem;
+        }
+
+        &:hover:not(:disabled) {
+            background-color: $danger-color;
+            color: $background-white;
+            border-color: $danger-color;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
         }
     }
 }

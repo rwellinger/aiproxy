@@ -41,81 +41,63 @@
                                 </div>
                             </div>
 
-                            <!-- Title Field (always visible, required only for instrumental) -->
+                            <!-- Sketch Selection -->
+                            <div class="form-group" *ngIf="sketches.length > 0">
+                                <label for="sketch-select">{{ 'songGenerator.selectSketch.label' | translate }}</label>
+                                <div class="sketch-select-group">
+                                    <select
+                                        id="sketch-select"
+                                        class="sketch-select"
+                                        [disabled]="isLoading"
+                                        [(ngModel)]="selectedSketchId"
+                                        [ngModelOptions]="{standalone: true}"
+                                        (ngModelChange)="onSketchIdChanged($event)">
+                                        <option [ngValue]="null">{{ 'songGenerator.selectSketch.placeholder' | translate }}</option>
+                                        <option
+                                            *ngFor="let sketch of sketches"
+                                            [ngValue]="sketch.id">
+                                            {{ sketch.title || ('songSketch.library.untitled' | translate) }}
+                                        </option>
+                                    </select>
+                                    <button
+                                        *ngIf="selectedSketch"
+                                        type="button"
+                                        class="clear-sketch-btn"
+                                        (click)="clearSketch()"
+                                        [disabled]="isLoading"
+                                        [title]="'songGenerator.selectSketch.clear' | translate">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Title Field (readonly) -->
                             <div class="form-group">
                                 <label for="title">{{ 'songGenerator.titleLabel' | translate }}<span class="required"
                                                                *ngIf="isInstrumentalMode"> {{ 'songGenerator.titleRequired' | translate }}</span></label>
-                                <div class="prompt-input-group">
-                                    <input
-                                            id="title"
-                                            type="text"
-                                            formControlName="title"
-                                            [placeholder]="'songGenerator.titlePlaceholder' | translate"
-                                            [required]="isInstrumentalMode"
-                                            maxlength="50"
-                                            [disabled]="isLoading"
-                                            class="title-input">
-                                    <div class="title-dropdown-container">
-                                        <button
-                                                type="button"
-                                                (click)="toggleTitleDropdown()"
-                                                [disabled]="isLoading || isGeneratingTitle"
-                                                class="magic-icon-button"
-                                                [title]="'songGenerator.titleActions' | translate">
-                                            <i class="fas fa-ellipsis-vertical" *ngIf="!isGeneratingTitle"></i>
-                                            <i class="fas fa-spinner fa-spin" *ngIf="isGeneratingTitle"></i>
-                                        </button>
-                                        <div class="dropdown-menu" *ngIf="showTitleDropdown"
-                                             (click)="$event.stopPropagation()">
-                                            <button
-                                                    type="button"
-                                                    class="dropdown-item"
-                                                    [disabled]="isLoading || isGeneratingTitle"
-                                                    (click)="selectTitleAction('generate')">
-                                                <i class="fas fa-wand-magic-sparkles"></i>
-                                                <span>{{ 'songGenerator.generateTitle' | translate }}</span>
-                                                <i class="fas fa-spinner fa-spin action-spinner"
-                                                   *ngIf="isGeneratingTitle"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                                <input
+                                    id="title"
+                                    type="text"
+                                    formControlName="title"
+                                    [placeholder]="'songGenerator.titlePlaceholder' | translate"
+                                    [required]="isInstrumentalMode"
+                                    maxlength="50"
+                                    readonly
+                                    class="title-input readonly-input">
                                 <div class="char-counter">{{ 'songGenerator.charCounter' | translate: {count: songForm.get('title')?.value?.length || 0} }}</div>
                             </div>
 
                             <div class="form-group">
                                 <label for="lyrics">{{ 'songGenerator.lyricsLabel' | translate }}</label>
-                                <div class="prompt-input-group" [class.disabled-section]="isInstrumentalMode">
-                        <textarea
-                                id="lyrics"
-                                formControlName="lyrics"
-                                [placeholder]="'songGenerator.lyricsPlaceholder' | translate"
-                                [required]="!isInstrumentalMode"
-                                [disabled]="isLoading || isInstrumentalMode"
-                                class="lyrics-input">
-                        </textarea>
-                                    <div class="lyrics-dropdown-container">
-                                        <button
-                                                type="button"
-                                                (click)="toggleLyricsDropdown()"
-                                                [disabled]="isLoading"
-                                                class="magic-icon-button"
-                                                [title]="'songGenerator.lyricsActions' | translate">
-                                            <i class="fas fa-ellipsis-vertical"></i>
-                                        </button>
-                                        <div class="dropdown-menu" *ngIf="showLyricsDropdown"
-                                             (click)="$event.stopPropagation()">
-                                            <button
-                                                    type="button"
-                                                    class="dropdown-item"
-                                                    [disabled]="isLoading"
-                                                    (click)="selectLyricsAction('edit-in-creator')">
-                                                <i class="fas fa-pencil"></i>
-                                                <span>{{ 'songGenerator.editInLyricCreator' | translate }}</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                                <textarea
+                                    id="lyrics"
+                                    formControlName="lyrics"
+                                    [placeholder]="'songGenerator.lyricsPlaceholder' | translate"
+                                    [required]="!isInstrumentalMode"
+                                    readonly
+                                    class="lyrics-input readonly-input"
+                                    [class.disabled-section]="isInstrumentalMode">
+                                </textarea>
                                 <div class="lyrics-char-count" *ngIf="songForm.get('lyrics')?.value">
                                     {{ songForm.get('lyrics')?.value?.length || 0 }} {{ 'songGenerator.charactersCount' | translate }}
                                 </div>
@@ -127,38 +109,15 @@
 
                             <div class="form-group">
                                 <label for="prompt">{{ 'songGenerator.musicStyleLabel' | translate }}</label>
-                                <div class="prompt-input-group">
-                        <textarea
-                                id="prompt"
-                                formControlName="prompt"
-                                [placeholder]="'songGenerator.musicStylePlaceholder' | translate"
-                                required
-                                maxlength="1024"
-                                [disabled]="isLoading"
-                                class="prompt-input">
-                        </textarea>
-                                    <div class="prompt-actions-container">
-                                        <button
-                                                type="button"
-                                                (click)="togglePromptDropdown()"
-                                                [disabled]="isLoading"
-                                                class="magic-icon-button"
-                                                [title]="'songGenerator.promptActions' | translate">
-                                            <i class="fas fa-ellipsis-vertical"></i>
-                                        </button>
-                                        <div class="dropdown-menu" *ngIf="showPromptDropdown"
-                                             (click)="$event.stopPropagation()">
-                                            <button
-                                                    type="button"
-                                                    class="dropdown-item"
-                                                    [disabled]="isLoading"
-                                                    (click)="selectPromptAction('edit-in-editor')">
-                                                <i class="fas fa-pencil"></i>
-                                                <span>{{ 'songGenerator.editInPromptEditor' | translate }}</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                                <textarea
+                                    id="prompt"
+                                    formControlName="prompt"
+                                    [placeholder]="'songGenerator.musicStylePlaceholder' | translate"
+                                    required
+                                    maxlength="1024"
+                                    readonly
+                                    class="prompt-input readonly-input">
+                                </textarea>
                                 <div class="lyrics-char-count" *ngIf="songForm.get('prompt')?.value">
                                     {{ songForm.get('prompt')?.value?.length || 0 }} / 1024 {{ 'songGenerator.charactersCount' | translate }}
                                 </div>
@@ -178,16 +137,11 @@
 
                             <div class="button-group">
                                 <button type="submit"
-                                        [disabled]="songForm.invalid || isLoading || isGeneratingTitle"
+                                        [disabled]="songForm.invalid || isLoading"
                                         class="create-button">
                                     <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
                                     <i class="fas fa-music" *ngIf="!isLoading"></i>
                                     {{ isLoading ? ('songGenerator.creating' | translate) : (isInstrumentalMode ? ('songGenerator.createInstrumental' | translate) : ('songGenerator.createButton' | translate)) }}
-                                </button>
-                                <button type="button" (click)="resetForm()"
-                                        [disabled]="isLoading || isGeneratingTitle"
-                                        class="reset-button">
-                                    <i class="fas fa-rotate-left"></i> {{ 'songGenerator.resetButton' | translate }}
                                 </button>
                             </div>
 

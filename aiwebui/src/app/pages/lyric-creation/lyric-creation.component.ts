@@ -3,7 +3,8 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, FormsModule} from '@angular
 import {CommonModule} from '@angular/common';
 import {MatDialog} from '@angular/material/dialog';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
-import {SongService} from '../../services/business/song.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {SongService, FormDataContext} from '../../services/business/song.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {ChatService} from '../../services/config/chat.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
@@ -54,6 +55,9 @@ export class LyricCreationComponent implements OnInit {
     // Section Detection Rules (loaded from API)
     private sectionDetectionPattern: RegExp | null = null;
 
+    // Context for form data storage (song-generator or sketch-creator)
+    private context: FormDataContext = 'song-generator';
+
     private fb = inject(FormBuilder);
     private songService = inject(SongService);
     private notificationService = inject(NotificationService);
@@ -63,6 +67,8 @@ export class LyricCreationComponent implements OnInit {
     private architectureService = inject(LyricArchitectureService);
     private translate = inject(TranslateService);
     private lyricParsingRuleService = inject(LyricParsingRuleService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
 
     get isAnyLyricOperationInProgress(): boolean {
         return this.isGeneratingLyrics || this.isTranslatingLyrics || this.isOptimizingPhrasing;
@@ -72,13 +78,26 @@ export class LyricCreationComponent implements OnInit {
         return this.isImprovingSection || this.isRewritingSection || this.isExtendingSection || this.isOptimizingSection;
     }
 
+    get isFromSketchCreator(): boolean {
+        return this.context === 'sketch-creator';
+    }
+
+    navigateBackToSketchCreator(): void {
+        this.router.navigate(['/song-sketch-creator']);
+    }
+
     ngOnInit() {
+        // Read context from URL query params (default: 'song-generator')
+        this.route.queryParams.subscribe(params => {
+            this.context = params['context'] === 'sketch' ? 'sketch-creator' : 'song-generator';
+        });
+
         this.lyricForm = this.fb.group({
             lyrics: ['']
         });
 
-        // Load saved lyrics from song generator storage
-        const savedData = this.songService.loadFormData();
+        // Load saved lyrics from context-aware storage
+        const savedData = this.songService.loadFormData(this.context);
         if (savedData.lyrics) {
             this.lyricForm.patchValue({lyrics: savedData.lyrics});
         }
@@ -122,12 +141,12 @@ export class LyricCreationComponent implements OnInit {
     }
 
     private saveLyrics(lyrics: string): void {
-        // Load existing song generator data and update only lyrics
-        const existingData = this.songService.loadFormData();
+        // Load existing data from context-aware storage and update only lyrics
+        const existingData = this.songService.loadFormData(this.context);
         this.songService.saveFormData({
             ...existingData,
             lyrics: lyrics
-        });
+        }, this.context);
     }
 
     clearLyrics(): void {

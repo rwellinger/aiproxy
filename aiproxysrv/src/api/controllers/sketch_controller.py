@@ -6,6 +6,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from db.sketch_service import sketch_service
+from schemas.common_schemas import PaginationMeta
 from schemas.sketch_schemas import (
     SketchCreateRequest,
     SketchListResponse,
@@ -91,11 +92,17 @@ class SketchController:
             # Convert sketches to Pydantic models
             sketch_responses = [SketchResponse.model_validate(sketch) for sketch in sketches]
 
+            # Create pagination metadata
+            pagination = PaginationMeta(
+                total=total,
+                offset=offset,
+                limit=limit,
+                has_more=(offset + len(sketches)) < total,
+            )
+
             response = SketchListResponse(
                 data=sketch_responses,
-                total=total,
-                limit=limit,
-                offset=offset,
+                pagination=pagination,
             )
 
             return response.model_dump(), 200

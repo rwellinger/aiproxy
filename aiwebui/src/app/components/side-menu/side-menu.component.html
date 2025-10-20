@@ -53,17 +53,17 @@
                 {{ 'sideMenu.music' | translate }}
             </span>
             <div class="group-items">
+                <a routerLink="/song-sketch-library" routerLinkActive="active">
+                    <i class="fas fa-folder-open"></i>
+                    {{ 'sideMenu.sketchLibrary' | translate }}
+                </a>
+                <a routerLink="/song-sketch-creator" routerLinkActive="active">
+                    <i class="fas fa-lightbulb"></i>
+                    {{ 'sideMenu.newSketch' | translate }}
+                </a>
                 <a routerLink="/songview" routerLinkActive="active">
                     <i class="fas fa-list"></i>
                     {{ 'sideMenu.library' | translate }}
-                </a>
-                <a routerLink="/lyriccreation" routerLinkActive="active">
-                    <i class="fas fa-pen-fancy"></i>
-                    {{ 'sideMenu.lyricCreation' | translate }}
-                </a>
-                <a routerLink="/music-style-prompt" routerLinkActive="active">
-                    <i class="fas fa-sliders"></i>
-                    {{ 'sideMenu.musicStylePrompt' | translate }}
                 </a>
                 <a routerLink="/songgen" routerLinkActive="active">
                     <i class="fas fa-plus"></i>

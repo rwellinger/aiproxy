@@ -121,9 +121,13 @@ class SketchService:
         try:
             query = db.query(SongSketch)
 
-            # Apply workflow filter if provided
+            # Apply workflow filter
             if workflow:
+                # Explicit workflow filter (draft, used, archived)
                 query = query.filter(SongSketch.workflow == workflow)
+            else:
+                # When no workflow is specified, exclude archived sketches
+                query = query.filter(SongSketch.workflow != "archived")
 
             # Apply search filter if provided
             if search:

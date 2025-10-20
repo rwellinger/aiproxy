@@ -1,8 +1,9 @@
 """Pydantic schemas for Sketch API validation"""
 
 from datetime import datetime
+from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_serializer, field_validator
 
 from schemas.common_schemas import BaseResponse, PaginationResponse
 
@@ -29,7 +30,7 @@ class SketchCreateRequest(BaseModel):
 class SketchResponse(BaseModel):
     """Schema for single sketch response"""
 
-    id: str = Field(..., description="Unique sketch ID")
+    id: UUID = Field(..., description="Unique sketch ID")
     title: str | None = Field(None, description="Sketch title")
     lyrics: str | None = Field(None, description="Song lyrics")
     prompt: str = Field(..., description="Music style prompt")
@@ -37,6 +38,11 @@ class SketchResponse(BaseModel):
     workflow: str = Field(..., description="Workflow status")
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime | None = Field(None, description="Last update timestamp")
+
+    @field_serializer("id")
+    def serialize_id(self, value: UUID) -> str:
+        """Convert UUID to string for JSON serialization"""
+        return str(value)
 
     @field_validator("workflow")
     @classmethod

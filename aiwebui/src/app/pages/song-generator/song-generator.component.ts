@@ -1,10 +1,11 @@
 import {Component, OnInit, ViewEncapsulation, inject, HostListener, ViewChild, ElementRef} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule} from '@angular/common';
-import {Router} from '@angular/router';
-import {MatDialog} from '@angular/material/dialog';
+import {Router, ActivatedRoute} from '@angular/router';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
+import {firstValueFrom} from 'rxjs';
 import {SongService} from '../../services/business/song.service';
+import {SketchService, Sketch} from '../../services/business/sketch.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {ChatService} from '../../services/config/chat.service';
@@ -12,13 +13,11 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCardModule} from '@angular/material/card';
 import {SongDetailPanelComponent} from '../../components/song-detail-panel/song-detail-panel.component';
 import {ProgressService} from '../../services/ui/progress.service';
-import {MusicStyleChooserModalComponent} from '../../components/music-style-chooser-modal/music-style-chooser-modal.component';
-import {MusicStyleChooserService} from '../../services/music-style-chooser.service';
 
 @Component({
     selector: 'app-song-generator',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, SongDetailPanelComponent, TranslateModule],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, SongDetailPanelComponent, TranslateModule],
     templateUrl: './song-generator.component.html',
     styleUrl: './song-generator.component.scss',
     encapsulation: ViewEncapsulation.None
@@ -27,14 +26,17 @@ export class SongGeneratorComponent implements OnInit {
     songForm!: FormGroup;
     isLoading = false;
     isGeneratingTitle = false;
-    showLyricsDropdown = false;
-    showPromptDropdown = false;
     showTitleDropdown = false;
     loadingMessage = '';
     result = '';
     currentlyPlaying: string | null = null;
     currentSongId: string | null = null;
     isInstrumentalMode = false; // Computed property to avoid method calls in template
+
+    // Sketch selection
+    sketches: Sketch[] = [];
+    selectedSketch: Sketch | null = null;
+    selectedSketchId: string | null = null;
 
     // Audio player state
     audioUrl: string | null = null;
@@ -51,14 +53,14 @@ export class SongGeneratorComponent implements OnInit {
 
     private fb = inject(FormBuilder);
     private songService = inject(SongService);
+    private sketchService = inject(SketchService);
     private apiConfig = inject(ApiConfigService);
     private notificationService = inject(NotificationService);
     private chatService = inject(ChatService);
     private progressService = inject(ProgressService);
-    private dialog = inject(MatDialog);
-    private musicStyleChooserService = inject(MusicStyleChooserService);
     private translate = inject(TranslateService);
     private router = inject(Router);
+    private route = inject(ActivatedRoute);
 
     ngOnInit() {
         this.songForm = this.fb.group({
@@ -69,12 +71,6 @@ export class SongGeneratorComponent implements OnInit {
             isInstrumental: [false]
         });
 
-        // Load saved form data
-        const savedData = this.songService.loadFormData();
-        if (savedData.lyrics || savedData.isInstrumental || savedData.title) {
-            this.songForm.patchValue(savedData);
-        }
-
         // Initialize isInstrumentalMode property
         this.isInstrumentalMode = this.songForm.get('isInstrumental')?.value || false;
 
@@ -84,13 +80,18 @@ export class SongGeneratorComponent implements OnInit {
             this.updateValidators(isInstrumental);
         });
 
-        // Save form data on changes
-        this.songForm.valueChanges.subscribe(value => {
-            this.songService.saveFormData(value);
-        });
-
         // Initialize validators based on current state
         this.updateValidators(this.songForm.get('isInstrumental')?.value || false);
+
+        // Load sketches
+        this.loadSketches();
+
+        // Check for sketch_id in URL
+        this.route.queryParams.subscribe(params => {
+            if (params['sketch_id']) {
+                this.loadSketchById(params['sketch_id']);
+            }
+        });
     }
 
     async onSubmit() {
@@ -107,7 +108,6 @@ export class SongGeneratorComponent implements OnInit {
     resetForm() {
         this.songForm.reset({model: 'auto', isInstrumental: false});
         this.isInstrumentalMode = false; // Reset computed property
-        this.songService.clearFormData();
         this.result = '';
     }
 
@@ -122,7 +122,8 @@ export class SongGeneratorComponent implements OnInit {
                 formValue.lyrics.trim(),
                 formValue.prompt.trim(),
                 formValue.model,
-                formValue.title?.trim() || undefined
+                formValue.title?.trim() || undefined,
+                this.selectedSketch?.id || undefined
             );
 
             if (data.task_id) {
@@ -151,7 +152,8 @@ export class SongGeneratorComponent implements OnInit {
             const data = await this.songService.generateInstrumental(
                 formValue.title.trim(),
                 formValue.prompt.trim(),
-                formValue.model
+                formValue.model,
+                this.selectedSketch?.id || undefined
             );
 
             if (data.task_id) {
@@ -433,92 +435,10 @@ export class SongGeneratorComponent implements OnInit {
         // No-op: Shared component handles this
     }
 
-    navigateToLyricCreator() {
-        this.router.navigate(['/lyriccreation']);
-    }
-
-    navigateToMusicStylePrompt() {
-        this.router.navigate(['/music-style-prompt']);
-    }
-
-    toggleLyricsDropdown() {
-        this.showLyricsDropdown = !this.showLyricsDropdown;
-    }
-
-    closeLyricsDropdown() {
-        this.showLyricsDropdown = false;
-    }
-
-    selectLyricsAction(action: 'edit-in-creator') {
-        this.closeLyricsDropdown();
-
-        if (action === 'edit-in-creator') {
-            this.navigateToLyricCreator();
-        }
-    }
-
-    togglePromptDropdown() {
-        this.showPromptDropdown = !this.showPromptDropdown;
-    }
-
-    closePromptDropdown() {
-        this.showPromptDropdown = false;
-    }
-
-    selectPromptAction(action: 'edit-in-editor') {
-        this.closePromptDropdown();
-
-        if (action === 'edit-in-editor') {
-            this.navigateToMusicStylePrompt();
-        }
-    }
-
-    openMusicStyleChooserModal(): void {
-        const isInstrumental = this.isInstrumentalMode; // Use property instead of method call
-        const dialogRef = this.dialog.open(MusicStyleChooserModalComponent, {
-            width: '1100px',
-            maxWidth: '95vw',
-            maxHeight: '90vh',
-            disableClose: false,
-            autoFocus: true,
-            data: { isInstrumental }
-        });
-
-        dialogRef.afterClosed().subscribe(result => {
-            if (result && result.stylePrompt) {
-                const currentPrompt = this.songForm.get('prompt')?.value?.trim();
-
-                // Warn if textarea is filled - ONLY when user confirms the dialog
-                if (currentPrompt) {
-                    const confirmOverwrite = confirm(this.translate.instant('songGenerator.styleChooserOverwriteWarning'));
-                    if (!confirmOverwrite) {
-                        return;
-                    }
-                }
-
-                // Apply the generated style prompt to the form
-                this.songForm.patchValue({
-                    prompt: result.stylePrompt
-                });
-                this.notificationService.success(this.translate.instant('songGenerator.success.styleApplied'));
-            }
-        });
-    }
-
     @HostListener('document:click', ['$event'])
     onDocumentClick(event: Event) {
         const target = event.target as HTMLElement;
-        const lyricsDropdown = target.closest('.lyrics-dropdown-container');
-        const promptDropdown = target.closest('.prompt-actions-container');
         const titleDropdown = target.closest('.title-dropdown-container');
-
-        if (!lyricsDropdown && this.showLyricsDropdown) {
-            this.closeLyricsDropdown();
-        }
-
-        if (!promptDropdown && this.showPromptDropdown) {
-            this.closePromptDropdown();
-        }
 
         if (!titleDropdown && this.showTitleDropdown) {
             this.closeTitleDropdown();
@@ -610,5 +530,65 @@ export class SongGeneratorComponent implements OnInit {
         if (action === 'generate') {
             this.generateTitle();
         }
+    }
+
+    // Sketch-related methods
+    async loadSketches(): Promise<void> {
+        try {
+            const response = await firstValueFrom(
+                this.sketchService.getSketches(100, 0, undefined)
+            );
+            this.sketches = response.data || [];
+        } catch (error: any) {
+            console.error('Error loading sketches:', error);
+        }
+    }
+
+    async loadSketchById(sketchId: string): Promise<void> {
+        try {
+            const response = await firstValueFrom(
+                this.sketchService.getSketchById(sketchId)
+            );
+            if (response.data) {
+                this.onSketchSelected(response.data);
+            }
+        } catch (error: any) {
+            this.notificationService.error(
+                this.translate.instant('songGenerator.errors.sketchNotFound')
+            );
+        }
+    }
+
+    onSketchIdChanged(sketchId: string | null): void {
+        if (!sketchId) {
+            this.clearSketch();
+            return;
+        }
+
+        const sketch = this.sketches.find(s => s.id === sketchId);
+        if (sketch) {
+            this.onSketchSelected(sketch);
+        }
+    }
+
+    onSketchSelected(sketch: Sketch): void {
+        this.selectedSketch = sketch;
+        this.selectedSketchId = sketch.id;
+        this.songForm.patchValue({
+            title: sketch.title || '',
+            lyrics: sketch.lyrics || '',
+            prompt: sketch.prompt || ''
+        });
+        this.notificationService.success(
+            this.translate.instant('songGenerator.success.sketchLoaded')
+        );
+    }
+
+    clearSketch(): void {
+        this.selectedSketch = null;
+        this.selectedSketchId = null;
+        this.notificationService.success(
+            this.translate.instant('songGenerator.success.sketchCleared')
+        );
     }
 }

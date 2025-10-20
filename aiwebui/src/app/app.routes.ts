@@ -28,6 +28,16 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/song-view/song-view.component').then(m => m.SongViewComponent)
     },
     {
+        path: 'song-sketch-creator',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/song-sketch-creator/song-sketch-creator.component').then(m => m.SongSketchCreatorComponent)
+    },
+    {
+        path: 'song-sketch-library',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/song-sketch-library/song-sketch-library.component').then(m => m.SongSketchLibraryComponent)
+    },
+    {
         path: 'lyriccreation',
         canActivate: [AuthGuard],
         loadComponent: () => import('./pages/lyric-creation/lyric-creation.component').then(m => m.LyricCreationComponent)

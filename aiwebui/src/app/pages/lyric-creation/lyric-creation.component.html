@@ -8,6 +8,15 @@
                         {{ 'lyricCreation.title' | translate }}
                     </h2>
                 </div>
+                <button
+                    *ngIf="isFromSketchCreator"
+                    type="button"
+                    (click)="navigateBackToSketchCreator()"
+                    class="back-to-sketch-button"
+                    [title]="'lyricCreation.backToSketch' | translate">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>{{ 'lyricCreation.backToSketch' | translate }}</span>
+                </button>
             </div>
 
             <form [formGroup]="lyricForm">

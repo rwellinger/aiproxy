@@ -1,0 +1,250 @@
+<div class="sketch-library-container master-detail-layout">
+  <!-- Left Side: Sketches List -->
+  <div class="list-section">
+    <mat-card class="list-card">
+      <!-- Header -->
+      <div class="list-header">
+        <div class="header-title">
+          <h2>
+            <i class="fas fa-folder-open"></i>
+            {{ 'songSketch.library.title' | translate }}
+          </h2>
+          <p class="subtitle">{{ 'songSketch.library.subtitle' | translate }}</p>
+        </div>
+        <button
+          type="button"
+          class="action-button new-sketch-button"
+          (click)="navigateToSketchCreator()">
+          <i class="fas fa-plus"></i>
+          <span>{{ 'songSketch.library.actions.newSketch' | translate }}</span>
+        </button>
+      </div>
+
+      <!-- Search and Filters -->
+      <div class="filters-section">
+        <!-- Search -->
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            [placeholder]="'songSketch.library.search.placeholder' | translate"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange($event)"
+            class="search-input">
+        </div>
+
+        <!-- Workflow Filter -->
+        <div class="workflow-filter">
+          <button
+            class="filter-btn"
+            [class.active]="currentWorkflow === 'all'"
+            (click)="onWorkflowChange('all')">
+            {{ 'songSketch.library.filters.all' | translate }}
+          </button>
+          <button
+            class="filter-btn"
+            [class.active]="currentWorkflow === 'draft'"
+            (click)="onWorkflowChange('draft')">
+            {{ 'songSketch.library.filters.draft' | translate }}
+          </button>
+          <button
+            class="filter-btn"
+            [class.active]="currentWorkflow === 'used'"
+            (click)="onWorkflowChange('used')">
+            {{ 'songSketch.library.filters.used' | translate }}
+          </button>
+          <button
+            class="filter-btn"
+            [class.active]="currentWorkflow === 'archived'"
+            (click)="onWorkflowChange('archived')">
+            {{ 'songSketch.library.filters.archived' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Sketches List -->
+      <div class="sketches-list">
+        <div
+          *ngFor="let sketch of sketches"
+          class="sketch-item"
+          [class.selected]="selectedSketch?.id === sketch.id"
+          (click)="selectSketch(sketch)">
+          <div class="sketch-item-header">
+            <h4 class="sketch-title">
+              {{ sketch.title || ('songSketch.library.untitled' | translate) }}
+            </h4>
+            <span class="workflow-badge" [ngClass]="getWorkflowClass(sketch.workflow)">
+              {{ getWorkflowLabel(sketch.workflow) }}
+            </span>
+          </div>
+          <div class="sketch-item-meta">
+            <span class="meta-date">
+              <i class="fas fa-clock"></i>
+              {{ formatDate(sketch.created_at) }}
+            </span>
+            <span class="meta-tags" *ngIf="sketch.tags">
+              <i class="fas fa-tags"></i>
+              {{ sketch.tags }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="sketches.length === 0 && !isLoading" class="empty-state">
+          <i class="fas fa-folder-open"></i>
+          <p>{{ 'songSketch.library.messages.noSketches' | translate }}</p>
+          <button type="button" class="action-button new-sketch-button" (click)="navigateToSketchCreator()">
+            <i class="fas fa-plus"></i>
+            <span>{{ 'songSketch.library.actions.createFirst' | translate }}</span>
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="loading-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>{{ 'songSketch.library.messages.loading' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button
+          class="pagination-btn"
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 0 || isLoading">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="pagination-info">
+          {{ 'songSketch.library.pagination.info' | translate: {current: currentPage + 1, total: totalPages} }}
+        </span>
+        <button
+          class="pagination-btn"
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage >= totalPages - 1 || isLoading">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Right Side: Sketch Detail -->
+  <div class="detail-section">
+    <mat-card class="detail-card" *ngIf="selectedSketch">
+      <mat-card-content>
+        <!-- Detail Header -->
+        <div class="detail-header">
+          <div class="detail-title">
+            <h2>{{ selectedSketch.title || ('songSketch.library.untitled' | translate) }}</h2>
+            <span class="workflow-badge" [ngClass]="getWorkflowClass(selectedSketch.workflow)">
+              {{ getWorkflowLabel(selectedSketch.workflow) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Detail Content -->
+        <div class="detail-content">
+          <!-- Metadata -->
+          <div class="detail-section-block">
+            <h3>{{ 'songSketch.library.detail.metadata' | translate }}</h3>
+            <div class="metadata-grid">
+              <div class="metadata-item">
+                <span class="metadata-label">{{ 'songSketch.library.detail.created' | translate }}:</span>
+                <span class="metadata-value">{{ formatDate(selectedSketch.created_at) }}</span>
+              </div>
+              <div class="metadata-item" *ngIf="selectedSketch.updated_at">
+                <span class="metadata-label">{{ 'songSketch.library.detail.updated' | translate }}:</span>
+                <span class="metadata-value">{{ formatDate(selectedSketch.updated_at) }}</span>
+              </div>
+              <div class="metadata-item" *ngIf="selectedSketch.tags">
+                <span class="metadata-label">{{ 'songSketch.library.detail.tags' | translate }}:</span>
+                <span class="metadata-value">{{ selectedSketch.tags }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Music Style Prompt -->
+          <div class="detail-section-block">
+            <h3>{{ 'songSketch.library.detail.musicStyle' | translate }}</h3>
+            <div class="prompt-display">
+              {{ selectedSketch.prompt }}
+            </div>
+          </div>
+
+          <!-- Lyrics -->
+          <div class="detail-section-block" *ngIf="selectedSketch.lyrics">
+            <h3>{{ 'songSketch.library.detail.lyrics' | translate }}</h3>
+            <div class="lyrics-display">
+              <pre>{{ selectedSketch.lyrics }}</pre>
+            </div>
+          </div>
+
+          <!-- Empty Lyrics Message -->
+          <div class="detail-section-block" *ngIf="!selectedSketch.lyrics">
+            <h3>{{ 'songSketch.library.detail.lyrics' | translate }}</h3>
+            <div class="empty-message">
+              <i class="fas fa-info-circle"></i>
+              {{ 'songSketch.library.detail.noLyrics' | translate }}
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <!-- Action Buttons at Bottom -->
+      <mat-card-actions align="end">
+        <div class="detail-actions">
+          <button
+            type="button"
+            class="action-button edit-button"
+            (click)="editSketch()"
+            [title]="'songSketch.library.actions.edit' | translate">
+            <i class="fas fa-edit"></i>
+            <span>{{ 'songSketch.library.actions.edit' | translate }}</span>
+          </button>
+          <button
+            type="button"
+            class="action-button archive-button"
+            *ngIf="selectedSketch.workflow !== 'archived'"
+            (click)="archiveSketch(selectedSketch)"
+            [title]="'songSketch.library.actions.archive' | translate">
+            <i class="fas fa-archive"></i>
+            <span>{{ 'songSketch.library.actions.archive' | translate }}</span>
+          </button>
+          <button
+            type="button"
+            class="action-button delete-button"
+            (click)="confirmDeleteSketch(selectedSketch.id)"
+            [title]="'songSketch.library.actions.delete' | translate">
+            <i class="fas fa-trash"></i>
+            <span>{{ 'songSketch.library.actions.delete' | translate }}</span>
+          </button>
+        </div>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Empty Detail State -->
+    <div class="empty-detail" *ngIf="!selectedSketch && sketches.length > 0">
+      <i class="fas fa-lightbulb"></i>
+      <p>{{ 'songSketch.library.detail.selectSketch' | translate }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ 'songSketch.library.confirmations.deleteTitle' | translate }}</h3>
+    </div>
+    <div class="modal-body">
+      <p>{{ 'songSketch.library.confirmations.deleteMessage' | translate }}</p>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="action-button cancel-modal-button" (click)="cancelDelete()">
+        <span>{{ 'songSketch.library.confirmations.cancel' | translate }}</span>
+      </button>
+      <button type="button" class="action-button confirm-delete-button" (click)="deleteSketch()">
+        <span>{{ 'songSketch.library.confirmations.confirm' | translate }}</span>
+      </button>
+    </div>
+  </div>
+</div>

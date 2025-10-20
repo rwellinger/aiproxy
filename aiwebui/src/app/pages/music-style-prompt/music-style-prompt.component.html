@@ -8,9 +8,20 @@
                         {{ 'musicStylePrompt.title' | translate }}
                     </h2>
                 </div>
-                <div class="mode-badge" [class.auto-mode]="currentMode === 'auto'" [class.manual-mode]="currentMode === 'manual'">
-                    <i class="fas" [class.fa-sync-alt]="currentMode === 'auto'" [class.fa-edit]="currentMode === 'manual'"></i>
-                    <span>{{ 'musicStylePrompt.mode.' + currentMode | translate }}</span>
+                <div class="prompt-header-actions">
+                    <button
+                        *ngIf="isFromSketchCreator"
+                        type="button"
+                        (click)="navigateBackToSketchCreator()"
+                        class="back-to-sketch-button"
+                        [title]="'musicStylePrompt.backToSketch' | translate">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>{{ 'musicStylePrompt.backToSketch' | translate }}</span>
+                    </button>
+                    <div class="mode-badge" [class.auto-mode]="currentMode === 'auto'" [class.manual-mode]="currentMode === 'manual'">
+                        <i class="fas" [class.fa-sync-alt]="currentMode === 'auto'" [class.fa-edit]="currentMode === 'manual'"></i>
+                        <span>{{ 'musicStylePrompt.mode.' + currentMode | translate }}</span>
+                    </div>
                 </div>
             </div>
 

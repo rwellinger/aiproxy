@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aiproxysrv"
-version = "2.3.5"
+version = "2.4.0"
 dependencies = [
     "Flask>=3.1.2",
     "Flask-CORS>=4.0.0",
@@ -145,6 +145,7 @@ addopts = [
 ]
 markers = [
     "unit: Unit tests (no external dependencies)",
+    "integration: Integration tests (test full controller flow with Pydantic validation)",
     "slow: Slow running tests",
 ]
 
