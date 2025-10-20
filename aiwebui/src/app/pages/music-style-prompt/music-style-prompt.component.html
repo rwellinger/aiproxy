@@ -3,7 +3,14 @@
         <mat-card-content>
             <div class="prompt-header">
                 <div class="prompt-title">
-                    <h2>{{ 'musicStylePrompt.title' | translate }}</h2>
+                    <h2>
+                        <i class="fas fa-sliders-h"></i>
+                        {{ 'musicStylePrompt.title' | translate }}
+                    </h2>
+                </div>
+                <div class="mode-badge" [class.auto-mode]="currentMode === 'auto'" [class.manual-mode]="currentMode === 'manual'">
+                    <i class="fas" [class.fa-sync-alt]="currentMode === 'auto'" [class.fa-edit]="currentMode === 'manual'"></i>
+                    <span>{{ 'musicStylePrompt.mode.' + currentMode | translate }}</span>
                 </div>
             </div>
 
@@ -22,6 +29,16 @@
                     </div>
                 </div>
 
+                <!-- Inline Style Chooser -->
+                <app-music-style-chooser-inline
+                    [mode]="currentMode"
+                    [isInstrumental]="false"
+                    [isCollapsed]="isStyleChooserCollapsed"
+                    (styleChanged)="onStyleChanged($event)"
+                    (applyStyles)="onApplyStyles($event)"
+                    (collapseToggled)="onCollapseToggled($event)">
+                </app-music-style-chooser-inline>
+
                 <div class="info-notice">
                     <i class="fas fa-info-circle"></i>
                     {{ 'musicStylePrompt.autoSaved' | translate }}
@@ -29,14 +46,6 @@
 
                 <div class="action-section">
                     <div class="ai-actions">
-                        <button
-                                type="button"
-                                (click)="openStyleChooser()"
-                                [disabled]="isAnyOperationInProgress"
-                                class="utility-button">
-                            <i class="fas fa-sliders"></i>
-                            <span>{{ 'musicStylePrompt.styleChooser' | translate }}</span>
-                        </button>
                         <button
                                 type="button"
                                 (click)="enhancePrompt()"

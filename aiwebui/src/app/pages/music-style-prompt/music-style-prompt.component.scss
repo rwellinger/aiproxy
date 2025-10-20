@@ -50,12 +50,59 @@
     padding: 0;
 
     h2 {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
       font-weight: 600;
       line-height: 1.5;
       font-size: 1.5rem;
       margin: 0;
       color: $text-primary;
+
+      i {
+        color: $primary-color;
+      }
     }
+  }
+}
+
+.mode-badge {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-md;
+  font-size: $font-sm;
+  font-weight: $font-weight-semibold;
+  transition: all 0.2s ease;
+
+  i {
+    font-size: $font-sm;
+  }
+
+  &.auto-mode {
+    background: rgba($primary-color, 0.1);
+    color: $primary-color;
+    border: 1px solid rgba($primary-color, 0.3);
+
+    i {
+      animation: spin 2s linear infinite;
+    }
+  }
+
+  &.manual-mode {
+    background: rgba($warning-color, 0.1);
+    color: darken($warning-color, 10%);
+    border: 1px solid rgba($warning-color, 0.3);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -106,7 +153,7 @@
   display: flex;
   align-items: center;
   gap: $spacing-10;
-  margin-top: $spacing-10;
+  margin-top: 2rem;
   margin-bottom: $spacing-10;
   padding: $spacing-10;
   background: $background-light;

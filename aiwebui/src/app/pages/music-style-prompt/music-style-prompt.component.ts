@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewEncapsulation, inject, HostListener} from '@angular/core';
+import {Component, OnInit, ViewEncapsulation, inject, HostListener, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {MatDialog} from '@angular/material/dialog';
@@ -9,12 +9,12 @@ import {ChatService} from '../../services/config/chat.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCardModule} from '@angular/material/card';
 import {ProgressService} from '../../services/ui/progress.service';
-import {MusicStyleChooserModalComponent} from '../../components/music-style-chooser-modal/music-style-chooser-modal.component';
+import {MusicStyleChooserInlineComponent} from '../../components/music-style-chooser-inline/music-style-chooser-inline.component';
 
 @Component({
     selector: 'app-music-style-prompt',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, TranslateModule],
+    imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, TranslateModule, MusicStyleChooserInlineComponent],
     templateUrl: './music-style-prompt.component.html',
     styleUrl: './music-style-prompt.component.scss',
     encapsulation: ViewEncapsulation.None
@@ -25,6 +25,10 @@ export class MusicStylePromptComponent implements OnInit {
     isTranslatingPrompt = false;
     showEditDropdown = false;
     lastSearchReplaceState: string | null = null;
+    currentMode: 'auto' | 'manual' = 'auto';
+    isStyleChooserCollapsed = false;
+
+    @ViewChild(MusicStyleChooserInlineComponent) styleChooser!: MusicStyleChooserInlineComponent;
 
     private fb = inject(FormBuilder);
     private songService = inject(SongService);
@@ -84,7 +88,13 @@ export class MusicStylePromptComponent implements OnInit {
 
     clearPrompt(): void {
         this.promptForm.patchValue({prompt: ''});
-        this.notificationService.success(this.translate.instant('musicStylePrompt.autoSaved'));
+        // Reset Style Chooser as well
+        if (this.styleChooser) {
+            this.styleChooser.reset();
+        }
+        // Switch back to auto-mode
+        this.switchToAutoMode();
+        this.notificationService.success(this.translate.instant('musicStylePrompt.cleared'));
     }
 
     async enhancePrompt() {
@@ -94,6 +104,7 @@ export class MusicStylePromptComponent implements OnInit {
             return;
         }
 
+        this.switchToManualMode();
         this.isEnhancingPrompt = true;
         this.promptForm.get('prompt')?.disable();
         try {
@@ -119,6 +130,7 @@ export class MusicStylePromptComponent implements OnInit {
             return;
         }
 
+        this.switchToManualMode();
         this.isTranslatingPrompt = true;
         this.promptForm.get('prompt')?.disable();
         try {
@@ -135,37 +147,6 @@ export class MusicStylePromptComponent implements OnInit {
             this.isTranslatingPrompt = false;
             this.promptForm.get('prompt')?.enable();
         }
-    }
-
-    openStyleChooser(): void {
-        const dialogRef = this.dialog.open(MusicStyleChooserModalComponent, {
-            width: '1100px',
-            maxWidth: '95vw',
-            maxHeight: '90vh',
-            disableClose: false,
-            autoFocus: true,
-            data: { isInstrumental: false }
-        });
-
-        dialogRef.afterClosed().subscribe(result => {
-            if (result && result.stylePrompt) {
-                const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
-
-                // Warn if textarea is filled
-                if (currentPrompt) {
-                    const confirmOverwrite = confirm(this.translate.instant('songGenerator.styleChooserOverwriteWarning'));
-                    if (!confirmOverwrite) {
-                        return;
-                    }
-                }
-
-                // Apply the generated style prompt to the form
-                this.promptForm.patchValue({
-                    prompt: result.stylePrompt
-                });
-                this.notificationService.success(this.translate.instant('songGenerator.success.styleApplied'));
-            }
-        });
     }
 
     private removeQuotes(text: string): string {
@@ -216,6 +197,8 @@ export class MusicStylePromptComponent implements OnInit {
             return;
         }
 
+        this.switchToManualMode();
+
         // Save state for undo
         this.lastSearchReplaceState = currentPrompt;
 
@@ -259,5 +242,43 @@ export class MusicStylePromptComponent implements OnInit {
             console.error('Failed to copy to clipboard:', error);
             this.notificationService.error(this.translate.instant('musicStylePrompt.errors.copyFailed'));
         }
+    }
+
+    onStyleChanged(stylePrompt: string): void {
+        // Auto-mode: Update prompt immediately
+        if (this.currentMode === 'auto') {
+            this.promptForm.patchValue({prompt: stylePrompt});
+        }
+    }
+
+    onApplyStyles(stylePrompt: string): void {
+        // Manual-mode: Apply styles and switch to auto-mode
+        const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
+
+        if (currentPrompt && currentPrompt !== stylePrompt) {
+            const confirmOverwrite = confirm(this.translate.instant('musicStylePrompt.mode.applyConfirm'));
+            if (!confirmOverwrite) {
+                return;
+            }
+        }
+
+        this.promptForm.patchValue({prompt: stylePrompt});
+        this.switchToAutoMode();
+        this.notificationService.success(this.translate.instant('musicStylePrompt.mode.stylesApplied'));
+    }
+
+    switchToManualMode(): void {
+        if (this.currentMode === 'manual') {
+            return;
+        }
+        this.currentMode = 'manual';
+    }
+
+    switchToAutoMode(): void {
+        this.currentMode = 'auto';
+    }
+
+    onCollapseToggled(isCollapsed: boolean): void {
+        this.isStyleChooserCollapsed = isCollapsed;
     }
 }

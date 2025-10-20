@@ -101,7 +101,8 @@ textarea {
     resize: vertical;
 }
 
-button {
+/* Base button defaults - only for buttons without specific classes */
+button:not([class*="tag-"]):not([class*="btn-"]):not([class*="button"]):not(.mat-):not(.mdc-) {
     font-family: $font-family-base;
     font-size: $button-font-size;
     cursor: pointer;

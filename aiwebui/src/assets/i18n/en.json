@@ -679,6 +679,7 @@
     "placeholder": "Describe the music style (e.g., 'energetic pop with synth, 120 BPM')...",
     "charactersCount": "characters",
     "autoSaved": "Changes are automatically saved to song generator",
+    "cleared": "Prompt and style selection cleared",
     "styleChooser": "Style Chooser",
     "enhancePrompt": "Enhance Prompt",
     "translateToEnglish": "Translate to English",
@@ -689,6 +690,21 @@
     "copiedToClipboard": "Copied to clipboard",
     "undoLastChange": "Undo Last Change",
     "undoApplied": "Change reverted successfully",
+    "mode": {
+      "auto": "Auto-Mode",
+      "manual": "Manual-Mode",
+      "switchToAuto": "Switch to Auto-Mode",
+      "manualWarning": "Manual-Mode active: Style changes will overwrite your edited prompt",
+      "applyConfirm": "This will overwrite your current prompt. Continue?",
+      "stylesApplied": "Music styles applied and switched to Auto-Mode"
+    },
+    "styleChooser": {
+      "title": "Style Chooser",
+      "preview": "Preview",
+      "applyButton": "Apply Styles & Switch to Auto-Mode",
+      "collapse": "Collapse",
+      "expand": "Expand"
+    },
     "errors": {
       "promptRequired": "Please enter a music style prompt",
       "copyFailed": "Failed to copy to clipboard"
