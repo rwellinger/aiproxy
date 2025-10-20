@@ -58,6 +58,13 @@ export class LyricCreationComponent implements OnInit {
     // Context for form data storage (song-generator or sketch-creator)
     private context: FormDataContext = 'song-generator';
 
+    // State from navigation (when called from sketch editor)
+    private isFromSketch = false;
+    private isEditMode = false;
+    private currentSketchId: string | null = null;
+    private sketchFormData: any = null;
+    private navigationState: any = null;
+
     private fb = inject(FormBuilder);
     private songService = inject(SongService);
     private notificationService = inject(NotificationService);
@@ -70,6 +77,12 @@ export class LyricCreationComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
 
+    constructor() {
+        // IMPORTANT: getCurrentNavigation() must be called in constructor!
+        const navigation = this.router.getCurrentNavigation();
+        this.navigationState = navigation?.extras?.state;
+    }
+
     get isAnyLyricOperationInProgress(): boolean {
         return this.isGeneratingLyrics || this.isTranslatingLyrics || this.isOptimizingPhrasing;
     }
@@ -79,33 +92,84 @@ export class LyricCreationComponent implements OnInit {
     }
 
     get isFromSketchCreator(): boolean {
-        return this.context === 'sketch-creator';
+        return this.isFromSketch;
     }
 
-    navigateBackToSketchCreator(): void {
-        this.router.navigate(['/song-sketch-creator']);
+    applyChanges(): void {
+        // Update lyrics in form data and navigate back
+        const updatedFormData = {
+            ...this.sketchFormData,
+            lyrics: this.lyricForm.get('lyrics')?.value || ''
+        };
+
+        this.navigateBackToSketchCreator(updatedFormData);
+
+        this.notificationService.success(
+            this.translate.instant('lyricCreation.changesApplied')
+        );
+    }
+
+    cancelChanges(): void {
+        // Discard changes and navigate back with original data
+        this.navigateBackToSketchCreator(this.sketchFormData);
+
+        this.notificationService.info(
+            this.translate.instant('lyricCreation.changesCancelled')
+        );
+    }
+
+    private navigateBackToSketchCreator(formData: any): void {
+        // Navigate back with form data
+        if (this.isEditMode && this.currentSketchId) {
+            this.router.navigate(['/song-sketch-creator'], {
+                state: {
+                    editMode: true,
+                    sketchId: this.currentSketchId,
+                    formData: formData
+                }
+            });
+        } else {
+            this.router.navigate(['/song-sketch-creator'], {
+                state: {
+                    formData: formData
+                }
+            });
+        }
     }
 
     ngOnInit() {
-        // Read context from URL query params (default: 'song-generator')
-        this.route.queryParams.subscribe(params => {
-            this.context = params['context'] === 'sketch' ? 'sketch-creator' : 'song-generator';
-        });
+        // Check if coming from sketch creator via router state
+        if (this.navigationState?.['context'] === 'sketch') {
+            this.isFromSketch = true;
+            this.isEditMode = this.navigationState['editMode'] || false;
+            this.currentSketchId = this.navigationState['sketchId'] || null;
+            this.sketchFormData = this.navigationState['formData'] || {};
+            this.context = 'sketch-creator';
+        } else {
+            // Song generator mode
+            this.context = 'song-generator';
+        }
 
         this.lyricForm = this.fb.group({
             lyrics: ['']
         });
 
-        // Load saved lyrics from context-aware storage
-        const savedData = this.songService.loadFormData(this.context);
-        if (savedData.lyrics) {
-            this.lyricForm.patchValue({lyrics: savedData.lyrics});
-        }
+        // Load lyrics based on context
+        if (this.isFromSketch && this.sketchFormData?.lyrics) {
+            // From sketch: load lyrics from router state
+            this.lyricForm.patchValue({lyrics: this.sketchFormData.lyrics});
+        } else if (!this.isFromSketch) {
+            // Song generator mode: load from localStorage
+            const savedData = this.songService.loadFormData(this.context);
+            if (savedData.lyrics) {
+                this.lyricForm.patchValue({lyrics: savedData.lyrics});
+            }
 
-        // Auto-save lyrics on changes
-        this.lyricForm.valueChanges.subscribe(value => {
-            this.saveLyrics(value.lyrics);
-        });
+            // Auto-save lyrics on changes (only for song generator)
+            this.lyricForm.valueChanges.subscribe(value => {
+                this.saveLyrics(value.lyrics);
+            });
+        }
 
         // Load section detection rules from API
         this.loadSectionDetectionRules();

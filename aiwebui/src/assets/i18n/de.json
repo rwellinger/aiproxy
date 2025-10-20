@@ -298,6 +298,8 @@
     "lyricArchitecture": "Text-Struktur",
     "resetButton": "Löschen",
     "autoSaved": "Automatisch zum Song Generator gespeichert",
+    "changesApplied": "Änderungen übernommen",
+    "changesCancelled": "Änderungen verworfen",
     "edit": "Bearbeiten",
     "tools": "Werkzeuge",
     "searchReplace": "Suchen & Ersetzen",
@@ -504,7 +506,6 @@
     "brandName": "thWelly's AI Toolbox",
     "createImage": "Erstellen",
     "createSong": "Song Erstellen",
-    "external": "Extern",
     "gallery": "Galerie",
     "library": "Song Bibliothek",
     "login": "Anmelden",
@@ -520,10 +521,7 @@
     "profile": "Profil",
     "promptTemplates": "Prompt Vorlagen",
     "settings": "Einstellungen",
-    "sketchLibrary": "Skizzen-Bibliothek",
-    "custom1": "AI Nutzung",
-    "custom2": "Claude Code",
-    "custom3": "Claude Code API"
+    "sketchLibrary": "Skizzen-Bibliothek"
   },
   "songDetailPanel": {
     "choices": {
@@ -692,6 +690,8 @@
     "charactersCount": "Zeichen",
     "autoSaved": "Änderungen werden automatisch im Song Generator gespeichert",
     "cleared": "Prompt und Stil-Auswahl gelöscht",
+    "changesApplied": "Änderungen übernommen",
+    "changesCancelled": "Änderungen verworfen",
     "styleChooser": "Stil-Auswahl",
     "enhancePrompt": "Prompt verbessern",
     "translateToEnglish": "Ins Englische übersetzen",
@@ -888,6 +888,8 @@
     "language": "Sprache",
     "promptsPerPage": "Prompts pro Seite",
     "promptsPerPageHint": "5-100 Prompts pro Seite",
+    "sketchesPerPage": "Sketches pro Seite",
+    "sketchesPerPageHint": "5-100 Sketches pro Seite",
     "languageHint": "Wähle deine bevorzugte Sprache",
     "lastLogin": "Letzter Login:",
     "lastName": "Nachname",
@@ -900,6 +902,7 @@
       "imageListLimitUpdated": "Bild-Listen-Limit aktualisiert",
       "languageUpdated": "Sprache aktualisiert",
       "promptListLimitUpdated": "Prompt-Listen-Limit aktualisiert",
+      "sketchListLimitUpdated": "Sketch-Listen-Limit aktualisiert",
       "settingsReset": "Einstellungen auf Standard zurückgesetzt",
       "songListLimitUpdated": "Song-Listen-Limit aktualisiert"
     },
@@ -993,6 +996,7 @@
   "songSketch": {
     "creator": {
       "title": "Song-Skizze erstellen",
+      "titleEdit": "Song-Skizze bearbeiten",
       "subtitle": "Entwickle deine Song-Idee vor der Generierung",
       "fields": {
         "title": "Titel",
@@ -1003,7 +1007,9 @@
         "lyricsCharCounter": "{{count}}/{{max}} Zeichen",
         "prompt": "Musikstil-Prompt",
         "promptPlaceholder": "Beschreibe den Musikstil...",
-        "promptCharCounter": "{{count}}/{{max}} Zeichen"
+        "promptCharCounter": "{{count}}/{{max}} Zeichen",
+        "workflow": "Workflow-Status",
+        "workflowHint": "Organisiere deine Skizzen nach Workflow-Status"
       },
       "tags": {
         "title": "Tags",
@@ -1014,6 +1020,8 @@
       },
       "buttons": {
         "save": "Skizze erstellen",
+        "update": "Skizze aktualisieren",
+        "cancel": "Abbrechen",
         "reset": "Zurücksetzen",
         "editLyrics": "Im Lyric Creator bearbeiten",
         "editMusicStyle": "Musikstil bearbeiten",
@@ -1023,6 +1031,8 @@
       },
       "messages": {
         "saved": "Skizze erfolgreich gespeichert",
+        "updated": "Skizze erfolgreich aktualisiert",
+        "loadError": "Fehler beim Laden der Skizze",
         "error": "Fehler beim Speichern der Skizze",
         "resetSuccess": "Formular erfolgreich zurückgesetzt",
         "validationError": "Bitte fülle alle erforderlichen Felder aus",
@@ -1079,8 +1089,7 @@
         "deleted": "Skizze erfolgreich gelöscht",
         "deleteError": "Fehler beim Löschen der Skizze",
         "archived": "Skizze erfolgreich archiviert",
-        "archiveError": "Fehler beim Archivieren der Skizze",
-        "editNotImplemented": "Bearbeitungsfunktion noch nicht implementiert"
+        "archiveError": "Fehler beim Archivieren der Skizze"
       }
     },
     "workflow": {

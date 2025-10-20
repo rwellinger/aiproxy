@@ -2,18 +2,19 @@
 @import '../../../scss/mixins';
 
 .sketch-creator-container {
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   padding: $spacing-md;
   background: $background-white;
   display: flex;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .sketch-creator-card {
-  max-width: 900px;
+  max-width: 1100px;
   width: 100%;
-  height: calc(100vh - 2rem);
+  height: 100%;
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   display: flex;
@@ -66,7 +67,7 @@
 }
 
 .form-group {
-  margin-bottom: $spacing-lg;
+  margin-bottom: $spacing-md;
 
   label {
     display: block;
@@ -78,6 +79,7 @@
     .required {
       color: $danger-color;
       margin-left: 4px;
+      font-weight: 600;
     }
   }
 
@@ -112,6 +114,12 @@
     resize: vertical;
     min-height: 100px;
     font-family: 'Courier New', monospace;
+  }
+
+  .prompt-textarea {
+    min-height: 50px;
+    flex: 1 1 auto;
+    max-height: 150px;
   }
 
   .prompt-input-group {
@@ -345,6 +353,23 @@
   }
 }
 
+.cancel-button {
+  @include button-secondary('base');
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-weight: $font-weight-medium !important;
+
+  i {
+    font-size: $font-base;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
 .submit-button {
   @include button-primary('base');
   display: inline-flex;
@@ -390,13 +415,28 @@
       align-items: center;
       gap: $spacing-xs;
       margin: 0 0 $spacing-sm 0;
+      padding: $spacing-xs;
       font-size: $font-sm;
       font-weight: $font-weight-semibold;
       color: $text-primary;
+      cursor: pointer;
+      border-radius: $border-radius-sm;
+      transition: background-color 0.2s ease;
+      user-select: none;
 
       i {
         font-size: $font-sm;
         color: $primary-color;
+      }
+
+      .category-chevron {
+        margin-left: auto;
+        transition: transform 0.2s ease;
+        font-size: 0.875rem;
+      }
+
+      &:hover {
+        background-color: rgba($primary-color, 0.05);
       }
     }
 
@@ -406,7 +446,20 @@
       gap: 4px;
       align-items: flex-start;
       line-height: 1;
+      animation: slideDown 0.2s ease-out;
+      overflow: hidden;
     }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
   }
 }
 
@@ -430,6 +483,7 @@
   line-height: 1;
   box-shadow: none;
   min-height: 22px;
+  text-transform: capitalize; // Display with first letter capitalized
 
   &:hover:not(.selected):not(:disabled) {
     border-color: rgba($primary-color, 0.5);

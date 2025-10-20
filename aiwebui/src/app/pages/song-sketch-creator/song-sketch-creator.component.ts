@@ -1,11 +1,11 @@
-import { Component, OnInit, ViewEncapsulation, inject, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation, inject, HostListener, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject, filter, takeUntil } from 'rxjs';
 
 import { SongService } from '../../services/business/song.service';
 import { SketchService } from '../../services/business/sketch.service';
@@ -28,16 +28,25 @@ import { MUSIC_STYLE_CATEGORIES } from '../../models/music-style-chooser.model';
   styleUrl: './song-sketch-creator.component.scss',
   encapsulation: ViewEncapsulation.None
 })
-export class SongSketchCreatorComponent implements OnInit {
+export class SongSketchCreatorComponent implements OnInit, OnDestroy {
   sketchForm!: FormGroup;
   isSaving = false;
   isGeneratingTitle = false;
   showTitleDropdown = false;
   selectedTags: string[] = [];
 
+  // Edit mode state
+  isEditMode = false;
+  currentSketchId: string | null = null;
+  private navigationState: any = null;
+
   // Tag categories from shared constants
   tagCategories = MUSIC_STYLE_CATEGORIES;
 
+  // Expanded tag category (only one at a time)
+  expandedCategory: 'style' | 'theme' | 'useCase' | null = null;
+
+  private destroy$ = new Subject<void>();
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private songService = inject(SongService);
@@ -46,30 +55,121 @@ export class SongSketchCreatorComponent implements OnInit {
   private translate = inject(TranslateService);
   private chatService = inject(ChatService);
   private progressService = inject(ProgressService);
+  private cdr = inject(ChangeDetectorRef);
 
-  ngOnInit(): void {
-    // Initialize form
+  constructor() {
+    // IMPORTANT: getCurrentNavigation() must be called in constructor!
+    // It returns null if called in ngOnInit
+    const navigation = this.router.getCurrentNavigation();
+    this.navigationState = navigation?.extras?.state;
+  }
+
+  async ngOnInit(): Promise<void> {
+    // Initialize form (workflow will be added later)
     this.sketchForm = this.fb.group({
-      title: ['', [Validators.maxLength(500)]],
-      lyrics: ['', [Validators.maxLength(10000)]],
-      prompt: ['', [Validators.required, Validators.maxLength(1024)]]
+      title: ['', [Validators.required, Validators.maxLength(500)]],
+      lyrics: ['', [Validators.required, Validators.maxLength(10000)]],
+      prompt: ['', [Validators.required, Validators.maxLength(1024)]],
+      workflow: ['draft']
     });
 
-    // Load saved form data from sketch-creator context
-    const savedData = this.songService.loadFormData('sketch-creator');
-    if (savedData && Object.keys(savedData).length > 0) {
-      this.sketchForm.patchValue(savedData);
+    // Handle initial navigation state
+    await this.handleNavigationState(this.navigationState);
 
-      // Load tags separately (convert string to array)
-      if (savedData['tags']) {
-        this.selectedTags = this.parseTagsFromString(savedData['tags'] as string);
+    // Listen to router events for subsequent navigations (when component is reused)
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe(async () => {
+      // Use history.state to get navigation state after navigation completed
+      const state = history.state;
+      if (state && (state.formData || state.editMode)) {
+        await this.handleNavigationState(state);
       }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private async handleNavigationState(state: any): Promise<void> {
+    if (!state) {
+      return;
     }
 
-    // Auto-save form data on changes
-    this.sketchForm.valueChanges.subscribe(() => {
-      this.saveFormDataWithTags();
+    if (state['editMode'] && state['sketchId']) {
+      // EDIT MODE: Load sketch for editing
+      this.isEditMode = true;
+      this.currentSketchId = state['sketchId'];
+
+      // Check if we have updated formData (coming back from child editor)
+      if (state['formData']) {
+        this.updateFormWithData(state['formData']);
+      } else {
+        await this.loadSketchForEdit(state['sketchId']);
+      }
+    } else if (state['formData']) {
+      // CREATE MODE: Restore form data from navigation state (coming back from child editors)
+      this.isEditMode = false;
+      this.currentSketchId = null;
+      this.updateFormWithData(state['formData']);
+    }
+  }
+
+  private updateFormWithData(formData: any): void {
+    this.sketchForm.patchValue({
+      title: formData.title || '',
+      lyrics: formData.lyrics || '',
+      prompt: formData.prompt || '',
+      workflow: formData.workflow || 'draft'
     });
+
+    // Load tags separately
+    if (formData.tags) {
+      this.selectedTags = this.parseTagsFromString(formData.tags);
+    } else {
+      this.selectedTags = [];
+    }
+
+    // Force change detection
+    this.cdr.detectChanges();
+  }
+
+  async loadSketchForEdit(sketchId: string): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.sketchService.getSketchById(sketchId)
+      );
+
+      const sketch = response.data;
+
+      // Populate form with sketch data
+      this.sketchForm.patchValue({
+        title: sketch.title || '',
+        lyrics: sketch.lyrics || '',
+        prompt: sketch.prompt,
+        workflow: sketch.workflow || 'draft'
+      });
+
+      // Load tags - parse and select them
+      if (sketch.tags) {
+        const parsedTags = this.parseTagsFromString(sketch.tags);
+        this.selectedTags = parsedTags;
+
+        // Force change detection to update UI
+        this.cdr.detectChanges();
+      } else {
+        this.selectedTags = [];
+      }
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('songSketch.creator.messages.loadError') + ': ' + error.message
+      );
+      // Navigate back to library on error
+      this.router.navigate(['/song-sketch-library']);
+    }
   }
 
   async saveSketch(): Promise<void> {
@@ -89,27 +189,46 @@ export class SongSketchCreatorComponent implements OnInit {
         ? this.selectedTags.join(', ')
         : undefined;
 
-      await firstValueFrom(
-        this.sketchService.createSketch({
-          title: formValue.title?.trim() || undefined,
-          lyrics: formValue.lyrics?.trim() || undefined,
-          prompt: formValue.prompt.trim(),
-          tags: tagsString,
-          workflow: 'draft'
-        })
-      );
+      const sketchData = {
+        title: formValue.title?.trim() || undefined,
+        lyrics: formValue.lyrics?.trim() || undefined,
+        prompt: formValue.prompt.trim(),
+        tags: tagsString,
+        workflow: formValue.workflow || 'draft'
+      };
 
-      this.notificationService.success(
-        this.translate.instant('songSketch.creator.messages.saved')
-      );
+      let savedSketchId: string;
 
-      // Reset form and clear saved data
+      if (this.isEditMode && this.currentSketchId) {
+        // UPDATE existing sketch
+        const response = await firstValueFrom(
+          this.sketchService.updateSketch(this.currentSketchId, sketchData)
+        );
+        savedSketchId = response.data.id;
+
+        this.notificationService.success(
+          this.translate.instant('songSketch.creator.messages.updated')
+        );
+      } else {
+        // CREATE new sketch
+        const response = await firstValueFrom(
+          this.sketchService.createSketch(sketchData)
+        );
+        savedSketchId = response.data.id;
+
+        this.notificationService.success(
+          this.translate.instant('songSketch.creator.messages.saved')
+        );
+      }
+
+      // Reset form and tags
       this.sketchForm.reset();
       this.selectedTags = [];
-      this.songService.clearFormData('sketch-creator');
 
-      // Navigate to sketch library after successful save
-      this.router.navigate(['/song-sketch-library']);
+      // Navigate to sketch library with saved sketch ID
+      this.router.navigate(['/song-sketch-library'], {
+        state: { selectedSketchId: savedSketchId }
+      });
     } catch (error: any) {
       const errorMessage = error?.error?.detail || error?.message ||
         this.translate.instant('songSketch.creator.messages.error');
@@ -122,29 +241,61 @@ export class SongSketchCreatorComponent implements OnInit {
   resetForm(): void {
     this.sketchForm.reset();
     this.selectedTags = [];
-    this.songService.clearFormData('sketch-creator');
     this.notificationService.success(
       this.translate.instant('songSketch.creator.messages.resetSuccess')
     );
   }
 
-  navigateToLyricCreator(): void {
-    // Save current form state first (including tags)
-    this.saveFormDataWithTags();
+  cancelEdit(): void {
+    // Navigate back to library with current sketch ID (if in edit mode)
+    if (this.isEditMode && this.currentSketchId) {
+      this.router.navigate(['/song-sketch-library'], {
+        state: { selectedSketchId: this.currentSketchId }
+      });
+    } else {
+      this.router.navigate(['/song-sketch-library']);
+    }
+  }
 
-    // Navigate with context parameter for sketch creator
+  navigateToLyricCreator(): void {
+    // Prepare current form data
+    const formData = {
+      title: this.sketchForm.get('title')?.value || '',
+      lyrics: this.sketchForm.get('lyrics')?.value || '',
+      prompt: this.sketchForm.get('prompt')?.value || '',
+      tags: this.selectedTags.join(', '),
+      workflow: this.sketchForm.get('workflow')?.value || 'draft'
+    };
+
+    // Navigate with form data in state
     this.router.navigate(['/lyriccreation'], {
-      queryParams: { context: 'sketch' }
+      state: {
+        context: 'sketch',
+        editMode: this.isEditMode,
+        sketchId: this.currentSketchId,
+        formData: formData
+      }
     });
   }
 
   navigateToMusicStylePrompt(): void {
-    // Save current form state first (including tags)
-    this.saveFormDataWithTags();
+    // Prepare current form data
+    const formData = {
+      title: this.sketchForm.get('title')?.value || '',
+      lyrics: this.sketchForm.get('lyrics')?.value || '',
+      prompt: this.sketchForm.get('prompt')?.value || '',
+      tags: this.selectedTags.join(', '),
+      workflow: this.sketchForm.get('workflow')?.value || 'draft'
+    };
 
-    // Navigate with context parameter for sketch creator
+    // Navigate with form data in state
     this.router.navigate(['/music-style-prompt'], {
-      queryParams: { context: 'sketch' }
+      state: {
+        context: 'sketch',
+        editMode: this.isEditMode,
+        sketchId: this.currentSketchId,
+        formData: formData
+      }
     });
   }
 
@@ -220,18 +371,26 @@ export class SongSketchCreatorComponent implements OnInit {
 
   // Tag management methods
   toggleTag(tag: string): void {
-    const index = this.selectedTags.indexOf(tag);
+    // Find tag index case-insensitive
+    const index = this.selectedTags.findIndex(selectedTag =>
+      selectedTag.toLowerCase() === tag.toLowerCase()
+    );
+
     if (index > -1) {
+      // Tag exists, remove it
       this.selectedTags.splice(index, 1);
     } else {
+      // Tag doesn't exist, add it (use the button's case)
       this.selectedTags.push(tag);
     }
-    // Auto-save when tags change
-    this.saveFormDataWithTags();
   }
 
   isTagSelected(tag: string): boolean {
-    return this.selectedTags.includes(tag);
+    // Case-insensitive comparison to handle lowercase model vs mixed-case saved tags
+    const isSelected = this.selectedTags.some(selectedTag =>
+      selectedTag.toLowerCase() === tag.toLowerCase()
+    );
+    return isSelected;
   }
 
   private parseTagsFromString(tagsString: string): string[] {
@@ -243,15 +402,18 @@ export class SongSketchCreatorComponent implements OnInit {
       .filter(tag => tag.length > 0);
   }
 
-  private saveFormDataWithTags(): void {
-    const formValue = this.sketchForm.value;
-    const tagsString = this.selectedTags.length > 0
-      ? this.selectedTags.join(', ')
-      : '';
+  // Toggle tag category expansion (only one at a time)
+  toggleCategory(category: 'style' | 'theme' | 'useCase'): void {
+    if (this.expandedCategory === category) {
+      // Close if already open
+      this.expandedCategory = null;
+    } else {
+      // Open this category (closes others)
+      this.expandedCategory = category;
+    }
+  }
 
-    this.songService.saveFormData({
-      ...formValue,
-      tags: tagsString
-    }, 'sketch-creator');
+  isCategoryExpanded(category: 'style' | 'theme' | 'useCase'): boolean {
+    return this.expandedCategory === category;
   }
 }

@@ -71,24 +71,43 @@
     gap: $spacing-sm;
   }
 
-  .back-to-sketch-button {
-    @include button-secondary('base');
-    display: inline-flex;
-    align-items: center;
+  .sketch-navigation-buttons {
+    display: flex;
     gap: $spacing-xs;
-    font-weight: $font-weight-medium !important;
+    align-items: center;
 
-    i {
-      font-size: $font-base;
+    .cancel-button {
+      @include button-secondary('base');
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-xs;
+      font-weight: $font-weight-medium !important;
+
+      i {
+        font-size: $font-base;
+      }
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
     }
 
-    span {
-      display: inline-block;
-    }
+    .apply-button {
+      @include button-primary('base');
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-xs;
+      font-weight: $font-weight-medium !important;
 
-    &:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      i {
+        font-size: $font-base;
+      }
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
     }
   }
 }
@@ -202,7 +221,7 @@
   align-items: center;
   gap: $spacing-15;
   flex-shrink: 0;
-  padding-top: $spacing-10;
+  margin-top: 2rem;
   overflow: visible;
 }
 

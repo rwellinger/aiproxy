@@ -4,6 +4,7 @@ export interface UserSettings {
   songListLimit: number;
   imageListLimit: number;
   promptListLimit: number;
+  sketchListLimit: number;
   language: Language;
 }
 
@@ -11,5 +12,6 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   songListLimit: 10,
   imageListLimit: 10,
   promptListLimit: 8,
+  sketchListLimit: 8,
   language: 'en'
 };

@@ -75,6 +75,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       songListLimit: [10, [Validators.required, Validators.min(5), Validators.max(100)]],
       imageListLimit: [10, [Validators.required, Validators.min(5), Validators.max(100)]],
       promptListLimit: [10, [Validators.required, Validators.min(5), Validators.max(100)]],
+      sketchListLimit: [8, [Validators.required, Validators.min(5), Validators.max(100)]],
       language: ['en', [Validators.required]]
     });
   }
@@ -331,6 +332,17 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     if (value && value >= 5 && value <= 100) {
       this.settingsService.updatePromptListLimit(value);
       this.notificationService.success(this.translate.instant('userProfile.notifications.promptListLimitUpdated'));
+    }
+  }
+
+  /**
+   * Update sketch list limit setting
+   */
+  public updateSketchListLimit(): void {
+    const value = this.settingsForm.get('sketchListLimit')?.value;
+    if (value && value >= 5 && value <= 100) {
+      this.settingsService.updateSketchListLimit(value);
+      this.notificationService.success(this.translate.instant('userProfile.notifications.sketchListLimitUpdated'));
     }
   }
 

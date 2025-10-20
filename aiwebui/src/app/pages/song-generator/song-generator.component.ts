@@ -587,6 +587,14 @@ export class SongGeneratorComponent implements OnInit {
     clearSketch(): void {
         this.selectedSketch = null;
         this.selectedSketchId = null;
+
+        // Clear form fields
+        this.songForm.patchValue({
+            title: '',
+            lyrics: '',
+            prompt: ''
+        });
+
         this.notificationService.success(
             this.translate.instant('songGenerator.success.sketchCleared')
         );

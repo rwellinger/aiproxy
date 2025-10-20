@@ -361,6 +361,7 @@
     font-size: $font-sm;
     line-height: 1.6;
     color: $text-primary;
+    min-height: 120px;
   }
 
   .lyrics-display {
@@ -368,7 +369,7 @@
     background-color: $background-light;
     border-radius: 8px;
     border: 1px solid $border-light;
-    max-height: 400px;
+    max-height: 600px;
     overflow-y: auto;
 
     pre {

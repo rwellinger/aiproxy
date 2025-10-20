@@ -9,6 +9,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { SketchService, Sketch } from '../../services/business/sketch.service';
 import { NotificationService } from '../../services/ui/notification.service';
+import { UserSettingsService } from '../../services/user-settings.service';
 
 @Component({
   selector: 'app-song-sketch-library',
@@ -30,7 +31,7 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
   selectedSketch: Sketch | null = null;
   pagination = {
     total: 0,
-    limit: 20,
+    limit: 8,
     offset: 0,
     has_more: false
   };
@@ -46,6 +47,9 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
   showDeleteConfirm = false;
   deleteSketchId: string | null = null;
 
+  // Navigation state (must be captured in constructor)
+  private navigationState: any = null;
+
   // RxJS subjects
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -54,8 +58,17 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
   private notificationService = inject(NotificationService);
   private translate = inject(TranslateService);
   private router = inject(Router);
+  private settingsService = inject(UserSettingsService);
 
   constructor() {
+    // IMPORTANT: getCurrentNavigation() must be called in constructor!
+    const navigation = this.router.getCurrentNavigation();
+    this.navigationState = navigation?.extras?.state;
+
+    // Load user settings for page size
+    const settings = this.settingsService.getCurrentSettings();
+    this.pagination.limit = settings.sketchListLimit;
+
     // Setup search debouncing
     this.searchSubject.pipe(
       debounceTime(300),
@@ -68,7 +81,18 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadSketches();
+    // Check if returning from save/edit with a selected sketch ID
+    const selectedSketchId = this.navigationState?.['selectedSketchId'];
+
+    this.loadSketches().then(() => {
+      // Re-select the sketch after save if ID was provided
+      if (selectedSketchId) {
+        const sketch = this.sketches.find(s => s.id === selectedSketchId);
+        if (sketch) {
+          this.selectSketch(sketch);
+        }
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -136,11 +160,15 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
   }
 
   editSketch(): void {
-    // Navigate to sketch creator and load the sketch data
-    // For now, we'll just show a message
-    this.notificationService.error(
-      this.translate.instant('songSketch.library.messages.editNotImplemented')
-    );
+    if (!this.selectedSketch) return;
+
+    // Navigate to sketch creator with Router State (no ID in URL)
+    this.router.navigate(['/song-sketch-creator'], {
+      state: {
+        editMode: true,
+        sketchId: this.selectedSketch.id
+      }
+    });
   }
 
   confirmDeleteSketch(sketchId: string): void {

@@ -8,15 +8,26 @@
                         {{ 'lyricCreation.title' | translate }}
                     </h2>
                 </div>
-                <button
-                    *ngIf="isFromSketchCreator"
-                    type="button"
-                    (click)="navigateBackToSketchCreator()"
-                    class="back-to-sketch-button"
-                    [title]="'lyricCreation.backToSketch' | translate">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>{{ 'lyricCreation.backToSketch' | translate }}</span>
-                </button>
+                <div *ngIf="isFromSketchCreator && !sectionEditorMode" class="sketch-navigation-buttons">
+                    <button
+                        type="button"
+                        (click)="cancelChanges()"
+                        class="cancel-button"
+                        [disabled]="isAnyLyricOperationInProgress"
+                        [title]="'common.cancel' | translate">
+                        <i class="fas fa-times"></i>
+                        <span>{{ 'common.cancel' | translate }}</span>
+                    </button>
+                    <button
+                        type="button"
+                        (click)="applyChanges()"
+                        class="apply-button"
+                        [disabled]="isAnyLyricOperationInProgress"
+                        [title]="'common.apply' | translate">
+                        <i class="fas fa-check"></i>
+                        <span>{{ 'common.apply' | translate }}</span>
+                    </button>
+                </div>
             </div>
 
             <form [formGroup]="lyricForm">
@@ -171,7 +182,7 @@
                     </div>
                 </div>
 
-                <div class="info-notice">
+                <div class="info-notice" *ngIf="!isFromSketchCreator">
                     <i class="fas fa-info-circle"></i>
                     {{ 'lyricCreation.autoSaved' | translate }}
                 </div>
