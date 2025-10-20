@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_serializer, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
 from schemas.common_schemas import BaseResponse, PaginationResponse
 
@@ -11,13 +11,8 @@ from schemas.common_schemas import BaseResponse, PaginationResponse
 class SketchCreateRequest(BaseModel):
     """Schema for sketch creation requests"""
 
-    title: str | None = Field(None, max_length=500, description="Sketch title")
-    lyrics: str | None = Field(None, max_length=10000, description="Song lyrics (optional)")
-    prompt: str = Field(..., min_length=1, max_length=1024, description="Music style prompt")
-    tags: str | None = Field(None, max_length=1000, description="Comma-separated tags")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "title": "Summer Vibes Idea",
                 "lyrics": "[Verse 1]\nSummer days are here...",
@@ -25,10 +20,18 @@ class SketchCreateRequest(BaseModel):
                 "tags": "pop, summer, upbeat",
             }
         }
+    )
+
+    title: str | None = Field(None, max_length=500, description="Sketch title")
+    lyrics: str | None = Field(None, max_length=10000, description="Song lyrics (optional)")
+    prompt: str = Field(..., min_length=1, max_length=1024, description="Music style prompt")
+    tags: str | None = Field(None, max_length=1000, description="Comma-separated tags")
 
 
 class SketchResponse(BaseModel):
     """Schema for single sketch response"""
+
+    model_config = ConfigDict(from_attributes=True)
 
     id: UUID = Field(..., description="Unique sketch ID")
     title: str | None = Field(None, description="Sketch title")
@@ -51,9 +54,6 @@ class SketchResponse(BaseModel):
         if v not in ["draft", "used", "archived"]:
             raise ValueError("workflow must be one of: draft, used, archived")
         return v
-
-    class Config:
-        from_attributes = True
 
 
 class SketchUpdateRequest(BaseModel):
