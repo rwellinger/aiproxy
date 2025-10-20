@@ -33,13 +33,17 @@ class SongCreationController:
             logger.info("Song generation requested with sketch_id", sketch_id=sketch_id)
 
             # Load and validate sketch
-            sketch = sketch_service.get_sketch_by_id(sketch_id)
-            if not sketch:
-                return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
+            db = next(get_db())
+            try:
+                sketch = sketch_service.get_sketch_by_id(db, sketch_id)
+                if not sketch:
+                    return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
 
-            # Validate sketch workflow state (must be draft or used)
-            if sketch.workflow not in ["draft", "used"]:
-                return {"error": f"Sketch is archived and cannot be used (workflow: {sketch.workflow})"}, 400
+                # Validate sketch workflow state (must be draft or used)
+                if sketch.workflow not in ["draft", "used"]:
+                    return {"error": f"Sketch is archived and cannot be used (workflow: {sketch.workflow})"}, 400
+            finally:
+                db.close()
 
             logger.info("Using sketch for song generation", sketch_id=sketch_id, sketch_workflow=sketch.workflow)
 
@@ -72,13 +76,17 @@ class SongCreationController:
 
         # Mark sketch as "used" if this is the first time it's being used
         if sketch_id:
-            sketch = sketch_service.get_sketch_by_id(sketch_id)
-            if sketch and sketch.workflow == "draft":
-                updated_sketch = sketch_service.mark_sketch_as_used(sketch_id)
-                if updated_sketch:
-                    logger.info("Marked sketch as used", sketch_id=sketch_id)
-                else:
-                    logger.warning("Failed to mark sketch as used", sketch_id=sketch_id)
+            db = next(get_db())
+            try:
+                sketch = sketch_service.get_sketch_by_id(db, sketch_id)
+                if sketch and sketch.workflow == "draft":
+                    updated_sketch = sketch_service.mark_sketch_as_used(db, sketch_id)
+                    if updated_sketch:
+                        logger.info("Marked sketch as used", sketch_id=sketch_id)
+                    else:
+                        logger.warning("Failed to mark sketch as used", sketch_id=sketch_id)
+            finally:
+                db.close()
 
         return {
             "task_id": task.id,
@@ -102,15 +110,21 @@ class SongCreationController:
             logger.info("Instrumental generation requested with sketch_id", sketch_id=sketch_id)
 
             # Load and validate sketch
-            sketch = sketch_service.get_sketch_by_id(sketch_id)
-            if not sketch:
-                return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
+            db = next(get_db())
+            try:
+                sketch = sketch_service.get_sketch_by_id(db, sketch_id)
+                if not sketch:
+                    return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
 
-            # Validate sketch workflow state (must be draft or used)
-            if sketch.workflow not in ["draft", "used"]:
-                return {"error": f"Sketch is archived and cannot be used (workflow: {sketch.workflow})"}, 400
+                # Validate sketch workflow state (must be draft or used)
+                if sketch.workflow not in ["draft", "used"]:
+                    return {"error": f"Sketch is archived and cannot be used (workflow: {sketch.workflow})"}, 400
+            finally:
+                db.close()
 
-            logger.info("Using sketch for instrumental generation", sketch_id=sketch_id, sketch_workflow=sketch.workflow)
+            logger.info(
+                "Using sketch for instrumental generation", sketch_id=sketch_id, sketch_workflow=sketch.workflow
+            )
 
         logger.info(
             "Starting instrumental generation",
@@ -137,17 +151,23 @@ class SongCreationController:
             # Continue anyway - fallback to Redis-only mode
             return {"task_id": task.id, "status_url": f"{host_url}api/v1/instrumental/task/status/{task.id}"}, 202
         else:
-            logger.info("Created instrumental song record in database", song_id=song.id, task_id=task.id, sketch_id=sketch_id)
+            logger.info(
+                "Created instrumental song record in database", song_id=song.id, task_id=task.id, sketch_id=sketch_id
+            )
 
         # Mark sketch as "used" if this is the first time it's being used
         if sketch_id:
-            sketch = sketch_service.get_sketch_by_id(sketch_id)
-            if sketch and sketch.workflow == "draft":
-                updated_sketch = sketch_service.mark_sketch_as_used(sketch_id)
-                if updated_sketch:
-                    logger.info("Marked sketch as used", sketch_id=sketch_id)
-                else:
-                    logger.warning("Failed to mark sketch as used", sketch_id=sketch_id)
+            db = next(get_db())
+            try:
+                sketch = sketch_service.get_sketch_by_id(db, sketch_id)
+                if sketch and sketch.workflow == "draft":
+                    updated_sketch = sketch_service.mark_sketch_as_used(db, sketch_id)
+                    if updated_sketch:
+                        logger.info("Marked sketch as used", sketch_id=sketch_id)
+                    else:
+                        logger.warning("Failed to mark sketch as used", sketch_id=sketch_id)
+            finally:
+                db.close()
 
         return {
             "task_id": task.id,

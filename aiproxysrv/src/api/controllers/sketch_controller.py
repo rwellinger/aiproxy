@@ -3,10 +3,8 @@
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from db.models import SongSketch
 from db.sketch_service import sketch_service
 from schemas.sketch_schemas import (
     SketchCreateRequest,
@@ -34,6 +32,7 @@ class SketchController:
         """
         try:
             sketch = sketch_service.create_sketch(
+                db=db,
                 title=sketch_data.title,
                 lyrics=sketch_data.lyrics,
                 prompt=sketch_data.prompt,
@@ -77,6 +76,7 @@ class SketchController:
         """
         try:
             result = sketch_service.get_sketches_paginated(
+                db=db,
                 limit=limit,
                 offset=offset,
                 search=search,
@@ -123,7 +123,7 @@ class SketchController:
             except ValueError:
                 return {"error": "Invalid sketch ID format"}, 400
 
-            sketch = sketch_service.get_sketch_by_id(sketch_id)
+            sketch = sketch_service.get_sketch_by_id(db, sketch_id)
 
             if not sketch:
                 return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
@@ -161,7 +161,7 @@ class SketchController:
             if not update_dict:
                 return {"error": "No fields to update"}, 400
 
-            sketch = sketch_service.update_sketch(sketch_id=sketch_id, **update_dict)
+            sketch = sketch_service.update_sketch(db=db, sketch_id=sketch_id, **update_dict)
 
             if not sketch:
                 return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
@@ -192,7 +192,7 @@ class SketchController:
             except ValueError:
                 return {"error": "Invalid sketch ID format"}, 400
 
-            success = sketch_service.delete_sketch(sketch_id)
+            success = sketch_service.delete_sketch(db, sketch_id)
 
             if not success:
                 return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
