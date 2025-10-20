@@ -28,6 +28,37 @@ class RuleType(str, Enum):
     SECTION = "section"
 
 
+class SongSketch(Base):
+    """Model for storing song concepts/drafts before generation"""
+
+    __tablename__ = "song_sketches"
+    __table_args__ = {"extend_existing": True}
+
+    # Primary identifier
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+
+    # Core song data
+    title = Column(String(500), nullable=True)
+    lyrics = Column(Text, nullable=True)
+    prompt = Column(Text, nullable=False)
+
+    # Metadata
+    tags = Column(String(1000), nullable=True)
+
+    # Workflow status
+    workflow = Column(String(50), nullable=False, default="draft", index=True)
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationship: Ein Sketch kann mehrere Songs haben
+    songs = relationship("Song", back_populates="sketch")
+
+    def __repr__(self):
+        return f"<SongSketch(id={self.id}, title='{self.title}', workflow='{self.workflow}')>"
+
+
 class Song(Base):
     """Model for storing song generation data and results"""
 
@@ -50,6 +81,9 @@ class Song(Base):
     workflow = Column(String(50), nullable=True)  # onWork, inUse, notUsed, or NULL
     is_instrumental = Column(Boolean, nullable=True, default=False)  # True for instrumental songs
 
+    # Sketch relationship (optional - song can be created from sketch or directly)
+    sketch_id = Column(UUID(as_uuid=True), ForeignKey("song_sketches.id"), nullable=True, index=True)
+
     # Status tracking
     status = Column(String(50), nullable=False, default="PENDING")  # PENDING, PROGRESS, SUCCESS, FAILURE, CANCELLED
     progress_info = Column(Text, nullable=True)  # JSON string for progress details
@@ -59,6 +93,9 @@ class Song(Base):
     choices = relationship(
         "SongChoice", back_populates="song", cascade="all, delete-orphan", order_by="SongChoice.choice_index"
     )
+
+    # Relation to sketch (n:1)
+    sketch = relationship("SongSketch", back_populates="songs")
 
     # MUREKA response data
     mureka_response = Column(Text, nullable=True)  # JSON string der kompletten MUREKA Response
