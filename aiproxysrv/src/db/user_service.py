@@ -120,7 +120,9 @@ class UserService:
         """Get user by email"""
         return db.query(User).filter(User.email == email, User.is_active).first()
 
-    def update_user(self, db: Session, user_id: str, first_name: str = None, last_name: str = None) -> User | None:
+    def update_user(
+        self, db: Session, user_id: str, first_name: str = None, last_name: str = None, artist_name: str = None
+    ) -> User | None:
         """Update user information"""
         try:
             user_uuid = uuid.UUID(user_id)
@@ -134,6 +136,8 @@ class UserService:
                 user.first_name = first_name
             if last_name is not None:
                 user.last_name = last_name
+            if artist_name is not None:
+                user.artist_name = artist_name
 
             user.updated_at = datetime.utcnow()
             db.commit()

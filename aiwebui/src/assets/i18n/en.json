@@ -177,8 +177,10 @@
     "createButton": "Create Image",
     "creating": "Creating...",
     "enhancePrompt": "Enhance Prompt",
+    "enhanceAsCover": "Enhance as Cover",
     "errors": {
-      "promptRequired": "Please enter a prompt first"
+      "promptRequired": "Please enter a prompt first",
+      "titleRequiredForCover": "Title is required for cover enhancement"
     },
     "generateTitle": "Generate Title",
     "generateTitleFallback": "Generate a creative image title",
@@ -188,11 +190,14 @@
     "progress": {
       "enhancing": "Enhancing Prompt...",
       "enhancinghint": "AI is improving your image prompt",
+      "enhancingCover": "Enhancing Cover Prompt...",
+      "enhancingCoverHint": "AI is optimizing your prompt for album cover with text rendering",
       "generatingTitle": "Generating Title...",
       "generatingTitleHint": "AI is creating an image title for you",
       "translating": "Translating Prompt...",
       "translatingHint": "AI is translating your prompt to English"
     },
+    "promptCharCounter": "{{count}}/{{max}} characters",
     "promptLabel": "Prompt:",
     "promptPlaceholder": "Describe the picture you want to create...",
     "resetButton": "Reset",
@@ -903,10 +908,14 @@
     },
     "fieldNames": {
       "firstName": "First name",
-      "lastName": "Last name"
+      "lastName": "Last name",
+      "artistName": "Artist name"
     },
     "firstName": "First Name",
     "firstNamePlaceholder": "Enter first name",
+    "artistName": "Artist Name",
+    "artistNamePlaceholder": "Enter artist name (e.g., thWelly)",
+    "artistNameHint": "Used for album cover generation (optional)",
     "imagesPerPage": "Images per page",
     "imagesPerPageHint": "5-100 images per page",
     "inactive": "Inactive",

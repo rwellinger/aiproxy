@@ -130,7 +130,11 @@ class UserController:
         db = self._get_db()
         try:
             user = self.user_service.update_user(
-                db=db, user_id=user_id, first_name=request.first_name, last_name=request.last_name
+                db=db,
+                user_id=user_id,
+                first_name=request.first_name,
+                last_name=request.last_name,
+                artist_name=request.artist_name,
             )
 
             if not user:

@@ -64,6 +64,7 @@
                                 formControlName="prompt"
                                 [placeholder]="'imageGenerator.promptPlaceholder' | translate"
                                 required
+                                maxlength="4000"
                                 [disabled]="isLoading"
                                 class="prompt-input">
                         </textarea>
@@ -94,6 +95,16 @@
                                             <button
                                                     type="button"
                                                     class="dropdown-item"
+                                                    [disabled]="isLoading || isImprovingPrompt || !canEnhanceAsCover"
+                                                    (click)="selectPromptAction('enhanceCover')">
+                                                <i class="fas fa-record-vinyl"></i>
+                                                <span>{{ 'imageGenerator.enhanceAsCover' | translate }}</span>
+                                                <i class="fas fa-spinner fa-spin action-spinner"
+                                                   *ngIf="isImprovingPrompt"></i>
+                                            </button>
+                                            <button
+                                                    type="button"
+                                                    class="dropdown-item"
                                                     [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt"
                                                     (click)="selectPromptAction('translate')">
                                                 <i class="fas fa-language"></i>
@@ -104,6 +115,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="char-counter">{{ 'imageGenerator.promptCharCounter' | translate: {count: promptForm.get('prompt')?.value?.length || 0, max: 4000} }}</div>
                             </div>
 
                             <div class="form-group">

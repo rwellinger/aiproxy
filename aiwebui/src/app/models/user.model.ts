@@ -7,6 +7,7 @@ export interface User {
   email: string;
   first_name?: string;
   last_name?: string;
+  artist_name?: string;
   is_active: boolean;
   is_verified: boolean;
   created_at: string;
@@ -44,6 +45,7 @@ export interface UserCreateResponse {
 export interface UserUpdateRequest {
   first_name?: string;
   last_name?: string;
+  artist_name?: string;
 }
 
 export interface UserUpdateResponse {

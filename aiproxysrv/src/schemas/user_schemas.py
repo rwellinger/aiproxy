@@ -17,6 +17,7 @@ class UserBase(BaseModel):
     email: EmailStr = Field(..., description="User email address")
     first_name: str | None = Field(None, max_length=100, description="User first name")
     last_name: str | None = Field(None, max_length=100, description="User last name")
+    artist_name: str | None = Field(None, max_length=100, description="Artist name for album covers")
 
 
 # User Creation
@@ -69,6 +70,7 @@ class UserResponse(BaseModel):
     email: str = Field(..., description="User email address")
     first_name: str | None = Field(None, description="User first name")
     last_name: str | None = Field(None, description="User last name")
+    artist_name: str | None = Field(None, description="Artist name for album covers")
     is_active: bool = Field(..., description="User active status")
     is_verified: bool = Field(..., description="User verification status")
     created_at: datetime = Field(..., description="User creation timestamp")
@@ -85,6 +87,7 @@ class UserUpdateRequest(BaseModel):
 
     first_name: str | None = Field(None, max_length=100, description="Updated first name")
     last_name: str | None = Field(None, max_length=100, description="Updated last name")
+    artist_name: str | None = Field(None, max_length=100, description="Updated artist name")
 
 
 class UserUpdateResponse(BaseResponse):

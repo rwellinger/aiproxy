@@ -24,13 +24,55 @@ from db.models import PromptTemplate
 TEMPLATES = {
     "image": {
         "enhance": {
-            "pre_condition": "You are a fact‑based DALL‑E 3 prompt enhancer. Create a single, concise prompt. No introduction, no commentary. Avoid any content that violates DALL‑E 3 usage policies. Use the following input text as inspiration and answer in the language of this input text.",
-            "post_condition": "Return only the prompt. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.",
-            "description": "Enhances image generation prompts for DALL-E3",
-            "version": "4.1",
+            "pre_condition": """You are a professional DALL-E 3 prompt enhancer. Create detailed, vivid prompts optimized for image generation.
+
+Guidelines:
+- Describe visual elements with precision (composition, lighting, colors, mood)
+- Include artistic style references when relevant (e.g., "photorealistic", "watercolor", "3D render")
+- Avoid any content violating DALL-E 3 usage policies
+- Keep prompts concise but descriptive (100-150 words)
+- Use the input as creative inspiration
+
+Answer in the same language as the input text.""",
+            "post_condition": "Return only the enhanced prompt. IMPORTANT: Keep the same language as input (German → German, English → English). No labels, explanations, or meta-commentary. Single continuous paragraph.",
+            "description": "Enhances general image generation prompts for DALL-E 3",
+            "version": "5.0",
             "model": "gpt-oss:20b",
-            "temperature": 0.9,
-            "max_tokens": 125,
+            "temperature": 0.8,
+            "max_tokens": 150,
+            "active": True,
+        },
+        "enhance-cover": {
+            "pre_condition": """You are a DALL-E 3 prompt enhancer specialized in album/song cover artwork with text rendering.
+
+CRITICAL TEXT-RENDERING RULES:
+- When text elements are specified, include them with EXACT wording in quotes
+- Add explicit rendering instructions: "PROMINENTLY featuring the text", "large clear readable letters"
+- Specify text placement: "at the top", "centered", "at the bottom"
+- Emphasize legibility: "perfectly legible professional typography", "sharp text rendering"
+
+Visual Design:
+- Describe cover composition, color palette, mood
+- Include artistic style (e.g., "album cover design", "minimalist", "vibrant")
+- Balance text prominence with visual appeal
+
+Answer in the same language as the input text.""",
+            "post_condition": """Return only the enhanced prompt.
+
+IMPORTANT:
+- Preserve all specified text elements with exact wording in quotes
+- Include explicit text rendering instructions for each text element
+- Keep same language as input (German → German, English → English)
+- No labels, explanations, or comments
+- Single continuous paragraph
+
+Example format:
+"Album cover design PROMINENTLY featuring the text 'Song Title' in large, bold, readable letters at the top, and 'by Artist Name' in elegant smaller professional typography at the bottom. [visual description]. Text must be perfectly legible and sharp.""",
+            "description": "Enhances prompts for album covers with optimized text rendering",
+            "version": "1.0",
+            "model": "gpt-oss:20b",
+            "temperature": 0.7,
+            "max_tokens": 200,
             "active": True,
         },
         "translate": {

@@ -177,8 +177,10 @@
     "createButton": "Bild erstellen",
     "creating": "Erstelle...",
     "enhancePrompt": "Prompt verbessern",
+    "enhanceAsCover": "Als Cover verbessern",
     "errors": {
-      "promptRequired": "Bitte gib zuerst einen Prompt ein"
+      "promptRequired": "Bitte gib zuerst einen Prompt ein",
+      "titleRequiredForCover": "Titel ist erforderlich für Cover-Verbesserung"
     },
     "generateTitle": "Titel generieren",
     "generateTitleFallback": "Erstelle einen kreativen Bild-Titel",
@@ -188,11 +190,14 @@
     "progress": {
       "enhancing": "Verbessere Prompt...",
       "enhancinghint": "KI verbessert deinen Bild-Prompt",
+      "enhancingCover": "Verbessere Cover-Prompt...",
+      "enhancingCoverHint": "KI optimiert deinen Prompt für Album-Cover mit Text-Rendering",
       "generatingTitle": "Erstelle Titel...",
       "generatingTitleHint": "KI erstellt einen Bild-Titel für dich",
       "translating": "Übersetze Prompt...",
       "translatingHint": "KI übersetzt deinen Prompt ins Englische"
     },
+    "promptCharCounter": "{{count}}/{{max}} Zeichen",
     "promptLabel": "Prompt:",
     "promptPlaceholder": "Beschreibe das Bild, das du erstellen möchtest...",
     "resetButton": "Zurücksetzen",
@@ -903,10 +908,14 @@
     },
     "fieldNames": {
       "firstName": "Vorname",
-      "lastName": "Nachname"
+      "lastName": "Nachname",
+      "artistName": "Künstlername"
     },
     "firstName": "Vorname",
     "firstNamePlaceholder": "Vorname eingeben",
+    "artistName": "Künstlername",
+    "artistNamePlaceholder": "Künstlernamen eingeben (z.B. thWelly)",
+    "artistNameHint": "Wird für Album-Cover-Generierung verwendet (optional)",
     "imagesPerPage": "Bilder pro Seite",
     "imagesPerPageHint": "5-100 Bilder pro Seite",
     "inactive": "Inaktiv",

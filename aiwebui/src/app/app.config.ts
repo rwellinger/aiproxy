@@ -32,7 +32,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     CookieService,
     provideTranslateService({
-      defaultLanguage: 'en',
+      fallbackLang: 'en',
       loader: {
         provide: TranslateLoader,
         useFactory: (http: HttpClient) => new CustomTranslateLoader(http),

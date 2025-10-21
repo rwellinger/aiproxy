@@ -214,6 +214,7 @@ class User(Base):
     # User profile
     first_name = Column(String(100), nullable=True)
     last_name = Column(String(100), nullable=True)
+    artist_name = Column(String(100), nullable=True)  # For album cover generation (e.g., "thWelly")
 
     # OAuth2 preparation (for future use)
     oauth_provider = Column(String(50), nullable=True)  # 'google', 'github', etc.

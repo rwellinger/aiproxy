@@ -68,7 +68,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   constructor() {
     this.userForm = this.fb.group({
       first_name: ['', [Validators.required, Validators.minLength(2)]],
-      last_name: ['', [Validators.required, Validators.minLength(2)]]
+      last_name: ['', [Validators.required, Validators.minLength(2)]],
+      artist_name: ['']
     });
 
     this.settingsForm = this.fb.group({
@@ -137,7 +138,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     if (this.currentUser) {
       this.userForm.patchValue({
         first_name: this.currentUser.first_name || '',
-        last_name: this.currentUser.last_name || ''
+        last_name: this.currentUser.last_name || '',
+        artist_name: this.currentUser.artist_name || ''
       });
     }
   }
@@ -170,6 +172,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         return this.translate.instant('userProfile.fieldNames.firstName');
       case 'last_name':
         return this.translate.instant('userProfile.fieldNames.lastName');
+      case 'artist_name':
+        return this.translate.instant('userProfile.fieldNames.artistName');
       default:
         return fieldName;
     }

@@ -75,6 +75,52 @@ export class ChatService {
     return this.validateAndCallUnified('image', 'enhance', prompt);
   }
 
+  async enhanceCoverPrompt(prompt: string, title: string, artistName?: string): Promise<string> {
+    const template = await firstValueFrom(this.promptConfig.getPromptTemplateAsync('image', 'enhance-cover'));
+    if (!template) {
+      throw new Error('Template image/enhance-cover not found in database');
+    }
+
+    // Validate template has all required parameters
+    if (!template.model) {
+      throw new Error('Template image/enhance-cover is missing model parameter');
+    }
+    if (template.temperature === undefined || template.temperature === null) {
+      throw new Error('Template image/enhance-cover is missing temperature parameter');
+    }
+    if (!template.max_tokens) {
+      throw new Error('Template image/enhance-cover is missing max_tokens parameter');
+    }
+
+    // Build text elements list
+    const textElements = [`- Main title: "${title}"`];
+    if (artistName) {
+      textElements.push(`- Artist credit: "by ${artistName}"`);
+    }
+
+    // Build enhanced input with title and optional artist name
+    const enhancedInput = `Image idea: ${prompt}
+
+REQUIRED TEXT ELEMENTS:
+${textElements.join('\n')}
+
+Please enhance this as an album cover prompt with these text elements prominently displayed.`;
+
+    const request: UnifiedChatRequest = {
+      pre_condition: template.pre_condition || '',
+      post_condition: template.post_condition || '',
+      input_text: enhancedInput,
+      temperature: template.temperature,
+      max_tokens: template.max_tokens,
+      model: template.model
+    };
+
+    const data: ChatResponse = await firstValueFrom(
+      this.http.post<ChatResponse>(this.apiConfig.endpoints.ollama.chatGenerateUnified, request)
+    );
+    return data.response;
+  }
+
   async improveMusicStylePrompt(prompt: string): Promise<string> {
     return this.validateAndCallUnified('music', 'enhance', prompt);
   }

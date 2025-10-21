@@ -79,6 +79,21 @@
                                 </mat-form-field>
                             </div>
 
+                            <!-- Artist Name Field -->
+                            <div class="form-row">
+                                <mat-form-field appearance="outline" class="full-width"
+                                                [class.readonly-field]="!isEditing">
+                                    <mat-label>{{ 'userProfile.artistName' | translate }}</mat-label>
+                                    <input
+                                            matInput
+                                            formControlName="artist_name"
+                                            [readonly]="!isEditing"
+                                            [class.readonly-input]="!isEditing"
+                                            [placeholder]="'userProfile.artistNamePlaceholder' | translate">
+                                    <mat-hint>{{ 'userProfile.artistNameHint' | translate }}</mat-hint>
+                                </mat-form-field>
+                            </div>
+
                             <!-- Email (Always Read-only) -->
                             <mat-form-field appearance="outline" class="full-width readonly-field">
                                 <mat-label>{{ 'userProfile.email' | translate }}</mat-label>

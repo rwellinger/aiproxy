@@ -9,6 +9,7 @@ import {ApiConfigService} from '../../services/config/api-config.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {ImageService} from '../../services/business/image.service';
 import {ChatService} from '../../services/config/chat.service';
+import {UserService} from '../../services/business/user.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
@@ -46,6 +47,7 @@ export class ImageGeneratorComponent implements OnInit {
     private progressService = inject(ProgressService);
     private imageBlobService = inject(ImageBlobService);
     private translate = inject(TranslateService);
+    private userService = inject(UserService);
 
     ngOnInit() {
         this.promptForm = this.fb.group({
@@ -206,6 +208,43 @@ export class ImageGeneratorComponent implements OnInit {
         }
     }
 
+    get canEnhanceAsCover(): boolean {
+        const hasTitle = this.promptForm.get('title')?.value?.trim();
+        return !!hasTitle;
+    }
+
+    async enhanceAsCover() {
+        const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
+        const title = this.promptForm.get('title')?.value?.trim();
+
+        if (!title) {
+            this.notificationService.error(this.translate.instant('imageGenerator.errors.titleRequiredForCover'));
+            return;
+        }
+
+        if (!currentPrompt) {
+            this.notificationService.error(this.translate.instant('imageGenerator.errors.promptRequired'));
+            return;
+        }
+
+        this.isImprovingPrompt = true;
+        try {
+            const user = await firstValueFrom(this.userService.getCurrentUserProfile());
+            const artistName = user?.artist_name;
+
+            const enhancedPrompt = await this.progressService.executeWithProgress(
+                () => this.chatService.enhanceCoverPrompt(currentPrompt, title, artistName),
+                this.translate.instant('imageGenerator.progress.enhancingCover'),
+                this.translate.instant('imageGenerator.progress.enhancingCoverHint')
+            );
+            this.promptForm.patchValue({prompt: this.removeQuotes(enhancedPrompt)});
+        } catch (error: any) {
+            this.notificationService.error(`Error enhancing cover prompt: ${error.message}`);
+        } finally {
+            this.isImprovingPrompt = false;
+        }
+    }
+
     togglePromptDropdown() {
         this.showPromptDropdown = !this.showPromptDropdown;
     }
@@ -214,11 +253,13 @@ export class ImageGeneratorComponent implements OnInit {
         this.showPromptDropdown = false;
     }
 
-    selectPromptAction(action: 'enhance' | 'translate') {
+    selectPromptAction(action: 'enhance' | 'translate' | 'enhanceCover') {
         this.closePromptDropdown();
 
         if (action === 'enhance') {
             this.improvePrompt();
+        } else if (action === 'enhanceCover') {
+            this.enhanceAsCover();
         } else if (action === 'translate') {
             this.translatePrompt();
         }
