@@ -4,166 +4,153 @@
     <!-- Left Side: Song Library Card -->
     <div class="song-library-section">
       <mat-card class="song-library-card">
-        <div class="song-list-panel">
+        <!-- Header -->
         <div class="list-header">
-            <h2>{{ 'songView.library.header' | translate }}</h2>
-            <div class="pagination-info-badge" *ngIf="pagination.total > 0">
-                {{ 'songView.library.songsCount' | translate:{count: pagination.total} }}
+          <div class="header-title">
+            <div class="header-title-group">
+              <h2>
+                <i class="fas fa-music"></i>
+                {{ 'songView.library.header' | translate }}
+              </h2>
+              <div class="songs-count-badge" *ngIf="pagination.total > 0">
+                {{ 'songView.header.count' | translate:{count: pagination.total} }}
+              </div>
             </div>
+            <p class="subtitle">{{ 'songView.library.subtitle' | translate }}</p>
+          </div>
+          <button
+            type="button"
+            class="action-button new-song-button"
+            (click)="navigateToSongGenerator()">
+            <i class="fas fa-plus"></i>
+            <span>{{ 'songView.actions.newSong' | translate }}</span>
+          </button>
         </div>
 
-        <div class="search-controls">
-            <div class="search-input-container">
-                <input type="text"
-                       [placeholder]="'songView.library.searchPlaceholder' | translate"
-                       class="search-input"
-                       [(ngModel)]="searchTerm"
-                       (ngModelChange)="onSearchChange($event)"
-                       [disabled]="isLoadingSongs"
-                       #searchInput>
-                <button type="button"
-                        class="clear-search-button"
-                        *ngIf="searchTerm"
-                        (click)="clearSearch()"
-                        [disabled]="isLoadingSongs"
-                        [title]="'songView.library.clearSearch' | translate">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
-
-        <div class="workflow-tabs">
-            <div class="tab-container">
-                <button type="button"
-                        class="workflow-tab"
-                        [class.active]="currentWorkflow === 'all'"
-                        (click)="setWorkflowFilter('all')"
-                        [disabled]="isLoadingSongs">
-                    {{ 'songView.filters.all' | translate }}
-                </button>
-                <button type="button"
-                        class="workflow-tab"
-                        [class.active]="currentWorkflow === 'inUse'"
-                        (click)="setWorkflowFilter('inUse')"
-                        [disabled]="isLoadingSongs">
-                    {{ 'songView.filters.inUse' | translate }}
-                </button>
-                <button type="button"
-                        class="workflow-tab"
-                        [class.active]="currentWorkflow === 'onWork'"
-                        (click)="setWorkflowFilter('onWork')"
-                        [disabled]="isLoadingSongs">
-                    {{ 'songView.filters.onWork' | translate }}
-                </button>
-                <button type="button"
-                        class="workflow-tab"
-                        [class.active]="currentWorkflow === 'notUsed'"
-                        (click)="setWorkflowFilter('notUsed')"
-                        [disabled]="isLoadingSongs">
-                    {{ 'songView.filters.notUsed' | translate }}
-                </button>
-            </div>
-        </div>
-
-        <div *ngIf="filteredSongs.length > 0" class="list-content">
-
-            <table class="result-table">
-                <thead>
-                <tr>
-                    <th *ngIf="isSelectionMode" class="checkbox-col">
-                        <input type="checkbox"
-                               [checked]="selectedSongIds.size === filteredSongs.length && filteredSongs.length > 0"
-                               [indeterminate]="selectedSongIds.size > 0 && selectedSongIds.size < filteredSongs.length"
-                               (change)="onSelectAllChange($event)">
-                    </th>
-                    <th class="icon-col"></th>
-                    <th class="lyrics-col">{{ 'songView.table.title' | translate }}</th>
-                    <th>{{ 'songView.table.model' | translate }}</th>
-                    <th class="sortable-header" (click)="toggleSort()">
-                        {{ 'songView.table.created' | translate }}
-                        <i class="fas" [class.fa-sort-down]="sortDirection === 'desc'"
-                           [class.fa-sort-up]="sortDirection === 'asc'"></i>
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr *ngFor="let song of filteredSongs; trackBy: trackBySong"
-                    [class.selected]="selectedSong?.id === song.id"
-                    [class.selection-selected]="isSelectionMode && selectedSongIds.has(song.id)"
-                    [class.in-use]="song.workflow === 'inUse'"
-                    [class.on-work]="song.workflow === 'onWork'"
-                    (click)="isSelectionMode ? toggleSongSelection(song.id) : selectSong(song)"
-                    [style.cursor]="isLoading ? 'not-allowed' : 'pointer'"
-                    [title]="song.workflow === 'inUse' ? ('songView.tooltips.inUseNoDelete' | translate) : song.workflow === 'onWork' ? ('songView.tooltips.onWorkNoDelete' | translate) : ''">
-                    <td *ngIf="isSelectionMode" class="checkbox-col" (click)="$event.stopPropagation()">
-                        <input type="checkbox"
-                               [checked]="selectedSongIds.has(song.id)"
-                               [disabled]="!canDeleteSong(song)"
-                               (change)="toggleSongSelection(song.id)"
-                               [title]="!canDeleteSong(song) ? (song.workflow === 'inUse' ? ('songView.tooltips.cannotDeleteInUse' | translate) : song.workflow === 'onWork' ? ('songView.tooltips.cannotDeleteOnWork' | translate) : ('songView.tooltips.cannotDelete' | translate)) : ''">
-                    </td>
-                    <td class="icon-col">
-                        <i class="fas"
-                           [class.fa-guitar]="song.is_instrumental === true"
-                           [class.fa-microphone]="song.is_instrumental !== true"
-                           [title]="song.is_instrumental === true ? ('songView.tooltips.instrumental' | translate) : ('songView.tooltips.withVocals' | translate)"></i>
-                    </td>
-                    <td class="lyrics-col">{{ getDisplayTitle(song) }}</td>
-                    <td>{{ song.model }}</td>
-                    <td>{{ formatDateShort(song.created_at) }}</td>
-                </tr>
-                </tbody>
-            </table>
-
-            <!-- Pagination moved below table -->
-            <div class="pagination-container" *ngIf="pagination.total > pagination.limit">
-                <div class="modern-pagination">
-                    <div class="pagination-pills">
-                        <button type="button"
-                                class="pagination-pill prev"
-                                (click)="previousPage()"
-                                [disabled]="pagination.offset === 0 || isLoading"
-                                [class.disabled]="pagination.offset === 0 || isLoading">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-
-                        <ng-container *ngFor="let page of getVisiblePages(); trackBy: trackByPage">
-                            <button type="button"
-                                    *ngIf="page !== '...'"
-                                    class="pagination-pill page-number"
-                                    [class.active]="page === Math.floor(pagination.offset / pagination.limit) + 1"
-                                    (click)="goToPage(+page - 1)"
-                                    [disabled]="isLoading">
-                                {{ page }}
-                            </button>
-                            <span *ngIf="page === '...'" class="pagination-ellipsis">⋯</span>
-                        </ng-container>
-
-                        <button type="button"
-                                class="pagination-pill next"
-                                (click)="nextPage()"
-                                [disabled]="!pagination.has_more || isLoading"
-                                [class.disabled]="!pagination.has_more || isLoading">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
+        <!-- Search and Filters -->
+        <div class="filters-section">
+          <!-- Search -->
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input
+              type="text"
+              [placeholder]="'songView.library.searchPlaceholder' | translate"
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchChange($event)"
+              class="search-input">
           </div>
 
-          <div *ngIf="filteredSongs.length === 0 && !isLoadingSongs && songs.length === 0" class="no-songs-message">
+          <!-- Workflow Filter -->
+          <div class="workflow-filter">
+            <button
+              class="filter-btn"
+              [class.active]="currentWorkflow === 'all'"
+              (click)="onWorkflowChange('all')">
+              {{ 'songView.filters.all' | translate }}
+            </button>
+            <button
+              class="filter-btn"
+              [class.active]="currentWorkflow === 'inUse'"
+              (click)="onWorkflowChange('inUse')">
+              {{ 'songView.filters.inUse' | translate }}
+            </button>
+            <button
+              class="filter-btn"
+              [class.active]="currentWorkflow === 'onWork'"
+              (click)="onWorkflowChange('onWork')">
+              {{ 'songView.filters.onWork' | translate }}
+            </button>
+            <button
+              class="filter-btn"
+              [class.active]="currentWorkflow === 'notUsed'"
+              (click)="onWorkflowChange('notUsed')">
+              {{ 'songView.filters.notUsed' | translate }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Songs List -->
+        <div class="songs-list">
+          <div
+            *ngFor="let song of filteredSongs; trackBy: trackBySong"
+            class="song-item"
+            [class.selected]="selectedSong?.id === song.id"
+            [class.selection-selected]="isSelectionMode && selectedSongIds.has(song.id)"
+            [class.in-use]="song.workflow === 'inUse'"
+            [class.on-work]="song.workflow === 'onWork'"
+            (click)="isSelectionMode ? toggleSongSelection(song.id) : selectSong(song)">
+            <!-- Checkbox for selection mode -->
+            <input
+              *ngIf="isSelectionMode"
+              type="checkbox"
+              class="song-checkbox"
+              [checked]="selectedSongIds.has(song.id)"
+              [disabled]="!canDeleteSong(song)"
+              (click)="$event.stopPropagation()"
+              (change)="toggleSongSelection(song.id)"
+              [title]="!canDeleteSong(song) ? (song.workflow === 'inUse' ? ('songView.tooltips.cannotDeleteInUse' | translate) : song.workflow === 'onWork' ? ('songView.tooltips.cannotDeleteOnWork' | translate) : ('songView.tooltips.cannotDelete' | translate)) : ''">
+
+            <div class="song-item-header">
+              <h4 class="song-title">
+                <i class="fas"
+                   [class.fa-guitar]="song.is_instrumental === true"
+                   [class.fa-microphone]="song.is_instrumental !== true"
+                   [title]="song.is_instrumental === true ? ('songView.tooltips.instrumental' | translate) : ('songView.tooltips.withVocals' | translate)"></i>
+                {{ getDisplayTitle(song) }}
+              </h4>
+              <span class="workflow-badge" [ngClass]="getWorkflowClass(song.workflow)">
+                {{ getWorkflowLabel(song.workflow) }}
+              </span>
+            </div>
+            <div class="song-item-meta">
+              <span class="meta-date">
+                <i class="fas fa-clock"></i>
+                {{ formatDate(song.created_at) }}
+              </span>
+              <span class="meta-tags" *ngIf="song.tags">
+                <i class="fas fa-tags"></i>
+                {{ song.tags }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="filteredSongs.length === 0 && !isLoadingSongs && songs.length === 0" class="empty-state">
+            <i class="fas fa-music"></i>
             <p>{{ 'songView.messages.noSongsInDb' | translate }}</p>
           </div>
 
-          <div *ngIf="filteredSongs.length === 0 && !isLoadingSongs && songs.length > 0" class="no-results-message">
+          <!-- No Results State -->
+          <div *ngIf="filteredSongs.length === 0 && !isLoadingSongs && songs.length > 0" class="empty-state">
+            <i class="fas fa-search"></i>
             <p>{{ 'songView.messages.noSearchResults' | translate }}</p>
             <small>{{ 'songView.messages.adjustSearch' | translate }}</small>
           </div>
 
-          <div *ngIf="isLoadingSongs" class="loading-message">
-            <i class="fas fa-spinner fa-spin"></i> {{ 'songView.messages.loadingSongs' | translate }}
+          <!-- Loading State -->
+          <div *ngIf="isLoadingSongs" class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>{{ 'songView.messages.loadingSongs' | translate }}</p>
           </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" *ngIf="pagination.total > pagination.limit">
+          <button
+            class="pagination-btn"
+            (click)="previousPage()"
+            [disabled]="pagination.offset === 0 || isLoading">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span class="pagination-info">
+            {{ 'songView.pagination.info' | translate: {current: Math.floor(pagination.offset / pagination.limit) + 1, total: Math.ceil(pagination.total / pagination.limit)} }}
+          </span>
+          <button
+            class="pagination-btn"
+            (click)="nextPage()"
+            [disabled]="!pagination.has_more || isLoading">
+            <i class="fas fa-chevron-right"></i>
+          </button>
         </div>
         <mat-card-actions align="end">
           <div class="library-actions">

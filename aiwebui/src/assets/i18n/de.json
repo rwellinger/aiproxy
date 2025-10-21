@@ -212,6 +212,7 @@
       "downloadOriginal": "Original herunterladen",
       "exitSelect": "Auswahl beenden",
       "fullSize": "Vollbildansicht",
+      "newImage": "Neues Bild",
       "refresh": "Aktualisieren",
       "selectAll": "Alle auswählen",
       "selectMode": "Auswahlmodus",
@@ -225,6 +226,9 @@
     "confirmations": {
       "bulkDelete": "Möchtest du wirklich {{count}} ausgewählte(s) Bild(er) löschen?"
     },
+    "header": {
+      "count": "{{count}} Bilder"
+    },
     "errors": {
       "deletingImages": "Fehler beim Löschen der Bilder: {{error}}",
       "loadingImages": "Fehler beim Laden der Bilder: {{error}}",
@@ -235,7 +239,8 @@
       "clearSearch": "Suche löschen",
       "header": "Verfügbare Bilder",
       "itemsCount": "{{count}} Einträge",
-      "searchPlaceholder": "Suche in Titel und Prompts..."
+      "searchPlaceholder": "Suche in Titel und Prompts...",
+      "subtitle": "Verwalte deine generierten Bilder"
     },
     "messages": {
       "adjustSearch": "Versuche deinen Suchbegriff anzupassen oder lösche die Suche, um alle Bilder zu sehen.",
@@ -245,6 +250,14 @@
       "selectImagePlaceholder": "Wähle ein Bild aus der Liste, um Details anzuzeigen"
     },
     "noImages": "Keine Bilder gefunden",
+    "orientation": {
+      "landscape": "Querformat",
+      "portrait": "Hochformat",
+      "square": "Quadratisch"
+    },
+    "pagination": {
+      "info": "Seite {{current}} von {{total}}"
+    },
     "placeholderText": "Dein generiertes Bild erscheint hier",
     "table": {
       "actions": "Aktionen",
@@ -776,6 +789,7 @@
       "downloadMp3": "MP3 herunterladen",
       "downloadStems": "Stems herunterladen",
       "exitSelect": "Auswahl beenden",
+      "newSong": "Neuer Song",
       "playAudio": "Audio abspielen",
       "playPause": "Abspielen/Pause",
       "refresh": "Aktualisieren",
@@ -790,6 +804,9 @@
     },
     "confirmations": {
       "bulkDelete": "Möchtest du wirklich {{count}} ausgewählte(n) Song(s) löschen?"
+    },
+    "header": {
+      "count": "{{count}} Songs"
     },
     "dialogs": {
       "lyricsTitle": "Songtext - {{title}}",
@@ -819,7 +836,8 @@
       "clearSearch": "Suche löschen",
       "header": "Verfügbare Songs",
       "searchPlaceholder": "Suche in Titel, Text & Tags...",
-      "songsCount": "{{count}} Songs"
+      "songsCount": "{{count}} Songs",
+      "subtitle": "Verwalte deine generierten Songs"
     },
     "messages": {
       "adjustSearch": "Versuche deinen Suchbegriff anzupassen oder lösche die Suche, um alle Songs zu sehen.",
@@ -838,6 +856,7 @@
     },
     "noSongs": "Keine Songs gefunden",
     "pagination": {
+      "info": "Seite {{current}} von {{total}}",
       "itemsPerPage": "Einträge pro Seite:",
       "of": "von"
     },
@@ -1045,6 +1064,9 @@
     "library": {
       "title": "Song-Skizzen Bibliothek",
       "subtitle": "Verwalte deine Song-Ideen",
+      "header": {
+        "count": "{{count}} Entwürfe"
+      },
       "untitled": "Unbenannte Skizze",
       "search": {
         "placeholder": "Skizzen durchsuchen..."

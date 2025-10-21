@@ -248,6 +248,7 @@ class SongBusinessService:
             "lyrics": song.lyrics,
             "title": song.title,
             "model": song.model,
+            "tags": song.tags,
             "workflow": song.workflow,
             "is_instrumental": song.is_instrumental,
             "created_at": song.created_at.isoformat() if song.created_at else None,
