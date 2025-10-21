@@ -2,5 +2,5 @@
 
 cd ../../aiproxysrv
 
-docker-compose up celery-worker aiproxy-app -d
+docker-compose up db-migration celery-worker aiproxy-app -d
 docker ps
