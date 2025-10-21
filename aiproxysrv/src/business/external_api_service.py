@@ -2,7 +2,7 @@
 
 import requests
 
-from config.settings import CHAT_DEBUG_LOGGING, OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_IMAGE_MODEL
+from config.settings import CHAT_DEBUG_LOGGING, OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_IMAGE_MODEL, OPENAI_TIMEOUT
 from utils.logger import logger
 
 
@@ -54,7 +54,7 @@ class OpenAIService:
             logger.info("OpenAI image request", model=self.model, size=size, prompt_length=len(prompt))
 
         try:
-            response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+            response = requests.post(api_url, headers=headers, json=payload, timeout=OPENAI_TIMEOUT)
 
             if CHAT_DEBUG_LOGGING:
                 logger.debug("OpenAI Image API response received", status_code=response.status_code)

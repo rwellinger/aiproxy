@@ -47,7 +47,7 @@ OPENAI_IMAGE_MODEL = os.getenv("OPENAI_IMAGE_MODEL", "dall-e-3")
 OPENAI_CHAT_MODELS = os.getenv(
     "OPENAI_CHAT_MODELS", "gpt-5,gpt-5-mini,gpt-5-nano,gpt-4o,gpt-4o-mini,gpt-4.1,gpt-4.1-mini"
 )
-OPENAI_TIMEOUT = int(os.getenv("OPENAI_TIMEOUT", "60"))
+OPENAI_TIMEOUT = int(os.getenv("OPENAI_TIMEOUT", "120"))
 
 # Backwards compatibility (deprecated - use OPENAI_BASE_URL + endpoints)
 OPENAI_URL = os.getenv("OPENAI_URL", f"{OPENAI_BASE_URL}/images")

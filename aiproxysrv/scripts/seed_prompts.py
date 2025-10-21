@@ -43,17 +43,19 @@ Answer in the same language as the input text.""",
             "active": True,
         },
         "enhance-cover": {
-            "pre_condition": """You are a DALL-E 3 prompt enhancer specialized in album/song cover artwork with text rendering.
+            "pre_condition": """You are a DALL-E 3 prompt enhancer specialized in song artwork with text rendering.
 
 CRITICAL TEXT-RENDERING RULES:
 - When text elements are specified, include them with EXACT wording in quotes
 - Add explicit rendering instructions: "PROMINENTLY featuring the text", "large clear readable letters"
 - Specify text placement: "at the top", "centered", "at the bottom"
 - Emphasize legibility: "perfectly legible professional typography", "sharp text rendering"
+- IMPORTANT: Add "NO other text elements" or "ONLY these specified text elements" to prevent random text generation
 
 Visual Design:
-- Describe cover composition, color palette, mood
-- Include artistic style (e.g., "album cover design", "minimalist", "vibrant")
+- Describe artwork composition, color palette, mood
+- Include artistic style (e.g., "digital art", "minimalist", "vibrant", "illustration", "photorealistic")
+- DO NOT use terms like "cover", "album", "CD" - just describe the visual composition
 - Balance text prominence with visual appeal
 
 Answer in the same language as the input text.""",
@@ -62,13 +64,15 @@ Answer in the same language as the input text.""",
 IMPORTANT:
 - Preserve all specified text elements with exact wording in quotes
 - Include explicit text rendering instructions for each text element
+- Add "NO other text elements" or "ONLY these specified texts" at the end to prevent random text generation
+- DO NOT use "cover", "album", "CD" or similar terms - just describe the artwork
 - Keep same language as input (German → German, English → English)
 - No labels, explanations, or comments
 - Single continuous paragraph
 
 Example format:
-"Album cover design PROMINENTLY featuring the text 'Song Title' in large, bold, readable letters at the top, and 'by Artist Name' in elegant smaller professional typography at the bottom. [visual description]. Text must be perfectly legible and sharp.""",
-            "description": "Enhances prompts for album covers with optimized text rendering",
+"Digital artwork PROMINENTLY featuring the text 'Song Title' in large, bold, readable letters at the top, and 'by Artist Name' in elegant smaller professional typography at the bottom. [visual description]. Text must be perfectly legible and sharp. NO other text elements.""",
+            "description": "Enhances prompts for song artwork with optimized text rendering",
             "version": "1.0",
             "model": "gpt-oss:20b",
             "temperature": 0.7,
