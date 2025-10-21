@@ -125,29 +125,13 @@
           <div class="form-group">
             <label for="workflow">{{ 'songSketch.creator.fields.workflow' | translate }}</label>
 
-            <!-- Edit Mode: Read-only badge -->
-            <div *ngIf="isEditMode" class="workflow-readonly">
+            <!-- Both modes: Read-only badge -->
+            <div class="workflow-readonly">
               <span class="workflow-badge-display">
                 {{ getWorkflowLabel(sketchForm.get('workflow')?.value || 'draft') }}
               </span>
               <div class="field-hint">
                 {{ 'songSketch.creator.fields.workflowReadonlyHint' | translate }}
-              </div>
-            </div>
-
-            <!-- Create Mode: Editable dropdown -->
-            <div *ngIf="!isEditMode">
-              <select
-                id="workflow"
-                formControlName="workflow"
-                [disabled]="isSaving"
-                class="form-select">
-                <option value="draft">{{ 'songSketch.workflow.draft' | translate }}</option>
-                <option value="used">{{ 'songSketch.workflow.used' | translate }}</option>
-                <option value="archived">{{ 'songSketch.workflow.archived' | translate }}</option>
-              </select>
-              <div class="field-hint">
-                {{ 'songSketch.creator.fields.workflowHint' | translate }}
               </div>
             </div>
           </div>

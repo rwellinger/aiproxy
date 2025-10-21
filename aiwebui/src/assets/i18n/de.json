@@ -597,6 +597,7 @@
     "untitled": "Unbenannter Song",
     "workflow": {
       "editTitle": "Workflow bearbeiten:",
+      "fail": "Fehlgeschlagen",
       "inUse": "In Verwendung",
       "label": "Workflow:",
       "noWorkflow": "Kein Workflow",
@@ -679,6 +680,10 @@
       "label": "Aus Skizze laden",
       "placeholder": "Skizze auswählen...",
       "clear": "Auswahl löschen"
+    },
+    "sketch": {
+      "workflowLabel": "Skizzen-Workflow:",
+      "workflowHint": "Workflow wird automatisch verwaltet (draft → used nach erstem Song)"
     },
     "styleChooser": "Stil-Auswahl",
     "styleChooserOverwriteWarning": "Bestehender Stil-Prompt wird überschrieben. Fortfahren?",
@@ -828,6 +833,7 @@
     },
     "filters": {
       "all": "Alle",
+      "fail": "Fehlgeschlagen",
       "inUse": "In Verwendung",
       "notUsed": "Nicht verwendet",
       "onWork": "In Arbeit"

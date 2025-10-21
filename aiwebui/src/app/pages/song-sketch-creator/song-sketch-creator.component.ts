@@ -239,7 +239,7 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
   }
 
   resetForm(): void {
-    this.sketchForm.reset();
+    this.sketchForm.reset({ workflow: 'draft' });
     this.selectedTags = [];
     this.notificationService.success(
       this.translate.instant('songSketch.creator.messages.resetSuccess')

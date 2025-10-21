@@ -328,7 +328,8 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
             { value: '', label: this.translate.instant('songDetailPanel.workflow.noWorkflow') },
             { value: 'inUse', label: this.translate.instant('songDetailPanel.workflow.inUse') },
             { value: 'onWork', label: this.translate.instant('songDetailPanel.workflow.onWork') },
-            { value: 'notUsed', label: this.translate.instant('songDetailPanel.workflow.notUsed') }
+            { value: 'notUsed', label: this.translate.instant('songDetailPanel.workflow.notUsed') },
+            { value: 'fail', label: this.translate.instant('songDetailPanel.workflow.fail') }
         ];
 
         if (this.songId) {

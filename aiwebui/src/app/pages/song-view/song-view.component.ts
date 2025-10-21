@@ -155,7 +155,8 @@ export class SongViewComponent implements OnInit, OnDestroy {
     this.isLoadingSongs = true;
     try {
       const offset = page * this.pagination.limit;
-      const workflowParam = this.currentWorkflow === 'all' ? undefined : this.currentWorkflow;
+      // Send workflow filter to backend (including "all")
+      const workflowParam = this.currentWorkflow === 'all' ? 'all' : this.currentWorkflow;
       const data = await this.songService.getSongs(
         this.pagination.limit,
         offset,
@@ -169,7 +170,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
       this.pagination = data.pagination || this.pagination;
       this.pagination.offset = offset;
 
-      // Use songs directly (no client-side filtering needed)
+      // Backend handles filtering, no client-side filter needed
       this.filteredSongs = this.songs;
 
       // Selection logic based on results
@@ -226,7 +227,8 @@ export class SongViewComponent implements OnInit, OnDestroy {
     this.isLoadingSongs = true;
     try {
       const newOffset = this.pagination.offset + this.pagination.limit;
-      const workflowParam = this.currentWorkflow === 'all' ? undefined : this.currentWorkflow;
+      // Send workflow filter to backend (including "all")
+      const workflowParam = this.currentWorkflow === 'all' ? 'all' : this.currentWorkflow;
       const data = await this.songService.getSongs(
         this.pagination.limit,
         newOffset,
@@ -242,7 +244,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
       this.pagination = data.pagination || this.pagination;
       this.pagination.offset = newOffset;
 
-      // Update filtered songs (direct assignment as no client-side filtering)
+      // Backend handles filtering, no client-side filter needed
       this.filteredSongs = this.songs;
     } catch (error: any) {
       this.notificationService.error(this.translate.instant('songView.errors.loadingMore', { error: error.message }));
@@ -947,6 +949,9 @@ export class SongViewComponent implements OnInit, OnDestroy {
   }
 
   getWorkflowClass(workflow: string): string {
+    if (!workflow) {
+      return 'badge-no-workflow'; // No workflow set
+    }
     switch (workflow) {
       case 'inUse':
         return 'badge-in-use';
@@ -954,12 +959,17 @@ export class SongViewComponent implements OnInit, OnDestroy {
         return 'badge-on-work';
       case 'notUsed':
         return 'badge-not-used';
+      case 'fail':
+        return 'badge-fail';
       default:
-        return 'badge-not-used';
+        return 'badge-no-workflow'; // Unknown workflow
     }
   }
 
   getWorkflowLabel(workflow: string): string {
+    if (!workflow) {
+      return '-'; // No workflow set
+    }
     switch (workflow) {
       case 'inUse':
         return this.translate.instant('songView.filters.inUse');
@@ -967,8 +977,10 @@ export class SongViewComponent implements OnInit, OnDestroy {
         return this.translate.instant('songView.filters.onWork');
       case 'notUsed':
         return this.translate.instant('songView.filters.notUsed');
+      case 'fail':
+        return this.translate.instant('songView.filters.fail');
       default:
-        return this.translate.instant('songView.filters.notUsed');
+        return '-'; // Unknown workflow
     }
   }
 

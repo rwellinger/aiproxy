@@ -413,7 +413,14 @@ class SongService:
 
                 # Apply workflow filter if provided
                 if workflow:
-                    query = query.filter(Song.workflow == workflow)
+                    if workflow == "all":
+                        # "all" excludes only notUsed and fail workflows (NULL is allowed)
+                        query = query.filter(
+                            (Song.workflow.is_(None)) | (Song.workflow.notin_(["notUsed", "fail"]))
+                        )
+                    else:
+                        # Specific workflow filter
+                        query = query.filter(Song.workflow == workflow)
 
                 # Apply search filter if provided
                 if search:
@@ -488,7 +495,14 @@ class SongService:
 
                 # Apply workflow filter if provided
                 if workflow:
-                    query = query.filter(Song.workflow == workflow)
+                    if workflow == "all":
+                        # "all" excludes only notUsed and fail workflows (NULL is allowed)
+                        query = query.filter(
+                            (Song.workflow.is_(None)) | (Song.workflow.notin_(["notUsed", "fail"]))
+                        )
+                    else:
+                        # Specific workflow filter
+                        query = query.filter(Song.workflow == workflow)
 
                 # Apply search filter if provided
                 if search:

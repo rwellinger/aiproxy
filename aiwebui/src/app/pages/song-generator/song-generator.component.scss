@@ -957,3 +957,38 @@ form .segment-control {
         }
     }
 }
+
+/* ===== SKETCH WORKFLOW INFO ===== */
+.sketch-workflow-info {
+    margin-top: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background-color: $background-light;
+    border-radius: $border-radius-sm;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    .workflow-label {
+        font-size: $font-sm;
+        font-weight: $font-weight-semibold;
+        color: $text-primary;
+    }
+
+    .workflow-badge-display {
+        display: inline-block;
+        padding: 4px 12px;
+        background-color: $primary-color;
+        color: $background-white;
+        border-radius: $border-radius-sm;
+        font-size: $font-sm;
+        font-weight: $font-weight-medium;
+        width: fit-content;
+    }
+
+    .field-hint {
+        margin-top: $spacing-xs;
+        font-size: 0.75rem;
+        color: $text-muted;
+        font-style: italic;
+    }
+}

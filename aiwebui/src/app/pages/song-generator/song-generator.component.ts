@@ -599,4 +599,9 @@ export class SongGeneratorComponent implements OnInit {
             this.translate.instant('songGenerator.success.sketchCleared')
         );
     }
+
+    getSketchWorkflowLabel(workflow: string | undefined): string {
+        if (!workflow) return '';
+        return this.translate.instant(`songSketch.workflow.${workflow}`);
+    }
 }

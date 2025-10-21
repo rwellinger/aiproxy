@@ -292,6 +292,24 @@
   }
 }
 
+/* ===== WORKFLOW READONLY ===== */
+.workflow-readonly {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  .workflow-badge-display {
+    display: inline-block;
+    padding: 6px 14px;
+    background-color: $primary-color;
+    color: $background-white;
+    border-radius: $border-radius-sm;
+    font-size: $font-sm;
+    font-weight: $font-weight-medium;
+    width: fit-content;
+  }
+}
+
 .action-section {
   display: flex;
   justify-content: space-between;

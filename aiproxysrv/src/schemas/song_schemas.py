@@ -54,7 +54,7 @@ class SongResponse(BaseModel):
     flac_url: str | None = Field(None, description="FLAC file URL")
     mp3_url: str | None = Field(None, description="MP3 file URL")
     stems_url: str | None = Field(None, description="Stems ZIP file URL")
-    workflow: str | None = Field("notUsed", description="Workflow status")
+    workflow: str | None = Field("notUsed", description="Workflow status (inUse, onWork, notUsed, fail)")
     rating: int | None = Field(None, ge=1, le=5, description="User rating")
     is_instrumental: bool | None = Field(False, description="True if this is an instrumental song")
     created_at: datetime = Field(..., description="Creation timestamp")
@@ -63,8 +63,8 @@ class SongResponse(BaseModel):
 
     @validator("workflow")
     def validate_workflow(cls, v):
-        if v and v not in ["inUse", "onWork", "notUsed"]:
-            raise ValueError("workflow must be one of: inUse, onWork, notUsed")
+        if v and v not in ["inUse", "onWork", "notUsed", "fail"]:
+            raise ValueError("workflow must be one of: inUse, onWork, notUsed, fail")
         return v
 
     class Config:
@@ -116,8 +116,8 @@ class SongListRequest(BaseModel):
 
     @validator("workflow")
     def validate_workflow(cls, v):
-        if v and v not in ["inUse", "onWork", "notUsed"]:
-            raise ValueError("workflow must be one of: inUse, onWork, notUsed")
+        if v and v not in ["inUse", "onWork", "notUsed", "fail"]:
+            raise ValueError("workflow must be one of: inUse, onWork, notUsed, fail")
         return v
 
     @validator("sort")
@@ -149,8 +149,8 @@ class SongUpdateRequest(BaseModel):
 
     @validator("workflow")
     def validate_workflow(cls, v):
-        if v and v not in ["inUse", "onWork", "notUsed"]:
-            raise ValueError("workflow must be one of: inUse, onWork, notUsed")
+        if v and v not in ["inUse", "onWork", "notUsed", "fail"]:
+            raise ValueError("workflow must be one of: inUse, onWork, notUsed, fail")
         return v
 
     class Config:

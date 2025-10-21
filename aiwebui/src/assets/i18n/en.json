@@ -597,6 +597,7 @@
     "untitled": "Untitled Song",
     "workflow": {
       "editTitle": "Edit Workflow:",
+      "fail": "Fail",
       "inUse": "In Use",
       "label": "Workflow:",
       "noWorkflow": "No Workflow",
@@ -679,6 +680,10 @@
       "label": "Load from Sketch",
       "placeholder": "Select a sketch...",
       "clear": "Clear Selection"
+    },
+    "sketch": {
+      "workflowLabel": "Sketch Workflow:",
+      "workflowHint": "Workflow is managed automatically (draft → used after first song)"
     },
     "styleChooser": "Style Chooser",
     "styleChooserOverwriteWarning": "Existing style prompt will be overwritten. Continue?",
@@ -828,6 +833,7 @@
     },
     "filters": {
       "all": "All",
+      "fail": "Fail",
       "inUse": "In Use",
       "notUsed": "Not Used",
       "onWork": "On Work"

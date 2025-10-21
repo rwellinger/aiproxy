@@ -66,6 +66,12 @@
               (click)="onWorkflowChange('notUsed')">
               {{ 'songView.filters.notUsed' | translate }}
             </button>
+            <button
+              class="filter-btn"
+              [class.active]="currentWorkflow === 'fail'"
+              (click)="onWorkflowChange('fail')">
+              {{ 'songView.filters.fail' | translate }}
+            </button>
           </div>
         </div>
 
