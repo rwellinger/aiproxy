@@ -14,7 +14,7 @@ class OpenAIChatRequest(BaseModel):
     """Schema for OpenAI Chat API request."""
 
     model: str = Field(..., min_length=1, description="OpenAI model name (e.g., gpt-4o)")
-    messages: list[OpenAIChatMessage] = Field(..., min_items=1, description="Conversation messages")
+    messages: list[OpenAIChatMessage] = Field(..., min_length=1, description="Conversation messages")
     temperature: float | None = Field(0.7, ge=0.0, le=2.0, description="Sampling temperature")
     max_tokens: int | None = Field(None, ge=1, description="Maximum tokens to generate")
     top_p: float | None = Field(1.0, ge=0.0, le=1.0, description="Nucleus sampling")

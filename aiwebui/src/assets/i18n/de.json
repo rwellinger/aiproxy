@@ -288,6 +288,7 @@
   },
   "lyricCreation": {
     "title": "Songtext Editor",
+    "backToSketch": "Zurück zur Skizze",
     "lyricsLabel": "Songtext:",
     "lyricsPlaceholder": "Schreibe deinen Songtext hier...",
     "charactersCount": "Zeichen",
@@ -297,6 +298,8 @@
     "lyricArchitecture": "Text-Struktur",
     "resetButton": "Löschen",
     "autoSaved": "Automatisch zum Song Generator gespeichert",
+    "changesApplied": "Änderungen übernommen",
+    "changesCancelled": "Änderungen verworfen",
     "edit": "Bearbeiten",
     "tools": "Werkzeuge",
     "searchReplace": "Suchen & Ersetzen",
@@ -502,25 +505,23 @@
     "aiChat": "AI Chat",
     "brandName": "thWelly's AI Toolbox",
     "createImage": "Erstellen",
-    "createSong": "Erstellen",
-    "external": "Extern",
+    "createSong": "Song Erstellen",
     "gallery": "Galerie",
-    "library": "Bibliothek",
+    "library": "Song Bibliothek",
     "login": "Anmelden",
     "logout": "Abmelden",
     "lyricCreation": "Songtext Editor",
     "lyricParsingRules": "Songtext-Parsing-Regeln",
     "music": "Musik",
     "musicStylePrompt": "Musikstil Prompt",
+    "newSketch": "Neue Skizze",
     "ollamaChat": "Ollama Chat",
     "openaiChat": "OpenAI Chat",
     "picture": "Bild",
     "profile": "Profil",
     "promptTemplates": "Prompt Vorlagen",
     "settings": "Einstellungen",
-    "custom1": "AI Nutzung",
-    "custom2": "Claude Code",
-    "custom3": "Claude Code API"
+    "sketchLibrary": "Skizzen-Bibliothek"
   },
   "songDetailPanel": {
     "choices": {
@@ -609,6 +610,7 @@
       "lyricsRequired": "Bitte gib zuerst einen Songtext ein",
       "optimizingPhrasing": "Fehler beim Optimieren der Phrasierung: {{error}}",
       "promptRequired": "Bitte gib zuerst einen Musikstil-Prompt ein",
+      "sketchNotFound": "Skizze nicht gefunden",
       "textRequired": "Bitte gib zuerst einen Text ein"
     },
     "generateTitle": "Titel generieren",
@@ -660,10 +662,17 @@
       "starting": "Starte Song-Erstellung",
       "timeout": "Verarbeite (Timeout-Behandlung)"
     },
+    "selectSketch": {
+      "label": "Aus Skizze laden",
+      "placeholder": "Skizze auswählen...",
+      "clear": "Auswahl löschen"
+    },
     "styleChooser": "Stil-Auswahl",
     "styleChooserOverwriteWarning": "Bestehender Stil-Prompt wird überschrieben. Fortfahren?",
     "success": {
       "architectureUpdated": "Song-Architektur erfolgreich aktualisiert",
+      "sketchCleared": "Skizzen-Auswahl gelöscht",
+      "sketchLoaded": "Skizze erfolgreich geladen",
       "styleApplied": "Musikstil-Auswahl erfolgreich angewandt"
     },
     "title": "Song erstellen",
@@ -676,10 +685,13 @@
   },
   "musicStylePrompt": {
     "title": "Music Style Prompt",
+    "backToSketch": "Zurück zur Skizze",
     "placeholder": "Musikstil beschreiben (z.B. 'energetischer Pop mit Synth, 120 BPM')...",
     "charactersCount": "Zeichen",
     "autoSaved": "Änderungen werden automatisch im Song Generator gespeichert",
     "cleared": "Prompt und Stil-Auswahl gelöscht",
+    "changesApplied": "Änderungen übernommen",
+    "changesCancelled": "Änderungen verworfen",
     "styleChooser": "Stil-Auswahl",
     "enhancePrompt": "Prompt verbessern",
     "translateToEnglish": "Ins Englische übersetzen",
@@ -876,6 +888,8 @@
     "language": "Sprache",
     "promptsPerPage": "Prompts pro Seite",
     "promptsPerPageHint": "5-100 Prompts pro Seite",
+    "sketchesPerPage": "Sketches pro Seite",
+    "sketchesPerPageHint": "5-100 Sketches pro Seite",
     "languageHint": "Wähle deine bevorzugte Sprache",
     "lastLogin": "Letzter Login:",
     "lastName": "Nachname",
@@ -888,6 +902,7 @@
       "imageListLimitUpdated": "Bild-Listen-Limit aktualisiert",
       "languageUpdated": "Sprache aktualisiert",
       "promptListLimitUpdated": "Prompt-Listen-Limit aktualisiert",
+      "sketchListLimitUpdated": "Sketch-Listen-Limit aktualisiert",
       "settingsReset": "Einstellungen auf Standard zurückgesetzt",
       "songListLimitUpdated": "Song-Listen-Limit aktualisiert"
     },
@@ -976,6 +991,111 @@
     "messages": {
       "noRules": "Noch keine Parsing-Regeln definiert",
       "loading": "Lade Parsing-Regeln..."
+    }
+  },
+  "songSketch": {
+    "creator": {
+      "title": "Song-Skizze erstellen",
+      "titleEdit": "Song-Skizze bearbeiten",
+      "subtitle": "Entwickle deine Song-Idee vor der Generierung",
+      "fields": {
+        "title": "Titel",
+        "titlePlaceholder": "Titel für deine Skizze eingeben...",
+        "titleCharCounter": "{{count}}/{{max}} Zeichen",
+        "lyrics": "Songtext",
+        "lyricsPlaceholder": "Gib deinen Songtext hier ein...",
+        "lyricsCharCounter": "{{count}}/{{max}} Zeichen",
+        "prompt": "Musikstil-Prompt",
+        "promptPlaceholder": "Beschreibe den Musikstil...",
+        "promptCharCounter": "{{count}}/{{max}} Zeichen",
+        "workflow": "Workflow-Status",
+        "workflowHint": "Organisiere deine Skizzen nach Workflow-Status"
+      },
+      "tags": {
+        "title": "Tags",
+        "styleCategory": "Stil",
+        "themeCategory": "Thema",
+        "useCaseCategory": "Verwendungszweck",
+        "selectedCount": "{{count}} Tags ausgewählt"
+      },
+      "buttons": {
+        "save": "Skizze erstellen",
+        "update": "Skizze aktualisieren",
+        "cancel": "Abbrechen",
+        "reset": "Zurücksetzen",
+        "editLyrics": "Im Lyric Creator bearbeiten",
+        "editMusicStyle": "Musikstil bearbeiten",
+        "openLibrary": "Bibliothek öffnen",
+        "titleActions": "Titel-Aktionen",
+        "generateTitle": "Titel mit KI generieren"
+      },
+      "messages": {
+        "saved": "Skizze erfolgreich gespeichert",
+        "updated": "Skizze erfolgreich aktualisiert",
+        "loadError": "Fehler beim Laden der Skizze",
+        "error": "Fehler beim Speichern der Skizze",
+        "resetSuccess": "Formular erfolgreich zurückgesetzt",
+        "validationError": "Bitte fülle alle erforderlichen Felder aus",
+        "generatingTitle": "Titel wird generiert...",
+        "generatingTitleHint": "KI erstellt einen passenden Titel",
+        "titleGenerationError": "Fehler bei der Titel-Generierung",
+        "generateTitleFallback": "Erstelle einen eingängigen Song-Titel"
+      }
+    },
+    "library": {
+      "title": "Song-Skizzen Bibliothek",
+      "subtitle": "Verwalte deine Song-Ideen",
+      "untitled": "Unbenannte Skizze",
+      "search": {
+        "placeholder": "Skizzen durchsuchen..."
+      },
+      "filters": {
+        "all": "Alle",
+        "draft": "Entwürfe",
+        "used": "Verwendet",
+        "archived": "Archiviert"
+      },
+      "actions": {
+        "newSketch": "Neue Skizze",
+        "createFirst": "Erste Skizze erstellen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "generate": "Song generieren",
+        "archive": "Archivieren"
+      },
+      "detail": {
+        "metadata": "Metadaten",
+        "created": "Erstellt",
+        "updated": "Aktualisiert",
+        "tags": "Tags",
+        "musicStyle": "Musikstil-Prompt",
+        "lyrics": "Songtext",
+        "noLyrics": "Kein Songtext für diese Skizze definiert",
+        "selectSketch": "Wähle eine Skizze aus der Liste, um Details anzuzeigen"
+      },
+      "pagination": {
+        "info": "Seite {{current}} von {{total}}"
+      },
+      "confirmations": {
+        "deleteTitle": "Skizze löschen",
+        "deleteMessage": "Möchtest du diese Skizze wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+        "cancel": "Abbrechen",
+        "confirm": "Löschen"
+      },
+      "messages": {
+        "noSketches": "Keine Skizzen gefunden",
+        "loading": "Lade Skizzen...",
+        "loadingError": "Fehler beim Laden der Skizzen",
+        "deleted": "Skizze erfolgreich gelöscht",
+        "deleteError": "Fehler beim Löschen der Skizze",
+        "archived": "Skizze erfolgreich archiviert",
+        "archiveError": "Fehler beim Archivieren der Skizze"
+      }
+    },
+    "workflow": {
+      "draft": "Entwurf",
+      "used": "Verwendet",
+      "archived": "Archiviert"
     }
   },
   "versionCheck": {

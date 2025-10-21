@@ -3,7 +3,8 @@ import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {MatDialog} from '@angular/material/dialog';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
-import {SongService} from '../../services/business/song.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {SongService, FormDataContext} from '../../services/business/song.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {ChatService} from '../../services/config/chat.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
@@ -28,6 +29,16 @@ export class MusicStylePromptComponent implements OnInit {
     currentMode: 'auto' | 'manual' = 'auto';
     isStyleChooserCollapsed = false;
 
+    // Context for form data storage (song-generator or sketch-creator)
+    private context: FormDataContext = 'song-generator';
+
+    // State from navigation (when called from sketch editor)
+    private isFromSketch = false;
+    private isEditMode = false;
+    private currentSketchId: string | null = null;
+    private sketchFormData: any = null;
+    private navigationState: any = null;
+
     @ViewChild(MusicStyleChooserInlineComponent) styleChooser!: MusicStyleChooserInlineComponent;
 
     private fb = inject(FormBuilder);
@@ -37,6 +48,14 @@ export class MusicStylePromptComponent implements OnInit {
     private progressService = inject(ProgressService);
     private dialog = inject(MatDialog);
     private translate = inject(TranslateService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+
+    constructor() {
+        // IMPORTANT: getCurrentNavigation() must be called in constructor!
+        const navigation = this.router.getCurrentNavigation();
+        this.navigationState = navigation?.extras?.state;
+    }
 
     get isAnyOperationInProgress(): boolean {
         return this.isEnhancingPrompt || this.isTranslatingPrompt;
@@ -50,21 +69,85 @@ export class MusicStylePromptComponent implements OnInit {
         return this.lastSearchReplaceState !== null;
     }
 
+    get isFromSketchCreator(): boolean {
+        return this.isFromSketch;
+    }
+
+    applyChanges(): void {
+        // Update prompt in form data and navigate back
+        const updatedFormData = {
+            ...this.sketchFormData,
+            prompt: this.promptForm.get('prompt')?.value || ''
+        };
+
+        this.navigateBackToSketchCreator(updatedFormData);
+
+        this.notificationService.success(
+            this.translate.instant('musicStylePrompt.changesApplied')
+        );
+    }
+
+    cancelChanges(): void {
+        // Discard changes and navigate back with original data
+        this.navigateBackToSketchCreator(this.sketchFormData);
+
+        this.notificationService.info(
+            this.translate.instant('musicStylePrompt.changesCancelled')
+        );
+    }
+
+    private navigateBackToSketchCreator(formData: any): void {
+        // Navigate back with form data
+        if (this.isEditMode && this.currentSketchId) {
+            this.router.navigate(['/song-sketch-creator'], {
+                state: {
+                    editMode: true,
+                    sketchId: this.currentSketchId,
+                    formData: formData
+                }
+            });
+        } else {
+            this.router.navigate(['/song-sketch-creator'], {
+                state: {
+                    formData: formData
+                }
+            });
+        }
+    }
+
     ngOnInit() {
+        // Check if coming from sketch creator via router state
+        if (this.navigationState?.['context'] === 'sketch') {
+            this.isFromSketch = true;
+            this.isEditMode = this.navigationState['editMode'] || false;
+            this.currentSketchId = this.navigationState['sketchId'] || null;
+            this.sketchFormData = this.navigationState['formData'] || {};
+            this.context = 'sketch-creator';
+        } else {
+            // Song generator mode
+            this.context = 'song-generator';
+        }
+
         this.promptForm = this.fb.group({
             prompt: ['']
         });
 
-        // Load saved prompt from song generator storage
-        const savedData = this.songService.loadFormData();
-        if (savedData.prompt) {
-            this.promptForm.patchValue({prompt: savedData.prompt});
-        }
+        // Load prompt based on context
+        if (this.isFromSketch && this.sketchFormData?.prompt) {
+            // From sketch: load prompt from router state
+            this.promptForm.patchValue({prompt: this.sketchFormData.prompt});
+        } else if (!this.isFromSketch) {
+            // Song generator mode: load from localStorage
+            const savedData = this.songService.loadFormData(this.context);
+            if (savedData.prompt) {
+                this.promptForm.patchValue({prompt: savedData.prompt});
+            }
 
-        // Auto-save prompt on changes
-        this.promptForm.valueChanges.subscribe(value => {
-            this.savePrompt(value.prompt);
-        });
+            // Auto-save prompt on changes (only for song generator)
+            this.promptForm.valueChanges.subscribe(value => {
+                this.savePrompt(value.prompt);
+            });
+        }
     }
 
     @HostListener('document:click', ['$event'])
@@ -78,12 +161,12 @@ export class MusicStylePromptComponent implements OnInit {
     }
 
     private savePrompt(prompt: string): void {
-        // Load existing song generator data and update only prompt
-        const existingData = this.songService.loadFormData();
+        // Load existing data from context-aware storage and update only prompt
+        const existingData = this.songService.loadFormData(this.context);
         this.songService.saveFormData({
             ...existingData,
             prompt: prompt
-        });
+        }, this.context);
     }
 
     clearPrompt(): void {

@@ -18,6 +18,7 @@ class SongGenerateRequest(BaseModel):
     model: str = Field("auto", description="Model to use for generation")
     style: str | None = Field(None, max_length=100, description="Music style/genre")
     duration: int | None = Field(30, ge=15, le=120, description="Song duration in seconds")
+    sketch_id: str | None = Field(None, description="Optional sketch ID to link this song to a sketch")
 
     @validator("model")
     def validate_model(cls, v):
@@ -272,6 +273,7 @@ class InstrumentalGenerateRequest(BaseModel):
     model: str = Field("auto", description="Model to use for generation")
     style: str | None = Field(None, max_length=100, description="Music style/genre")
     duration: int | None = Field(30, ge=15, le=120, description="Instrumental duration in seconds")
+    sketch_id: str | None = Field(None, description="Optional sketch ID to link this instrumental to a sketch")
 
     @validator("model")
     def validate_model(cls, v):

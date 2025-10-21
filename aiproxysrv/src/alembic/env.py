@@ -15,6 +15,7 @@ from db.models import (  # noqa: F401
     PromptTemplate,
     Song,
     SongChoice,
+    SongSketch,
     User,
 )
 

@@ -38,6 +38,10 @@ export class UserSettingsService {
     this.updateSettings({ promptListLimit: limit });
   }
 
+  updateSketchListLimit(limit: number): void {
+    this.updateSettings({ sketchListLimit: limit });
+  }
+
   updateLanguage(language: Language): void {
     this.updateSettings({ language });
   }

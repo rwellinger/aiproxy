@@ -102,6 +102,21 @@ export class ApiConfigService {
             update: (id: number) => `${this.baseUrl}/api/v1/lyric-parsing-rules/${id}`,
             delete: (id: number) => `${this.baseUrl}/api/v1/lyric-parsing-rules/${id}`,
             reorder: `${this.baseUrl}/api/v1/lyric-parsing-rules/reorder`
+        },
+        sketch: {
+            create: () => `${this.baseUrl}/api/v1/sketches`,
+            list: (limit?: number, offset?: number, workflow?: string, search?: string) => {
+                const params = new URLSearchParams();
+                if (limit !== undefined) params.append('limit', limit.toString());
+                if (offset !== undefined) params.append('offset', offset.toString());
+                if (workflow) params.append('workflow', workflow);
+                if (search) params.append('search', search);
+                const query = params.toString();
+                return `${this.baseUrl}/api/v1/sketches${query ? '?' + query : ''}`;
+            },
+            detail: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
+            update: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
+            delete: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`
         }
     };
 

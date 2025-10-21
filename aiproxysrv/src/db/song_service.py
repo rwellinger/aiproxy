@@ -33,6 +33,7 @@ class SongService:
         model: str = "auto",
         is_instrumental: bool = False,
         title: str = None,
+        sketch_id: str = None,
     ) -> Song | None:
         """Create a new song record in the database"""
         try:
@@ -46,6 +47,7 @@ class SongService:
                     status=SongStatus.PENDING.value,
                     is_instrumental=is_instrumental,
                     title=title,
+                    sketch_id=sketch_id,
                 )
 
                 db.add(song)
@@ -53,7 +55,12 @@ class SongService:
                 db.refresh(song)
 
                 logger.info(
-                    "song_created", task_id=task_id, song_id=str(song.id), model=model, is_instrumental=is_instrumental
+                    "song_created",
+                    task_id=task_id,
+                    song_id=str(song.id),
+                    model=model,
+                    is_instrumental=is_instrumental,
+                    sketch_id=sketch_id,
                 )
                 return song
 

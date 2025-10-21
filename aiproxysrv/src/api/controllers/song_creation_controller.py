@@ -11,6 +11,7 @@ from celery_app import generate_instrumental_task, generate_song_task
 from config.settings import MUREKA_API_KEY, MUREKA_STATUS_ENDPOINT, MUREKA_STEM_GENERATE_ENDPOINT
 from db.database import get_db
 from db.models import SongChoice
+from db.sketch_service import sketch_service
 from db.song_service import song_service
 from utils.logger import logger
 
@@ -26,22 +27,44 @@ class SongCreationController:
         if not check_balance_func():
             return {"error": "Insufficient MUREKA balance"}, 402  # Payment Required
 
+        # Handle sketch_id if provided
+        sketch_id = payload.get("sketch_id")
+        if sketch_id:
+            logger.info("Song generation requested with sketch_id", sketch_id=sketch_id)
+
+            # Load and validate sketch
+            db = next(get_db())
+            try:
+                sketch = sketch_service.get_sketch_by_id(db, sketch_id)
+                if not sketch:
+                    return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
+
+                # Validate sketch workflow state (must be draft or used)
+                if sketch.workflow not in ["draft", "used"]:
+                    return {"error": f"Sketch is archived and cannot be used (workflow: {sketch.workflow})"}, 400
+            finally:
+                db.close()
+
+            logger.info("Using sketch for song generation", sketch_id=sketch_id, sketch_workflow=sketch.workflow)
+
         logger.info(
             "Starting song generation",
             lyrics_length=len(payload.get("lyrics", "")),
             prompt=payload.get("prompt", ""),
             model=payload.get("model", ""),
+            sketch_id=sketch_id,
         )
 
         task = generate_song_task.delay(payload)
 
-        # Create song record in database
+        # Create song record in database with sketch reference
         song = song_service.create_song(
             task_id=task.id,
             lyrics=payload.get("lyrics", ""),
             prompt=payload.get("prompt", ""),
             model=payload.get("model", "auto"),
             title=payload.get("title"),
+            sketch_id=sketch_id,
         )
 
         if not song:
@@ -49,7 +72,21 @@ class SongCreationController:
             # Continue anyway - fallback to Redis-only mode
             return {"task_id": task.id, "status_url": f"{host_url}api/v1/song/status/{task.id}"}, 202
         else:
-            logger.info("Created song record in database", song_id=song.id, task_id=task.id)
+            logger.info("Created song record in database", song_id=song.id, task_id=task.id, sketch_id=sketch_id)
+
+        # Mark sketch as "used" if this is the first time it's being used
+        if sketch_id:
+            db = next(get_db())
+            try:
+                sketch = sketch_service.get_sketch_by_id(db, sketch_id)
+                if sketch and sketch.workflow == "draft":
+                    updated_sketch = sketch_service.mark_sketch_as_used(db, sketch_id)
+                    if updated_sketch:
+                        logger.info("Marked sketch as used", sketch_id=sketch_id)
+                    else:
+                        logger.warning("Failed to mark sketch as used", sketch_id=sketch_id)
+            finally:
+                db.close()
 
         return {
             "task_id": task.id,
@@ -67,13 +104,38 @@ class SongCreationController:
         if not check_balance_func():
             return {"error": "Insufficient MUREKA balance"}, 402  # Payment Required
 
+        # Handle sketch_id if provided
+        sketch_id = payload.get("sketch_id")
+        if sketch_id:
+            logger.info("Instrumental generation requested with sketch_id", sketch_id=sketch_id)
+
+            # Load and validate sketch
+            db = next(get_db())
+            try:
+                sketch = sketch_service.get_sketch_by_id(db, sketch_id)
+                if not sketch:
+                    return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
+
+                # Validate sketch workflow state (must be draft or used)
+                if sketch.workflow not in ["draft", "used"]:
+                    return {"error": f"Sketch is archived and cannot be used (workflow: {sketch.workflow})"}, 400
+            finally:
+                db.close()
+
+            logger.info(
+                "Using sketch for instrumental generation", sketch_id=sketch_id, sketch_workflow=sketch.workflow
+            )
+
         logger.info(
-            "Starting instrumental generation", prompt=payload.get("prompt", ""), model=payload.get("model", "")
+            "Starting instrumental generation",
+            prompt=payload.get("prompt", ""),
+            model=payload.get("model", ""),
+            sketch_id=sketch_id,
         )
 
         task = generate_instrumental_task.delay(payload)
 
-        # Create song record in database with instrumental flag
+        # Create song record in database with instrumental flag and sketch reference
         song = song_service.create_song(
             task_id=task.id,
             lyrics="",  # Empty for instrumental
@@ -81,6 +143,7 @@ class SongCreationController:
             model=payload.get("model", "auto"),
             is_instrumental=True,
             title=payload.get("title"),
+            sketch_id=sketch_id,
         )
 
         if not song:
@@ -88,7 +151,23 @@ class SongCreationController:
             # Continue anyway - fallback to Redis-only mode
             return {"task_id": task.id, "status_url": f"{host_url}api/v1/instrumental/task/status/{task.id}"}, 202
         else:
-            logger.info("Created instrumental song record in database", song_id=song.id, task_id=task.id)
+            logger.info(
+                "Created instrumental song record in database", song_id=song.id, task_id=task.id, sketch_id=sketch_id
+            )
+
+        # Mark sketch as "used" if this is the first time it's being used
+        if sketch_id:
+            db = next(get_db())
+            try:
+                sketch = sketch_service.get_sketch_by_id(db, sketch_id)
+                if sketch and sketch.workflow == "draft":
+                    updated_sketch = sketch_service.mark_sketch_as_used(db, sketch_id)
+                    if updated_sketch:
+                        logger.info("Marked sketch as used", sketch_id=sketch_id)
+                    else:
+                        logger.warning("Failed to mark sketch as used", sketch_id=sketch_id)
+            finally:
+                db.close()
 
         return {
             "task_id": task.id,

@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class BaseResponse(BaseModel):
@@ -67,19 +67,16 @@ class StatusEnum(str):
 class BulkDeleteRequest(BaseModel):
     """Schema for bulk deletion requests"""
 
-    ids: list[str] = Field(..., min_items=1, description="List of IDs to delete")
+    model_config = ConfigDict(json_schema_extra={"example": {"ids": ["item_1", "item_2", "item_3"]}})
 
-    class Config:
-        json_schema_extra = {"example": {"ids": ["item_1", "item_2", "item_3"]}}
+    ids: list[str] = Field(..., min_length=1, description="List of IDs to delete")
 
 
 class BulkDeleteResponse(BaseResponse):
     """Schema for bulk deletion response"""
 
-    data: dict[str, Any] = Field(..., description="Bulk deletion results")
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "success": True,
                 "data": {
@@ -90,19 +87,21 @@ class BulkDeleteResponse(BaseResponse):
                 },
             }
         }
+    )
+
+    data: dict[str, Any] = Field(..., description="Bulk deletion results")
 
 
 class RedisTaskResponse(BaseModel):
     """Schema for Redis/Celery task response"""
+
+    model_config = ConfigDict(from_attributes=True)
 
     task_id: str = Field(..., description="Celery task ID")
     status: str = Field(..., description="Task status")
     result: dict[str, Any] | None = Field(None, description="Task result if completed")
     created_at: datetime | None = Field(None, description="Task creation time")
     updated_at: datetime | None = Field(None, description="Task last update time")
-
-    class Config:
-        from_attributes = True
 
 
 class RedisTaskListResponse(BaseResponse):

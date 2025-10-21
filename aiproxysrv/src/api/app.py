@@ -24,6 +24,7 @@ from .routes.ollama_routes import api_ollama_v1
 from .routes.openai_chat_routes import api_openai_chat_v1
 from .routes.prompt_routes import api_prompt_v1
 from .routes.redis_routes import api_redis_v1
+from .routes.sketch_routes import api_sketch_v1
 from .routes.song_routes import api_song_task_v1, api_song_v1
 from .routes.user_routes import api_user_v1
 
@@ -303,6 +304,7 @@ def create_app():
                     "api_image_v1": "Images",
                     "api_song_v1": "Songs",
                     "api_song_task_v1": "Song Tasks",
+                    "api_sketch_v1": "Sketches",
                     "api_instrumental_v1": "Instrumentals",
                     "api_instrumental_task_v1": "Instrumental Tasks",
                     "api_lyric_parsing_rule_v1": "Lyric Parsing Rules",
@@ -323,6 +325,7 @@ def create_app():
                         (
                             "api_image_v1",
                             "api_song_v1",
+                            "api_sketch_v1",
                             "api_instrumental_v1",
                             "api_instrumental_task_v1",
                             "api_lyric_parsing_rule_v1",
@@ -548,6 +551,7 @@ def create_app():
     app.register_blueprint(api_image_v1)
     app.register_blueprint(api_song_v1)
     app.register_blueprint(api_song_task_v1)
+    app.register_blueprint(api_sketch_v1)
     app.register_blueprint(api_instrumental_v1)
     app.register_blueprint(api_instrumental_task_v1)
     app.register_blueprint(api_lyric_parsing_rule_v1)

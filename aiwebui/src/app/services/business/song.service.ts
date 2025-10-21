@@ -13,6 +13,13 @@ interface SongFormData extends Record<string, unknown> {
   isInstrumental?: boolean;
 }
 
+/**
+ * Context for form data storage
+ * - 'song-generator': Form data for song generation page
+ * - 'sketch-creator': Form data for sketch creation page
+ */
+export type FormDataContext = 'song-generator' | 'sketch-creator';
+
 interface SongGenerateResponse {
   task_id: string;
   song_id?: string;
@@ -63,8 +70,6 @@ interface SongDetailResponse extends Record<string, unknown> {
   providedIn: 'root'
 })
 export class SongService {
-  private readonly STORAGE_KEY = 'songFormData';
-
   private http = inject(HttpClient);
   private apiConfig = inject(ApiConfigService);
 
@@ -88,28 +93,49 @@ export class SongService {
     );
   }
 
-  loadFormData(): SongFormData {
-    const raw = localStorage.getItem(this.STORAGE_KEY);
+  /**
+   * Load form data from localStorage with context-aware key
+   * @param context - Context for storage (default: 'song-generator')
+   * @returns Form data object or empty object if not found
+   */
+  loadFormData(context: FormDataContext = 'song-generator'): SongFormData {
+    const key = `${context}-form-data`;
+    const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : {};
   }
 
-  saveFormData(data: SongFormData): void {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+  /**
+   * Save form data to localStorage with context-aware key
+   * @param data - Form data to save
+   * @param context - Context for storage (default: 'song-generator')
+   */
+  saveFormData(data: SongFormData, context: FormDataContext = 'song-generator'): void {
+    const key = `${context}-form-data`;
+    localStorage.setItem(key, JSON.stringify(data));
   }
 
-  clearFormData(): void {
-    localStorage.removeItem(this.STORAGE_KEY);
+  /**
+   * Clear form data from localStorage with context-aware key
+   * @param context - Context for storage (default: 'song-generator')
+   */
+  clearFormData(context: FormDataContext = 'song-generator'): void {
+    const key = `${context}-form-data`;
+    localStorage.removeItem(key);
   }
 
-  async generateSong(lyrics: string, prompt: string, model: string, title?: string): Promise<SongGenerateResponse> {
+  async generateSong(lyrics: string, prompt: string, model: string, title?: string, sketchId?: string): Promise<SongGenerateResponse> {
     const body: any = { lyrics, model, prompt };
     if (title) body.title = title;
+    if (sketchId) body.sketch_id = sketchId;
 
     return this.httpWithTimeout<SongGenerateResponse>('POST', this.apiConfig.endpoints.song.generate, body, 60000);
   }
 
-  async generateInstrumental(title: string, prompt: string, model: string): Promise<SongGenerateResponse> {
-    return this.httpWithTimeout<SongGenerateResponse>('POST', this.apiConfig.endpoints.instrumental.generate, { title, model, prompt }, 60000);
+  async generateInstrumental(title: string, prompt: string, model: string, sketchId?: string): Promise<SongGenerateResponse> {
+    const body: any = { title, model, prompt };
+    if (sketchId) body.sketch_id = sketchId;
+
+    return this.httpWithTimeout<SongGenerateResponse>('POST', this.apiConfig.endpoints.instrumental.generate, body, 60000);
   }
 
   async checkSongStatus(taskId: string): Promise<SongStatusResponse> {
