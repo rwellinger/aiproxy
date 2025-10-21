@@ -223,6 +223,9 @@
       "errors": "{{count}} errors",
       "notFound": "{{count}} not found"
     },
+    "header": {
+      "count": "{{count}} images"
+    },
     "confirmations": {
       "bulkDelete": "Are you sure you want to delete {{count}} selected image(s)?"
     },
@@ -247,6 +250,11 @@
       "selectImagePlaceholder": "Select an image from the list to view details"
     },
     "noImages": "No images found",
+    "orientation": {
+      "landscape": "Landscape",
+      "portrait": "Portrait",
+      "square": "Square"
+    },
     "pagination": {
       "info": "Page {{current}} of {{total}}"
     },
@@ -797,6 +805,9 @@
     "confirmations": {
       "bulkDelete": "Are you sure you want to delete {{count}} selected song(s)?"
     },
+    "header": {
+      "count": "{{count}} songs"
+    },
     "dialogs": {
       "lyricsTitle": "Lyrics - {{title}}",
       "stylePromptTitle": "Style Prompt - {{title}}"
@@ -1053,6 +1064,9 @@
     "library": {
       "title": "Song Sketch Library",
       "subtitle": "Manage your song ideas",
+      "header": {
+        "count": "{{count}} sketches"
+      },
       "untitled": "Untitled Sketch",
       "search": {
         "placeholder": "Search sketches..."

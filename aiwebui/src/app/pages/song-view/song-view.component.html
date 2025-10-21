@@ -7,10 +7,15 @@
         <!-- Header -->
         <div class="list-header">
           <div class="header-title">
-            <h2>
-              <i class="fas fa-music"></i>
-              {{ 'songView.library.header' | translate }}
-            </h2>
+            <div class="header-title-group">
+              <h2>
+                <i class="fas fa-music"></i>
+                {{ 'songView.library.header' | translate }}
+              </h2>
+              <div class="songs-count-badge" *ngIf="pagination.total > 0">
+                {{ 'songView.header.count' | translate:{count: pagination.total} }}
+              </div>
+            </div>
             <p class="subtitle">{{ 'songView.library.subtitle' | translate }}</p>
           </div>
           <button
@@ -98,13 +103,13 @@
               </span>
             </div>
             <div class="song-item-meta">
-              <span class="meta-model">
-                <i class="fas fa-robot"></i>
-                {{ song.model }}
-              </span>
               <span class="meta-date">
                 <i class="fas fa-clock"></i>
                 {{ formatDate(song.created_at) }}
+              </span>
+              <span class="meta-tags" *ngIf="song.tags">
+                <i class="fas fa-tags"></i>
+                {{ song.tags }}
               </span>
             </div>
           </div>

@@ -226,6 +226,9 @@
     "confirmations": {
       "bulkDelete": "Möchtest du wirklich {{count}} ausgewählte(s) Bild(er) löschen?"
     },
+    "header": {
+      "count": "{{count}} Bilder"
+    },
     "errors": {
       "deletingImages": "Fehler beim Löschen der Bilder: {{error}}",
       "loadingImages": "Fehler beim Laden der Bilder: {{error}}",
@@ -247,6 +250,11 @@
       "selectImagePlaceholder": "Wähle ein Bild aus der Liste, um Details anzuzeigen"
     },
     "noImages": "Keine Bilder gefunden",
+    "orientation": {
+      "landscape": "Querformat",
+      "portrait": "Hochformat",
+      "square": "Quadratisch"
+    },
     "pagination": {
       "info": "Seite {{current}} von {{total}}"
     },
@@ -797,6 +805,9 @@
     "confirmations": {
       "bulkDelete": "Möchtest du wirklich {{count}} ausgewählte(n) Song(s) löschen?"
     },
+    "header": {
+      "count": "{{count}} Songs"
+    },
     "dialogs": {
       "lyricsTitle": "Songtext - {{title}}",
       "stylePromptTitle": "Stil-Prompt - {{title}}"
@@ -1053,6 +1064,9 @@
     "library": {
       "title": "Song-Skizzen Bibliothek",
       "subtitle": "Verwalte deine Song-Ideen",
+      "header": {
+        "count": "{{count}} Entwürfe"
+      },
       "untitled": "Unbenannte Skizze",
       "search": {
         "placeholder": "Skizzen durchsuchen..."

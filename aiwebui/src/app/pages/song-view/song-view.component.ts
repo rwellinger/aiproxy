@@ -973,6 +973,6 @@ export class SongViewComponent implements OnInit, OnDestroy {
   }
 
   navigateToSongGenerator() {
-    this.router.navigate(['/song-generator']);
+    this.router.navigate(['/songgen']);
   }
 }

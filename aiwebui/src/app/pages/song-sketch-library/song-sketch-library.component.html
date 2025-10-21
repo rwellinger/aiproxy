@@ -5,10 +5,15 @@
       <!-- Header -->
       <div class="list-header">
         <div class="header-title">
-          <h2>
-            <i class="fas fa-folder-open"></i>
-            {{ 'songSketch.library.title' | translate }}
-          </h2>
+          <div class="header-title-group">
+            <h2>
+              <i class="fas fa-folder-open"></i>
+              {{ 'songSketch.library.title' | translate }}
+            </h2>
+            <div class="sketches-count-badge" *ngIf="pagination.total > 0">
+              {{ 'songSketch.library.header.count' | translate:{count: pagination.total} }}
+            </div>
+          </div>
           <p class="subtitle">{{ 'songSketch.library.subtitle' | translate }}</p>
         </div>
         <button

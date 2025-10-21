@@ -278,6 +278,21 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
+    getImageOrientation(size: string): string {
+        // Map image size to orientation type
+        switch (size) {
+            case '1024x1024':
+                return 'square';
+            case '1792x1024':
+                return 'landscape';
+            case '1024x1792':
+                return 'portrait';
+            default:
+                // Fallback for unknown sizes
+                return 'square';
+        }
+    }
+
     downloadImage(imageUrl: string) {
         // Use authenticated download via ImageBlobService
         const filename = this.getImageFilename();
@@ -555,6 +570,6 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     navigateToImageGenerator() {
-        this.router.navigate(['/image-generator']);
+        this.router.navigate(['/imagegen']);
     }
 }

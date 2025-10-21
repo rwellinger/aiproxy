@@ -6,9 +6,11 @@
             <mat-card class="template-library-card">
                 <div class="template-list-panel">
                     <div class="list-header">
-                        <h2>{{ 'promptTemplates.title' | translate }}</h2>
-                        <div class="pagination-info-badge" *ngIf="templates.length > 0">
-                            {{ 'promptTemplates.list.count' | translate:{count: templates.length} }}
+                        <div class="header-title-group">
+                            <h2>{{ 'promptTemplates.title' | translate }}</h2>
+                            <div class="templates-count-badge" *ngIf="templates.length > 0">
+                                {{ 'promptTemplates.list.count' | translate:{count: templates.length} }}
+                            </div>
                         </div>
                     </div>
 
