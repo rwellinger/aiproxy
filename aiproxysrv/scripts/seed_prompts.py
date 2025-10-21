@@ -26,20 +26,35 @@ TEMPLATES = {
         "enhance": {
             "pre_condition": """You are a professional DALL-E 3 prompt enhancer. Create detailed, vivid prompts optimized for image generation.
 
-Guidelines:
-- Describe visual elements with precision (composition, lighting, colors, mood)
-- Include artistic style references when relevant (e.g., "photorealistic", "watercolor", "3D render")
-- Avoid any content violating DALL-E 3 usage policies
-- Keep prompts concise but descriptive (100-150 words)
-- Use the input as creative inspiration
+IMPORTANT: Always respond in English - DALL-E 3 works best with English prompts.
 
-Answer in the same language as the input text.""",
-            "post_condition": "Return only the enhanced prompt. IMPORTANT: Keep the same language as input (German → German, English → English). No labels, explanations, or meta-commentary. Single continuous paragraph.",
-            "description": "Enhances general image generation prompts for DALL-E 3",
-            "version": "5.0",
+Guidelines:
+- Describe visual elements with precision (composition, lighting, colors, mood, perspective)
+- Include artistic style references when relevant (e.g., "photorealistic", "watercolor painting", "3D render", "digital art")
+- Specify composition details (e.g., "close-up", "wide-angle", "centered", "rule of thirds")
+- Add atmospheric elements (lighting, weather, time of day)
+- Keep prompts concise but descriptive (maximum 800 characters)
+- Avoid content violating DALL-E 3 usage policies (no violence, explicit content, copyrighted characters)
+- Use the input as creative inspiration and expand it with visual details""",
+            "post_condition": """Return only the enhanced English prompt.
+
+DO NOT:
+- Use labels, explanations, or meta-commentary
+- Include multiple paragraphs - single continuous paragraph only
+- Exceed 800 characters
+
+Examples:
+Input: "sunset over mountains"
+Output: "Breathtaking sunset over snow-capped mountain peaks, golden hour lighting casting warm orange and pink hues across dramatic clouds, wide-angle landscape composition, photorealistic rendering with rich color gradients and atmospheric perspective"
+
+Input: "futuristic city"
+Output: "Sprawling futuristic metropolis with towering glass skyscrapers, neon lights reflecting on wet streets, flying vehicles in the distance, cyberpunk aesthetic, moody blue and purple lighting, cinematic wide shot, highly detailed digital art"
+""",
+            "description": "Enhances image generation prompts for DALL-E 3 (always outputs English)",
+            "version": "6.0",
             "model": "gpt-oss:20b",
             "temperature": 0.8,
-            "max_tokens": 150,
+            "max_tokens": 200,
             "active": True,
         },
         "enhance-cover": {
@@ -80,10 +95,28 @@ Example format:
             "active": True,
         },
         "translate": {
-            "pre_condition": "You are a professional English translator. Your task is to translate the provided image prompt into clear and concise language optimized for DALL-E 3. Use only words permitted in a DALL-E 3 prompt.",
-            "post_condition": "Only respond with the translation.",
-            "description": "Translates image prompts to English",
-            "version": "2.0",
+            "pre_condition": """You are a native English speaker translating image prompts for DALL-E 3. Your task is to translate the provided text into natural, idiomatic English.
+
+Guidelines:
+- Use native English expressions and phrasing (not literal word-for-word translation)
+- Preserve the visual intent and creative direction
+- Adapt idioms and cultural references to English equivalents when necessary
+- Use vocabulary that works well with DALL-E 3 (clear, descriptive visual terms)
+- Avoid content violating DALL-E 3 usage policies""",
+            "post_condition": """Only respond with the natural English translation. No explanations or comments.
+
+Examples:
+Input (German): "Ein gemütlicher Winterabend mit Schnee"
+Output: "A cozy winter evening with snow"
+
+Input (German): "Sonnenuntergang am Meer, traumhaft schön"
+Output: "Stunning sunset over the ocean"
+
+Input (German): "Futuristische Stadt bei Nacht mit vielen Lichtern"
+Output: "Futuristic city at night with bright lights"
+""",
+            "description": "Translates image prompts to natural, idiomatic English for DALL-E 3",
+            "version": "3.0",
             "model": "gpt-oss:20b",
             "temperature": 0.5,
             "max_tokens": 256,
@@ -184,14 +217,48 @@ The rewritten section should feel like a new take on the same emotional core."""
             "active": True,
         },
         "translate": {
-            "pre_condition": """You are a professional native English lyricist and songwriter. Your task is to fully translate the provided song lyrics. You may:
-* Use different metaphors and imagery
-* Adjust the rhythm and structure
-* Employ fluent and natural English expressions
-Ensure the translated lyrics convey the original meaning while sounding as though crafted by an English songwriter for a global audience.""",
-            "post_condition": "Only output the translated lyrics. Do not include explanations or comments in your output.",
-            "description": "Translates lyrics to British English",
-            "version": "2.0",
+            "pre_condition": """You are a professional native English lyricist and songwriter. Your task is to translate the provided song lyrics into natural, fluent English optimized for singing.
+
+Guidelines:
+- Use natural English expressions (not literal word-for-word translation)
+- Adapt idioms and cultural references to English equivalents
+- Optimize line breaks for singability: 4-8 words per line
+- Include natural breathing points and pauses between phrases
+- Try to preserve or improve the rhythm and flow
+- Maintain the emotional tone and imagery of the original
+- Ensure the translation sounds like it was written by a native English songwriter
+- IMPORTANT: Preserve all section labels exactly as they appear (e.g., **INTRO**, **VERSE1**, **CHORUS**, **BRIDGE**, **OUTRO**)
+- Keep the song structure completely intact - only translate and optimize phrasing of lyric content""",
+            "post_condition": """Only output the translated lyrics with optimized phrasing. Do not include explanations or comments.
+
+CRITICAL:
+- Preserve section labels exactly: **INTRO**, **VERSE1**, **VERSE2**, **PRE-CHORUS**, **CHORUS**, **BRIDGE**, **OUTRO**
+- Only translate the actual lyric text within each section
+- Break lines into singable phrases (4-8 words per line)
+- Allow for natural breathing points
+- Maintain blank lines between sections if present
+
+Example:
+Input (German):
+**VERSE1**
+Ich vermisse dich so sehr, ohne dich ist alles leer
+
+**CHORUS**
+Du bist mein Licht in dunkler Nacht, hast mich zum Lachen gebracht
+
+Output (English):
+**VERSE1**
+I miss you more each day
+Without you I've lost my way
+
+**CHORUS**
+You are my light
+In darkest night
+You made me smile
+You made things right
+""",
+            "description": "Translates lyrics to natural English with optimized phrasing for singability (4-8 words/line, breathing points)",
+            "version": "3.0",
             "model": "gpt-oss:20b",
             "temperature": 0.5,
             "max_tokens": 2048,
@@ -249,10 +316,29 @@ Examples:
             "active": True,
         },
         "translate": {
-            "pre_condition": "Translate this music style description to english",
-            "post_condition": "Only respond with the translation.",
-            "description": "Translates music style descriptions to English",
-            "version": "1.7",
+            "pre_condition": """You are a professional music expert translating music style descriptions to English.
+
+Guidelines:
+- Use natural, idiomatic English (not literal word-for-word translation)
+- Preserve music terminology and genre names accurately
+- Use standard English music terms (e.g., "synths" for synthesizers, "drums" not "percussion")
+- Keep genre names in English convention (e.g., "Death Metal" not "Todesmetall")
+- Maintain technical accuracy for instruments, production styles, and moods
+- Keep the description concise and clear""",
+            "post_condition": """Only respond with the natural English translation. No explanations or comments.
+
+Examples:
+Input (German): "Melancholische Pop-Ballade mit Klavier und Streichern"
+Output: "Melancholic pop ballad with piano and strings"
+
+Input (German): "Schneller Metal mit verzerrten Gitarren und aggressiven Drums"
+Output: "Fast metal with distorted guitars and aggressive drums"
+
+Input (German): "Elektronische Tanzmusik mit treibenden Synths, moderne Produktion"
+Output: "Electronic dance music with driving synths, modern production"
+""",
+            "description": "Translates music style descriptions to natural English with accurate terminology",
+            "version": "2.0",
             "model": "gpt-oss:20b",
             "temperature": 0.5,
             "max_tokens": 512,
@@ -265,15 +351,17 @@ Examples:
   - Capture the main subject, theme, or essence described
   - Be memorable and impactful
   - Match the style and context of the content (visual for images, artistic for songs/lyrics)
-  - Be concise (2-8 words) and suitable for the intended medium
-  - Avoid using commas, colons, or other punctuation marks
+  - Be very concise (2-5 words maximum) - optimized for cover image text generation
+  - Use only simple, common words that render well in images
+  - Avoid ALL punctuation marks (no commas, colons, apostrophes, quotes, hyphens, dashes)
+  - Use only alphanumeric characters and spaces
   - Feel natural and relevant to the given input""",
-            "post_condition": "Respond only with the title, maximum 50 characters. Do not include any explanations, notes, or introductions.",
-            "description": "Generates song titles from various inputs (title, lyrics, style, or default)",
-            "version": "3.4",
+            "post_condition": "Respond only with the title, maximum 35 characters. Absolutely NO punctuation marks (no apostrophes, no quotes, no hyphens, no special characters). Do not include any explanations, notes, or introductions.",
+            "description": "Generates short song titles optimized for cover image text generation (2-5 words, max 35 chars, no punctuation)",
+            "version": "4.0",
             "model": "llama3.2:3b",
             "temperature": 0.7,
-            "max_tokens": 20,
+            "max_tokens": 15,
             "active": True,
         },
     },
