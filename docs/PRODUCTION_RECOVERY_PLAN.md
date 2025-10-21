@@ -1,0 +1,166 @@
+# 🚨 Production Database Recovery Plan
+
+**Datum:** 2025-10-21
+**Problem:** Songs werden nicht mehr angezeigt nach Migration auf Produktion
+**Aktuelle Alembic-Version auf Prod:** 0f864573b58a
+
+---
+
+## Problem-Analyse
+
+### Was ist passiert?
+1. Code wurde deployed mit neuen SQLAlchemy Models (`sketch_id`, `song_sketches`)
+2. Aber Migration `d4641a241b98` wurde NICHT auf Produktion ausgeführt
+3. Backend versucht Songs zu laden → SQL-Error wegen fehlender Spalte `sketch_id`
+4. Daher: Keine Songs werden angezeigt (obwohl Daten noch in DB sind)
+
+### Fehlende Migrationen auf Produktion
+```
+✅ 0f864573b58a - add_lyric_parsing_rules_table (AKTUELL)
+❌ 234ea0f4b6c3 - base64_encode_lyric_parsing_rule_replacements
+❌ d4641a241b98 - add_song_sketches_table
+```
+
+---
+
+## Recovery-Steps (IN DIESER REIHENFOLGE!)
+
+### SCHRITT 1: Backup erstellen (KRITISCH!)
+```bash
+# SSH auf Production Server
+ssh rob@10.0.1.120
+
+# PostgreSQL Backup
+docker exec -t mac_ki_service-postgres-1 pg_dump -U aiuser -d aiproxy > /tmp/aiproxy_backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Backup auf lokalen Rechner kopieren
+scp rob@10.0.1.120:/tmp/aiproxy_backup_*.sql ~/Desktop/
+```
+
+### SCHRITT 2: Alembic-Status auf Produktion prüfen
+```bash
+# Im aiproxysrv Container
+docker exec -it mac_ki_service-aiproxysrv-1 bash
+cd /app
+alembic current
+alembic history | head -20
+```
+
+**Erwartetes Ergebnis:**
+```
+0f864573b58a (current)
+```
+
+### SCHRITT 3: Fehlende Migrationen anwenden
+```bash
+# Im aiproxysrv Container (oder direkt im Docker Command)
+docker exec -it mac_ki_service-aiproxysrv-1 alembic upgrade head
+
+# Oder als einzelne Steps:
+docker exec -it mac_ki_service-aiproxysrv-1 alembic upgrade 234ea0f4b6c3
+docker exec -it mac_ki_service-aiproxysrv-1 alembic upgrade d4641a241b98
+```
+
+**Was passiert:**
+1. Migration `234ea0f4b6c3`: Encodiert `replacement` Werte in `lyric_parsing_rules` zu Base64
+2. Migration `d4641a241b98`:
+   - Erstellt Tabelle `song_sketches`
+   - Fügt Spalte `sketch_id` zur `songs` Tabelle hinzu (nullable!)
+   - Erstellt Foreign Key Constraint
+
+### SCHRITT 4: Verifizierung
+```bash
+# Alembic Version prüfen
+docker exec -it mac_ki_service-aiproxysrv-1 alembic current
+
+# Sollte zeigen:
+# d4641a241b98 (head)
+```
+
+```sql
+-- PostgreSQL Tabellen prüfen
+docker exec -it mac_ki_service-postgres-1 psql -U aiuser -d aiproxy -c "\d songs"
+-- Sollte jetzt sketch_id Spalte zeigen
+
+docker exec -it mac_ki_service-postgres-1 psql -U aiuser -d aiproxy -c "\dt"
+-- Sollte song_sketches Tabelle zeigen
+
+-- Songs-Daten prüfen
+docker exec -it mac_ki_service-postgres-1 psql -U aiuser -d aiproxy -c "SELECT COUNT(*) FROM songs;"
+```
+
+### SCHRITT 5: Backend-Container neu starten
+```bash
+# Container neu starten, damit Model-Änderungen aktiv werden
+docker restart mac_ki_service-aiproxysrv-1
+docker restart mac_ki_service-celery-worker-1
+
+# Logs prüfen
+docker logs -f mac_ki_service-aiproxysrv-1
+```
+
+### SCHRITT 6: Funktionstest
+1. **Frontend öffnen:** https://10.0.1.120
+2. **Songs-Übersicht öffnen**
+3. **Verifizieren:** Songs werden wieder angezeigt
+4. **Test:** Song-Details öffnen, abspielen testen
+
+---
+
+## Rollback-Plan (falls Probleme auftreten)
+
+### Option 1: Migration rückgängig machen
+```bash
+docker exec -it mac_ki_service-aiproxysrv-1 alembic downgrade 0f864573b58a
+docker restart mac_ki_service-aiproxysrv-1
+```
+
+**ABER ACHTUNG:** Das würde nur funktionieren, wenn der alte Code deployed wäre!
+
+### Option 2: Backup wiederherstellen
+```bash
+# Backup auf Server kopieren
+scp ~/Desktop/aiproxy_backup_*.sql rob@10.0.1.120:/tmp/
+
+# Restore
+ssh rob@10.0.1.120
+docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy < /tmp/aiproxy_backup_*.sql
+```
+
+---
+
+## Lessons Learned & Best Practices
+
+### ❌ Was schiefgelaufen ist:
+1. **Code deployed OHNE Migrationen auszuführen**
+2. **Keine Synchronisation zwischen Code-Deployment und DB-Migration**
+3. **Kein Pre-Deployment Check der Alembic-Version**
+
+### ✅ Zukünftig:
+1. **IMMER Deployment-Reihenfolge einhalten:**
+   ```
+   1. Backup erstellen
+   2. Alembic Migrations ausführen
+   3. Code deployen
+   4. Backend-Container neu starten
+   5. Funktionstest
+   ```
+
+2. **Pre-Deployment Checklist:**
+   - [ ] Backup erstellt
+   - [ ] Alembic current version geprüft
+   - [ ] Migration Script geprüft
+   - [ ] Rollback-Plan erstellt
+   - [ ] Migrations auf Test-DB getestet
+
+3. **Automatisierung:**
+   - Migration-Script in Docker-Entrypoint einbauen?
+   - Health-Check für Schema-Konsistenz?
+
+---
+
+## Kontakt bei Problemen
+- **Rob:** rob.wellinger@gmail.com
+- **Claude Code:** Dokumentation im Projekt
+
+**Status:** ⏳ Warte auf Bestätigung für Durchführung

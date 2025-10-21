@@ -80,6 +80,13 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   - Song architecture builder with drag & drop reordering
   - AI-powered section improvement, rewriting, and extension via Ollama
   - Text tools: cleanup, structure application, section navigation, undo functionality
+- **Song Sketch Library** - Organize and develop song ideas before generation
+  - Create and manage song sketches (title, lyrics, music style prompt, tags)
+  - Workflow management (draft, used, archived)
+  - Master-detail view with search and filtering
+  - AI-powered title generation
+  - Direct integration with Song Generator and Lyric Creator
+  - Convert sketches to full songs with one click
 - **Image Generation** via DALL-E 3 (OpenAI API)
 - **Music Generation** via Mureka API
 - **Asynchronous Processing** for time-intensive generation processes
@@ -187,6 +194,8 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   ├── pages/         # Feature Pages
   │   ├── ai-chat/            # AI Chat conversation interface
   │   ├── lyric-creation/     # Lyric editor with section-based editing & AI tools
+  │   ├── song-sketch-creator/  # Create/edit song sketches
+  │   ├── song-sketch-library/  # Manage song sketch library
   │   ├── image-generator/    # UI for image generation
   │   ├── image-view/         # Display of generated images
   │   ├── song-generator/     # UI for music generation
@@ -195,7 +204,7 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   │   ├── user-profile/       # User profile page
   │   └── prompt-templates/   # Template management for prompts
   ├── services/      # API Services & Business Logic
-  │   ├── business/           # ConversationService for chat management
+  │   ├── business/           # ConversationService, SketchService, SongService
   │   ├── config/             # ChatService, ApiConfigService
   │   └── lyric-architecture.service.ts  # Song structure management & persistence
   ├── models/        # TypeScript Interfaces & Models
@@ -301,6 +310,7 @@ src/assets/i18n/
 - `common.*` - Shared UI elements (buttons, labels, etc.)
 - `chat.*` - AI Chat interface
 - `lyricCreation.*` - Lyric editor and section-based editing (40+ keys)
+- `songSketch.*` - Song sketch library and creator (50+ keys)
 - `imageGenerator.*` - Image generation page
 - `imageView.*` - Image gallery and details
 - `songGenerator.*` - Song generation page (50+ keys)
@@ -318,12 +328,15 @@ Users can change the language in **User Profile → Settings → Language**. The
   ```
   src/
   ├── api/           # API Layer (Business Logic & Routing)
-  │   ├── controllers/        # ConversationController, ChatController
-  │   └── routes/             # conversation_routes, chat_routes
+  │   ├── controllers/        # SketchController, ConversationController, ChatController
+  │   └── routes/             # sketch_routes, conversation_routes, chat_routes
   ├── business/      # Core Business Logic Services
   ├── db/            # Models & Database Connection
-  │   └── models/             # Conversation, Message models
+  │   ├── models.py           # SongSketch, Song, Conversation, Message models
+  │   ├── sketch_service.py   # Sketch CRUD operations
+  │   └── song_service.py     # Song CRUD operations
   ├── schemas/       # Pydantic Data Schemas
+  │   ├── sketch_schemas.py   # SketchCreate, SketchUpdate, SketchResponse
   │   └── conversation_schemas.py  # Request/Response schemas
   ├── celery_app/    # Async Processing (Mureka API)
   ├── config/        # Configuration (reads .env)
@@ -772,13 +785,17 @@ services:
 | **Prompt Templates** | Reusable prompt templates with pre/post conditions and AI parameters       |
 | **Template Processing** | Automatic prompt optimization with model, temperature, max_tokens        |
 | **Settings**   | Frontend component for system configuration and user preferences                |
-| **Entity-Relationship** | Database schema with 6 tables (including conversations, messages)         |
+| **Entity-Relationship** | Database schema with 10 tables (songs, sketches, conversations, users, etc.) |
 | **aitestmock** | Mock server for OpenAI and Mureka APIs for cost reduction in development/testing |
 | **Lyric Editor** | Integrated songwriting tool with section-based editing and AI assistance        |
 | **Song Architecture** | Structured song layout definition (INTRO, VERSE, CHORUS, BRIDGE, OUTRO, etc.) |
 | **Section Editor** | Split-view interface for editing individual lyric sections with AI tools        |
 | **Lyric Architecture Service** | Frontend service managing song structure persistence in localStorage    |
 | **Text Tools** | Cleanup, structure application, and undo operations for lyric text              |
+| **Song Sketch** | Pre-generation song concept with title, lyrics, music style prompt, and tags    |
+| **Sketch Library** | Master-detail view for managing song sketches with search and filtering         |
+| **Sketch Creator** | Form interface for creating/editing song sketches with AI title generation      |
+| **Sketch Workflow** | Organizational state: draft (new), used (generated), archived (inactive)        |
 
 ---
 
@@ -800,12 +817,14 @@ services:
 | `id` | UUID | Primary Key |
 | `task_id` | VARCHAR(255) | Celery Task ID (unique) |
 | `job_id` | VARCHAR(255) | MUREKA Job ID |
+| `sketch_id` | UUID | Foreign Key to song_sketches.id (nullable) |
 | `lyrics` | TEXT | Song text input |
 | `prompt` | TEXT | Style prompt for generation |
-| `model` | VARCHAR(100) | Generation model (default: "chirp-v3-5") |
+| `model` | VARCHAR(100) | Generation model (default: "auto") |
 | `title` | VARCHAR(500) | User-defined title |
 | `tags` | VARCHAR(1000) | User-defined tags |
 | `workflow` | VARCHAR(50) | Status: onWork, inUse, notUsed |
+| `is_instrumental` | BOOLEAN | True for instrumental songs |
 | `status` | VARCHAR(50) | PENDING, PROGRESS, SUCCESS, FAILURE, CANCELLED |
 | `progress_info` | TEXT | JSON progress details |
 | `error_message` | TEXT | Error information |
@@ -835,7 +854,21 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
-#### 13.2.3 generated_images
+#### 13.2.3 song_sketches
+**Purpose**: Song concept/draft management before generation (1:N to songs)
+
+| Column | Type | Description |
+|--------|-----|-------------|
+| `id` | UUID | Primary Key |
+| `title` | VARCHAR(500) | Sketch title (optional) |
+| `lyrics` | TEXT | Lyric draft (optional) |
+| `prompt` | TEXT | Music style prompt (required) |
+| `tags` | VARCHAR(1000) | User-defined tags |
+| `workflow` | VARCHAR(50) | Workflow status: draft, used, archived |
+| `created_at` | TIMESTAMP | Creation timestamp |
+| `updated_at` | TIMESTAMP | Last update |
+
+#### 13.2.4 generated_images
 **Purpose**: Generated images and metadata
 
 | Column | Type | Description |
@@ -853,7 +886,7 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
-#### 13.2.4 prompt_templates
+#### 13.2.5 prompt_templates
 **Purpose**: AI prompt templates for various categories and actions
 
 | Column | Type | Description |
@@ -872,7 +905,7 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
-#### 13.2.5 conversations
+#### 13.2.6 conversations
 **Purpose**: AI Chat conversations with persistent context
 
 | Column | Type | Description |
@@ -886,7 +919,7 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
-#### 13.2.6 messages
+#### 13.2.7 messages
 **Purpose**: Individual messages within conversations (1:N to conversations)
 
 | Column | Type | Description |
@@ -898,7 +931,7 @@ services:
 | `token_count` | INTEGER | Token count for this message |
 | `created_at` | TIMESTAMP | Creation timestamp |
 
-#### 13.2.7 messages_archive
+#### 13.2.8 messages_archive
 **Purpose**: Archived messages from conversation compression (1:N to conversations)
 
 | Column | Type | Description |
@@ -913,7 +946,7 @@ services:
 | `archived_at` | TIMESTAMP | Archiving timestamp |
 | `summary_message_id` | UUID | Reference to summary message (if applicable) |
 
-#### 13.2.8 users
+#### 13.2.9 users
 **Purpose**: User accounts and authentication
 
 | Column | Type | Description |
@@ -931,7 +964,7 @@ services:
 | `updated_at` | TIMESTAMP | Last update timestamp |
 | `last_login` | TIMESTAMP | Last login timestamp |
 
-#### 13.2.9 lyric_parsing_rules
+#### 13.2.10 lyric_parsing_rules
 **Purpose**: Configurable regex-based rules for lyric cleanup and section detection
 
 | Column | Type | Description |
@@ -949,15 +982,17 @@ services:
 
 ### 13.3 Relationships and Constraints
 
+- **song_sketches ↔ songs**: 1:N relationship (one sketch can be used for multiple songs)
 - **songs ↔ song_choices**: 1:N relationship with CASCADE DELETE
 - **conversations ↔ messages**: 1:N relationship with CASCADE DELETE
 - **conversations ↔ messages_archive**: 1:N relationship with CASCADE DELETE
 - **users ↔ conversations**: 1:N relationship (user_id references users.id)
 - **Unique Constraints**: `songs.task_id`, `generated_images.filename`, `users.email`
 - **Indexes**:
-  - Performance: `task_id`, `job_id`, `song_id`, `conversation_id`, `original_message_id`
-  - Lookup: `users.email`, `lyric_parsing_rules.active`, `lyric_parsing_rules.order`
+  - Performance: `task_id`, `job_id`, `song_id`, `sketch_id`, `conversation_id`, `original_message_id`
+  - Lookup: `users.email`, `lyric_parsing_rules.active`, `lyric_parsing_rules.order`, `song_sketches.workflow`
 - **Foreign Keys**:
+  - `songs.sketch_id` → `song_sketches.id` (nullable)
   - `song_choices.song_id` → `songs.id`
   - `messages.conversation_id` → `conversations.id`
   - `messages_archive.conversation_id` → `conversations.id`

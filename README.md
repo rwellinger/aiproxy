@@ -23,6 +23,13 @@ A full-stack platform for AI-powered image and music generation with Python back
     - Cleanup rules: Line breaks, smart quotes, trailing spaces, em dashes, etc.
     - Section detection: Markdown-style labels (**Intro**, **Verse1**, **Chorus**, etc.)
     - Database-driven configuration with execution order control
+- **Song Sketch Library** - Organize and develop song ideas before generation
+  - Create and manage song sketches (title, lyrics, music style prompt, tags)
+  - Workflow management (draft, used, archived)
+  - Master-detail view with search and filtering
+  - AI-powered title generation
+  - Direct integration with Song Generator and Lyric Creator
+  - Convert sketches to full songs with one click
 - **Image Generation** via DALL·E 3 (OpenAI)
 - **Song Generation** via Mureka API (asynchronous with Celery)
 - **PostgreSQL** database for persistent storage
@@ -230,12 +237,15 @@ mac_ki_service/
 ├── aiwebui/             # Angular 18 Frontend
 │   ├── src/app/
 │   │   ├── pages/       # Feature pages
-│   │   │   ├── ai-chat/          # AI Chat conversations
-│   │   │   ├── image-generator/  # Image generation UI
-│   │   │   ├── song-generator/   # Song generation UI
+│   │   │   ├── ai-chat/               # AI Chat conversations
+│   │   │   ├── lyric-creation/        # Lyric editor with AI tools
+│   │   │   ├── song-sketch-creator/   # Create/edit song sketches
+│   │   │   ├── song-sketch-library/   # Manage song sketches
+│   │   │   ├── image-generator/       # Image generation UI
+│   │   │   ├── song-generator/        # Song generation UI
 │   │   │   └── ...
 │   │   ├── services/    # API services
-│   │   │   ├── business/         # Conversation management
+│   │   │   ├── business/         # Conversation, Sketch & Song services
 │   │   │   └── config/           # Chat & API config
 │   │   ├── components/  # Shared components
 │   │   └── models/      # TypeScript interfaces
