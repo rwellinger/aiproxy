@@ -11,6 +11,7 @@ import {
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {HttpClient} from '@angular/common/http';
+import {Router} from '@angular/router';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {ImageBlobService} from '../../services/ui/image-blob.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
@@ -105,6 +106,10 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     private notificationService = inject(NotificationService);
     private settingsService = inject(UserSettingsService);
     private translate = inject(TranslateService);
+    private router = inject(Router);
+
+    // Make Math available in template
+    Math = Math;
 
     constructor() {
         // Setup search debouncing
@@ -549,5 +554,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
         this.openImageModal();
     }
 
-    protected readonly Math = Math;
+    navigateToImageGenerator() {
+        this.router.navigate(['/image-generator']);
+    }
 }

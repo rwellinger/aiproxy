@@ -212,6 +212,7 @@
       "downloadOriginal": "Download Original",
       "exitSelect": "Exit Select",
       "fullSize": "Full Size",
+      "newImage": "New Image",
       "refresh": "Refresh",
       "selectAll": "Select All",
       "selectMode": "Select Mode",
@@ -235,7 +236,8 @@
       "clearSearch": "Clear search",
       "header": "Available Pictures",
       "itemsCount": "{{count}} items",
-      "searchPlaceholder": "Search in titles and prompts..."
+      "searchPlaceholder": "Search in titles and prompts...",
+      "subtitle": "Manage your generated images"
     },
     "messages": {
       "adjustSearch": "Try adjusting your search term or clear the search to see all images.",
@@ -245,6 +247,9 @@
       "selectImagePlaceholder": "Select an image from the list to view details"
     },
     "noImages": "No images found",
+    "pagination": {
+      "info": "Page {{current}} of {{total}}"
+    },
     "placeholderText": "Your generated image will appear here",
     "table": {
       "actions": "Actions",
@@ -776,6 +781,7 @@
       "downloadMp3": "Download MP3",
       "downloadStems": "Download Stems",
       "exitSelect": "Exit Select",
+      "newSong": "New Song",
       "playAudio": "Play Audio",
       "playPause": "Play/Pause",
       "refresh": "Refresh",
@@ -819,7 +825,8 @@
       "clearSearch": "Clear search",
       "header": "Available Songs",
       "searchPlaceholder": "Search in titles, lyrics & tags...",
-      "songsCount": "{{count}} songs"
+      "songsCount": "{{count}} songs",
+      "subtitle": "Manage your generated songs"
     },
     "messages": {
       "adjustSearch": "Try adjusting your search term or clear the search to see all songs.",
@@ -838,6 +845,7 @@
     },
     "noSongs": "No songs found",
     "pagination": {
+      "info": "Page {{current}} of {{total}}",
       "itemsPerPage": "Items per page:",
       "of": "of"
     },

@@ -4,6 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {Subject, debounceTime, distinctUntilChanged, takeUntil, firstValueFrom} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
+import {Router} from '@angular/router';
 import {SongService} from '../../services/business/song.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
 import {NotificationService} from '../../services/ui/notification.service';
@@ -107,6 +108,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
   private settingsService = inject(UserSettingsService);
   private http = inject(HttpClient);
   private translate = inject(TranslateService);
+  private router = inject(Router);
 
   constructor() {
     // Setup search debouncing
@@ -937,5 +939,40 @@ export class SongViewComponent implements OnInit, OnDestroy {
     return this.isInstrumental(song)
       ? this.translate.instant('songView.tooltips.instrumental')
       : this.translate.instant('songView.tooltips.withVocals');
+  }
+
+  // Workflow filter methods (for new UI)
+  onWorkflowChange(workflow: string) {
+    this.setWorkflowFilter(workflow);
+  }
+
+  getWorkflowClass(workflow: string): string {
+    switch (workflow) {
+      case 'inUse':
+        return 'badge-in-use';
+      case 'onWork':
+        return 'badge-on-work';
+      case 'notUsed':
+        return 'badge-not-used';
+      default:
+        return 'badge-not-used';
+    }
+  }
+
+  getWorkflowLabel(workflow: string): string {
+    switch (workflow) {
+      case 'inUse':
+        return this.translate.instant('songView.filters.inUse');
+      case 'onWork':
+        return this.translate.instant('songView.filters.onWork');
+      case 'notUsed':
+        return this.translate.instant('songView.filters.notUsed');
+      default:
+        return this.translate.instant('songView.filters.notUsed');
+    }
+  }
+
+  navigateToSongGenerator() {
+    this.router.navigate(['/song-generator']);
   }
 }
