@@ -415,9 +415,7 @@ class SongService:
                 if workflow:
                     if workflow == "all":
                         # "all" excludes only notUsed and fail workflows (NULL is allowed)
-                        query = query.filter(
-                            (Song.workflow.is_(None)) | (Song.workflow.notin_(["notUsed", "fail"]))
-                        )
+                        query = query.filter((Song.workflow.is_(None)) | (Song.workflow.notin_(["notUsed", "fail"])))
                     else:
                         # Specific workflow filter
                         query = query.filter(Song.workflow == workflow)
@@ -497,9 +495,7 @@ class SongService:
                 if workflow:
                     if workflow == "all":
                         # "all" excludes only notUsed and fail workflows (NULL is allowed)
-                        query = query.filter(
-                            (Song.workflow.is_(None)) | (Song.workflow.notin_(["notUsed", "fail"]))
-                        )
+                        query = query.filter((Song.workflow.is_(None)) | (Song.workflow.notin_(["notUsed", "fail"])))
                     else:
                         # Specific workflow filter
                         query = query.filter(Song.workflow == workflow)
