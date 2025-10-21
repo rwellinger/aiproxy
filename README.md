@@ -307,9 +307,14 @@ python src/worker.py
 cd src && alembic upgrade head
 cd src && alembic revision --autogenerate -m "description"
 
-# Seed scripts
-python scripts/seed_prompts.py                    # Seed prompt templates
-python scripts/seed_lyric_parsing_rules.py        # Seed lyric parsing rules
+# Database seeding (SQL-based, Docker-friendly)
+# From project root (mac_ki_service/)
+cat scripts/db/seed_prompts.sql | docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy
+cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy
+
+# Or local PostgreSQL (without Docker)
+psql -h localhost -U aiuser -d aiproxy -f scripts/db/seed_prompts.sql
+psql -h localhost -U aiuser -d aiproxy -f scripts/db/seed_lyric_parsing_rules.sql
 
 # Code Quality & Linting (Ruff)
 ruff check .                   # Run linter

@@ -2,7 +2,7 @@
 
 **Author:** Rob
 **Language:** English
-**Last Updated:** 2025-10-15
+**Last Updated:** 2025-10-21
 
 ---
 
@@ -326,13 +326,13 @@ conda activate mac_ki_service
 # Development Server
 python src/server.py           # Dev server (PyCharm)
 
-# Database Migrations (from aiproxysrv directory)
-cd src && alembic upgrade head                          # Apply migrations
-cd src && alembic revision --autogenerate -m "message"  # Create migration
-
-# Seed Scripts
-python scripts/seed_prompts.py                          # Seed prompt templates
-python scripts/seed_lyric_parsing_rules.py              # Seed lyric parsing rules
+# Database Migrations
+# IMPORTANT: alembic.ini is in aiproxysrv/ root, NOT in src/
+# Always run from aiproxysrv/ directory!
+alembic current                                         # Show current version
+alembic upgrade head                                    # Apply migrations
+alembic revision --autogenerate -m "message"            # Create migration
+alembic history                                         # Show migration history
 
 # Celery Worker
 python src/worker.py           # Start worker
@@ -356,6 +356,30 @@ pytest tests/test_health.py    # Run specific test file
 pytest -k "test_name"          # Run tests matching pattern
 pytest --cov=src               # Run with coverage report
 ```
+
+### Database Seeding
+**Working Directory:** Project root (`mac_ki_service/`)
+
+**IMPORTANT:** All seed scripts are SQL-based (not Python) for easy deployment in Docker environments.
+
+```bash
+# Seed Prompt Templates
+cat scripts/db/seed_prompts.sql | docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy
+
+# Seed Lyric Parsing Rules
+cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy
+
+# Local PostgreSQL (without Docker)
+psql -h localhost -U aiuser -d aiproxy -f scripts/db/seed_prompts.sql
+psql -h localhost -U aiuser -d aiproxy -f scripts/db/seed_lyric_parsing_rules.sql
+```
+
+**Why SQL instead of Python?**
+- ✅ No Python environment dependencies
+- ✅ Easy to run in Docker containers (Production)
+- ✅ Fast execution, no DB connection overhead
+- ✅ Version-controlled, idempotent (UPSERT logic)
+- ✅ No need to worry about `.env` configurations
 
 ### Docker
 **Working Directory:** Project root (`mac_ki_service/`)
@@ -403,10 +427,26 @@ pytest -v -s                  # Verbose output
 6. ✅ Verify all API endpoints use `ApiConfigService`
 7. ✅ Check no hardcoded URLs in frontend
 8. ✅ Verify `.env` not committed
-9. ✅ Run database migrations (`cd aiproxysrv/src && alembic upgrade head`)
-10. ✅ Test with aitestmock first
-11. ✅ Check Docker containers start (`docker compose up -d` from root)
-12. ✅ Verify Nginx routing (forwardproxy)
+9. ✅ **Database Migrations** (from `aiproxysrv/`):
+   - `alembic current` - Check current version
+   - `alembic upgrade head` - Apply pending migrations
+10. ✅ **Schema Comparison** (PyCharm Database Tool):
+    - Compare DEV ↔ PROD structures
+    - Red/Green = critical differences (fix before deploy!)
+    - Blue = harmless (operator classes, extensions)
+    - No structural differences = ready to deploy
+11. ✅ Test with aitestmock first
+12. ✅ Check Docker containers start (`docker compose up -d` from root)
+13. ✅ Verify Nginx routing (forwardproxy)
+
+**After Production Deploy:**
+1. ✅ Run `alembic upgrade head` on PROD (if new migrations)
+2. ✅ Verify schema with PyCharm Compare (should be identical)
+3. ✅ Run seed scripts if needed (from project root):
+   ```bash
+   cat scripts/db/seed_prompts.sql | docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy
+   cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy
+   ```
 
 ---
 
