@@ -223,9 +223,75 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
 
       // Reload list
       await this.loadSketches(this.currentPage);
+
+      // Update selected sketch to reflect new workflow
+      if (this.selectedSketch?.id === sketch.id) {
+        const updatedSketch = this.sketches.find(s => s.id === sketch.id);
+        if (updatedSketch) {
+          this.selectedSketch = updatedSketch;
+        }
+      }
     } catch (error: any) {
       this.notificationService.error(
         this.translate.instant('songSketch.library.messages.archiveError') + ': ' + error.message
+      );
+    }
+  }
+
+  async markAsUsed(sketch: Sketch): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.sketchService.updateSketch(sketch.id, {
+          workflow: 'used'
+        })
+      );
+
+      this.notificationService.success(
+        this.translate.instant('songSketch.library.messages.markedAsUsed')
+      );
+
+      // Reload list
+      await this.loadSketches(this.currentPage);
+
+      // Update selected sketch to reflect new workflow
+      if (this.selectedSketch?.id === sketch.id) {
+        const updatedSketch = this.sketches.find(s => s.id === sketch.id);
+        if (updatedSketch) {
+          this.selectedSketch = updatedSketch;
+        }
+      }
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('songSketch.library.messages.markAsUsedError') + ': ' + error.message
+      );
+    }
+  }
+
+  async markAsDraft(sketch: Sketch): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.sketchService.updateSketch(sketch.id, {
+          workflow: 'draft'
+        })
+      );
+
+      this.notificationService.success(
+        this.translate.instant('songSketch.library.messages.markedAsDraft')
+      );
+
+      // Reload list
+      await this.loadSketches(this.currentPage);
+
+      // Update selected sketch to reflect new workflow
+      if (this.selectedSketch?.id === sketch.id) {
+        const updatedSketch = this.sketches.find(s => s.id === sketch.id);
+        if (updatedSketch) {
+          this.selectedSketch = updatedSketch;
+        }
+      }
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('songSketch.library.messages.markAsDraftError') + ': ' + error.message
       );
     }
   }
@@ -239,6 +305,17 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
+  formatDateDetailed(dateString: string): string {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('de-DE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
   getWorkflowLabel(workflow: string): string {
     return this.translate.instant(`songSketch.workflow.${workflow}`);
   }
@@ -250,5 +327,23 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
       archived: 'badge-archived'
     };
     return classMap[workflow] || 'badge-draft';
+  }
+
+  async copyToClipboard(text: string, fieldName: string): Promise<void> {
+    if (!text || !text.trim()) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      this.notificationService.success(
+        this.translate.instant(`songSketch.library.actions.copy${fieldName}`)
+      );
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      this.notificationService.error(
+        this.translate.instant('songSketch.library.messages.copyError')
+      );
+    }
   }
 }

@@ -139,7 +139,15 @@
         <!-- Detail Header -->
         <div class="detail-header">
           <div class="detail-title">
-            <h2>{{ selectedSketch.title || ('songSketch.library.untitled' | translate) }}</h2>
+            <h2>
+              {{ selectedSketch.title || ('songSketch.library.untitled' | translate) }}
+              <button type="button"
+                      class="copy-icon-btn"
+                      (click)="copyToClipboard(selectedSketch.title || '', 'Title')"
+                      [title]="'songSketch.library.actions.copyTitle' | translate">
+                <i class="fas fa-copy"></i>
+              </button>
+            </h2>
             <span class="workflow-badge" [ngClass]="getWorkflowClass(selectedSketch.workflow)">
               {{ getWorkflowLabel(selectedSketch.workflow) }}
             </span>
@@ -151,25 +159,39 @@
           <!-- Metadata -->
           <div class="detail-section-block">
             <h3>{{ 'songSketch.library.detail.metadata' | translate }}</h3>
-            <div class="metadata-grid">
-              <div class="metadata-item">
-                <span class="metadata-label">{{ 'songSketch.library.detail.created' | translate }}:</span>
-                <span class="metadata-value">{{ formatDate(selectedSketch.created_at) }}</span>
+
+            <!-- Dates Row -->
+            <div class="metadata-row">
+              <div class="metadata-date-item">
+                <i class="fas fa-calendar-plus meta-icon"></i>
+                <span class="meta-value">{{ formatDateDetailed(selectedSketch.created_at) }}</span>
               </div>
-              <div class="metadata-item" *ngIf="selectedSketch.updated_at">
-                <span class="metadata-label">{{ 'songSketch.library.detail.updated' | translate }}:</span>
-                <span class="metadata-value">{{ formatDate(selectedSketch.updated_at) }}</span>
+              <div class="metadata-date-item" *ngIf="selectedSketch.updated_at">
+                <i class="fas fa-calendar-check meta-icon"></i>
+                <span class="meta-value">{{ formatDateDetailed(selectedSketch.updated_at) }}</span>
               </div>
-              <div class="metadata-item" *ngIf="selectedSketch.tags">
-                <span class="metadata-label">{{ 'songSketch.library.detail.tags' | translate }}:</span>
-                <span class="metadata-value">{{ selectedSketch.tags }}</span>
+            </div>
+
+            <!-- Tags Row -->
+            <div class="metadata-row" *ngIf="selectedSketch.tags">
+              <div class="metadata-tags-item">
+                <i class="fas fa-tags meta-icon"></i>
+                <span class="meta-value">{{ selectedSketch.tags }}</span>
               </div>
             </div>
           </div>
 
           <!-- Music Style Prompt -->
           <div class="detail-section-block">
-            <h3>{{ 'songSketch.library.detail.musicStyle' | translate }}</h3>
+            <div class="section-header">
+              <h3>{{ 'songSketch.library.detail.musicStyle' | translate }}</h3>
+              <button type="button"
+                      class="copy-icon-btn"
+                      (click)="copyToClipboard(selectedSketch.prompt, 'Prompt')"
+                      [title]="'songSketch.library.actions.copyPrompt' | translate">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
             <div class="prompt-display">
               {{ selectedSketch.prompt }}
             </div>
@@ -177,7 +199,15 @@
 
           <!-- Lyrics -->
           <div class="detail-section-block" *ngIf="selectedSketch.lyrics">
-            <h3>{{ 'songSketch.library.detail.lyrics' | translate }}</h3>
+            <div class="section-header">
+              <h3>{{ 'songSketch.library.detail.lyrics' | translate }}</h3>
+              <button type="button"
+                      class="copy-icon-btn"
+                      (click)="copyToClipboard(selectedSketch.lyrics, 'Lyrics')"
+                      [title]="'songSketch.library.actions.copyLyrics' | translate">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
             <div class="lyrics-display">
               <pre>{{ selectedSketch.lyrics }}</pre>
             </div>
@@ -197,14 +227,40 @@
       <!-- Action Buttons at Bottom -->
       <mat-card-actions align="end">
         <div class="detail-actions">
+          <!-- Edit Button - only enabled for draft sketches -->
           <button
             type="button"
             class="action-button edit-button"
             (click)="editSketch()"
-            [title]="'songSketch.library.actions.edit' | translate">
+            [disabled]="selectedSketch.workflow !== 'draft'"
+            [title]="selectedSketch.workflow !== 'draft' ? ('songSketch.library.actions.editDisabled' | translate) : ('songSketch.library.actions.edit' | translate)">
             <i class="fas fa-edit"></i>
             <span>{{ 'songSketch.library.actions.edit' | translate }}</span>
           </button>
+
+          <!-- Mark as Used Button - only for draft sketches -->
+          <button
+            type="button"
+            class="action-button used-button"
+            *ngIf="selectedSketch.workflow === 'draft'"
+            (click)="markAsUsed(selectedSketch)"
+            [title]="'songSketch.library.actions.markAsUsed' | translate">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ 'songSketch.library.actions.markAsUsed' | translate }}</span>
+          </button>
+
+          <!-- Back to Draft Button - only for used sketches -->
+          <button
+            type="button"
+            class="action-button draft-button"
+            *ngIf="selectedSketch.workflow === 'used'"
+            (click)="markAsDraft(selectedSketch)"
+            [title]="'songSketch.library.actions.backToDraft' | translate">
+            <i class="fas fa-undo"></i>
+            <span>{{ 'songSketch.library.actions.backToDraft' | translate }}</span>
+          </button>
+
+          <!-- Archive Button - visible for draft and used sketches -->
           <button
             type="button"
             class="action-button archive-button"
@@ -214,6 +270,8 @@
             <i class="fas fa-archive"></i>
             <span>{{ 'songSketch.library.actions.archive' | translate }}</span>
           </button>
+
+          <!-- Delete Button - always visible -->
           <button
             type="button"
             class="action-button delete-button"

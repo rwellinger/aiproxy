@@ -280,7 +280,7 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
 
   navigateToMusicStylePrompt(): void {
     // Prepare current form data
-    const formData = {
+    const formData: any = {
       title: this.sketchForm.get('title')?.value || '',
       lyrics: this.sketchForm.get('lyrics')?.value || '',
       prompt: this.sketchForm.get('prompt')?.value || '',
@@ -415,5 +415,9 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
 
   isCategoryExpanded(category: 'style' | 'theme' | 'useCase'): boolean {
     return this.expandedCategory === category;
+  }
+
+  getWorkflowLabel(workflow: string): string {
+    return this.translate.instant(`songSketch.workflow.${workflow}`);
   }
 }

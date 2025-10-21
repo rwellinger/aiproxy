@@ -11,6 +11,7 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCardModule} from '@angular/material/card';
 import {ProgressService} from '../../services/ui/progress.service';
 import {MusicStyleChooserInlineComponent} from '../../components/music-style-chooser-inline/music-style-chooser-inline.component';
+import {MusicStyleChooserService} from '../../services/music-style-chooser.service';
 
 @Component({
     selector: 'app-music-style-prompt',
@@ -43,6 +44,7 @@ export class MusicStylePromptComponent implements OnInit {
 
     private fb = inject(FormBuilder);
     private songService = inject(SongService);
+    private musicStyleService = inject(MusicStyleChooserService);
     private notificationService = inject(NotificationService);
     private chatService = inject(ChatService);
     private progressService = inject(ProgressService);
@@ -136,6 +138,25 @@ export class MusicStylePromptComponent implements OnInit {
         if (this.isFromSketch && this.sketchFormData?.prompt) {
             // From sketch: load prompt from router state
             this.promptForm.patchValue({prompt: this.sketchFormData.prompt});
+
+            // Try to parse the prompt to detect auto-mode pattern
+            const parsed = this.musicStyleService.parsePromptToSelections(this.sketchFormData.prompt);
+
+            if (parsed?.isAutoMode) {
+                // Pattern recognized - switch to auto mode and restore selections
+                this.currentMode = 'auto';
+                this.musicStyleService.saveConfig(parsed.config);
+            } else {
+                // No pattern match - default to manual mode and clear selections
+                this.switchToManualMode();
+                // Reset config to avoid old buttons staying active
+                this.musicStyleService.saveConfig({
+                    selectedStyles: [],
+                    selectedInstruments: [],
+                    selectedThemes: [],
+                    lastModified: new Date()
+                });
+            }
         } else if (!this.isFromSketch) {
             // Song generator mode: load from localStorage
             const savedData = this.songService.loadFormData(this.context);

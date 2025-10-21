@@ -1028,7 +1028,8 @@
         "promptPlaceholder": "Describe the music style...",
         "promptCharCounter": "{{count}}/{{max}} characters",
         "workflow": "Workflow Status",
-        "workflowHint": "Organize your sketches by workflow status"
+        "workflowHint": "Organize your sketches by workflow status",
+        "workflowReadonlyHint": "Workflow can only be changed in the library view"
       },
       "tags": {
         "title": "Tags",
@@ -1081,9 +1082,15 @@
         "newSketch": "New Sketch",
         "createFirst": "Create Your First Sketch",
         "edit": "Edit",
+        "editDisabled": "Edit disabled (only available for drafts)",
         "delete": "Delete",
         "generate": "Generate Song",
-        "archive": "Archive"
+        "archive": "Archive",
+        "copyTitle": "Title copied to clipboard",
+        "copyLyrics": "Lyrics copied to clipboard",
+        "copyPrompt": "Music style prompt copied to clipboard",
+        "markAsUsed": "Mark as Used",
+        "backToDraft": "Back to Draft"
       },
       "detail": {
         "metadata": "Metadata",
@@ -1111,7 +1118,12 @@
         "deleted": "Sketch deleted successfully",
         "deleteError": "Error deleting sketch",
         "archived": "Sketch archived successfully",
-        "archiveError": "Error archiving sketch"
+        "archiveError": "Error archiving sketch",
+        "copyError": "Failed to copy to clipboard",
+        "markedAsUsed": "Sketch marked as used",
+        "markAsUsedError": "Error marking sketch as used",
+        "markedAsDraft": "Sketch marked as draft",
+        "markAsDraftError": "Error marking sketch as draft"
       }
     },
     "workflow": {

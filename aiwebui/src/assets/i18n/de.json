@@ -1028,7 +1028,8 @@
         "promptPlaceholder": "Beschreibe den Musikstil...",
         "promptCharCounter": "{{count}}/{{max}} Zeichen",
         "workflow": "Workflow-Status",
-        "workflowHint": "Organisiere deine Skizzen nach Workflow-Status"
+        "workflowHint": "Organisiere deine Skizzen nach Workflow-Status",
+        "workflowReadonlyHint": "Workflow kann nur in der Bibliotheksansicht geändert werden"
       },
       "tags": {
         "title": "Tags",
@@ -1081,9 +1082,15 @@
         "newSketch": "Neue Skizze",
         "createFirst": "Erste Skizze erstellen",
         "edit": "Bearbeiten",
+        "editDisabled": "Bearbeiten deaktiviert (nur für Entwürfe verfügbar)",
         "delete": "Löschen",
         "generate": "Song generieren",
-        "archive": "Archivieren"
+        "archive": "Archivieren",
+        "copyTitle": "Titel in Zwischenablage kopiert",
+        "copyLyrics": "Songtext in Zwischenablage kopiert",
+        "copyPrompt": "Musikstil-Prompt in Zwischenablage kopiert",
+        "markAsUsed": "Als verwendet markieren",
+        "backToDraft": "Zurück zu Entwurf"
       },
       "detail": {
         "metadata": "Metadaten",
@@ -1111,7 +1118,12 @@
         "deleted": "Skizze erfolgreich gelöscht",
         "deleteError": "Fehler beim Löschen der Skizze",
         "archived": "Skizze erfolgreich archiviert",
-        "archiveError": "Fehler beim Archivieren der Skizze"
+        "archiveError": "Fehler beim Archivieren der Skizze",
+        "copyError": "Fehler beim Kopieren in die Zwischenablage",
+        "markedAsUsed": "Skizze als verwendet markiert",
+        "markAsUsedError": "Fehler beim Markieren als verwendet",
+        "markedAsDraft": "Skizze als Entwurf markiert",
+        "markAsDraftError": "Fehler beim Markieren als Entwurf"
       }
     },
     "workflow": {
