@@ -1,7 +1,6 @@
 """Unit tests for ImageBusinessService (excluding DB operations)"""
 
 import hashlib
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -85,7 +84,6 @@ class TestImageBusinessService:
 
         with pytest.raises(ImageGenerationError, match="Size is required"):
             service._validate_generation_request("valid prompt", None)
-
 
     def test_generate_prompt_hash_handles_unicode(self, service):
         """Test hash generation with unicode characters"""

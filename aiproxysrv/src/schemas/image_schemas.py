@@ -11,7 +11,9 @@ class ImageGenerateRequest(BaseModel):
     """Schema for image generation requests"""
 
     prompt: str = Field(..., min_length=1, max_length=4000, description="Image generation prompt (AI-enhanced)")
-    user_prompt: str | None = Field(None, min_length=1, max_length=4000, description="Original user input (before AI enhancement)")
+    user_prompt: str | None = Field(
+        None, min_length=1, max_length=4000, description="Original user input (before AI enhancement)"
+    )
     size: str | None = Field("1024x1024", description="Image size")
     title: str | None = Field(None, max_length=255, description="Image title")
 
