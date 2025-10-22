@@ -86,26 +86,6 @@
                                                     type="button"
                                                     class="dropdown-item"
                                                     [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt"
-                                                    (click)="selectPromptAction('enhance')">
-                                                <i class="fas fa-wand-magic-sparkles"></i>
-                                                <span>{{ 'imageGenerator.enhancePrompt' | translate }}</span>
-                                                <i class="fas fa-spinner fa-spin action-spinner"
-                                                   *ngIf="isImprovingPrompt"></i>
-                                            </button>
-                                            <button
-                                                    type="button"
-                                                    class="dropdown-item"
-                                                    [disabled]="isLoading || isImprovingPrompt || !canEnhanceAsCover"
-                                                    (click)="selectPromptAction('enhanceCover')">
-                                                <i class="fas fa-record-vinyl"></i>
-                                                <span>{{ 'imageGenerator.enhanceAsCover' | translate }}</span>
-                                                <i class="fas fa-spinner fa-spin action-spinner"
-                                                   *ngIf="isImprovingPrompt"></i>
-                                            </button>
-                                            <button
-                                                    type="button"
-                                                    class="dropdown-item"
-                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt"
                                                     (click)="selectPromptAction('translate')">
                                                 <i class="fas fa-language"></i>
                                                 <span>{{ 'imageGenerator.translateToEnglish' | translate }}</span>
@@ -126,6 +106,91 @@
                                     <option value="1792x1024">Landscape (1792x1024)</option>
                                     <option value="1024x1792">Portrait (1024x1792)</option>
                                 </select>
+                            </div>
+
+                            <!-- Style Preferences Section -->
+                            <div class="style-preferences-section">
+                                <h3 class="section-title">
+                                    <i class="fas fa-palette"></i>
+                                    {{ 'imageGenerator.styles.sectionTitle' | translate }}
+                                </h3>
+
+                                <!-- Style Selectors Grid (2x2) -->
+                                <div class="style-selectors">
+                                    <!-- Artistic Style -->
+                                    <mat-form-field appearance="outline" class="style-field">
+                                        <mat-label>{{ 'imageGenerator.styles.artisticStyle.label' | translate }}</mat-label>
+                                        <mat-select [formControl]="artisticStyle" [disabled]="isLoading">
+                                            <mat-option *ngFor="let option of artisticStyleOptions" [value]="option.value">
+                                                {{ option.labelKey | translate }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <!-- Composition -->
+                                    <mat-form-field appearance="outline" class="style-field">
+                                        <mat-label>{{ 'imageGenerator.styles.composition.label' | translate }}</mat-label>
+                                        <mat-select [formControl]="composition" [disabled]="isLoading">
+                                            <mat-option *ngFor="let option of compositionOptions" [value]="option.value"
+                                                        [disabled]="option.value === 'album-cover' && !canUseAlbumCover">
+                                                {{ option.labelKey | translate }}
+                                                <span *ngIf="option.value === 'album-cover' && !canUseAlbumCover" class="option-hint">
+                                                    ({{ 'imageGenerator.titleRequired' | translate }})
+                                                </span>
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <!-- Lighting -->
+                                    <mat-form-field appearance="outline" class="style-field">
+                                        <mat-label>{{ 'imageGenerator.styles.lighting.label' | translate }}</mat-label>
+                                        <mat-select [formControl]="lighting" [disabled]="isLoading">
+                                            <mat-option *ngFor="let option of lightingOptions" [value]="option.value">
+                                                {{ option.labelKey | translate }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <!-- Color Palette -->
+                                    <mat-form-field appearance="outline" class="style-field">
+                                        <mat-label>{{ 'imageGenerator.styles.colorPalette.label' | translate }}</mat-label>
+                                        <mat-select [formControl]="colorPalette" [disabled]="isLoading">
+                                            <mat-option *ngFor="let option of colorPaletteOptions" [value]="option.value">
+                                                {{ option.labelKey | translate }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Detail Level & AI Enhancement Quality (Side by Side) -->
+                                <div class="detail-enhancement-row">
+                                    <mat-form-field appearance="outline" class="style-field">
+                                        <mat-label>{{ 'imageGenerator.styles.detailLevel.label' | translate }}</mat-label>
+                                        <mat-select [formControl]="detailLevel" [disabled]="isLoading">
+                                            <mat-option *ngFor="let option of detailLevelOptions" [value]="option.value">
+                                                {{ option.labelKey | translate }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="style-field">
+                                        <mat-label>{{ 'imageGenerator.enhanceQuality.label' | translate }}</mat-label>
+                                        <mat-select [formControl]="enhanceQuality" [disabled]="isLoading || isAlbumCoverMode">
+                                            <mat-option *ngFor="let option of enhanceQualityOptions" [value]="option.value">
+                                                {{ option.labelKey | translate }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-hint *ngIf="isAlbumCoverMode">
+                                            {{ 'imageGenerator.albumCoverEnhancementHint' | translate }}
+                                        </mat-hint>
+                                        <mat-hint *ngIf="!isAlbumCoverMode && enhanceQuality.value === 'auto'">
+                                            {{ isManualMode
+                                                ? ('imageGenerator.enhanceQuality.hints.autoManual' | translate)
+                                                : ('imageGenerator.enhanceQuality.hints.autoQuality' | translate)
+                                            }}
+                                        </mat-hint>
+                                    </mat-form-field>
+                                </div>
                             </div>
 
                             <div class="button-group">

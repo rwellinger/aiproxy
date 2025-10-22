@@ -15,14 +15,31 @@ class ImageController:
     def __init__(self):
         self.business_service = ImageBusinessService()
 
-    def generate_image(self, prompt: str, size: str, title: str | None = None) -> tuple[dict[str, Any], int]:
+    def generate_image(
+        self,
+        prompt: str,
+        size: str,
+        title: str | None = None,
+        user_prompt: str | None = None,
+        artistic_style: str | None = None,
+        composition: str | None = None,
+        lighting: str | None = None,
+        color_palette: str | None = None,
+        detail_level: str | None = None,
+    ) -> tuple[dict[str, Any], int]:
         """
         Generate image via business service
 
         Args:
-            prompt: Image generation prompt
+            prompt: AI-enhanced image generation prompt (from Ollama)
             size: Image size specification
             title: Optional image title
+            user_prompt: Optional original user input (before AI enhancement)
+            artistic_style: Optional artistic style (auto, photorealistic, digital-art, etc.)
+            composition: Optional composition (auto, portrait, landscape, etc.)
+            lighting: Optional lighting (auto, natural, studio, dramatic, etc.)
+            color_palette: Optional color palette (auto, vibrant, muted, etc.)
+            detail_level: Optional detail level (auto, minimal, moderate, highly-detailed)
 
         Returns:
             Tuple of (response_data, status_code)
@@ -32,7 +49,17 @@ class ImageController:
             return {"error": "Missing prompt or size"}, 400
 
         try:
-            result = self.business_service.generate_image(prompt, size, title)
+            result = self.business_service.generate_image(
+                prompt=prompt,
+                size=size,
+                title=title,
+                user_prompt=user_prompt,
+                artistic_style=artistic_style,
+                composition=composition,
+                lighting=lighting,
+                color_palette=color_palette,
+                detail_level=detail_level,
+            )
             return result, 200
 
         except ImageGenerationError as e:

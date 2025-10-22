@@ -159,6 +159,7 @@
       "image": "Generiertes Bild"
     },
     "errors": {
+      "copyFailed": "Fehler beim Kopieren in die Zwischenablage",
       "failedToLoad": "Fehler beim Laden des Bildes",
       "loadImage": "Fehler beim Laden der Bild-Details",
       "updateTitle": "Fehler beim Aktualisieren des Titels"
@@ -167,6 +168,28 @@
     "placeholder": "Wähle ein Bild aus der Liste, um Details anzuzeigen",
     "prompt": {
       "label": "Prompt:"
+    },
+    "prompts": {
+      "title": "Prompt-Details",
+      "userInput": {
+        "label": "Deine Eingabe"
+      },
+      "aiEnhanced": {
+        "label": "KI-Optimiert"
+      },
+      "final": {
+        "label": "Final (an DALL-E gesendet)",
+        "copy": "Kopieren",
+        "copied": "In Zwischenablage kopiert!"
+      }
+    },
+    "styles": {
+      "title": "Stil-Auswahl",
+      "artistic": "Stil",
+      "composition": "Komposition",
+      "lighting": "Beleuchtung",
+      "colorPalette": "Farbpalette",
+      "detailLevel": "Detailgrad"
     },
     "title": "Bild-Details",
     "untitled": "Unbenanntes Bild"
@@ -195,13 +218,96 @@
       "generatingTitle": "Erstelle Titel...",
       "generatingTitleHint": "KI erstellt einen Bild-Titel für dich",
       "translating": "Übersetze Prompt...",
-      "translatingHint": "KI übersetzt deinen Prompt ins Englische"
+      "translatingHint": "KI übersetzt deinen Prompt ins Englische",
+      "enhancingQuality": "Verbessere Prompt (Qualität)...",
+      "enhancingQualityHint": "KI verbessert deinen Prompt mit großem Modell (3-5s)",
+      "enhancingFast": "Verbessere Prompt (Schnell)...",
+      "enhancingFastHint": "KI verbessert deinen Prompt mit kleinem Modell (<1s)"
     },
     "promptCharCounter": "{{count}}/{{max}} Zeichen",
     "promptLabel": "Prompt:",
     "promptPlaceholder": "Beschreibe das Bild, das du erstellen möchtest...",
     "resetButton": "Zurücksetzen",
     "sizeLabel": "Bildgröße:",
+    "styles": {
+      "sectionTitle": "Stil-Auswahl",
+      "artisticStyle": {
+        "label": "Kunststil:",
+        "options": {
+          "auto": "Auto (KI entscheidet)",
+          "photorealistic": "Fotorealistisch",
+          "digital-art": "Digitale Kunst",
+          "oil-painting": "Ölgemälde",
+          "watercolor": "Aquarell",
+          "cartoon": "Cartoon",
+          "anime": "Anime/Manga",
+          "sketch": "Skizze",
+          "3d-render": "3D-Render"
+        }
+      },
+      "composition": {
+        "label": "Komposition:",
+        "options": {
+          "auto": "Auto (KI entscheidet)",
+          "portrait": "Porträt",
+          "landscape": "Landschaft",
+          "wide-angle": "Weitwinkel",
+          "close-up": "Nahaufnahme",
+          "rule-of-thirds": "Drittelregel",
+          "centered": "Zentriert",
+          "album-cover": "Album-Cover"
+        }
+      },
+      "lighting": {
+        "label": "Beleuchtung:",
+        "options": {
+          "auto": "Auto (KI entscheidet)",
+          "natural": "Natürliches Tageslicht",
+          "studio": "Studio-Beleuchtung",
+          "dramatic": "Dramatisch/Stimmungsvoll",
+          "golden-hour": "Goldene Stunde",
+          "night": "Nachtszene"
+        }
+      },
+      "colorPalette": {
+        "label": "Farbpalette:",
+        "options": {
+          "auto": "Auto (KI entscheidet)",
+          "vibrant": "Lebhafte Farben",
+          "muted": "Gedämpfte Töne",
+          "monochrome": "Monochrom",
+          "high-contrast": "Hoher Kontrast",
+          "warm": "Warme Töne",
+          "cool": "Kühle Töne",
+          "pastel": "Pastellfarben"
+        }
+      },
+      "detailLevel": {
+        "label": "Detailgrad:",
+        "options": {
+          "auto": "Auto (KI entscheidet)",
+          "minimal": "Minimal",
+          "moderate": "Moderat",
+          "highly-detailed": "Sehr detailliert"
+        }
+      }
+    },
+    "enhanceQuality": {
+      "label": "KI-Verbesserungsqualität:",
+      "options": {
+        "auto": "Auto (Intelligente Auswahl)",
+        "quality": "Qualität (Großes Modell, 3-5s)",
+        "fast": "Schnell (Kleines Modell, <1s)",
+        "off": "Aus (Keine Verbesserung)"
+      },
+      "hints": {
+        "autoManual": "",
+        "autoQuality": "Auto-Modus nutzt Qualitäts-Verbesserung (keine manuellen Stile)"
+      }
+    },
+    "titleRequired": "Titel erforderlich",
+    "albumCoverRequiresTitle": "Album-Cover-Komposition erfordert einen Titel. Bitte zuerst Titel hinzufügen.",
+    "albumCoverEnhancementHint": "Album-Cover nutzt immer KI",
     "title": "Bild erstellen",
     "titleActions": "Titel-Aktionen",
     "titleLabel": "Titel:",

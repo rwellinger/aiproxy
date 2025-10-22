@@ -261,7 +261,13 @@ def compare_schemas(dev_conn_str: str, prod_conn_str: str):
                     print(f"    - {idx}")
 
         if not (
-            only_in_dev_cols or only_in_prod_cols or col_def_diffs or only_in_dev_cons or only_in_prod_cons or only_in_dev_idx or only_in_prod_idx
+            only_in_dev_cols
+            or only_in_prod_cols
+            or col_def_diffs
+            or only_in_dev_cons
+            or only_in_prod_cons
+            or only_in_dev_idx
+            or only_in_prod_idx
         ):
             print("✓ Structure identical")
 

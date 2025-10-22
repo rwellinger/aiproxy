@@ -159,6 +159,7 @@
       "image": "Generated Picture"
     },
     "errors": {
+      "copyFailed": "Failed to copy to clipboard",
       "failedToLoad": "Failed to load image",
       "loadImage": "Error loading image details",
       "updateTitle": "Error updating title"
@@ -167,6 +168,28 @@
     "placeholder": "Select an image from the list to view details",
     "prompt": {
       "label": "Prompt:"
+    },
+    "prompts": {
+      "title": "Prompt Details",
+      "userInput": {
+        "label": "Your Input"
+      },
+      "aiEnhanced": {
+        "label": "AI Enhanced"
+      },
+      "final": {
+        "label": "Final (sent to DALL-E)",
+        "copy": "Copy",
+        "copied": "Copied to clipboard!"
+      }
+    },
+    "styles": {
+      "title": "Style Selections",
+      "artistic": "Style",
+      "composition": "Composition",
+      "lighting": "Lighting",
+      "colorPalette": "Color Palette",
+      "detailLevel": "Detail Level"
     },
     "title": "Image Details",
     "untitled": "Untitled Image"
@@ -195,13 +218,96 @@
       "generatingTitle": "Generating Title...",
       "generatingTitleHint": "AI is creating an image title for you",
       "translating": "Translating Prompt...",
-      "translatingHint": "AI is translating your prompt to English"
+      "translatingHint": "AI is translating your prompt to English",
+      "enhancingQuality": "Enhancing Prompt (Quality)...",
+      "enhancingQualityHint": "AI is improving your prompt with large model (3-5s)",
+      "enhancingFast": "Enhancing Prompt (Fast)...",
+      "enhancingFastHint": "AI is improving your prompt with small model (<1s)"
     },
     "promptCharCounter": "{{count}}/{{max}} characters",
     "promptLabel": "Prompt:",
     "promptPlaceholder": "Describe the picture you want to create...",
     "resetButton": "Reset",
     "sizeLabel": "Picture Size:",
+    "styles": {
+      "sectionTitle": "Style Selection",
+      "artisticStyle": {
+        "label": "Artistic Style:",
+        "options": {
+          "auto": "Auto (AI decides)",
+          "photorealistic": "Photorealistic",
+          "digital-art": "Digital Art",
+          "oil-painting": "Oil Painting",
+          "watercolor": "Watercolor",
+          "cartoon": "Cartoon",
+          "anime": "Anime/Manga",
+          "sketch": "Sketch",
+          "3d-render": "3D Render"
+        }
+      },
+      "composition": {
+        "label": "Composition:",
+        "options": {
+          "auto": "Auto (AI decides)",
+          "portrait": "Portrait",
+          "landscape": "Landscape",
+          "wide-angle": "Wide Angle",
+          "close-up": "Close-Up",
+          "rule-of-thirds": "Rule of Thirds",
+          "centered": "Centered",
+          "album-cover": "Album Cover"
+        }
+      },
+      "lighting": {
+        "label": "Lighting:",
+        "options": {
+          "auto": "Auto (AI decides)",
+          "natural": "Natural Daylight",
+          "studio": "Studio Lighting",
+          "dramatic": "Dramatic/Moody",
+          "golden-hour": "Golden Hour",
+          "night": "Night Scene"
+        }
+      },
+      "colorPalette": {
+        "label": "Color Palette:",
+        "options": {
+          "auto": "Auto (AI decides)",
+          "vibrant": "Vibrant Colors",
+          "muted": "Muted Tones",
+          "monochrome": "Monochrome",
+          "high-contrast": "High Contrast",
+          "warm": "Warm Tones",
+          "cool": "Cool Tones",
+          "pastel": "Pastel Colors"
+        }
+      },
+      "detailLevel": {
+        "label": "Detail Level:",
+        "options": {
+          "auto": "Auto (AI decides)",
+          "minimal": "Minimal",
+          "moderate": "Moderate",
+          "highly-detailed": "Highly Detailed"
+        }
+      }
+    },
+    "enhanceQuality": {
+      "label": "AI Enhancement Quality:",
+      "options": {
+        "auto": "Auto (Smart selection)",
+        "quality": "Quality (Large model, 3-5s)",
+        "fast": "Fast (Small model, <1s)",
+        "off": "Off (No enhancement)"
+      },
+      "hints": {
+        "autoManual": "",
+        "autoQuality": "Auto mode will use Quality enhancement (no manual styles)"
+      }
+    },
+    "titleRequired": "Title required",
+    "albumCoverRequiresTitle": "Album Cover composition requires a title. Please add a title first.",
+    "albumCoverEnhancementHint": "Album Cover always uses AI",
     "title": "Create Picture",
     "titleActions": "Title actions",
     "titleLabel": "Title:",

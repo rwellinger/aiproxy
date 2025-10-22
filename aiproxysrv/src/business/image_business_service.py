@@ -29,14 +29,31 @@ class ImageBusinessService:
         self.images_dir.mkdir(parents=True, exist_ok=True)
         self.file_service = FileManagementService()
 
-    def generate_image(self, prompt: str, size: str, title: str | None = None) -> dict[str, Any]:
+    def generate_image(
+        self,
+        prompt: str,
+        size: str,
+        title: str | None = None,
+        user_prompt: str | None = None,
+        artistic_style: str | None = None,
+        composition: str | None = None,
+        lighting: str | None = None,
+        color_palette: str | None = None,
+        detail_level: str | None = None,
+    ) -> dict[str, Any]:
         """
         Generate image with validation and business logic
 
         Args:
-            prompt: Image generation prompt
+            prompt: AI-enhanced image generation prompt (from Ollama)
             size: Image size specification
             title: Optional image title
+            user_prompt: Optional original user input (before AI enhancement)
+            artistic_style: Optional artistic style (auto, photorealistic, digital-art, etc.)
+            composition: Optional composition (auto, portrait, landscape, etc.)
+            lighting: Optional lighting (auto, natural, studio, dramatic, etc.)
+            color_palette: Optional color palette (auto, vibrant, muted, etc.)
+            detail_level: Optional detail level (auto, minimal, moderate, highly-detailed)
 
         Returns:
             Dict containing image URL and metadata
@@ -49,12 +66,27 @@ class ImageBusinessService:
         prompt_preview = prompt[:50] + ("..." if len(prompt) > 50 else "")
         logger.info("Starting image generation", prompt_preview=prompt_preview, size=size)
 
+        # Construct enhanced prompt with style preferences
+        from .image_enhancement_service import ImageEnhancementService
+
+        enhanced_prompt = ImageEnhancementService.construct_enhanced_prompt(
+            base_prompt=prompt,
+            artistic_style=artistic_style,
+            composition=composition,
+            lighting=lighting,
+            color_palette=color_palette,
+            detail_level=detail_level,
+        )
+
+        # Use enhanced_prompt for generation, or original if no styles applied
+        final_prompt = enhanced_prompt if enhanced_prompt != prompt else prompt
+
         try:
             # Generate image via external API (delegated to external service)
             from .external_api_service import OpenAIService
 
             openai_service = OpenAIService()
-            image_url = openai_service.generate_image(prompt, size)
+            image_url = openai_service.generate_image(final_prompt, size)
 
             # Download and save image
             filename, file_path = self._process_and_save_image(image_url, prompt)
@@ -63,14 +95,36 @@ class ImageBusinessService:
             local_url = f"{IMAGE_BASE_URL}/{filename}"
 
             # Save metadata to database and get the generated image record
-            generated_image = self._save_image_metadata(prompt, size, filename, file_path, local_url, title)
+            generated_image = self._save_image_metadata(
+                user_prompt=user_prompt,
+                prompt=prompt,  # Ollama-enhanced prompt
+                enhanced_prompt=enhanced_prompt if enhanced_prompt != prompt else None,
+                size=size,
+                filename=filename,
+                file_path=file_path,
+                local_url=local_url,
+                title=title,
+                artistic_style=artistic_style,
+                composition=composition,
+                lighting=lighting,
+                color_palette=color_palette,
+                detail_level=detail_level,
+            )
 
             logger.info(f"Image generated successfully: {filename}")
             response = {"url": local_url, "saved_path": str(file_path)}
 
-            # Include image ID if database save was successful
+            # Include image metadata if database save was successful
             if generated_image:
                 response["id"] = str(generated_image.id)
+                response["user_prompt"] = generated_image.user_prompt
+                response["prompt"] = generated_image.prompt
+                response["enhanced_prompt"] = generated_image.enhanced_prompt
+                response["artistic_style"] = generated_image.artistic_style
+                response["composition"] = generated_image.composition
+                response["lighting"] = generated_image.lighting
+                response["color_palette"] = generated_image.color_palette
+                response["detail_level"] = generated_image.detail_level
                 logger.info("Image saved to database", image_id=generated_image.id, filename=filename)
             else:
                 logger.warning("Image generated but failed to save metadata to database", filename=filename)
@@ -290,11 +344,26 @@ class ImageBusinessService:
         return filename, file_path
 
     def _save_image_metadata(
-        self, prompt: str, size: str, filename: str, file_path: Path, local_url: str, title: str | None = None
+        self,
+        prompt: str,
+        size: str,
+        filename: str,
+        file_path: Path,
+        local_url: str,
+        title: str | None = None,
+        user_prompt: str | None = None,
+        enhanced_prompt: str | None = None,
+        artistic_style: str | None = None,
+        composition: str | None = None,
+        lighting: str | None = None,
+        color_palette: str | None = None,
+        detail_level: str | None = None,
     ) -> Optional["GeneratedImage"]:
         """Save image metadata to database"""
         return ImageService.save_generated_image(
+            user_prompt=user_prompt,
             prompt=prompt,
+            enhanced_prompt=enhanced_prompt,
             size=size,
             filename=filename,
             file_path=str(file_path),
@@ -302,13 +371,20 @@ class ImageBusinessService:
             model_used=OPENAI_MODEL,
             prompt_hash=self._generate_prompt_hash(prompt),
             title=title,
+            artistic_style=artistic_style,
+            composition=composition,
+            lighting=lighting,
+            color_palette=color_palette,
+            detail_level=detail_level,
         )
 
     def _transform_image_to_api_format(self, image, include_file_path: bool = False) -> dict[str, Any]:
         """Transform database image object to API response format"""
         image_data = {
             "id": str(image.id),
+            "user_prompt": image.user_prompt,
             "prompt": image.prompt,
+            "enhanced_prompt": image.enhanced_prompt,
             "size": image.size,
             "filename": image.filename,
             "url": image.local_url,
@@ -318,6 +394,11 @@ class ImageBusinessService:
             "created_at": image.created_at.isoformat() if image.created_at else None,
             "updated_at": image.updated_at.isoformat() if image.updated_at else None,
             "prompt_hash": image.prompt_hash,
+            "artistic_style": image.artistic_style,
+            "composition": image.composition,
+            "lighting": image.lighting,
+            "color_palette": image.color_palette,
+            "detail_level": image.detail_level,
         }
 
         if include_file_path:

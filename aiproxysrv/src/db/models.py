@@ -156,7 +156,9 @@ class GeneratedImage(Base):
     __table_args__ = {"extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    prompt = Column(Text, nullable=False)
+    user_prompt = Column(Text, nullable=True)  # Original user input (before AI enhancement)
+    prompt = Column(Text, nullable=False)  # AI-enhanced prompt (Ollama)
+    enhanced_prompt = Column(Text, nullable=True)  # Final prompt sent to DALL-E (Ollama + Styles)
     size = Column(String(20), nullable=False)
     filename = Column(String(255), nullable=False, unique=True)
     file_path = Column(String(500), nullable=False)
@@ -165,6 +167,14 @@ class GeneratedImage(Base):
     prompt_hash = Column(String(32), nullable=True)
     title = Column(String(255), nullable=True)  # Custom user title
     tags = Column(Text, nullable=True)  # Comma-separated tags
+
+    # Style preferences (guided mode)
+    artistic_style = Column(String(50), nullable=True)  # photorealistic, digital-art, oil-painting, etc.
+    composition = Column(String(50), nullable=True)  # portrait, landscape, wide-angle, etc.
+    lighting = Column(String(50), nullable=True)  # natural, studio, dramatic, etc.
+    color_palette = Column(String(50), nullable=True)  # vibrant, muted, monochrome, etc.
+    detail_level = Column(String(50), nullable=True)  # minimal, moderate, highly-detailed
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

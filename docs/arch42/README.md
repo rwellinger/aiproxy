@@ -88,6 +88,11 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   - Direct integration with Song Generator and Lyric Creator
   - Convert sketches to full songs with one click
 - **Image Generation** via DALL-E 3 (OpenAI API)
+  - Fast Enhancement Mode: One-click AI-powered prompt optimization via templates
+  - Gallery view with filtering, search, and sorting
+  - Master-detail layout with responsive design
+  - Detail panel showing metadata (original/enhanced/revised prompts)
+  - Download and delete functionality
 - **Music Generation** via Mureka API
 - **Asynchronous Processing** for time-intensive generation processes
 - **Ollama Model Chat** for prompt improvements via prompt templates
@@ -190,21 +195,24 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   ```
   src/app/
   ├── components/    # Shared Components
-  │   └── lyric-architect-modal/  # Song architecture builder with drag & drop
+  │   ├── lyric-architect-modal/  # Song architecture builder with drag & drop
+  │   ├── image-detail-panel/     # Image detail view component
+  │   ├── song-detail-panel/      # Song detail view component
+  │   └── ...
   ├── pages/         # Feature Pages
   │   ├── ai-chat/            # AI Chat conversation interface
   │   ├── lyric-creation/     # Lyric editor with section-based editing & AI tools
   │   ├── song-sketch-creator/  # Create/edit song sketches
   │   ├── song-sketch-library/  # Manage song sketch library
-  │   ├── image-generator/    # UI for image generation
-  │   ├── image-view/         # Display of generated images
+  │   ├── image-generator/    # Image generation with fast enhancement mode
+  │   ├── image-view/         # Image gallery with master-detail layout
   │   ├── song-generator/     # UI for music generation
   │   ├── song-view/          # Display of generated songs
   │   ├── song-profile/       # Mureka account information
   │   ├── user-profile/       # User profile page
   │   └── prompt-templates/   # Template management for prompts
   ├── services/      # API Services & Business Logic
-  │   ├── business/           # ConversationService, SketchService, SongService
+  │   ├── business/           # ImageService, ConversationService, SketchService, SongService
   │   ├── config/             # ChatService, ApiConfigService
   │   └── lyric-architecture.service.ts  # Song structure management & persistence
   ├── models/        # TypeScript Interfaces & Models
@@ -874,7 +882,10 @@ services:
 | Column | Type | Description |
 |--------|-----|-------------|
 | `id` | UUID | Primary Key |
-| `prompt` | TEXT | Generation prompt |
+| `prompt` | TEXT | Final generation prompt (used for DALL-E) |
+| `original_prompt` | TEXT | User's original input prompt (nullable) |
+| `enhanced_prompt` | TEXT | AI-enhanced prompt from template (nullable) |
+| `revised_prompt` | TEXT | DALL-E's revised prompt (nullable) |
 | `size` | VARCHAR(20) | Image size (e.g. "1024x1024") |
 | `filename` | VARCHAR(255) | Unique filename |
 | `file_path` | VARCHAR(500) | Local file path |

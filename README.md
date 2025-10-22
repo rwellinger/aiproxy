@@ -31,6 +31,11 @@ A full-stack platform for AI-powered image and music generation with Python back
   - Direct integration with Song Generator and Lyric Creator
   - Convert sketches to full songs with one click
 - **Image Generation** via DALL·E 3 (OpenAI)
+  - Fast Enhancement Mode: One-click AI-powered prompt optimization
+  - Gallery view with filtering, search, and sorting
+  - Detail panel with metadata (original/enhanced/revised prompts)
+  - Download and delete functionality
+  - Master-detail layout with responsive design
 - **Song Generation** via Mureka API (asynchronous with Celery)
 - **PostgreSQL** database for persistent storage
 - **Angular 18** frontend with Material Design
@@ -241,13 +246,16 @@ mac_ki_service/
 │   │   │   ├── lyric-creation/        # Lyric editor with AI tools
 │   │   │   ├── song-sketch-creator/   # Create/edit song sketches
 │   │   │   ├── song-sketch-library/   # Manage song sketches
-│   │   │   ├── image-generator/       # Image generation UI
+│   │   │   ├── image-generator/       # Image generation with fast enhancement
+│   │   │   ├── image-view/            # Image gallery with master-detail view
 │   │   │   ├── song-generator/        # Song generation UI
 │   │   │   └── ...
 │   │   ├── services/    # API services
-│   │   │   ├── business/         # Conversation, Sketch & Song services
+│   │   │   ├── business/         # Image, Conversation, Sketch & Song services
 │   │   │   └── config/           # Chat & API config
 │   │   ├── components/  # Shared components
+│   │   │   ├── image-detail-panel/    # Image detail view component
+│   │   │   └── ...
 │   │   └── models/      # TypeScript interfaces
 │   ├── package.json
 │   └── VERSION          # Version file for releases

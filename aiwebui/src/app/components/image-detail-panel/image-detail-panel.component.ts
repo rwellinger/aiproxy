@@ -163,7 +163,8 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
 
   getDisplayTitle(image: any): string {
     if (!image) return '';
-    return image.title || image.prompt?.slice(0, 50) + (image.prompt?.length > 50 ? '...' : '') || this.translate.instant('imageDetailPanel.untitled');
+    const displayPrompt = image.user_prompt || image.prompt || '';
+    return image.title || (displayPrompt ? displayPrompt.slice(0, 50) + (displayPrompt.length > 50 ? '...' : '') : this.translate.instant('imageDetailPanel.untitled'));
   }
 
   formatDate(dateString: string): string {
@@ -207,5 +208,97 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
     }
 
     return '';
+  }
+
+  // === Prompt Methods ===
+
+  hasUserPrompt(): boolean {
+    // Show user prompt if it exists AND is different from enhanced prompt
+    if (!this.image?.user_prompt || !this.image.user_prompt.trim()) {
+      return false;
+    }
+    // Only show if we have enhanced prompt AND it's different from user prompt
+    if (!this.image.enhanced_prompt) {
+      return true; // Show user prompt if no enhancement happened
+    }
+    return this.image.user_prompt.trim() !== this.image.enhanced_prompt.trim();
+  }
+
+  hasEnhancedPrompt(): boolean {
+    return !!(this.image?.enhanced_prompt && this.image.enhanced_prompt.trim());
+  }
+
+  shouldShowPromptSection(): boolean {
+    // Always show if we have at least user_prompt or enhanced_prompt
+    return !!(this.hasUserPrompt() || this.hasEnhancedPrompt());
+  }
+
+  // === Style Methods ===
+
+  hasManualStyles(): boolean {
+    if (!this.image) return false;
+    return !!(
+      (this.image.artistic_style && this.image.artistic_style !== 'auto') ||
+      (this.image.composition && this.image.composition !== 'auto') ||
+      (this.image.lighting && this.image.lighting !== 'auto') ||
+      (this.image.color_palette && this.image.color_palette !== 'auto') ||
+      (this.image.detail_level && this.image.detail_level !== 'auto')
+    );
+  }
+
+  getStyleChips(): {label: string, value: string}[] {
+    if (!this.image) return [];
+
+    const chips: {label: string, value: string}[] = [];
+
+    if (this.image.artistic_style && this.image.artistic_style !== 'auto') {
+      chips.push({
+        label: this.translate.instant('imageDetailPanel.styles.artistic'),
+        value: this.translate.instant(`imageGenerator.styles.artisticStyle.options.${this.image.artistic_style}`)
+      });
+    }
+
+    if (this.image.composition && this.image.composition !== 'auto') {
+      chips.push({
+        label: this.translate.instant('imageDetailPanel.styles.composition'),
+        value: this.translate.instant(`imageGenerator.styles.composition.options.${this.image.composition}`)
+      });
+    }
+
+    if (this.image.lighting && this.image.lighting !== 'auto') {
+      chips.push({
+        label: this.translate.instant('imageDetailPanel.styles.lighting'),
+        value: this.translate.instant(`imageGenerator.styles.lighting.options.${this.image.lighting}`)
+      });
+    }
+
+    if (this.image.color_palette && this.image.color_palette !== 'auto') {
+      chips.push({
+        label: this.translate.instant('imageDetailPanel.styles.colorPalette'),
+        value: this.translate.instant(`imageGenerator.styles.colorPalette.options.${this.image.color_palette}`)
+      });
+    }
+
+    if (this.image.detail_level && this.image.detail_level !== 'auto') {
+      chips.push({
+        label: this.translate.instant('imageDetailPanel.styles.detailLevel'),
+        value: this.translate.instant(`imageGenerator.styles.detailLevel.options.${this.image.detail_level}`)
+      });
+    }
+
+    return chips;
+  }
+
+  // === Copy to Clipboard ===
+
+  copyToClipboard(text: string): void {
+    if (!text) return;
+
+    navigator.clipboard.writeText(text).then(() => {
+      this.notificationService.success(this.translate.instant('imageDetailPanel.prompts.final.copied'));
+    }).catch(err => {
+      console.error('Failed to copy to clipboard:', err);
+      this.notificationService.error(this.translate.instant('imageDetailPanel.errors.copyFailed'));
+    });
   }
 }

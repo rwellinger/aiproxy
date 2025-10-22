@@ -18,6 +18,13 @@ class ImageService:
         model_used: str,
         prompt_hash: str,
         title: str | None = None,
+        user_prompt: str | None = None,
+        enhanced_prompt: str | None = None,
+        artistic_style: str | None = None,
+        composition: str | None = None,
+        lighting: str | None = None,
+        color_palette: str | None = None,
+        detail_level: str | None = None,
     ) -> GeneratedImage | None:
         """
         Save generated image metadata to database
@@ -28,7 +35,9 @@ class ImageService:
         db = SessionLocal()
         try:
             generated_image = GeneratedImage(
+                user_prompt=user_prompt,
                 prompt=prompt,
+                enhanced_prompt=enhanced_prompt,
                 size=size,
                 filename=filename,
                 file_path=file_path,
@@ -36,6 +45,11 @@ class ImageService:
                 model_used=model_used,
                 prompt_hash=prompt_hash,
                 title=title,
+                artistic_style=artistic_style,
+                composition=composition,
+                lighting=lighting,
+                color_palette=color_palette,
+                detail_level=detail_level,
             )
             db.add(generated_image)
             db.commit()
@@ -105,7 +119,11 @@ class ImageService:
                 from sqlalchemy import or_
 
                 query = query.filter(
-                    or_(GeneratedImage.title.ilike(search_term), GeneratedImage.prompt.ilike(search_term))
+                    or_(
+                        GeneratedImage.title.ilike(search_term),
+                        GeneratedImage.user_prompt.ilike(search_term),
+                        GeneratedImage.prompt.ilike(search_term),
+                    )
                 )
 
             # Apply sorting
@@ -143,7 +161,11 @@ class ImageService:
                 from sqlalchemy import or_
 
                 query = query.filter(
-                    or_(GeneratedImage.title.ilike(search_term), GeneratedImage.prompt.ilike(search_term))
+                    or_(
+                        GeneratedImage.title.ilike(search_term),
+                        GeneratedImage.user_prompt.ilike(search_term),
+                        GeneratedImage.prompt.ilike(search_term),
+                    )
                 )
 
             return query.count()
