@@ -123,7 +123,7 @@ Output: "Futuristic metropolis with glass skyscrapers, neon lights, flying vehic
     true
 );
 
--- image/enhance-cover (v1.2)
+-- image/enhance-cover (v1.2) - RESTORED: Best performing version
 SELECT upsert_prompt_template(
     'image',
     'enhance-cover',
@@ -132,10 +132,10 @@ SELECT upsert_prompt_template(
 CRITICAL TEXT-RENDERING RULES:
 - When text elements are specified, include them with EXACT wording in quotes
 - ALL text must be in ALL CAPS (uppercase letters only) for better recognition
-- Add explicit rendering instructions: "PROMINENTLY featuring the text", "large clear readable letters"
-- Specify text placement: "HORIZONTALLY CENTERED at the top", "HORIZONTALLY CENTERED at the bottom"
-- Emphasize legibility: "perfectly legible professional typography", "sharp text rendering"
-- IMPORTANT: End prompt with "ONLY the specified title text is visible - no additional words, numbers, labels, or random characters anywhere else in the image"
+- Add explicit rendering instructions: "prominently displaying the text", "large bold readable typography"
+- Specify text placement: "horizontally centered near the top", "horizontally centered near the bottom"
+- Emphasize legibility: "crystal clear professional lettering", "sharp crisp text"
+- IMPORTANT: End prompt with "This title text must be the only visible text - no other words, numbers, symbols, or characters should appear anywhere in the composition"
 
 Visual Design:
 - Describe artwork composition, color palette, mood
@@ -159,9 +159,9 @@ IMPORTANT:
 - Single continuous paragraph
 
 Example format:
-"Digital artwork PROMINENTLY featuring the text ''SONG TITLE'' in large, bold, ALL CAPS readable letters HORIZONTALLY CENTERED at the top, and ''BY ARTIST NAME'' in clearly visible smaller professional typography HORIZONTALLY CENTERED at the bottom. [visual description]. Text must be perfectly legible and sharp. ONLY the title text ''SONG TITLE'' and artist credit ''BY ARTIST NAME'' are visible - no additional words, numbers, labels, or random characters anywhere else in the image."',
+"Digital artwork prominently displaying the text ''SONG TITLE'' in large bold ALL CAPS readable typography horizontally centered near the top, and ''BY ARTIST NAME'' in clearly visible smaller professional lettering horizontally centered near the bottom. [visual description]. Text is crystal clear and sharp. This title text must be the only visible text - no other words, numbers, symbols, or characters should appear anywhere in the composition."',
     'Enhances prompts for song artwork with optimized text rendering',
-    '1.2',
+    '1.2.1',
     'gpt-oss:20b',
     0.7,
     200,
