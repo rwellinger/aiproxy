@@ -25,6 +25,7 @@ class ImageEnhancementService:
         "close-up": "close-up shot, detailed view, tight framing",
         "rule-of-thirds": "rule of thirds composition, balanced placement",
         "centered": "centered composition, symmetrical, focal point",
+        "album-cover": "",  # Album cover enhancement handled by frontend (includes title + artist)
     }
 
     LIGHTING_MAPPINGS = {

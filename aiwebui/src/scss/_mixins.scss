@@ -154,7 +154,7 @@
     overflow-y: hidden;
     display: flex;
     flex-direction: column;
-    max-height: calc(100vh - 260px);
+    height: 100%;
 
     .details-section {
         flex: 1;

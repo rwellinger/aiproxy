@@ -50,12 +50,13 @@ export class ImageGeneratorComponent implements OnInit {
     generatedImageData: any = null;
 
     // Style-related FormControls (managed separately for cleaner code)
+    // Note: Initial values will be overridden in ngOnInit() from LocalStorage
     artisticStyle = new FormControl<ArtisticStyle>('auto');
     composition = new FormControl<CompositionStyle>('auto');
     lighting = new FormControl<LightingStyle>('auto');
     colorPalette = new FormControl<ColorPaletteStyle>('auto');
     detailLevel = new FormControl<DetailLevel>('auto');
-    enhanceQuality = new FormControl<EnhanceQuality>('auto');
+    enhanceQuality = new FormControl<EnhanceQuality>('auto', { nonNullable: true });
 
     // Dropdown options (i18n keys)
     artisticStyleOptions: SelectOption<ArtisticStyle>[] = [
@@ -77,7 +78,8 @@ export class ImageGeneratorComponent implements OnInit {
         { value: 'wide-angle', labelKey: 'imageGenerator.styles.composition.options.wide-angle' },
         { value: 'close-up', labelKey: 'imageGenerator.styles.composition.options.close-up' },
         { value: 'rule-of-thirds', labelKey: 'imageGenerator.styles.composition.options.rule-of-thirds' },
-        { value: 'centered', labelKey: 'imageGenerator.styles.composition.options.centered' }
+        { value: 'centered', labelKey: 'imageGenerator.styles.composition.options.centered' },
+        { value: 'album-cover', labelKey: 'imageGenerator.styles.composition.options.album-cover' }
     ];
 
     lightingOptions: SelectOption<LightingStyle>[] = [
@@ -150,17 +152,48 @@ export class ImageGeneratorComponent implements OnInit {
         this.detailLevel.setValue(savedStyles.detailLevel);
         this.enhanceQuality.setValue(savedStyles.enhanceQuality);
 
+        // If Album Cover is already selected, force enhanceQuality to 'auto' and disable it
+        if (savedStyles.composition === 'album-cover') {
+            this.enhanceQuality.setValue('auto');
+            this.enhanceQuality.disable();
+            this.saveStylePreferences();
+        }
+
         // Save style preferences on changes
         this.artisticStyle.valueChanges.subscribe(() => this.saveStylePreferences());
-        this.composition.valueChanges.subscribe(() => this.saveStylePreferences());
+        this.composition.valueChanges.subscribe(value => {
+            // Auto-set enhancement quality and disable when Album Cover is selected
+            if (value === 'album-cover') {
+                this.enhanceQuality.setValue('auto', { emitEvent: false });
+                this.enhanceQuality.disable();
+            } else {
+                // Re-enable when switching away from Album Cover
+                this.enhanceQuality.enable();
+            }
+            this.saveStylePreferences();
+        });
         this.lighting.valueChanges.subscribe(() => this.saveStylePreferences());
         this.colorPalette.valueChanges.subscribe(() => this.saveStylePreferences());
         this.detailLevel.valueChanges.subscribe(() => this.saveStylePreferences());
         this.enhanceQuality.valueChanges.subscribe(() => this.saveStylePreferences());
+
+        // Watch title changes → Reset composition if album-cover but no title
+        this.promptForm.get('title')?.valueChanges.subscribe(title => {
+            if (!title?.trim() && this.composition.value === 'album-cover') {
+                this.composition.setValue('auto');
+                this.notificationService.info(this.translate.instant('imageGenerator.albumCoverRequiresTitle'));
+            }
+        });
     }
 
     async onSubmit() {
         if (this.promptForm.valid) {
+            // Validate title is required for Album Cover composition
+            if (this.composition.value === 'album-cover' && !this.promptForm.get('title')?.value?.trim()) {
+                this.notificationService.error(this.translate.instant('imageGenerator.errors.titleRequiredForCover'));
+                return;
+            }
+
             this.isLoading = true;
             this.result = '';
 
@@ -171,24 +204,37 @@ export class ImageGeneratorComponent implements OnInit {
 
                 // Step 1: AI Enhancement (if not 'off')
                 if (effectiveMode !== 'off') {
-                    const progressMessage =
-                        effectiveMode === 'quality'
-                            ? this.translate.instant('imageGenerator.progress.enhancingQuality')
-                            : this.translate.instant('imageGenerator.progress.enhancingFast');
+                    // Album Cover uses special cover enhancement
+                    if (this.composition.value === 'album-cover') {
+                        const user = await firstValueFrom(this.userService.getCurrentUserProfile());
+                        const artistName = user?.artist_name;
 
-                    const progressHint =
-                        effectiveMode === 'quality'
-                            ? this.translate.instant('imageGenerator.progress.enhancingQualityHint')
-                            : this.translate.instant('imageGenerator.progress.enhancingFastHint');
-
-                    finalPrompt = await this.progressService.executeWithProgress(
-                        () =>
+                        finalPrompt = await this.progressService.executeWithProgress(
+                            () => this.chatService.enhanceCoverPrompt(finalPrompt, formValue.title, artistName),
+                            this.translate.instant('imageGenerator.progress.enhancingCover'),
+                            this.translate.instant('imageGenerator.progress.enhancingCoverHint')
+                        );
+                    } else {
+                        // Regular enhancement (quality or fast)
+                        const progressMessage =
                             effectiveMode === 'quality'
-                                ? this.chatService.improveImagePrompt(finalPrompt)
-                                : this.chatService.improveImagePromptFast(finalPrompt),
-                        progressMessage,
-                        progressHint
-                    );
+                                ? this.translate.instant('imageGenerator.progress.enhancingQuality')
+                                : this.translate.instant('imageGenerator.progress.enhancingFast');
+
+                        const progressHint =
+                            effectiveMode === 'quality'
+                                ? this.translate.instant('imageGenerator.progress.enhancingQualityHint')
+                                : this.translate.instant('imageGenerator.progress.enhancingFastHint');
+
+                        finalPrompt = await this.progressService.executeWithProgress(
+                            () =>
+                                effectiveMode === 'quality'
+                                    ? this.chatService.improveImagePrompt(finalPrompt)
+                                    : this.chatService.improveImagePromptFast(finalPrompt),
+                            progressMessage,
+                            progressHint
+                        );
+                    }
 
                     finalPrompt = this.removeQuotes(finalPrompt);
                 }
@@ -335,43 +381,6 @@ export class ImageGeneratorComponent implements OnInit {
         }
     }
 
-    get canEnhanceAsCover(): boolean {
-        const hasTitle = this.promptForm.get('title')?.value?.trim();
-        return !!hasTitle;
-    }
-
-    async enhanceAsCover() {
-        const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
-        const title = this.promptForm.get('title')?.value?.trim();
-
-        if (!title) {
-            this.notificationService.error(this.translate.instant('imageGenerator.errors.titleRequiredForCover'));
-            return;
-        }
-
-        if (!currentPrompt) {
-            this.notificationService.error(this.translate.instant('imageGenerator.errors.promptRequired'));
-            return;
-        }
-
-        this.isImprovingPrompt = true;
-        try {
-            const user = await firstValueFrom(this.userService.getCurrentUserProfile());
-            const artistName = user?.artist_name;
-
-            const enhancedPrompt = await this.progressService.executeWithProgress(
-                () => this.chatService.enhanceCoverPrompt(currentPrompt, title, artistName),
-                this.translate.instant('imageGenerator.progress.enhancingCover'),
-                this.translate.instant('imageGenerator.progress.enhancingCoverHint')
-            );
-            this.promptForm.patchValue({prompt: this.removeQuotes(enhancedPrompt)});
-        } catch (error: any) {
-            this.notificationService.error(`Error enhancing cover prompt: ${error.message}`);
-        } finally {
-            this.isImprovingPrompt = false;
-        }
-    }
-
     togglePromptDropdown() {
         this.showPromptDropdown = !this.showPromptDropdown;
     }
@@ -380,12 +389,10 @@ export class ImageGeneratorComponent implements OnInit {
         this.showPromptDropdown = false;
     }
 
-    selectPromptAction(action: 'translate' | 'enhanceCover') {
+    selectPromptAction(action: 'translate') {
         this.closePromptDropdown();
 
-        if (action === 'enhanceCover') {
-            this.enhanceAsCover();
-        } else if (action === 'translate') {
+        if (action === 'translate') {
             this.translatePrompt();
         }
     }
@@ -460,6 +467,20 @@ export class ImageGeneratorComponent implements OnInit {
     }
 
     /**
+     * Check if Album Cover composition can be used (requires title)
+     */
+    get canUseAlbumCover(): boolean {
+        return !!this.promptForm.get('title')?.value?.trim();
+    }
+
+    /**
+     * Check if Album Cover composition is currently selected
+     */
+    get isAlbumCoverMode(): boolean {
+        return this.composition.value === 'album-cover';
+    }
+
+    /**
      * Save current style preferences to LocalStorage
      */
     private saveStylePreferences(): void {
@@ -476,13 +497,19 @@ export class ImageGeneratorComponent implements OnInit {
     /**
      * Determine effective enhancement mode based on 'auto' setting
      * Auto Mode → Quality (creative AI help needed)
-     * Manual Mode → Fast (user already set precise styles)
+     * Manual Mode → Off (user already set precise styles, avoid conflicts)
+     * Album Cover → Always Quality (needs title + artist context)
      */
     private getEffectiveEnhanceMode(): 'quality' | 'fast' | 'off' {
+        // Album Cover always requires enhancement (for title + artist integration)
+        if (this.composition.value === 'album-cover') {
+            return 'quality';
+        }
+
         const selected = this.enhanceQuality.value;
 
         if (selected === 'auto') {
-            return this.isManualMode ? 'fast' : 'quality';
+            return this.isManualMode ? 'off' : 'quality';
         }
 
         return selected as 'quality' | 'fast' | 'off';

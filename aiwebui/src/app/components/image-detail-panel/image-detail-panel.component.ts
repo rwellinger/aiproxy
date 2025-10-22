@@ -163,7 +163,8 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
 
   getDisplayTitle(image: any): string {
     if (!image) return '';
-    return image.title || image.prompt?.slice(0, 50) + (image.prompt?.length > 50 ? '...' : '') || this.translate.instant('imageDetailPanel.untitled');
+    const displayPrompt = image.user_prompt || image.prompt || '';
+    return image.title || (displayPrompt ? displayPrompt.slice(0, 50) + (displayPrompt.length > 50 ? '...' : '') : this.translate.instant('imageDetailPanel.untitled'));
   }
 
   formatDate(dateString: string): string {
@@ -212,12 +213,15 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
   // === Prompt Methods ===
 
   hasUserPrompt(): boolean {
-    // Show user prompt if it exists AND is different from AI-enhanced prompt
+    // Show user prompt if it exists AND is different from enhanced prompt
     if (!this.image?.user_prompt || !this.image.user_prompt.trim()) {
       return false;
     }
-    // Only show if different from AI-enhanced prompt
-    return this.image.user_prompt.trim() !== this.image.prompt.trim();
+    // Only show if we have enhanced prompt AND it's different from user prompt
+    if (!this.image.enhanced_prompt) {
+      return true; // Show user prompt if no enhancement happened
+    }
+    return this.image.user_prompt.trim() !== this.image.enhanced_prompt.trim();
   }
 
   hasEnhancedPrompt(): boolean {
@@ -225,8 +229,8 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
   }
 
   shouldShowPromptSection(): boolean {
-    // Always show if we have at least the base prompt
-    return !!(this.image?.prompt || this.hasUserPrompt() || this.hasEnhancedPrompt());
+    // Always show if we have at least user_prompt or enhanced_prompt
+    return !!(this.hasUserPrompt() || this.hasEnhancedPrompt());
   }
 
   // === Style Methods ===

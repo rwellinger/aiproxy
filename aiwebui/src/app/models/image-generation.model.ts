@@ -25,7 +25,8 @@ export type CompositionStyle =
   | 'wide-angle'
   | 'close-up'
   | 'rule-of-thirds'
-  | 'centered';
+  | 'centered'
+  | 'album-cover';
 
 export type LightingStyle = 'auto' | 'natural' | 'studio' | 'dramatic' | 'golden-hour' | 'night';
 

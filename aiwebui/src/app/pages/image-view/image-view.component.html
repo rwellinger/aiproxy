@@ -156,7 +156,7 @@
               [showEditTitle]="true"
               [showActionButtons]="false"
               title=""
-              [showMetaInfo]="['model', 'size', 'created']"
+              [showMetaInfo]="['model', 'size', 'created', 'id']"
               [placeholderText]="'imageView.messages.selectImagePlaceholder' | translate"
               (titleChanged)="onTitleChanged()">
           </app-image-detail-panel>
@@ -185,7 +185,7 @@
             </button>
         </div>
         <div class="modal-body">
-            <img [src]="selectedImageBlobUrl" [alt]="selectedImage.prompt | displayName" class="preview-image">
+            <img [src]="selectedImageBlobUrl" [alt]="(selectedImage.user_prompt || selectedImage.prompt || 'Image') | displayName" class="preview-image">
         </div>
     </div>
 </div>

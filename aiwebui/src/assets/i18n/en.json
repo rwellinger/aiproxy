@@ -254,7 +254,8 @@
           "wide-angle": "Wide Angle",
           "close-up": "Close-Up",
           "rule-of-thirds": "Rule of Thirds",
-          "centered": "Centered"
+          "centered": "Centered",
+          "album-cover": "Album Cover"
         }
       },
       "lighting": {
@@ -300,10 +301,13 @@
         "off": "Off (No enhancement)"
       },
       "hints": {
-        "autoManual": "Auto mode will use Fast enhancement (styles selected)",
-        "autoQuality": "Auto mode will use Quality enhancement (no styles)"
+        "autoManual": "",
+        "autoQuality": "Auto mode will use Quality enhancement (no manual styles)"
       }
     },
+    "titleRequired": "Title required",
+    "albumCoverRequiresTitle": "Album Cover composition requires a title. Please add a title first.",
+    "albumCoverEnhancementHint": "Album Cover always uses AI",
     "title": "Create Picture",
     "titleActions": "Title actions",
     "titleLabel": "Title:",

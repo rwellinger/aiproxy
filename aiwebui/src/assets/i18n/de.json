@@ -254,7 +254,8 @@
           "wide-angle": "Weitwinkel",
           "close-up": "Nahaufnahme",
           "rule-of-thirds": "Drittelregel",
-          "centered": "Zentriert"
+          "centered": "Zentriert",
+          "album-cover": "Album-Cover"
         }
       },
       "lighting": {
@@ -300,10 +301,13 @@
         "off": "Aus (Keine Verbesserung)"
       },
       "hints": {
-        "autoManual": "Auto-Modus nutzt Schnelle Verbesserung (Stile ausgewählt)",
-        "autoQuality": "Auto-Modus nutzt Qualitäts-Verbesserung (keine Stile)"
+        "autoManual": "",
+        "autoQuality": "Auto-Modus nutzt Qualitäts-Verbesserung (keine manuellen Stile)"
       }
     },
+    "titleRequired": "Titel erforderlich",
+    "albumCoverRequiresTitle": "Album-Cover-Komposition erfordert einen Titel. Bitte zuerst Titel hinzufügen.",
+    "albumCoverEnhancementHint": "Album-Cover nutzt immer KI",
     "title": "Bild erstellen",
     "titleActions": "Titel-Aktionen",
     "titleLabel": "Titel:",

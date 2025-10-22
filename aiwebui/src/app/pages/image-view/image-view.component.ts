@@ -28,7 +28,9 @@ interface ImageData {
     id: string;
     filename: string;
     model_used: string;
-    prompt: string;
+    prompt: string | null;
+    user_prompt?: string | null;
+    enhanced_prompt?: string | null;
     prompt_hash: string;
     size: string;
     url: string;
@@ -488,8 +490,9 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
         if (image.title && image.title.trim()) {
             return image.title.trim();
         }
-        // Generate title from prompt (first 30 chars)
-        return image.prompt.length > 30 ? image.prompt.substring(0, 27) + '...' : image.prompt;
+        // Generate title from user_prompt (original user input)
+        const displayPrompt = image.user_prompt || image.prompt || 'Untitled';
+        return displayPrompt.length > 30 ? displayPrompt.substring(0, 27) + '...' : displayPrompt;
     }
 
     startEditTitle() {

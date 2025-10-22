@@ -119,7 +119,11 @@ class ImageService:
                 from sqlalchemy import or_
 
                 query = query.filter(
-                    or_(GeneratedImage.title.ilike(search_term), GeneratedImage.prompt.ilike(search_term))
+                    or_(
+                        GeneratedImage.title.ilike(search_term),
+                        GeneratedImage.user_prompt.ilike(search_term),
+                        GeneratedImage.prompt.ilike(search_term),
+                    )
                 )
 
             # Apply sorting
@@ -157,7 +161,11 @@ class ImageService:
                 from sqlalchemy import or_
 
                 query = query.filter(
-                    or_(GeneratedImage.title.ilike(search_term), GeneratedImage.prompt.ilike(search_term))
+                    or_(
+                        GeneratedImage.title.ilike(search_term),
+                        GeneratedImage.user_prompt.ilike(search_term),
+                        GeneratedImage.prompt.ilike(search_term),
+                    )
                 )
 
             return query.count()

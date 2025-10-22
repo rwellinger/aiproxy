@@ -250,26 +250,12 @@
     }
   }
 
-  // Detail Level (Centered, 50% width)
-  .detail-level-container {
-    display: flex;
-    justify-content: center;
+  // Detail Level & Enhancement Quality (Side by Side)
+  .detail-enhancement-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-15;
     margin-bottom: $spacing-15;
-
-    .detail-level-field {
-      width: 50%;
-    }
-  }
-
-  // Enhancement Section
-  .enhancement-section {
-    display: flex;
-    justify-content: center;
-
-    .enhancement-field {
-      width: 100%;
-      max-width: 400px;
-    }
   }
 }
 
@@ -595,16 +581,8 @@
       gap: $spacing-10;
     }
 
-    .detail-level-container {
-      .detail-level-field {
-        width: 100%; // Full width on mobile
-      }
-    }
-
-    .enhancement-section {
-      .enhancement-field {
-        max-width: 100%; // Full width on mobile
-      }
+    .detail-enhancement-row {
+      grid-template-columns: 1fr; // Stack vertically on mobile
     }
   }
 }

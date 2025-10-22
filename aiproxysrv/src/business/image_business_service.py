@@ -97,7 +97,7 @@ class ImageBusinessService:
             # Save metadata to database and get the generated image record
             generated_image = self._save_image_metadata(
                 user_prompt=user_prompt,
-                prompt=prompt,
+                prompt=prompt,  # Ollama-enhanced prompt
                 enhanced_prompt=enhanced_prompt if enhanced_prompt != prompt else None,
                 size=size,
                 filename=filename,

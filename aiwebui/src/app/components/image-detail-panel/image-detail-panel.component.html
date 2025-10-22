@@ -55,15 +55,30 @@
         <div class="image-display-compact">
             <div class="responsive-image-container" [ngClass]="getImageSizeClass()">
                 <img [src]="imageBlobUrl"
-                     [alt]="image.prompt || ('imageDetailPanel.alt.image' | translate)"
+                     [alt]="image.user_prompt || image.prompt || ('imageDetailPanel.alt.image' | translate)"
                      (error)="onImageError($event)"
                      loading="lazy"
                      class="responsive-image">
             </div>
         </div>
 
-        <!-- Meta Info Grid -->
+        <!-- Meta Info -->
         <div class="image-meta-info">
+            <!-- ID Row (separate, full width) -->
+            <div class="meta-id-row" *ngIf="shouldShowMetaInfo('id') && image.id">
+                <div class="meta-item meta-item-id">
+                    <i class="fas fa-fingerprint meta-icon"></i>
+                    <span class="meta-value meta-id" [title]="image.id">{{ image.id }}</span>
+                    <button type="button"
+                            class="copy-id-btn"
+                            (click)="copyToClipboard(image.id)"
+                            [title]="'imageDetailPanel.copyId' | translate">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Other Meta Data Grid -->
             <div class="meta-grid">
                 <div class="meta-item" *ngIf="shouldShowMetaInfo('model') && image.model_used">
                     <i class="fas fa-robot meta-icon"></i>
@@ -82,7 +97,7 @@
 
         <!-- Prompt Details Expansion Panel -->
         <div class="expansion-panels" *ngIf="shouldShowPromptSection()">
-            <details class="expansion-panel">
+            <details class="expansion-panel" open>
                 <summary class="expansion-header">
                     <i class="fas fa-comment-dots"></i>
                     <span>{{ 'imageDetailPanel.prompts.title' | translate }}</span>
@@ -106,7 +121,7 @@
                         <div class="prompt-text">{{ image.prompt }}</div>
                     </div>
 
-                    <!-- Final Prompt (to DALL-E) -->
+                    <!-- Final Prompt (to DALL-E with Styles) -->
                     <div class="prompt-section" *ngIf="hasEnhancedPrompt()">
                         <div class="prompt-label">
                             <i class="fas fa-paper-plane"></i>
