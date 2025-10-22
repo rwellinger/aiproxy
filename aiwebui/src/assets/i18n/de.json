@@ -168,6 +168,14 @@
     "prompt": {
       "label": "Prompt:"
     },
+    "promptDetails": {
+      "title": "Prompt-Details",
+      "originalPrompt": "Original-Prompt:",
+      "enhancedPrompt": "Verbesserter Prompt:",
+      "styleSelections": "Stil-Auswahl:",
+      "copyEnhanced": "Verbesserten Prompt kopieren",
+      "noEnhancedPrompt": "Keine KI-Verbesserung wurde verwendet"
+    },
     "title": "Bild-Details",
     "untitled": "Unbenanntes Bild"
   },
@@ -195,13 +203,76 @@
       "generatingTitle": "Erstelle Titel...",
       "generatingTitleHint": "KI erstellt einen Bild-Titel für dich",
       "translating": "Übersetze Prompt...",
-      "translatingHint": "KI übersetzt deinen Prompt ins Englische"
+      "translatingHint": "KI übersetzt deinen Prompt ins Englische",
+      "enhancingQuality": "Verbessere Prompt (Qualität)...",
+      "enhancingQualityHint": "KI verbessert deinen Prompt mit großem Modell (3-5s)",
+      "enhancingFast": "Verbessere Prompt (Schnell)...",
+      "enhancingFastHint": "KI verbessert deinen Prompt mit kleinem Modell (<1s)"
     },
     "promptCharCounter": "{{count}}/{{max}} Zeichen",
     "promptLabel": "Prompt:",
     "promptPlaceholder": "Beschreibe das Bild, das du erstellen möchtest...",
     "resetButton": "Zurücksetzen",
     "sizeLabel": "Bildgröße:",
+    "styles": {
+      "artisticStyleLabel": "Kunststil:",
+      "compositionLabel": "Komposition:",
+      "lightingLabel": "Beleuchtung:",
+      "colorPaletteLabel": "Farbpalette:",
+      "detailLevelLabel": "Detailgrad:",
+      "artisticStyles": {
+        "auto": "Auto (KI entscheidet)",
+        "photorealistic": "Fotorealistisch",
+        "digitalArt": "Digitale Kunst",
+        "oilPainting": "Ölgemälde",
+        "watercolor": "Aquarell",
+        "cartoon": "Cartoon",
+        "anime": "Anime/Manga",
+        "sketch": "Skizze",
+        "3dRender": "3D-Render"
+      },
+      "compositions": {
+        "auto": "Auto (KI entscheidet)",
+        "portrait": "Porträt",
+        "landscape": "Landschaft",
+        "wideAngle": "Weitwinkel",
+        "closeUp": "Nahaufnahme",
+        "ruleOfThirds": "Drittelregel",
+        "centered": "Zentriert"
+      },
+      "lightings": {
+        "auto": "Auto (KI entscheidet)",
+        "natural": "Natürliches Tageslicht",
+        "studio": "Studio-Beleuchtung",
+        "dramatic": "Dramatisch/Stimmungsvoll",
+        "goldenHour": "Goldene Stunde",
+        "night": "Nachtszene"
+      },
+      "colorPalettes": {
+        "auto": "Auto (KI entscheidet)",
+        "vibrant": "Lebhafte Farben",
+        "muted": "Gedämpfte Töne",
+        "monochrome": "Monochrom",
+        "highContrast": "Hoher Kontrast",
+        "warm": "Warme Töne",
+        "cool": "Kühle Töne",
+        "pastel": "Pastellfarben"
+      },
+      "detailLevels": {
+        "auto": "Auto (KI entscheidet)",
+        "minimal": "Minimal",
+        "moderate": "Moderat",
+        "highlyDetailed": "Sehr detailliert"
+      }
+    },
+    "enhanceQuality": {
+      "label": "KI-Verbesserungsqualität:",
+      "auto": "Auto (Intelligente Auswahl)",
+      "quality": "Qualität (Großes Modell, 3-5s)",
+      "fast": "Schnell (Kleines Modell, <1s)",
+      "off": "Aus (Keine Verbesserung)",
+      "autoHint": "Auto-Modus nutzt Qualität für kreative Prompts, Schnell für Stil-Prompts"
+    },
     "title": "Bild erstellen",
     "titleActions": "Titel-Aktionen",
     "titleLabel": "Titel:",

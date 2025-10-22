@@ -75,6 +75,10 @@ export class ChatService {
     return this.validateAndCallUnified('image', 'enhance', prompt);
   }
 
+  async improveImagePromptFast(prompt: string): Promise<string> {
+    return this.validateAndCallUnified('image', 'enhance-fast', prompt);
+  }
+
   async enhanceCoverPrompt(prompt: string, title: string, artistName?: string): Promise<string> {
     const template = await firstValueFrom(this.promptConfig.getPromptTemplateAsync('image', 'enhance-cover'));
     if (!template) {

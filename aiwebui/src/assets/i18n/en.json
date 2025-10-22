@@ -168,6 +168,14 @@
     "prompt": {
       "label": "Prompt:"
     },
+    "promptDetails": {
+      "title": "Prompt Details",
+      "originalPrompt": "Original Prompt:",
+      "enhancedPrompt": "Enhanced Prompt:",
+      "styleSelections": "Style Selections:",
+      "copyEnhanced": "Copy Enhanced Prompt",
+      "noEnhancedPrompt": "No AI enhancement was used"
+    },
     "title": "Image Details",
     "untitled": "Untitled Image"
   },
@@ -195,13 +203,76 @@
       "generatingTitle": "Generating Title...",
       "generatingTitleHint": "AI is creating an image title for you",
       "translating": "Translating Prompt...",
-      "translatingHint": "AI is translating your prompt to English"
+      "translatingHint": "AI is translating your prompt to English",
+      "enhancingQuality": "Enhancing Prompt (Quality)...",
+      "enhancingQualityHint": "AI is improving your prompt with large model (3-5s)",
+      "enhancingFast": "Enhancing Prompt (Fast)...",
+      "enhancingFastHint": "AI is improving your prompt with small model (<1s)"
     },
     "promptCharCounter": "{{count}}/{{max}} characters",
     "promptLabel": "Prompt:",
     "promptPlaceholder": "Describe the picture you want to create...",
     "resetButton": "Reset",
     "sizeLabel": "Picture Size:",
+    "styles": {
+      "artisticStyleLabel": "Artistic Style:",
+      "compositionLabel": "Composition:",
+      "lightingLabel": "Lighting:",
+      "colorPaletteLabel": "Color Palette:",
+      "detailLevelLabel": "Detail Level:",
+      "artisticStyles": {
+        "auto": "Auto (AI decides)",
+        "photorealistic": "Photorealistic",
+        "digitalArt": "Digital Art",
+        "oilPainting": "Oil Painting",
+        "watercolor": "Watercolor",
+        "cartoon": "Cartoon",
+        "anime": "Anime/Manga",
+        "sketch": "Sketch",
+        "3dRender": "3D Render"
+      },
+      "compositions": {
+        "auto": "Auto (AI decides)",
+        "portrait": "Portrait",
+        "landscape": "Landscape",
+        "wideAngle": "Wide Angle",
+        "closeUp": "Close-Up",
+        "ruleOfThirds": "Rule of Thirds",
+        "centered": "Centered"
+      },
+      "lightings": {
+        "auto": "Auto (AI decides)",
+        "natural": "Natural Daylight",
+        "studio": "Studio Lighting",
+        "dramatic": "Dramatic/Moody",
+        "goldenHour": "Golden Hour",
+        "night": "Night Scene"
+      },
+      "colorPalettes": {
+        "auto": "Auto (AI decides)",
+        "vibrant": "Vibrant Colors",
+        "muted": "Muted Tones",
+        "monochrome": "Monochrome",
+        "highContrast": "High Contrast",
+        "warm": "Warm Tones",
+        "cool": "Cool Tones",
+        "pastel": "Pastel Colors"
+      },
+      "detailLevels": {
+        "auto": "Auto (AI decides)",
+        "minimal": "Minimal",
+        "moderate": "Moderate",
+        "highlyDetailed": "Highly Detailed"
+      }
+    },
+    "enhanceQuality": {
+      "label": "AI Enhancement Quality:",
+      "auto": "Auto (Smart selection)",
+      "quality": "Quality (Large model, 3-5s)",
+      "fast": "Fast (Small model, <1s)",
+      "off": "Off (No enhancement)",
+      "autoHint": "Auto mode uses Quality for creative prompts, Fast for styled prompts"
+    },
     "title": "Create Picture",
     "titleActions": "Title actions",
     "titleLabel": "Title:",

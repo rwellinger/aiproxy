@@ -218,6 +218,61 @@
   @include input-focus-state($primary-color);
 }
 
+/* ===== STYLE PREFERENCES SECTION ===== */
+.style-preferences-section {
+  margin-top: $spacing-20;
+  padding-top: $spacing-20;
+  border-top: 1px solid $border-light;
+
+  .section-title {
+    font-size: $font-lg;
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+    margin: 0 0 $spacing-15 0;
+    display: flex;
+    align-items: center;
+    gap: $spacing-10;
+
+    i {
+      color: $primary-color;
+    }
+  }
+
+  // Style Selectors Grid (2x2)
+  .style-selectors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-15;
+    margin-bottom: $spacing-15;
+
+    .style-field {
+      width: 100%;
+    }
+  }
+
+  // Detail Level (Centered, 50% width)
+  .detail-level-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: $spacing-15;
+
+    .detail-level-field {
+      width: 50%;
+    }
+  }
+
+  // Enhancement Section
+  .enhancement-section {
+    display: flex;
+    justify-content: center;
+
+    .enhancement-field {
+      width: 100%;
+      max-width: 400px;
+    }
+  }
+}
+
 .button-group {
   display: flex;
   gap: $spacing-10;
@@ -497,39 +552,59 @@
 @media (max-width: 768px) {
   .image-generator-container {
     padding: 1rem;
-    
+
     .generator-grid {
       gap: 1rem;
-      
+
       .image-creation-card,
       .generated-image-card {
         min-height: 350px;
-        
+
         mat-card-content {
           padding: 0.75rem;
         }
       }
     }
   }
-  
+
   .controls-content {
     padding: 1rem;
   }
-  
+
   .image-actions {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .action-button {
     width: 100%;
   }
-  
+
   .button-group {
     flex-direction: column;
   }
-  
+
   .reset-button {
     flex: 1;
+  }
+
+  // Style Preferences Responsive
+  .style-preferences-section {
+    .style-selectors {
+      grid-template-columns: 1fr; // Single column on mobile
+      gap: $spacing-10;
+    }
+
+    .detail-level-container {
+      .detail-level-field {
+        width: 100%; // Full width on mobile
+      }
+    }
+
+    .enhancement-section {
+      .enhancement-field {
+        max-width: 100%; // Full width on mobile
+      }
+    }
   }
 }
