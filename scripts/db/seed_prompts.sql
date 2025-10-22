@@ -123,7 +123,7 @@ Output: "Futuristic metropolis with glass skyscrapers, neon lights, flying vehic
     true
 );
 
--- image/enhance-cover (v1.0)
+-- image/enhance-cover (v1.2)
 SELECT upsert_prompt_template(
     'image',
     'enhance-cover',
@@ -131,10 +131,11 @@ SELECT upsert_prompt_template(
 
 CRITICAL TEXT-RENDERING RULES:
 - When text elements are specified, include them with EXACT wording in quotes
+- ALL text must be in ALL CAPS (uppercase letters only) for better recognition
 - Add explicit rendering instructions: "PROMINENTLY featuring the text", "large clear readable letters"
-- Specify text placement: "at the top", "centered", "at the bottom"
+- Specify text placement: "HORIZONTALLY CENTERED at the top", "HORIZONTALLY CENTERED at the bottom"
 - Emphasize legibility: "perfectly legible professional typography", "sharp text rendering"
-- IMPORTANT: Add "NO other text elements" or "ONLY these specified text elements" to prevent random text generation
+- IMPORTANT: End prompt with "ONLY the specified title text is visible - no additional words, numbers, labels, or random characters anywhere else in the image"
 
 Visual Design:
 - Describe artwork composition, color palette, mood
@@ -147,17 +148,20 @@ Answer in the same language as the input text.',
 
 IMPORTANT:
 - Preserve all specified text elements with exact wording in quotes
+- ALL text must be in ALL CAPS (uppercase letters only)
 - Include explicit text rendering instructions for each text element
-- Add "NO other text elements" or "ONLY these specified texts" at the end to prevent random text generation
+- Text must be HORIZONTALLY CENTERED for proper framing
+- End with clear restriction: "ONLY the specified title text is visible - no additional words, numbers, labels, or random characters anywhere else in the image"
+- DO NOT use vague phrases like "no other text" - be specific about what is forbidden
 - DO NOT use "cover", "album", "CD" or similar terms - just describe the artwork
 - Keep same language as input (German → German, English → English)
 - No labels, explanations, or comments
 - Single continuous paragraph
 
 Example format:
-"Digital artwork PROMINENTLY featuring the text ''Song Title'' in large, bold, readable letters at the top, and ''by Artist Name'' in elegant smaller professional typography at the bottom. [visual description]. Text must be perfectly legible and sharp. NO other text elements."',
+"Digital artwork PROMINENTLY featuring the text ''SONG TITLE'' in large, bold, ALL CAPS readable letters HORIZONTALLY CENTERED at the top, and ''BY ARTIST NAME'' in clearly visible smaller professional typography HORIZONTALLY CENTERED at the bottom. [visual description]. Text must be perfectly legible and sharp. ONLY the title text ''SONG TITLE'' and artist credit ''BY ARTIST NAME'' are visible - no additional words, numbers, labels, or random characters anywhere else in the image."',
     'Enhances prompts for song artwork with optimized text rendering',
-    '1.0',
+    '1.2',
     'gpt-oss:20b',
     0.7,
     200,
