@@ -356,6 +356,7 @@ pytest --cov=src               # Run with coverage report
 ## General Don'ts
 
 - ❌ NEVER commit `.env` to repo
+- ❌ NEVER write unit tests with infrastructure dependencies like file system or database
 - ❌ NEVER use emojis (unless explicitly requested)
 - ❌ NEVER create unnecessary markdown files
 - ❌ NEVER skip linting before commits (run `ruff check . --fix` in aiproxysrv)
