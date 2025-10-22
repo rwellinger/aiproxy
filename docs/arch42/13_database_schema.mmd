@@ -3,12 +3,14 @@ erDiagram
         UUID id PK "Primary Key"
         VARCHAR task_id UK "Celery Task ID"
         VARCHAR job_id "MUREKA Job ID"
+        UUID sketch_id FK "Foreign Key to song_sketches (nullable)"
         TEXT lyrics "Song lyrics input"
         TEXT prompt "Style prompt"
         VARCHAR model "Generation model (chirp-v3-5)"
         VARCHAR title "User-defined title"
         VARCHAR tags "User tags"
         VARCHAR workflow "onWork, inUse, notUsed"
+        BOOLEAN is_instrumental "True for instrumental songs"
         VARCHAR status "PENDING, PROGRESS, SUCCESS, FAILURE, CANCELLED"
         TEXT progress_info "JSON progress details"
         TEXT error_message "Error information"
@@ -38,15 +40,19 @@ erDiagram
 
     generated_images {
         UUID id PK "Primary Key"
-        TEXT prompt "Generation prompt"
+        TEXT user_prompt "Original user input (before AI enhancement)"
+        TEXT prompt "AI-enhanced prompt (via Ollama)"
+        TEXT enhanced_prompt "Final prompt sent to DALL-E (Ollama + Styles)"
+        TEXT revised_prompt "DALL-E's revised prompt (returned by OpenAI)"
         VARCHAR size "Image size (1024x1024)"
         VARCHAR filename UK "Unique filename"
         VARCHAR file_path "Local file path"
         VARCHAR local_url "Local access URL"
-        VARCHAR model_used "Generation model"
+        VARCHAR model_used "Generation model (dall-e-3)"
         VARCHAR prompt_hash "Prompt hash for deduplication"
         VARCHAR title "User-defined title"
         TEXT tags "User tags"
+        VARCHAR artistic_style "Artistic style: photorealistic, digital-art, oil-painting, etc."
         TIMESTAMP created_at "Creation timestamp"
         TIMESTAMP updated_at "Last update timestamp"
     }
@@ -115,12 +121,23 @@ erDiagram
         TIMESTAMP last_login "Last login timestamp"
     }
 
+    song_sketches {
+        UUID id PK "Primary Key"
+        VARCHAR title "Sketch title (optional)"
+        TEXT lyrics "Lyric draft (optional)"
+        TEXT prompt "Music style prompt (required)"
+        VARCHAR tags "User-defined tags"
+        VARCHAR workflow "Workflow status: draft, used, archived"
+        TIMESTAMP created_at "Creation timestamp"
+        TIMESTAMP updated_at "Last update timestamp"
+    }
+
     lyric_parsing_rules {
         INTEGER id PK "Primary Key (auto-increment)"
         VARCHAR name "Rule name"
         TEXT description "Rule description"
         TEXT pattern "Regex pattern to match"
-        TEXT replacement "Replacement text"
+        TEXT replacement "Replacement text (base64 encoded)"
         VARCHAR rule_type "Rule type: cleanup, section"
         BOOLEAN active "Rule is active"
         INTEGER order "Execution order"
@@ -128,6 +145,7 @@ erDiagram
         TIMESTAMP updated_at "Last update timestamp"
     }
 
+    song_sketches ||--o{ songs : "used for generation"
     songs ||--o{ song_choices : "has choices"
     users ||--o{ conversations : "owns conversations"
     conversations ||--o{ messages : "contains messages"

@@ -200,10 +200,13 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   │   ├── song-detail-panel/      # Song detail view component
   │   └── ...
   ├── pages/         # Feature Pages
-  │   ├── ai-chat/            # AI Chat conversation interface
+  │   ├── ai-chat/            # AI Chat conversation interface (Ollama)
+  │   ├── openai-chat/        # OpenAI GPT chat interface
   │   ├── lyric-creation/     # Lyric editor with section-based editing & AI tools
+  │   ├── lyric-parsing-rules/  # Manage regex-based lyric cleanup rules
   │   ├── song-sketch-creator/  # Create/edit song sketches
   │   ├── song-sketch-library/  # Manage song sketch library
+  │   ├── music-style-prompt/   # Music style template management
   │   ├── image-generator/    # Image generation with fast enhancement mode
   │   ├── image-view/         # Image gallery with master-detail layout
   │   ├── song-generator/     # UI for music generation
@@ -882,10 +885,10 @@ services:
 | Column | Type | Description |
 |--------|-----|-------------|
 | `id` | UUID | Primary Key |
-| `prompt` | TEXT | Final generation prompt (used for DALL-E) |
-| `original_prompt` | TEXT | User's original input prompt (nullable) |
-| `enhanced_prompt` | TEXT | AI-enhanced prompt from template (nullable) |
-| `revised_prompt` | TEXT | DALL-E's revised prompt (nullable) |
+| `user_prompt` | TEXT | Original user input (before AI enhancement) |
+| `prompt` | TEXT | AI-enhanced prompt (via Ollama) |
+| `enhanced_prompt` | TEXT | Final prompt sent to DALL-E (Ollama + Styles) |
+| `revised_prompt` | TEXT | DALL-E's revised prompt (returned by OpenAI) |
 | `size` | VARCHAR(20) | Image size (e.g. "1024x1024") |
 | `filename` | VARCHAR(255) | Unique filename |
 | `file_path` | VARCHAR(500) | Local file path |
@@ -894,6 +897,7 @@ services:
 | `prompt_hash` | VARCHAR(32) | Prompt hash for deduplication |
 | `title` | VARCHAR(255) | User-defined title |
 | `tags` | TEXT | User-defined tags |
+| `artistic_style` | VARCHAR(50) | Artistic style: photorealistic, digital-art, oil-painting, etc. |
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
