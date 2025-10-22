@@ -34,12 +34,37 @@
 ## Core Features
 
 - **Image Generation**: AI-powered via DALL-E/OpenAI API
+  - Fast Enhancement Mode: One-click prompt optimization via AI templates
+  - Gallery view with filtering & search
+  - Detail view with metadata & download options
 - **Song Generation**: AI music via Mureka API (Lyrics/Instrumental, FLAC/MP3, Stems)
+  - Full song creation workflow (sketch → generation → library)
+  - Song sketches: Draft system for music ideas
+  - Music style templates: Reusable style prompts
+  - Playback with integrated audio player
+  - Multi-format support (MP3, FLAC, stems)
 - **Lyric Creation**: AI-assisted lyric editor with section detection, cleanup rules, and structure management
+  - Lyric Architect: Visual song structure editor (Verse, Chorus, Bridge, etc.)
+  - Real-time section detection with Markdown-style labels
+  - Search & replace functionality
+  - Auto-cleanup with configurable regex rules
 - **Lyric Parsing Rules**: Configurable regex-based cleanup (line breaks, smart quotes, etc.) and section detection (Markdown-style labels)
+  - Rule management UI with preview
+  - Execution order control
+  - Pattern testing & validation
 - **Chat**: Ollama (local) & OpenAI (external) integration
+  - Multi-conversation management
+  - Message streaming support
+  - Export conversations (Markdown, JSON)
+  - Token tracking & context management
 - **Prompt Management**: Template system for reusable prompts
+  - Category-based organization
+  - Pre/post-condition support
+  - Model-specific templates
 - **User Profiles**: Settings, language preferences (EN/DE)
+  - Authentication & authorization (JWT)
+  - Password management
+  - Profile customization
 
 ## Tech Stack
 
@@ -76,26 +101,60 @@
 Proxy server for external APIs (OpenAI, Mureka, Ollama) + PostgreSQL Access
 
 **Key Paths:**
-- `src/api` - FastAPI routes & business logic
-- `src/business` - Business logic services
-- `src/db` - SQLAlchemy models & connection
-- `src/schemas` - Pydantic models
-- `src/celery_app` - Async Mureka tasks
-- `src/alembic` - Database migrations
-- `src/server.py` - Dev server
-- `src/wsgi.py` - Prod entry (Gunicorn)
-- `src/worker.py` - Celery worker
+- `src/api/` - FastAPI routing & controllers
+  - `routes/` - API endpoint definitions (chat, conversation, image, song, sketch, user, prompts, lyric parsing rules)
+  - `controllers/` - Business logic & request handling
+- `src/business/` - Core business logic services
+- `src/db/` - SQLAlchemy models & database connection
+- `src/schemas/` - Pydantic request/response models
+- `src/celery_app/` - Async Mureka song generation tasks
+- `src/mureka/` - Mureka API client integration
+- `src/config/` - Application configuration
+- `src/utils/` - Helper functions & utilities
+- `src/alembic/` - Database migrations (versions/)
+- `src/server.py` - Development server entry point
+- `src/wsgi.py` - Production entry (Gunicorn)
+- `src/worker.py` - Celery worker process
 
 ### `aiwebui` (Angular 18 Frontend)
 Material Design UI with SCSS, TypeScript, ngx-translate
 
 **Key Paths:**
-- `src/app/pages/` - Feature pages (image-generator, song-generator, song-view, chat, user-profile)
-- `src/app/services/` - API calls & business logic
-- `src/app/components/` - Shared UI components
-- `src/app/models/` - TypeScript interfaces
-- `src/app/guards/` - Route protection
-- `src/app/interceptors/` - HTTP handling
+- `src/app/pages/` - Feature pages & views
+  - `image-generator/` - AI image generation (DALL-E integration)
+  - `image-view/` - Image gallery & management
+  - `song-generator/` - AI song creation interface
+  - `song-view/` - Song library & playback
+  - `song-profile/` - Detailed song view with player & metadata
+  - `song-sketch-creator/` - Song draft creation tool
+  - `song-sketch-library/` - Manage song drafts/sketches
+  - `lyric-creation/` - AI-assisted lyric editor with parsing rules
+  - `lyric-parsing-rules/` - Manage regex-based lyric cleanup rules
+  - `music-style-prompt/` - Music style template management
+  - `ai-chat/` - Ollama local chat interface
+  - `openai-chat/` - OpenAI GPT chat interface
+  - `user-profile/` - User settings & preferences
+  - `prompt-templates/` - Reusable AI prompt management
+- `src/app/services/` - Service layer (business logic & API calls)
+  - `business/` - Core business services (image, song, sketch, auth, conversation, user, chat-export, openai-chat)
+  - `config/` - API configuration & endpoint management (ApiConfigService)
+  - `ui/` - UI state management services
+  - `utils/` - Utility services & helpers
+- `src/app/components/` - Shared/reusable UI components
+  - `side-menu/` - Navigation sidebar
+  - `image-detail-panel/` - Image detail view component
+  - `song-detail-panel/` - Song detail view component
+  - `lyric-architect-modal/` - Lyric structure editor dialog
+  - `music-style-chooser-modal/` - Music style selection dialog
+  - `music-style-chooser-inline/` - Inline music style selector
+  - `search-replace-dialog/` - Text search & replace utility
+  - `password-change-modal/` - User password change dialog
+- `src/app/models/` - TypeScript interfaces & data models
+- `src/app/guards/` - Route guards for authentication & authorization
+- `src/app/interceptors/` - HTTP interceptors (JWT injection, error handling)
+- `src/app/auth/` - Authentication components
+  - `login/` - Login page component
+- `src/app/pipes/` - Custom Angular pipes
 - `src/assets/i18n/` - Translation files (en.json, de.json)
 
 ### `forwardproxy` (Nginx)
@@ -607,27 +666,72 @@ lsof -i :5432  # PostgreSQL
 
 ## Database Tables
 
-- `songs` - Generated songs (title, lyrics, status, job_id, flac_url, mp3_url, stems_url)
+- `songs` - Generated songs (title, lyrics, status, job_id, flac_url, mp3_url, stems_url, audio_file_path)
 - `song_choices` - Individual song variations from MUREKA (mp3_url, flac_url, stem_url, duration, rating)
-- `images` - Generated images (title, prompt, status, job_id, url)
-- `prompt_templates` - Reusable AI prompts (category, action, pre_condition, post_condition, model)
-- `lyric_parsing_rules` - Configurable regex rules for lyric cleanup and section detection (pattern, replacement, rule_type, order)
-- `users` - User accounts & settings (email, password_hash, is_active)
-- `conversations` - Chat conversations (title, model, provider, token_count)
-- `messages` - Individual chat messages (role, content, token_count)
+- `song_sketches` - Song drafts/ideas (title, lyrics, style_description, instrumental_only, creator notes)
+- `images` - Generated images (title, prompt, original_prompt, enhanced_prompt, status, job_id, url, revised_prompt)
+- `prompt_templates` - Reusable AI prompts (category, action, pre_condition, post_condition, model, enabled)
+- `lyric_parsing_rules` - Configurable regex rules for lyric cleanup and section detection (pattern, replacement, rule_type, order, enabled)
+- `users` - User accounts & settings (email, password_hash, is_active, language_preference)
+- `conversations` - Chat conversations (title, model, provider, token_count, user_id)
+- `messages` - Individual chat messages (role, content, token_count, conversation_id)
 - `messages_archive` - Archived messages from compression
 
 ## Key API Endpoints
 
 ```
-POST /api/images/generate      # Generate image
-GET  /api/images               # List images
-POST /api/songs/generate       # Generate song
-GET  /api/songs                # List songs
-GET  /api/songs/{id}/flac      # Download FLAC
-POST /api/songs/{id}/stems     # Generate stems
-GET  /api/prompts              # List prompt templates
-GET  /api/account/status       # Mureka account status
+# Images
+POST /api/images/generate           # Generate image (with optional fast enhancement)
+GET  /api/images                    # List images with pagination
+GET  /api/images/{id}               # Get image details
+DELETE /api/images/{id}             # Delete image
+
+# Songs
+POST /api/songs/generate            # Generate song from sketch or direct input
+GET  /api/songs                     # List songs with pagination
+GET  /api/songs/{id}                # Get song details
+GET  /api/songs/{id}/flac           # Download FLAC audio
+GET  /api/songs/{id}/mp3            # Download MP3 audio
+POST /api/songs/{id}/stems          # Generate stems for song
+DELETE /api/songs/{id}              # Delete song
+
+# Song Sketches
+POST /api/sketches                  # Create song sketch
+GET  /api/sketches                  # List sketches
+GET  /api/sketches/{id}             # Get sketch details
+PUT  /api/sketches/{id}             # Update sketch
+DELETE /api/sketches/{id}           # Delete sketch
+
+# Prompts & Templates
+GET  /api/prompts                   # List prompt templates
+POST /api/prompts                   # Create prompt template
+PUT  /api/prompts/{id}              # Update prompt template
+DELETE /api/prompts/{id}            # Delete prompt template
+
+# Lyric Parsing Rules
+GET  /api/lyric-parsing-rules       # List rules
+POST /api/lyric-parsing-rules       # Create rule
+PUT  /api/lyric-parsing-rules/{id}  # Update rule
+DELETE /api/lyric-parsing-rules/{id}# Delete rule
+
+# Chat & Conversations
+POST /api/conversations             # Create conversation
+GET  /api/conversations             # List conversations
+GET  /api/conversations/{id}        # Get conversation with messages
+DELETE /api/conversations/{id}      # Delete conversation
+POST /api/chat/ollama               # Send message to Ollama (streaming)
+POST /api/chat/openai               # Send message to OpenAI
+
+# User Management
+POST /api/users/login               # User login (JWT)
+POST /api/users/register            # User registration
+GET  /api/users/profile             # Get user profile
+PUT  /api/users/profile             # Update profile
+PUT  /api/users/password            # Change password
+
+# System
+GET  /api/health                    # Health check
+GET  /api/account/status            # Mureka account status
 ```
 
 ## Common Pitfalls
