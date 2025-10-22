@@ -39,6 +39,7 @@ export class ImageGeneratorComponent implements OnInit {
     isLoading = false;
     isImprovingPrompt = false;
     isTranslatingPrompt = false;
+    isInterpretingLyric = false;
     showPromptDropdown = false;
     isGeneratingTitle = false;
     showTitleDropdown = false;
@@ -152,23 +153,31 @@ export class ImageGeneratorComponent implements OnInit {
         this.detailLevel.setValue(savedStyles.detailLevel);
         this.enhanceQuality.setValue(savedStyles.enhanceQuality);
 
-        // If Album Cover is already selected, force enhanceQuality to 'auto' and disable it
+        // If Album Cover is already selected, force enhanceQuality to 'auto' and size to square
         if (savedStyles.composition === 'album-cover') {
             this.enhanceQuality.setValue('auto');
             this.enhanceQuality.disable();
+            this.promptForm.patchValue({ size: '1024x1024' }, { emitEvent: false });
+            this.promptForm.get('size')?.disable({ emitEvent: false });
             this.saveStylePreferences();
         }
 
         // Save style preferences on changes
         this.artisticStyle.valueChanges.subscribe(() => this.saveStylePreferences());
         this.composition.valueChanges.subscribe(value => {
-            // Auto-set enhancement quality and disable when Album Cover is selected
+            // Auto-set enhancement quality, size, and disable when Album Cover is selected
             if (value === 'album-cover') {
                 this.enhanceQuality.setValue('auto', { emitEvent: false });
                 this.enhanceQuality.disable();
+                this.promptForm.patchValue({ size: '1024x1024' }, { emitEvent: false });
+                // Disable size dropdown to prevent format changes
+                this.promptForm.get('size')?.disable({ emitEvent: false });
+                // Reset incompatible styles to 'auto' when switching to Album Cover
+                this.resetIncompatibleStylesForAlbumCover();
             } else {
                 // Re-enable when switching away from Album Cover
                 this.enhanceQuality.enable();
+                this.promptForm.get('size')?.enable({ emitEvent: false });
             }
             this.saveStylePreferences();
         });
@@ -395,6 +404,28 @@ export class ImageGeneratorComponent implements OnInit {
         }
     }
 
+    async interpretLyric() {
+        const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
+        if (!currentPrompt) {
+            this.notificationService.error(this.translate.instant('imageGenerator.errors.promptRequired'));
+            return;
+        }
+
+        this.isInterpretingLyric = true;
+        try {
+            const interpretedPrompt = await this.progressService.executeWithProgress(
+                () => this.chatService.interpretLyricPrompt(currentPrompt),
+                this.translate.instant('imageGenerator.progress.interpretingLyric'),
+                this.translate.instant('imageGenerator.progress.interpretingLyricHint')
+            );
+            this.promptForm.patchValue({prompt: this.removeQuotes(interpretedPrompt)});
+        } catch (error: any) {
+            this.notificationService.error(`Error interpreting lyric: ${error.message}`);
+        } finally {
+            this.isInterpretingLyric = false;
+        }
+    }
+
     togglePromptDropdown() {
         this.showPromptDropdown = !this.showPromptDropdown;
     }
@@ -403,11 +434,13 @@ export class ImageGeneratorComponent implements OnInit {
         this.showPromptDropdown = false;
     }
 
-    selectPromptAction(action: 'translate') {
+    selectPromptAction(action: 'translate' | 'interpret-lyric') {
         this.closePromptDropdown();
 
         if (action === 'translate') {
             this.translatePrompt();
+        } else if (action === 'interpret-lyric') {
+            this.interpretLyric();
         }
     }
 
@@ -541,5 +574,55 @@ export class ImageGeneratorComponent implements OnInit {
     private removeQuotes(text: string): string {
         if (!text) return text;
         return text.replace(/^["']|["']$/g, '').trim();
+    }
+
+    /**
+     * Reset incompatible styles to 'auto' when Album Cover is selected
+     * Album Cover requires sharp, legible text rendering which conflicts with:
+     * - Painterly styles (oil-painting, watercolor, sketch)
+     * - Dramatic lighting (strong shadows obscure text)
+     * - Low-contrast palettes (muted, monochrome)
+     */
+    private resetIncompatibleStylesForAlbumCover(): void {
+        const incompatibleArtisticStyles: ArtisticStyle[] = ['oil-painting', 'watercolor', 'sketch'];
+        const incompatibleLighting: LightingStyle[] = ['dramatic'];
+        const incompatibleColorPalettes: ColorPaletteStyle[] = ['muted', 'monochrome'];
+
+        if (incompatibleArtisticStyles.includes(this.artisticStyle.value as ArtisticStyle)) {
+            this.artisticStyle.setValue('auto', { emitEvent: false });
+        }
+        if (incompatibleLighting.includes(this.lighting.value as LightingStyle)) {
+            this.lighting.setValue('auto', { emitEvent: false });
+        }
+        if (incompatibleColorPalettes.includes(this.colorPalette.value as ColorPaletteStyle)) {
+            this.colorPalette.setValue('auto', { emitEvent: false });
+        }
+    }
+
+    /**
+     * Check if an artistic style option is incompatible with Album Cover composition
+     */
+    isArtisticStyleIncompatibleWithAlbumCover(style: ArtisticStyle): boolean {
+        if (!this.isAlbumCoverMode || style === 'auto') return false;
+        const incompatibleStyles: ArtisticStyle[] = ['oil-painting', 'watercolor', 'sketch'];
+        return incompatibleStyles.includes(style);
+    }
+
+    /**
+     * Check if a lighting option is incompatible with Album Cover composition
+     */
+    isLightingIncompatibleWithAlbumCover(lighting: LightingStyle): boolean {
+        if (!this.isAlbumCoverMode || lighting === 'auto') return false;
+        const incompatibleLighting: LightingStyle[] = ['dramatic'];
+        return incompatibleLighting.includes(lighting);
+    }
+
+    /**
+     * Check if a color palette option is incompatible with Album Cover composition
+     */
+    isColorPaletteIncompatibleWithAlbumCover(palette: ColorPaletteStyle): boolean {
+        if (!this.isAlbumCoverMode || palette === 'auto') return false;
+        const incompatiblePalettes: ColorPaletteStyle[] = ['muted', 'monochrome'];
+        return incompatiblePalettes.includes(palette);
     }
 }

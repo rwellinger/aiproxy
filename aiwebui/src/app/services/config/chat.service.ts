@@ -185,6 +185,10 @@ Please enhance this as an album cover prompt with these text elements prominentl
     return this.validateAndCallUnified('image', 'translate', prompt);
   }
 
+  async interpretLyricPrompt(lyric: string): Promise<string> {
+    return this.validateAndCallUnified('image', 'interpret-lyric', lyric);
+  }
+
   async generateTitle(inputText: string): Promise<string> {
     return this.validateAndCallUnified('titel', 'generate', inputText);
   }

@@ -219,6 +219,8 @@
       "generatingTitleHint": "KI erstellt einen Bild-Titel für dich",
       "translating": "Übersetze Prompt...",
       "translatingHint": "KI übersetzt deinen Prompt ins Englische",
+      "interpretingLyric": "Interpretiere Lyrics...",
+      "interpretingLyricHint": "KI wandelt Songtext in eine visuelle Szenenbeschreibung um",
       "enhancingQuality": "Verbessere Prompt (Qualität)...",
       "enhancingQualityHint": "KI verbessert deinen Prompt mit großem Modell (3-5s)",
       "enhancingFast": "Verbessere Prompt (Schnell)...",
@@ -226,9 +228,14 @@
     },
     "promptCharCounter": "{{count}}/{{max}} Zeichen",
     "promptLabel": "Prompt:",
-    "promptPlaceholder": "Beschreibe das Bild, das du erstellen möchtest...",
+    "promptPlaceholder": "Beschreibe das Bild, das du erstellen möchtest... (Englische Prompts erzielen bessere Resultate mit DALL-E)",
     "resetButton": "Zurücksetzen",
     "sizeLabel": "Bildgröße:",
+    "size": {
+      "square": "Quadratisch (1024x1024)",
+      "landscape": "Querformat (1792x1024)",
+      "portrait": "Hochformat (1024x1792)"
+    },
     "styles": {
       "sectionTitle": "Stil-Auswahl",
       "artisticStyle": {
@@ -308,6 +315,9 @@
     "titleRequired": "Titel erforderlich",
     "albumCoverRequiresTitle": "Album-Cover-Komposition erfordert einen Titel. Bitte zuerst Titel hinzufügen.",
     "albumCoverEnhancementHint": "Album-Cover nutzt immer KI",
+    "albumCoverSquareOnly": "Album-Cover benötigt quadratisches Format",
+    "incompatibleWithAlbumCover": "Inkompatibel mit Cover",
+    "interpretLyric": "Lyrics interpretieren",
     "title": "Bild erstellen",
     "titleActions": "Titel-Aktionen",
     "titleLabel": "Titel:",

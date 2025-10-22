@@ -182,6 +182,13 @@
   margin-top: $spacing-xs;
 }
 
+.hint-text {
+  font-size: $font-sm;
+  color: $text-muted;
+  text-align: left;
+  margin-top: $spacing-xs;
+}
+
 .form-group label {
   @include label-text();
 }

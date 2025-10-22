@@ -128,7 +128,7 @@
     "addTag": "Add tag...",
     "completed": "Completed",
     "created": "Created",
-    "imageDetails": "Image Details",
+    "imageDetails": "Picture Details",
     "jobId": "Job ID",
     "lyrics": "Lyrics",
     "model": "Model",
@@ -160,12 +160,12 @@
     },
     "errors": {
       "copyFailed": "Failed to copy to clipboard",
-      "failedToLoad": "Failed to load image",
-      "loadImage": "Error loading image details",
+      "failedToLoad": "Failed to load picture",
+      "loadImage": "Error loading picture details",
       "updateTitle": "Error updating title"
     },
-    "loading": "Loading image details...",
-    "placeholder": "Select an image from the list to view details",
+    "loading": "Loading picture details...",
+    "placeholder": "Select an picture from the list to view details",
     "prompt": {
       "label": "Prompt:"
     },
@@ -191,13 +191,13 @@
       "colorPalette": "Color Palette",
       "detailLevel": "Detail Level"
     },
-    "title": "Image Details",
-    "untitled": "Untitled Image"
+    "title": "Picture Details",
+    "untitled": "Untitled Picture"
   },
   "imageGenerator": {
     "charCounter": "{{count}}/50",
-    "costInfo": "Image generation: ~$0.05 each",
-    "createButton": "Create Image",
+    "costInfo": "Picture generation: ~$0.05 each",
+    "createButton": "Create Picture",
     "creating": "Creating...",
     "enhancePrompt": "Enhance Prompt",
     "enhanceAsCover": "Enhance as Cover",
@@ -206,19 +206,21 @@
       "titleRequiredForCover": "Title is required for cover enhancement"
     },
     "generateTitle": "Generate Title",
-    "generateTitleFallback": "Generate a creative image title",
+    "generateTitleFallback": "Generate a creative picture title",
     "loadingMessage": "Creating your picture - this usually takes 10-30 seconds",
     "modelLabel": "Model:",
     "picturePromptActions": "Picture prompt actions",
     "progress": {
       "enhancing": "Enhancing Prompt...",
-      "enhancinghint": "AI is improving your image prompt",
+      "enhancinghint": "AI is improving your picture prompt",
       "enhancingCover": "Enhancing Cover Prompt...",
       "enhancingCoverHint": "AI is optimizing your prompt for album cover with text rendering",
       "generatingTitle": "Generating Title...",
-      "generatingTitleHint": "AI is creating an image title for you",
+      "generatingTitleHint": "AI is creating an picture title for you",
       "translating": "Translating Prompt...",
       "translatingHint": "AI is translating your prompt to English",
+      "interpretingLyric": "Interpreting Lyrics...",
+      "interpretingLyricHint": "AI is transforming lyrics into a visual scene description",
       "enhancingQuality": "Enhancing Prompt (Quality)...",
       "enhancingQualityHint": "AI is improving your prompt with large model (3-5s)",
       "enhancingFast": "Enhancing Prompt (Fast)...",
@@ -226,9 +228,14 @@
     },
     "promptCharCounter": "{{count}}/{{max}} characters",
     "promptLabel": "Prompt:",
-    "promptPlaceholder": "Describe the picture you want to create...",
+    "promptPlaceholder": "Describe the picture you want to create... (English prompts work best with DALL-E)",
     "resetButton": "Reset",
     "sizeLabel": "Picture Size:",
+    "size": {
+      "square": "Square (1024x1024)",
+      "landscape": "Landscape (1792x1024)",
+      "portrait": "Portrait (1024x1792)"
+    },
     "styles": {
       "sectionTitle": "Style Selection",
       "artisticStyle": {
@@ -308,6 +315,9 @@
     "titleRequired": "Title required",
     "albumCoverRequiresTitle": "Album Cover composition requires a title. Please add a title first.",
     "albumCoverEnhancementHint": "Album Cover always uses AI",
+    "albumCoverSquareOnly": "Album Cover requires square format",
+    "incompatibleWithAlbumCover": "Incompatible with Cover",
+    "interpretLyric": "Interpret Lyrics",
     "title": "Create Picture",
     "titleActions": "Title actions",
     "titleLabel": "Title:",
@@ -323,7 +333,7 @@
       "downloadOriginal": "Download Original",
       "exitSelect": "Exit Select",
       "fullSize": "Full Size",
-      "newImage": "New Image",
+      "newImage": "New Picture",
       "refresh": "Refresh",
       "selectAll": "Select All",
       "selectMode": "Select Mode",
@@ -335,15 +345,15 @@
       "notFound": "{{count}} not found"
     },
     "header": {
-      "count": "{{count}} images"
+      "count": "{{count}} pictures"
     },
     "confirmations": {
-      "bulkDelete": "Are you sure you want to delete {{count}} selected image(s)?"
+      "bulkDelete": "Are you sure you want to delete {{count}} selected pictures(s)?"
     },
     "errors": {
-      "deletingImages": "Error deleting images: {{error}}",
-      "loadingImages": "Error loading images: {{error}}",
-      "noImagesSelected": "No images selected for deletion",
+      "deletingImages": "Error deleting pictures: {{error}}",
+      "loadingImages": "Error loading pictures: {{error}}",
+      "noImagesSelected": "No pictures selected for deletion",
       "updatingTitle": "Error updating title: {{error}}"
     },
     "gallery": {
@@ -351,16 +361,16 @@
       "header": "Available Pictures",
       "itemsCount": "{{count}} items",
       "searchPlaceholder": "Search in titles and prompts...",
-      "subtitle": "Manage your generated images"
+      "subtitle": "Manage your generated pictures"
     },
     "messages": {
-      "adjustSearch": "Try adjusting your search term or clear the search to see all images.",
+      "adjustSearch": "Try adjusting your search term or clear the search to see all pictures.",
       "loadingImages": "Loading pictures...",
       "noImagesInDb": "No pictures found in the database.",
       "noSearchResults": "No pictures match your search criteria.",
-      "selectImagePlaceholder": "Select an image from the list to view details"
+      "selectImagePlaceholder": "Select an picture from the list to view details"
     },
-    "noImages": "No images found",
+    "noImages": "No pictures found",
     "orientation": {
       "landscape": "Landscape",
       "portrait": "Portrait",
@@ -369,7 +379,7 @@
     "pagination": {
       "info": "Page {{current}} of {{total}}"
     },
-    "placeholderText": "Your generated image will appear here",
+    "placeholderText": "Your generated picture will appear here",
     "table": {
       "actions": "Actions",
       "created": "Created",
@@ -379,7 +389,7 @@
       "status": "Status",
       "title": "Title"
     },
-    "title": "Image Gallery"
+    "title": "Picture Gallery"
   },
   "lyricArchitect": {
     "buttons": {
@@ -530,7 +540,7 @@
     "copied": "Copied to clipboard",
     "deleted": "Deleted successfully",
     "error": "Error",
-    "imageCreated": "Image created successfully",
+    "imageCreated": "Picture created successfully",
     "info": "Info",
     "passwordChanged": "Password changed successfully",
     "profileUpdated": "Profile updated successfully",
@@ -1022,8 +1032,8 @@
     "artistName": "Artist Name",
     "artistNamePlaceholder": "Enter artist name (e.g., thWelly)",
     "artistNameHint": "Used for album cover generation (optional)",
-    "imagesPerPage": "Images per page",
-    "imagesPerPageHint": "5-100 images per page",
+    "imagesPerPage": "Pictures per page",
+    "imagesPerPageHint": "5-100 pictures per page",
     "inactive": "Inactive",
     "language": "Language",
     "promptsPerPage": "Prompts per page",
@@ -1039,7 +1049,7 @@
     "murekaAccount": "Mureka Account",
     "notVerified": "Not verified",
     "notifications": {
-      "imageListLimitUpdated": "Image list limit updated",
+      "imageListLimitUpdated": "Picture list limit updated",
       "languageUpdated": "Language updated",
       "promptListLimitUpdated": "Prompt list limit updated",
       "sketchListLimitUpdated": "Sketch list limit updated",

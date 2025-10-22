@@ -64,7 +64,7 @@
                                 formControlName="prompt"
                                 [placeholder]="'imageGenerator.promptPlaceholder' | translate"
                                 required
-                                maxlength="4000"
+                                maxlength="2500"
                                 [disabled]="isLoading"
                                 class="prompt-input">
                         </textarea>
@@ -72,40 +72,53 @@
                                         <button
                                                 type="button"
                                                 (click)="togglePromptDropdown()"
-                                                [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt || !promptForm.get('prompt')?.value?.trim()"
+                                                [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt || isInterpretingLyric || !promptForm.get('prompt')?.value?.trim()"
                                                 class="magic-icon-button"
                                                 [title]="'imageGenerator.picturePromptActions' | translate">
                                             <i class="fas fa-ellipsis-vertical"
-                                               *ngIf="!isImprovingPrompt && !isTranslatingPrompt"></i>
+                                               *ngIf="!isImprovingPrompt && !isTranslatingPrompt && !isInterpretingLyric"></i>
                                             <i class="fas fa-spinner fa-spin"
-                                               *ngIf="isImprovingPrompt || isTranslatingPrompt"></i>
+                                               *ngIf="isImprovingPrompt || isTranslatingPrompt || isInterpretingLyric"></i>
                                         </button>
                                         <div class="dropdown-menu" *ngIf="showPromptDropdown"
                                              (click)="$event.stopPropagation()">
                                             <button
                                                     type="button"
                                                     class="dropdown-item"
-                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt"
+                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt || isInterpretingLyric"
                                                     (click)="selectPromptAction('translate')">
                                                 <i class="fas fa-language"></i>
                                                 <span>{{ 'imageGenerator.translateToEnglish' | translate }}</span>
                                                 <i class="fas fa-spinner fa-spin action-spinner"
                                                    *ngIf="isTranslatingPrompt"></i>
                                             </button>
+                                            <button
+                                                    type="button"
+                                                    class="dropdown-item"
+                                                    [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt || isInterpretingLyric"
+                                                    (click)="selectPromptAction('interpret-lyric')">
+                                                <i class="fas fa-music"></i>
+                                                <span>{{ 'imageGenerator.interpretLyric' | translate }}</span>
+                                                <i class="fas fa-spinner fa-spin action-spinner"
+                                                   *ngIf="isInterpretingLyric"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="char-counter">{{ 'imageGenerator.promptCharCounter' | translate: {count: promptForm.get('prompt')?.value?.length || 0, max: 4000} }}</div>
+                                <div class="char-counter">{{ 'imageGenerator.promptCharCounter' | translate: {count: promptForm.get('prompt')?.value?.length || 0, max: 2500} }}</div>
                             </div>
 
                             <div class="form-group">
                                 <label for="size">{{ 'imageGenerator.sizeLabel' | translate }}</label>
-                                <select id="size" formControlName="size" required [disabled]="isLoading"
+                                <select id="size" formControlName="size" required [disabled]="isLoading || isAlbumCoverMode"
                                         class="size-select">
-                                    <option value="1024x1024">Square (1024x1024)</option>
-                                    <option value="1792x1024">Landscape (1792x1024)</option>
-                                    <option value="1024x1792">Portrait (1024x1792)</option>
+                                    <option value="1024x1024">{{ 'imageGenerator.size.square' | translate }}</option>
+                                    <option value="1792x1024">{{ 'imageGenerator.size.landscape' | translate }}</option>
+                                    <option value="1024x1792">{{ 'imageGenerator.size.portrait' | translate }}</option>
                                 </select>
+                                <div *ngIf="isAlbumCoverMode" class="hint-text">
+                                    {{ 'imageGenerator.albumCoverSquareOnly' | translate }}
+                                </div>
                             </div>
 
                             <!-- Style Preferences Section -->
@@ -121,8 +134,12 @@
                                     <mat-form-field appearance="outline" class="style-field">
                                         <mat-label>{{ 'imageGenerator.styles.artisticStyle.label' | translate }}</mat-label>
                                         <mat-select [formControl]="artisticStyle" [disabled]="isLoading">
-                                            <mat-option *ngFor="let option of artisticStyleOptions" [value]="option.value">
+                                            <mat-option *ngFor="let option of artisticStyleOptions" [value]="option.value"
+                                                        [disabled]="isArtisticStyleIncompatibleWithAlbumCover(option.value)">
                                                 {{ option.labelKey | translate }}
+                                                <span *ngIf="isArtisticStyleIncompatibleWithAlbumCover(option.value)" class="option-hint">
+                                                    ({{ 'imageGenerator.incompatibleWithAlbumCover' | translate }})
+                                                </span>
                                             </mat-option>
                                         </mat-select>
                                     </mat-form-field>
@@ -145,8 +162,12 @@
                                     <mat-form-field appearance="outline" class="style-field">
                                         <mat-label>{{ 'imageGenerator.styles.lighting.label' | translate }}</mat-label>
                                         <mat-select [formControl]="lighting" [disabled]="isLoading">
-                                            <mat-option *ngFor="let option of lightingOptions" [value]="option.value">
+                                            <mat-option *ngFor="let option of lightingOptions" [value]="option.value"
+                                                        [disabled]="isLightingIncompatibleWithAlbumCover(option.value)">
                                                 {{ option.labelKey | translate }}
+                                                <span *ngIf="isLightingIncompatibleWithAlbumCover(option.value)" class="option-hint">
+                                                    ({{ 'imageGenerator.incompatibleWithAlbumCover' | translate }})
+                                                </span>
                                             </mat-option>
                                         </mat-select>
                                     </mat-form-field>
@@ -155,8 +176,12 @@
                                     <mat-form-field appearance="outline" class="style-field">
                                         <mat-label>{{ 'imageGenerator.styles.colorPalette.label' | translate }}</mat-label>
                                         <mat-select [formControl]="colorPalette" [disabled]="isLoading">
-                                            <mat-option *ngFor="let option of colorPaletteOptions" [value]="option.value">
+                                            <mat-option *ngFor="let option of colorPaletteOptions" [value]="option.value"
+                                                        [disabled]="isColorPaletteIncompatibleWithAlbumCover(option.value)">
                                                 {{ option.labelKey | translate }}
+                                                <span *ngIf="isColorPaletteIncompatibleWithAlbumCover(option.value)" class="option-hint">
+                                                    ({{ 'imageGenerator.incompatibleWithAlbumCover' | translate }})
+                                                </span>
                                             </mat-option>
                                         </mat-select>
                                     </mat-form-field>
