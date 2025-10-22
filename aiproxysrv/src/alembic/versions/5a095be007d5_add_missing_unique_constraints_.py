@@ -5,17 +5,17 @@ Revises: 75b410845228
 Create Date: 2025-10-21 23:36:04.864689
 
 """
-from typing import Sequence, Union
+
+from collections.abc import Sequence
 
 from alembic import op
-import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '5a095be007d5'
-down_revision: Union[str, Sequence[str], None] = '75b410845228'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+revision: str = "5a095be007d5"
+down_revision: str | Sequence[str] | None = "75b410845228"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -61,8 +61,8 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade schema - Remove UNIQUE constraints."""
     # Remove constraints
-    op.drop_constraint('uq_lyric_parsing_rule_name', 'lyric_parsing_rules', type_='unique')
-    op.drop_constraint('songs_task_id_key', 'songs', type_='unique')
+    op.drop_constraint("uq_lyric_parsing_rule_name", "lyric_parsing_rules", type_="unique")
+    op.drop_constraint("songs_task_id_key", "songs", type_="unique")
 
     # Recreate the original index
-    op.create_index('ix_songs_task_id', 'songs', ['task_id'], unique=True)
+    op.create_index("ix_songs_task_id", "songs", ["task_id"], unique=True)

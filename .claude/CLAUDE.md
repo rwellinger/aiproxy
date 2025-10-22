@@ -364,15 +364,25 @@ pytest --cov=src               # Run with coverage report
 
 ```bash
 # Seed Prompt Templates
-cat scripts/db/seed_prompts.sql | docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy
+cat scripts/db/seed_prompts.sql | docker exec -i postgres psql -U aiproxy -d aiproxysrv
+
+# Seed Image Fast Enhancement Template
+cat scripts/db/seed_prompts_image_fast.sql | docker exec -i postgres psql -U aiproxy -d aiproxysrv
 
 # Seed Lyric Parsing Rules
-cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy
+cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i postgres psql -U aiproxy -d aiproxysrv
 
 # Local PostgreSQL (without Docker)
-psql -h localhost -U aiuser -d aiproxy -f scripts/db/seed_prompts.sql
-psql -h localhost -U aiuser -d aiproxy -f scripts/db/seed_lyric_parsing_rules.sql
+psql -h localhost -U aiproxy -d aiproxysrv -f scripts/db/seed_prompts.sql
+psql -h localhost -U aiproxy -d aiproxysrv -f scripts/db/seed_prompts_image_fast.sql
+psql -h localhost -U aiproxy -d aiproxysrv -f scripts/db/seed_lyric_parsing_rules.sql
 ```
+
+**DB Credentials** (from `aiproxysrv/.env_postgres`):
+- **Service Name**: `postgres` (Docker Compose service)
+- **Database**: `aiproxysrv`
+- **User**: `aiproxy`
+- **Password**: `aiproxy123`
 
 **Why SQL instead of Python?**
 - ✅ No Python environment dependencies
