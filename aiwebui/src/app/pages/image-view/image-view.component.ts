@@ -492,7 +492,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         // Generate title from user_prompt (original user input)
         const displayPrompt = image.user_prompt || image.prompt || 'Untitled';
-        return displayPrompt.length > 30 ? displayPrompt.substring(0, 27) + '...' : displayPrompt;
+        return displayPrompt.length > 50 ? displayPrompt.substring(0, 47) + '...' : displayPrompt;
     }
 
     startEditTitle() {

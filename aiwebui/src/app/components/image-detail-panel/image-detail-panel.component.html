@@ -36,12 +36,36 @@
                 </button>
             </div>
             <div class="title-edit-row" *ngIf="editingTitle">
-                <input type="text"
-                       class="title-input"
-                       [(ngModel)]="editTitleValue"
-                       (keyup.enter)="saveTitle()"
-                       (keyup.escape)="cancelEditTitle()"
-                       #titleInput>
+                <div class="title-input-group">
+                    <input type="text"
+                           class="title-input"
+                           [(ngModel)]="editTitleValue"
+                           (keyup.enter)="saveTitle()"
+                           (keyup.escape)="cancelEditTitle()"
+                           #titleInput>
+                    <div class="title-dropdown-container">
+                        <button
+                                type="button"
+                                (click)="toggleTitleDropdown()"
+                                [disabled]="isGeneratingTitle"
+                                class="magic-icon-button"
+                                [title]="'imageGenerator.titleActions' | translate">
+                            <i class="fas fa-ellipsis-vertical" *ngIf="!isGeneratingTitle"></i>
+                            <i class="fas fa-spinner fa-spin" *ngIf="isGeneratingTitle"></i>
+                        </button>
+                        <div class="dropdown-menu" *ngIf="showTitleDropdown" (click)="$event.stopPropagation()">
+                            <button
+                                    type="button"
+                                    class="dropdown-item"
+                                    [disabled]="isGeneratingTitle"
+                                    (click)="selectTitleAction('generate')">
+                                <i class="fas fa-wand-magic-sparkles"></i>
+                                <span>{{ 'imageGenerator.generateTitle' | translate }}</span>
+                                <i class="fas fa-spinner fa-spin action-spinner" *ngIf="isGeneratingTitle"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <button type="button" class="save-btn" (click)="saveTitle()">
                     <i class="fas fa-check"></i>
                 </button>

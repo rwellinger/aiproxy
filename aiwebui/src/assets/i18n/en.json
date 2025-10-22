@@ -311,7 +311,7 @@
     "title": "Create Picture",
     "titleActions": "Title actions",
     "titleLabel": "Title:",
-    "titlePlaceholder": "Enter picture title (optional, max 50 characters)...",
+    "titlePlaceholder": "Enter picture title (AI generates one if left empty)...",
     "translateToEnglish": "Translate to English"
   },
   "imageView": {

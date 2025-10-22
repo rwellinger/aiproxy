@@ -199,6 +199,20 @@ export class ImageGeneratorComponent implements OnInit {
 
             try {
                 const formValue = this.promptForm.value;
+                let titleValue = formValue.title?.trim();
+
+                // Auto-generate title if empty (obligatory)
+                if (!titleValue) {
+                    titleValue = await this.progressService.executeWithProgress(
+                        () => this.chatService.generateTitleFast(formValue.prompt.trim()),
+                        this.translate.instant('imageGenerator.progress.generatingTitle'),
+                        this.translate.instant('imageGenerator.progress.generatingTitleHint')
+                    );
+                    titleValue = this.removeQuotes(titleValue);
+                    // Update form with generated title
+                    this.promptForm.patchValue({ title: titleValue }, { emitEvent: false });
+                }
+
                 const effectiveMode = this.getEffectiveEnhanceMode();
                 let finalPrompt = formValue.prompt.trim();
 
@@ -210,7 +224,7 @@ export class ImageGeneratorComponent implements OnInit {
                         const artistName = user?.artist_name;
 
                         finalPrompt = await this.progressService.executeWithProgress(
-                            () => this.chatService.enhanceCoverPrompt(finalPrompt, formValue.title, artistName),
+                            () => this.chatService.enhanceCoverPrompt(finalPrompt, titleValue, artistName),
                             this.translate.instant('imageGenerator.progress.enhancingCover'),
                             this.translate.instant('imageGenerator.progress.enhancingCoverHint')
                         );
@@ -241,7 +255,7 @@ export class ImageGeneratorComponent implements OnInit {
 
                 // Step 2: Send generation request with styles
                 const requestBody: any = {
-                    title: formValue.title?.trim() || null,
+                    title: titleValue || null,
                     user_prompt: formValue.prompt.trim(), // Original user input
                     prompt: finalPrompt, // AI-enhanced prompt (Ollama)
                     size: formValue.size
@@ -280,7 +294,7 @@ export class ImageGeneratorComponent implements OnInit {
                         user_prompt: data.user_prompt || null,
                         prompt: data.prompt || finalPrompt,
                         enhanced_prompt: data.enhanced_prompt || null,
-                        title: formValue.title?.trim() || null,
+                        title: titleValue || null,
                         size: formValue.size,
                         model_used: 'DALL-E 3',
                         created_at: new Date().toISOString(),

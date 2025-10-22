@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnInit, OnChanges, SimpleChanges, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnInit, OnChanges, SimpleChanges, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -7,6 +7,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ImageBlobService } from '../../services/ui/image-blob.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import { ApiConfigService } from '../../services/config/api-config.service';
+import { ChatService } from '../../services/config/chat.service';
+import { ProgressService } from '../../services/ui/progress.service';
 
 @Component({
   selector: 'app-image-detail-panel',
@@ -21,6 +23,8 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
   private apiConfigService = inject(ApiConfigService);
   private http = inject(HttpClient);
   private translate = inject(TranslateService);
+  private chatService = inject(ChatService);
+  private progressService = inject(ProgressService);
 
   imageBlobUrl: string = '';
   @Input() image: any = null;
@@ -45,6 +49,8 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
 
   editingTitle = false;
   editTitleValue = '';
+  showTitleDropdown = false;
+  isGeneratingTitle = false;
 
   startEditTitle() {
     if (!this.showEditTitle || !this.image) return;
@@ -79,6 +85,64 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
   cancelEditTitle() {
     this.editingTitle = false;
     this.editTitleValue = '';
+    this.showTitleDropdown = false;
+  }
+
+  // Title generation methods
+  async generateTitle() {
+    // Determine input text: current title > user_prompt > prompt > fallback
+    let inputText = this.editTitleValue?.trim();
+    if (!inputText) {
+      inputText = this.image?.user_prompt?.trim() || this.image?.prompt?.trim();
+    }
+    if (!inputText) {
+      inputText = this.translate.instant('imageGenerator.generateTitleFallback');
+    }
+
+    this.isGeneratingTitle = true;
+    try {
+      const generatedTitle = await this.progressService.executeWithProgress(
+        () => this.chatService.generateTitle(inputText),
+        this.translate.instant('imageGenerator.progress.generatingTitle'),
+        this.translate.instant('imageGenerator.progress.generatingTitleHint')
+      );
+      this.editTitleValue = this.removeQuotes(generatedTitle);
+    } catch (error: any) {
+      this.notificationService.error(`Error generating title: ${error.message}`);
+    } finally {
+      this.isGeneratingTitle = false;
+    }
+  }
+
+  toggleTitleDropdown() {
+    this.showTitleDropdown = !this.showTitleDropdown;
+  }
+
+  closeTitleDropdown() {
+    this.showTitleDropdown = false;
+  }
+
+  selectTitleAction(action: 'generate') {
+    this.closeTitleDropdown();
+
+    if (action === 'generate') {
+      this.generateTitle();
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    const titleDropdown = target.closest('.title-dropdown-container');
+
+    if (!titleDropdown && this.showTitleDropdown) {
+      this.closeTitleDropdown();
+    }
+  }
+
+  private removeQuotes(text: string): string {
+    if (!text) return text;
+    return text.replace(/^["']|["']$/g, '').trim();
   }
 
   onDownloadOriginal() {

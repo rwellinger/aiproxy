@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -22,12 +22,10 @@ export class UserService {
   private authService = inject(AuthService);
 
   /**
-   * Get user profile by ID
+   * Get user profile (uses JWT token, no userId required)
    */
-  public getUserProfile(userId: string): Observable<User> {
-    const headers = this.getAuthHeaders();
-
-    return this.http.get<User>(`${this.baseUrl}/api/v1/user/profile/${userId}`, { headers })
+  public getUserProfile(): Observable<User> {
+    return this.http.get<User>(`${this.baseUrl}/api/v1/user/profile`)
       .pipe(
         map(response => response),
         catchError(this.handleError)
@@ -35,18 +33,16 @@ export class UserService {
   }
 
   /**
-   * Update user profile (first name, last name)
+   * Update user profile (uses JWT token, no userId required)
    */
-  public updateUserProfile(userId: string, userData: UserUpdateRequest): Observable<User> {
-    const headers = this.getAuthHeaders();
-
-    return this.http.put<UserUpdateResponse>(`${this.baseUrl}/api/v1/user/edit/${userId}`, userData, { headers })
+  public updateUserProfile(userData: UserUpdateRequest): Observable<User> {
+    return this.http.put<UserUpdateResponse>(`${this.baseUrl}/api/v1/user/edit`, userData)
       .pipe(
         map(response => {
           if (response.success && response.user) {
             // Update the user in auth service
             const currentUser = this.authService.getCurrentUser();
-            if (currentUser && currentUser.id === userId) {
+            if (currentUser) {
               const updatedUser = { ...currentUser, ...userData };
               this.authService.updateUser(updatedUser);
             }
@@ -59,12 +55,10 @@ export class UserService {
   }
 
   /**
-   * Change user password
+   * Change user password (uses JWT token, no userId required)
    */
-  public changePassword(userId: string, passwordData: PasswordChangeRequest): Observable<PasswordChangeResponse> {
-    const headers = this.getAuthHeaders();
-
-    return this.http.put<PasswordChangeResponse>(`${this.baseUrl}/api/v1/user/password/${userId}`, passwordData, { headers })
+  public changePassword(passwordData: PasswordChangeRequest): Observable<PasswordChangeResponse> {
+    return this.http.put<PasswordChangeResponse>(`${this.baseUrl}/api/v1/user/password`, passwordData)
       .pipe(
         map(response => {
           if (response.success) {
@@ -77,54 +71,24 @@ export class UserService {
   }
 
   /**
-   * Get current user profile
+   * Get current user profile (alias for getUserProfile, kept for compatibility)
    */
   public getCurrentUserProfile(): Observable<User> {
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      return throwError(() => new Error('No authenticated user'));
-    }
-
-    return this.getUserProfile(currentUser.id);
+    return this.getUserProfile();
   }
 
   /**
-   * Update current user profile
+   * Update current user profile (alias for updateUserProfile, kept for compatibility)
    */
   public updateCurrentUserProfile(userData: UserUpdateRequest): Observable<User> {
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      return throwError(() => new Error('No authenticated user'));
-    }
-
-    return this.updateUserProfile(currentUser.id, userData);
+    return this.updateUserProfile(userData);
   }
 
   /**
-   * Change current user password
+   * Change current user password (alias for changePassword, kept for compatibility)
    */
   public changeCurrentUserPassword(passwordData: PasswordChangeRequest): Observable<PasswordChangeResponse> {
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      return throwError(() => new Error('No authenticated user'));
-    }
-
-    return this.changePassword(currentUser.id, passwordData);
-  }
-
-  /**
-   * Get authorization headers
-   */
-  private getAuthHeaders(): HttpHeaders {
-    const token = this.authService.getToken();
-    if (!token) {
-      throw new Error('No authentication token available');
-    }
-
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
+    return this.changePassword(passwordData);
   }
 
   /**

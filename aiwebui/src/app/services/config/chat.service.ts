@@ -189,6 +189,10 @@ Please enhance this as an album cover prompt with these text elements prominentl
     return this.validateAndCallUnified('titel', 'generate', inputText);
   }
 
+  async generateTitleFast(inputText: string): Promise<string> {
+    return this.validateAndCallUnified('titel', 'generate-fast', inputText);
+  }
+
   async improveLyricSection(
     sectionLabel: string,
     sectionContent: string,

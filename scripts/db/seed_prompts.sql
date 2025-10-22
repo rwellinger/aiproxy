@@ -477,6 +477,20 @@ SELECT upsert_prompt_template(
     true
 );
 
+-- titel/generate-fast (v1.0)
+SELECT upsert_prompt_template(
+    'titel',
+    'generate-fast',
+    'Generate a short title (2-4 words) in the same language as the input. Keep it simple and descriptive. No punctuation marks.',
+    'Output only the title (max 35 characters). No punctuation, no explanations.',
+    'Fast title generation optimized for speed with llama3.2:3b (auto-generation fallback)',
+    '1.0',
+    'llama3.2:3b',
+    0.5,
+    10,
+    true
+);
+
 -- ============================================================
 -- Cleanup and Statistics
 -- ============================================================

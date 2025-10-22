@@ -311,7 +311,7 @@
     "title": "Bild erstellen",
     "titleActions": "Titel-Aktionen",
     "titleLabel": "Titel:",
-    "titlePlaceholder": "Bild-Titel eingeben (optional, max. 50 Zeichen)...",
+    "titlePlaceholder": "Bild-Titel eingeben (AI generiert einen bei leer)...",
     "translateToEnglish": "Ins Englische übersetzen"
   },
   "imageView": {
