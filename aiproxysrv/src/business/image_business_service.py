@@ -34,6 +34,7 @@ class ImageBusinessService:
         prompt: str,
         size: str,
         title: str | None = None,
+        user_prompt: str | None = None,
         artistic_style: str | None = None,
         composition: str | None = None,
         lighting: str | None = None,
@@ -44,9 +45,10 @@ class ImageBusinessService:
         Generate image with validation and business logic
 
         Args:
-            prompt: Image generation prompt
+            prompt: AI-enhanced image generation prompt (from Ollama)
             size: Image size specification
             title: Optional image title
+            user_prompt: Optional original user input (before AI enhancement)
             artistic_style: Optional artistic style (auto, photorealistic, digital-art, etc.)
             composition: Optional composition (auto, portrait, landscape, etc.)
             lighting: Optional lighting (auto, natural, studio, dramatic, etc.)
@@ -94,6 +96,7 @@ class ImageBusinessService:
 
             # Save metadata to database and get the generated image record
             generated_image = self._save_image_metadata(
+                user_prompt=user_prompt,
                 prompt=prompt,
                 enhanced_prompt=enhanced_prompt if enhanced_prompt != prompt else None,
                 size=size,
@@ -111,9 +114,17 @@ class ImageBusinessService:
             logger.info(f"Image generated successfully: {filename}")
             response = {"url": local_url, "saved_path": str(file_path)}
 
-            # Include image ID if database save was successful
+            # Include image metadata if database save was successful
             if generated_image:
                 response["id"] = str(generated_image.id)
+                response["user_prompt"] = generated_image.user_prompt
+                response["prompt"] = generated_image.prompt
+                response["enhanced_prompt"] = generated_image.enhanced_prompt
+                response["artistic_style"] = generated_image.artistic_style
+                response["composition"] = generated_image.composition
+                response["lighting"] = generated_image.lighting
+                response["color_palette"] = generated_image.color_palette
+                response["detail_level"] = generated_image.detail_level
                 logger.info("Image saved to database", image_id=generated_image.id, filename=filename)
             else:
                 logger.warning("Image generated but failed to save metadata to database", filename=filename)
@@ -340,6 +351,7 @@ class ImageBusinessService:
         file_path: Path,
         local_url: str,
         title: str | None = None,
+        user_prompt: str | None = None,
         enhanced_prompt: str | None = None,
         artistic_style: str | None = None,
         composition: str | None = None,
@@ -349,6 +361,7 @@ class ImageBusinessService:
     ) -> Optional["GeneratedImage"]:
         """Save image metadata to database"""
         return ImageService.save_generated_image(
+            user_prompt=user_prompt,
             prompt=prompt,
             enhanced_prompt=enhanced_prompt,
             size=size,
@@ -369,6 +382,7 @@ class ImageBusinessService:
         """Transform database image object to API response format"""
         image_data = {
             "id": str(image.id),
+            "user_prompt": image.user_prompt,
             "prompt": image.prompt,
             "enhanced_prompt": image.enhanced_prompt,
             "size": image.size,

@@ -156,8 +156,9 @@ class GeneratedImage(Base):
     __table_args__ = {"extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    prompt = Column(Text, nullable=False)
-    enhanced_prompt = Column(Text, nullable=True)  # AI-enhanced prompt sent to DALL-E
+    user_prompt = Column(Text, nullable=True)  # Original user input (before AI enhancement)
+    prompt = Column(Text, nullable=False)  # AI-enhanced prompt (Ollama)
+    enhanced_prompt = Column(Text, nullable=True)  # Final prompt sent to DALL-E (Ollama + Styles)
     size = Column(String(20), nullable=False)
     filename = Column(String(255), nullable=False, unique=True)
     file_path = Column(String(500), nullable=False)

@@ -65,6 +65,7 @@ export interface StylePreferences {
  */
 export interface ImageGenerationRequest {
   prompt: string;
+  user_prompt?: string;
   size?: string;
   title?: string;
   artistic_style?: string;
@@ -80,6 +81,7 @@ export interface ImageGenerationRequest {
 export interface Image {
   id: string;
   title: string | null;
+  user_prompt: string | null;
   prompt: string;
   enhanced_prompt: string | null;
   size: string | null;

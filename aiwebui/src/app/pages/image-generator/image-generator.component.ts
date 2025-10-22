@@ -61,22 +61,22 @@ export class ImageGeneratorComponent implements OnInit {
     artisticStyleOptions: SelectOption<ArtisticStyle>[] = [
         { value: 'auto', labelKey: 'imageGenerator.styles.artisticStyle.options.auto' },
         { value: 'photorealistic', labelKey: 'imageGenerator.styles.artisticStyle.options.photorealistic' },
-        { value: 'digital-art', labelKey: 'imageGenerator.styles.artisticStyle.options.digitalArt' },
-        { value: 'oil-painting', labelKey: 'imageGenerator.styles.artisticStyle.options.oilPainting' },
+        { value: 'digital-art', labelKey: 'imageGenerator.styles.artisticStyle.options.digital-art' },
+        { value: 'oil-painting', labelKey: 'imageGenerator.styles.artisticStyle.options.oil-painting' },
         { value: 'watercolor', labelKey: 'imageGenerator.styles.artisticStyle.options.watercolor' },
         { value: 'cartoon', labelKey: 'imageGenerator.styles.artisticStyle.options.cartoon' },
         { value: 'anime', labelKey: 'imageGenerator.styles.artisticStyle.options.anime' },
         { value: 'sketch', labelKey: 'imageGenerator.styles.artisticStyle.options.sketch' },
-        { value: '3d-render', labelKey: 'imageGenerator.styles.artisticStyle.options.render3d' }
+        { value: '3d-render', labelKey: 'imageGenerator.styles.artisticStyle.options.3d-render' }
     ];
 
     compositionOptions: SelectOption<CompositionStyle>[] = [
         { value: 'auto', labelKey: 'imageGenerator.styles.composition.options.auto' },
         { value: 'portrait', labelKey: 'imageGenerator.styles.composition.options.portrait' },
         { value: 'landscape', labelKey: 'imageGenerator.styles.composition.options.landscape' },
-        { value: 'wide-angle', labelKey: 'imageGenerator.styles.composition.options.wideAngle' },
-        { value: 'close-up', labelKey: 'imageGenerator.styles.composition.options.closeUp' },
-        { value: 'rule-of-thirds', labelKey: 'imageGenerator.styles.composition.options.ruleOfThirds' },
+        { value: 'wide-angle', labelKey: 'imageGenerator.styles.composition.options.wide-angle' },
+        { value: 'close-up', labelKey: 'imageGenerator.styles.composition.options.close-up' },
+        { value: 'rule-of-thirds', labelKey: 'imageGenerator.styles.composition.options.rule-of-thirds' },
         { value: 'centered', labelKey: 'imageGenerator.styles.composition.options.centered' }
     ];
 
@@ -85,7 +85,7 @@ export class ImageGeneratorComponent implements OnInit {
         { value: 'natural', labelKey: 'imageGenerator.styles.lighting.options.natural' },
         { value: 'studio', labelKey: 'imageGenerator.styles.lighting.options.studio' },
         { value: 'dramatic', labelKey: 'imageGenerator.styles.lighting.options.dramatic' },
-        { value: 'golden-hour', labelKey: 'imageGenerator.styles.lighting.options.goldenHour' },
+        { value: 'golden-hour', labelKey: 'imageGenerator.styles.lighting.options.golden-hour' },
         { value: 'night', labelKey: 'imageGenerator.styles.lighting.options.night' }
     ];
 
@@ -94,7 +94,7 @@ export class ImageGeneratorComponent implements OnInit {
         { value: 'vibrant', labelKey: 'imageGenerator.styles.colorPalette.options.vibrant' },
         { value: 'muted', labelKey: 'imageGenerator.styles.colorPalette.options.muted' },
         { value: 'monochrome', labelKey: 'imageGenerator.styles.colorPalette.options.monochrome' },
-        { value: 'high-contrast', labelKey: 'imageGenerator.styles.colorPalette.options.highContrast' },
+        { value: 'high-contrast', labelKey: 'imageGenerator.styles.colorPalette.options.high-contrast' },
         { value: 'warm', labelKey: 'imageGenerator.styles.colorPalette.options.warm' },
         { value: 'cool', labelKey: 'imageGenerator.styles.colorPalette.options.cool' },
         { value: 'pastel', labelKey: 'imageGenerator.styles.colorPalette.options.pastel' }
@@ -104,7 +104,7 @@ export class ImageGeneratorComponent implements OnInit {
         { value: 'auto', labelKey: 'imageGenerator.styles.detailLevel.options.auto' },
         { value: 'minimal', labelKey: 'imageGenerator.styles.detailLevel.options.minimal' },
         { value: 'moderate', labelKey: 'imageGenerator.styles.detailLevel.options.moderate' },
-        { value: 'highly-detailed', labelKey: 'imageGenerator.styles.detailLevel.options.highlyDetailed' }
+        { value: 'highly-detailed', labelKey: 'imageGenerator.styles.detailLevel.options.highly-detailed' }
     ];
 
     enhanceQualityOptions: SelectOption<EnhanceQuality>[] = [
@@ -196,7 +196,8 @@ export class ImageGeneratorComponent implements OnInit {
                 // Step 2: Send generation request with styles
                 const requestBody: any = {
                     title: formValue.title?.trim() || null,
-                    prompt: finalPrompt,
+                    user_prompt: formValue.prompt.trim(), // Original user input
+                    prompt: finalPrompt, // AI-enhanced prompt (Ollama)
                     size: formValue.size
                 };
 
@@ -226,11 +227,12 @@ export class ImageGeneratorComponent implements OnInit {
                     this.generatedImageUrl = data.url || '';
                     this.generatedImageId = data.id || null;
 
-                    // Create image object for direct display
+                    // Create image object for direct display (use data from backend)
                     this.generatedImageData = {
                         id: data.id || null,
                         url: data.url,
-                        prompt: formValue.prompt,
+                        user_prompt: data.user_prompt || null,
+                        prompt: data.prompt || finalPrompt,
                         enhanced_prompt: data.enhanced_prompt || null,
                         title: formValue.title?.trim() || null,
                         size: formValue.size,

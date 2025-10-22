@@ -10,7 +10,8 @@ from .common_schemas import BaseResponse, PaginationResponse
 class ImageGenerateRequest(BaseModel):
     """Schema for image generation requests"""
 
-    prompt: str = Field(..., min_length=1, max_length=4000, description="Image generation prompt")
+    prompt: str = Field(..., min_length=1, max_length=4000, description="Image generation prompt (AI-enhanced)")
+    user_prompt: str | None = Field(None, min_length=1, max_length=4000, description="Original user input (before AI enhancement)")
     size: str | None = Field("1024x1024", description="Image size")
     title: str | None = Field(None, max_length=255, description="Image title")
 
@@ -47,8 +48,9 @@ class ImageResponse(BaseModel):
 
     id: str = Field(..., description="Unique image ID")
     title: str | None = Field(None, description="Image title")
-    prompt: str = Field(..., description="Generation prompt used")
-    enhanced_prompt: str | None = Field(None, description="AI-enhanced prompt sent to DALL-E")
+    user_prompt: str | None = Field(None, description="Original user input (before AI enhancement)")
+    prompt: str = Field(..., description="AI-enhanced prompt (Ollama)")
+    enhanced_prompt: str | None = Field(None, description="Final prompt sent to DALL-E (Ollama + Styles)")
     size: str | None = Field(None, description="Image dimensions")
     status: str = Field(..., description="Generation status")
     url: str | None = Field(None, description="Image URL if completed")
@@ -69,7 +71,8 @@ class ImageResponse(BaseModel):
             "example": {
                 "id": "img_abc123",
                 "title": "Ocean Sunset",
-                "prompt": "A beautiful sunset over the ocean",
+                "user_prompt": "A beautiful sunset",
+                "prompt": "A beautiful sunset over the ocean with sailing boats",
                 "enhanced_prompt": "A beautiful sunset over the ocean with sailing boats, photorealistic style, landscape composition, golden hour lighting, warm color palette, highly detailed",
                 "size": "1024x1024",
                 "status": "completed",

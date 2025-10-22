@@ -159,6 +159,7 @@
       "image": "Generiertes Bild"
     },
     "errors": {
+      "copyFailed": "Fehler beim Kopieren in die Zwischenablage",
       "failedToLoad": "Fehler beim Laden des Bildes",
       "loadImage": "Fehler beim Laden der Bild-Details",
       "updateTitle": "Fehler beim Aktualisieren des Titels"
@@ -168,13 +169,27 @@
     "prompt": {
       "label": "Prompt:"
     },
-    "promptDetails": {
+    "prompts": {
       "title": "Prompt-Details",
-      "originalPrompt": "Original-Prompt:",
-      "enhancedPrompt": "Verbesserter Prompt:",
-      "styleSelections": "Stil-Auswahl:",
-      "copyEnhanced": "Verbesserten Prompt kopieren",
-      "noEnhancedPrompt": "Keine KI-Verbesserung wurde verwendet"
+      "userInput": {
+        "label": "Deine Eingabe"
+      },
+      "aiEnhanced": {
+        "label": "KI-Optimiert"
+      },
+      "final": {
+        "label": "Final (an DALL-E gesendet)",
+        "copy": "Kopieren",
+        "copied": "In Zwischenablage kopiert!"
+      }
+    },
+    "styles": {
+      "title": "Stil-Auswahl",
+      "artistic": "Stil",
+      "composition": "Komposition",
+      "lighting": "Beleuchtung",
+      "colorPalette": "Farbpalette",
+      "detailLevel": "Detailgrad"
     },
     "title": "Bild-Details",
     "untitled": "Unbenanntes Bild"
@@ -215,63 +230,79 @@
     "resetButton": "Zurücksetzen",
     "sizeLabel": "Bildgröße:",
     "styles": {
-      "artisticStyleLabel": "Kunststil:",
-      "compositionLabel": "Komposition:",
-      "lightingLabel": "Beleuchtung:",
-      "colorPaletteLabel": "Farbpalette:",
-      "detailLevelLabel": "Detailgrad:",
-      "artisticStyles": {
-        "auto": "Auto (KI entscheidet)",
-        "photorealistic": "Fotorealistisch",
-        "digitalArt": "Digitale Kunst",
-        "oilPainting": "Ölgemälde",
-        "watercolor": "Aquarell",
-        "cartoon": "Cartoon",
-        "anime": "Anime/Manga",
-        "sketch": "Skizze",
-        "3dRender": "3D-Render"
+      "sectionTitle": "Stil-Auswahl",
+      "artisticStyle": {
+        "label": "Kunststil:",
+        "options": {
+          "auto": "Auto (KI entscheidet)",
+          "photorealistic": "Fotorealistisch",
+          "digital-art": "Digitale Kunst",
+          "oil-painting": "Ölgemälde",
+          "watercolor": "Aquarell",
+          "cartoon": "Cartoon",
+          "anime": "Anime/Manga",
+          "sketch": "Skizze",
+          "3d-render": "3D-Render"
+        }
       },
-      "compositions": {
-        "auto": "Auto (KI entscheidet)",
-        "portrait": "Porträt",
-        "landscape": "Landschaft",
-        "wideAngle": "Weitwinkel",
-        "closeUp": "Nahaufnahme",
-        "ruleOfThirds": "Drittelregel",
-        "centered": "Zentriert"
+      "composition": {
+        "label": "Komposition:",
+        "options": {
+          "auto": "Auto (KI entscheidet)",
+          "portrait": "Porträt",
+          "landscape": "Landschaft",
+          "wide-angle": "Weitwinkel",
+          "close-up": "Nahaufnahme",
+          "rule-of-thirds": "Drittelregel",
+          "centered": "Zentriert"
+        }
       },
-      "lightings": {
-        "auto": "Auto (KI entscheidet)",
-        "natural": "Natürliches Tageslicht",
-        "studio": "Studio-Beleuchtung",
-        "dramatic": "Dramatisch/Stimmungsvoll",
-        "goldenHour": "Goldene Stunde",
-        "night": "Nachtszene"
+      "lighting": {
+        "label": "Beleuchtung:",
+        "options": {
+          "auto": "Auto (KI entscheidet)",
+          "natural": "Natürliches Tageslicht",
+          "studio": "Studio-Beleuchtung",
+          "dramatic": "Dramatisch/Stimmungsvoll",
+          "golden-hour": "Goldene Stunde",
+          "night": "Nachtszene"
+        }
       },
-      "colorPalettes": {
-        "auto": "Auto (KI entscheidet)",
-        "vibrant": "Lebhafte Farben",
-        "muted": "Gedämpfte Töne",
-        "monochrome": "Monochrom",
-        "highContrast": "Hoher Kontrast",
-        "warm": "Warme Töne",
-        "cool": "Kühle Töne",
-        "pastel": "Pastellfarben"
+      "colorPalette": {
+        "label": "Farbpalette:",
+        "options": {
+          "auto": "Auto (KI entscheidet)",
+          "vibrant": "Lebhafte Farben",
+          "muted": "Gedämpfte Töne",
+          "monochrome": "Monochrom",
+          "high-contrast": "Hoher Kontrast",
+          "warm": "Warme Töne",
+          "cool": "Kühle Töne",
+          "pastel": "Pastellfarben"
+        }
       },
-      "detailLevels": {
-        "auto": "Auto (KI entscheidet)",
-        "minimal": "Minimal",
-        "moderate": "Moderat",
-        "highlyDetailed": "Sehr detailliert"
+      "detailLevel": {
+        "label": "Detailgrad:",
+        "options": {
+          "auto": "Auto (KI entscheidet)",
+          "minimal": "Minimal",
+          "moderate": "Moderat",
+          "highly-detailed": "Sehr detailliert"
+        }
       }
     },
     "enhanceQuality": {
       "label": "KI-Verbesserungsqualität:",
-      "auto": "Auto (Intelligente Auswahl)",
-      "quality": "Qualität (Großes Modell, 3-5s)",
-      "fast": "Schnell (Kleines Modell, <1s)",
-      "off": "Aus (Keine Verbesserung)",
-      "autoHint": "Auto-Modus nutzt Qualität für kreative Prompts, Schnell für Stil-Prompts"
+      "options": {
+        "auto": "Auto (Intelligente Auswahl)",
+        "quality": "Qualität (Großes Modell, 3-5s)",
+        "fast": "Schnell (Kleines Modell, <1s)",
+        "off": "Aus (Keine Verbesserung)"
+      },
+      "hints": {
+        "autoManual": "Auto-Modus nutzt Schnelle Verbesserung (Stile ausgewählt)",
+        "autoQuality": "Auto-Modus nutzt Qualitäts-Verbesserung (keine Stile)"
+      }
     },
     "title": "Bild erstellen",
     "titleActions": "Titel-Aktionen",

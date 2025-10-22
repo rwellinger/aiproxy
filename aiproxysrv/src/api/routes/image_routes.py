@@ -35,6 +35,7 @@ def generate(body: ImageGenerateRequest):
             prompt=body.prompt,
             size=body.size,
             title=body.title,
+            user_prompt=body.user_prompt,
             artistic_style=body.artistic_style,
             composition=body.composition,
             lighting=body.lighting,

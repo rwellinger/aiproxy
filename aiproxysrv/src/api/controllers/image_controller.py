@@ -20,6 +20,7 @@ class ImageController:
         prompt: str,
         size: str,
         title: str | None = None,
+        user_prompt: str | None = None,
         artistic_style: str | None = None,
         composition: str | None = None,
         lighting: str | None = None,
@@ -30,9 +31,10 @@ class ImageController:
         Generate image via business service
 
         Args:
-            prompt: Image generation prompt
+            prompt: AI-enhanced image generation prompt (from Ollama)
             size: Image size specification
             title: Optional image title
+            user_prompt: Optional original user input (before AI enhancement)
             artistic_style: Optional artistic style (auto, photorealistic, digital-art, etc.)
             composition: Optional composition (auto, portrait, landscape, etc.)
             lighting: Optional lighting (auto, natural, studio, dramatic, etc.)
@@ -51,6 +53,7 @@ class ImageController:
                 prompt=prompt,
                 size=size,
                 title=title,
+                user_prompt=user_prompt,
                 artistic_style=artistic_style,
                 composition=composition,
                 lighting=lighting,

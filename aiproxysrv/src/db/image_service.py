@@ -18,6 +18,7 @@ class ImageService:
         model_used: str,
         prompt_hash: str,
         title: str | None = None,
+        user_prompt: str | None = None,
         enhanced_prompt: str | None = None,
         artistic_style: str | None = None,
         composition: str | None = None,
@@ -34,6 +35,7 @@ class ImageService:
         db = SessionLocal()
         try:
             generated_image = GeneratedImage(
+                user_prompt=user_prompt,
                 prompt=prompt,
                 enhanced_prompt=enhanced_prompt,
                 size=size,

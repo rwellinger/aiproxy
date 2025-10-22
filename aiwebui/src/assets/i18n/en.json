@@ -159,6 +159,7 @@
       "image": "Generated Picture"
     },
     "errors": {
+      "copyFailed": "Failed to copy to clipboard",
       "failedToLoad": "Failed to load image",
       "loadImage": "Error loading image details",
       "updateTitle": "Error updating title"
@@ -168,13 +169,27 @@
     "prompt": {
       "label": "Prompt:"
     },
-    "promptDetails": {
+    "prompts": {
       "title": "Prompt Details",
-      "originalPrompt": "Original Prompt:",
-      "enhancedPrompt": "Enhanced Prompt:",
-      "styleSelections": "Style Selections:",
-      "copyEnhanced": "Copy Enhanced Prompt",
-      "noEnhancedPrompt": "No AI enhancement was used"
+      "userInput": {
+        "label": "Your Input"
+      },
+      "aiEnhanced": {
+        "label": "AI Enhanced"
+      },
+      "final": {
+        "label": "Final (sent to DALL-E)",
+        "copy": "Copy",
+        "copied": "Copied to clipboard!"
+      }
+    },
+    "styles": {
+      "title": "Style Selections",
+      "artistic": "Style",
+      "composition": "Composition",
+      "lighting": "Lighting",
+      "colorPalette": "Color Palette",
+      "detailLevel": "Detail Level"
     },
     "title": "Image Details",
     "untitled": "Untitled Image"
@@ -215,63 +230,79 @@
     "resetButton": "Reset",
     "sizeLabel": "Picture Size:",
     "styles": {
-      "artisticStyleLabel": "Artistic Style:",
-      "compositionLabel": "Composition:",
-      "lightingLabel": "Lighting:",
-      "colorPaletteLabel": "Color Palette:",
-      "detailLevelLabel": "Detail Level:",
-      "artisticStyles": {
-        "auto": "Auto (AI decides)",
-        "photorealistic": "Photorealistic",
-        "digitalArt": "Digital Art",
-        "oilPainting": "Oil Painting",
-        "watercolor": "Watercolor",
-        "cartoon": "Cartoon",
-        "anime": "Anime/Manga",
-        "sketch": "Sketch",
-        "3dRender": "3D Render"
+      "sectionTitle": "Style Selection",
+      "artisticStyle": {
+        "label": "Artistic Style:",
+        "options": {
+          "auto": "Auto (AI decides)",
+          "photorealistic": "Photorealistic",
+          "digital-art": "Digital Art",
+          "oil-painting": "Oil Painting",
+          "watercolor": "Watercolor",
+          "cartoon": "Cartoon",
+          "anime": "Anime/Manga",
+          "sketch": "Sketch",
+          "3d-render": "3D Render"
+        }
       },
-      "compositions": {
-        "auto": "Auto (AI decides)",
-        "portrait": "Portrait",
-        "landscape": "Landscape",
-        "wideAngle": "Wide Angle",
-        "closeUp": "Close-Up",
-        "ruleOfThirds": "Rule of Thirds",
-        "centered": "Centered"
+      "composition": {
+        "label": "Composition:",
+        "options": {
+          "auto": "Auto (AI decides)",
+          "portrait": "Portrait",
+          "landscape": "Landscape",
+          "wide-angle": "Wide Angle",
+          "close-up": "Close-Up",
+          "rule-of-thirds": "Rule of Thirds",
+          "centered": "Centered"
+        }
       },
-      "lightings": {
-        "auto": "Auto (AI decides)",
-        "natural": "Natural Daylight",
-        "studio": "Studio Lighting",
-        "dramatic": "Dramatic/Moody",
-        "goldenHour": "Golden Hour",
-        "night": "Night Scene"
+      "lighting": {
+        "label": "Lighting:",
+        "options": {
+          "auto": "Auto (AI decides)",
+          "natural": "Natural Daylight",
+          "studio": "Studio Lighting",
+          "dramatic": "Dramatic/Moody",
+          "golden-hour": "Golden Hour",
+          "night": "Night Scene"
+        }
       },
-      "colorPalettes": {
-        "auto": "Auto (AI decides)",
-        "vibrant": "Vibrant Colors",
-        "muted": "Muted Tones",
-        "monochrome": "Monochrome",
-        "highContrast": "High Contrast",
-        "warm": "Warm Tones",
-        "cool": "Cool Tones",
-        "pastel": "Pastel Colors"
+      "colorPalette": {
+        "label": "Color Palette:",
+        "options": {
+          "auto": "Auto (AI decides)",
+          "vibrant": "Vibrant Colors",
+          "muted": "Muted Tones",
+          "monochrome": "Monochrome",
+          "high-contrast": "High Contrast",
+          "warm": "Warm Tones",
+          "cool": "Cool Tones",
+          "pastel": "Pastel Colors"
+        }
       },
-      "detailLevels": {
-        "auto": "Auto (AI decides)",
-        "minimal": "Minimal",
-        "moderate": "Moderate",
-        "highlyDetailed": "Highly Detailed"
+      "detailLevel": {
+        "label": "Detail Level:",
+        "options": {
+          "auto": "Auto (AI decides)",
+          "minimal": "Minimal",
+          "moderate": "Moderate",
+          "highly-detailed": "Highly Detailed"
+        }
       }
     },
     "enhanceQuality": {
       "label": "AI Enhancement Quality:",
-      "auto": "Auto (Smart selection)",
-      "quality": "Quality (Large model, 3-5s)",
-      "fast": "Fast (Small model, <1s)",
-      "off": "Off (No enhancement)",
-      "autoHint": "Auto mode uses Quality for creative prompts, Fast for styled prompts"
+      "options": {
+        "auto": "Auto (Smart selection)",
+        "quality": "Quality (Large model, 3-5s)",
+        "fast": "Fast (Small model, <1s)",
+        "off": "Off (No enhancement)"
+      },
+      "hints": {
+        "autoManual": "Auto mode will use Fast enhancement (styles selected)",
+        "autoQuality": "Auto mode will use Quality enhancement (no styles)"
+      }
     },
     "title": "Create Picture",
     "titleActions": "Title actions",
