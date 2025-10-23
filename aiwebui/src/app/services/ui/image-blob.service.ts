@@ -1,12 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, map, catchError, shareReplay } from 'rxjs';
+import { ApiConfigService } from '../config/api-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImageBlobService {
   private http = inject(HttpClient);
+  private apiConfig = inject(ApiConfigService);
   private blobCache = new Map<string, Observable<string>>();
 
   /**
@@ -22,8 +24,13 @@ export class ImageBlobService {
       return this.blobCache.get(imageUrl)!;
     }
 
+    // Build absolute URL if imageUrl is relative
+    const absoluteUrl = imageUrl.startsWith('http')
+      ? imageUrl
+      : `${this.apiConfig.getBaseUrl()}${imageUrl}`;
+
     // Create observable for authenticated image fetch
-    const blobUrl$ = this.http.get(imageUrl, {
+    const blobUrl$ = this.http.get(absoluteUrl, {
       responseType: 'blob',
       // HttpClient will automatically add auth headers via interceptor
     }).pipe(
@@ -50,7 +57,12 @@ export class ImageBlobService {
   downloadImage(imageUrl: string, filename?: string): void {
     if (!imageUrl) return;
 
-    this.http.get(imageUrl, {
+    // Build absolute URL if imageUrl is relative
+    const absoluteUrl = imageUrl.startsWith('http')
+      ? imageUrl
+      : `${this.apiConfig.getBaseUrl()}${imageUrl}`;
+
+    this.http.get(absoluteUrl, {
       responseType: 'blob'
     }).subscribe({
       next: (blob: Blob) => {

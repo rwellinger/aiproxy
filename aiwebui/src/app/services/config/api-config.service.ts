@@ -33,10 +33,12 @@ export class ApiConfigService {
             status: (taskId: string) => `${this.baseUrl}/api/v1/image/status/${taskId}`,
             tasks: `${this.baseUrl}/api/v1/image/tasks`,
             list: (limit?: number, offset?: number) => `${this.baseUrl}/api/v1/image/list${limit !== undefined || offset !== undefined ? '?' : ''}${limit !== undefined ? `limit=${limit}` : ''}${limit !== undefined && offset !== undefined ? '&' : ''}${offset !== undefined ? `offset=${offset}` : ''}`,
+            listForTextOverlay: `${this.baseUrl}/api/v1/image/list-for-text-overlay`,
             detail: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}`,
             delete: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}`,
             update: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}`,
-            bulkDelete: `${this.baseUrl}/api/v1/image/bulk-delete`
+            bulkDelete: `${this.baseUrl}/api/v1/image/bulk-delete`,
+            addTextOverlay: `${this.baseUrl}/api/v1/image/add-text-overlay`
         },
         redis: {
             keys: `${this.baseUrl}/api/v1/redis/list/keys`,
@@ -117,6 +119,10 @@ export class ApiConfigService {
             detail: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
             update: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
             delete: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`
+        },
+        user: {
+            profile: `${this.baseUrl}/api/v1/user/profile`,
+            update: `${this.baseUrl}/api/v1/user/profile`
         }
     };
 

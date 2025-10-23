@@ -4,7 +4,7 @@ import uuid
 from enum import Enum
 
 from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -174,6 +174,7 @@ class GeneratedImage(Base):
     lighting = Column(String(50), nullable=True)  # natural, studio, dramatic, etc.
     color_palette = Column(String(50), nullable=True)  # vibrant, muted, monochrome, etc.
     detail_level = Column(String(50), nullable=True)  # minimal, moderate, highly-detailed
+    text_overlay_metadata = Column(JSON, nullable=True)  # Metadata for text overlays (title, artist, font_style, etc.)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

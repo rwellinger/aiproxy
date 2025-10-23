@@ -36,6 +36,7 @@ interface ImageData {
     url: string;
     title?: string;
     tags?: string;
+    text_overlay_metadata?: any;
     created_at: string;
     updated_at?: string;
 }
@@ -486,6 +487,10 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Title editing methods
+    hasTextOverlay(image: ImageData): boolean {
+        return image.text_overlay_metadata !== null && image.text_overlay_metadata !== undefined;
+    }
+
     getDisplayTitle(image: ImageData): string {
         if (image.title && image.title.trim()) {
             return image.title.trim();

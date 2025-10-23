@@ -7,6 +7,31 @@
 /* Highlight.js Theme for Code Syntax Highlighting */
 @import 'highlight.js/styles/github.css';
 
+/* Custom Fonts for Text Overlay Editor */
+@font-face {
+  font-family: 'Anton';
+  src: url('/assets/fonts/Anton-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto Light';
+  src: url('/assets/fonts/Roboto-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/assets/fonts/PlayfairDisplay-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 // CSS Custom Properties werden durch SCSS-Variablen ersetzt (siehe _variables.scss)
 
 /* ===== GLOBAL BASE STYLES ===== */
@@ -390,5 +415,37 @@ code {
 
   em {
     font-style: italic;
+  }
+}
+
+/* ===== TEXT OVERLAY EDITOR - GLOBAL OVERRIDES ===== */
+/* These styles need to be global to override Angular Material custom elements.
+   Component-level SCSS doesn't work for mat-select and mat-expansion-panel icons.
+   See docs/TROUBLESHOOTING.md - "Angular Material Styling Issues" for debugging guide. */
+
+// Font Style Option Icons (in mat-select dropdown)
+.mat-mdc-option .font-style-option {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+
+  i {
+    font-size: 1rem !important;
+    min-width: 1.25rem !important;
+    text-align: center !important;
+    color: $primary-color !important;
+  }
+}
+
+// Accordion Panel Title Icons (mat-expansion-panel headers)
+// IMPORTANT: Use custom element selector (mat-panel-title) NOT class selector (.mat-panel-title)
+mat-panel-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: $spacing-xs !important;
+
+  i {
+    font-size: $font-sm !important;
+    color: $primary-color !important;
   }
 }

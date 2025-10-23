@@ -179,16 +179,21 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
   }
 
   private loadImageBlob() {
-    if (this.image?.url) {
-      this.imageBlobService.getImageBlobUrl(this.image.url).subscribe({
+    // Use display_url if available (overlay version), otherwise fallback to url (original)
+    const imageUrl = this.image?.display_url || this.image?.url;
+
+    if (imageUrl) {
+      this.imageBlobService.getImageBlobUrl(imageUrl).subscribe({
         next: (blobUrl) => {
           this.imageBlobUrl = blobUrl;
         },
         error: (error) => {
-          console.error('Failed to load image blob:', error);
+          console.error('Failed to load image blob:', imageUrl, error);
           this.imageBlobUrl = '';
         }
       });
+    } else {
+      console.warn('[ImageDetailPanel] No imageUrl to load!', this.image);
     }
   }
 
@@ -223,6 +228,10 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  hasTextOverlay(): boolean {
+    return this.image?.text_overlay_metadata !== null && this.image?.text_overlay_metadata !== undefined;
   }
 
   getDisplayTitle(image: any): string {

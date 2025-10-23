@@ -158,6 +158,9 @@
     "alt": {
       "image": "Generiertes Bild"
     },
+    "badges": {
+      "textOverlay": "Text-Overlay"
+    },
     "errors": {
       "copyFailed": "Fehler beim Kopieren in die Zwischenablage",
       "failedToLoad": "Fehler beim Laden des Bildes",
@@ -388,6 +391,10 @@
       "size": "Größe",
       "status": "Status",
       "title": "Titel"
+    },
+    "tooltips": {
+      "original": "Original-Bild",
+      "withOverlay": "Bild mit Text-Overlay"
     },
     "title": "Bild-Galerie"
   },
@@ -655,7 +662,8 @@
     "profile": "Profil",
     "promptTemplates": "Prompt Vorlagen",
     "settings": "Einstellungen",
-    "sketchLibrary": "Skizzen-Bibliothek"
+    "sketchLibrary": "Skizzen-Bibliothek",
+    "textOverlayEditor": "Text-Overlay"
   },
   "songDetailPanel": {
     "choices": {
@@ -1265,5 +1273,54 @@
   },
   "versionCheck": {
     "newVersion": "Neue Version {{version}} verfügbar!\nDie Anwendung wird jetzt neu geladen."
+  },
+  "textOverlayEditor": {
+    "title": "Text Overlay Editor",
+    "titleSection": "Titel-Einstellungen",
+    "artistSection": "Künstler-Einstellungen (Optional)",
+    "form": {
+      "selectImage": "Bild auswählen",
+      "imageRequired": "Bild ist erforderlich",
+      "title": "Titel",
+      "titleRequired": "Titel ist erforderlich",
+      "titlePosition": "Titel-Position",
+      "titleFontSize": "Titel-Schriftgröße",
+      "artist": "Künstler",
+      "artistPosition": "Künstler-Position",
+      "artistFontSize": "Künstler-Schriftgröße",
+      "artistColor": "Künstler-Farbe",
+      "artistOutlineColor": "Künstler-Umrandung",
+      "useCustomArtistFont": "Andere Schriftart für Künstler verwenden",
+      "artistFontStyle": "Künstler-Schriftart",
+      "fontStyle": "Schriftart",
+      "textColor": "Textfarbe",
+      "outlineColor": "Umrandungsfarbe",
+      "belowTitle": "Unter Titel",
+      "belowTitleLeft": "Links",
+      "belowTitleCenter": "Zentriert",
+      "belowTitleRight": "Rechts",
+      "gridPosition": "Raster-Position",
+      "customPosition": "Freie Position",
+      "clickOnImage": "Auf Bild klicken",
+      "coordinateX": "X-Position (%)",
+      "coordinateY": "Y-Position (%)",
+      "useTitleColor": "Titel-Farbe verwenden"
+    },
+    "buttons": {
+      "apply": "Anwenden & Rendern",
+      "download": "Herunterladen"
+    },
+    "preview": {
+      "title": "Live-Vorschau",
+      "selectImagePlaceholder": "Wähle ein Bild aus, um zu starten"
+    },
+    "success": {
+      "applied": "Text-Overlay erfolgreich angewendet"
+    },
+    "errors": {
+      "loadImagesFailed": "Fehler beim Laden der Bilder",
+      "formInvalid": "Bitte fülle alle Pflichtfelder aus",
+      "applyFailed": "Fehler beim Anwenden des Text-Overlays"
+    }
   }
 }
