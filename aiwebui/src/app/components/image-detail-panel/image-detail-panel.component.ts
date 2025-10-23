@@ -182,17 +182,9 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
     // Use display_url if available (overlay version), otherwise fallback to url (original)
     const imageUrl = this.image?.display_url || this.image?.url;
 
-    console.log('[ImageDetailPanel] Loading image blob:', {
-      imageUrl,
-      hasDisplayUrl: !!this.image?.display_url,
-      hasUrl: !!this.image?.url,
-      imageId: this.image?.id
-    });
-
     if (imageUrl) {
       this.imageBlobService.getImageBlobUrl(imageUrl).subscribe({
         next: (blobUrl) => {
-          console.log('[ImageDetailPanel] Image blob loaded successfully:', blobUrl);
           this.imageBlobUrl = blobUrl;
         },
         error: (error) => {

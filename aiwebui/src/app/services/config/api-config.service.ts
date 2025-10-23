@@ -119,6 +119,10 @@ export class ApiConfigService {
             detail: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
             update: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
             delete: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`
+        },
+        user: {
+            profile: `${this.baseUrl}/api/v1/user/profile`,
+            update: `${this.baseUrl}/api/v1/user/profile`
         }
     };
 

@@ -1299,8 +1299,12 @@
       "belowTitleLeft": "Links",
       "belowTitleCenter": "Zentriert",
       "belowTitleRight": "Rechts",
-      "customPosition": "Benutzerdefinierte Position",
-      "sameAsTitle": "Gleich wie Titel (wenn leer)"
+      "gridPosition": "Raster-Position",
+      "customPosition": "Freie Position",
+      "clickOnImage": "Auf Bild klicken",
+      "coordinateX": "X-Position (%)",
+      "coordinateY": "Y-Position (%)",
+      "useTitleColor": "Titel-Farbe verwenden"
     },
     "buttons": {
       "apply": "Anwenden & Rendern",

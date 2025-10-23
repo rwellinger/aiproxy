@@ -1299,8 +1299,12 @@
       "belowTitleLeft": "Left",
       "belowTitleCenter": "Center",
       "belowTitleRight": "Right",
+      "gridPosition": "Grid Position",
       "customPosition": "Custom Position",
-      "sameAsTitle": "Same as Title (if empty)"
+      "clickOnImage": "Click on Image",
+      "coordinateX": "X Position (%)",
+      "coordinateY": "Y Position (%)",
+      "useTitleColor": "Use Title Color"
     },
     "buttons": {
       "apply": "Apply & Render",

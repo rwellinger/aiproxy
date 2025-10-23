@@ -247,11 +247,11 @@ class ImageController:
         artist: str | None = None,
         font_style: str = "bold",
         # V2 parameters
-        title_position: str = "center",
+        title_position: str | dict[str, float] = "center",
         title_font_size: float = 0.08,
         title_color: str = "#FFFFFF",
         title_outline_color: str = "#000000",
-        artist_position: str | None = None,
+        artist_position: str | dict[str, float] | None = None,
         artist_font_size: float = 0.05,
         artist_color: str | None = None,
         artist_outline_color: str | None = None,

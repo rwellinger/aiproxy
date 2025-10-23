@@ -620,3 +620,66 @@ cd aiproxysrv && alembic upgrade head && cd ..
 cd aiwebui && npm install && npm run build:prod && cd ..
 docker compose up -d
 ```
+
+---
+
+## Angular Material Styling Issues
+
+### Problem: SCSS Styles werden nicht angewendet (Component-Level)
+
+**Symptom:** SCSS-Änderungen in Component-Dateien greifen nicht, selbst mit `ViewEncapsulation.None` und `!important`.
+
+**Root Cause:**
+- Angular Material Custom Elements (wie `mat-panel-title`, `mat-expansion-panel-header`) werden in separate Lazy-Loaded Chunks kompiliert
+- Component-SCSS wird später geladen als Angular Material Styles
+- Selektoren mit CSS-Klassen (`.mat-panel-title`) funktionieren oft nicht, weil es Custom Elements sind
+
+**Debugging-Prozess:**
+
+1. **Test mit extremen Styles** (in `styles.scss`):
+   ```scss
+   // Try multiple selector variations with extreme colors
+   mat-panel-title {
+     background-color: pink !important;  // Custom element selector
+   }
+
+   .mat-panel-title {
+     background-color: red !important;   // Class selector
+   }
+
+   mat-expansion-panel-header {
+     background-color: orange !important;
+   }
+   ```
+
+2. **Build und Hard-Refresh** (Cmd+Shift+R / Strg+Shift+R)
+
+3. **Welche Farbe siehst Du?**
+   - Das zeigt, welcher Selector tatsächlich greift
+   - Beispiel: Pink (#ffc0cb) → `mat-panel-title` funktioniert!
+
+4. **Finalen Style anwenden**:
+   ```scss
+   // In styles.scss (global!)
+   mat-panel-title {
+     display: flex !important;
+     align-items: center !important;
+     gap: $spacing-xs !important;
+
+     i {
+       font-size: $font-sm !important;
+       color: $primary-color !important;
+     }
+   }
+   ```
+
+**Wichtig:**
+- ✅ **Immer in `src/styles.scss`** (global), nicht in Component-SCSS
+- ✅ **Custom Element Selektoren** (`mat-panel-title`) statt Klassen (`.mat-panel-title`)
+- ✅ **!important verwenden** um Angular Material zu überschreiben
+- ✅ **Extreme Test-Styles** zum Debuggen (dann sieht man sofort, ob es greift)
+
+**Beispiel-Fall:**
+- Problem: Icons in `mat-expansion-panel` Titeln wurden nicht angezeigt
+- Lösung: `mat-panel-title` (ohne Punkt!) in `styles.scss` mit `!important`
+- Commit: "feat(text-overlay): Add icons to accordion panel titles"
