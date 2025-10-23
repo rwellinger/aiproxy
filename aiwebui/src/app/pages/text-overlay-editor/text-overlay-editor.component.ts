@@ -21,6 +21,7 @@ import { debounceTime } from 'rxjs';
 
 import { ApiConfigService } from '../../services/config/api-config.service';
 import { NotificationService } from '../../services/ui/notification.service';
+import { TranslateService } from '@ngx-translate/core';
 
 interface GeneratedImage {
   id: string;
@@ -84,6 +85,7 @@ export class TextOverlayEditorComponent implements OnInit {
   private http = inject(HttpClient);
   private apiConfig = inject(ApiConfigService);
   private notificationService = inject(NotificationService);
+  private translate = inject(TranslateService);
   private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
@@ -135,7 +137,7 @@ export class TextOverlayEditorComponent implements OnInit {
         },
         error: (error) => {
           console.error('Failed to load images:', error);
-          this.notificationService.error('textOverlayEditor.errors.loadImagesFailed');
+          this.notificationService.error(this.translate.instant('textOverlayEditor.errors.loadImagesFailed'));
         }
       });
   }
@@ -194,7 +196,7 @@ export class TextOverlayEditorComponent implements OnInit {
         },
         error: (error) => {
           console.error('Failed to load image:', error);
-          this.notificationService.error('textOverlayEditor.errors.loadImagesFailed');
+          this.notificationService.error(this.translate.instant('textOverlayEditor.errors.loadImagesFailed'));
         }
       });
   }
@@ -515,7 +517,7 @@ export class TextOverlayEditorComponent implements OnInit {
 
   applyTextOverlay(): void {
     if (!this.form.valid || !this.selectedImage) {
-      this.notificationService.error('textOverlayEditor.errors.formInvalid');
+      this.notificationService.error(this.translate.instant('textOverlayEditor.errors.formInvalid'));
       return;
     }
 
@@ -553,13 +555,13 @@ export class TextOverlayEditorComponent implements OnInit {
         next: (response) => {
           this.isProcessing = false;
           this.resultImageFilePath = response.image_url;
-          this.notificationService.success('textOverlayEditor.success.applied');
+          this.notificationService.success(this.translate.instant('textOverlayEditor.success.applied'));
           this.loadImages(); // Reload image list
         },
         error: (error) => {
           this.isProcessing = false;
           console.error('Failed to apply text overlay:', error);
-          this.notificationService.error('textOverlayEditor.errors.applyFailed');
+          this.notificationService.error(this.translate.instant('textOverlayEditor.errors.applyFailed'));
         }
       });
   }
@@ -583,7 +585,7 @@ export class TextOverlayEditorComponent implements OnInit {
         },
         error: (error) => {
           console.error('Failed to download image:', error);
-          this.notificationService.error('textOverlayEditor.errors.applyFailed');
+          this.notificationService.error(this.translate.instant('textOverlayEditor.errors.applyFailed'));
         }
       });
   }

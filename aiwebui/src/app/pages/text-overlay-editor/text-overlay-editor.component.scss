@@ -255,16 +255,20 @@
 }
 
 .badge {
-  padding: 0.125rem 0.375rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
   white-space: nowrap;
 }
 
 .badge-album-cover {
-  background-color: #4caf50;
-  color: white;
+  background-color: rgba(156, 39, 176, 0.1);
+  color: #9c27b0;
+  border: 1px solid rgba(156, 39, 176, 0.3);
 }
 
 // Position Tabs Field (Title & Artist)
@@ -362,10 +366,21 @@
   .coordinate-inputs {
     display: flex;
     gap: 8px;
+    align-items: flex-start;
 
     .coord-field {
       flex: 1;
       max-width: 130px;
+    }
+
+    .font-size-field {
+      flex: 1;
+      max-width: 130px;
+      margin-left: 16px; // Extra spacing to separate from X/Y fields
+
+      input[type="number"] {
+        padding-right: 8px; // Add spacing before suffix (px)
+      }
     }
   }
 }

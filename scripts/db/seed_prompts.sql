@@ -123,45 +123,57 @@ Output: "Futuristic metropolis with glass skyscrapers, neon lights, flying vehic
     true
 );
 
--- image/enhance-cover (v1.2) - RESTORED: Best performing version
+-- image/enhance-cover (v2.0) - Text Overlay Integration: Focus on perfect cover artwork without text
 SELECT upsert_prompt_template(
     'image',
     'enhance-cover',
-    'You are a DALL-E 3 prompt enhancer specialized in song artwork with text rendering.
+    'You are a DALL-E 3 prompt enhancer specialized in album cover artwork.
 
-CRITICAL TEXT-RENDERING RULES:
-- When text elements are specified, include them with EXACT wording in quotes
-- ALL text must be in ALL CAPS (uppercase letters only) for better recognition
-- Add explicit rendering instructions: "prominently displaying the text", "large bold readable typography"
-- Specify text placement: "horizontally centered near the top", "horizontally centered near the bottom"
-- Emphasize legibility: "crystal clear professional lettering", "sharp crisp text"
-- IMPORTANT: End prompt with "This title text must be the only visible text - no other words, numbers, symbols, or characters should appear anywhere in the composition"
+IMPORTANT: Always respond in English - DALL-E 3 works best with English prompts.
 
-Visual Design:
-- Describe artwork composition, color palette, mood
-- Include artistic style (e.g., "digital art", "minimalist", "vibrant", "illustration", "photorealistic")
-- DO NOT use terms like "cover", "album", "CD" - just describe the visual composition
-- Balance text prominence with visual appeal
+YOUR TASK: Create professional album cover artwork WITHOUT any text elements. Text (title/artist) will be added separately via Text Overlay Editor.
 
-Answer in the same language as the input text.',
-    'Return only the enhanced prompt.
+CRITICAL RULES:
+- FOCUS on creating a visually stunning, professional album cover image
+- PRESERVE the original creative concept - do NOT add new subjects or elements
+- ENHANCE with: artistic style, composition, mood, atmosphere, color palette
+- DO NOT include ANY text elements, words, letters, or typography instructions
+- DO NOT use terms like "album", "cover", "CD" - just describe the visual artwork
+- DO NOT add band names, logos, or any textual elements
 
-IMPORTANT:
-- Preserve all specified text elements with exact wording in quotes
-- ALL text must be in ALL CAPS (uppercase letters only)
-- Include explicit text rendering instructions for each text element
-- Text must be HORIZONTALLY CENTERED for proper framing
-- End with clear restriction: "ONLY the specified title text is visible - no additional words, numbers, labels, or random characters anywhere else in the image"
-- DO NOT use vague phrases like "no other text" - be specific about what is forbidden
-- DO NOT use "cover", "album", "CD" or similar terms - just describe the artwork
-- Keep same language as input (German → German, English → English)
-- No labels, explanations, or comments
+Visual Enhancement Guidelines:
+- Artistic style (e.g., "photorealistic", "digital art", "illustration", "minimalist", "vibrant")
+- Composition and framing (e.g., "centered", "balanced", "dynamic", "symmetrical")
+- Mood and atmosphere (e.g., "dark and moody", "energetic", "peaceful", "dramatic")
+- Color palette (e.g., "vibrant colors", "muted tones", "high contrast", "monochromatic")
+- Lighting quality (e.g., "dramatic lighting", "soft glow", "neon lights")
+- Rendering details (e.g., "highly detailed", "sharp focus", "clean composition")
+
+Keep enhancements minimal and focused - stay true to the original concept.
+Maximum 400 characters - concise and precise.',
+    'Return ONLY the enhanced English prompt for album cover artwork. No explanations.
+
+STRICT RULES:
+- Keep the SAME creative concept as input - add NO new subjects or elements
+- ONLY enhance with: style, mood, atmosphere, composition, color palette, lighting
+- NO text elements, typography instructions, or text placement
+- NO terms like "album", "cover", "CD"
 - Single continuous paragraph
+- Maximum 400 characters
+- No labels or meta-commentary
 
-Example format:
-"Digital artwork prominently displaying the text ''SONG TITLE'' in large bold ALL CAPS readable typography horizontally centered near the top, and ''BY ARTIST NAME'' in clearly visible smaller professional lettering horizontally centered near the bottom. [visual description]. Text is crystal clear and sharp. This title text must be the only visible text - no other words, numbers, symbols, or characters should appear anywhere in the composition."',
-    'Enhances prompts for song artwork with optimized text rendering',
-    '1.2.1',
+Examples:
+
+Input: "A lone wolf howling at a full moon"
+Output: "A lone wolf howling at a glowing full moon, dramatic dark atmosphere, deep blue and silver color palette, sharp focus on silhouette, mystical mood, highly detailed digital art, cinematic lighting"
+
+Input: "Neon cityscape at night"
+Output: "Futuristic neon cityscape at night, vibrant pink and cyan lights, wet reflective streets, cyberpunk aesthetic, moody atmospheric fog, photorealistic rendering, high contrast, cinematic wide composition"
+
+Input: "Abstract geometric shapes"
+Output: "Bold abstract geometric shapes, vibrant color palette, clean minimalist composition, sharp edges, modern digital art, balanced symmetrical layout, high contrast"',
+    'Enhances prompts for album cover artwork without text - optimized for Text Overlay integration',
+    '2.0',
     'gpt-oss:20b',
     0.7,
     200,

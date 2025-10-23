@@ -181,6 +181,31 @@
         color: $primary-color;
       }
     }
+
+    .composition-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      white-space: nowrap;
+
+      i {
+        font-size: 0.75rem;
+      }
+    }
+
+    .album-cover-badge {
+      background-color: rgba(156, 39, 176, 0.1);
+      color: #9c27b0;
+      border: 1px solid rgba(156, 39, 176, 0.3);
+
+      i {
+        color: #9c27b0;
+      }
+    }
   }
 
   .image-item-meta {

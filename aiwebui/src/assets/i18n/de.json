@@ -217,7 +217,7 @@
       "enhancing": "Verbessere Prompt...",
       "enhancinghint": "KI verbessert deinen Bild-Prompt",
       "enhancingCover": "Verbessere Cover-Prompt...",
-      "enhancingCoverHint": "KI optimiert deinen Prompt für Album-Cover mit Text-Rendering",
+      "enhancingCoverHint": "KI optimiert deinen Prompt für professionelles Album-Cover-Artwork",
       "generatingTitle": "Erstelle Titel...",
       "generatingTitleHint": "KI erstellt einen Bild-Titel für dich",
       "translating": "Übersetze Prompt...",
@@ -395,6 +395,9 @@
     "tooltips": {
       "original": "Original-Bild",
       "withOverlay": "Bild mit Text-Overlay"
+    },
+    "compositionBadge": {
+      "albumCover": "Album-Cover"
     },
     "title": "Bild-Galerie"
   },
@@ -1285,6 +1288,7 @@
       "titleRequired": "Titel ist erforderlich",
       "titlePosition": "Titel-Position",
       "titleFontSize": "Titel-Schriftgröße",
+      "fontSize": "Schriftgröße",
       "artist": "Künstler",
       "artistPosition": "Künstler-Position",
       "artistFontSize": "Künstler-Schriftgröße",

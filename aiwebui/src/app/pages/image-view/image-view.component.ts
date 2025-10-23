@@ -37,6 +37,7 @@ interface ImageData {
     title?: string;
     tags?: string;
     text_overlay_metadata?: any;
+    composition?: string;
     created_at: string;
     updated_at?: string;
 }

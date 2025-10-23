@@ -65,6 +65,11 @@
                    [title]="hasTextOverlay(image) ? ('imageView.tooltips.withOverlay' | translate) : ('imageView.tooltips.original' | translate)"></i>
                 {{ getDisplayTitle(image) }}
               </h4>
+              <!-- Album Cover Badge -->
+              <span *ngIf="image.composition === 'album-cover'" class="composition-badge album-cover-badge">
+                <i class="fas fa-compact-disc"></i>
+                {{ 'imageView.compositionBadge.albumCover' | translate }}
+              </span>
             </div>
             <div class="image-item-meta">
               <span class="meta-date">

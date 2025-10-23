@@ -229,11 +229,8 @@ export class ImageGeneratorComponent implements OnInit {
                 if (effectiveMode !== 'off') {
                     // Album Cover uses special cover enhancement
                     if (this.composition.value === 'album-cover') {
-                        const user = await firstValueFrom(this.userService.getCurrentUserProfile());
-                        const artistName = user?.artist_name;
-
                         finalPrompt = await this.progressService.executeWithProgress(
-                            () => this.chatService.enhanceCoverPrompt(finalPrompt, titleValue, artistName),
+                            () => this.chatService.enhanceCoverPrompt(finalPrompt),
                             this.translate.instant('imageGenerator.progress.enhancingCover'),
                             this.translate.instant('imageGenerator.progress.enhancingCoverHint')
                         );
@@ -578,24 +575,15 @@ export class ImageGeneratorComponent implements OnInit {
 
     /**
      * Reset incompatible styles to 'auto' when Album Cover is selected
-     * Album Cover requires sharp, legible text rendering which conflicts with:
-     * - Painterly styles (oil-painting, watercolor, sketch)
-     * - Dramatic lighting (strong shadows obscure text)
-     * - Low-contrast palettes (muted, monochrome)
+     * Album Cover (with Text Overlay) only restricts sketch style.
+     * Other styles (oil-painting, watercolor, dramatic, muted, monochrome) are now allowed
+     * since text is added separately via Text Overlay Editor.
      */
     private resetIncompatibleStylesForAlbumCover(): void {
-        const incompatibleArtisticStyles: ArtisticStyle[] = ['oil-painting', 'watercolor', 'sketch'];
-        const incompatibleLighting: LightingStyle[] = ['dramatic'];
-        const incompatibleColorPalettes: ColorPaletteStyle[] = ['muted', 'monochrome'];
+        const incompatibleArtisticStyles: ArtisticStyle[] = ['sketch'];
 
         if (incompatibleArtisticStyles.includes(this.artisticStyle.value as ArtisticStyle)) {
             this.artisticStyle.setValue('auto', { emitEvent: false });
-        }
-        if (incompatibleLighting.includes(this.lighting.value as LightingStyle)) {
-            this.lighting.setValue('auto', { emitEvent: false });
-        }
-        if (incompatibleColorPalettes.includes(this.colorPalette.value as ColorPaletteStyle)) {
-            this.colorPalette.setValue('auto', { emitEvent: false });
         }
     }
 
@@ -604,25 +592,25 @@ export class ImageGeneratorComponent implements OnInit {
      */
     isArtisticStyleIncompatibleWithAlbumCover(style: ArtisticStyle): boolean {
         if (!this.isAlbumCoverMode || style === 'auto') return false;
-        const incompatibleStyles: ArtisticStyle[] = ['oil-painting', 'watercolor', 'sketch'];
+        const incompatibleStyles: ArtisticStyle[] = ['sketch'];
         return incompatibleStyles.includes(style);
     }
 
     /**
      * Check if a lighting option is incompatible with Album Cover composition
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     isLightingIncompatibleWithAlbumCover(lighting: LightingStyle): boolean {
-        if (!this.isAlbumCoverMode || lighting === 'auto') return false;
-        const incompatibleLighting: LightingStyle[] = ['dramatic'];
-        return incompatibleLighting.includes(lighting);
+        // No lighting restrictions for Album Cover (text added via Text Overlay)
+        return false;
     }
 
     /**
      * Check if a color palette option is incompatible with Album Cover composition
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     isColorPaletteIncompatibleWithAlbumCover(palette: ColorPaletteStyle): boolean {
-        if (!this.isAlbumCoverMode || palette === 'auto') return false;
-        const incompatiblePalettes: ColorPaletteStyle[] = ['muted', 'monochrome'];
-        return incompatiblePalettes.includes(palette);
+        // No color palette restrictions for Album Cover (text added via Text Overlay)
+        return false;
     }
 }

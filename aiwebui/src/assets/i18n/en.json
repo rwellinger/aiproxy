@@ -217,7 +217,7 @@
       "enhancing": "Enhancing Prompt...",
       "enhancinghint": "AI is improving your picture prompt",
       "enhancingCover": "Enhancing Cover Prompt...",
-      "enhancingCoverHint": "AI is optimizing your prompt for album cover with text rendering",
+      "enhancingCoverHint": "AI is optimizing your prompt for professional album cover artwork",
       "generatingTitle": "Generating Title...",
       "generatingTitleHint": "AI is creating an picture title for you",
       "translating": "Translating Prompt...",
@@ -395,6 +395,9 @@
     "tooltips": {
       "original": "Original Picture",
       "withOverlay": "Picture with Text Overlay"
+    },
+    "compositionBadge": {
+      "albumCover": "Album Cover"
     },
     "title": "Picture Gallery"
   },
@@ -1285,6 +1288,7 @@
       "titleRequired": "Title is required",
       "titlePosition": "Title Position",
       "titleFontSize": "Title Font Size",
+      "fontSize": "Font Size",
       "artist": "Artist",
       "artistPosition": "Artist Position",
       "artistFontSize": "Artist Font Size",
