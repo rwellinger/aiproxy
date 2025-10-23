@@ -25,7 +25,13 @@
 
     <!-- Image Details Content -->
     <div *ngIf="image" class="image-details-section">
-        <h2>{{ title }}</h2>
+        <div class="title-with-badge">
+            <h2>{{ title }}</h2>
+            <span *ngIf="hasTextOverlay()" class="overlay-badge">
+                <i class="fas fa-layer-group"></i>
+                {{ 'imageDetailPanel.badges.textOverlay' | translate }}
+            </span>
+        </div>
 
         <!-- Editable Title Section -->
         <div class="image-title-section" *ngIf="showEditTitle">

@@ -8,11 +8,15 @@ WORKDIR /app
 # Copy source files BEFORE pip install (required for editable install)
 COPY src/ ./src/
 COPY pyproject.toml .
+COPY scripts/ ./scripts/
 
 # Install system dependencies
 RUN apt-get update && \
     apt-get install -y curl && \
     rm -rf /var/lib/apt/lists/*
+
+# Install fonts for text overlay feature
+RUN bash scripts/install_fonts.sh
 
 # Install PIP Dependencies
 # Note: src/ must exist before this step for editable install

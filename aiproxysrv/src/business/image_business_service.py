@@ -179,6 +179,28 @@ class ImageBusinessService:
             logger.error("Error retrieving images", error=str(e))
             raise ImageGenerationError(f"Failed to retrieve images: {e}") from e
 
+    def get_images_for_text_overlay(self) -> dict[str, Any]:
+        """
+        Get list of images suitable for text overlay
+        - Only images with title (not NULL and not empty)
+        - Sorted: composition='album-cover' first, then by created_at DESC
+        - No pagination (return all matching images)
+
+        Returns:
+            Dict containing filtered and sorted images
+        """
+        try:
+            images = ImageService.get_images_for_text_overlay()
+
+            # Transform to API response format
+            image_list = [self._transform_image_to_api_format(image) for image in images]
+
+            return {"images": image_list}
+
+        except Exception as e:
+            logger.error("Error retrieving images for text overlay", error=str(e))
+            raise ImageGenerationError(f"Failed to retrieve images for text overlay: {e}") from e
+
     def get_image_details(self, image_id: str) -> dict[str, Any] | None:
         """
         Get detailed information for a single image
@@ -380,6 +402,12 @@ class ImageBusinessService:
 
     def _transform_image_to_api_format(self, image, include_file_path: bool = False) -> dict[str, Any]:
         """Transform database image object to API response format"""
+        # Determine display URL: use overlay image if text_overlay_metadata exists
+        display_url = image.local_url
+        if image.text_overlay_metadata and "_with_text" not in image.local_url:
+            # Replace .png with _with_text.png for overlay version (only if not already present)
+            display_url = image.local_url.replace(".png", "_with_text.png")
+
         image_data = {
             "id": str(image.id),
             "user_prompt": image.user_prompt,
@@ -388,9 +416,11 @@ class ImageBusinessService:
             "size": image.size,
             "filename": image.filename,
             "url": image.local_url,
+            "display_url": display_url,
             "model_used": image.model_used,
             "title": image.title,
             "tags": image.tags,
+            "text_overlay_metadata": image.text_overlay_metadata,
             "created_at": image.created_at.isoformat() if image.created_at else None,
             "updated_at": image.updated_at.isoformat() if image.updated_at else None,
             "prompt_hash": image.prompt_hash,

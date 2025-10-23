@@ -182,6 +182,33 @@ class ImageService:
             db.close()
 
     @staticmethod
+    def get_images_for_text_overlay() -> list[GeneratedImage]:
+        """
+        Get images suitable for text overlay
+        - Only images with title (not NULL and not empty)
+        - Exclude images that already have text overlay (text_overlay_metadata is not NULL)
+        - Sorted: composition='album-cover' first, then by created_at DESC
+        """
+        db = SessionLocal()
+        try:
+            from sqlalchemy import case
+
+            # Create a sort expression: album-cover = 0, others = 1 (so album-cover comes first)
+            album_cover_priority = case((GeneratedImage.composition == "album-cover", 0), else_=1)
+
+            query = (
+                db.query(GeneratedImage)
+                .filter(GeneratedImage.title.isnot(None))
+                .filter(GeneratedImage.title != "")
+                .filter(GeneratedImage.text_overlay_metadata.is_(None))  # Exclude overlay images
+                .order_by(album_cover_priority, GeneratedImage.created_at.desc())
+            )
+
+            return query.all()
+        finally:
+            db.close()
+
+    @staticmethod
     def delete_image_metadata(image_id: str) -> bool:
         """Delete image metadata by ID"""
         db = SessionLocal()

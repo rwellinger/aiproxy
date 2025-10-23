@@ -14,9 +14,9 @@ class ImageTextOverlayService:
 
     # Font mappings
     FONT_FILES = {
-        "bold": "Montserrat-Bold.ttf",
-        "elegant": "PlayfairDisplay-Regular.ttf",
-        "modern": "Roboto-Black.ttf",
+        "bold": "Anton-Regular.ttf",  # Heavy display font
+        "elegant": "PlayfairDisplay-Regular.ttf",  # Serif
+        "light": "Roboto-Light.ttf",  # Thin sans-serif
     }
 
     @staticmethod
@@ -29,6 +29,15 @@ class ImageTextOverlayService:
         text_color: str = "#FFD700",  # Gold
         outline_color: str = "#000000",  # Black
         outline_width: int = 3,
+        # New parameters for v2 (not used in V1, kept for API compatibility)  # noqa: ARG004
+        title_position: str | None = None,  # noqa: ARG004
+        artist_position: str | None = None,  # noqa: ARG004
+        title_font_size: float | None = None,  # noqa: ARG004
+        artist_font_size: float | None = None,  # noqa: ARG004
+        title_color: str | None = None,  # noqa: ARG004
+        artist_color: str | None = None,  # noqa: ARG004
+        title_outline_color: str | None = None,  # noqa: ARG004
+        artist_outline_color: str | None = None,  # noqa: ARG004
     ) -> dict[str, Any]:
         """
         Add text overlay to image with perfect spelling
@@ -38,10 +47,18 @@ class ImageTextOverlayService:
             title: Title text (will be uppercase)
             artist: Optional artist name (will be uppercase)
             font_style: Font style (bold/elegant/modern)
-            position: Text position (top/center/bottom)
-            text_color: Hex color for text (e.g., "#FFD700")
-            outline_color: Hex color for outline (e.g., "#000000")
+            position: Text position (top/center/bottom) - DEPRECATED, use title_position
+            text_color: Hex color for text - DEPRECATED, use title_color
+            outline_color: Hex color for outline - DEPRECATED, use title_outline_color
             outline_width: Pixel width of outline
+            title_position: Grid position for title (e.g., "top-left", "center", "bottom-right")
+            artist_position: Grid position for artist
+            title_font_size: Font size as percentage of image height (0.05 - 0.15)
+            artist_font_size: Font size as percentage of image height (0.05 - 0.15)
+            title_color: Hex color for title text
+            artist_color: Hex color for artist text
+            title_outline_color: Hex outline color for title
+            artist_outline_color: Hex outline color for artist
 
         Returns:
             {
@@ -58,7 +75,7 @@ class ImageTextOverlayService:
             font_size = int(img.height * 0.08)
 
             # Load font
-            font_file = ImageTextOverlayService.FONT_FILES.get(font_style, "Montserrat-Bold.ttf")
+            font_file = ImageTextOverlayService.FONT_FILES.get(font_style, "Anton-Regular.ttf")
             font_path = ImageTextOverlayService.FONTS_DIR / font_file
 
             if not font_path.exists():

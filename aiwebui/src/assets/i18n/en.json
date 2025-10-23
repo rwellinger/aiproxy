@@ -158,6 +158,9 @@
     "alt": {
       "image": "Generated Picture"
     },
+    "badges": {
+      "textOverlay": "Text Overlay"
+    },
     "errors": {
       "copyFailed": "Failed to copy to clipboard",
       "failedToLoad": "Failed to load picture",
@@ -388,6 +391,10 @@
       "size": "Size",
       "status": "Status",
       "title": "Title"
+    },
+    "tooltips": {
+      "original": "Original Picture",
+      "withOverlay": "Picture with Text Overlay"
     },
     "title": "Picture Gallery"
   },
@@ -655,7 +662,8 @@
     "profile": "Profile",
     "promptTemplates": "Prompt Templates",
     "settings": "Settings",
-    "sketchLibrary": "Sketch Library"
+    "sketchLibrary": "Sketch Library",
+    "textOverlayEditor": "Text Overlay"
   },
   "songDetailPanel": {
     "choices": {
@@ -1265,5 +1273,50 @@
   },
   "versionCheck": {
     "newVersion": "New version {{version}} available!\nThe application will now reload."
+  },
+  "textOverlayEditor": {
+    "title": "Text Overlay Editor",
+    "titleSection": "Title Settings",
+    "artistSection": "Artist Settings (Optional)",
+    "form": {
+      "selectImage": "Select Image",
+      "imageRequired": "Image is required",
+      "title": "Title",
+      "titleRequired": "Title is required",
+      "titlePosition": "Title Position",
+      "titleFontSize": "Title Font Size",
+      "artist": "Artist",
+      "artistPosition": "Artist Position",
+      "artistFontSize": "Artist Font Size",
+      "artistColor": "Artist Color",
+      "artistOutlineColor": "Artist Outline",
+      "useCustomArtistFont": "Use different font for Artist",
+      "artistFontStyle": "Artist Font Style",
+      "fontStyle": "Font Style",
+      "textColor": "Text Color",
+      "outlineColor": "Outline Color",
+      "belowTitle": "Below Title",
+      "belowTitleLeft": "Left",
+      "belowTitleCenter": "Center",
+      "belowTitleRight": "Right",
+      "customPosition": "Custom Position",
+      "sameAsTitle": "Same as Title (if empty)"
+    },
+    "buttons": {
+      "apply": "Apply & Render",
+      "download": "Download"
+    },
+    "preview": {
+      "title": "Live Preview",
+      "selectImagePlaceholder": "Select an image to start"
+    },
+    "success": {
+      "applied": "Text overlay applied successfully"
+    },
+    "errors": {
+      "loadImagesFailed": "Failed to load images",
+      "formInvalid": "Please fill in all required fields",
+      "applyFailed": "Failed to apply text overlay"
+    }
   }
 }

@@ -71,5 +71,10 @@ export const routes: Routes = [
         path: 'lyric-parsing-rules',
         canActivate: [AuthGuard],
         loadComponent: () => import('./pages/lyric-parsing-rules/lyric-parsing-rules.component').then(m => m.LyricParsingRulesComponent)
+    },
+    {
+        path: 'text-overlay-editor',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/text-overlay-editor/text-overlay-editor.component').then(m => m.TextOverlayEditorComponent)
     }
 ];

@@ -59,7 +59,10 @@
 
             <div class="image-item-header">
               <h4 class="image-title">
-                <i class="fas fa-image"></i>
+                <i class="fas"
+                   [class.fa-layer-group]="hasTextOverlay(image)"
+                   [class.fa-image]="!hasTextOverlay(image)"
+                   [title]="hasTextOverlay(image) ? ('imageView.tooltips.withOverlay' | translate) : ('imageView.tooltips.original' | translate)"></i>
                 {{ getDisplayTitle(image) }}
               </h4>
             </div>
