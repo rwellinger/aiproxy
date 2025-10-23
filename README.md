@@ -36,6 +36,14 @@ A full-stack platform for AI-powered image and music generation with Python back
   - Detail panel with metadata (original/enhanced/revised prompts)
   - Download and delete functionality
   - Master-detail layout with responsive design
+  - **Text Overlay Editor** - Add customizable text to generated images
+    - Real-time canvas preview with position markers
+    - Title and optional artist text (auto-uppercase)
+    - Three font styles: Bold (Anton), Elegant (Playfair Display), Light (Roboto)
+    - Advanced positioning: 3x3 grid or custom pixel coordinates
+    - Independent color and outline controls for title and artist
+    - Composition-based sorting (e.g., album-cover images prioritized)
+    - Non-destructive editing: Creates new image records
 - **Song Generation** via Mureka API (asynchronous with Celery)
 - **PostgreSQL** database for persistent storage
 - **Angular 18** frontend with Material Design
@@ -248,6 +256,7 @@ mac_ki_service/
 │   │   │   ├── song-sketch-library/   # Manage song sketches
 │   │   │   ├── image-generator/       # Image generation with fast enhancement
 │   │   │   ├── image-view/            # Image gallery with master-detail view
+│   │   │   ├── text-overlay-editor/   # Add text overlays to images
 │   │   │   ├── song-generator/        # Song generation UI
 │   │   │   └── ...
 │   │   ├── services/    # API services

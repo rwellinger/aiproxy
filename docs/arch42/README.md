@@ -93,6 +93,15 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   - Master-detail layout with responsive design
   - Detail panel showing metadata (original/enhanced/revised prompts)
   - Download and delete functionality
+  - **Text Overlay Editor** - Add customizable text to generated images
+    - Real-time canvas preview with position markers
+    - Title and optional artist text (auto-uppercase, artist prefixed with "BY")
+    - Three font styles: Bold (Anton), Elegant (Playfair Display), Light (Roboto)
+    - Advanced positioning: 3x3 grid system or custom pixel coordinates
+    - Independent color and outline controls for title and artist
+    - Composition-based sorting (e.g., album-cover composition prioritized)
+    - Non-destructive editing: Creates new image records without modifying originals
+    - Metadata storage in database (JSON field: text_overlay_metadata)
 - **Music Generation** via Mureka API
 - **Asynchronous Processing** for time-intensive generation processes
 - **Ollama Model Chat** for prompt improvements via prompt templates
@@ -163,6 +172,7 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
 ### 4.2 Technology Stack
 - **Frontend**: Angular 18.2.13 + TypeScript + Angular Material + SCSS + RxJS
 - **Backend**: Python 3.12.12 + FastAPI + SQLAlchemy 2.0 + Pydantic 2.0 + Alembic 1.13
+- **Image Processing**: Pillow (PIL) 11.0.0 - Text overlay rendering, font handling, image manipulation
 - **API Documentation**: OpenAPI/Swagger (auto-generated)
 - **Authentication**: PyJWT + BCrypt
 - **Async Processing**: Celery 5.4 + Redis 5.0
@@ -209,6 +219,7 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   │   ├── music-style-prompt/   # Music style template management
   │   ├── image-generator/    # Image generation with fast enhancement mode
   │   ├── image-view/         # Image gallery with master-detail layout
+  │   ├── text-overlay-editor/  # Add text overlays to generated images
   │   ├── song-generator/     # UI for music generation
   │   ├── song-view/          # Display of generated songs
   │   ├── song-profile/       # Mureka account information
@@ -495,7 +506,142 @@ Edit Individual Sections → [AI Tools] → Improve/Rewrite/Extend →
 [Apply & Save] → [Song Generator] → Generate Song
 ```
 
-### 6.5 Lyric Parsing Rules Engine
+### 6.5 Text Overlay Workflow
+
+**Overview**: The Text Overlay Editor enables users to add customizable text (title and optional artist name) to previously generated images without modifying the originals.
+
+**Key Components:**
+
+1. **Text Overlay Editor Page** (`text-overlay-editor.component.ts`)
+   - Dual-panel layout: control panel (left) + canvas preview (right)
+   - Real-time HTML5 Canvas preview with position markers
+   - Click-to-position mode for interactive text placement
+   - Auto-fills artist name from user profile
+   - Debounced form updates (300ms) for performance
+
+2. **Canvas Preview System**
+   - Live rendering of text overlays with red crosshair position markers
+   - Automatic scaling between CSS dimensions and actual canvas resolution
+   - Position markers show text anchor points for both title and artist
+   - Image caching via Blob for performance
+
+3. **Backend Processing** (`ImageTextOverlayServiceV2`)
+   - Python Pillow (PIL) for server-side image manipulation
+   - Non-destructive editing: creates new image files with `_with_text_{timestamp}` suffix
+   - Supports both grid-based (3x3) and custom pixel positioning
+   - Text rendering with configurable outline width (default 3px)
+
+**Workflow Steps:**
+
+1. **Image Selection**
+   - User opens Text Overlay Editor
+   - System fetches images with titles via `GET /api/v1/image/list-for-text-overlay`
+   - **Composition-based sorting**: Images with `composition='album-cover'` appear first
+   - Excludes images that already have overlays (`text_overlay_metadata IS NULL`)
+
+2. **Text Configuration**
+   - Title (required): Auto-converted to UPPERCASE
+   - Artist (optional): Auto-filled from user profile, prefixed with "BY" during rendering
+   - Font Style Selection: Bold (Anton), Elegant (Playfair Display), Light (Roboto)
+   - Independent font styles for title and artist (optional)
+
+3. **Position Configuration**
+   - **Grid Mode**: 3x3 predefined positions (top-left, center, bottom-right, etc.)
+   - **Custom Mode**: Click on canvas or use percentage sliders (0-100% X/Y)
+   - Position markers rendered as red crosshairs on canvas preview
+   - Separate positions for title and artist
+
+4. **Color Customization**
+   - Title color + outline color (hex color pickers)
+   - Artist color + outline color (independent controls)
+   - Real-time preview updates with debouncing
+
+5. **Font Size Control**
+   - Title font size: 20-300px (pixel-based slider)
+   - Artist font size: 10-200px (smaller range)
+   - Live canvas preview reflects size changes
+
+6. **Apply Overlay**
+   - User clicks "Apply" button
+   - Frontend sends POST to `/api/v1/image/add-text-overlay` with V2 parameters
+   - Backend `ImageTextOverlayServiceV2.add_text_overlay()`:
+     - Loads original image from disk
+     - Renders text with Pillow: outline first, then fill color
+     - Saves new file: `{original}_with_text_{timestamp}.png`
+     - Creates new `GeneratedImage` record (preserves original)
+     - Stores overlay settings in `text_overlay_metadata` JSON field
+
+7. **Result & Download**
+   - New image appears in image gallery (Image View page)
+   - Original image remains unchanged
+   - User can download result via image detail panel
+
+**Technical Details:**
+
+- **API Endpoints**:
+  - `GET /api/v1/image/list-for-text-overlay` - Fetch overlay-eligible images
+  - `POST /api/v1/image/add-text-overlay` - Process overlay request
+  - `GET /api/v1/image/<filename>` - Serve image files (JWT-protected)
+
+- **Database Schema** (`generated_images` table):
+  - `text_overlay_metadata` (JSON, nullable): Stores overlay configuration
+  - `composition` (VARCHAR, nullable): Image composition type (e.g., 'album-cover', 'landscape', 'portrait')
+  - Enables filtering and sorting by composition
+
+- **Position System**:
+  - **Grid Positions** (normalized 0.1-0.9):
+    - `top-left` (0.1, 0.1), `top-center` (0.5, 0.1), `top-right` (0.9, 0.1)
+    - `middle-left` (0.1, 0.5), `center` (0.5, 0.5), `middle-right` (0.9, 0.5)
+    - `bottom-left` (0.1, 0.9), `bottom-center` (0.5, 0.9), `bottom-right` (0.9, 0.9)
+  - **Custom Positions**: Percentage-based (0.0-1.0 range), converted to pixels
+
+- **Font Files** (stored in `aiproxysrv/fonts/`):
+  - `Anton-Regular.ttf` - Heavy display font (bold style)
+  - `PlayfairDisplay-Regular.ttf` - Elegant serif font
+  - `Roboto-Light.ttf` - Thin sans-serif font
+
+- **Metadata JSON Structure**:
+  ```json
+  {
+    "title": "SONG TITLE",
+    "artist": "Artist Name",
+    "font_style": "bold",
+    "title_position": {"x": 0.5, "y": 0.1},
+    "title_font_size": 80,
+    "title_color": "#FFFFFF",
+    "title_outline_color": "#000000",
+    "artist_position": {"x": 0.5, "y": 0.2},
+    "artist_font_size": 40,
+    "artist_color": "#FFFFFF",
+    "artist_outline_color": "#000000",
+    "artist_font_style": "bold"
+  }
+  ```
+
+- **Internationalization**: Full i18n support via `textOverlay.*` translation keys (EN/DE)
+
+- **Authentication**: All endpoints require JWT authentication (`@jwt_required`)
+
+**User Experience Flow:**
+
+```
+[Text Overlay Editor] → Select Image (composition='album-cover' first) →
+[Load Image] → Configure Title & Artist → [Select Font Style] →
+[Position via Grid/Custom] → [Adjust Colors] → [Canvas Preview] →
+[Apply] → Backend Processing (Pillow) → [New Image Created] →
+[Download] → Result saved to disk and database
+```
+
+**Album Cover Clarification:**
+
+The `composition` field in the `generated_images` table is used to categorize image types (e.g., 'album-cover', 'landscape', 'portrait', 'wide-angle'). This is a **style preference** for image generation, NOT a separate entity. When users generate images with `composition='album-cover'`, those images are prioritized in the Text Overlay Editor's image list, making it easier to find suitable images for text overlays.
+
+**Related Models:**
+
+- **User Model** (`users` table): `artist_name` field provides default artist name
+- **GeneratedImage Model** (`generated_images` table): `composition` field enables composition-based filtering
+
+### 6.6 Lyric Parsing Rules Engine
 
 **Overview**: The Lyric Parsing Rules Engine provides configurable regex-based text processing for lyric cleanup and section detection. Rules are stored in the database and dynamically applied without hardcoded logic.
 
@@ -807,6 +953,14 @@ services:
 | **Sketch Library** | Master-detail view for managing song sketches with search and filtering         |
 | **Sketch Creator** | Form interface for creating/editing song sketches with AI title generation      |
 | **Sketch Workflow** | Organizational state: draft (new), used (generated), archived (inactive)        |
+| **Text Overlay** | Feature to add customizable text (title/artist) to generated images             |
+| **Pillow (PIL)** | Python Imaging Library 11.0.0 for image manipulation and text rendering         |
+| **Canvas Preview** | Real-time HTML5 Canvas rendering of text overlay with position markers          |
+| **Composition** | Image style preference (album-cover, landscape, portrait, wide-angle, etc.)     |
+| **ImageTextOverlayServiceV2** | Backend service for text overlay rendering with advanced positioning       |
+| **Position Markers** | Red crosshair indicators showing text anchor points on canvas preview           |
+| **Grid Positioning** | 3x3 predefined position system (top-left, center, bottom-right, etc.)          |
+| **Custom Positioning** | Percentage-based (0-100% X/Y) or pixel-based text placement                    |
 
 ---
 
@@ -898,6 +1052,11 @@ services:
 | `title` | VARCHAR(255) | User-defined title |
 | `tags` | TEXT | User-defined tags |
 | `artistic_style` | VARCHAR(50) | Artistic style: photorealistic, digital-art, oil-painting, etc. |
+| `composition` | VARCHAR(50) | Composition type: album-cover, landscape, portrait, wide-angle, etc. |
+| `lighting` | VARCHAR(50) | Lighting style: natural, studio, dramatic, etc. |
+| `color_palette` | VARCHAR(50) | Color palette: vibrant, muted, monochrome, etc. |
+| `detail_level` | VARCHAR(50) | Detail level: minimal, moderate, highly-detailed |
+| `text_overlay_metadata` | JSON | Text overlay configuration (title, artist, positions, colors, fonts) |
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
@@ -971,6 +1130,7 @@ services:
 | `password_hash` | VARCHAR(255) | BCrypt password hash |
 | `first_name` | VARCHAR(100) | First name |
 | `last_name` | VARCHAR(100) | Last name |
+| `artist_name` | VARCHAR(100) | Artist name for text overlays (auto-filled in Text Overlay Editor) |
 | `oauth_provider` | VARCHAR(50) | OAuth provider (Google, GitHub, etc.) |
 | `oauth_id` | VARCHAR(255) | OAuth provider user ID |
 | `is_active` | BOOLEAN | Account is active |
@@ -1036,6 +1196,6 @@ cd src && alembic current
 ---
 
 *Document created: 01.09.2025*
-*Last updated: 18.10.2025*
-*Version: 1.8*
+*Last updated: 24.10.2025*
+*Version: 1.9*
 *Author: Rob (rob.wellinger@gmail.com)*
