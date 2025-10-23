@@ -7,7 +7,7 @@ import traceback
 from flask import Blueprint, jsonify, request, send_from_directory
 from flask_pydantic import validate
 
-from api.auth_middleware import jwt_required
+from api.auth_middleware import get_current_user_id, jwt_required
 from api.controllers.image_controller import ImageController
 from config.settings import IMAGES_DIR
 from schemas.common_schemas import ErrorResponse
@@ -129,3 +129,45 @@ def update_image_metadata(image_id: str, body: ImageUpdateRequest):
     except Exception as e:
         error_response = ErrorResponse(error=str(e))
         return jsonify(error_response.dict()), 500
+
+
+@api_image_v1.route("/add-text-overlay", methods=["POST"])
+@jwt_required
+def add_text_overlay():
+    """Add text overlay to existing image"""
+    user_id = get_current_user_id()
+
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    raw_json = request.get_json(silent=True)
+
+    if not raw_json:
+        return jsonify({"error": "No JSON provided"}), 400
+
+    # Extract parameters
+    image_id = raw_json.get("image_id")
+    title = raw_json.get("title")
+    artist = raw_json.get("artist")
+    font_style = raw_json.get("font_style", "bold")
+    position = raw_json.get("position", "top")
+    text_color = raw_json.get("text_color", "#FFD700")
+    outline_color = raw_json.get("outline_color", "#000000")
+
+    # Validate required fields
+    if not image_id or not title:
+        return jsonify({"error": "image_id and title are required"}), 400
+
+    # Call controller
+    response_data, status_code = image_controller.add_text_overlay(
+        image_id=image_id,
+        user_id=str(user_id),
+        title=title,
+        artist=artist,
+        font_style=font_style,
+        position=position,
+        text_color=text_color,
+        outline_color=outline_color,
+    )
+
+    return jsonify(response_data), status_code
