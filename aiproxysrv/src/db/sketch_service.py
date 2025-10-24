@@ -24,6 +24,10 @@ class SketchService:
         prompt: str,
         tags: str | None = None,
         workflow: str = "draft",
+        description_long: str | None = None,
+        description_short: str | None = None,
+        description_tags: str | None = None,
+        info: str | None = None,
     ) -> SongSketch | None:
         """
         Create a new sketch record in the database
@@ -35,6 +39,10 @@ class SketchService:
             prompt: Music style prompt (required)
             tags: Comma-separated tags (optional)
             workflow: Workflow status (default: draft)
+            description_long: Long description for release (optional)
+            description_short: Short description for release (optional)
+            description_tags: Release tags (optional)
+            info: Working notes (optional)
 
         Returns:
             SongSketch instance if successful, None otherwise
@@ -46,6 +54,10 @@ class SketchService:
                 prompt=prompt,
                 tags=tags,
                 workflow=workflow,
+                description_long=description_long,
+                description_short=description_short,
+                description_tags=description_tags,
+                info=info,
             )
 
             db.add(sketch)
@@ -83,9 +95,9 @@ class SketchService:
         try:
             sketch = db.query(SongSketch).filter(SongSketch.id == sketch_id).first()
             if sketch:
-                logger.debug("sketch_retrieved_by_id", sketch_id=str(sketch_id), workflow=sketch.workflow)
+                logger.debug("Sketch retrieved", sketch_id=str(sketch_id), workflow=sketch.workflow)
             else:
-                logger.debug("sketch_not_found_by_id", sketch_id=str(sketch_id))
+                logger.debug("Sketch not found", sketch_id=str(sketch_id))
             return sketch
         except Exception as e:
             logger.error(
@@ -196,6 +208,10 @@ class SketchService:
         prompt: str | None = None,
         tags: str | None = None,
         workflow: str | None = None,
+        description_long: str | None = None,
+        description_short: str | None = None,
+        description_tags: str | None = None,
+        info: str | None = None,
     ) -> SongSketch | None:
         """
         Update an existing sketch
@@ -208,6 +224,10 @@ class SketchService:
             prompt: New music style prompt (optional)
             tags: New tags (optional)
             workflow: New workflow status (optional)
+            description_long: Long description for release (optional)
+            description_short: Short description for release (optional)
+            description_tags: Release tags (optional)
+            info: Working notes (optional)
 
         Returns:
             Updated SongSketch instance if successful, None otherwise
@@ -215,28 +235,40 @@ class SketchService:
         try:
             sketch = db.query(SongSketch).filter(SongSketch.id == sketch_id).first()
             if not sketch:
-                logger.warning("sketch_not_found_for_update", sketch_id=str(sketch_id))
+                logger.warning("Sketch not found for update", sketch_id=str(sketch_id))
                 return None
 
             # Track which fields are being updated
             updated_fields = []
 
-            # Update only provided fields
+            # Update only provided fields (empty strings are converted to None for optional fields)
             if title is not None:
-                sketch.title = title
+                sketch.title = title if title.strip() else None
                 updated_fields.append("title")
             if lyrics is not None:
-                sketch.lyrics = lyrics
+                sketch.lyrics = lyrics if lyrics.strip() else None
                 updated_fields.append("lyrics")
             if prompt is not None:
                 sketch.prompt = prompt
                 updated_fields.append("prompt")
             if tags is not None:
-                sketch.tags = tags
+                sketch.tags = tags if tags.strip() else None
                 updated_fields.append("tags")
             if workflow is not None:
                 sketch.workflow = workflow
                 updated_fields.append("workflow")
+            if description_long is not None:
+                sketch.description_long = description_long if description_long.strip() else None
+                updated_fields.append("description_long")
+            if description_short is not None:
+                sketch.description_short = description_short if description_short.strip() else None
+                updated_fields.append("description_short")
+            if description_tags is not None:
+                sketch.description_tags = description_tags if description_tags.strip() else None
+                updated_fields.append("description_tags")
+            if info is not None:
+                sketch.info = info if info.strip() else None
+                updated_fields.append("info")
 
             # Update timestamp
             sketch.updated_at = datetime.utcnow()
@@ -244,7 +276,7 @@ class SketchService:
             db.commit()
             db.refresh(sketch)
 
-            logger.info("sketch_updated", sketch_id=str(sketch_id), fields_updated=updated_fields)
+            logger.info("Sketch updated", sketch_id=str(sketch_id), fields_updated=updated_fields)
             return sketch
 
         except SQLAlchemyError as e:
@@ -277,9 +309,9 @@ class SketchService:
             if sketch:
                 db.delete(sketch)
                 db.commit()
-                logger.info("sketch_deleted", sketch_id=str(sketch_id))
+                logger.info("Sketch deleted", sketch_id=str(sketch_id))
                 return True
-            logger.warning("sketch_not_found_for_deletion", sketch_id=str(sketch_id))
+            logger.warning("Sketch not found for deletion", sketch_id=str(sketch_id))
             return False
         except SQLAlchemyError as e:
             db.rollback()
@@ -311,7 +343,7 @@ class SketchService:
         try:
             sketch = db.query(SongSketch).filter(SongSketch.id == sketch_id).first()
             if not sketch:
-                logger.warning("sketch_not_found_for_mark_as_used", sketch_id=str(sketch_id))
+                logger.warning("Sketch not found for mark as used", sketch_id=str(sketch_id))
                 return None
 
             sketch.workflow = "used"
@@ -320,7 +352,7 @@ class SketchService:
             db.commit()
             db.refresh(sketch)
 
-            logger.info("sketch_marked_as_used", sketch_id=str(sketch_id))
+            logger.info("Sketch marked as used", sketch_id=str(sketch_id))
             return sketch
 
         except SQLAlchemyError as e:

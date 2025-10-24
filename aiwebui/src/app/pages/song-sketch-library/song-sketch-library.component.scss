@@ -359,6 +359,21 @@
 }
 
 .detail-content {
+  .detail-tabs {
+    .mat-mdc-tab-body-content {
+      padding-top: $spacing-md;
+    }
+
+    .tab-icon {
+      margin-right: $spacing-xs;
+      font-size: 1rem;
+    }
+  }
+
+  .tab-content {
+    padding: 0;
+  }
+
   .detail-section-block {
     margin-bottom: $spacing-lg;
 
@@ -389,6 +404,59 @@
       .metadata-value {
         font-size: $font-sm;
         color: $text-primary;
+      }
+    }
+  }
+
+  .metadata-id-row {
+    margin-bottom: $spacing-md;
+
+    .metadata-id-item {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding: $spacing-xs 0;
+
+      .meta-icon {
+        color: $primary-color;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+      }
+
+      .meta-id {
+        font-family: 'Courier New', monospace;
+        font-size: $font-sm;
+        color: $text-secondary;
+        background: $background-light;
+        padding: 6px 12px;
+        border-radius: $border-radius-sm;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+      }
+
+      .copy-id-btn {
+        background: transparent;
+        border: none;
+        color: $text-secondary;
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: $border-radius-sm;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        &:hover {
+          background: $background-light;
+          color: $primary-color;
+        }
+
+        i {
+          font-size: $font-base;
+        }
       }
     }
   }
@@ -489,6 +557,47 @@
       white-space: pre-wrap;
       word-wrap: break-word;
     }
+  }
+
+  .description-display {
+    padding: $spacing-md;
+    background-color: $background-light;
+    border-radius: 8px;
+    border: 1px solid $border-light;
+    max-height: 400px;
+    overflow-y: auto;
+
+    pre {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      font-size: $font-sm;
+      line-height: 1.6;
+      color: $text-primary;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  }
+
+  .description-short-display {
+    padding: $spacing-md;
+    background-color: $background-light;
+    border-radius: 8px;
+    border: 1px solid $border-light;
+    font-size: $font-sm;
+    line-height: 1.6;
+    color: $text-primary;
+  }
+
+  .description-tags-display {
+    padding: $spacing-md;
+    background-color: $background-light;
+    border-radius: 8px;
+    border: 1px solid $border-light;
+    font-size: $font-sm;
+    line-height: 1.6;
+    color: $text-primary;
+    max-height: 200px;
+    overflow-y: auto;
   }
 
   .empty-message {

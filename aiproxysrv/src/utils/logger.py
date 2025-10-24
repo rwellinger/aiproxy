@@ -18,8 +18,10 @@ logger.remove()
 # Custom formatter function to handle extra fields
 def format_record(record):
     """
-    Custom formatter that displays extra fields (error, error_type, stacktrace)
-    for ERROR and CRITICAL level logs.
+    Custom formatter that displays extra fields based on log level:
+    - DEBUG: Shows extra fields inline (compact, single-line)
+    - INFO/WARNING: Message only (clean for production)
+    - ERROR/CRITICAL: Shows extra fields multi-line (detailed error analysis)
     """
     # Base format
     format_str = (
@@ -29,27 +31,59 @@ def format_record(record):
         "<level>{message}</level>"
     )
 
-    # Add extra fields for ERROR/CRITICAL logs
-    if record["level"].name in ("ERROR", "CRITICAL"):
+    # Show extra fields for DEBUG and ERROR/CRITICAL levels
+    if record["level"].name in ("DEBUG", "ERROR", "CRITICAL"):
         extra = record["extra"]
 
-        if "error_type" in extra:
-            format_str += "\n  <yellow>└─ Type:</yellow> <red>{extra[error_type]}</red>"
+        if record["level"].name in ("ERROR", "CRITICAL"):
+            # ERROR/CRITICAL: Multi-line format with special handling for error fields
+            if "error_type" in extra:
+                format_str += "\n  <yellow>└─ Type:</yellow> <red>{extra[error_type]}</red>"
 
-        if "error" in extra:
-            format_str += "\n  <yellow>└─ Error:</yellow> <red>{extra[error]}</red>"
+            if "error" in extra:
+                format_str += "\n  <yellow>└─ Error:</yellow> <red>{extra[error]}</red>"
 
-        if "stacktrace" in extra and extra["stacktrace"]:
-            # Add stacktrace with indentation
-            format_str += "\n  <yellow>└─ Stacktrace:</yellow>\n<red>{extra[stacktrace]}</red>"
+            if "stacktrace" in extra and extra["stacktrace"]:
+                format_str += "\n  <yellow>└─ Stacktrace:</yellow>\n<red>{extra[stacktrace]}</red>"
 
-        # Show other extra fields if present (except the ones we already handled)
-        other_extras = {
-            k: v for k, v in extra.items() if k not in ("error_type", "error", "stacktrace") and not k.startswith("_")
-        }
-        if other_extras:
-            for key, _value in other_extras.items():
-                format_str += f"\n  <yellow>└─ {key}:</yellow> {{extra[{key}]}}"
+            # Show other extra fields (except already handled ones)
+            other_extras = {
+                k: v
+                for k, v in extra.items()
+                if k not in ("error_type", "error", "stacktrace") and not k.startswith("_")
+            }
+            if other_extras:
+                for key, value in other_extras.items():
+                    # Serialize complex objects and escape braces
+                    if isinstance(value, (dict, list)):
+                        import json
+
+                        value_str = json.dumps(value, ensure_ascii=False)
+                    else:
+                        value_str = str(value)
+                    value_str = value_str.replace("{", "{{").replace("}", "}}")
+                    format_str += f"\n  <yellow>└─ {key}:</yellow> {value_str}"
+        else:
+            # DEBUG: Compact inline format (key=value key=value)
+            relevant_extras = {k: v for k, v in extra.items() if not k.startswith("_")}
+            if relevant_extras:
+                for key, value in relevant_extras.items():
+                    # Serialize complex objects (dict, list) to avoid format string issues
+                    if isinstance(value, (dict, list)):
+                        import json
+
+                        value_str = json.dumps(value, ensure_ascii=False)
+                    else:
+                        value_str = str(value)
+
+                    # Truncate long values for readability
+                    if len(value_str) > 100:
+                        value_str = value_str[:97] + "..."
+
+                    # Escape curly braces to prevent format string errors
+                    value_str = value_str.replace("{", "{{").replace("}", "}}")
+
+                    format_str += f" <cyan>{key}</cyan>=<yellow>{value_str}</yellow>"
 
     format_str += "\n"
     return format_str

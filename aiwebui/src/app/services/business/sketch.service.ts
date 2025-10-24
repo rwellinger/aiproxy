@@ -12,6 +12,10 @@ export interface Sketch {
   lyrics?: string;
   prompt: string;
   tags?: string;
+  description_long?: string;
+  description_short?: string;
+  description_tags?: string;
+  info?: string;
   workflow: 'draft' | 'used' | 'archived';
   created_at: string;
   updated_at?: string;

@@ -87,6 +87,8 @@ class UnifiedChatRequest(BaseModel):
     )
     max_tokens: int | None = Field(None, gt=0, le=4000, description="Maximum tokens to generate (overrides template)")
     model: str | None = Field(None, description="AI model to use (overrides template)")
+    category: str | None = Field(None, description="Template category (for logging/tracking)")
+    action: str | None = Field(None, description="Template action (for logging/tracking)")
 
     @validator("model")
     def validate_model(cls, v):

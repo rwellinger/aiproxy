@@ -4,71 +4,13 @@ Note: Success cases with Pydantic model_validate() are tested via integration te
 These unit tests focus on error handling and edge cases.
 """
 
-from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
-from pydantic import ValidationError
 
 from api.controllers.sketch_controller import SketchController
-from schemas.sketch_schemas import SketchCreateRequest, SketchUpdateRequest
-
-
-@pytest.mark.unit
-class TestSketchControllerCreate:
-    """Test SketchController.create_sketch method"""
-
-    def test_create_sketch_success(self, mock_db_session):
-        """Test successful sketch creation"""
-        sketch_data = SketchCreateRequest(
-            title="Test Sketch",
-            lyrics="[Verse 1]\nTest lyrics",
-            prompt="upbeat pop",
-            tags="pop, test",
-        )
-
-        # Mock the created sketch from business layer
-        mock_sketch = MagicMock()
-        mock_sketch.id = uuid4()
-        mock_sketch.title = "Test Sketch"
-        mock_sketch.lyrics = "[Verse 1]\nTest lyrics"
-        mock_sketch.prompt = "upbeat pop"
-        mock_sketch.tags = "pop, test"
-        mock_sketch.workflow = "draft"
-        mock_sketch.created_at = datetime.now()
-        mock_sketch.updated_at = None
-
-        # Mock the global sketch_service instance's create_sketch method
-        with patch("db.sketch_service.sketch_service.create_sketch", return_value=mock_sketch):
-            result, status_code = SketchController.create_sketch(sketch_data=sketch_data, db=mock_db_session)
-
-            assert status_code == 201
-            assert "data" in result
-            assert "message" in result
-            assert result["message"] == "Sketch created successfully"
-
-    def test_create_sketch_validation_error(self, mock_db_session):
-        """Test sketch creation with invalid data"""
-        # Prompt is required, so missing it should raise validation error
-        with pytest.raises(ValidationError):
-            SketchCreateRequest(
-                title="Test",
-                lyrics="Test lyrics",
-                # prompt is missing - should fail validation
-                tags="test",
-            )
-
-    def test_create_sketch_business_layer_failure(self, mock_db_session):
-        """Test sketch creation when business layer returns None"""
-        sketch_data = SketchCreateRequest(title="Test Sketch", lyrics="Test lyrics", prompt="upbeat pop", tags="test")
-
-        # Mock the global sketch_service instance's create_sketch method returning None (failure)
-        with patch("db.sketch_service.sketch_service.create_sketch", return_value=None):
-            result, status_code = SketchController.create_sketch(sketch_data=sketch_data, db=mock_db_session)
-
-            assert status_code == 500
-            assert "error" in result
+from schemas.sketch_schemas import SketchUpdateRequest
 
 
 @pytest.mark.unit

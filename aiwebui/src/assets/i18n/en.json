@@ -1159,6 +1159,10 @@
       "title": "Create Song Sketch",
       "titleEdit": "Edit Song Sketch",
       "subtitle": "Develop your song idea before generating",
+      "tabs": {
+        "general": "General",
+        "description": "Release Info"
+      },
       "fields": {
         "title": "Title",
         "titlePlaceholder": "Enter a title for your sketch...",
@@ -1172,6 +1176,29 @@
         "workflow": "Workflow Status",
         "workflowHint": "Organize your sketches by workflow status",
         "workflowReadonlyHint": "Workflow can only be changed in the library view"
+      },
+      "description": {
+        "descriptionLong": "Long Description",
+        "descriptionLongPlaceholder": "Detailed description for streaming platforms (max 1000 characters)...",
+        "descriptionLongHint": "Generate from lyrics using AI",
+        "descriptionShort": "Short Description",
+        "descriptionShortPlaceholder": "Brief description (max 150 characters)...",
+        "descriptionShortHint": "Generate from long description using AI",
+        "descriptionTags": "Release Tags",
+        "descriptionTagsPlaceholder": "Comma-separated tags (e.g., melancholic, urban, introspective)...",
+        "descriptionTagsHint": "Generate 10 tags from long description using AI",
+        "info": "Working Notes",
+        "infoPlaceholder": "Technical notes for DAW production...",
+        "infoHint": "Insert template for key, tempo, bars, and length",
+        "infoTemplateKey": "Key:",
+        "infoTemplateTimeSignature": "Time Signature:",
+        "infoTemplateTotalBars": "Total Number of Bars:",
+        "infoTemplateSongLength": "Song Length:",
+        "generateLong": "Generate with AI",
+        "generateShort": "Generate with AI",
+        "generateTags": "Generate with AI",
+        "insertTemplate": "Insert Template",
+        "charCounter": "{{count}}/{{max}} characters"
       },
       "tags": {
         "title": "Tags",
@@ -1201,7 +1228,23 @@
         "generatingTitle": "Generating Title...",
         "generatingTitleHint": "AI is creating a fitting title",
         "titleGenerationError": "Error generating title",
-        "generateTitleFallback": "Create a catchy song title"
+        "generateTitleFallback": "Create a catchy song title",
+        "generatingDescriptionLong": "Generating Long Description...",
+        "generatingDescriptionLongHint": "AI is analyzing your lyrics",
+        "descriptionLongGenerated": "Long description generated successfully",
+        "descriptionLongError": "Error generating long description",
+        "descriptionLongRequired": "Please add lyrics first to generate description",
+        "generatingDescriptionShort": "Generating Short Description...",
+        "generatingDescriptionShortHint": "AI is creating a concise summary",
+        "descriptionShortGenerated": "Short description generated successfully",
+        "descriptionShortError": "Error generating short description",
+        "descriptionShortRequired": "Please generate long description first",
+        "generatingTags": "Generating Tags...",
+        "generatingTagsHint": "AI is creating relevant tags",
+        "tagsGenerated": "Tags generated successfully",
+        "tagsError": "Error generating tags",
+        "tagsRequired": "Please generate long description first",
+        "templateInserted": "Template inserted successfully"
       }
     },
     "library": {
@@ -1231,10 +1274,19 @@
         "copyTitle": "Title copied to clipboard",
         "copyLyrics": "Lyrics copied to clipboard",
         "copyPrompt": "Music style prompt copied to clipboard",
+        "copyId": "Copy ID to clipboard",
+        "copyDescriptionLong": "Long description copied to clipboard",
+        "copyDescriptionShort": "Short description copied to clipboard",
+        "copyDescriptionTags": "Description tags copied to clipboard",
+        "copyInfo": "Work information copied to clipboard",
         "markAsUsed": "Mark as Used",
         "backToDraft": "Back to Draft"
       },
       "detail": {
+        "tabs": {
+          "general": "General",
+          "description": "Release Info"
+        },
         "metadata": "Metadata",
         "created": "Created",
         "updated": "Updated",
@@ -1242,6 +1294,14 @@
         "musicStyle": "Music Style Prompt",
         "lyrics": "Lyrics",
         "noLyrics": "No lyrics defined for this sketch",
+        "descriptionLong": "Long Description",
+        "descriptionShort": "Short Description",
+        "descriptionTags": "Description Tags",
+        "info": "Work Information",
+        "noDescriptionLong": "No long description available",
+        "noDescriptionShort": "No short description available",
+        "noDescriptionTags": "No description tags available",
+        "noInfo": "No work information available",
         "selectSketch": "Select a sketch from the list to view details"
       },
       "pagination": {

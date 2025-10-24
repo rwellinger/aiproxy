@@ -66,6 +66,35 @@
   }
 }
 
+// Material Tabs Styling
+.creator-tabs {
+  margin-bottom: $spacing-md;
+
+  .mat-mdc-tab-body-content {
+    padding-top: $spacing-md;
+  }
+
+  .tab-icon {
+    margin-right: $spacing-xs;
+    font-size: 1rem;
+  }
+}
+
+.tab-content {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .form-group {
   margin-bottom: $spacing-12;
 
@@ -114,6 +143,14 @@
     resize: vertical;
     min-height: 100px;
     font-family: 'Courier New', monospace;
+
+    &.form-textarea-compact {
+      min-height: 60px !important;
+    }
+
+    &.form-textarea-large {
+      min-height: 150px !important;
+    }
   }
 
   .prompt-textarea {

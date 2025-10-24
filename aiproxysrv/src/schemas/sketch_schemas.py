@@ -26,6 +26,10 @@ class SketchCreateRequest(BaseModel):
     lyrics: str | None = Field(None, max_length=10000, description="Song lyrics (optional)")
     prompt: str = Field(..., min_length=1, max_length=1024, description="Music style prompt")
     tags: str | None = Field(None, max_length=1000, description="Comma-separated tags")
+    description_long: str | None = Field(None, description="Long description for release platforms")
+    description_short: str | None = Field(None, max_length=150, description="Short description (max 150 chars)")
+    description_tags: str | None = Field(None, max_length=1000, description="Release tags (comma-separated)")
+    info: str | None = Field(None, description="Working notes (key, tempo, bars, length)")
 
 
 class SketchResponse(BaseModel):
@@ -38,6 +42,10 @@ class SketchResponse(BaseModel):
     lyrics: str | None = Field(None, description="Song lyrics")
     prompt: str = Field(..., description="Music style prompt")
     tags: str | None = Field(None, description="Comma-separated tags")
+    description_long: str | None = Field(None, description="Long description for release platforms")
+    description_short: str | None = Field(None, description="Short description (max 150 chars)")
+    description_tags: str | None = Field(None, description="Release tags (comma-separated)")
+    info: str | None = Field(None, description="Working notes (key, tempo, bars, length)")
     workflow: str = Field(..., description="Workflow status")
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime | None = Field(None, description="Last update timestamp")
@@ -63,6 +71,10 @@ class SketchUpdateRequest(BaseModel):
     lyrics: str | None = Field(None, max_length=10000, description="New lyrics")
     prompt: str | None = Field(None, min_length=1, max_length=1024, description="New music style")
     tags: str | None = Field(None, max_length=1000, description="New tags")
+    description_long: str | None = Field(None, description="New long description")
+    description_short: str | None = Field(None, max_length=150, description="New short description")
+    description_tags: str | None = Field(None, max_length=1000, description="New release tags")
+    info: str | None = Field(None, description="New working notes")
     workflow: str | None = Field(None, description="New workflow status")
 
     @field_validator("workflow")

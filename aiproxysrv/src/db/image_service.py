@@ -217,9 +217,9 @@ class ImageService:
             if image:
                 db.delete(image)
                 db.commit()
-                logger.info("image_metadata_deleted", image_id=str(image_id))
+                logger.info("Image metadata deleted", image_id=str(image_id))
                 return True
-            logger.warning("image_not_found_for_deletion", image_id=str(image_id))
+            logger.warning("Image not found for deletion", image_id=str(image_id))
             return False
         except Exception as e:
             db.rollback()

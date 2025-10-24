@@ -27,6 +27,10 @@ def mock_sketch_db_model():
     mock.prompt = "upbeat pop"
     mock.tags = "pop, test"
     mock.workflow = "draft"
+    mock.description_long = None
+    mock.description_short = None
+    mock.description_tags = None
+    mock.info = None
     mock.created_at = datetime.now()
     mock.updated_at = None
     return mock

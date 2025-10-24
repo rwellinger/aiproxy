@@ -101,7 +101,92 @@ getData() {
 - **MUREKA**: https://platform.mureka.ai/docs/
 - **OpenAI**: https://platform.openai.com/docs/api-reference/introduction
 
-### 3. JWT Authentication REQUIRED for ALL Backend APIs
+### 3. Ollama + Prompt Template Integration (MANDATORY WORKFLOW!)
+
+**CRITICAL:** This is NOT a direct Ollama proxy - it's a **Template-Driven Generation System**.
+
+**Mandatory Workflow (NO EXCEPTIONS!):**
+```
+User Input → Load Template from DB → Validate → Unified Endpoint → Response
+```
+
+**Rules:**
+- **ALL** Ollama calls with templates **MUST** use `/api/v1/ollama/chat/generate-unified`
+- **ALL** such operations **MUST** go through `ChatService` in the frontend
+- **NEVER** implement direct Ollama API calls in new services
+- **NEVER** use templates before they exist in DB (backend has no data!)
+
+**Implementation:**
+
+```typescript
+// ✅ CORRECT: Simple case
+async myNewFeature(input: string): Promise<string> {
+  return this.chatService.validateAndCallUnified('category', 'action', input);
+}
+
+// ✅ CORRECT: Complex case (with custom logic)
+async myComplexFeature(input: string, customParam: string): Promise<string> {
+  // 1. Load template from DB
+  const template = await firstValueFrom(
+    this.promptConfig.getPromptTemplateAsync('category', 'action')
+  );
+  if (!template) {
+    throw new Error('Template category/action not found in database');
+  }
+
+  // 2. Validate required fields
+  if (!template.model || template.temperature === null || !template.max_tokens) {
+    throw new Error('Template is missing required parameters');
+  }
+
+  // 3. Build request (can enhance pre_condition/post_condition here)
+  const request: UnifiedChatRequest = {
+    pre_condition: template.pre_condition + '\n' + customParam,
+    post_condition: template.post_condition || '',
+    input_text: input,
+    temperature: template.temperature,
+    max_tokens: template.max_tokens,
+    model: template.model
+  };
+
+  // 4. Call unified endpoint
+  const data = await firstValueFrom(
+    this.http.post<ChatResponse>(
+      this.apiConfig.endpoints.ollama.chatGenerateUnified,
+      request
+    )
+  );
+  return data.response;
+}
+
+// ❌ WRONG: Direct Ollama call (bypasses template system!)
+async wrongImplementation(input: string): Promise<string> {
+  return this.http.post('http://localhost:11434/api/generate', {
+    model: 'llama2',  // ❌ Hardcoded, not from DB template!
+    prompt: input     // ❌ No pre/post conditions from template!
+  });
+}
+
+// ❌ WRONG: Custom endpoint (templates don't exist in DB yet!)
+async wrongBackendCall(input: string): Promise<string> {
+  return this.http.post('/api/v1/my-custom-ollama-endpoint', {
+    prompt: input  // ❌ Backend has no template configuration!
+  });
+}
+```
+
+**Why this matters:**
+1. **Templates MUST be in DB first** - backend loads config from `prompt_templates` table
+2. **Centralized control** - all Ollama+Template calls go through one validated path
+3. **Prevents Junior mistakes** - no ad-hoc Ollama integrations that bypass templates
+
+**See also:**
+- `aiwebui/src/app/services/config/chat.service.ts` - Reference implementation
+- `aiproxysrv/src/api/routes/chat_routes.py` - Backend unified endpoint
+
+---
+
+### 4. JWT Authentication REQUIRED for ALL Backend APIs
 - **ALL** backend endpoints (except login/register/health) **MUST** use `@jwt_required`
 - User ID **MUST** be from JWT token via `get_current_user_id()`, **NOT** URL params
 - **Why?** Prevents unauthorized access, URL manipulation
@@ -138,10 +223,18 @@ def get_user_profile():
 - Enables JWT injection via interceptors
 
 ### Always run build + lint
+**CRITICAL:** Always use `lint:all` to check BOTH TypeScript AND SCSS!
+
 ```bash
 # From aiwebui directory
-npm run build && npm run lint
+npm run build && npm run lint:all
 ```
+
+**Available lint commands:**
+- `npm run lint:all` - TypeScript + SCSS (use this after changes!)
+- `npm run lint` - TypeScript only (ESLint)
+- `npm run lint:scss` - SCSS only (Stylelint)
+- `npm run lint:scss:fix` - Auto-fix SCSS issues
 
 ---
 
@@ -172,6 +265,53 @@ npm run build && npm run lint
 - Remove unused styles after changes
 - No inline styles
 - Comply with Stylelint rules
+
+### SCSS Architecture for NEW Components (CRITICAL!)
+
+**New components (with `_NEW_` or `-new-` in filename) have STRICT rules enforced by Stylelint:**
+
+**Rules:**
+1. **BEM for custom elements** - Max 2 levels
+   - `.feature__element`, `.feature__element--modifier`
+
+2. **Material overrides** - Max 3 levels, ONLY for `mat-*`
+   - `.feature mat-card mat-card-content { }` ✅
+
+3. **NO custom nesting over 2 levels**
+   - Use flat BEM classes instead of nesting
+
+**Example:**
+```scss
+// ✅ CORRECT: BEM with max 2 levels
+.product-list { }
+.product-list__item { }
+.product-list__item--active { }
+
+// ✅ CORRECT: Material override max 3
+.product-list {
+  mat-card {                    // +1
+    mat-card-content {          // +2
+      padding: 1rem;            // Styling (no +3!)
+    }
+  }
+}
+
+// ❌ BUILD FAILS: Custom nesting over 2
+.product-list {
+  .content {
+    .item {                     // ❌ ERROR: 3 custom levels
+      .child { }
+    }
+  }
+}
+```
+
+**Naming convention for strict rules:**
+- `product-list-new.component.scss` ✅ Strict
+- `_NEW_customer.component.scss` ✅ Strict
+- `payment.component.scss` ⚠️ Warnings only
+
+**Old components** are ignored by Stylelint to avoid breaking changes.
 
 ---
 
@@ -209,6 +349,63 @@ Use **feature-grouped hierarchical keys** (max 3 levels):
 ---
 
 ## Python Code Quality & Testing
+
+### Logging (Loguru)
+**IMPORTANT:** All backend code MUST use structured logging with context.
+
+#### Rules
+- **ALWAYS** use `logger` from `utils.logger`, **NEVER** `print()`
+- **ALWAYS** provide context via extra fields (NOT in the message string)
+- **ALWAYS** use human-readable messages (NOT `snake_case`)
+
+#### Patterns
+
+```python
+from utils.logger import logger
+
+# ✅ CORRECT: Structured logging with context
+logger.debug("Sketch retrieved", sketch_id=sketch_id, workflow=workflow, user_id=user_id)
+logger.info("Song updated", song_id=song_id, fields_updated=list(update_data.keys()))
+logger.warning("Template not found", category=category, action=action)
+logger.error("Database error", error=str(e), error_type=type(e).__name__, sketch_id=sketch_id)
+
+# ❌ WRONG: Snake-case messages (unreadable)
+logger.debug("sketch_retrieved_by_id", sketch_id=sketch_id)
+logger.info("song_updated", song_id=song_id)
+
+# ❌ WRONG: Context in message string (not parseable)
+logger.debug(f"Sketch retrieved: {sketch_id}")
+logger.info(f"Song updated with fields: {update_data.keys()}")
+
+# ❌ WRONG: Using print()
+print(f"Processing sketch {sketch_id}")
+```
+
+#### Log Levels
+- **DEBUG:** Development details with all context fields (visible only in dev)
+- **INFO:** Production events, message only (no context fields shown)
+- **WARNING:** Unexpected conditions, message only
+- **ERROR:** Failures with full context (multi-line format with error details)
+
+#### Output Examples
+
+**Development (LOG_LEVEL=DEBUG):**
+```
+DEBUG | Prompt template loaded category=image action=enhance model=llama3.2:3b temperature=0.7 max_tokens=500 version=1.0
+DEBUG | Sketch retrieved sketch_id=395efa8b workflow=draft user_id=1
+INFO  | Sketch updated
+```
+
+**Production (LOG_LEVEL=WARNING):**
+```
+WARNING | Template not found
+ERROR   | Database error
+  └─ Type: OperationalError
+  └─ Error: connection timeout
+  └─ sketch_id: 395efa8b
+```
+
+---
 
 ### Ruff (Linting & Formatting)
 **IMPORTANT:** All Python code MUST pass Ruff before commits.
@@ -260,7 +457,9 @@ pytest --cov=src               # Coverage report
 ```bash
 npm run dev                    # Development server
 npm run build:prod             # Production build → forwardproxy/html/aiwebui
-npm run lint                   # ESLint
+npm run lint:all               # TypeScript + SCSS (use this!)
+npm run lint                   # TypeScript only (ESLint)
+npm run lint:scss              # SCSS only (Stylelint)
 npm run test                   # Unit tests
 ```
 
@@ -341,7 +540,7 @@ npm run e2e                   # E2E tests
 
 ### Before Production Deploy
 1. ✅ Run `npm run build:prod` (from `aiwebui/`)
-2. ✅ Run `npm run lint` (from `aiwebui/`, no errors)
+2. ✅ Run `npm run lint:all` (from `aiwebui/`, TypeScript + SCSS, no errors)
 3. ✅ Run `ruff check . --fix && ruff format .` (from `aiproxysrv/`, no errors)
 4. ✅ Run `pytest` (from `aiproxysrv/`, all tests pass)
 5. ✅ Test language switch (EN ↔ DE)

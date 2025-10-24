@@ -45,6 +45,12 @@ class SongSketch(Base):
     # Metadata
     tags = Column(String(1000), nullable=True)
 
+    # Release descriptions (for publishing to platforms)
+    description_long = Column(Text, nullable=True)
+    description_short = Column(String(150), nullable=True)
+    description_tags = Column(String(1000), nullable=True)
+    info = Column(Text, nullable=True)
+
     # Workflow status
     workflow = Column(String(50), nullable=False, default="draft", index=True)
 

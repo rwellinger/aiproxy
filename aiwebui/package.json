@@ -1,6 +1,6 @@
 {
   "name": "aiwebui",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -13,6 +13,9 @@
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",
     "lint:check": "ng lint --quiet",
+    "lint:scss": "stylelint \"src/**/*.scss\"",
+    "lint:scss:fix": "stylelint \"src/**/*.scss\" --fix",
+    "lint:all": "npm run lint && npm run lint:scss",
     "update-version": "node scripts/update-version.js"
   },
   "private": true,
@@ -51,6 +54,9 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "stylelint": "^16.25.0",
+    "stylelint-config-standard-scss": "^13.1.0",
+    "stylelint-scss": "^6.12.1",
     "typescript": "~5.4.2",
     "typescript-eslint": "8.40.0"
   }

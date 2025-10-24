@@ -13,6 +13,32 @@
 
         <!-- Form -->
         <form [formGroup]="sketchForm" (ngSubmit)="saveSketch()">
+          <!-- Create Mode: No tabs, only General form -->
+          <div *ngIf="!isEditMode">
+            <ng-container *ngTemplateOutlet="generalContent"></ng-container>
+          </div>
+
+          <!-- Edit Mode: Material Tabs -->
+          <mat-tab-group *ngIf="isEditMode" [(selectedIndex)]="selectedTabIndex" class="creator-tabs">
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <i class="fas fa-edit tab-icon"></i>
+                {{ 'songSketch.creator.tabs.general' | translate }}
+              </ng-template>
+              <ng-container *ngTemplateOutlet="generalContent"></ng-container>
+            </mat-tab>
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <i class="fas fa-info-circle tab-icon"></i>
+                {{ 'songSketch.creator.tabs.description' | translate }}
+              </ng-template>
+              <ng-container *ngTemplateOutlet="descriptionContent"></ng-container>
+            </mat-tab>
+          </mat-tab-group>
+
+          <!-- Template for General Content -->
+          <ng-template #generalContent>
+          <div class="tab-content">
           <!-- Title Field -->
           <div class="form-group">
             <label for="title">
@@ -212,6 +238,127 @@
               {{ 'songSketch.creator.tags.selectedCount' | translate:{count: selectedTags.length} }}
             </div>
           </div>
+          </div>
+          </ng-template>
+          <!-- End General Content Template -->
+
+          <!-- Template for Description Content -->
+          <ng-template #descriptionContent>
+          <div class="tab-content">
+            <!-- Long Description Field -->
+            <div class="form-group">
+              <label for="description_long">
+                {{ 'songSketch.creator.description.descriptionLong' | translate }}
+              </label>
+              <div class="prompt-input-group">
+                <textarea
+                  id="description_long"
+                  formControlName="description_long"
+                  [placeholder]="'songSketch.creator.description.descriptionLongPlaceholder' | translate"
+                  [disabled]="isSaving || isGeneratingDescriptionLong"
+                  rows="6"
+                  maxlength="1000"
+                  class="form-textarea">
+                </textarea>
+                <button
+                  type="button"
+                  (click)="generateDescriptionLong()"
+                  [disabled]="isSaving || isGeneratingDescriptionLong"
+                  class="magic-icon-button"
+                  [title]="'songSketch.creator.description.descriptionLongHint' | translate">
+                  <i class="fas fa-wand-magic-sparkles" *ngIf="!isGeneratingDescriptionLong"></i>
+                  <i class="fas fa-spinner fa-spin" *ngIf="isGeneratingDescriptionLong"></i>
+                </button>
+              </div>
+              <div class="char-counter">
+                {{ 'songSketch.creator.description.charCounter' | translate: {count: charCountDescriptionLong, max: 1000} }}
+              </div>
+            </div>
+
+            <!-- Short Description Field -->
+            <div class="form-group">
+              <label for="description_short">
+                {{ 'songSketch.creator.description.descriptionShort' | translate }}
+              </label>
+              <div class="prompt-input-group">
+                <textarea
+                  id="description_short"
+                  formControlName="description_short"
+                  [placeholder]="'songSketch.creator.description.descriptionShortPlaceholder' | translate"
+                  maxlength="150"
+                  [disabled]="isSaving || isGeneratingDescriptionShort"
+                  rows="2"
+                  class="form-textarea form-textarea-compact">
+                </textarea>
+                <button
+                  type="button"
+                  (click)="generateDescriptionShort()"
+                  [disabled]="isSaving || isGeneratingDescriptionShort || !hasDescriptionLong()"
+                  class="magic-icon-button"
+                  [title]="'songSketch.creator.description.descriptionShortHint' | translate">
+                  <i class="fas fa-wand-magic-sparkles" *ngIf="!isGeneratingDescriptionShort"></i>
+                  <i class="fas fa-spinner fa-spin" *ngIf="isGeneratingDescriptionShort"></i>
+                </button>
+              </div>
+              <div class="char-counter">
+                {{ 'songSketch.creator.description.charCounter' | translate: {count: charCountDescriptionShort, max: 150} }}
+              </div>
+            </div>
+
+            <!-- Description Tags Field -->
+            <div class="form-group">
+              <label for="description_tags">
+                {{ 'songSketch.creator.description.descriptionTags' | translate }}
+              </label>
+              <div class="prompt-input-group">
+                <textarea
+                  id="description_tags"
+                  formControlName="description_tags"
+                  [placeholder]="'songSketch.creator.description.descriptionTagsPlaceholder' | translate"
+                  [disabled]="isSaving || isGeneratingTags"
+                  rows="2"
+                  maxlength="1000"
+                  class="form-textarea form-textarea-compact">
+                </textarea>
+                <button
+                  type="button"
+                  (click)="generateDescriptionTags()"
+                  [disabled]="isSaving || isGeneratingTags || !hasDescriptionLong()"
+                  class="magic-icon-button"
+                  [title]="'songSketch.creator.description.descriptionTagsHint' | translate">
+                  <i class="fas fa-wand-magic-sparkles" *ngIf="!isGeneratingTags"></i>
+                  <i class="fas fa-spinner fa-spin" *ngIf="isGeneratingTags"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Info Field -->
+            <div class="form-group">
+              <label for="info">
+                {{ 'songSketch.creator.description.info' | translate }}
+              </label>
+              <div class="prompt-input-group">
+                <textarea
+                  id="info"
+                  formControlName="info"
+                  [placeholder]="'songSketch.creator.description.infoPlaceholder' | translate"
+                  [disabled]="isSaving"
+                  rows="5"
+                  class="form-textarea form-textarea-large">
+                </textarea>
+                <button
+                  type="button"
+                  (click)="insertInfoTemplate()"
+                  [disabled]="isSaving"
+                  class="edit-button"
+                  [title]="'songSketch.creator.description.infoHint' | translate">
+                  <i class="fas fa-file-lines"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          </ng-template>
+          <!-- End Description Content Template -->
 
           <!-- Action Section -->
           <div class="action-section">
