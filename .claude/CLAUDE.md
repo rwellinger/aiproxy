@@ -223,10 +223,18 @@ def get_user_profile():
 - Enables JWT injection via interceptors
 
 ### Always run build + lint
+**CRITICAL:** Always use `lint:all` to check BOTH TypeScript AND SCSS!
+
 ```bash
 # From aiwebui directory
-npm run build && npm run lint
+npm run build && npm run lint:all
 ```
+
+**Available lint commands:**
+- `npm run lint:all` - TypeScript + SCSS (use this after changes!)
+- `npm run lint` - TypeScript only (ESLint)
+- `npm run lint:scss` - SCSS only (Stylelint)
+- `npm run lint:scss:fix` - Auto-fix SCSS issues
 
 ---
 
@@ -257,6 +265,53 @@ npm run build && npm run lint
 - Remove unused styles after changes
 - No inline styles
 - Comply with Stylelint rules
+
+### SCSS Architecture for NEW Components (CRITICAL!)
+
+**New components (with `_NEW_` or `-new-` in filename) have STRICT rules enforced by Stylelint:**
+
+**Rules:**
+1. **BEM for custom elements** - Max 2 levels
+   - `.feature__element`, `.feature__element--modifier`
+
+2. **Material overrides** - Max 3 levels, ONLY for `mat-*`
+   - `.feature mat-card mat-card-content { }` ✅
+
+3. **NO custom nesting over 2 levels**
+   - Use flat BEM classes instead of nesting
+
+**Example:**
+```scss
+// ✅ CORRECT: BEM with max 2 levels
+.product-list { }
+.product-list__item { }
+.product-list__item--active { }
+
+// ✅ CORRECT: Material override max 3
+.product-list {
+  mat-card {                    // +1
+    mat-card-content {          // +2
+      padding: 1rem;            // Styling (no +3!)
+    }
+  }
+}
+
+// ❌ BUILD FAILS: Custom nesting over 2
+.product-list {
+  .content {
+    .item {                     // ❌ ERROR: 3 custom levels
+      .child { }
+    }
+  }
+}
+```
+
+**Naming convention for strict rules:**
+- `product-list-new.component.scss` ✅ Strict
+- `_NEW_customer.component.scss` ✅ Strict
+- `payment.component.scss` ⚠️ Warnings only
+
+**Old components** are ignored by Stylelint to avoid breaking changes.
 
 ---
 
@@ -402,7 +457,9 @@ pytest --cov=src               # Coverage report
 ```bash
 npm run dev                    # Development server
 npm run build:prod             # Production build → forwardproxy/html/aiwebui
-npm run lint                   # ESLint
+npm run lint:all               # TypeScript + SCSS (use this!)
+npm run lint                   # TypeScript only (ESLint)
+npm run lint:scss              # SCSS only (Stylelint)
 npm run test                   # Unit tests
 ```
 
@@ -483,7 +540,7 @@ npm run e2e                   # E2E tests
 
 ### Before Production Deploy
 1. ✅ Run `npm run build:prod` (from `aiwebui/`)
-2. ✅ Run `npm run lint` (from `aiwebui/`, no errors)
+2. ✅ Run `npm run lint:all` (from `aiwebui/`, TypeScript + SCSS, no errors)
 3. ✅ Run `ruff check . --fix && ruff format .` (from `aiproxysrv/`, no errors)
 4. ✅ Run `pytest` (from `aiproxysrv/`, all tests pass)
 5. ✅ Test language switch (EN ↔ DE)
