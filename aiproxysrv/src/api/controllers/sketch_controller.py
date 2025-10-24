@@ -162,8 +162,10 @@ class SketchController:
             except ValueError:
                 return {"error": "Invalid sketch ID format"}, 400
 
-            # Get only the fields that were actually provided (exclude_unset=True)
-            update_dict = update_data.model_dump(exclude_unset=True)
+            # Get all fields that were explicitly provided in the request
+            # This includes fields set to None (to allow clearing fields)
+            # model_fields_set contains only fields that were actually in the request payload
+            update_dict = {field: getattr(update_data, field) for field in update_data.model_fields_set}
 
             if not update_dict:
                 return {"error": "No fields to update"}, 400

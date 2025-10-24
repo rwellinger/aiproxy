@@ -1159,6 +1159,10 @@
       "title": "Song-Skizze erstellen",
       "titleEdit": "Song-Skizze bearbeiten",
       "subtitle": "Entwickle deine Song-Idee vor der Generierung",
+      "tabs": {
+        "general": "Allgemein",
+        "description": "Release-Info"
+      },
       "fields": {
         "title": "Titel",
         "titlePlaceholder": "Titel für deine Skizze eingeben...",
@@ -1172,6 +1176,25 @@
         "workflow": "Workflow-Status",
         "workflowHint": "Organisiere deine Skizzen nach Workflow-Status",
         "workflowReadonlyHint": "Workflow kann nur in der Bibliotheksansicht geändert werden"
+      },
+      "description": {
+        "descriptionLong": "Lange Beschreibung",
+        "descriptionLongPlaceholder": "Detaillierte Beschreibung für Streaming-Plattformen (max. 1000 Zeichen)...",
+        "descriptionLongHint": "Aus Lyrics mit KI generieren",
+        "descriptionShort": "Kurze Beschreibung",
+        "descriptionShortPlaceholder": "Kurzbeschreibung (max. 150 Zeichen)...",
+        "descriptionShortHint": "Aus langer Beschreibung mit KI generieren",
+        "descriptionTags": "Release-Tags",
+        "descriptionTagsPlaceholder": "Komma-getrennte Tags (z.B. melancholisch, urban, introspektiv)...",
+        "descriptionTagsHint": "10 Tags aus langer Beschreibung mit KI generieren",
+        "info": "Arbeitsnotizen",
+        "infoPlaceholder": "Technische Notizen für die DAW-Produktion...",
+        "infoHint": "Vorlage für Tonart, Tempo, Takte und Länge einfügen",
+        "generateLong": "Mit KI generieren",
+        "generateShort": "Mit KI generieren",
+        "generateTags": "Mit KI generieren",
+        "insertTemplate": "Vorlage einfügen",
+        "charCounter": "{{count}}/{{max}} Zeichen"
       },
       "tags": {
         "title": "Tags",
@@ -1201,7 +1224,23 @@
         "generatingTitle": "Titel wird generiert...",
         "generatingTitleHint": "KI erstellt einen passenden Titel",
         "titleGenerationError": "Fehler bei der Titel-Generierung",
-        "generateTitleFallback": "Erstelle einen eingängigen Song-Titel"
+        "generateTitleFallback": "Erstelle einen eingängigen Song-Titel",
+        "generatingDescriptionLong": "Lange Beschreibung wird generiert...",
+        "generatingDescriptionLongHint": "KI analysiert deinen Songtext",
+        "descriptionLongGenerated": "Lange Beschreibung erfolgreich generiert",
+        "descriptionLongError": "Fehler beim Generieren der langen Beschreibung",
+        "descriptionLongRequired": "Bitte füge zuerst Lyrics hinzu um eine Beschreibung zu generieren",
+        "generatingDescriptionShort": "Kurze Beschreibung wird generiert...",
+        "generatingDescriptionShortHint": "KI erstellt eine prägnante Zusammenfassung",
+        "descriptionShortGenerated": "Kurze Beschreibung erfolgreich generiert",
+        "descriptionShortError": "Fehler beim Generieren der kurzen Beschreibung",
+        "descriptionShortRequired": "Bitte generiere zuerst die lange Beschreibung",
+        "generatingTags": "Tags werden generiert...",
+        "generatingTagsHint": "KI erstellt passende Tags",
+        "tagsGenerated": "Tags erfolgreich generiert",
+        "tagsError": "Fehler beim Generieren der Tags",
+        "tagsRequired": "Bitte generiere zuerst die lange Beschreibung",
+        "templateInserted": "Vorlage erfolgreich eingefügt"
       }
     },
     "library": {
@@ -1231,6 +1270,7 @@
         "copyTitle": "Titel in Zwischenablage kopiert",
         "copyLyrics": "Songtext in Zwischenablage kopiert",
         "copyPrompt": "Musikstil-Prompt in Zwischenablage kopiert",
+        "copyId": "ID in Zwischenablage kopieren",
         "markAsUsed": "Als verwendet markieren",
         "backToDraft": "Zurück zu Entwurf"
       },

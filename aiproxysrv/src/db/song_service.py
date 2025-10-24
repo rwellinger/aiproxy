@@ -89,7 +89,7 @@ class SongService:
                         choices_count=len(song.choices),
                     )
                 else:
-                    logger.debug("song_not_found_by_task_id", task_id=task_id)
+                    logger.debug("Song not found", task_id=task_id)
                 return song
             finally:
                 db.close()
@@ -108,7 +108,7 @@ class SongService:
                         "song_retrieved_by_job_id", job_id=job_id, song_id=str(song.id), choices_count=len(song.choices)
                     )
                 else:
-                    logger.debug("song_not_found_by_job_id", job_id=job_id)
+                    logger.debug("Song not found", job_id=job_id)
                 return song
             finally:
                 db.close()
@@ -125,7 +125,7 @@ class SongService:
             try:
                 song = db.query(Song).filter(Song.task_id == task_id).first()
                 if not song:
-                    logger.warning("song_not_found_for_status_update", task_id=task_id)
+                    logger.warning("Song not found for status update", task_id=task_id)
                     return False
 
                 song.status = status
@@ -162,7 +162,7 @@ class SongService:
             try:
                 song = db.query(Song).filter(Song.task_id == task_id).first()
                 if not song:
-                    logger.warning("song_not_found_for_result_update", task_id=task_id)
+                    logger.warning("Song not found for result update", task_id=task_id)
                     return False
 
                 # Update status to SUCCESS
@@ -177,11 +177,11 @@ class SongService:
                     # Update model with the actual model used by Mureka (not the request model)
                     if mureka_result.get("model"):
                         song.model = mureka_result.get("model")
-                        logger.info("song_model_updated", task_id=task_id, model=song.model)
+                        logger.info("Song model updated", task_id=task_id, model=song.model)
 
                     # Process choices array
                     choices_data = mureka_result.get("choices", [])
-                    logger.info("processing_song_choices", task_id=task_id, choices_count=len(choices_data))
+                    logger.info("Processing song choices", task_id=task_id, choices_count=len(choices_data))
 
                     for choice_data in choices_data:
                         song_choice = SongChoice(
@@ -213,7 +213,7 @@ class SongService:
                     song.completed_at = datetime.fromtimestamp(result_data["completed_at"])
 
                 db.commit()
-                logger.info("song_result_updated", task_id=task_id, choices_count=len(choices_data))
+                logger.info("Song result updated", task_id=task_id, choices_count=len(choices_data))
                 return True
 
             except SQLAlchemyError as e:
@@ -246,14 +246,14 @@ class SongService:
             try:
                 song = db.query(Song).filter(Song.task_id == task_id).first()
                 if not song:
-                    logger.warning("song_not_found_for_error_update", task_id=task_id)
+                    logger.warning("Song not found for error update", task_id=task_id)
                     return False
 
                 song.status = SongStatus.FAILURE.value
                 song.error_message = error_message
 
                 db.commit()
-                logger.info("song_error_updated", task_id=task_id, error_message=error_message)
+                logger.info("Song error updated", task_id=task_id, error_message=error_message)
                 return True
 
             except SQLAlchemyError as e:
@@ -277,9 +277,9 @@ class SongService:
             deleted = r.delete(celery_key)
 
             if deleted:
-                logger.info("redis_cleanup_successful", task_id=task_id, deleted_keys=deleted)
+                logger.info("Redis cleanup successful", task_id=task_id, deleted_keys=deleted)
             else:
-                logger.debug("redis_cleanup_no_data", task_id=task_id)
+                logger.debug("Redis cleanup - no data found", task_id=task_id)
 
             return True
 
@@ -345,7 +345,7 @@ class SongService:
                 choices = (
                     db.query(SongChoice).filter(SongChoice.song_id == song_id).order_by(SongChoice.choice_index).all()
                 )
-                logger.debug("song_choices_retrieved", song_id=str(song_id), choices_count=len(choices))
+                logger.debug("Song choices retrieved", song_id=str(song_id), choices_count=len(choices))
                 return choices
             finally:
                 db.close()
@@ -364,7 +364,7 @@ class SongService:
                         "choice_retrieved_by_mureka_id", mureka_choice_id=mureka_choice_id, choice_id=str(choice.id)
                     )
                 else:
-                    logger.debug("choice_not_found_by_mureka_id", mureka_choice_id=mureka_choice_id)
+                    logger.debug("Choice not found", mureka_choice_id=mureka_choice_id)
                 return choice
             finally:
                 db.close()
@@ -535,9 +535,9 @@ class SongService:
             try:
                 song = db.query(Song).options(joinedload(Song.choices)).filter(Song.id == song_id).first()
                 if song:
-                    logger.debug("song_retrieved_by_id", song_id=str(song_id), choices_count=len(song.choices))
+                    logger.debug("Song retrieved", song_id=str(song_id), choices_count=len(song.choices))
                 else:
-                    logger.debug("song_not_found_by_id", song_id=str(song_id))
+                    logger.debug("Song not found", song_id=str(song_id))
                 return song
             finally:
                 db.close()
@@ -561,7 +561,7 @@ class SongService:
                 songs = (
                     db.query(Song).options(joinedload(Song.choices)).order_by(Song.created_at.desc()).limit(limit).all()
                 )
-                logger.debug("recent_songs_retrieved", count=len(songs), limit=limit)
+                logger.debug("Recent songs retrieved", count=len(songs), limit=limit)
                 return songs
             finally:
                 db.close()
@@ -586,9 +586,9 @@ class SongService:
                 if song:
                     db.delete(song)  # Cascade will delete choices
                     db.commit()
-                    logger.info("song_deleted", song_id=str(song_id))
+                    logger.info("Song deleted", song_id=str(song_id))
                     return True
-                logger.warning("song_not_found_for_deletion", song_id=str(song_id))
+                logger.warning("Song not found for deletion", song_id=str(song_id))
                 return False
             except SQLAlchemyError as e:
                 db.rollback()
@@ -622,7 +622,7 @@ class SongService:
             try:
                 song = db.query(Song).filter(Song.id == song_id).first()
                 if not song:
-                    logger.warning("song_not_found_for_update", song_id=str(song_id))
+                    logger.warning("Song not found for update", song_id=str(song_id))
                     return None
 
                 # Update allowed fields
@@ -647,7 +647,7 @@ class SongService:
                     "updated_at": song.updated_at,
                 }
 
-                logger.info("song_updated", song_id=str(song_id), fields_updated=list(update_data.keys()))
+                logger.info("Song updated", song_id=str(song_id), fields_updated=list(update_data.keys()))
 
                 # Return a simple object with the data we need
                 class UpdatedSong:
@@ -691,21 +691,21 @@ class SongService:
         try:
             # Validate rating value
             if rating is not None and rating not in [0, 1]:
-                logger.warning("invalid_rating_value", choice_id=str(choice_id), rating=rating)
+                logger.warning("Invalid rating value", choice_id=str(choice_id), rating=rating)
                 return False
 
             db = next(get_db())
             try:
                 choice = db.query(SongChoice).filter(SongChoice.id == choice_id).first()
                 if not choice:
-                    logger.warning("choice_not_found_for_rating_update", choice_id=str(choice_id))
+                    logger.warning("Choice not found for rating update", choice_id=str(choice_id))
                     return False
 
                 choice.rating = rating
                 choice.updated_at = datetime.utcnow()
 
                 db.commit()
-                logger.info("choice_rating_updated", choice_id=str(choice_id), rating=rating)
+                logger.info("Choice rating updated", choice_id=str(choice_id), rating=rating)
                 return True
 
             except SQLAlchemyError as e:
@@ -742,9 +742,9 @@ class SongService:
             try:
                 choice = db.query(SongChoice).filter(SongChoice.id == choice_id).first()
                 if choice:
-                    logger.debug("choice_retrieved_by_id", choice_id=str(choice_id))
+                    logger.debug("Choice retrieved", choice_id=str(choice_id))
                 else:
-                    logger.debug("choice_not_found_by_id", choice_id=str(choice_id))
+                    logger.debug("Choice not found", choice_id=str(choice_id))
                 return choice
             finally:
                 db.close()

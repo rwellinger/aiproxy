@@ -13,6 +13,7 @@ from schemas.prompt_schemas import (
     PromptTemplatesGroupedResponse,
     PromptTemplateUpdate,
 )
+from utils.logger import logger
 
 
 class PromptController:
@@ -73,12 +74,24 @@ class PromptController:
             )
 
             if not template:
+                logger.warning("Prompt template not found", category=category, action=action)
                 return {"error": f"Template not found for category '{category}' and action '{action}'"}, 404
+
+            logger.debug(
+                "Prompt template loaded",
+                category=category,
+                action=action,
+                model=template.model,
+                temperature=template.temperature,
+                max_tokens=template.max_tokens,
+                version=template.version,
+            )
 
             response = PromptTemplateResponse.model_validate(template)
             return response.model_dump(), 200
 
         except Exception as e:
+            logger.error("Failed to retrieve prompt template", category=category, action=action, error=str(e))
             return {"error": f"Failed to retrieve template: {str(e)}"}, 500
 
     @staticmethod

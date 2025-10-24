@@ -5,6 +5,32 @@ import { PromptConfigService } from './prompt-config.service';
 import { LyricArchitectureService } from '../lyric-architecture.service';
 import { firstValueFrom } from 'rxjs';
 
+/**
+ * ⚠️ CRITICAL: Single Entry Point for Ollama + Prompt Template Integration
+ *
+ * This service is the ONLY place where Ollama should be called with database templates.
+ *
+ * MANDATORY WORKFLOW:
+ * 1. Load Prompt Template from DB (via PromptConfigService)
+ * 2. Validate required fields (model, temperature, max_tokens MUST be set)
+ * 3. Call unified endpoint: /api/v1/ollama/chat/generate-unified
+ *
+ * ❌ NEVER:
+ * - Direct Ollama API calls in other services
+ * - Bypass validateAndCallUnified() for template-based operations
+ * - Use templates before they exist in DB (backend has no data!)
+ * - Implement custom Ollama integration in new features
+ *
+ * ✅ ALWAYS:
+ * - Use validateAndCallUnified(category, action, inputText) for simple cases
+ * - Follow its pattern for complex cases (see generateLyricsWithArchitecture, improveLyricSection)
+ * - Ensure templates exist in DB first (check prompt_templates table)
+ * - Use this.apiConfig.endpoints.ollama.chatGenerateUnified
+ *
+ * WHY? This is NOT a direct Ollama proxy - it's a Template-Driven Generation System.
+ * Templates MUST be in DB first, otherwise backend has no configuration to work with.
+ */
+
 interface UnifiedChatRequest {
   pre_condition: string;
   post_condition: string;
@@ -13,6 +39,8 @@ interface UnifiedChatRequest {
   temperature?: number;
   max_tokens?: number;
   model?: string;
+  category?: string;
+  action?: string;
 }
 
 
@@ -39,7 +67,7 @@ export class ChatService {
   private promptConfig = inject(PromptConfigService);
   private architectureService = inject(LyricArchitectureService);
 
-  private async validateAndCallUnified(category: string, action: string, inputText: string): Promise<string> {
+  async validateAndCallUnified(category: string, action: string, inputText: string): Promise<string> {
     const template = await firstValueFrom(this.promptConfig.getPromptTemplateAsync(category, action));
     if (!template) {
       throw new Error(`Template ${category}/${action} not found in database`);
@@ -62,7 +90,9 @@ export class ChatService {
       input_text: inputText,
       temperature: template.temperature,
       max_tokens: template.max_tokens,
-      model: template.model
+      model: template.model,
+      category: category,
+      action: action
     };
 
     const data: ChatResponse = await firstValueFrom(
@@ -122,7 +152,9 @@ export class ChatService {
       input_text: inputText,
       temperature: template.temperature,
       max_tokens: template.max_tokens,
-      model: template.model
+      model: template.model,
+      category: 'lyrics',
+      action: 'generate'
     };
 
     const data: ChatResponse = await firstValueFrom(
@@ -188,7 +220,9 @@ export class ChatService {
       user_instructions: userInstructions || '',
       temperature: template.temperature,
       max_tokens: template.max_tokens,
-      model: template.model
+      model: template.model,
+      category: 'lyrics',
+      action: 'improve-section'
     };
 
     const data: ChatResponse = await firstValueFrom(
@@ -221,7 +255,9 @@ export class ChatService {
       user_instructions: userInstructions || '',
       temperature: template.temperature,
       max_tokens: template.max_tokens,
-      model: template.model
+      model: template.model,
+      category: 'lyrics',
+      action: 'rewrite-section'
     };
 
     const data: ChatResponse = await firstValueFrom(
@@ -254,7 +290,9 @@ export class ChatService {
       user_instructions: userInstructions || '',
       temperature: template.temperature,
       max_tokens: template.max_tokens,
-      model: template.model
+      model: template.model,
+      category: 'lyrics',
+      action: 'optimize-phrasing'
     };
 
     const data: ChatResponse = await firstValueFrom(
@@ -291,7 +329,9 @@ export class ChatService {
       user_instructions: userInstructions || '',
       temperature: template.temperature,
       max_tokens: template.max_tokens,
-      model: template.model
+      model: template.model,
+      category: 'lyrics',
+      action: 'extend-section'
     };
 
     const data: ChatResponse = await firstValueFrom(

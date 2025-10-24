@@ -393,6 +393,59 @@
     }
   }
 
+  .metadata-id-row {
+    margin-bottom: $spacing-md;
+
+    .metadata-id-item {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding: $spacing-xs 0;
+
+      .meta-icon {
+        color: $primary-color;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+      }
+
+      .meta-id {
+        font-family: 'Courier New', monospace;
+        font-size: $font-sm;
+        color: $text-secondary;
+        background: $background-light;
+        padding: 6px 12px;
+        border-radius: $border-radius-sm;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+      }
+
+      .copy-id-btn {
+        background: transparent;
+        border: none;
+        color: $text-secondary;
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: $border-radius-sm;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        &:hover {
+          background: $background-light;
+          color: $primary-color;
+        }
+
+        i {
+          font-size: $font-base;
+        }
+      }
+    }
+  }
+
   .metadata-row {
     display: flex;
     gap: $spacing-lg;

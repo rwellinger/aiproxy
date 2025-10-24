@@ -160,6 +160,20 @@
           <div class="detail-section-block">
             <h3>{{ 'songSketch.library.detail.metadata' | translate }}</h3>
 
+            <!-- ID Row -->
+            <div class="metadata-id-row">
+              <div class="metadata-id-item">
+                <i class="fas fa-fingerprint meta-icon"></i>
+                <span class="meta-id" [title]="selectedSketch.id">{{ selectedSketch.id }}</span>
+                <button type="button"
+                        class="copy-id-btn"
+                        (click)="copyToClipboard(selectedSketch.id, 'ID')"
+                        [title]="'songSketch.library.actions.copyId' | translate">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+            </div>
+
             <!-- Dates Row -->
             <div class="metadata-row">
               <div class="metadata-date-item">

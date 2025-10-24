@@ -40,6 +40,14 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
   currentSketchId: string | null = null;
   private navigationState: any = null;
 
+  // Tab state (only visible in edit mode)
+  activeTab: 'general' | 'description' = 'general';
+
+  // AI generation states
+  isGeneratingDescriptionLong = false;
+  isGeneratingDescriptionShort = false;
+  isGeneratingTags = false;
+
   // Tag categories from shared constants
   tagCategories = MUSIC_STYLE_CATEGORIES;
 
@@ -70,7 +78,12 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
       title: ['', [Validators.required, Validators.maxLength(500)]],
       lyrics: ['', [Validators.required, Validators.maxLength(10000)]],
       prompt: ['', [Validators.required, Validators.maxLength(1024)]],
-      workflow: ['draft']
+      workflow: ['draft'],
+      // Release description fields (optional)
+      description_long: [''],
+      description_short: ['', Validators.maxLength(150)],
+      description_tags: [''],
+      info: ['']
     });
 
     // Handle initial navigation state
@@ -123,7 +136,11 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
       title: formData.title || '',
       lyrics: formData.lyrics || '',
       prompt: formData.prompt || '',
-      workflow: formData.workflow || 'draft'
+      workflow: formData.workflow || 'draft',
+      description_long: formData.description_long || '',
+      description_short: formData.description_short || '',
+      description_tags: formData.description_tags || '',
+      info: formData.info || ''
     });
 
     // Load tags separately
@@ -150,7 +167,11 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
         title: sketch.title || '',
         lyrics: sketch.lyrics || '',
         prompt: sketch.prompt,
-        workflow: sketch.workflow || 'draft'
+        workflow: sketch.workflow || 'draft',
+        description_long: sketch.description_long || '',
+        description_short: sketch.description_short || '',
+        description_tags: sketch.description_tags || '',
+        info: sketch.info || ''
       });
 
       // Load tags - parse and select them
@@ -194,7 +215,11 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
         lyrics: formValue.lyrics?.trim() || undefined,
         prompt: formValue.prompt.trim(),
         tags: tagsString,
-        workflow: formValue.workflow || 'draft'
+        workflow: formValue.workflow || 'draft',
+        description_long: formValue.description_long?.trim() || null,
+        description_short: formValue.description_short?.trim() || null,
+        description_tags: formValue.description_tags?.trim() || null,
+        info: formValue.info?.trim() || null
       };
 
       let savedSketchId: string;
@@ -311,6 +336,14 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
     return this.sketchForm.get('prompt')?.value?.length || 0;
   }
 
+  get charCountDescriptionLong(): number {
+    return this.sketchForm.get('description_long')?.value?.length || 0;
+  }
+
+  get charCountDescriptionShort(): number {
+    return this.sketchForm.get('description_short')?.value?.length || 0;
+  }
+
   // Title generation methods
   toggleTitleDropdown(): void {
     this.showTitleDropdown = !this.showTitleDropdown;
@@ -369,6 +402,108 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
     return text.replace(/^["']|["']$/g, '').trim();
   }
 
+  // AI Description Generation Methods
+  async generateDescriptionLong(): Promise<void> {
+    const lyrics = this.sketchForm.get('lyrics')?.value?.trim();
+    if (!lyrics) {
+      this.notificationService.error(
+        this.translate.instant('songSketch.creator.messages.descriptionLongRequired')
+      );
+      return;
+    }
+
+    this.isGeneratingDescriptionLong = true;
+    try {
+      const descriptionLong = await this.progressService.executeWithProgress(
+        () => this.chatService.validateAndCallUnified('description', 'generate-long', lyrics),
+        this.translate.instant('songSketch.creator.messages.generatingDescriptionLong'),
+        this.translate.instant('songSketch.creator.messages.generatingDescriptionLongHint')
+      );
+
+      this.sketchForm.patchValue({ description_long: descriptionLong });
+      this.notificationService.success(
+        this.translate.instant('songSketch.creator.messages.descriptionLongGenerated')
+      );
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('songSketch.creator.messages.descriptionLongError') + ': ' + error.message
+      );
+    } finally {
+      this.isGeneratingDescriptionLong = false;
+    }
+  }
+
+  async generateDescriptionShort(): Promise<void> {
+    const descriptionLong = this.sketchForm.get('description_long')?.value?.trim();
+    if (!descriptionLong) {
+      this.notificationService.error(
+        this.translate.instant('songSketch.creator.messages.descriptionShortRequired')
+      );
+      return;
+    }
+
+    this.isGeneratingDescriptionShort = true;
+    try {
+      const descriptionShort = await this.progressService.executeWithProgress(
+        () => this.chatService.validateAndCallUnified('description', 'generate-short', descriptionLong),
+        this.translate.instant('songSketch.creator.messages.generatingDescriptionShort'),
+        this.translate.instant('songSketch.creator.messages.generatingDescriptionShortHint')
+      );
+
+      this.sketchForm.patchValue({ description_short: descriptionShort });
+      this.notificationService.success(
+        this.translate.instant('songSketch.creator.messages.descriptionShortGenerated')
+      );
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('songSketch.creator.messages.descriptionShortError') + ': ' + error.message
+      );
+    } finally {
+      this.isGeneratingDescriptionShort = false;
+    }
+  }
+
+  async generateDescriptionTags(): Promise<void> {
+    const descriptionLong = this.sketchForm.get('description_long')?.value?.trim();
+    if (!descriptionLong) {
+      this.notificationService.error(
+        this.translate.instant('songSketch.creator.messages.tagsRequired')
+      );
+      return;
+    }
+
+    this.isGeneratingTags = true;
+    try {
+      const tags = await this.progressService.executeWithProgress(
+        () => this.chatService.validateAndCallUnified('description', 'generate-tags', descriptionLong),
+        this.translate.instant('songSketch.creator.messages.generatingTags'),
+        this.translate.instant('songSketch.creator.messages.generatingTagsHint')
+      );
+
+      this.sketchForm.patchValue({ description_tags: tags });
+      this.notificationService.success(
+        this.translate.instant('songSketch.creator.messages.tagsGenerated')
+      );
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('songSketch.creator.messages.tagsError') + ': ' + error.message
+      );
+    } finally {
+      this.isGeneratingTags = false;
+    }
+  }
+
+  insertInfoTemplate(): void {
+    const template = `Tonart:
+Taktart:
+Total Anzahl Bars:
+Song Länge:`;
+    this.sketchForm.patchValue({ info: template });
+    this.notificationService.success(
+      this.translate.instant('songSketch.creator.messages.templateInserted')
+    );
+  }
+
   // Tag management methods
   toggleTag(tag: string): void {
     // Find tag index case-insensitive
@@ -419,5 +554,10 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
 
   getWorkflowLabel(workflow: string): string {
     return this.translate.instant(`songSketch.workflow.${workflow}`);
+  }
+
+  hasDescriptionLong(): boolean {
+    const descLong = this.sketchForm.get('description_long')?.value;
+    return !!(descLong && descLong.trim().length > 0);
   }
 }
