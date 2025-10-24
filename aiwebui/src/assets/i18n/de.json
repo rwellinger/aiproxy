@@ -1190,6 +1190,10 @@
         "info": "Arbeitsnotizen",
         "infoPlaceholder": "Technische Notizen für die DAW-Produktion...",
         "infoHint": "Vorlage für Tonart, Tempo, Takte und Länge einfügen",
+        "infoTemplateKey": "Tonart:",
+        "infoTemplateTimeSignature": "Taktart:",
+        "infoTemplateTotalBars": "Total Anzahl Bars:",
+        "infoTemplateSongLength": "Song Länge:",
         "generateLong": "Mit KI generieren",
         "generateShort": "Mit KI generieren",
         "generateTags": "Mit KI generieren",
@@ -1271,10 +1275,18 @@
         "copyLyrics": "Songtext in Zwischenablage kopiert",
         "copyPrompt": "Musikstil-Prompt in Zwischenablage kopiert",
         "copyId": "ID in Zwischenablage kopieren",
+        "copyDescriptionLong": "Lange Beschreibung in Zwischenablage kopiert",
+        "copyDescriptionShort": "Kurze Beschreibung in Zwischenablage kopiert",
+        "copyDescriptionTags": "Beschreibungs-Tags in Zwischenablage kopiert",
+        "copyInfo": "Arbeitsinformationen in Zwischenablage kopiert",
         "markAsUsed": "Als verwendet markieren",
         "backToDraft": "Zurück zu Entwurf"
       },
       "detail": {
+        "tabs": {
+          "general": "Allgemein",
+          "description": "Release Info"
+        },
         "metadata": "Metadaten",
         "created": "Erstellt",
         "updated": "Aktualisiert",
@@ -1282,6 +1294,14 @@
         "musicStyle": "Musikstil-Prompt",
         "lyrics": "Songtext",
         "noLyrics": "Kein Songtext für diese Skizze definiert",
+        "descriptionLong": "Lange Beschreibung",
+        "descriptionShort": "Kurze Beschreibung",
+        "descriptionTags": "Beschreibungs-Tags",
+        "info": "Arbeitsinformationen",
+        "noDescriptionLong": "Keine lange Beschreibung verfügbar",
+        "noDescriptionShort": "Keine kurze Beschreibung verfügbar",
+        "noDescriptionTags": "Keine Beschreibungs-Tags verfügbar",
+        "noInfo": "Keine Arbeitsinformationen verfügbar",
         "selectSketch": "Wähle eine Skizze aus der Liste, um Details anzuzeigen"
       },
       "pagination": {

@@ -1190,6 +1190,10 @@
         "info": "Working Notes",
         "infoPlaceholder": "Technical notes for DAW production...",
         "infoHint": "Insert template for key, tempo, bars, and length",
+        "infoTemplateKey": "Key:",
+        "infoTemplateTimeSignature": "Time Signature:",
+        "infoTemplateTotalBars": "Total Number of Bars:",
+        "infoTemplateSongLength": "Song Length:",
         "generateLong": "Generate with AI",
         "generateShort": "Generate with AI",
         "generateTags": "Generate with AI",
@@ -1271,10 +1275,18 @@
         "copyLyrics": "Lyrics copied to clipboard",
         "copyPrompt": "Music style prompt copied to clipboard",
         "copyId": "Copy ID to clipboard",
+        "copyDescriptionLong": "Long description copied to clipboard",
+        "copyDescriptionShort": "Short description copied to clipboard",
+        "copyDescriptionTags": "Description tags copied to clipboard",
+        "copyInfo": "Work information copied to clipboard",
         "markAsUsed": "Mark as Used",
         "backToDraft": "Back to Draft"
       },
       "detail": {
+        "tabs": {
+          "general": "General",
+          "description": "Release Info"
+        },
         "metadata": "Metadata",
         "created": "Created",
         "updated": "Updated",
@@ -1282,6 +1294,14 @@
         "musicStyle": "Music Style Prompt",
         "lyrics": "Lyrics",
         "noLyrics": "No lyrics defined for this sketch",
+        "descriptionLong": "Long Description",
+        "descriptionShort": "Short Description",
+        "descriptionTags": "Description Tags",
+        "info": "Work Information",
+        "noDescriptionLong": "No long description available",
+        "noDescriptionShort": "No short description available",
+        "noDescriptionTags": "No description tags available",
+        "noInfo": "No work information available",
         "selectSketch": "Select a sketch from the list to view details"
       },
       "pagination": {

@@ -285,8 +285,8 @@
                   [placeholder]="'songSketch.creator.description.descriptionShortPlaceholder' | translate"
                   maxlength="150"
                   [disabled]="isSaving || isGeneratingDescriptionShort"
-                  rows="3"
-                  class="form-textarea">
+                  rows="2"
+                  class="form-textarea form-textarea-compact">
                 </textarea>
                 <button
                   type="button"
@@ -314,9 +314,9 @@
                   formControlName="description_tags"
                   [placeholder]="'songSketch.creator.description.descriptionTagsPlaceholder' | translate"
                   [disabled]="isSaving || isGeneratingTags"
-                  rows="3"
+                  rows="2"
                   maxlength="1000"
-                  class="form-textarea">
+                  class="form-textarea form-textarea-compact">
                 </textarea>
                 <button
                   type="button"
@@ -342,7 +342,7 @@
                   [placeholder]="'songSketch.creator.description.infoPlaceholder' | translate"
                   [disabled]="isSaving"
                   rows="5"
-                  class="form-textarea">
+                  class="form-textarea form-textarea-large">
                 </textarea>
                 <button
                   type="button"

@@ -359,6 +359,16 @@
 }
 
 .detail-content {
+  .detail-tabs {
+    .mat-mdc-tab-body-content {
+      padding-top: $spacing-md;
+    }
+  }
+
+  .tab-content {
+    padding: 0;
+  }
+
   .detail-section-block {
     margin-bottom: $spacing-lg;
 
@@ -542,6 +552,47 @@
       white-space: pre-wrap;
       word-wrap: break-word;
     }
+  }
+
+  .description-display {
+    padding: $spacing-md;
+    background-color: $background-light;
+    border-radius: 8px;
+    border: 1px solid $border-light;
+    max-height: 400px;
+    overflow-y: auto;
+
+    pre {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      font-size: $font-sm;
+      line-height: 1.6;
+      color: $text-primary;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  }
+
+  .description-short-display {
+    padding: $spacing-md;
+    background-color: $background-light;
+    border-radius: 8px;
+    border: 1px solid $border-light;
+    font-size: $font-sm;
+    line-height: 1.6;
+    color: $text-primary;
+  }
+
+  .description-tags-display {
+    padding: $spacing-md;
+    background-color: $background-light;
+    border-radius: 8px;
+    border: 1px solid $border-light;
+    font-size: $font-sm;
+    line-height: 1.6;
+    color: $text-primary;
+    max-height: 200px;
+    overflow-y: auto;
   }
 
   .empty-message {

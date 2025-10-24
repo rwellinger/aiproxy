@@ -494,10 +494,15 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
   }
 
   insertInfoTemplate(): void {
-    const template = `Tonart:
-Taktart:
-Total Anzahl Bars:
-Song Länge:`;
+    const key = this.translate.instant('songSketch.creator.description.infoTemplateKey');
+    const timeSignature = this.translate.instant('songSketch.creator.description.infoTemplateTimeSignature');
+    const totalBars = this.translate.instant('songSketch.creator.description.infoTemplateTotalBars');
+    const songLength = this.translate.instant('songSketch.creator.description.infoTemplateSongLength');
+
+    const template = `${key}
+${timeSignature}
+${totalBars}
+${songLength}`;
     this.sketchForm.patchValue({ info: template });
     this.notificationService.success(
       this.translate.instant('songSketch.creator.messages.templateInserted')
