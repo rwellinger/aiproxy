@@ -66,49 +66,17 @@
   }
 }
 
-// Tabs
-.tabs-container {
+// Material Tabs Styling
+.creator-tabs {
   margin-bottom: $spacing-md;
-  flex-shrink: 0;
-}
 
-.tabs {
-  display: flex;
-  gap: $spacing-xs;
-  border-bottom: 2px solid #e9ecef;
-}
+  .mat-mdc-tab-body-content {
+    padding-top: $spacing-md;
+  }
 
-.tab-button {
-  padding: $spacing-sm $spacing-md;
-  background: transparent;
-  border: none;
-  border-bottom: 3px solid transparent;
-  color: $text-secondary;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: $spacing-xs;
-  font-size: 0.9375rem;
-
-  i {
+  .tab-icon {
+    margin-right: $spacing-xs;
     font-size: 1rem;
-  }
-
-  &:hover:not(:disabled) {
-    color: $primary-color;
-    background: rgba($primary-color, 0.05);
-  }
-
-  &.active {
-    color: $primary-color;
-    border-bottom-color: $primary-color;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
 }
 

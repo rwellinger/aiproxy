@@ -5,6 +5,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
 import { firstValueFrom, Subject, filter, takeUntil } from 'rxjs';
 
 import { SongService } from '../../services/business/song.service';
@@ -22,6 +23,7 @@ import { MUSIC_STYLE_CATEGORIES } from '../../models/music-style-chooser.model';
     ReactiveFormsModule,
     MatCardModule,
     MatSnackBarModule,
+    MatTabsModule,
     TranslateModule
   ],
   templateUrl: './song-sketch-creator.component.html',
@@ -41,7 +43,7 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
   private navigationState: any = null;
 
   // Tab state (only visible in edit mode)
-  activeTab: 'general' | 'description' = 'general';
+  selectedTabIndex = 0;
 
   // AI generation states
   isGeneratingDescriptionLong = false;

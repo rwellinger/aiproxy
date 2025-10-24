@@ -11,34 +11,34 @@
         </div>
       </div>
 
-      <!-- Tabs (only visible in edit mode) -->
-      <div class="tabs-container" *ngIf="isEditMode">
-        <div class="tabs">
-          <button
-            type="button"
-            class="tab-button"
-            [class.active]="activeTab === 'general'"
-            (click)="activeTab = 'general'"
-            [disabled]="isSaving">
-            <i class="fas fa-edit"></i>
-            {{ 'songSketch.creator.tabs.general' | translate }}
-          </button>
-          <button
-            type="button"
-            class="tab-button"
-            [class.active]="activeTab === 'description'"
-            (click)="activeTab = 'description'"
-            [disabled]="isSaving">
-            <i class="fas fa-info-circle"></i>
-            {{ 'songSketch.creator.tabs.description' | translate }}
-          </button>
-        </div>
-      </div>
-
         <!-- Form -->
         <form [formGroup]="sketchForm" (ngSubmit)="saveSketch()">
-          <!-- General Tab Content -->
-          <div class="tab-content" *ngIf="!isEditMode || activeTab === 'general'">
+          <!-- Create Mode: No tabs, only General form -->
+          <div *ngIf="!isEditMode">
+            <ng-container *ngTemplateOutlet="generalContent"></ng-container>
+          </div>
+
+          <!-- Edit Mode: Material Tabs -->
+          <mat-tab-group *ngIf="isEditMode" [(selectedIndex)]="selectedTabIndex" class="creator-tabs">
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <i class="fas fa-edit tab-icon"></i>
+                {{ 'songSketch.creator.tabs.general' | translate }}
+              </ng-template>
+              <ng-container *ngTemplateOutlet="generalContent"></ng-container>
+            </mat-tab>
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <i class="fas fa-info-circle tab-icon"></i>
+                {{ 'songSketch.creator.tabs.description' | translate }}
+              </ng-template>
+              <ng-container *ngTemplateOutlet="descriptionContent"></ng-container>
+            </mat-tab>
+          </mat-tab-group>
+
+          <!-- Template for General Content -->
+          <ng-template #generalContent>
+          <div class="tab-content">
           <!-- Title Field -->
           <div class="form-group">
             <label for="title">
@@ -239,10 +239,12 @@
             </div>
           </div>
           </div>
-          <!-- End General Tab Content -->
+          </ng-template>
+          <!-- End General Content Template -->
 
-          <!-- Description Tab Content (only in edit mode) -->
-          <div class="tab-content" *ngIf="isEditMode && activeTab === 'description'">
+          <!-- Template for Description Content -->
+          <ng-template #descriptionContent>
+          <div class="tab-content">
             <!-- Long Description Field -->
             <div class="form-group">
               <label for="description_long">
@@ -355,7 +357,8 @@
               </div>
             </div>
           </div>
-          <!-- End Description Tab Content -->
+          </ng-template>
+          <!-- End Description Content Template -->
 
           <!-- Action Section -->
           <div class="action-section">

@@ -363,6 +363,11 @@
     .mat-mdc-tab-body-content {
       padding-top: $spacing-md;
     }
+
+    .tab-icon {
+      margin-right: $spacing-xs;
+      font-size: 1rem;
+    }
   }
 
   .tab-content {
