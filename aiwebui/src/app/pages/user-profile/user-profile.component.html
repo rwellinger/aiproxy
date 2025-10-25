@@ -263,6 +263,33 @@
                 <mat-card-content>
                     <!-- Embed the existing SongProfile component -->
                     <app-song-profile [isEmbedded]="true"></app-song-profile>
+
+                    <!-- API Costs Section (OpenAI only) -->
+                    <div class="api-costs-section" *ngIf="costsSummary?.openai">
+                        <div class="api-costs-header">
+                            <div class="api-costs-avatar">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div class="api-costs-header-text">
+                                <h3>{{ 'userProfile.costs.title' | translate }}</h3>
+                                <p *ngIf="costsSummary!.openai!.organization_id">{{ costsSummary!.openai!.organization_id }}</p>
+                            </div>
+                        </div>
+                        <div class="api-costs-list">
+                            <div class="api-costs-item">
+                                <span class="api-costs-label">{{ 'userProfile.costs.image' | translate }}:</span>
+                                <span class="api-costs-value">${{ costsSummary!.openai!.image.toFixed(2) }}</span>
+                            </div>
+                            <div class="api-costs-item">
+                                <span class="api-costs-label">{{ 'userProfile.costs.chat' | translate }}:</span>
+                                <span class="api-costs-value">${{ costsSummary!.openai!.chat.toFixed(2) }}</span>
+                            </div>
+                            <div class="api-costs-item api-costs-total">
+                                <span class="api-costs-label">{{ 'userProfile.costs.total' | translate }}:</span>
+                                <span class="api-costs-value">${{ costsSummary!.openai!.total.toFixed(2) }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </mat-card-content>
                 <mat-card-actions align="end">
                     <div class="action-buttons">

@@ -1024,6 +1024,14 @@
     "active": "Active",
     "cancelButton": "Cancel",
     "changePassword": "Change Password",
+    "costs": {
+      "title": "OpenAI Costs",
+      "organizationId": "Organization ID",
+      "image": "Images",
+      "chat": "Chat",
+      "total": "Total",
+      "remaining": "Balance Remaining"
+    },
     "editButton": "Edit",
     "email": "Email",
     "emailHint": "Email cannot be changed",

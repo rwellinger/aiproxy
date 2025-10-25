@@ -2,7 +2,13 @@
 
 import requests
 
-from config.settings import CHAT_DEBUG_LOGGING, OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_IMAGE_MODEL, OPENAI_TIMEOUT
+from config.settings import (
+    CHAT_DEBUG_LOGGING,
+    OPENAI_ADMIN_BASE_URL,
+    OPENAI_API_KEY,
+    OPENAI_IMAGE_MODEL,
+    OPENAI_TIMEOUT,
+)
 from utils.logger import logger
 
 
@@ -17,7 +23,7 @@ class OpenAIService:
 
     def __init__(self):
         self.api_key = OPENAI_API_KEY
-        self.base_url = OPENAI_BASE_URL
+        self.base_url = OPENAI_ADMIN_BASE_URL
         self.model = OPENAI_IMAGE_MODEL
 
     def generate_image(self, prompt: str, size: str) -> str:

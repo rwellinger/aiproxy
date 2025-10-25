@@ -77,17 +77,27 @@ FLASK_SERVER_PORT=5050
 FLASK_SERVER_HOST=0.0.0.0
 
 # ==================================================
-# OPENAI CONFIGURATION (Images + Chat)
+# OPENAI CONFIGURATION (Images + Chat + Admin API)
 # ==================================================
+# OpenAI API Key (for images and chat)
 OPENAI_API_KEY=
-OPENAI_BASE_URL=https://api.openai.com/v1
+
+# OpenAI Admin API Key (for organization cost tracking)
+# Get from: https://platform.openai.com/settings/organization/admin-keys
+OPENAI_ADMIN_API_KEY=
+
+# OpenAI Base URL (used for ALL OpenAI API calls: images, chat, and admin)
+OPENAI_ADMIN_BASE_URL=https://api.openai.com/v1
+
+# Image and Chat Model Configuration
 OPENAI_IMAGE_MODEL=dall-e-3
 OPENAI_CHAT_MODELS=gpt-4o,gpt-4o-mini,gpt-4,gpt-5,gpt-5-mini,gpt-5-nano,gpt-4.1,gpt-4.1-mini
 
-# Timeout for OpenAI API requests in seconds (default: 120)
-# DALL-E 3 image generation can take 60-120 seconds for complex prompts
-# Increase if experiencing timeout errors (e.g., 180 or 240)
+# Timeout for OpenAI API requests in seconds
+# Images (default: 120) - DALL-E 3 generation can take 60-120 seconds
+# Admin API (default: 30) - Cost tracking endpoints are faster
 OPENAI_TIMEOUT=120
+OPENAI_ADMIN_TIMEOUT=30
 
 # Deprecated (backwards compatibility) - will be removed in future
 # OPENAI_URL=https://api.openai.com/v1/images
