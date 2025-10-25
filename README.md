@@ -44,6 +44,11 @@ A full-stack platform for AI-powered image and music generation with Python back
     - Independent color and outline controls for title and artist
     - Composition-based sorting (e.g., album-cover images prioritized)
     - Non-destructive editing: Creates new image records
+  - **Usage Cost Tracking** - Real-time OpenAI API cost monitoring
+    - TTL-based caching (1h for current month, forever for history)
+    - Cost breakdown by model (DALL-E, GPT)
+    - Monthly and all-time aggregation
+    - Displayed in User Profile
 - **Song Generation** via Mureka API (asynchronous with Celery)
 - **PostgreSQL** database for persistent storage
 - **Angular 18** frontend with Material Design

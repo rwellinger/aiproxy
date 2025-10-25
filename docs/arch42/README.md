@@ -102,6 +102,12 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
     - Composition-based sorting (e.g., album-cover composition prioritized)
     - Non-destructive editing: Creates new image records without modifying originals
     - Metadata storage in database (JSON field: text_overlay_metadata)
+  - **Usage Cost Tracking** - Real-time monitoring of OpenAI API costs
+    - TTL-based caching (1 hour for current month, forever for historical)
+    - Cost categorization by model (DALL-E, GPT, etc.)
+    - Monthly and all-time cost aggregation
+    - Integration with OpenAI Admin API
+    - Display in User Profile page
 - **Music Generation** via Mureka API
 - **Asynchronous Processing** for time-intensive generation processes
 - **Ollama Model Chat** for prompt improvements via prompt templates
@@ -168,6 +174,66 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
 - **Event-driven**: Asynchronous processing via Celery
 - **API-First**: REST API as central interface
 - **Containerized**: Docker for consistent deployments
+- **3-Tier Architecture**: Strict separation of concerns in backend (Controller → Business → Repository)
+
+#### 4.1.1 Backend 3-Tier Architecture (MANDATORY)
+
+**Layer Separation:**
+```
+Controller → Business Service → Repository
+(HTTP)       (Logic, Testable)  (DB CRUD)
+```
+
+**Layer Responsibilities:**
+
+**1. Controller Layer** (`src/api/controllers/*_controller.py`)
+- ✅ HTTP request/response handling
+- ✅ Input validation (Pydantic)
+- ✅ Call business layer
+- ❌ NO business logic
+- ❌ NO direct DB queries
+
+**2. Business Layer** (`src/business/*_service.py` or `*_transformer.py`)
+- ✅ Business logic, calculations, transformations
+- ✅ Pure functions (no DB, no file system)
+- ✅ **MUST be unit-testable** without mocks
+- ❌ NO database queries
+- ❌ NO file system operations
+
+**3. Repository Layer** (`src/db/*_service.py`)
+- ✅ CRUD operations only
+- ✅ SQLAlchemy queries
+- ❌ NO business logic
+- ❌ NO transformations (use business layer)
+- ❌ **NO unit tests** (pure CRUD, not testable without DB)
+
+**Example Implementation (OpenAI Usage Costs):**
+```
+OpenAICostController (src/api/controllers/openai_cost_controller.py)
+  ├─ HTTP endpoints (GET /api/v1/openai/costs/*)
+  ├─ JWT authentication (@jwt_required)
+  ├─ Calls Business Layer ↓
+
+ApiCostTransformer (src/business/api_cost_transformer.py)
+  ├─ Pure functions (unit-tested):
+  │   ├─ transform_to_dict() - DB Model → Dict (Decimal → float)
+  │   ├─ apply_cost_defaults() - Default values
+  │   ├─ validate_cost_data() - Validation
+  │   └─ format_all_time_costs() - Formatting
+  ├─ Calls Repository Layer ↓
+
+ApiCostService (src/db/api_cost_service.py)
+  └─ CRUD operations (no tests):
+      ├─ get_cached_month()
+      ├─ save_month_costs()
+      └─ get_all_time_totals()
+```
+
+**Benefits:**
+- **Testability**: Business logic 100% unit-testable (pure functions)
+- **Maintainability**: Clear separation, easy to refactor
+- **Scalability**: Business logic can be reused across controllers
+- **Code Review**: Violations easily detectable during PR review
 
 ### 4.2 Technology Stack
 - **Frontend**: Angular 18.2.13 + TypeScript + Angular Material + SCSS + RxJS
@@ -1148,12 +1214,40 @@ services:
 | `name` | VARCHAR(100) | Rule name |
 | `description` | TEXT | Rule description |
 | `pattern` | TEXT | Regex pattern to match |
-| `replacement` | TEXT | Replacement text |
+| `replacement` | TEXT | Replacement text (Base64-encoded) |
 | `rule_type` | VARCHAR(50) | Rule type: cleanup, section |
 | `active` | BOOLEAN | Rule is active |
 | `order` | INTEGER | Execution order |
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update timestamp |
+
+#### 13.2.11 api_costs_monthly
+**Purpose**: OpenAI API cost tracking with TTL-based caching strategy
+
+| Column | Type | Description |
+|--------|-----|-------------|
+| `id` | UUID | Primary Key |
+| `provider` | VARCHAR(50) | API provider (openai, mureka) |
+| `organization_id` | VARCHAR(255) | Optional organization identifier |
+| `year` | INTEGER | Year (e.g., 2025) |
+| `month` | INTEGER | Month (1-12) |
+| `total_cost` | DECIMAL(10, 2) | Total cost in USD |
+| `image_cost` | DECIMAL(10, 2) | Cost for DALL-E image generation |
+| `chat_cost` | DECIMAL(10, 2) | Cost for GPT chat completions |
+| `line_items` | JSONB | Detailed breakdown by model (e.g., dall-e-3, gpt-4) |
+| `is_finalized` | BOOLEAN | TRUE for past months (cached forever), FALSE for current month |
+| `last_updated_at` | TIMESTAMP | Last update timestamp (for TTL calculation) |
+| `created_at` | TIMESTAMP | Creation timestamp |
+
+**Caching Strategy:**
+- **Current Month** (`is_finalized=FALSE`): Revalidate after TTL (default: 1 hour)
+- **Past Months** (`is_finalized=TRUE`): Cached forever, never revalidate
+- **All-Time**: Aggregated from DB (no API calls)
+
+**API Integration:**
+- **Source**: OpenAI Admin API (`https://api.openai.com/v1/usage`)
+- **Authentication**: `OPENAI_ADMIN_API_KEY` (separate from generation key)
+- **Pagination**: Handles 100+ line items per month
 
 ### 13.3 Relationships and Constraints
 

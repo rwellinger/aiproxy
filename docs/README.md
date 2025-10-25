@@ -38,9 +38,9 @@ Technical guides for developers:
 - [**CI/CD**](CI_CD.md) - GitHub Actions, build pipeline, release workflow
 - [**Database Implementation & Migrations**](DB_IMPL_DEVS.md) - SQLAlchemy models and Alembic workflow
 - [**Docker/Colima Installation**](DOCKER-INSTALL.md) - Container runtime setup for macOS
-- [**ESLint Configuration**](LINT_README.md) - Linting rules for Angular frontend
-- [**OpenAPI/Swagger Implementation**](OPENAPI_IMPL_DEFS.md) - API documentation setup
 - [**User Management Setup**](README_USER_SETUP.md) - Initial user creation and authentication
+- [**Migration Process**](MIGRATION_PROCESS.md) - Database migration workflow with init-container pattern
+- [**Production Recovery Plan**](PRODUCTION_RECOVERY_PLAN.md) - Emergency recovery procedures
 
 ## Quick Start
 
