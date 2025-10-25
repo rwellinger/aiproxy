@@ -26,6 +26,18 @@ def get_openai_current_month():
     return jsonify(response_data), status_code
 
 
+@api_openai_costs_v1.route("/all-time", methods=["GET"])
+@jwt_required
+def get_openai_all_time():
+    """Get OpenAI all-time aggregated costs across all months"""
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    response_data, status_code = cost_controller.get_all_time_costs()
+    return jsonify(response_data), status_code
+
+
 @api_openai_costs_v1.route("/<int:year>/<int:month>", methods=["GET"])
 @jwt_required
 def get_openai_month(year: int, month: int):

@@ -1029,6 +1029,8 @@
       "title": "OpenAI Costs",
       "loading": "Loading API costs...",
       "organizationId": "Organization ID",
+      "currentMonth": "Current Month",
+      "allTimeSummary": "All Time Summary",
       "image": "Images",
       "chat": "Chat",
       "total": "Total",

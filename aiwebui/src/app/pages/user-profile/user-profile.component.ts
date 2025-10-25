@@ -52,6 +52,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   currentSettings: UserSettings | null = null;
   openaiCosts: MonthlyCosts | null = null;
+  openaiAllTimeCosts: MonthlyCosts | null = null;
   isLoading = false;
   isLoadingCosts = false;
   isEditing = false;
@@ -91,6 +92,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.subscribeToAuthState();
     this.loadUserSettings();
     this.loadOpenAICosts();
+    this.loadOpenAIAllTimeCosts();
   }
 
   ngOnDestroy(): void {
@@ -403,6 +405,22 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Failed to load OpenAI costs:', error);
           this.isLoadingCosts = false;
+        }
+      });
+  }
+
+  /**
+   * Load OpenAI all-time costs
+   */
+  private loadOpenAIAllTimeCosts(): void {
+    this.costService.getAllTimeCosts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.openaiAllTimeCosts = data.costs;
+        },
+        error: (error) => {
+          console.error('Failed to load OpenAI all-time costs:', error);
         }
       });
   }

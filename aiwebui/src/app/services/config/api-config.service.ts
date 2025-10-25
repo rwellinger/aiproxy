@@ -126,7 +126,8 @@ export class ApiConfigService {
         },
         costs: {
             openaiCurrent: `${this.baseUrl}/api/v1/openai/costs/current`,
-            openaiMonth: (year: number, month: number) => `${this.baseUrl}/api/v1/openai/costs/${year}/${month}`
+            openaiMonth: (year: number, month: number) => `${this.baseUrl}/api/v1/openai/costs/${year}/${month}`,
+            openaiAllTime: `${this.baseUrl}/api/v1/openai/costs/all-time`
         }
     };
 

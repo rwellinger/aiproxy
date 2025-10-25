@@ -314,6 +314,38 @@ class OpenAICostController:
             )
             return {"status": "error", "message": f"Unexpected error: {e}"}, 500
 
+    def get_all_time_costs(self) -> tuple[dict[str, Any], int]:
+        """
+        Get all-time aggregated costs across all months
+
+        Sums all costs for provider 'openai', regardless of organization_id.
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            with SessionLocal() as db:
+                # Get aggregated totals from repository (pure DB operation)
+                total, image, chat = self.cost_service.get_all_time_totals(db, "openai")
+
+                # Transform to response format using business layer
+                from business.api_cost_transformer import ApiCostTransformer
+
+                costs = ApiCostTransformer.format_all_time_costs(total, image, chat)
+
+                logger.debug("All-time costs calculated", total=total, image=image, chat=chat)
+
+                return {"status": "success", "costs": costs}, 200
+
+        except Exception as e:
+            logger.error(
+                "Error fetching all-time costs",
+                error=str(e),
+                error_type=type(e).__name__,
+                stacktrace=traceback.format_exc(),
+            )
+            return {"status": "error", "message": f"Unexpected error: {e}"}, 500
+
     def _is_cache_expired(self, cached: dict) -> bool:
         """Check if cache is expired (based on TTL)"""
         if cached.get("is_finalized"):

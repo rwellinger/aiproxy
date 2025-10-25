@@ -283,6 +283,9 @@
                                     <p *ngIf="openaiCosts.organization_id">{{ openaiCosts.organization_id }}</p>
                                 </div>
                             </div>
+
+                            <!-- Current Month Section -->
+                            <h4 class="api-costs-subtitle">{{ 'userProfile.costs.currentMonth' | translate }}</h4>
                             <div class="api-costs-list">
                                 <div class="api-costs-item">
                                     <span class="api-costs-label">{{ 'userProfile.costs.image' | translate }}:</span>
@@ -295,6 +298,23 @@
                                 <div class="api-costs-item api-costs-total">
                                     <span class="api-costs-label">{{ 'userProfile.costs.total' | translate }}:</span>
                                     <span class="api-costs-value">${{ openaiCosts.total.toFixed(2) }}</span>
+                                </div>
+                            </div>
+
+                            <!-- All Time Summary Section -->
+                            <h4 class="api-costs-subtitle" *ngIf="openaiAllTimeCosts">{{ 'userProfile.costs.allTimeSummary' | translate }}</h4>
+                            <div class="api-costs-list" *ngIf="openaiAllTimeCosts">
+                                <div class="api-costs-item">
+                                    <span class="api-costs-label">{{ 'userProfile.costs.image' | translate }}:</span>
+                                    <span class="api-costs-value">${{ openaiAllTimeCosts.image.toFixed(2) }}</span>
+                                </div>
+                                <div class="api-costs-item">
+                                    <span class="api-costs-label">{{ 'userProfile.costs.chat' | translate }}:</span>
+                                    <span class="api-costs-value">${{ openaiAllTimeCosts.chat.toFixed(2) }}</span>
+                                </div>
+                                <div class="api-costs-item api-costs-total">
+                                    <span class="api-costs-label">{{ 'userProfile.costs.total' | translate }}:</span>
+                                    <span class="api-costs-value">${{ openaiAllTimeCosts.total.toFixed(2) }}</span>
                                 </div>
                             </div>
                         </div>

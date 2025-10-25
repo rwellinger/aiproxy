@@ -179,3 +179,55 @@ class ApiCostService:
                 error_type=type(e).__name__,
             )
             return False
+
+    def get_all_time_totals(self, db: Session, provider: str) -> tuple[float, float, float]:
+        """
+        Get sum of all costs across all months (pure DB aggregation)
+
+        Note: Sums ALL entries for the provider, regardless of organization_id.
+        This is correct because there's typically only one organization per provider.
+
+        Args:
+            db: Database session
+            provider: 'openai' or 'mureka'
+
+        Returns:
+            Tuple of (total_cost, image_cost, chat_cost) as floats
+        """
+        try:
+            from sqlalchemy import func
+
+            query = db.query(
+                func.sum(ApiCostMonthly.total_cost).label("total"),
+                func.sum(ApiCostMonthly.image_cost).label("image"),
+                func.sum(ApiCostMonthly.chat_cost).label("chat"),
+            ).filter(ApiCostMonthly.provider == provider)
+
+            # No organization_id filter - sum ALL entries for this provider
+            result = query.first()
+
+            if result and result.total is not None:
+                logger.debug(
+                    "All-time costs retrieved",
+                    provider=provider,
+                    total=float(result.total),
+                    image=float(result.image or 0),
+                    chat=float(result.chat or 0),
+                )
+                return (
+                    float(result.total or 0),
+                    float(result.image or 0),
+                    float(result.chat or 0),
+                )
+
+            logger.debug("No all-time costs found", provider=provider)
+            return (0.0, 0.0, 0.0)
+
+        except SQLAlchemyError as e:
+            logger.error(
+                "Error retrieving all-time costs",
+                provider=provider,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return (0.0, 0.0, 0.0)

@@ -78,3 +78,30 @@ class ApiCostTransformer:
             return False, "Field 'total' cannot be negative"
 
         return True, None
+
+    @staticmethod
+    def format_all_time_costs(total: float, image: float, chat: float, currency: str = "usd") -> dict[str, Any]:
+        """
+        Format all-time aggregated costs to response format (pure function)
+
+        Args:
+            total: Total cost across all months
+            image: Image cost across all months
+            chat: Chat cost across all months
+            currency: Currency code (default: 'usd')
+
+        Returns:
+            Dict with formatted all-time cost data
+        """
+        return {
+            "year": None,  # All-time has no specific year
+            "month": None,  # All-time has no specific month
+            "total": total,
+            "image": image,
+            "chat": chat,
+            "currency": currency,
+            "organization_id": None,
+            "breakdown": {},  # No line-item breakdown for aggregated data
+            "bucket_count": None,
+            "is_finalized": True,  # All-time data is always considered finalized
+        }

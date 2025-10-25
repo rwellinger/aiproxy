@@ -39,4 +39,10 @@ export class CostService {
             this.apiConfig.endpoints.costs.openaiMonth(year, month)
         );
     }
+
+    getAllTimeCosts(): Observable<CostResponse> {
+        return this.http.get<CostResponse>(
+            this.apiConfig.endpoints.costs.openaiAllTime
+        );
+    }
 }
