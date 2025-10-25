@@ -25,12 +25,6 @@ Example Output:
 import argparse
 import sys
 from datetime import UTC, datetime
-from pathlib import Path
-
-# Add aiproxysrv/src to Python path
-script_dir = Path(__file__).resolve().parent
-src_dir = script_dir.parent / "src"
-sys.path.insert(0, str(src_dir))
 
 from api.controllers.openai_cost_controller import OpenAICostAPIError, OpenAICostController
 from db.api_cost_service import ApiCostService
