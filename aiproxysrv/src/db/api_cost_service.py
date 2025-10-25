@@ -4,7 +4,7 @@ Pure CRUD operations, no business logic.
 Business logic is in business/api_cost_transformer.py
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -125,7 +125,7 @@ class ApiCostService:
                 existing.line_items = costs_with_defaults["breakdown"]
                 existing.bucket_count = costs_with_defaults["bucket_count"]
                 existing.is_finalized = is_finalized
-                existing.last_updated_at = datetime.now()
+                existing.last_updated_at = datetime.now(UTC)
                 # Update organization_id if provided
                 if organization_id:
                     existing.organization_id = organization_id
@@ -152,7 +152,7 @@ class ApiCostService:
                     line_items=costs_with_defaults["breakdown"],
                     bucket_count=costs_with_defaults["bucket_count"],
                     is_finalized=is_finalized,
-                    last_updated_at=datetime.now(),
+                    last_updated_at=datetime.now(UTC),
                 )
                 db.add(new_cost)
 

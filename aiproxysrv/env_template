@@ -99,6 +99,12 @@ OPENAI_CHAT_MODELS=gpt-4o,gpt-4o-mini,gpt-4,gpt-5,gpt-5-mini,gpt-5-nano,gpt-4.1,
 OPENAI_TIMEOUT=120
 OPENAI_ADMIN_TIMEOUT=30
 
+# OpenAI Cost Cache TTL in seconds (default: 3600 = 1 hour)
+# Controls how long cost data is cached before fetching fresh data from OpenAI Admin API
+# Lower values = more frequent API calls (useful for testing)
+# Higher values = less API load (recommended for production)
+OPENAI_COST_CACHE_TTL=3600
+
 # Deprecated (backwards compatibility) - will be removed in future
 # OPENAI_URL=https://api.openai.com/v1/images
 # OPENAI_MODEL=dall-e-3

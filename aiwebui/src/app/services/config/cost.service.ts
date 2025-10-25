@@ -21,19 +21,6 @@ export interface CostResponse {
     cached?: boolean;
 }
 
-export interface MurekaAccount {
-    balance?: number;
-    total_recharge?: number;
-    total_spending?: number;
-    request_limit?: number;
-}
-
-export interface CostSummary {
-    status: string;
-    openai: MonthlyCosts | null;
-    mureka: MurekaAccount | null;
-}
-
 @Injectable({
     providedIn: 'root'
 })
@@ -50,12 +37,6 @@ export class CostService {
     getMonthCosts(year: number, month: number): Observable<CostResponse> {
         return this.http.get<CostResponse>(
             this.apiConfig.endpoints.costs.openaiMonth(year, month)
-        );
-    }
-
-    getCostsSummary(): Observable<CostSummary> {
-        return this.http.get<CostSummary>(
-            this.apiConfig.endpoints.costs.summary
         );
     }
 }

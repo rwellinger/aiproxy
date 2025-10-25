@@ -21,7 +21,7 @@ import { AuthService } from '../../services/business/auth.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { LanguageService } from '../../services/language.service';
-import { CostService, CostSummary } from '../../services/config/cost.service';
+import { CostService, MonthlyCosts } from '../../services/config/cost.service';
 import { User } from '../../models/user.model';
 import { UserSettings, Language } from '../../models/user-settings.model';
 
@@ -51,8 +51,9 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup;
   currentUser: User | null = null;
   currentSettings: UserSettings | null = null;
-  costsSummary: CostSummary | null = null;
+  openaiCosts: MonthlyCosts | null = null;
   isLoading = false;
+  isLoadingCosts = false;
   isEditing = false;
   userDisplayName = 'Unknown User'; // Computed property to avoid method calls in template
   availableLanguages: {code: Language, name: string}[] = []; // Computed property to avoid method calls in template
@@ -89,7 +90,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.loadUserProfile();
     this.subscribeToAuthState();
     this.loadUserSettings();
-    this.loadCostsSummary();
+    this.loadOpenAICosts();
   }
 
   ngOnDestroy(): void {
@@ -388,17 +389,20 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load API costs summary (OpenAI + Mureka)
+   * Load OpenAI costs (separate from Mureka)
    */
-  private loadCostsSummary(): void {
-    this.costService.getCostsSummary()
+  private loadOpenAICosts(): void {
+    this.isLoadingCosts = true;
+    this.costService.getCurrentMonthCosts()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.costsSummary = data;
+          this.openaiCosts = data.costs;
+          this.isLoadingCosts = false;
         },
         error: (error) => {
-          console.error('Failed to load costs summary:', error);
+          console.error('Failed to load OpenAI costs:', error);
+          this.isLoadingCosts = false;
         }
       });
   }

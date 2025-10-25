@@ -12,6 +12,12 @@
   </div>
 
   <div class="account-content">
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>{{ 'songProfile.loading' | translate }}</p>
+      </div>
+
       <!-- Account Information -->
       <div class="account-info-section" *ngIf="!isLoading">
           <div class="account-result-section">

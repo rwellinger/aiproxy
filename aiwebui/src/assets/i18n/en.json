@@ -912,7 +912,8 @@
     "notifications": {
       "loadError": "Error loading billing info"
     },
-    "title": "Profile Controls"
+    "title": "Profile Controls",
+    "loading": "Loading account info..."
   },
   "songView": {
     "actions": {
@@ -1026,6 +1027,7 @@
     "changePassword": "Change Password",
     "costs": {
       "title": "OpenAI Costs",
+      "loading": "Loading API costs...",
       "organizationId": "Organization ID",
       "image": "Images",
       "chat": "Chat",

@@ -78,9 +78,24 @@ def verify_schema() -> int:
             ],
             "conversations": [
                 ("id", "UUID"),
+                ("user_id", "UUID"),
                 ("title", "VARCHAR"),
                 ("model", "VARCHAR"),
+                ("provider", "VARCHAR"),
                 ("system_context", "TEXT"),
+            ],
+            "messages": [
+                ("id", "UUID"),
+                ("conversation_id", "UUID"),
+                ("role", "VARCHAR"),
+                ("content", "TEXT"),
+            ],
+            "messages_archive": [
+                ("id", "UUID"),
+                ("original_message_id", "UUID"),
+                ("conversation_id", "UUID"),
+                ("role", "VARCHAR"),
+                ("content", "TEXT"),
             ],
             "lyric_parsing_rules": [
                 ("id", "INTEGER"),
@@ -88,6 +103,34 @@ def verify_schema() -> int:
                 ("replacement", "TEXT"),
                 ("rule_type", "VARCHAR"),
                 ("active", "BOOLEAN"),
+            ],
+            "generated_images": [
+                ("id", "UUID"),
+                ("prompt", "TEXT"),
+                ("filename", "VARCHAR"),
+                ("file_path", "VARCHAR"),
+                ("size", "VARCHAR"),
+            ],
+            "prompt_templates": [
+                ("id", "INTEGER"),
+                ("category", "VARCHAR"),
+                ("action", "VARCHAR"),
+                ("pre_condition", "TEXT"),
+                ("post_condition", "TEXT"),
+                ("active", "BOOLEAN"),
+            ],
+            "users": [
+                ("id", "UUID"),
+                ("email", "VARCHAR"),
+                ("is_active", "BOOLEAN"),
+            ],
+            "api_costs_monthly": [
+                ("id", "UUID"),
+                ("provider", "VARCHAR"),
+                ("year", "INTEGER"),
+                ("month", "INTEGER"),
+                ("total_cost", "NUMERIC"),
+                ("is_finalized", "BOOLEAN"),
             ],
         }
 
@@ -113,6 +156,8 @@ def verify_schema() -> int:
             "songs": [("fk_songs_sketch_id", "song_sketches")],
             "song_choices": [("song_choices_song_id_fkey", "songs")],
             "messages": [("messages_conversation_id_fkey", "conversations")],
+            "messages_archive": [("messages_archive_conversation_id_fkey", "conversations")],
+            "conversations": [("conversations_user_id_fkey", "users")],
         }
 
         for table_name, expected_fks in critical_fks.items():

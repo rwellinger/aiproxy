@@ -1,5 +1,6 @@
 """OpenAI Cost Controller - Handles OpenAI Admin API Cost operations"""
 
+import os
 import traceback
 from collections import defaultdict
 from datetime import UTC, datetime
@@ -17,7 +18,7 @@ from utils.logger import logger
 class OpenAICostController:
     """Controller for OpenAI Admin Cost API integration"""
 
-    CACHE_TTL_SECONDS = 3600  # 1 hour (configurable via env)
+    CACHE_TTL_SECONDS = int(os.getenv("OPENAI_COST_CACHE_TTL", "3600"))  # Default: 1 hour
 
     def __init__(self):
         self.api_key = OPENAI_ADMIN_API_KEY
@@ -195,14 +196,30 @@ class OpenAICostController:
         try:
             now = datetime.now(UTC)
 
-            # Check cache
+            # Check cache - try without organization_id first (for existing entries with org_id)
             with SessionLocal() as db:
-                cached = self.cost_service.get_cached_month(db, "openai", now.year, now.month)
+                # First try: Find ANY cached entry for this month (ignoring organization_id)
+                from db.models import ApiCostMonthly
 
-                if cached and not self._is_cache_expired(cached):
-                    ttl_remaining = self._ttl_remaining(cached)
-                    logger.debug("Current month costs from cache", ttl_remaining=ttl_remaining)
-                    return {"status": "success", "costs": cached, "cached": True}, 200
+                cached_record = (
+                    db.query(ApiCostMonthly)
+                    .filter(
+                        ApiCostMonthly.provider == "openai",
+                        ApiCostMonthly.year == now.year,
+                        ApiCostMonthly.month == now.month,
+                    )
+                    .first()
+                )
+
+                if cached_record:
+                    from business.api_cost_transformer import ApiCostTransformer
+
+                    cached = ApiCostTransformer.transform_to_dict(cached_record)
+
+                    if not self._is_cache_expired(cached):
+                        ttl_remaining = self._ttl_remaining(cached)
+                        logger.debug("Current month costs from cache", ttl_remaining=ttl_remaining)
+                        return {"status": "success", "costs": cached, "cached": True}, 200
 
             # Cache expired or not exists → Fetch from API
             logger.info("Fetching current month costs from OpenAI API")
@@ -249,11 +266,24 @@ class OpenAICostController:
                     "message": "Use /current for current month",
                 }, 400
 
-            # Check cache
+            # Check cache - ignore organization_id for lookup
             with SessionLocal() as db:
-                cached = self.cost_service.get_cached_month(db, "openai", year, month)
+                from db.models import ApiCostMonthly
 
-                if cached and cached.get("is_finalized"):
+                cached_record = (
+                    db.query(ApiCostMonthly)
+                    .filter(
+                        ApiCostMonthly.provider == "openai",
+                        ApiCostMonthly.year == year,
+                        ApiCostMonthly.month == month,
+                    )
+                    .first()
+                )
+
+                if cached_record and cached_record.is_finalized:
+                    from business.api_cost_transformer import ApiCostTransformer
+
+                    cached = ApiCostTransformer.transform_to_dict(cached_record)
                     logger.debug("Historical month costs from cache (finalized)", year=year, month=month)
                     return {"status": "success", "costs": cached, "cached": True}, 200
 

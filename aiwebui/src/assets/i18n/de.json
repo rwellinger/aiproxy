@@ -912,7 +912,8 @@
     "notifications": {
       "loadError": "Fehler beim Laden der Rechnungsinformationen"
     },
-    "title": "Profil-Steuerung"
+    "title": "Profil-Steuerung",
+    "loading": "Lade Kontoinformationen..."
   },
   "songView": {
     "actions": {
@@ -1026,6 +1027,7 @@
     "changePassword": "Passwort ändern",
     "costs": {
       "title": "OpenAI-Kosten",
+      "loading": "API-Kosten werden geladen...",
       "organizationId": "Organisations-ID",
       "image": "Bilder",
       "chat": "Chat",

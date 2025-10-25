@@ -1,3 +1,5 @@
+import time
+
 from flask import jsonify, request
 
 from services.openai_service import OpenAIService
@@ -26,6 +28,9 @@ class OpenAIController:
 
     def organization_costs(self, start_time: int, end_time: int, limit: int):
         """Mock OpenAI Admin Cost API"""
+        # Simulate slow API response (15 seconds)
+        time.sleep(15)
+
         # Generate mock data (10 daily buckets)
         buckets = []
         current_ts = start_time
