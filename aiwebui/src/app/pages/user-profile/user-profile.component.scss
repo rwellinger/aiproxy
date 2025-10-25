@@ -370,6 +370,86 @@
       }
     }
 
+    // API Costs Section (shared styles for both user-section and mureka-section)
+    .api-costs-section {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid $border-light;
+    }
+
+    .api-costs-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid $border-light;
+    }
+
+    .api-costs-avatar {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2.5rem;
+      flex-shrink: 0;
+    }
+
+    .api-costs-header-text {
+      flex-grow: 1;
+
+      h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+        color: $text-primary;
+      }
+
+      p {
+        margin: 0;
+        color: $text-secondary;
+        font-size: 1rem;
+      }
+    }
+
+    .api-costs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .api-costs-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      font-size: 0.95rem;
+    }
+
+    .api-costs-item.api-costs-total {
+      border-top: 2px solid $border-light;
+      margin-top: 0.5rem;
+      padding-top: 1rem;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .api-costs-total .api-costs-value {
+      color: $primary-color;
+      font-weight: 700;
+    }
+
+    .api-costs-label {
+      color: $text-secondary;
+    }
+
+    .api-costs-value {
+      color: $text-primary;
+      font-weight: 500;
+    }
   }
 }
 

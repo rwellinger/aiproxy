@@ -1024,6 +1024,14 @@
     "active": "Aktiv",
     "cancelButton": "Abbrechen",
     "changePassword": "Passwort ändern",
+    "costs": {
+      "title": "OpenAI-Kosten",
+      "organizationId": "Organisations-ID",
+      "image": "Bilder",
+      "chat": "Chat",
+      "total": "Gesamt",
+      "remaining": "Restguthaben"
+    },
     "editButton": "Bearbeiten",
     "email": "E-Mail",
     "emailHint": "E-Mail kann nicht geändert werden",

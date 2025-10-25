@@ -17,6 +17,7 @@ from utils.logger import logger
 
 from .routes.chat_routes import api_chat_v1
 from .routes.conversation_routes import api_conversation_v1
+from .routes.cost_routes import api_cost_v1
 from .routes.image_routes import api_image_v1
 from .routes.instrumental_routes import api_instrumental_task_v1, api_instrumental_v1
 from .routes.lyric_parsing_rule_routes import api_lyric_parsing_rule_v1
@@ -557,6 +558,7 @@ def create_app():
     app.register_blueprint(api_lyric_parsing_rule_v1)
     app.register_blueprint(api_redis_v1)
     app.register_blueprint(api_chat_v1)
+    app.register_blueprint(api_cost_v1)
     app.register_blueprint(api_prompt_v1)
     app.register_blueprint(api_user_v1)
     app.register_blueprint(api_conversation_v1)

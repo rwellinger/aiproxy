@@ -3,8 +3,8 @@
 import uuid
 from enum import Enum
 
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy import ARRAY, Boolean, Column, DateTime, Float, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy.dialects.postgresql import JSON, JSONB, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -380,3 +380,42 @@ class LyricParsingRule(Base):
 
     def __repr__(self):
         return f"<LyricParsingRule(id={self.id}, name='{self.name}', type='{self.rule_type}', active={self.active}, order={self.order})>"
+
+
+class ApiCostMonthly(Base):
+    """Model for monthly API cost caching with TTL support"""
+
+    __tablename__ = "api_costs_monthly"
+    __table_args__ = {"extend_existing": True}
+
+    # Primary identifier
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+
+    # Provider and organization
+    provider = Column(String(50), nullable=False, index=True)  # 'openai', 'mureka'
+    organization_id = Column(String(100), nullable=True, index=True)  # User-specific keys (optional)
+
+    # Time period
+    year = Column(Integer, nullable=False, index=True)
+    month = Column(Integer, nullable=False, index=True)  # 1-12
+
+    # Aggregated costs
+    total_cost = Column(Numeric(12, 6), nullable=False)
+    image_cost = Column(Numeric(12, 6), default=0)  # DALL-E costs
+    chat_cost = Column(Numeric(12, 6), default=0)  # GPT costs
+    currency = Column(String(3), default="usd")
+
+    # Details
+    line_items = Column(JSONB, nullable=True)  # Full breakdown by line_item
+    bucket_count = Column(Integer, nullable=True)  # Debug: Number of days/buckets
+    project_ids = Column(ARRAY(Text), nullable=True)  # Filtered projects (optional)
+
+    # Caching metadata (for Hybrid-Caching with TTL)
+    is_finalized = Column(Boolean, default=False, nullable=False, index=True)  # TRUE = Past month (never reload)
+    last_updated_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)  # Last API update
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    def __repr__(self):
+        return f"<ApiCostMonthly(provider='{self.provider}', year={self.year}, month={self.month}, total={self.total_cost}, finalized={self.is_finalized})>"

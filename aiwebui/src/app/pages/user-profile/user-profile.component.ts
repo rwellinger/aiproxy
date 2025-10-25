@@ -21,6 +21,7 @@ import { AuthService } from '../../services/business/auth.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { LanguageService } from '../../services/language.service';
+import { CostService, CostSummary } from '../../services/config/cost.service';
 import { User } from '../../models/user.model';
 import { UserSettings, Language } from '../../models/user-settings.model';
 
@@ -50,6 +51,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup;
   currentUser: User | null = null;
   currentSettings: UserSettings | null = null;
+  costsSummary: CostSummary | null = null;
   isLoading = false;
   isEditing = false;
   userDisplayName = 'Unknown User'; // Computed property to avoid method calls in template
@@ -63,6 +65,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   private notificationService = inject(NotificationService);
   private settingsService = inject(UserSettingsService);
   private languageService = inject(LanguageService);
+  private costService = inject(CostService);
   private translate = inject(TranslateService);
 
   constructor() {
@@ -86,6 +89,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.loadUserProfile();
     this.subscribeToAuthState();
     this.loadUserSettings();
+    this.loadCostsSummary();
   }
 
   ngOnDestroy(): void {
@@ -381,5 +385,21 @@ export class UserProfileComponent implements OnInit, OnDestroy {
    */
   public getCurrentLanguage(): Language {
     return this.languageService.getCurrentLanguage();
+  }
+
+  /**
+   * Load API costs summary (OpenAI + Mureka)
+   */
+  private loadCostsSummary(): void {
+    this.costService.getCostsSummary()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.costsSummary = data;
+        },
+        error: (error) => {
+          console.error('Failed to load costs summary:', error);
+        }
+      });
   }
 }

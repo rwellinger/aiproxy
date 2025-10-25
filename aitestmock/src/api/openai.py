@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, request
 
 from controllers.openai_controller import OpenAIController
 
@@ -12,3 +12,16 @@ def generate_image():
     """Simulation of https://api.openai.com/v1/images/generations"""
     print("Generating image")
     return controller.generate_image()
+
+
+@openai_routes.route("/organization/costs", methods=["GET"])
+def organization_costs():
+    """Simulation of https://api.openai.com/v1/organization/costs"""
+    start_time = int(request.args.get("start_time", 0))
+    end_time = int(request.args.get("end_time", 0))
+    limit = int(request.args.get("limit", 7))
+
+    print(
+        f"Mock OpenAI Cost API called: start_time={start_time}, end_time={end_time}, limit={limit}"
+    )
+    return controller.organization_costs(start_time, end_time, limit)

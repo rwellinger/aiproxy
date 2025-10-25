@@ -39,18 +39,20 @@ _mureka_choices = int(os.getenv("MUREKA_CHOICES", "2"))
 MUREKA_CHOICES = max(1, min(3, _mureka_choices))  # Enforce min=1, max=3
 
 # --------------------------------------------------
-# OpenAI Config (Images + Chat)
+# OpenAI Config (Images + Chat + Admin API)
 # --------------------------------------------------
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+OPENAI_ADMIN_API_KEY = os.getenv("OPENAI_ADMIN_API_KEY")
+OPENAI_ADMIN_BASE_URL = os.getenv("OPENAI_ADMIN_BASE_URL", "https://api.openai.com/v1")
 OPENAI_IMAGE_MODEL = os.getenv("OPENAI_IMAGE_MODEL", "dall-e-3")
 OPENAI_CHAT_MODELS = os.getenv(
     "OPENAI_CHAT_MODELS", "gpt-5,gpt-5-mini,gpt-5-nano,gpt-4o,gpt-4o-mini,gpt-4.1,gpt-4.1-mini"
 )
 OPENAI_TIMEOUT = int(os.getenv("OPENAI_TIMEOUT", "120"))
+OPENAI_ADMIN_TIMEOUT = int(os.getenv("OPENAI_ADMIN_TIMEOUT", "30"))
 
-# Backwards compatibility (deprecated - use OPENAI_BASE_URL + endpoints)
-OPENAI_URL = os.getenv("OPENAI_URL", f"{OPENAI_BASE_URL}/images")
+# Backwards compatibility (deprecated - use OPENAI_ADMIN_BASE_URL + endpoints)
+OPENAI_URL = os.getenv("OPENAI_URL", f"{OPENAI_ADMIN_BASE_URL}/images")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", OPENAI_IMAGE_MODEL)
 
 # --------------------------------------------------

@@ -214,6 +214,83 @@ def get_user_profile():
 
 ---
 
+## Architecture Principles (CRITICAL!)
+
+### 3-Layer Architecture (MANDATORY for all new features)
+
+**Separation of Concerns:**
+```
+Controller → Business Service → Repository
+(HTTP)       (Logic, Testable)  (DB CRUD)
+```
+
+**Layer Responsibilities:**
+
+**1. Business Layer** (`src/business/*_service.py`)
+- ✅ Business logic, calculations, transformations
+- ✅ Pure functions (no DB, no file system)
+- ✅ **MUST be unit-testable** without mocks
+- ❌ NO database queries
+- ❌ NO file system operations
+
+**2. Repository Layer** (`src/db/*_service.py`)
+- ✅ CRUD operations only
+- ✅ SQLAlchemy queries
+- ❌ NO business logic
+- ❌ NO transformations (use business layer)
+- ❌ **NO unit tests** (pure CRUD, not testable without DB)
+
+**3. Controller Layer** (`src/api/controllers/*_controller.py`)
+- ✅ HTTP request/response handling
+- ✅ Input validation (Pydantic)
+- ✅ Call business layer
+- ❌ NO business logic
+- ❌ NO direct DB queries
+
+**Example (Images - CORRECT Pattern):**
+```python
+# ✅ CORRECT: Separation of Concerns
+image_controller.py
+  └─> image_business_service.py
+       ├─ Validation, hashing, file management
+       ├─ Calls: image_enhancement_service.py (pure functions)
+       └─> image_service.py (DB CRUD only)
+
+# Tests:
+# - image_enhancement_service.py: 100% coverage (pure functions)
+# - image_service.py: 0% coverage (CRUD, no tests)
+```
+
+**Anti-Pattern (WRONG):**
+```python
+# ❌ WRONG: Business logic mixed with DB
+class SomeService:
+    def get_data(self, db: Session):
+        result = db.query(...).first()  # DB query
+
+        # ❌ Business logic in DB service!
+        return {
+            "total": float(result.total),  # Transformation
+            "image": costs.get("image", 0)  # Defaults
+        }
+```
+
+**Refactoring Guide:**
+
+If you find business logic in `src/db/*_service.py`:
+1. Create `src/business/*_transformer.py` for transformations
+2. Extract pure functions (transformations, defaults, calculations)
+3. Write unit tests for business layer
+4. Keep DB layer as pure CRUD
+
+**Checklist for NEW Services:**
+- [ ] Business logic in `src/business/` (unit-testable)
+- [ ] DB operations in `src/db/` (CRUD only, no tests)
+- [ ] Controller calls business layer (no direct DB)
+- [ ] Unit tests cover business logic (not infrastructure)
+
+---
+
 ## Angular 18 Modern Patterns
 
 ### Always use inject() for DI
@@ -423,7 +500,7 @@ pre-commit install             # Auto-run on git commit (optional)
 ```
 
 ### pytest (Unit Testing)
-**IMPORTANT:** All Python code changes MUST be validated with tests.
+**CRITICAL: Only test business logic, NEVER infrastructure!**
 
 ```bash
 # From aiproxysrv directory
@@ -434,9 +511,40 @@ pytest -k "test_name"          # Run tests matching pattern
 pytest --cov=src               # Coverage report
 ```
 
+**What to Test (CRITICAL RULES):**
+
+❌ **DO NOT write tests for:**
+- **Database services** (`src/db/*_service.py`) - Pure CRUD operations, no business logic
+- **File system operations** - Infrastructure, not logic
+- **External API clients** - Mock hell, no value
+- **SQLAlchemy mocks** - Testing mock setup, not real behavior
+- **Controllers with only DB calls** - Integration tests, not unit tests
+
+✅ **DO write tests for:**
+- **Business logic services** (`src/business/*_service.py`) - Pure functions, calculations
+- **Validation logic** - HTTP status codes, error messages
+- **Utilities** - String manipulation, data transformations, calculations
+- **Complex algorithms** - Anything with conditional logic
+
+**Example:**
+```python
+# ❌ BAD: Testing DB service (no business logic, only CRUD)
+class TestApiCostService:
+    def test_get_cached_month(self, mock_db_session):
+        # Testing SQLAlchemy mock setup = USELESS!
+        # If DB schema changes, test breaks but gives no safety
+        mock_db_session.query().filter().first()
+
+# ✅ GOOD: Testing business logic (pure function)
+class TestImageEnhancementService:
+    def test_hex_to_rgb_conversion(self):
+        # Real logic, no infrastructure
+        assert hex_to_rgb("#FF5733") == (255, 87, 51)
+```
+
 **When to Write Tests:**
-- **New Features**: Write tests for all new functionality
-- **Bug Fixes**: Add test case that reproduces the bug
+- **New Features**: Write tests for business logic only
+- **Bug Fixes**: Add test case that reproduces the bug (if logic-related)
 - **Refactoring**: Extend existing tests if logic changes
 
 ---
@@ -444,7 +552,6 @@ pytest --cov=src               # Coverage report
 ## General Don'ts
 
 - ❌ NEVER commit `.env` to repo
-- ❌ NEVER write unit tests with infrastructure dependencies (file system, database)
 - ❌ NEVER use emojis (unless explicitly requested)
 - ❌ NEVER create unnecessary markdown files
 - ❌ NEVER skip linting before commits
@@ -587,6 +694,7 @@ npm run e2e                   # E2E tests
 3. **DB connection leaks**: Not closing sessions properly
 4. **Missing error handling**: No try/catch in routes
 5. **Missing JWT protection**: Unprotected API endpoints
+6. **Architecture violations**: Business logic in DB layer (Code Review catches this)
 
 ### Both
 1. **Ignoring linter warnings**: ESLint/Stylelint/Ruff errors

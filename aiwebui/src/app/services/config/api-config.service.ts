@@ -123,6 +123,11 @@ export class ApiConfigService {
         user: {
             profile: `${this.baseUrl}/api/v1/user/profile`,
             update: `${this.baseUrl}/api/v1/user/profile`
+        },
+        costs: {
+            openaiCurrent: `${this.baseUrl}/api/v1/costs/openai/current`,
+            openaiMonth: (year: number, month: number) => `${this.baseUrl}/api/v1/costs/openai/${year}/${month}`,
+            summary: `${this.baseUrl}/api/v1/costs/summary`
         }
     };
 
