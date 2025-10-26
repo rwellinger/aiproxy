@@ -26,6 +26,7 @@ export class MusicStylePromptComponent implements OnInit {
     isEnhancingPrompt = false;
     isTranslatingPrompt = false;
     showEditDropdown = false;
+    showEnhancerDropdown = false;
     lastSearchReplaceState: string | null = null;
     currentMode: 'auto' | 'manual' = 'auto';
     isStyleChooserCollapsed = false;
@@ -174,10 +175,15 @@ export class MusicStylePromptComponent implements OnInit {
     @HostListener('document:click', ['$event'])
     onDocumentClick(event: MouseEvent): void {
         const target = event.target as HTMLElement;
-        const clickedInside = target.closest('.edit-dropdown-container');
+        const clickedInEditDropdown = target.closest('.edit-dropdown-container');
+        const clickedInEnhancerDropdown = target.closest('.enhancer-dropdown-container');
 
-        if (!clickedInside && this.showEditDropdown) {
+        if (!clickedInEditDropdown && this.showEditDropdown) {
             this.showEditDropdown = false;
+        }
+
+        if (!clickedInEnhancerDropdown && this.showEnhancerDropdown) {
+            this.showEnhancerDropdown = false;
         }
     }
 
@@ -227,6 +233,40 @@ export class MusicStylePromptComponent implements OnInit {
         }
     }
 
+    async enhanceSunoPrompt() {
+        const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
+        if (!currentPrompt) {
+            this.notificationService.error(this.translate.instant('musicStylePrompt.errors.promptRequired'));
+            return;
+        }
+
+        // Detect gender from prompt text (from style chooser selections)
+        let gender: 'male' | 'female' | undefined;
+        if (currentPrompt.toLowerCase().includes('male-voice') || currentPrompt.toLowerCase().includes('male voice')) {
+            gender = 'male';
+        } else if (currentPrompt.toLowerCase().includes('female-voice') || currentPrompt.toLowerCase().includes('female voice')) {
+            gender = 'female';
+        }
+
+        this.switchToManualMode();
+        this.isEnhancingPrompt = true;
+        this.promptForm.get('prompt')?.disable();
+        try {
+            const enhancedPrompt = await this.progressService.executeWithProgress(
+                () => this.chatService.improveMusicStylePromptForSuno(currentPrompt, gender),
+                this.translate.instant('musicStylePrompt.progress.enhancingSuno'),
+                this.translate.instant('musicStylePrompt.progress.enhancingSunoHint')
+            );
+            this.promptForm.patchValue({prompt: this.removeQuotes(enhancedPrompt)});
+            this.notificationService.success(this.translate.instant('musicStylePrompt.success.promptEnhancedSuno'));
+        } catch (error: any) {
+            this.notificationService.error(`Error enhancing prompt for Suno: ${error.message}`);
+        } finally {
+            this.isEnhancingPrompt = false;
+            this.promptForm.get('prompt')?.enable();
+        }
+    }
+
     async translatePrompt() {
         const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
         if (!currentPrompt) {
@@ -262,6 +302,10 @@ export class MusicStylePromptComponent implements OnInit {
         this.showEditDropdown = !this.showEditDropdown;
     }
 
+    toggleEnhancerDropdown(): void {
+        this.showEnhancerDropdown = !this.showEnhancerDropdown;
+    }
+
     selectEditAction(action: string): void {
         this.showEditDropdown = false;
 
@@ -272,6 +316,16 @@ export class MusicStylePromptComponent implements OnInit {
             case 'undo':
                 this.undoLastChange();
                 break;
+        }
+    }
+
+    selectEnhancerAction(action: 'standard' | 'suno'): void {
+        this.showEnhancerDropdown = false;
+
+        if (action === 'standard') {
+            this.enhancePrompt();
+        } else {
+            this.enhanceSunoPrompt();
         }
     }
 

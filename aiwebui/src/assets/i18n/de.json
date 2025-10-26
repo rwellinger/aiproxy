@@ -852,6 +852,10 @@
     "copiedToClipboard": "In Zwischenablage kopiert",
     "undoLastChange": "Letzte Änderung rückgängig",
     "undoApplied": "Änderung erfolgreich rückgängig gemacht",
+    "enhancer": {
+      "standard": "Standard Enhancer",
+      "suno": "Enhancer for Suno"
+    },
     "mode": {
       "auto": "Auto-Modus",
       "manual": "Manuell-Modus",
@@ -874,11 +878,14 @@
     "progress": {
       "enhancing": "Prompt wird verbessert...",
       "enhancingHint": "KI verbessert deine Musikstilbeschreibung",
+      "enhancingSuno": "Für Suno optimieren...",
+      "enhancingSunoHint": "KI optimiert deinen Prompt für Suno Post-Processing",
       "translating": "Prompt wird übersetzt...",
       "translatingHint": "KI übersetzt deinen Prompt ins Englische"
     },
     "success": {
       "promptEnhanced": "Prompt erfolgreich verbessert",
+      "promptEnhancedSuno": "Prompt für Suno optimiert",
       "promptTranslated": "Prompt erfolgreich übersetzt"
     },
     "searchReplaceDialog": {

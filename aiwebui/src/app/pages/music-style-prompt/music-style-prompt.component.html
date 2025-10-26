@@ -68,15 +68,39 @@
 
                 <div class="action-section">
                     <div class="ai-actions">
-                        <button
-                                type="button"
-                                (click)="enhancePrompt()"
-                                [disabled]="isAnyOperationInProgress || !promptForm.get('prompt')?.value?.trim()"
-                                class="ai-action-button">
-                            <i class="fas fa-wand-magic-sparkles" *ngIf="!isEnhancingPrompt"></i>
-                            <i class="fas fa-spinner fa-spin" *ngIf="isEnhancingPrompt"></i>
-                            <span>{{ 'musicStylePrompt.enhancePrompt' | translate }}</span>
-                        </button>
+                        <!-- Enhancer Dropdown -->
+                        <div class="enhancer-dropdown-container">
+                            <button
+                                    type="button"
+                                    (click)="toggleEnhancerDropdown()"
+                                    [disabled]="isAnyOperationInProgress || !promptForm.get('prompt')?.value?.trim()"
+                                    class="ai-action-button">
+                                <i class="fas fa-wand-magic-sparkles" *ngIf="!isEnhancingPrompt"></i>
+                                <i class="fas fa-spinner fa-spin" *ngIf="isEnhancingPrompt"></i>
+                                <span>{{ 'musicStylePrompt.enhancePrompt' | translate }}</span>
+                                <i class="fas fa-chevron-down dropdown-chevron"></i>
+                            </button>
+                            <div class="dropdown-menu" *ngIf="showEnhancerDropdown"
+                                 (click)="$event.stopPropagation()">
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isAnyOperationInProgress"
+                                        (click)="selectEnhancerAction('standard')">
+                                    <i class="fas fa-wand-sparkles"></i>
+                                    <span>{{ 'musicStylePrompt.enhancer.standard' | translate }}</span>
+                                </button>
+                                <button
+                                        type="button"
+                                        class="dropdown-item"
+                                        [disabled]="isAnyOperationInProgress"
+                                        (click)="selectEnhancerAction('suno')">
+                                    <i class="fas fa-music"></i>
+                                    <span>{{ 'musicStylePrompt.enhancer.suno' | translate }}</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <button
                                 type="button"
                                 (click)="translatePrompt()"

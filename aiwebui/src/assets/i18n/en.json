@@ -852,6 +852,10 @@
     "copiedToClipboard": "Copied to clipboard",
     "undoLastChange": "Undo Last Change",
     "undoApplied": "Change reverted successfully",
+    "enhancer": {
+      "standard": "Standard Enhancer",
+      "suno": "Enhancer for Suno"
+    },
     "mode": {
       "auto": "Auto-Mode",
       "manual": "Manual-Mode",
@@ -874,11 +878,14 @@
     "progress": {
       "enhancing": "Enhancing prompt...",
       "enhancingHint": "AI is improving your music style description",
+      "enhancingSuno": "Enhancing for Suno...",
+      "enhancingSunoHint": "AI is optimizing your prompt for Suno post-processing",
       "translating": "Translating prompt...",
       "translatingHint": "AI is translating your prompt to English"
     },
     "success": {
       "promptEnhanced": "Prompt successfully enhanced",
+      "promptEnhancedSuno": "Prompt optimized for Suno",
       "promptTranslated": "Prompt successfully translated"
     },
     "searchReplaceDialog": {

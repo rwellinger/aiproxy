@@ -117,6 +117,49 @@ export class ChatService {
     return this.validateAndCallUnified('music', 'enhance', prompt);
   }
 
+  async improveMusicStylePromptForSuno(prompt: string, gender?: 'male' | 'female'): Promise<string> {
+    const template = await firstValueFrom(this.promptConfig.getPromptTemplateAsync('music', 'enhance-suno'));
+    if (!template) {
+      throw new Error('Template music/enhance-suno not found in database');
+    }
+
+    // Validate template has all required parameters
+    if (!template.model) {
+      throw new Error('Template music/enhance-suno is missing model parameter');
+    }
+    if (template.temperature === undefined || template.temperature === null) {
+      throw new Error('Template music/enhance-suno is missing temperature parameter');
+    }
+    if (!template.max_tokens) {
+      throw new Error('Template music/enhance-suno is missing max_tokens parameter');
+    }
+
+    // Enhance pre_condition with gender preference if specified
+    let enhancedPreCondition = template.pre_condition || '';
+    if (gender) {
+      const genderInstruction = gender === 'male'
+        ? '\n\nVocal preference: Male voice with natural pitch (avoid unnaturally high male vocals)'
+        : '\n\nVocal preference: Female voice with natural pitch';
+      enhancedPreCondition += genderInstruction;
+    }
+
+    const request: UnifiedChatRequest = {
+      pre_condition: enhancedPreCondition,
+      post_condition: template.post_condition || '',
+      input_text: prompt,
+      temperature: template.temperature,
+      max_tokens: template.max_tokens,
+      model: template.model,
+      category: 'music',
+      action: 'enhance-suno'
+    };
+
+    const data: ChatResponse = await firstValueFrom(
+      this.http.post<ChatResponse>(this.apiConfig.endpoints.ollama.chatGenerateUnified, request)
+    );
+    return data.response;
+  }
+
   async generateLyrics(inputText: string): Promise<string> {
     return this.generateLyricsWithArchitecture(inputText);
   }

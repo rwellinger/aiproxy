@@ -283,7 +283,8 @@
   }
 }
 
-.edit-dropdown-container {
+.edit-dropdown-container,
+.enhancer-dropdown-container {
   position: relative;
   display: inline-block;
   overflow: visible;
@@ -297,7 +298,6 @@
 .dropdown-menu {
   position: absolute;
   bottom: calc(100% + $spacing-xs);
-  right: 0;
   background: $background-white;
   border: 1px solid $border-light;
   border-radius: $border-radius-lg;
@@ -306,6 +306,14 @@
   z-index: 1000;
   overflow: hidden;
   animation: dropdown-fade-up 0.15s ease-out;
+}
+
+.edit-dropdown-container .dropdown-menu {
+  right: 0;
+}
+
+.enhancer-dropdown-container .dropdown-menu {
+  left: 0;
 }
 
 .dropdown-item {
