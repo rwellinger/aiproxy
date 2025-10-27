@@ -1,8 +1,5 @@
 # Claude Code Configuration
 
-> **IMPORTANT:** This file MUST stay in project ROOT for `@CLAUDE` access to work!
-> Copy also exists in `.claude/CLAUDE.md` for organization, but only ROOT version is accessible via `@`.
-
 **Author:** Rob
 **Language:** English
 **Last Updated:** 2025-10-24
@@ -17,7 +14,7 @@
 - Stick to the facts, even if the answer is negative or counterintuitive.
 - Call me "Rob"
 - Be factual, precise, and to the point
-- Follow Clean Code Patterns and standard ICT best practices
+- **CRITICAL:** Follow Clean Code Patterns and standard ICT best practices
 - My nativ language is german so if possible give you answers in german.
 
 ## Language Rules
