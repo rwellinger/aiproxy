@@ -328,6 +328,75 @@
     }
   }
 
+  // iPad & Touch Device Optimizations
+  @media (max-width: 1024px) and (hover: none) {
+    // Reorder buttons for touch devices (alternative to drag & drop)
+    .reorder-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-right: $spacing-xs;
+
+      .reorder-btn {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 8px;
+
+        mat-icon {
+          font-size: 20px;
+        }
+
+        &:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    // Hide drag handle on touch devices
+    .drag-handle {
+      display: none;
+    }
+
+    // Larger touch targets for all buttons
+    .remove-btn,
+    .add-btn {
+      min-width: 44px;
+      min-height: 44px;
+    }
+
+    // Action buttons - full width
+    .action-buttons {
+      flex-direction: column;
+      gap: $spacing-sm;
+
+      button {
+        width: 100%;
+        min-height: 60px;
+        font-size: 1rem;
+      }
+    }
+
+    // Modal dialog adjustments
+    .dialog-content {
+      width: 95vw;
+      max-width: 100%;
+    }
+
+    // Architecture container - stack vertically
+    .architecture-container {
+      grid-template-columns: 1fr;
+      gap: $spacing-md;
+    }
+
+    // List items - larger touch targets
+    .section-item,
+    .available-section-item {
+      min-height: 60px;
+      padding: $spacing-sm;
+    }
+  }
+
   // Responsive Design
   @media (max-width: 768px) {
     .dialog-content {

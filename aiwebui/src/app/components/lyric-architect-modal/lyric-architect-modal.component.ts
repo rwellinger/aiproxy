@@ -16,6 +16,7 @@ import {
 } from '../../models/lyric-architecture.model';
 import { LyricArchitectureService } from '../../services/lyric-architecture.service';
 import { NotificationService } from '../../services/ui/notification.service';
+import { DeviceService } from '../../services/ui/device.service';
 import { SongSectionDisplayPipe } from '../../pipes/song-section-display.pipe';
 
 @Component({
@@ -43,6 +44,12 @@ export class LyricArchitectModalComponent implements OnInit, OnDestroy {
   private notificationService = inject(NotificationService);
   private translateService = inject(TranslateService);
   private dialogRef = inject(MatDialogRef<LyricArchitectModalComponent>);
+  private deviceService = inject(DeviceService);
+
+  // Expose touch device detection to template
+  get isTouchDevice(): boolean {
+    return this.deviceService.isTouchDevice;
+  }
 
   ngOnInit(): void {
     this.loadConfig();
@@ -159,5 +166,26 @@ export class LyricArchitectModalComponent implements OnInit, OnDestroy {
   getSectionDescription(section: SongSection): string {
     const sectionDef = AVAILABLE_SECTIONS.find(s => s.section === section);
     return sectionDef?.description || '';
+  }
+
+  // Touch-friendly alternative to drag & drop
+  moveSectionUp(index: number): void {
+    if (index === 0) {
+      return; // Already at top
+    }
+    const section = this.config.sections[index];
+    this.config.sections.splice(index, 1);
+    this.config.sections.splice(index - 1, 0, section);
+    this.updateConfig();
+  }
+
+  moveSectionDown(index: number): void {
+    if (index >= this.config.sections.length - 1) {
+      return; // Already at bottom
+    }
+    const section = this.config.sections[index];
+    this.config.sections.splice(index, 1);
+    this.config.sections.splice(index + 1, 0, section);
+    this.updateConfig();
   }
 }

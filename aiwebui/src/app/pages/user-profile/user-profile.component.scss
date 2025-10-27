@@ -70,7 +70,7 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-
+        overflow-y: auto;
       }
 
       mat-card-actions {
@@ -477,6 +477,65 @@
         order: 1;
       }
     }
+  }
+}
+
+// iPad & Touch Device Optimizations
+@media (max-width: 1024px) and (hover: none) {
+  .user-profile-container {
+    padding: $spacing-sm;
+  }
+
+  .profile-card {
+    max-width: 100%;
+  }
+
+  // Larger form inputs for touch
+  .form-input,
+  .form-textarea,
+  .form-select {
+    min-height: 44px;
+    font-size: 16px; // Prevent iOS zoom
+  }
+
+  // Full-width buttons with larger touch targets
+  .action-button,
+  .save-button,
+  .cancel-button,
+  .change-password-button {
+    width: 100%;
+    min-height: 60px;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  // Action buttons - vertical stack
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+
+    button {
+      width: 100%;
+      min-height: 60px;
+    }
+  }
+
+  // Form rows - vertical stack
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  // Settings toggles - larger touch targets
+  .mat-slide-toggle {
+    margin: 0.75rem 0;
+  }
+
+  // Avatar section - vertical layout
+  .avatar-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
   }
 }
 

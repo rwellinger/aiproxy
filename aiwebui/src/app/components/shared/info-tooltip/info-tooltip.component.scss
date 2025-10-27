@@ -1,0 +1,20 @@
+@import '../../../../scss/variables';
+
+.info-tooltip-icon {
+  font-size: 14px;
+  color: $text-muted;
+  cursor: help;
+  transition: color $transition-fast;
+  margin-left: $spacing-xs;
+
+  &:hover {
+    color: $primary-color;
+  }
+
+  // Touch optimization
+  @media (hover: none) {
+    font-size: 16px;
+    padding: 14px;
+    margin: -14px -14px -14px $spacing-xs;
+  }
+}

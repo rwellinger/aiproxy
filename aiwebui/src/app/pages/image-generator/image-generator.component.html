@@ -205,15 +205,16 @@
                                                 {{ option.labelKey | translate }}
                                             </mat-option>
                                         </mat-select>
-                                        <mat-hint *ngIf="isAlbumCoverMode">
-                                            {{ 'imageGenerator.albumCoverEnhancementHint' | translate }}
-                                        </mat-hint>
-                                        <mat-hint *ngIf="!isAlbumCoverMode && enhanceQuality.value === 'auto'">
-                                            {{ isManualMode
-                                                ? ('imageGenerator.enhanceQuality.hints.autoManual' | translate)
-                                                : ('imageGenerator.enhanceQuality.hints.autoQuality' | translate)
-                                            }}
-                                        </mat-hint>
+                                        <app-info-tooltip matSuffix
+                                            *ngIf="isAlbumCoverMode"
+                                            [text]="'imageGenerator.albumCoverEnhancementHint'">
+                                        </app-info-tooltip>
+                                        <app-info-tooltip matSuffix
+                                            *ngIf="!isAlbumCoverMode && enhanceQuality.value === 'auto'"
+                                            [text]="isManualMode
+                                                ? 'imageGenerator.enhanceQuality.hints.autoManual'
+                                                : 'imageGenerator.enhanceQuality.hints.autoQuality'">
+                                        </app-info-tooltip>
                                     </mat-form-field>
                                 </div>
                             </div>

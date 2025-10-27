@@ -437,7 +437,57 @@
 // because Angular Material custom elements require global CSS to override properly.
 // See docs/TROUBLESHOOTING.md - "Angular Material Styling Issues" for details.
 
-// Responsive: Stack on small screens
+// iPad & Touch Device Optimizations
+@media (max-width: 1024px) and (hover: none) {
+  .editor-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .left-panel {
+    max-height: 50vh;
+  }
+
+  // Larger form inputs for touch
+  .form-input,
+  .form-textarea,
+  .form-select {
+    min-height: 44px;
+    font-size: 16px; // Prevent iOS zoom
+  }
+
+  // Larger buttons for touch targets
+  .action-button,
+  .save-button,
+  .download-button {
+    min-height: 60px;
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  // Grid Position Selector - larger touch targets
+  .grid-position-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  // Accordion panels - easier to tap
+  .mat-expansion-panel-header {
+    min-height: 60px;
+  }
+
+  // Below title buttons - stack vertically
+  .below-title-group__buttons {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+      min-height: 44px;
+    }
+  }
+}
+
+// Responsive: Stack on small screens (non-touch devices)
 @media (max-width: 1024px) {
   .editor-container {
     grid-template-columns: 1fr;

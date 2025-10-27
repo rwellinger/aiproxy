@@ -8,6 +8,11 @@
         "desktop": "Desktop / Laptop",
         "tablet": "Tablet (iPad)"
       }
+    },
+    "landscapeWarning": {
+      "title": "Gerät Drehen",
+      "message": "Für die beste Erfahrung drehe dein iPad bitte in den Querformat-Modus.",
+      "hint": "Diese Anwendung ist für Querformat optimiert."
     }
   },
   "aiChat": {
@@ -426,7 +431,9 @@
     },
     "structure": {
       "empty": "Ziehe Abschnitte hierher, um deine Song-Struktur zu erstellen",
-      "removeSection": "Abschnitt entfernen"
+      "removeSection": "Abschnitt entfernen",
+      "moveUp": "Abschnitt nach oben",
+      "moveDown": "Abschnitt nach unten"
     },
     "title": "Songtext-Architektur"
   },

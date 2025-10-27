@@ -28,13 +28,36 @@
           (cdkDropListDropped)="onSectionDrop($event)">
 
           <div
-            *ngFor="let item of config.sections; trackBy: trackBySectionId"
+            *ngFor="let item of config.sections; let i = index; trackBy: trackBySectionId"
             class="section-item"
             cdkDrag>
 
             <div class="section-content">
-              <div class="drag-handle" cdkDragHandle>
+              <!-- Desktop: Drag handle -->
+              <div class="drag-handle" cdkDragHandle *ngIf="!isTouchDevice">
                 <i class="fas fa-grip-vertical"></i>
+              </div>
+
+              <!-- Touch: Reorder buttons -->
+              <div class="reorder-buttons" *ngIf="isTouchDevice">
+                <button
+                  type="button"
+                  mat-icon-button
+                  class="reorder-btn"
+                  (click)="moveSectionUp(i)"
+                  [disabled]="i === 0"
+                  [title]="'lyricArchitect.structure.moveUp' | translate">
+                  <mat-icon>arrow_upward</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  class="reorder-btn"
+                  (click)="moveSectionDown(i)"
+                  [disabled]="i === config.sections.length - 1"
+                  [title]="'lyricArchitect.structure.moveDown' | translate">
+                  <mat-icon>arrow_downward</mat-icon>
+                </button>
               </div>
 
               <div class="section-info">

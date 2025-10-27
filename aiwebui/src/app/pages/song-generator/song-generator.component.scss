@@ -992,3 +992,71 @@ form .segment-control {
         font-style: italic;
     }
 }
+
+// iPad & Touch Device Optimizations
+@media (max-width: 1024px) and (hover: none) {
+  .song-generator-container {
+    padding: $spacing-sm;
+  }
+
+  .song-generator-card {
+    max-width: 100%;
+    height: calc(100vh - 1rem);
+  }
+
+  // Form grid to single column
+  .song-generator-form {
+    grid-template-columns: 1fr;
+  }
+
+  // Larger form inputs for touch
+  .form-input,
+  .form-textarea,
+  .form-select {
+    min-height: 44px;
+    font-size: 16px; // Prevent iOS zoom
+  }
+
+  .form-textarea {
+    min-height: 120px;
+  }
+
+  // Music style grid - 2 columns on iPad
+  .music-style-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-xs;
+  }
+
+  // Vertical stacking of action buttons
+  .action-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .utility-actions,
+  .submit-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  // Full-width buttons with larger touch targets
+  .utility-button,
+  .generate-button,
+  .clear-button,
+  .navigate-button {
+    width: 100%;
+    height: 60px;
+    font-size: 1rem;
+  }
+
+  // Header adjustments
+  .generator-header {
+    padding: 0.75rem;
+
+    .generator-title h2 {
+      font-size: 1.25rem;
+    }
+  }
+}

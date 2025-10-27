@@ -16,6 +16,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {ImageDetailPanelComponent} from '../../components/image-detail-panel/image-detail-panel.component';
+import {InfoTooltipComponent} from '../../components/shared/info-tooltip/info-tooltip.component';
 import {ProgressService} from '../../services/ui/progress.service';
 import {
     ArtisticStyle,
@@ -30,7 +31,7 @@ import {
 @Component({
     selector: 'app-image-generator',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, MatButtonModule, MatSelectModule, MatFormFieldModule, ImageDetailPanelComponent, TranslateModule],
+    imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, MatButtonModule, MatSelectModule, MatFormFieldModule, ImageDetailPanelComponent, InfoTooltipComponent, TranslateModule],
     templateUrl: './image-generator.component.html',
     styleUrl: './image-generator.component.scss'
 })

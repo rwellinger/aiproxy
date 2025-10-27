@@ -18,8 +18,24 @@
   </div>
 </div>
 
-<!-- Main App (Hidden on Mobile) -->
-<div *ngIf="!showMobileWarning" class="app-layout">
+<!-- iPad Portrait Warning (Landscape Recommended) -->
+<div *ngIf="showLandscapeWarning" class="landscape-warning-screen">
+  <div class="landscape-warning-content">
+    <i class="fas fa-tablet-alt landscape-warning-icon"></i>
+    <i class="fas fa-sync-alt rotation-icon"></i>
+    <h1>{{ 'app.landscapeWarning.title' | translate }}</h1>
+    <p class="warning-message">{{ 'app.landscapeWarning.message' | translate }}</p>
+    <div class="rotation-hint">
+      <i class="fas fa-mobile-alt"></i>
+      <i class="fas fa-arrow-right"></i>
+      <i class="fas fa-tablet-alt"></i>
+    </div>
+    <p class="hint">{{ 'app.landscapeWarning.hint' | translate }}</p>
+  </div>
+</div>
+
+<!-- Main App (Hidden on Mobile/Portrait) -->
+<div *ngIf="!showMobileWarning && !showLandscapeWarning" class="app-layout">
   <!-- Side Menu (20%) - Only show when authenticated -->
   <app-side-menu *ngIf="(authState$ | async)?.isAuthenticated"></app-side-menu>
 

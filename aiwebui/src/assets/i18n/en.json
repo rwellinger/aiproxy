@@ -8,6 +8,11 @@
         "desktop": "Desktop / Laptop",
         "tablet": "Tablet (iPad)"
       }
+    },
+    "landscapeWarning": {
+      "title": "Rotate Your Device",
+      "message": "For the best experience, please rotate your iPad to landscape mode.",
+      "hint": "This application is optimized for landscape orientation."
     }
   },
   "aiChat": {
@@ -426,7 +431,9 @@
     },
     "structure": {
       "empty": "Drag sections here to build your song structure",
-      "removeSection": "Remove section"
+      "removeSection": "Remove section",
+      "moveUp": "Move section up",
+      "moveDown": "Move section down"
     },
     "title": "Lyric Architecture"
   },

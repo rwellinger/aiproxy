@@ -446,6 +446,53 @@
   }
 }
 
+// iPad & Touch Device Optimizations
+@media (max-width: 1024px) and (hover: none) {
+  // Stack Master-Detail layout on iPad
+  .image-view-container.master-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  // Sections with adjusted heights
+  .image-gallery-section,
+  .image-details-section {
+    height: auto;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  // Larger touch targets for image items
+  .image-item {
+    min-height: 60px;
+    padding: 12px;
+
+    &:active {
+      background: rgba($primary-color, 0.08);
+      transform: scale(0.99);
+    }
+  }
+
+  // Image grid - 2 columns on iPad
+  .images-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  // Full-width action buttons
+  .action-button,
+  .detail-actions button {
+    width: 100%;
+    height: 60px;
+    margin-bottom: 0.5rem;
+  }
+
+  // Adjust card heights
+  .image-gallery-card,
+  .image-details-card {
+    height: auto;
+  }
+}
+
 @media (max-width: 768px) {
   .image-view-container {
     padding: 1rem;

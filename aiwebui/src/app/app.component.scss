@@ -74,6 +74,72 @@
     border-top: 1px solid #e2e8f0;
 }
 
+/* Landscape Warning Screen (iPad Portrait) */
+.landscape-warning-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    padding: 2rem;
+    text-align: center;
+}
+
+.landscape-warning-content {
+    max-width: 500px;
+    background: white;
+    padding: 3rem 2rem;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.landscape-warning-icon {
+    font-size: 4rem;
+    color: #f5576c;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.rotation-icon {
+    font-size: 2.5rem;
+    color: #f093fb;
+    margin-bottom: 1.5rem;
+    display: block;
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.rotation-hint {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+
+    i {
+        font-size: 2rem;
+        color: #f5576c;
+
+        &.fa-arrow-right {
+            font-size: 1.5rem;
+            color: #f093fb;
+        }
+
+        &:last-child {
+            transform: rotate(90deg);
+        }
+    }
+}
+
 .app-layout {
     display: flex;
     height: 100vh;

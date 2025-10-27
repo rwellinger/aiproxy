@@ -5,6 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { SideMenuComponent } from './components/side-menu/side-menu.component';
 import { AuthService } from './services/business/auth.service';
 import { VersionCheckService } from './services/config/version-check.service';
+import { DeviceService } from './services/ui/device.service';
 
 @Component({
   selector: 'app-root',
@@ -16,9 +17,11 @@ import { VersionCheckService } from './services/config/version-check.service';
 export class AppComponent implements OnInit {
   title = 'aiwebui';
   showMobileWarning = false;
+  showLandscapeWarning = false;
 
   private authService = inject(AuthService);
   private versionCheckService = inject(VersionCheckService);
+  private deviceService = inject(DeviceService);
 
   public authState$ = this.authService.authState$;
 
@@ -26,12 +29,23 @@ export class AppComponent implements OnInit {
     // Version-Check beim App-Start initialisieren
     this.versionCheckService.initVersionCheck();
 
-    // Check if mobile device (< 768px)
-    this.checkMobileDevice();
-    window.addEventListener('resize', () => this.checkMobileDevice());
+    // Check device warnings
+    this.checkDeviceWarnings();
+    window.addEventListener('resize', () => this.checkDeviceWarnings());
   }
 
-  private checkMobileDevice(): void {
-    this.showMobileWarning = window.innerWidth < 768;
+  private checkDeviceWarnings(): void {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    // Mobile warning (< 768px)
+    this.showMobileWarning = width < 768;
+
+    // iPad Portrait warning (768-1024px AND height > width AND touch device)
+    this.showLandscapeWarning = !this.showMobileWarning &&
+                                 width >= 768 &&
+                                 width <= 1024 &&
+                                 height > width &&
+                                 this.deviceService.isTouchDevice;
   }
 }
