@@ -3,6 +3,8 @@
 import logging
 from typing import Any
 
+from business.song_mureka_transformer import SongMurekaTransformer
+from business.song_transformer import SongTransformer
 from db.song_service import song_service
 
 
@@ -56,7 +58,7 @@ class SongBusinessService:
             total_count = song_service.get_total_songs_count(status=status, search=search, workflow=workflow)
 
             # Transform to API response format
-            songs_list = [self._transform_song_to_list_format(song) for song in songs]
+            songs_list = [SongTransformer.transform_song_to_list_format(song) for song in songs]
 
             return {
                 "songs": songs_list,
@@ -87,7 +89,7 @@ class SongBusinessService:
             if not song:
                 return None
 
-            return self._transform_song_to_detail_format(song)
+            return SongTransformer.transform_song_to_detail_format(song)
 
         except Exception as e:
             logger.error(f"Error retrieving song {song_id}: {e}")
@@ -241,73 +243,54 @@ class SongBusinessService:
             logger.error(f"Error updating choice rating {choice_id}: {e}")
             raise SongBusinessError(f"Failed to update choice rating: {e}") from e
 
-    def _transform_song_to_list_format(self, song) -> dict[str, Any]:
-        """Transform song object to list display format"""
-        return {
-            "id": str(song.id),
-            "lyrics": song.lyrics,
-            "title": song.title,
-            "model": song.model,
-            "tags": song.tags,
-            "workflow": song.workflow,
-            "is_instrumental": song.is_instrumental,
-            "created_at": song.created_at.isoformat() if song.created_at else None,
+    def process_song_completion(self, task_id: str, result_data: dict[str, Any]) -> bool:
+        """
+        Process MUREKA song completion with business logic transformation
+
+        This method orchestrates:
+        1. Parse MUREKA API response (business layer)
+        2. Update database with parsed data (repository layer)
+
+        Args:
+            task_id: Celery task ID
+            result_data: Raw MUREKA API response dict
+
+        Returns:
+            True if successful, False otherwise
+
+        Example result_data:
+        {
+            "status": "SUCCESS",
+            "result": {
+                "status": "succeeded",
+                "model": "mureka-7.5",
+                "choices": [...]
+            },
+            "completed_at": 1234567890
         }
+        """
+        try:
+            # Business logic: Parse MUREKA response
+            logger.info("Parsing MUREKA result", task_id=task_id)
+            parsed = SongMurekaTransformer.parse_mureka_result(result_data)
 
-    def _transform_song_to_detail_format(self, song) -> dict[str, Any]:
-        """Transform song object to detailed format with choices"""
-        # Format choices
-        choices_list = []
-        for choice in song.choices:
-            choice_data = {
-                "id": str(choice.id),
-                "mureka_choice_id": choice.mureka_choice_id,
-                "choice_index": choice.choice_index,
-                "mp3_url": choice.mp3_url,
-                "flac_url": choice.flac_url,
-                "video_url": choice.video_url,
-                "image_url": choice.image_url,
-                "stem_url": choice.stem_url,
-                "stem_generated_at": choice.stem_generated_at.isoformat() if choice.stem_generated_at else None,
-                "duration": choice.duration,
-                "title": choice.title,
-                "tags": choice.tags,
-                "rating": choice.rating,
-                "formattedDuration": self._format_duration_from_ms(choice.duration) if choice.duration else None,
-                "created_at": choice.created_at.isoformat() if choice.created_at else None,
-            }
-            choices_list.append(choice_data)
+            # Repository: Update song with parsed data
+            success = song_service.update_song_result(task_id, parsed)
 
-        # Format song data
-        return {
-            "id": str(song.id),
-            "task_id": song.task_id,
-            "job_id": song.job_id,
-            "lyrics": song.lyrics,
-            "prompt": song.prompt,
-            "model": song.model,
-            "title": song.title,
-            "tags": song.tags,
-            "workflow": song.workflow,
-            "is_instrumental": song.is_instrumental,
-            "status": song.status,
-            "progress_info": song.progress_info,
-            "error_message": song.error_message,
-            "mureka_response": song.mureka_response,
-            "mureka_status": song.mureka_status,
-            "choices_count": len(choices_list),
-            "choices": choices_list,
-            "created_at": song.created_at.isoformat() if song.created_at else None,
-            "updated_at": song.updated_at.isoformat() if song.updated_at else None,
-            "completed_at": song.completed_at.isoformat() if song.completed_at else None,
-        }
+            if success:
+                logger.info(
+                    "Song completion processed",
+                    task_id=task_id,
+                    model=parsed.get("model"),
+                    choices_count=parsed.get("choices_count", 0),
+                )
+            else:
+                logger.warning("Failed to update song result", task_id=task_id)
 
-    def _format_duration_from_ms(self, duration_ms: float) -> str:
-        """Format duration from milliseconds to MM:SS format"""
-        if not duration_ms:
-            return "00:00"
+            return success
 
-        total_seconds = int(duration_ms / 1000)
-        minutes = total_seconds // 60
-        seconds = total_seconds % 60
-        return f"{minutes:02d}:{seconds:02d}"
+        except Exception as e:
+            logger.error(
+                "Song completion processing failed", task_id=task_id, error=str(e), error_type=type(e).__name__
+            )
+            raise SongBusinessError(f"Failed to process song completion: {e}") from e
