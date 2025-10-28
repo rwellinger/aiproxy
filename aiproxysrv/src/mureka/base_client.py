@@ -7,7 +7,6 @@ import traceback
 import requests
 from requests import HTTPError
 
-from api.json_helpers import prune
 from config.settings import (
     MUREKA_API_KEY,
     MUREKA_MAX_POLL_ATTEMPTS,
@@ -16,6 +15,7 @@ from config.settings import (
     MUREKA_POLL_INTERVAL_SHORT,
     MUREKA_TIMEOUT,
 )
+from mureka.json_utils import prune_keys
 from utils.logger import logger
 
 
@@ -116,7 +116,7 @@ class MurekaBaseClient:
     def _clean_response_data(self, response_data: dict) -> dict:
         """Clean response data by removing unwanted keys"""
         keys_to_remove = {"lyrics_sections"}
-        return prune(response_data, keys_to_remove)
+        return prune_keys(response_data, keys_to_remove)
 
     def _update_task_state(
         self,
