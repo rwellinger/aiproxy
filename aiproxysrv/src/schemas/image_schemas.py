@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .common_schemas import BaseResponse, PaginationResponse
 
@@ -24,14 +24,15 @@ class ImageGenerateRequest(BaseModel):
     color_palette: str | None = Field(None, description="Color palette (auto, vibrant, muted, monochrome, etc.)")
     detail_level: str | None = Field(None, description="Detail level (auto, minimal, moderate, highly-detailed)")
 
-    @validator("size")
+    @field_validator("size")
+    @classmethod
     def validate_size(cls, v):
         if v and v not in ["512x512", "1024x1024", "1024x1792", "1792x1024"]:
             raise ValueError("size must be one of: 512x512, 1024x1024, 1024x1792, 1792x1024")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "prompt": "A beautiful sunset over the ocean with sailing boats",
                 "size": "1024x1024",
@@ -43,6 +44,7 @@ class ImageGenerateRequest(BaseModel):
                 "detail_level": "highly-detailed",
             }
         }
+    )
 
 
 class ImageResponse(BaseModel):
@@ -67,9 +69,9 @@ class ImageResponse(BaseModel):
     color_palette: str | None = Field(None, description="Color palette used")
     detail_level: str | None = Field(None, description="Detail level used")
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": "img_abc123",
                 "title": "Ocean Sunset",
@@ -88,7 +90,8 @@ class ImageResponse(BaseModel):
                 "color_palette": "warm",
                 "detail_level": "highly-detailed",
             }
-        }
+        },
+    )
 
 
 class ImageGenerateResponse(BaseResponse):
@@ -106,13 +109,15 @@ class ImageListRequest(BaseModel):
     sort: str | None = Field("created_at", description="Sort field")
     order: str | None = Field("desc", description="Sort order")
 
-    @validator("sort")
+    @field_validator("sort")
+    @classmethod
     def validate_sort(cls, v):
         if v and v not in ["created_at", "completed_at", "title"]:
             raise ValueError("sort must be one of: created_at, completed_at, title")
         return v
 
-    @validator("order")
+    @field_validator("order")
+    @classmethod
     def validate_order(cls, v):
         if v and v not in ["asc", "desc"]:
             raise ValueError("order must be either asc or desc")
@@ -131,10 +136,11 @@ class ImageUpdateRequest(BaseModel):
     title: str | None = Field(None, max_length=255, description="New image title")
     tags: list[str] | None = Field(None, description="Image tags")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {"title": "Beautiful Ocean Sunset", "tags": ["sunset", "ocean", "peaceful", "nature"]}
         }
+    )
 
 
 class ImageUpdateResponse(BaseResponse):

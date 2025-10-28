@@ -5,7 +5,7 @@ User management Pydantic schemas for OpenAPI integration
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from schemas.common_schemas import BaseResponse
 
@@ -26,7 +26,8 @@ class UserCreateRequest(UserBase):
 
     password: str = Field(..., min_length=4, max_length=128, description="User password")
 
-    @validator("password")
+    @field_validator("password")
+    @classmethod
     def validate_password(cls, v):
         if len(v) < 4:
             raise ValueError("Password must be at least 4 characters long")
@@ -77,8 +78,7 @@ class UserResponse(BaseModel):
     updated_at: datetime | None = Field(None, description="Last update timestamp")
     last_login: datetime | None = Field(None, description="Last login timestamp")
 
-    class Config:
-        from_attributes = True  # For SQLAlchemy model conversion
+    model_config = ConfigDict(from_attributes=True)
 
 
 # User Update
@@ -103,7 +103,8 @@ class PasswordChangeRequest(BaseModel):
     old_password: str = Field(..., description="Current password")
     new_password: str = Field(..., min_length=4, max_length=128, description="New password")
 
-    @validator("new_password")
+    @field_validator("new_password")
+    @classmethod
     def validate_new_password(cls, v):
         if len(v) < 4:
             raise ValueError("New password must be at least 4 characters long")
@@ -122,7 +123,8 @@ class PasswordResetRequest(BaseModel):
     email: EmailStr = Field(..., description="User email address")
     new_password: str = Field(..., min_length=4, max_length=128, description="New password")
 
-    @validator("new_password")
+    @field_validator("new_password")
+    @classmethod
     def validate_new_password(cls, v):
         if len(v) < 4:
             raise ValueError("New password must be at least 4 characters long")

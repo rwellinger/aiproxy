@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.types import UUID4
 
 from .common_schemas import BaseResponse, PaginationResponse
@@ -20,15 +20,16 @@ class SongGenerateRequest(BaseModel):
     duration: int | None = Field(30, ge=15, le=120, description="Song duration in seconds")
     sketch_id: str | None = Field(None, description="Optional sketch ID to link this song to a sketch")
 
-    @validator("model")
+    @field_validator("model")
+    @classmethod
     def validate_model(cls, v):
         allowed_models = ["auto", "mureka-7.5", "mureka-7", "mureka-6", "mureka-o1"]
         if v not in allowed_models:
             raise ValueError(f"model must be one of: {', '.join(allowed_models)}")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "prompt": "Upbeat pop song about summer vacation",
                 "lyrics": "[Verse 1]\nSummer days are here again...",
@@ -38,6 +39,7 @@ class SongGenerateRequest(BaseModel):
                 "duration": 30,
             }
         }
+    )
 
 
 class SongResponse(BaseModel):
@@ -61,15 +63,16 @@ class SongResponse(BaseModel):
     completed_at: datetime | None = Field(None, description="Completion timestamp")
     tags: list[str] | None = Field(None, description="Song tags")
 
-    @validator("workflow")
+    @field_validator("workflow")
+    @classmethod
     def validate_workflow(cls, v):
         if v and v not in ["inUse", "onWork", "notUsed", "fail"]:
             raise ValueError("workflow must be one of: inUse, onWork, notUsed, fail")
         return v
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": "song_abc123",
                 "title": "Summer Vibes",
@@ -87,7 +90,8 @@ class SongResponse(BaseModel):
                 "completed_at": "2024-01-01T12:02:30Z",
                 "tags": ["pop", "summer", "upbeat"],
             }
-        }
+        },
+    )
 
 
 class SongGenerateResponse(BaseResponse):
@@ -108,25 +112,29 @@ class SongListRequest(BaseModel):
     sort: str | None = Field("created_at", description="Sort field")
     order: str | None = Field("desc", description="Sort order")
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def validate_status(cls, v):
         if v and v not in ["pending", "processing", "progress", "completed", "failed"]:
             raise ValueError("status must be one of: pending, processing, progress, completed, failed")
         return v
 
-    @validator("workflow")
+    @field_validator("workflow")
+    @classmethod
     def validate_workflow(cls, v):
         if v and v not in ["inUse", "onWork", "notUsed", "fail"]:
             raise ValueError("workflow must be one of: inUse, onWork, notUsed, fail")
         return v
 
-    @validator("sort")
+    @field_validator("sort")
+    @classmethod
     def validate_sort(cls, v):
         if v and v not in ["created_at", "completed_at", "title", "rating"]:
             raise ValueError("sort must be one of: created_at, completed_at, title, rating")
         return v
 
-    @validator("order")
+    @field_validator("order")
+    @classmethod
     def validate_order(cls, v):
         if v and v not in ["asc", "desc"]:
             raise ValueError("order must be either asc or desc")
@@ -147,14 +155,15 @@ class SongUpdateRequest(BaseModel):
     rating: int | None = Field(None, ge=1, le=5, description="User rating")
     tags: list[str] | None = Field(None, description="Song tags")
 
-    @validator("workflow")
+    @field_validator("workflow")
+    @classmethod
     def validate_workflow(cls, v):
         if v and v not in ["inUse", "onWork", "notUsed", "fail"]:
             raise ValueError("workflow must be one of: inUse, onWork, notUsed, fail")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "title": "Amazing Summer Song",
                 "workflow": "inUse",
@@ -162,6 +171,7 @@ class SongUpdateRequest(BaseModel):
                 "tags": ["pop", "summer", "upbeat", "vacation"],
             }
         }
+    )
 
 
 class SongUpdateResponse(BaseResponse):
@@ -175,8 +185,7 @@ class StemGenerateRequest(BaseModel):
 
     choice_id: UUID4 = Field(..., description="Choice ID to generate stems for")
 
-    class Config:
-        json_schema_extra = {"example": {"choice_id": "1e6cd76e-d574-4058-9eec-9a2dc38dd737"}}
+    model_config = ConfigDict(json_schema_extra={"example": {"choice_id": "1e6cd76e-d574-4058-9eec-9a2dc38dd737"}})
 
 
 class StemGenerateResponse(BaseResponse):
@@ -217,8 +226,7 @@ class ChoiceRatingUpdateRequest(BaseModel):
 
     rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5")
 
-    class Config:
-        json_schema_extra = {"example": {"rating": 4}}
+    model_config = ConfigDict(json_schema_extra={"example": {"rating": 4}})
 
 
 class ChoiceRatingUpdateResponse(BaseResponse):
@@ -275,15 +283,16 @@ class InstrumentalGenerateRequest(BaseModel):
     duration: int | None = Field(30, ge=15, le=120, description="Instrumental duration in seconds")
     sketch_id: str | None = Field(None, description="Optional sketch ID to link this instrumental to a sketch")
 
-    @validator("model")
+    @field_validator("model")
+    @classmethod
     def validate_model(cls, v):
         allowed_models = ["auto", "mureka-7.5", "mureka-7", "mureka-6", "mureka-o1"]
         if v not in allowed_models:
             raise ValueError(f"model must be one of: {', '.join(allowed_models)}")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "title": "Passionate R&B Instrumental",
                 "prompt": "r&b, slow, passionate",
@@ -292,6 +301,7 @@ class InstrumentalGenerateRequest(BaseModel):
                 "duration": 30,
             }
         }
+    )
 
 
 class InstrumentalGenerateResponse(BaseResponse):

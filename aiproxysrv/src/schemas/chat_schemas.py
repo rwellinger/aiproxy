@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .common_schemas import BaseResponse
 
@@ -16,8 +16,9 @@ class ChatOptions(BaseModel):
     top_p: float | None = Field(0.9, ge=0.0, le=1.0, description="Top-p sampling parameter")
     repeat_penalty: float | None = Field(1.1, ge=0.0, le=2.0, description="Repeat penalty")
 
-    class Config:
-        json_schema_extra = {"example": {"temperature": 0.7, "max_tokens": 100, "top_p": 0.9, "repeat_penalty": 1.1}}
+    model_config = ConfigDict(
+        json_schema_extra={"example": {"temperature": 0.7, "max_tokens": 100, "top_p": 0.9, "repeat_penalty": 1.1}}
+    )
 
 
 class ChatRequest(BaseModel):
@@ -29,15 +30,16 @@ class ChatRequest(BaseModel):
     post_condition: str | None = Field("", description="Text after user input")
     options: ChatOptions | None = Field(default_factory=ChatOptions, description="Generation options")
 
-    @validator("model")
+    @field_validator("model")
+    @classmethod
     def validate_model(cls, v):
         valid_models = ["llama3.2:3b", "gpt-oss:20b", "deepseek-r1:8b", "gemma3:4b"]
         if v not in valid_models:
             raise ValueError(f"model must be one of: {', '.join(valid_models)}")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "model": "llama3.2:3b",
                 "prompt": "Explain quantum computing in simple terms",
@@ -46,6 +48,7 @@ class ChatRequest(BaseModel):
                 "options": {"temperature": 0.7, "max_tokens": 150, "top_p": 0.9, "repeat_penalty": 1.1},
             }
         }
+    )
 
 
 class ChatResponse(BaseResponse):
@@ -56,8 +59,8 @@ class ChatResponse(BaseResponse):
     usage: dict[str, Any] | None = Field(None, description="Token usage statistics")
     timestamp: datetime = Field(default_factory=datetime.now, description="Response timestamp")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "success": True,
                 "data": {
@@ -71,6 +74,7 @@ class ChatResponse(BaseResponse):
                 "timestamp": "2024-01-01T12:00:00Z",
             }
         }
+    )
 
 
 class UnifiedChatRequest(BaseModel):
@@ -90,7 +94,8 @@ class UnifiedChatRequest(BaseModel):
     category: str | None = Field(None, description="Template category (for logging/tracking)")
     action: str | None = Field(None, description="Template action (for logging/tracking)")
 
-    @validator("model")
+    @field_validator("model")
+    @classmethod
     def validate_model(cls, v):
         if v is not None:
             valid_models = ["llama3.2:3b", "gpt-oss:20b", "deepseek-r1:8b", "gemma3:4b"]
@@ -98,8 +103,8 @@ class UnifiedChatRequest(BaseModel):
                 raise ValueError(f"model must be one of: {', '.join(valid_models)}")
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "pre_condition": "You are a helpful AI assistant.",
                 "post_condition": "Keep your answer concise.",
@@ -110,6 +115,7 @@ class UnifiedChatRequest(BaseModel):
                 "model": "llama3.2:3b",
             }
         }
+    )
 
 
 class ChatErrorResponse(BaseResponse):
@@ -120,8 +126,8 @@ class ChatErrorResponse(BaseResponse):
     model: str | None = Field(None, description="Model that was attempted")
     timestamp: datetime = Field(default_factory=datetime.now, description="Error timestamp")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "success": False,
                 "error": "Model not available or invalid parameters",
@@ -129,3 +135,4 @@ class ChatErrorResponse(BaseResponse):
                 "timestamp": "2024-01-01T12:00:00Z",
             }
         }
+    )

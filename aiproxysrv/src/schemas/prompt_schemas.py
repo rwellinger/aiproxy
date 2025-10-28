@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class PromptTemplateBase(BaseModel):
@@ -23,7 +23,8 @@ class PromptTemplateBase(BaseModel):
     max_tokens: int | None = Field(None, gt=0, description="Maximum tokens to generate")
     active: bool = Field(True, description="Whether the template is active")
 
-    @validator("model")
+    @field_validator("model")
+    @classmethod
     def validate_model(cls, v):
         if v is not None and v not in ["llama3.2:3b", "gpt-oss:20b", "deepseek-r1:8b", "gemma3:4b"]:
             raise ValueError("model must be one of: llama3.2:3b, gpt-oss:20b, deepseek-r1:8b, gemma3:4b")
@@ -52,7 +53,8 @@ class PromptTemplateUpdate(BaseModel):
     max_tokens: int | None = Field(None, gt=0, description="Maximum tokens to generate")
     active: bool | None = Field(None, description="Whether the template is active")
 
-    @validator("model")
+    @field_validator("model")
+    @classmethod
     def validate_model(cls, v):
         if v is not None and v not in ["llama3.2:3b", "gpt-oss:20b", "deepseek-r1:8b", "gemma3:4b"]:
             raise ValueError("model must be one of: llama3.2:3b, gpt-oss:20b, deepseek-r1:8b, gemma3:4b")
@@ -66,8 +68,7 @@ class PromptTemplateResponse(PromptTemplateBase):
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime | None = Field(None, description="Last update timestamp")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PromptTemplateListResponse(BaseModel):

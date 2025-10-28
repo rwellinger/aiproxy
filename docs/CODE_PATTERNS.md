@@ -461,10 +461,10 @@ class SongController:
         return True
 ```
 
-### Pydantic Schemas
+### Pydantic Schemas (V2)
 
 ```python
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
@@ -477,7 +477,16 @@ class SongBase(BaseModel):
 
 class SongCreate(SongBase):
     """Schema for creating a song."""
-    pass
+    model: str = Field("auto", description="Model to use for generation")
+
+    @field_validator("model")
+    @classmethod
+    def validate_model(cls, v):
+        """Validate model field (Pydantic V2 pattern)."""
+        allowed_models = ["auto", "mureka-7.5", "mureka-7", "mureka-6"]
+        if v not in allowed_models:
+            raise ValueError(f"model must be one of: {', '.join(allowed_models)}")
+        return v
 
 class SongUpdate(BaseModel):
     """Schema for updating a song."""
@@ -511,6 +520,35 @@ class SongListResponse(BaseModel):
     total: int
     skip: int
     limit: int
+```
+
+**Important Pydantic V2 Changes:**
+
+- **Validators**: Use `@field_validator("field")` instead of `@validator("field")`
+- **Class Method**: Always add `@classmethod` decorator
+- **Import**: `from pydantic import field_validator` (not `validator`)
+
+**Migration Example:**
+
+```python
+# ❌ V1 (OLD - deprecated)
+from pydantic import validator
+
+@validator("model")
+def validate_model(cls, v):
+    if v not in ["auto", "mureka-7.5"]:
+        raise ValueError("Invalid model")
+    return v
+
+# ✅ V2 (NEW - current)
+from pydantic import field_validator
+
+@field_validator("model")
+@classmethod
+def validate_model(cls, v):
+    if v not in ["auto", "mureka-7.5"]:
+        raise ValueError("Invalid model")
+    return v
 ```
 
 ### SQLAlchemy Model
