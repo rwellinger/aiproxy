@@ -343,6 +343,12 @@ ruff check .                   # Run linter
 ruff check . --fix             # Auto-fix issues
 ruff format .                  # Format code
 
+# Logging (CRITICAL!)
+# ALWAYS use: from utils.logger import logger
+# NEVER use:  import logging
+# Standard Python logger crashes with structured parameters: logger.info("msg", param=value)
+# See CLAUDE.md for complete logging guidelines
+
 # Unit Testing (pytest)
 pytest                         # Run all tests
 pytest -v -s                   # Verbose output with print statements

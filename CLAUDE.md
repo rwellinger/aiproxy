@@ -446,19 +446,27 @@ Use **feature-grouped hierarchical keys** (max 3 levels):
 
 #### Rules
 - **ALWAYS** use `logger` from `utils.logger`, **NEVER** `print()`
+- **ALWAYS** use `from utils.logger import logger`, **NEVER** `import logging`
 - **ALWAYS** provide context via extra fields (NOT in the message string)
 - **ALWAYS** use human-readable messages (NOT `snake_case`)
+
+**CRITICAL:** Using `import logging` instead of `from utils.logger import logger` will cause crashes when using structured logging parameters (e.g., `logger.info("Message", param=value)`). Standard Python logger does NOT support named parameters!
 
 #### Patterns
 
 ```python
+# ✅ CORRECT: Use Loguru logger from utils
 from utils.logger import logger
 
-# ✅ CORRECT: Structured logging with context
 logger.debug("Sketch retrieved", sketch_id=sketch_id, workflow=workflow, user_id=user_id)
 logger.info("Song updated", song_id=song_id, fields_updated=list(update_data.keys()))
 logger.warning("Template not found", category=category, action=action)
 logger.error("Database error", error=str(e), error_type=type(e).__name__, sketch_id=sketch_id)
+
+# ❌ WRONG: Standard Python logging (CRASHES with structured parameters!)
+import logging
+logger = logging.getLogger(__name__)
+logger.info("Processing", task_id=task_id)  # TypeError: info() got unexpected keyword argument 'task_id'
 
 # ❌ WRONG: Snake-case messages (unreadable)
 logger.debug("sketch_retrieved_by_id", sketch_id=sketch_id)
