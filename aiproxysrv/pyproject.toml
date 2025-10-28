@@ -163,6 +163,7 @@ omit = [
     "*/.venv/*",
     # Infrastructure - not unit-testable per CLAUDE.md
     "src/db/*_service.py",                 # DB/CRUD services (no business logic)
+    "src/services/*.py",                   # External API clients (infrastructure, mock hell)
     "src/mureka/*.py",                     # External API clients (mock hell)
     "src/celery_app/tasks.py",             # Celery tasks (infrastructure)
     "src/celery_app/slot_manager.py",      # Celery slot management (global state)
@@ -184,8 +185,9 @@ omit = [
     "src/schemas/*.py",                    # Pydantic schemas (validation only)
     # Imports only
     "*/__init__.py",                       # Import statements only
-    # Configuration
+    # Configuration & Utilities (Infrastructure)
     "src/config/*.py",                     # Configuration files (no business logic)
+    "src/utils/logger.py",                 # Logger configuration (infrastructure, no business logic)
 ]
 
 [tool.coverage.report]
