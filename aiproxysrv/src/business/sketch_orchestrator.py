@@ -1,4 +1,4 @@
-"""Sketch Business Service - Handles sketch management business logic"""
+"""Sketch Orchestrator - Coordinates sketch operations (no testable business logic)"""
 
 from typing import Any
 from uuid import UUID
@@ -10,14 +10,14 @@ from db.sketch_service import sketch_service
 from utils.logger import logger
 
 
-class SketchBusinessError(Exception):
-    """Base exception for sketch business logic errors"""
+class SketchOrchestratorError(Exception):
+    """Base exception for sketch orchestration errors"""
 
     pass
 
 
-class SketchBusinessService:
-    """Business logic service for sketch operations"""
+class SketchOrchestrator:
+    """Orchestrates sketch operations (calls normalizer + repository)"""
 
     def create_sketch(
         self,
@@ -51,7 +51,7 @@ class SketchBusinessService:
             Created SongSketch instance
 
         Raises:
-            SketchBusinessError: If creation fails
+            SketchOrchestratorError: If creation fails
         """
         try:
             # Business logic: Normalize all string fields
@@ -72,13 +72,13 @@ class SketchBusinessService:
             sketch = sketch_service.create_sketch(db=db, workflow=workflow, **normalized_data)
 
             if not sketch:
-                raise SketchBusinessError("Failed to create sketch")
+                raise SketchOrchestratorError("Failed to create sketch")
 
             return sketch
 
         except Exception as e:
             logger.error("Sketch creation failed", error=str(e), error_type=type(e).__name__)
-            raise SketchBusinessError(f"Failed to create sketch: {e}") from e
+            raise SketchOrchestratorError(f"Failed to create sketch: {e}") from e
 
     def update_sketch(
         self,
@@ -98,7 +98,7 @@ class SketchBusinessService:
             Updated SongSketch instance
 
         Raises:
-            SketchBusinessError: If update fails or sketch not found
+            SketchOrchestratorError: If update fails or sketch not found
         """
         try:
             # Business logic: Normalize all string fields
@@ -108,15 +108,15 @@ class SketchBusinessService:
             sketch = sketch_service.update_sketch(db=db, sketch_id=sketch_id, **normalized_data)
 
             if not sketch:
-                raise SketchBusinessError(f"Sketch not found with ID: {sketch_id}")
+                raise SketchOrchestratorError(f"Sketch not found with ID: {sketch_id}")
 
             return sketch
 
-        except SketchBusinessError:
+        except SketchOrchestratorError:
             raise
         except Exception as e:
             logger.error("Sketch update failed", sketch_id=str(sketch_id), error=str(e), error_type=type(e).__name__)
-            raise SketchBusinessError(f"Failed to update sketch: {e}") from e
+            raise SketchOrchestratorError(f"Failed to update sketch: {e}") from e
 
     def get_sketches_with_workflow_filter(
         self,
@@ -173,4 +173,4 @@ class SketchBusinessService:
 
         except Exception as e:
             logger.error("Failed to retrieve sketches", error=str(e), error_type=type(e).__name__)
-            raise SketchBusinessError(f"Failed to retrieve sketches: {e}") from e
+            raise SketchOrchestratorError(f"Failed to retrieve sketches: {e}") from e

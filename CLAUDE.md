@@ -217,16 +217,29 @@ def get_user_profile():
 
 **Separation of Concerns:**
 ```
-Controller → Business Service → Repository
-(HTTP)       (Logic, Testable)  (DB CRUD)
+Controller → Orchestrator → Transformer/Normalizer + Repository
+(HTTP)       (Coordinates)  (Pure Functions)      (DB CRUD)
 ```
+
+**Naming Convention (CRITICAL!):**
+
+| File Pattern | Purpose | Testable? | Example |
+|--------------|---------|-----------|---------|
+| `*_orchestrator.py` | Coordinates services, NO business logic | ❌ No (only calls other services) | `SketchOrchestrator`, `SongOrchestrator` |
+| `*_transformer.py` | Pure functions: transformations, mappings | ✅ Yes (100% coverage) | `SongMurekaTransformer`, `ApiCostTransformer` |
+| `*_normalizer.py` | Pure functions: string normalization | ✅ Yes (100% coverage) | `SketchNormalizer` |
+| `*_auth_service.py` | Pure functions: authentication logic | ✅ Yes (100% coverage) | `UserAuthService` |
+| `*_enhancement_service.py` | Pure functions: enhancements | ✅ Yes (100% coverage) | `ImageEnhancementService` |
+| `*_service.py` (in `db/`) | CRUD operations only | ❌ No (infrastructure) | `SketchService`, `SongService` |
 
 **Layer Responsibilities:**
 
-**1. Business Layer** (`src/business/*_service.py`)
-- ✅ Business logic, calculations, transformations
+**1. Business Layer** (`src/business/`)
+- **Orchestrators** (`*_orchestrator.py`): Coordinate services (NOT testable, no business logic)
+- **Transformers/Normalizers**: Pure functions (100% unit-testable)
+- ✅ Business logic, calculations, transformations (in transformers/normalizers)
 - ✅ Pure functions (no DB, no file system)
-- ✅ **MUST be unit-testable** without mocks
+- ✅ **MUST be unit-testable** without mocks (transformers/normalizers only)
 - ❌ NO database queries
 - ❌ NO file system operations
 
@@ -240,7 +253,7 @@ Controller → Business Service → Repository
 **3. Controller Layer** (`src/api/controllers/*_controller.py`)
 - ✅ HTTP request/response handling
 - ✅ Input validation (Pydantic)
-- ✅ Call business layer
+- ✅ Call orchestrator or business services
 - ❌ NO business logic
 - ❌ NO direct DB queries
 
@@ -248,13 +261,14 @@ Controller → Business Service → Repository
 ```python
 # ✅ CORRECT: Separation of Concerns
 image_controller.py
-  └─> image_business_service.py
-       ├─ Validation, hashing, file management
-       ├─ Calls: image_enhancement_service.py (pure functions)
-       └─> image_service.py (DB CRUD only)
+  └─> image_orchestrator.py (coordinates services, NOT testable)
+       ├─ Calls: image_enhancement_service.py (pure functions, 100% tested)
+       ├─ Calls: file_management_service.py (infrastructure)
+       └─> image_service.py (DB CRUD only, NO tests)
 
 # Tests:
 # - image_enhancement_service.py: 100% coverage (pure functions)
+# - image_orchestrator.py: 0% coverage (orchestration, not testable)
 # - image_service.py: 0% coverage (CRUD, no tests)
 ```
 

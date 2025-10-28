@@ -159,7 +159,7 @@ class SongService:
         """
         Update song with completion results and create choices
 
-        IMPORTANT: This method expects PRE-PARSED data from SongBusinessService.
+        IMPORTANT: This method expects PRE-PARSED data from SongOrchestrator.
         All MUREKA response parsing is done in the business layer (SongMurekaTransformer).
 
         Args:

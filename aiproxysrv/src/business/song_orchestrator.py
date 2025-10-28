@@ -1,4 +1,4 @@
-"""Song Business Service - Handles song management business logic"""
+"""Song Orchestrator - Coordinates song operations (no testable business logic)"""
 
 import logging
 from typing import Any
@@ -11,14 +11,14 @@ from db.song_service import song_service
 logger = logging.getLogger(__name__)
 
 
-class SongBusinessError(Exception):
-    """Base exception for song business logic errors"""
+class SongOrchestratorError(Exception):
+    """Base exception for song orchestration errors"""
 
     pass
 
 
-class SongBusinessService:
-    """Business logic service for song operations"""
+class SongOrchestrator:
+    """Orchestrates song operations (calls transformers + repository)"""
 
     def get_songs_with_pagination(
         self,
@@ -72,7 +72,7 @@ class SongBusinessService:
 
         except Exception as e:
             logger.error(f"Error retrieving songs: {e}")
-            raise SongBusinessError(f"Failed to retrieve songs: {e}") from e
+            raise SongOrchestratorError(f"Failed to retrieve songs: {e}") from e
 
     def get_song_details(self, song_id: str) -> dict[str, Any] | None:
         """
@@ -93,7 +93,7 @@ class SongBusinessService:
 
         except Exception as e:
             logger.error(f"Error retrieving song {song_id}: {e}")
-            raise SongBusinessError(f"Failed to retrieve song: {e}") from e
+            raise SongOrchestratorError(f"Failed to retrieve song: {e}") from e
 
     def update_song_metadata(self, song_id: str, update_data: dict[str, Any]) -> dict[str, Any] | None:
         """
@@ -117,12 +117,12 @@ class SongBusinessService:
             filtered_data = {k: v for k, v in update_data.items() if k in allowed_fields}
 
             if not filtered_data:
-                raise SongBusinessError("No valid fields provided for update")
+                raise SongOrchestratorError("No valid fields provided for update")
 
             # Update the song
             updated_song = song_service.update_song(song_id, filtered_data)
             if not updated_song:
-                raise SongBusinessError("Failed to update song")
+                raise SongOrchestratorError("Failed to update song")
 
             logger.info(f"Song {song_id} updated successfully")
             return {
@@ -135,7 +135,7 @@ class SongBusinessService:
 
         except Exception as e:
             logger.error(f"Error updating song {song_id}: {e}")
-            raise SongBusinessError(f"Failed to update song: {e}") from e
+            raise SongOrchestratorError(f"Failed to update song: {e}") from e
 
     def delete_single_song(self, song_id: str) -> bool:
         """
@@ -157,11 +157,11 @@ class SongBusinessService:
                 logger.info(f"Song {song_id} and its choices deleted successfully")
                 return True
             else:
-                raise SongBusinessError("Failed to delete song")
+                raise SongOrchestratorError("Failed to delete song")
 
         except Exception as e:
             logger.error(f"Error deleting song {song_id}: {type(e).__name__}: {e}")
-            raise SongBusinessError(f"Failed to delete song: {e}") from e
+            raise SongOrchestratorError(f"Failed to delete song: {e}") from e
 
     def bulk_delete_songs(self, song_ids: list[str]) -> dict[str, Any]:
         """
@@ -174,10 +174,10 @@ class SongBusinessService:
             Dict containing deletion results and summary
         """
         if not song_ids:
-            raise SongBusinessError("No song IDs provided")
+            raise SongOrchestratorError("No song IDs provided")
 
         if len(song_ids) > 100:
-            raise SongBusinessError("Too many songs (max 100 per request)")
+            raise SongOrchestratorError("Too many songs (max 100 per request)")
 
         results = {"deleted": [], "not_found": [], "errors": []}
 
@@ -224,7 +224,7 @@ class SongBusinessService:
         try:
             # Validate rating value
             if rating is not None and rating not in [0, 1]:
-                raise SongBusinessError("Rating must be null, 0 (thumbs down), or 1 (thumbs up)")
+                raise SongOrchestratorError("Rating must be null, 0 (thumbs down), or 1 (thumbs up)")
 
             # Check if choice exists
             choice = song_service.get_choice_by_id(choice_id)
@@ -234,14 +234,14 @@ class SongBusinessService:
             # Update rating
             success = song_service.update_choice_rating(choice_id, rating)
             if not success:
-                raise SongBusinessError("Failed to update choice rating")
+                raise SongOrchestratorError("Failed to update choice rating")
 
             logger.info(f"Choice {choice_id} rating updated to {rating}")
             return {"id": choice_id, "rating": rating, "message": "Rating updated successfully"}
 
         except Exception as e:
             logger.error(f"Error updating choice rating {choice_id}: {e}")
-            raise SongBusinessError(f"Failed to update choice rating: {e}") from e
+            raise SongOrchestratorError(f"Failed to update choice rating: {e}") from e
 
     def process_song_completion(self, task_id: str, result_data: dict[str, Any]) -> bool:
         """
@@ -293,4 +293,4 @@ class SongBusinessService:
             logger.error(
                 "Song completion processing failed", task_id=task_id, error=str(e), error_type=type(e).__name__
             )
-            raise SongBusinessError(f"Failed to process song completion: {e}") from e
+            raise SongOrchestratorError(f"Failed to process song completion: {e}") from e

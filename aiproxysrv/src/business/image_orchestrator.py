@@ -1,4 +1,4 @@
-"""Image Business Service - Handles image generation and management business logic"""
+"""Image Orchestrator - Coordinates image operations (no testable business logic)"""
 
 import hashlib
 import time
@@ -21,8 +21,8 @@ class ImageGenerationError(Exception):
     pass
 
 
-class ImageBusinessService:
-    """Business logic service for image operations"""
+class ImageOrchestrator:
+    """Orchestrates image operations (calls services + repository)"""
 
     def __init__(self):
         self.images_dir = Path(IMAGES_DIR)

@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from business.song_business_service import SongBusinessError, SongBusinessService
+from business.song_orchestrator import SongOrchestrator, SongOrchestratorError
 
 from .song_account_controller import SongAccountController
 from .song_creation_controller import SongCreationController
@@ -20,7 +20,7 @@ class SongController:
         self.creation_controller = SongCreationController()
         self.task_controller = SongTaskController()
         self.account_controller = SongAccountController()
-        self.business_service = SongBusinessService()
+        self.orchestrator = SongOrchestrator()
 
     def get_celery_health(self) -> tuple[dict[str, Any], int]:
         """Check Celery Worker Status"""
@@ -92,7 +92,7 @@ class SongController:
             Tuple of (response_data, status_code)
         """
         try:
-            result = self.business_service.get_songs_with_pagination(
+            result = self.orchestrator.get_songs_with_pagination(
                 limit=limit,
                 offset=offset,
                 status=status,
@@ -103,7 +103,7 @@ class SongController:
             )
             return result, 200
 
-        except SongBusinessError as e:
+        except SongOrchestratorError as e:
             logger.error(f"Failed to retrieve songs: {e}")
             return {"error": str(e)}, 500
         except Exception as e:
@@ -121,14 +121,14 @@ class SongController:
             Tuple of (response_data, status_code)
         """
         try:
-            result = self.business_service.get_song_details(song_id)
+            result = self.orchestrator.get_song_details(song_id)
 
             if result is None:
                 return {"error": "Song not found"}, 404
 
             return result, 200
 
-        except SongBusinessError as e:
+        except SongOrchestratorError as e:
             logger.error(f"Failed to retrieve song {song_id}: {e}")
             return {"error": str(e)}, 500
         except Exception as e:
@@ -147,14 +147,14 @@ class SongController:
             Tuple of (response_data, status_code)
         """
         try:
-            result = self.business_service.update_song_metadata(song_id, update_data)
+            result = self.orchestrator.update_song_metadata(song_id, update_data)
 
             if result is None:
                 return {"error": "Song not found"}, 404
 
             return result, 200
 
-        except SongBusinessError as e:
+        except SongOrchestratorError as e:
             logger.error(f"Failed to update song {song_id}: {e}")
             return {"error": str(e)}, 400 if "No valid fields" in str(e) else 500
         except Exception as e:
@@ -172,14 +172,14 @@ class SongController:
             Tuple of (response_data, status_code)
         """
         try:
-            success = self.business_service.delete_single_song(song_id)
+            success = self.orchestrator.delete_single_song(song_id)
 
             if not success:
                 return {"error": "Song not found"}, 404
 
             return {"message": "Song deleted successfully"}, 200
 
-        except SongBusinessError as e:
+        except SongOrchestratorError as e:
             logger.error(f"Failed to delete song {song_id}: {e}")
             return {"error": str(e)}, 500
         except Exception as e:
@@ -203,7 +203,7 @@ class SongController:
             return {"error": "Too many songs (max 100 per request)"}, 400
 
         try:
-            result = self.business_service.bulk_delete_songs(song_ids)
+            result = self.orchestrator.bulk_delete_songs(song_ids)
 
             # Determine response status based on results
             summary = result["summary"]
@@ -216,7 +216,7 @@ class SongController:
 
             return result, status_code
 
-        except SongBusinessError as e:
+        except SongOrchestratorError as e:
             logger.error(f"Bulk delete failed: {e}")
             return {"error": str(e)}, 500
         except Exception as e:
@@ -236,14 +236,14 @@ class SongController:
         """
         try:
             rating = rating_data.get("rating")
-            result = self.business_service.update_choice_rating(choice_id, rating)
+            result = self.orchestrator.update_choice_rating(choice_id, rating)
 
             if result is None:
                 return {"error": "Song choice not found"}, 404
 
             return result, 200
 
-        except SongBusinessError as e:
+        except SongOrchestratorError as e:
             logger.error(f"Failed to update choice rating {choice_id}: {e}")
             if "Rating must be" in str(e):
                 return {"error": str(e)}, 400

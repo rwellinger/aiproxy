@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from business.image_business_service import ImageBusinessService, ImageGenerationError
+from business.image_orchestrator import ImageGenerationError, ImageOrchestrator
 from business.image_text_overlay_service_v2 import ImageTextOverlayServiceV2
 
 
@@ -15,7 +15,7 @@ class ImageController:
     """Controller for image HTTP request handling"""
 
     def __init__(self):
-        self.business_service = ImageBusinessService()
+        self.orchestrator = ImageOrchestrator()
 
     def generate_image(
         self,
@@ -51,7 +51,7 @@ class ImageController:
             return {"error": "Missing prompt or size"}, 400
 
         try:
-            result = self.business_service.generate_image(
+            result = self.orchestrator.generate_image(
                 prompt=prompt,
                 size=size,
                 title=title,
@@ -93,7 +93,7 @@ class ImageController:
             Tuple of (response_data, status_code)
         """
         try:
-            result = self.business_service.get_images_with_pagination(
+            result = self.orchestrator.get_images_with_pagination(
                 limit=limit, offset=offset, search=search, sort_by=sort_by, sort_direction=sort_direction
             )
             return result, 200
@@ -116,7 +116,7 @@ class ImageController:
             Tuple of (response_data, status_code)
         """
         try:
-            result = self.business_service.get_image_details(image_id)
+            result = self.orchestrator.get_image_details(image_id)
 
             if result is None:
                 return {"error": "Image not found"}, 404
@@ -141,7 +141,7 @@ class ImageController:
             Tuple of (response_data, status_code)
         """
         try:
-            success = self.business_service.delete_single_image(image_id)
+            success = self.orchestrator.delete_single_image(image_id)
 
             if not success:
                 return {"error": "Image not found"}, 404
@@ -172,7 +172,7 @@ class ImageController:
             return {"error": "Too many images (max 100 per request)"}, 400
 
         try:
-            result = self.business_service.bulk_delete_images(image_ids)
+            result = self.orchestrator.bulk_delete_images(image_ids)
 
             # Determine response status based on results
             summary = result["summary"]
@@ -205,7 +205,7 @@ class ImageController:
             Tuple of (response_data, status_code)
         """
         try:
-            result = self.business_service.update_image_metadata(image_id, title, tags)
+            result = self.orchestrator.update_image_metadata(image_id, title, tags)
 
             if result is None:
                 return {"error": "Image not found"}, 404
@@ -229,7 +229,7 @@ class ImageController:
             Tuple of (response_data, status_code)
         """
         try:
-            result = self.business_service.get_images_for_text_overlay()
+            result = self.orchestrator.get_images_for_text_overlay()
             return result, 200
 
         except ImageGenerationError as e:
@@ -287,7 +287,7 @@ class ImageController:
         """
         try:
             # Get original image details
-            original_image = self.business_service.get_image_details(image_id)
+            original_image = self.orchestrator.get_image_details(image_id)
 
             if original_image is None:
                 return {"error": "Image not found"}, 404
