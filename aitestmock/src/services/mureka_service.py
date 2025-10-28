@@ -5,8 +5,13 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from utils.logger import logger
+
 
 class MurekaService:
+    # Maximum delay for mock processing (5 minutes)
+    MAX_DELAY_SECONDS = 300
+
     def __init__(self):
         # In-memory storage for async song generation jobs
         self._song_jobs = {}
@@ -157,7 +162,26 @@ class MurekaService:
             return default_seconds
 
         match = re.search(r"(\d+)s\b", str(text))
-        return int(match.group(1)) if match else default_seconds
+        if match:
+            requested_delay = int(match.group(1))
+
+            # Check if delay exceeds maximum
+            if requested_delay > self.MAX_DELAY_SECONDS:
+                logger.warning(
+                    "Not allowed timeout detected, using maximum",
+                    requested_delay=f"{requested_delay}s",
+                    max_allowed=f"{self.MAX_DELAY_SECONDS}s",
+                    will_use=f"{self.MAX_DELAY_SECONDS}s"
+                )
+                return self.MAX_DELAY_SECONDS
+
+            logger.info(
+                "Mock will simulate backend processing with delay",
+                delay=f"{requested_delay}s"
+            )
+            return requested_delay
+
+        return default_seconds
 
     def _generate_random_id(self):
         """Generate a random ID in the format similar to '94608690380802'"""

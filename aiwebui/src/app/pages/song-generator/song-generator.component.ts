@@ -191,6 +191,13 @@ export class SongGeneratorComponent implements OnInit {
                     const errorMessage = data.result?.error || data.result || this.translate.instant(errorKey);
                     this.notificationService.error(`${this.translate.instant(errorKey)}: ${errorMessage}`);
                     this.result = `<div class="error-box">Error: ${errorMessage}</div>`;
+
+                    // Refresh detail panel to show FAILURE status from DB
+                    if (this.songDetailPanel && this.currentSongId) {
+                        this.songDetailPanel.songId = this.currentSongId;
+                        await this.songDetailPanel.reloadSong();
+                    }
+
                     completed = true;
                 } else {
                     const statusText = this.getStatusText(data);
