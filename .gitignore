@@ -37,3 +37,4 @@ dump.rdb
 /aitestmock/static/audio/*
 /develop-env/.env-dev
 /aiproxysrv/htmlcov/
+/logs/
