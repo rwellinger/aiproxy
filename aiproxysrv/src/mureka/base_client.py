@@ -2,7 +2,6 @@
 MUREKA Base Client - Shared HTTP and utilities logic
 """
 
-import logging
 import traceback
 
 import requests
@@ -17,9 +16,7 @@ from config.settings import (
     MUREKA_POLL_INTERVAL_SHORT,
     MUREKA_TIMEOUT,
 )
-
-
-logger = logging.getLogger(__name__)
+from utils.logger import logger
 
 
 class MurekaBaseClient:

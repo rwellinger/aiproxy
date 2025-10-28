@@ -2,8 +2,10 @@
 
 from typing import Any
 
+from business.bulk_delete_transformer import BulkDeleteTransformer, DeleteResult
 from business.song_mureka_transformer import SongMurekaTransformer
 from business.song_transformer import SongTransformer
+from business.song_validator import SongValidator
 from db.song_service import song_service
 from utils.logger import logger
 
@@ -109,12 +111,13 @@ class SongOrchestrator:
             if not song:
                 return None
 
-            # Validate and filter allowed fields
-            allowed_fields = ["title", "tags", "workflow"]
-            filtered_data = {k: v for k, v in update_data.items() if k in allowed_fields}
+            # Business logic: Validate and filter allowed fields (delegated to validator)
+            from business.song_validator import SongValidationError
 
-            if not filtered_data:
-                raise SongOrchestratorError("No valid fields provided for update")
+            try:
+                filtered_data = SongValidator.validate_update_fields(update_data)
+            except SongValidationError as e:
+                raise SongOrchestratorError(str(e)) from e
 
             # Update the song
             updated_song = song_service.update_song(song_id, filtered_data)
@@ -170,42 +173,41 @@ class SongOrchestrator:
         Returns:
             Dict containing deletion results and summary
         """
-        if not song_ids:
-            raise SongOrchestratorError("No song IDs provided")
+        # Business logic: Validate bulk delete request (delegated to validator)
+        from business.song_validator import SongValidationError
 
-        if len(song_ids) > 100:
-            raise SongOrchestratorError("Too many songs (max 100 per request)")
+        try:
+            SongValidator.validate_bulk_delete_count(song_ids)
+        except SongValidationError as e:
+            raise SongOrchestratorError(str(e)) from e
 
-        results = {"deleted": [], "not_found": [], "errors": []}
-
+        # Orchestration: Process each delete operation
+        delete_results = []
         for song_id in song_ids:
             try:
                 song = song_service.get_song_by_id(song_id)
                 if not song:
-                    results["not_found"].append(song_id)
+                    delete_results.append(DeleteResult(song_id, "not_found"))
                     continue
 
                 success = song_service.delete_song_by_id(song_id)
                 if success:
-                    results["deleted"].append(song_id)
+                    delete_results.append(DeleteResult(song_id, "deleted"))
                     logger.info(f"Song {song_id} and its choices deleted successfully")
                 else:
-                    results["errors"].append({"id": song_id, "error": "Failed to delete song"})
+                    delete_results.append(DeleteResult(song_id, "error", "Failed to delete song"))
 
             except Exception as e:
                 error_msg = f"{type(e).__name__}: {e}"
-                results["errors"].append({"id": song_id, "error": error_msg})
+                delete_results.append(DeleteResult(song_id, "error", error_msg))
                 logger.error(f"Error deleting song {song_id}: {error_msg}")
 
-        summary = {
-            "total_requested": len(song_ids),
-            "deleted": len(results["deleted"]),
-            "not_found": len(results["not_found"]),
-            "errors": len(results["errors"]),
-        }
+        # Business logic: Aggregate results (delegated to transformer)
+        aggregated_results = BulkDeleteTransformer.aggregate_results(delete_results)
+        response = BulkDeleteTransformer.format_bulk_delete_response(aggregated_results, len(song_ids))
 
-        logger.info(f"Bulk delete completed: {summary}")
-        return {"summary": summary, "results": results}
+        logger.info(f"Bulk delete completed: {response['summary']}")
+        return response
 
     def update_choice_rating(self, choice_id: str, rating: int | None) -> dict[str, Any] | None:
         """
@@ -219,9 +221,13 @@ class SongOrchestrator:
             Updated choice data or None if not found
         """
         try:
-            # Validate rating value
-            if rating is not None and rating not in [0, 1]:
-                raise SongOrchestratorError("Rating must be null, 0 (thumbs down), or 1 (thumbs up)")
+            # Business logic: Validate rating value (delegated to validator)
+            from business.song_validator import SongValidationError
+
+            try:
+                SongValidator.validate_rating(rating)
+            except SongValidationError as e:
+                raise SongOrchestratorError(str(e)) from e
 
             # Check if choice exists
             choice = song_service.get_choice_by_id(choice_id)

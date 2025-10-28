@@ -1,16 +1,13 @@
 """Song Controller - Orchestrates specialized song controllers"""
 
-import logging
 from typing import Any
 
 from business.song_orchestrator import SongOrchestrator, SongOrchestratorError
+from utils.logger import logger
 
 from .song_account_controller import SongAccountController
 from .song_creation_controller import SongCreationController
 from .song_task_controller import SongTaskController
-
-
-logger = logging.getLogger(__name__)
 
 
 class SongController:

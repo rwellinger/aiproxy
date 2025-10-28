@@ -1,10 +1,11 @@
 """Image Orchestrator - Coordinates image operations (no testable business logic)"""
 
-import hashlib
-import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
+from business.bulk_delete_transformer import BulkDeleteTransformer, DeleteResult
+from business.image_transformer import ImageTransformer
+from business.image_validator import ImageValidator
 from config.settings import DELETE_PHYSICAL_FILES, IMAGE_BASE_URL, IMAGES_DIR, OPENAI_MODEL
 from db.image_service import ImageService
 from utils.logger import logger
@@ -61,7 +62,14 @@ class ImageOrchestrator:
         Raises:
             ImageGenerationError: If generation fails
         """
-        self._validate_generation_request(prompt, size)
+        # Business logic: Validate request (delegated to validator)
+        from business.image_validator import ImageValidationError
+
+        try:
+            ImageValidator.validate_prompt(prompt)
+            ImageValidator.validate_size(size)
+        except ImageValidationError as e:
+            raise ImageGenerationError(str(e)) from e
 
         prompt_preview = prompt[:50] + ("..." if len(prompt) > 50 else "")
         logger.info("Starting image generation", prompt_preview=prompt_preview, size=size)
@@ -268,20 +276,22 @@ class ImageOrchestrator:
         Returns:
             Dict containing deletion results and summary
         """
-        if not image_ids:
-            raise ImageGenerationError("No image IDs provided")
+        # Business logic: Validate bulk delete request (delegated to validator)
+        from business.image_validator import ImageValidationError
 
-        if len(image_ids) > 100:
-            raise ImageGenerationError("Too many images (max 100 per request)")
+        try:
+            ImageValidator.validate_bulk_delete_count(image_ids)
+        except ImageValidationError as e:
+            raise ImageGenerationError(str(e)) from e
 
-        results = {"deleted": [], "not_found": [], "errors": []}
-
+        # Orchestration: Process each delete operation
+        delete_results = []
         for image_id in image_ids:
             try:
                 # Check if image exists
                 image = ImageService.get_image_by_id(image_id)
                 if not image:
-                    results["not_found"].append(image_id)
+                    delete_results.append(DeleteResult(image_id, "not_found"))
                     continue
 
                 # Delete physical file if enabled
@@ -291,25 +301,22 @@ class ImageOrchestrator:
                 # Delete metadata from database
                 success = ImageService.delete_image_metadata(image_id)
                 if success:
-                    results["deleted"].append(image_id)
+                    delete_results.append(DeleteResult(image_id, "deleted"))
                     logger.info("Bulk delete: Image deleted", image_id=image_id)
                 else:
-                    results["errors"].append({"id": image_id, "error": "Failed to delete metadata"})
+                    delete_results.append(DeleteResult(image_id, "error", "Failed to delete metadata"))
 
             except Exception as e:
                 error_msg = f"{type(e).__name__}: {e}"
-                results["errors"].append({"id": image_id, "error": error_msg})
+                delete_results.append(DeleteResult(image_id, "error", error_msg))
                 logger.error("Bulk delete: Error deleting image", image_id=image_id, error=error_msg)
 
-        summary = {
-            "total_requested": len(image_ids),
-            "deleted": len(results["deleted"]),
-            "not_found": len(results["not_found"]),
-            "errors": len(results["errors"]),
-        }
+        # Business logic: Aggregate results (delegated to transformer)
+        aggregated_results = BulkDeleteTransformer.aggregate_results(delete_results)
+        response = BulkDeleteTransformer.format_bulk_delete_response(aggregated_results, len(image_ids))
 
-        logger.info("Bulk delete completed", summary=summary)
-        return {"summary": summary, "results": results}
+        logger.info("Bulk delete completed", summary=response["summary"])
+        return response
 
     def update_image_metadata(self, image_id: str, title: str = None, tags: str = None) -> dict[str, Any] | None:
         """
@@ -344,19 +351,10 @@ class ImageOrchestrator:
             logger.error("Error updating image", image_id=image_id, error_type=type(e).__name__, error=str(e))
             raise ImageGenerationError(f"Failed to update image: {e}") from e
 
-    def _validate_generation_request(self, prompt: str, size: str) -> None:
-        """Validate image generation request parameters"""
-        if not prompt or not prompt.strip():
-            raise ImageGenerationError("Prompt is required")
-
-        if not size:
-            raise ImageGenerationError("Size is required")
-
     def _process_and_save_image(self, image_url: str, prompt: str) -> tuple[str, Path]:
         """Download and save image to filesystem"""
-        # Generate filename
-        prompt_hash = self._generate_prompt_hash(prompt)
-        filename = f"{prompt_hash}_{int(time.time())}.png"
+        # Business logic: Generate filename (delegated to transformer)
+        filename = ImageTransformer.generate_filename(prompt)
         file_path = self.images_dir / filename
 
         # Download and save
@@ -382,6 +380,9 @@ class ImageOrchestrator:
         detail_level: str | None = None,
     ) -> Optional["GeneratedImage"]:
         """Save image metadata to database"""
+        # Business logic: Generate prompt hash (delegated to transformer)
+        prompt_hash = ImageTransformer.generate_prompt_hash(prompt)
+
         return ImageService.save_generated_image(
             user_prompt=user_prompt,
             prompt=prompt,
@@ -391,7 +392,7 @@ class ImageOrchestrator:
             file_path=str(file_path),
             local_url=local_url,
             model_used=OPENAI_MODEL,
-            prompt_hash=self._generate_prompt_hash(prompt),
+            prompt_hash=prompt_hash,
             title=title,
             artistic_style=artistic_style,
             composition=composition,
@@ -402,40 +403,5 @@ class ImageOrchestrator:
 
     def _transform_image_to_api_format(self, image, include_file_path: bool = False) -> dict[str, Any]:
         """Transform database image object to API response format"""
-        # Determine display URL: use overlay image if text_overlay_metadata exists
-        display_url = image.local_url
-        if image.text_overlay_metadata and "_with_text" not in image.local_url:
-            # Replace .png with _with_text.png for overlay version (only if not already present)
-            display_url = image.local_url.replace(".png", "_with_text.png")
-
-        image_data = {
-            "id": str(image.id),
-            "user_prompt": image.user_prompt,
-            "prompt": image.prompt,
-            "enhanced_prompt": image.enhanced_prompt,
-            "size": image.size,
-            "filename": image.filename,
-            "url": image.local_url,
-            "display_url": display_url,
-            "model_used": image.model_used,
-            "title": image.title,
-            "tags": image.tags,
-            "text_overlay_metadata": image.text_overlay_metadata,
-            "created_at": image.created_at.isoformat() if image.created_at else None,
-            "updated_at": image.updated_at.isoformat() if image.updated_at else None,
-            "prompt_hash": image.prompt_hash,
-            "artistic_style": image.artistic_style,
-            "composition": image.composition,
-            "lighting": image.lighting,
-            "color_palette": image.color_palette,
-            "detail_level": image.detail_level,
-        }
-
-        if include_file_path:
-            image_data["file_path"] = image.file_path
-
-        return image_data
-
-    def _generate_prompt_hash(self, prompt: str) -> str:
-        """Generate hash for prompt"""
-        return hashlib.md5(prompt.encode()).hexdigest()[:10]
+        # Business logic: Transform to API format (delegated to transformer)
+        return ImageTransformer.transform_image_to_api_format(image, include_file_path)

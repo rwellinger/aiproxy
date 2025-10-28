@@ -12,6 +12,9 @@ from schemas.prompt_schemas import PromptTemplateCreate, PromptTemplateUpdate
 
 api_prompt_v1 = Blueprint("api_prompt_v1", __name__, url_prefix="/api/v1/prompts")
 
+# Create controller instance (uses orchestrator pattern)
+prompt_controller = PromptController()
+
 
 @api_prompt_v1.route("", methods=["GET"])
 @jwt_required
@@ -19,7 +22,7 @@ def get_all_templates():
     """Get all prompt templates grouped by category and action"""
     db: Session = next(get_db())
     try:
-        result, status_code = PromptController.get_all_templates(db)
+        result, status_code = prompt_controller.get_all_templates(db)
         return jsonify(result), status_code
     finally:
         db.close()
@@ -31,7 +34,7 @@ def get_category_templates(category: str):
     """Get all templates for a specific category"""
     db: Session = next(get_db())
     try:
-        result, status_code = PromptController.get_category_templates(db, category)
+        result, status_code = prompt_controller.get_category_templates(db, category)
         return jsonify(result), status_code
     finally:
         db.close()
@@ -43,7 +46,7 @@ def get_specific_template(category: str, action: str):
     """Get a specific template by category and action"""
     db: Session = next(get_db())
     try:
-        result, status_code = PromptController.get_specific_template(db, category, action)
+        result, status_code = prompt_controller.get_specific_template(db, category, action)
         return jsonify(result), status_code
     finally:
         db.close()
@@ -60,7 +63,7 @@ def update_template(category: str, action: str):
 
     db: Session = next(get_db())
     try:
-        result, status_code = PromptController.update_template(db, category, action, update_data)
+        result, status_code = prompt_controller.update_template(db, category, action, update_data)
         return jsonify(result), status_code
     finally:
         db.close()
@@ -77,7 +80,7 @@ def create_template():
 
     db: Session = next(get_db())
     try:
-        result, status_code = PromptController.create_template(db, template_data)
+        result, status_code = prompt_controller.create_template(db, template_data)
         return jsonify(result), status_code
     finally:
         db.close()
@@ -89,7 +92,7 @@ def delete_template(category: str, action: str):
     """Soft delete a template (set active=False)"""
     db: Session = next(get_db())
     try:
-        result, status_code = PromptController.delete_template(db, category, action)
+        result, status_code = prompt_controller.delete_template(db, category, action)
         return jsonify(result), status_code
     finally:
         db.close()

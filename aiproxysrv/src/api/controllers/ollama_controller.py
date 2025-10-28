@@ -1,21 +1,21 @@
-"""Ollama Controller - Proxy for Ollama API calls."""
+"""Ollama Controller - Proxy for Ollama API calls (uses Transformer Pattern)"""
 
 from typing import Any
 
 import requests
 
-from config.model_context_windows import get_context_window_size
+from business.ollama_model_transformer import OllamaModelTransformer
 from config.settings import OLLAMA_CHAT_MODELS, OLLAMA_DEFAULT_MODEL, OLLAMA_TIMEOUT, OLLAMA_URL
 from utils.logger import logger
 
 
 class OllamaController:
-    """Controller for proxying Ollama API requests."""
+    """Controller for proxying Ollama API requests (uses transformer for business logic)"""
 
     @staticmethod
     def get_models() -> tuple[dict[str, Any], int]:
         """
-        Get available Ollama models.
+        Get available Ollama models (raw response from server).
 
         Returns:
             Tuple of (response_data, status_code)
@@ -41,11 +41,11 @@ class OllamaController:
             return {"error": "Cannot connect to Ollama API"}, 503
 
         except requests.exceptions.RequestException as e:
-            logger.error("Ollama API request failed", error=str(e))
+            logger.error("Ollama API request failed", error=str(e), error_type=type(e).__name__)
             return {"error": f"Ollama API error: {str(e)}"}, 500
 
         except Exception as e:
-            logger.error("Unexpected error in get_models", error=str(e))
+            logger.error("Unexpected error in get_models", error=str(e), error_type=type(e).__name__)
             return {"error": f"Unexpected error: {str(e)}"}, 500
 
     @staticmethod
@@ -53,7 +53,7 @@ class OllamaController:
         """
         Get available Ollama chat models based on configuration.
 
-        Behavior:
+        Behavior (via transformer):
         - OLLAMA_CHAT_MODELS empty: Fetch all models from Ollama server
         - OLLAMA_CHAT_MODELS set: Return only whitelisted models (static)
 
@@ -62,21 +62,16 @@ class OllamaController:
             Response format: {"models": [{"name": str, "context_window": int, "is_default": bool}]}
         """
         try:
-            # Parse configured models (empty string = fetch all from server)
-            configured_models = [m.strip() for m in OLLAMA_CHAT_MODELS.split(",") if m.strip()]
+            # Business Logic: Parse configured models using transformer
+            configured_models = OllamaModelTransformer.parse_configured_models(OLLAMA_CHAT_MODELS)
 
             if configured_models:
                 # Static mode: Use whitelist from configuration
                 logger.info("Using static Ollama model list", model_count=len(configured_models))
-                models = []
-                for model_name in configured_models:
-                    models.append(
-                        {
-                            "name": model_name,
-                            "context_window": get_context_window_size(model_name),
-                            "is_default": model_name == OLLAMA_DEFAULT_MODEL,
-                        }
-                    )
+
+                # Business Logic: Build static model list using transformer
+                models = OllamaModelTransformer.build_static_model_list(configured_models, OLLAMA_DEFAULT_MODEL)
+
             else:
                 # Dynamic mode: Fetch all models from Ollama server
                 logger.info("Fetching dynamic Ollama model list from server")
@@ -87,19 +82,10 @@ class OllamaController:
                 data = response.json()
                 server_models = data.get("models", [])
 
-                models = []
-                for model in server_models:
-                    model_name = model.get("name", "")
-                    if model_name:
-                        models.append(
-                            {
-                                "name": model_name,
-                                "context_window": get_context_window_size(model_name),
-                                "is_default": model_name == OLLAMA_DEFAULT_MODEL,
-                            }
-                        )
+                # Business Logic: Transform server models using transformer
+                models = OllamaModelTransformer.transform_server_models_to_frontend(server_models, OLLAMA_DEFAULT_MODEL)
 
-                logger.info("Ollama models fetched successfully", model_count=len(models))
+                logger.info("Ollama models fetched and transformed", model_count=len(models))
 
             return {"models": models}, 200
 
@@ -112,9 +98,9 @@ class OllamaController:
             return {"error": "Cannot connect to Ollama API"}, 503
 
         except requests.exceptions.RequestException as e:
-            logger.error("Ollama API request failed", error=str(e))
+            logger.error("Ollama API request failed", error=str(e), error_type=type(e).__name__)
             return {"error": f"Ollama API error: {str(e)}"}, 500
 
         except Exception as e:
-            logger.error("Unexpected error in get_available_chat_models", error=str(e))
+            logger.error("Unexpected error in get_available_chat_models", error=str(e), error_type=type(e).__name__)
             return {"error": f"Unexpected error: {str(e)}"}, 500

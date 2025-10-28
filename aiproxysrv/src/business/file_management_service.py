@@ -1,13 +1,11 @@
 """File Management Service - Handles file operations for the application"""
 
-import logging
 import os
 from pathlib import Path
 
 import requests
 
-
-logger = logging.getLogger(__name__)
+from utils.logger import logger
 
 
 class FileDownloadError(Exception):

@@ -86,7 +86,7 @@ class TestOllamaControllerGetChatModels:
         def mock_context_window(model_name):
             return 4096 if "llama" in model_name else 8192
 
-        mocker.patch("api.controllers.ollama_controller.get_context_window_size", side_effect=mock_context_window)
+        mocker.patch("business.ollama_model_transformer.get_context_window_size", side_effect=mock_context_window)
 
         controller = OllamaController()
         result, status_code = controller.get_available_chat_models()
@@ -115,7 +115,7 @@ class TestOllamaControllerGetChatModels:
         mocker.patch("requests.get", return_value=mock_response)
 
         # Mock context window function
-        mocker.patch("api.controllers.ollama_controller.get_context_window_size", return_value=4096)
+        mocker.patch("business.ollama_model_transformer.get_context_window_size", return_value=4096)
 
         controller = OllamaController()
         result, status_code = controller.get_available_chat_models()
@@ -156,7 +156,7 @@ class TestOllamaControllerGetChatModels:
         mock_response.raise_for_status.return_value = None
 
         mocker.patch("requests.get", return_value=mock_response)
-        mocker.patch("api.controllers.ollama_controller.get_context_window_size", return_value=2048)
+        mocker.patch("business.ollama_model_transformer.get_context_window_size", return_value=2048)
 
         controller = OllamaController()
         result, status_code = controller.get_available_chat_models()
@@ -169,7 +169,7 @@ class TestOllamaControllerGetChatModels:
         """Test whitelist with spaces in model names"""
         mocker.patch("api.controllers.ollama_controller.OLLAMA_CHAT_MODELS", " llama3.2:3b , mistral:7b ")
         mocker.patch("api.controllers.ollama_controller.OLLAMA_DEFAULT_MODEL", "llama3.2:3b")
-        mocker.patch("api.controllers.ollama_controller.get_context_window_size", return_value=4096)
+        mocker.patch("business.ollama_model_transformer.get_context_window_size", return_value=4096)
 
         controller = OllamaController()
         result, status_code = controller.get_available_chat_models()

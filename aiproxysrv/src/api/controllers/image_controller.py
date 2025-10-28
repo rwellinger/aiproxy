@@ -1,14 +1,11 @@
 """Image Controller - Handles HTTP requests for image operations"""
 
-import logging
 from pathlib import Path
 from typing import Any
 
 from business.image_orchestrator import ImageGenerationError, ImageOrchestrator
 from business.image_text_overlay_service_v2 import ImageTextOverlayServiceV2
-
-
-logger = logging.getLogger(__name__)
+from utils.logger import logger
 
 
 class ImageController:
