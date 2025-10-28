@@ -1,10 +1,16 @@
 """
 User Controller for handling user authentication and management
+
+Uses 3-Layer Architecture:
+- Controller (this file): HTTP handling, request/response formatting
+- Business (UserAuthService): Authentication logic, password hashing, JWT
+- Repository (UserService): Database CRUD operations
 """
 
 from datetime import datetime, timedelta
 from typing import Any
 
+from business.user_auth_service import UserAuthService
 from db.database import SessionLocal
 from db.user_service import UserService
 from schemas.common_schemas import ErrorResponse
@@ -31,6 +37,7 @@ class UserController:
 
     def __init__(self):
         self.user_service = UserService()
+        self.auth_service = UserAuthService()
 
     def _get_db(self):
         """Get database session"""
@@ -49,11 +56,19 @@ class UserController:
         """Create a new user"""
         db = self._get_db()
         try:
-            # Create user using service
+            # Business logic: Validate password strength
+            is_valid, error_msg = self.auth_service.validate_password_strength(request.password)
+            if not is_valid:
+                return self._format_error_response(error_msg, 400)
+
+            # Business logic: Hash password
+            password_hash = self.auth_service.hash_password(request.password)
+
+            # Repository: Create user
             user = self.user_service.create_user(
                 db=db,
                 email=request.email,
-                password=request.password,
+                password_hash=password_hash,
                 first_name=request.first_name,
                 last_name=request.last_name,
             )
@@ -78,22 +93,32 @@ class UserController:
         """Authenticate user and return JWT token"""
         db = self._get_db()
         try:
-            # Authenticate user
-            user = self.user_service.authenticate_user(db=db, email=request.email, password=request.password)
+            # Repository: Get user by email
+            user = self.user_service.get_user_by_email(db, request.email)
 
-            if not user:
+            if not user or not user.password_hash:
+                logger.debug("Login failed - user not found or no password", email=request.email)
                 return self._format_error_response("Invalid email or password", 401)
 
-            # Generate JWT token
-            token = self.user_service.generate_jwt_token(user.id, user.email)
+            # Business logic: Verify password
+            if not self.auth_service.verify_password(request.password, user.password_hash):
+                logger.debug("Login failed - invalid password", email=request.email)
+                return self._format_error_response("Invalid email or password", 401)
+
+            # Repository: Update last login timestamp
+            self.user_service.update_last_login(db, str(user.id))
+
+            # Business logic: Generate JWT token
+            token = self.auth_service.generate_jwt_token(str(user.id), user.email)
 
             # Create response
             user_response = UserResponse.model_validate(user)
-            expires_at = datetime.utcnow() + timedelta(hours=self.user_service.jwt_expiration_hours)
+            expires_at = datetime.utcnow() + timedelta(hours=self.auth_service.jwt_expiration_hours)
 
             response = LoginResponse(
                 success=True, message="Login successful", token=token, user=user_response, expires_at=expires_at
             )
+            logger.info("User logged in successfully", user_id=str(user.id), email=user.email)
             return self._format_success_response(response, 200)
 
         except Exception as e:
@@ -154,18 +179,38 @@ class UserController:
         """Change user password"""
         db = self._get_db()
         try:
-            success = self.user_service.change_password(
-                db=db, user_id=user_id, old_password=request.old_password, new_password=request.new_password
-            )
+            # Repository: Get user
+            user = self.user_service.get_user_by_id(db, user_id)
+
+            if not user or not user.password_hash:
+                logger.debug("Password change failed - user not found", user_id=user_id)
+                return self._format_error_response("User not found", 404)
+
+            # Business logic: Verify old password
+            if not self.auth_service.verify_password(request.old_password, user.password_hash):
+                logger.debug("Password change failed - invalid old password", user_id=user_id)
+                return self._format_error_response("Invalid current password", 400)
+
+            # Business logic: Validate new password strength
+            is_valid, error_msg = self.auth_service.validate_password_strength(request.new_password)
+            if not is_valid:
+                return self._format_error_response(error_msg, 400)
+
+            # Business logic: Hash new password
+            new_password_hash = self.auth_service.hash_password(request.new_password)
+
+            # Repository: Update password hash
+            success = self.user_service.update_password_hash(db, user_id, new_password_hash)
 
             if not success:
-                return self._format_error_response("Invalid current password or user not found", 400)
+                return self._format_error_response("Failed to update password", 500)
 
             response = PasswordChangeResponse(success=True, message="Password changed successfully")
+            logger.info("Password changed successfully", user_id=user_id)
             return self._format_success_response(response, 200)
 
         except Exception as e:
-            logger.error("Error changing password", error=str(e))
+            logger.error("Error changing password", error=str(e), user_id=user_id)
             return self._format_error_response("Internal server error", 500)
         finally:
             db.close()
@@ -174,16 +219,33 @@ class UserController:
         """Reset user password (admin function)"""
         db = self._get_db()
         try:
-            success = self.user_service.reset_password(db=db, email=request.email, new_password=request.new_password)
+            # Repository: Get user by email
+            user = self.user_service.get_user_by_email(db, request.email)
 
-            if not success:
+            if not user:
+                logger.debug("Password reset failed - user not found", email=request.email)
                 return self._format_error_response("User not found", 404)
 
+            # Business logic: Validate new password strength
+            is_valid, error_msg = self.auth_service.validate_password_strength(request.new_password)
+            if not is_valid:
+                return self._format_error_response(error_msg, 400)
+
+            # Business logic: Hash new password
+            new_password_hash = self.auth_service.hash_password(request.new_password)
+
+            # Repository: Update password hash
+            success = self.user_service.update_password_hash(db, str(user.id), new_password_hash)
+
+            if not success:
+                return self._format_error_response("Failed to reset password", 500)
+
             response = PasswordResetResponse(success=True, message="Password reset successfully")
+            logger.info("Password reset successfully", email=request.email, user_id=str(user.id))
             return self._format_success_response(response, 200)
 
         except Exception as e:
-            logger.error("Error resetting password", error=str(e))
+            logger.error("Error resetting password", error=str(e), email=request.email)
             return self._format_error_response("Internal server error", 500)
         finally:
             db.close()
@@ -210,11 +272,12 @@ class UserController:
         """Validate JWT token and return user info (with database check)"""
         db = self._get_db()
         try:
-            payload = self.user_service.verify_jwt_token(token)
+            # Business logic: Verify JWT token
+            payload = self.auth_service.verify_jwt_token(token)
             if not payload:
                 return None
 
-            # Verify user still exists in database
+            # Repository: Verify user still exists in database
             user = self.user_service.get_user_by_id(db, payload.get("user_id"))
             if not user:
                 logger.warning("Token valid but user not found in database", user_id=payload.get("user_id"))
@@ -230,7 +293,8 @@ class UserController:
     def validate_token_light(self, token: str) -> dict[str, Any] | None:
         """Lightweight JWT token validation (no database check)"""
         try:
-            payload = self.user_service.verify_jwt_token(token)
+            # Business logic: Verify JWT token
+            payload = self.auth_service.verify_jwt_token(token)
             if payload:
                 return {"user_id": payload.get("user_id"), "email": payload.get("email")}
             return None
