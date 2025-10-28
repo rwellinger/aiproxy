@@ -7,6 +7,7 @@ import traceback
 import requests
 from requests import HTTPError
 
+from adapters.mureka.json_utils import prune_keys
 from config.settings import (
     MUREKA_API_KEY,
     MUREKA_MAX_POLL_ATTEMPTS,
@@ -15,7 +16,6 @@ from config.settings import (
     MUREKA_POLL_INTERVAL_SHORT,
     MUREKA_TIMEOUT,
 )
-from mureka.json_utils import prune_keys
 from utils.logger import logger
 
 
@@ -84,7 +84,7 @@ class MurekaBaseClient:
             except ValueError:
                 error_message = error.response.text or error.response.reason
 
-            from mureka.handlers import analyze_429_error_type
+            from adapters.mureka.handlers import analyze_429_error_type
 
             error_type = analyze_429_error_type(error_message)
 

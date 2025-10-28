@@ -2,9 +2,9 @@
 
 from typing import Any
 
+from adapters.openai.api_client import OpenAIAPIClient
 from business.openai_chat_transformer import build_chat_payload, get_available_models, parse_chat_response
 from config.settings import CHAT_DEBUG_LOGGING, OPENAI_CHAT_MODELS
-from services.openai_api_client import OpenAIAPIClient
 from utils.logger import logger
 
 

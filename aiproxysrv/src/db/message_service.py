@@ -102,9 +102,7 @@ class MessageService:
             )
             return None
 
-    def archive_messages(
-        self, db: Session, messages: list[Message], summary_message_id: uuid.UUID
-    ) -> int:
+    def archive_messages(self, db: Session, messages: list[Message], summary_message_id: uuid.UUID) -> int:
         """
         Archive messages by moving them to messages_archive table.
 

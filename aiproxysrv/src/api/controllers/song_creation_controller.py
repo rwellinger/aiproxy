@@ -6,13 +6,13 @@ from typing import Any
 
 import requests
 
+from adapters.mureka.json_utils import prune_keys
 from celery_app import generate_instrumental_task, generate_song_task
 from config.settings import MUREKA_API_KEY, MUREKA_STATUS_ENDPOINT, MUREKA_STEM_GENERATE_ENDPOINT
 from db.database import get_db
 from db.models import SongChoice
 from db.sketch_service import sketch_service
 from db.song_service import song_service
-from mureka.json_utils import prune_keys
 from utils.logger import logger
 
 

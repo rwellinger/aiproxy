@@ -163,8 +163,7 @@ omit = [
     "*/.venv/*",
     # Infrastructure - not unit-testable per CLAUDE.md
     "src/db/*_service.py",                 # DB/CRUD services (no business logic)
-    "src/services/*.py",                   # External API clients (infrastructure, mock hell)
-    "src/mureka/*.py",                     # External API clients (mock hell)
+    "src/adapters/*/*.py",                 # External API adapters (OpenAI, Mureka, Ollama - infrastructure, mock hell)
     "src/celery_app/tasks.py",             # Celery tasks (infrastructure)
     "src/celery_app/slot_manager.py",      # Celery slot management (global state)
     "src/api/app.py",                      # Flask app setup

@@ -51,7 +51,9 @@ class OpenAIAPIClient:
                 full_payload=payload,
             )
         else:
-            logger.info("OpenAI Chat request", model=payload.get("model"), message_count=len(payload.get("messages", [])))
+            logger.info(
+                "OpenAI Chat request", model=payload.get("model"), message_count=len(payload.get("messages", []))
+            )
 
         try:
             resp = requests.post(api_url, headers=headers, json=payload, timeout=self.timeout)

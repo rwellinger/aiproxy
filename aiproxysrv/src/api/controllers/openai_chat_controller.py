@@ -2,8 +2,8 @@
 
 from typing import Any
 
+from adapters.openai.api_client import OpenAIAPIError  # noqa: F401 # Re-export for backward compatibility
 from business.openai_chat_orchestrator import OpenAIChatOrchestrator
-from services.openai_api_client import OpenAIAPIError  # noqa: F401 # Re-export for backward compatibility
 
 
 __all__ = ["OpenAIChatController", "OpenAIAPIError"]

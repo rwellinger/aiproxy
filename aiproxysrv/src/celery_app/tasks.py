@@ -8,16 +8,16 @@ import traceback
 from celery.exceptions import SoftTimeLimitExceeded
 from requests import HTTPError
 
-from business.song_orchestrator import SongOrchestrator
-from config.settings import MUREKA_CHOICES
-from db.song_service import song_service
-from mureka import (
+from adapters.mureka import (
     start_mureka_generation,
     start_mureka_instrumental_generation,
     wait_for_mureka_completion,
     wait_for_mureka_instrumental_completion,
 )
-from mureka.handlers import handle_http_error
+from adapters.mureka.handlers import handle_http_error
+from business.song_orchestrator import SongOrchestrator
+from config.settings import MUREKA_CHOICES
+from db.song_service import song_service
 from utils.logger import logger
 
 from .celery_config import celery_app
@@ -131,7 +131,7 @@ def generate_song_task(self, payload: dict) -> dict:
             except ValueError:
                 error_message = e.response.text or e.response.reason
 
-            from mureka.handlers import analyze_429_error_type
+            from adapters.mureka.handlers import analyze_429_error_type
 
             error_type = analyze_429_error_type(error_message)
 
@@ -288,7 +288,7 @@ def generate_instrumental_task(self, payload: dict) -> dict:
             except ValueError:
                 error_message = e.response.text or e.response.reason
 
-            from mureka.handlers import analyze_429_error_type
+            from adapters.mureka.handlers import analyze_429_error_type
 
             error_type = analyze_429_error_type(error_message)
 

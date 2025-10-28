@@ -53,9 +53,7 @@ class ConversationService:
             )
             return None
 
-    def update_token_count(
-        self, db: Session, conversation_id: uuid.UUID, token_count: int
-    ) -> bool:
+    def update_token_count(self, db: Session, conversation_id: uuid.UUID, token_count: int) -> bool:
         """
         Update conversation token count and updated_at timestamp.
 

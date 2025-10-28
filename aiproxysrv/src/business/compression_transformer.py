@@ -3,9 +3,7 @@
 from typing import Any
 
 
-def filter_compressible_messages(
-    messages: list[Any], keep_recent: int
-) -> tuple[list[Any], list[Any], list[Any]]:
+def filter_compressible_messages(messages: list[Any], keep_recent: int) -> tuple[list[Any], list[Any], list[Any]]:
     """
     Separate messages into protected (system), old (to archive), and recent (to keep).
 

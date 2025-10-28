@@ -1,7 +1,5 @@
 """Tests for Compression Transformer - Business logic unit tests"""
 
-import pytest
-
 from business.compression_transformer import (
     build_summary_messages,
     build_summary_prompt,
