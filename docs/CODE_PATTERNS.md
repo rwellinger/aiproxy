@@ -746,3 +746,20 @@ def test_create_song(client):
     assert data["data"]["title"] == "New Song"
     assert data["data"]["status"] == "pending"
 ```
+
+---
+
+## 3-Layer Architecture (Current Implementation)
+
+**NEW:** For modern 3-Layer Architecture patterns with Orchestrators, Transformers, and Repositories,
+see **[CODE_PATTERNS_3LAYER.md](CODE_PATTERNS_3LAYER.md)**.
+
+This document contains:
+- ✅ Orchestrator Pattern (coordination)
+- ✅ Transformer Pattern (pure functions, 100% testable)
+- ✅ Normalizer Pattern (string transformations)
+- ✅ Repository Pattern (CRUD only)
+- ✅ Complete flow examples
+- ✅ Testing strategy
+- ✅ Anti-patterns (what NOT to do)
+

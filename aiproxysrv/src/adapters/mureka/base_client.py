@@ -2,13 +2,12 @@
 MUREKA Base Client - Shared HTTP and utilities logic
 """
 
-import logging
 import traceback
 
 import requests
 from requests import HTTPError
 
-from api.json_helpers import prune
+from adapters.mureka.json_utils import prune_keys
 from config.settings import (
     MUREKA_API_KEY,
     MUREKA_MAX_POLL_ATTEMPTS,
@@ -17,9 +16,7 @@ from config.settings import (
     MUREKA_POLL_INTERVAL_SHORT,
     MUREKA_TIMEOUT,
 )
-
-
-logger = logging.getLogger(__name__)
+from utils.logger import logger
 
 
 class MurekaBaseClient:
@@ -87,7 +84,7 @@ class MurekaBaseClient:
             except ValueError:
                 error_message = error.response.text or error.response.reason
 
-            from mureka.handlers import analyze_429_error_type
+            from adapters.mureka.handlers import analyze_429_error_type
 
             error_type = analyze_429_error_type(error_message)
 
@@ -119,7 +116,7 @@ class MurekaBaseClient:
     def _clean_response_data(self, response_data: dict) -> dict:
         """Clean response data by removing unwanted keys"""
         keys_to_remove = {"lyrics_sections"}
-        return prune(response_data, keys_to_remove)
+        return prune_keys(response_data, keys_to_remove)
 
     def _update_task_state(
         self,

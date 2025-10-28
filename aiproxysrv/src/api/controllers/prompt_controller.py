@@ -1,11 +1,14 @@
-"""Controller for prompt template management"""
+"""Controller for prompt template management - Uses Orchestrator Pattern"""
 
 from typing import Any
 
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from db.models import PromptTemplate
+from business.prompt_template_orchestrator import (
+    PromptTemplateOrchestrator,
+    PromptTemplateOrchestratorError,
+)
+from business.prompt_template_validator import PromptTemplateValidationError
 from schemas.prompt_schemas import (
     PromptCategoryResponse,
     PromptTemplateCreate,
@@ -17,70 +20,98 @@ from utils.logger import logger
 
 
 class PromptController:
-    """Controller for prompt template operations"""
+    """Controller for prompt template HTTP request handling (uses orchestrator)"""
 
-    @staticmethod
-    def get_all_templates(db: Session) -> tuple[dict[str, Any], int]:
+    def __init__(self):
+        self.orchestrator = PromptTemplateOrchestrator()
+
+    def get_all_templates(self, db: Session) -> tuple[dict[str, Any], int]:
         """Get all prompt templates grouped by category and action"""
         try:
-            templates = db.query(PromptTemplate).filter(PromptTemplate.active).all()
+            templates = self.orchestrator.get_all_templates(db)
 
-            # Group by category and action
+            # Filter active templates and group by category/action
             grouped: dict[str, dict[str, Any]] = {}
             for template in templates:
+                if not template.active:
+                    continue
+
                 if template.category not in grouped:
                     grouped[template.category] = {}
 
                 template_data = PromptTemplateResponse.model_validate(template)
                 grouped[template.category][template.action] = template_data
 
+            logger.info("Retrieved all templates", total_count=len(templates), category_count=len(grouped))
+
             response = PromptTemplatesGroupedResponse(categories=grouped)
             return response.model_dump(), 200
 
+        except PromptTemplateOrchestratorError as e:
+            logger.error("Orchestrator error retrieving templates", error=str(e), error_type=type(e).__name__)
+            return {"error": f"Failed to retrieve templates: {str(e)}"}, 500
         except Exception as e:
+            logger.error("Unexpected error retrieving templates", error=str(e), error_type=type(e).__name__)
             return {"error": f"Failed to retrieve templates: {str(e)}"}, 500
 
-    @staticmethod
-    def get_category_templates(db: Session, category: str) -> tuple[dict[str, Any], int]:
+    def get_category_templates(self, db: Session, category: str) -> tuple[dict[str, Any], int]:
         """Get all templates for a specific category"""
         try:
-            templates = (
-                db.query(PromptTemplate).filter(PromptTemplate.category == category, PromptTemplate.active).all()
-            )
+            templates = self.orchestrator.get_templates_by_category(db, category)
 
-            if not templates:
+            # Filter active templates
+            active_templates = [t for t in templates if t.active]
+
+            if not active_templates:
+                logger.warning("No active templates found for category", category=category)
                 return {"error": f"No templates found for category '{category}'"}, 404
 
             # Group by action
             templates_by_action: dict[str, PromptTemplateResponse] = {}
-            for template in templates:
+            for template in active_templates:
                 template_data = PromptTemplateResponse.model_validate(template)
                 templates_by_action[template.action] = template_data
+
+            logger.info("Retrieved category templates", category=category, count=len(active_templates))
 
             response = PromptCategoryResponse(category=category, templates=templates_by_action)
             return response.model_dump(), 200
 
+        except PromptTemplateOrchestratorError as e:
+            logger.error(
+                "Orchestrator error retrieving category templates",
+                category=category,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Failed to retrieve category templates: {str(e)}"}, 500
         except Exception as e:
+            logger.error(
+                "Unexpected error retrieving category templates",
+                category=category,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
             return {"error": f"Failed to retrieve category templates: {str(e)}"}, 500
 
-    @staticmethod
-    def get_specific_template(db: Session, category: str, action: str) -> tuple[dict[str, Any], int]:
+    def get_specific_template(self, db: Session, category: str, action: str) -> tuple[dict[str, Any], int]:
         """Get a specific template by category and action"""
         try:
-            template = (
-                db.query(PromptTemplate)
-                .filter(PromptTemplate.category == category, PromptTemplate.action == action, PromptTemplate.active)
-                .first()
-            )
+            template = self.orchestrator.get_template_by_category_action(db, category, action)
 
             if not template:
-                logger.warning("Prompt template not found", category=category, action=action)
+                logger.warning("Template not found", category=category, action=action)
                 return {"error": f"Template not found for category '{category}' and action '{action}'"}, 404
 
-            logger.debug(
-                "Prompt template loaded",
+            if not template.active:
+                logger.warning("Template is inactive", category=category, action=action, template_id=template.id)
+                return {"error": f"Template not found for category '{category}' and action '{action}'"}, 404
+
+            logger.info(
+                "Retrieved template",
                 category=category,
                 action=action,
+                template_id=template.id,
                 model=template.model,
                 temperature=template.temperature,
                 max_tokens=template.max_tokens,
@@ -90,103 +121,156 @@ class PromptController:
             response = PromptTemplateResponse.model_validate(template)
             return response.model_dump(), 200
 
+        except PromptTemplateOrchestratorError as e:
+            logger.error(
+                "Orchestrator error retrieving template",
+                category=category,
+                action=action,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Failed to retrieve template: {str(e)}"}, 500
         except Exception as e:
-            logger.error("Failed to retrieve prompt template", category=category, action=action, error=str(e))
+            logger.error(
+                "Unexpected error retrieving template",
+                category=category,
+                action=action,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
             return {"error": f"Failed to retrieve template: {str(e)}"}, 500
 
-    @staticmethod
     def update_template(
-        db: Session, category: str, action: str, update_data: PromptTemplateUpdate
+        self, db: Session, category: str, action: str, update_data: PromptTemplateUpdate
     ) -> tuple[dict[str, Any], int]:
         """Update an existing template with automatic version increment"""
         try:
-            template = (
-                db.query(PromptTemplate)
-                .filter(PromptTemplate.category == category, PromptTemplate.action == action)
-                .first()
+            # Convert Pydantic model to dict (exclude unset fields)
+            update_dict = update_data.model_dump(exclude_unset=True)
+
+            # Orchestrator handles validation + version increment
+            updated_template = self.orchestrator.update_template(db, category, action, update_dict)
+
+            logger.info(
+                "Template updated",
+                category=category,
+                action=action,
+                template_id=updated_template.id,
+                new_version=updated_template.version,
+                fields_updated=list(update_dict.keys()),
             )
 
-            if not template:
-                return {"error": f"Template not found for category '{category}' and action '{action}'"}, 404
-
-            # Update only provided fields
-            update_dict = update_data.model_dump(exclude_unset=True)
-            for field, value in update_dict.items():
-                setattr(template, field, value)
-
-            # Auto-increment version by 0.1
-            current_version = template.version or "1.0"
-            try:
-                version_float = float(current_version)
-                new_version = f"{version_float + 0.1:.1f}"
-                template.version = new_version
-            except (ValueError, TypeError):
-                # If version is not a valid float, start with 1.1
-                template.version = "1.1"
-
-            # updated_at will be set automatically by SQLAlchemy onupdate trigger
-            db.commit()
-            db.refresh(template)
-
-            response = PromptTemplateResponse.model_validate(template)
+            response = PromptTemplateResponse.model_validate(updated_template)
             return response.model_dump(), 200
 
+        except PromptTemplateValidationError as e:
+            logger.warning("Validation error updating template", category=category, action=action, error=str(e))
+            return {"error": f"Validation error: {str(e)}"}, 400
+        except PromptTemplateOrchestratorError as e:
+            error_msg = str(e)
+            if "not found" in error_msg.lower():
+                logger.warning("Template not found for update", category=category, action=action)
+                return {"error": f"Template not found for category '{category}' and action '{action}'"}, 404
+            logger.error(
+                "Orchestrator error updating template",
+                category=category,
+                action=action,
+                error=error_msg,
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Failed to update template: {error_msg}"}, 500
         except Exception as e:
-            db.rollback()
+            logger.error(
+                "Unexpected error updating template",
+                category=category,
+                action=action,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
             return {"error": f"Failed to update template: {str(e)}"}, 500
 
-    @staticmethod
-    def create_template(db: Session, template_data: PromptTemplateCreate) -> tuple[dict[str, Any], int]:
+    def create_template(self, db: Session, template_data: PromptTemplateCreate) -> tuple[dict[str, Any], int]:
         """Create a new prompt template"""
         try:
-            # Check if template already exists
-            existing = (
-                db.query(PromptTemplate)
-                .filter(
-                    PromptTemplate.category == template_data.category, PromptTemplate.action == template_data.action
-                )
-                .first()
+            # Convert Pydantic model to dict
+            template_dict = template_data.model_dump()
+
+            # Orchestrator handles validation + creation
+            new_template = self.orchestrator.create_template(db, template_dict)
+
+            logger.info(
+                "Template created",
+                category=new_template.category,
+                action=new_template.action,
+                template_id=new_template.id,
+                version=new_template.version,
             )
-
-            if existing:
-                return {
-                    "error": f"Template already exists for category '{template_data.category}' and action '{template_data.action}'"
-                }, 409
-
-            # Create new template
-            new_template = PromptTemplate(**template_data.model_dump())
-            db.add(new_template)
-            db.commit()
-            db.refresh(new_template)
 
             response = PromptTemplateResponse.model_validate(new_template)
             return response.model_dump(), 201
 
-        except IntegrityError:
-            db.rollback()
-            return {"error": "Template with this category and action already exists"}, 409
+        except PromptTemplateValidationError as e:
+            logger.warning(
+                "Validation error creating template",
+                category=template_data.category,
+                action=template_data.action,
+                error=str(e),
+            )
+            return {"error": f"Validation error: {str(e)}"}, 400
+        except PromptTemplateOrchestratorError as e:
+            error_msg = str(e)
+            if "already exists" in error_msg.lower():
+                logger.warning("Template already exists", category=template_data.category, action=template_data.action)
+                return {
+                    "error": f"Template already exists for category '{template_data.category}' and action '{template_data.action}'"
+                }, 409
+            logger.error(
+                "Orchestrator error creating template",
+                category=template_data.category,
+                action=template_data.action,
+                error=error_msg,
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Failed to create template: {error_msg}"}, 500
         except Exception as e:
-            db.rollback()
+            logger.error(
+                "Unexpected error creating template",
+                category=template_data.category,
+                action=template_data.action,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
             return {"error": f"Failed to create template: {str(e)}"}, 500
 
-    @staticmethod
-    def delete_template(db: Session, category: str, action: str) -> tuple[dict[str, Any], int]:
-        """Soft delete a template (set active=False)"""
+    def delete_template(self, db: Session, category: str, action: str) -> tuple[dict[str, Any], int]:
+        """Soft delete a template (set active=False via orchestrator)"""
         try:
-            template = (
-                db.query(PromptTemplate)
-                .filter(PromptTemplate.category == category, PromptTemplate.action == action)
-                .first()
-            )
+            # Orchestrator handles deletion
+            self.orchestrator.delete_template(db, category, action)
 
-            if not template:
-                return {"error": f"Template not found for category '{category}' and action '{action}'"}, 404
-
-            template.active = False
-            db.commit()
+            logger.info("Template deleted", category=category, action=action)
 
             return {"message": f"Template for category '{category}' and action '{action}' has been deactivated"}, 200
 
+        except PromptTemplateOrchestratorError as e:
+            error_msg = str(e)
+            if "not found" in error_msg.lower():
+                logger.warning("Template not found for deletion", category=category, action=action)
+                return {"error": f"Template not found for category '{category}' and action '{action}'"}, 404
+            logger.error(
+                "Orchestrator error deleting template",
+                category=category,
+                action=action,
+                error=error_msg,
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Failed to delete template: {error_msg}"}, 500
         except Exception as e:
-            db.rollback()
+            logger.error(
+                "Unexpected error deleting template",
+                category=category,
+                action=action,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
             return {"error": f"Failed to delete template: {str(e)}"}, 500

@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from api.controllers.image_controller import ImageController
-from business.image_business_service import ImageGenerationError
+from business.image_orchestrator import ImageGenerationError
 
 
 @pytest.mark.unit
@@ -16,7 +16,7 @@ class TestImageControllerGetImagesForTextOverlay:
         """Test successful retrieval of images for text overlay"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
         expected_result = {
             "images": [
@@ -29,21 +29,21 @@ class TestImageControllerGetImagesForTextOverlay:
             "total": 1,
         }
 
-        controller.business_service.get_images_for_text_overlay.return_value = expected_result
+        controller.orchestrator.get_images_for_text_overlay.return_value = expected_result
 
         result, status_code = controller.get_images_for_text_overlay()
 
         assert status_code == 200
         assert result == expected_result
-        controller.business_service.get_images_for_text_overlay.assert_called_once()
+        controller.orchestrator.get_images_for_text_overlay.assert_called_once()
 
     def test_get_images_for_text_overlay_business_error(self, mocker):
         """Test handling of business layer error"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.get_images_for_text_overlay.side_effect = ImageGenerationError("Database error")
+        controller.orchestrator.get_images_for_text_overlay.side_effect = ImageGenerationError("Database error")
 
         result, status_code = controller.get_images_for_text_overlay()
 
@@ -55,9 +55,9 @@ class TestImageControllerGetImagesForTextOverlay:
         """Test handling of unexpected error"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.get_images_for_text_overlay.side_effect = Exception("Unexpected failure")
+        controller.orchestrator.get_images_for_text_overlay.side_effect = Exception("Unexpected failure")
 
         result, status_code = controller.get_images_for_text_overlay()
 
@@ -74,9 +74,9 @@ class TestImageControllerAddTextOverlay:
         """Test text overlay when source image not found"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.get_image_details.return_value = None
+        controller.orchestrator.get_image_details.return_value = None
 
         result, status_code = controller.add_text_overlay(
             image_id="nonexistent",
@@ -92,10 +92,10 @@ class TestImageControllerAddTextOverlay:
         """Test text overlay when image has no file path"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
         # Mock image without file_path
-        controller.business_service.get_image_details.return_value = {
+        controller.orchestrator.get_image_details.return_value = {
             "id": "123",
             "title": "Test",
         }
@@ -114,9 +114,9 @@ class TestImageControllerAddTextOverlay:
         """Test text overlay with business layer error"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.get_image_details.side_effect = ImageGenerationError("Database error")
+        controller.orchestrator.get_image_details.side_effect = ImageGenerationError("Database error")
 
         result, status_code = controller.add_text_overlay(
             image_id="123",
@@ -132,9 +132,9 @@ class TestImageControllerAddTextOverlay:
         """Test text overlay with unexpected error"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.get_image_details.side_effect = ValueError("Invalid input")
+        controller.orchestrator.get_image_details.side_effect = ValueError("Invalid input")
 
         result, status_code = controller.add_text_overlay(
             image_id="123",
@@ -155,9 +155,9 @@ class TestImageControllerDeleteImage:
         """Test successful image deletion"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.delete_single_image.return_value = True
+        controller.orchestrator.delete_single_image.return_value = True
 
         result, status_code = controller.delete_image("123")
 
@@ -168,9 +168,9 @@ class TestImageControllerDeleteImage:
         """Test deletion of non-existent image"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.delete_single_image.return_value = False
+        controller.orchestrator.delete_single_image.return_value = False
 
         result, status_code = controller.delete_image("nonexistent")
 
@@ -181,9 +181,9 @@ class TestImageControllerDeleteImage:
         """Test deletion with business layer error"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.delete_single_image.side_effect = ImageGenerationError("Database error")
+        controller.orchestrator.delete_single_image.side_effect = ImageGenerationError("Database error")
 
         result, status_code = controller.delete_image("123")
 
@@ -199,7 +199,7 @@ class TestImageControllerBulkDelete:
         """Test bulk delete with empty ID list"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
         result, status_code = controller.bulk_delete_images([])
 
@@ -211,7 +211,7 @@ class TestImageControllerBulkDelete:
         """Test bulk delete with too many IDs (>100)"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
         # Create 101 IDs
         too_many_ids = [f"id_{i}" for i in range(101)]
@@ -226,9 +226,9 @@ class TestImageControllerBulkDelete:
         """Test bulk delete with all deletions successful"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.bulk_delete_images.return_value = {
+        controller.orchestrator.bulk_delete_images.return_value = {
             "summary": {"deleted": 3, "not_found": 0, "errors": 0},
             "details": [],
         }
@@ -242,9 +242,9 @@ class TestImageControllerBulkDelete:
         """Test bulk delete with partial success (multi-status)"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.bulk_delete_images.return_value = {
+        controller.orchestrator.bulk_delete_images.return_value = {
             "summary": {"deleted": 2, "not_found": 1, "errors": 0},
             "details": [],
         }
@@ -258,9 +258,9 @@ class TestImageControllerBulkDelete:
         """Test bulk delete with all IDs not found"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.bulk_delete_images.return_value = {
+        controller.orchestrator.bulk_delete_images.return_value = {
             "summary": {"deleted": 0, "not_found": 3, "errors": 0},
             "details": [],
         }
@@ -274,9 +274,9 @@ class TestImageControllerBulkDelete:
         """Test bulk delete with all deletions failing"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.bulk_delete_images.return_value = {
+        controller.orchestrator.bulk_delete_images.return_value = {
             "summary": {"deleted": 0, "not_found": 0, "errors": 3},
             "details": [],
         }
@@ -295,7 +295,7 @@ class TestImageControllerUpdateMetadata:
         """Test successful metadata update"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
         expected_result = {
             "id": "123",
@@ -303,7 +303,7 @@ class TestImageControllerUpdateMetadata:
             "tags": "tag1,tag2",
         }
 
-        controller.business_service.update_image_metadata.return_value = expected_result
+        controller.orchestrator.update_image_metadata.return_value = expected_result
 
         result, status_code = controller.update_image_metadata("123", title="Updated Title", tags="tag1,tag2")
 
@@ -314,9 +314,9 @@ class TestImageControllerUpdateMetadata:
         """Test update metadata for non-existent image"""
         mocker.patch.object(ImageController, "__init__", return_value=None)
         controller = ImageController()
-        controller.business_service = MagicMock()
+        controller.orchestrator = MagicMock()
 
-        controller.business_service.update_image_metadata.return_value = None
+        controller.orchestrator.update_image_metadata.return_value = None
 
         result, status_code = controller.update_image_metadata("nonexistent", title="New Title")
 

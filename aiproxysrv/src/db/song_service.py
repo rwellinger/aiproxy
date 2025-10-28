@@ -155,8 +155,26 @@ class SongService:
             logger.error("song_status_update_failed", task_id=task_id, error=str(e), error_type=type(e).__name__)
             return False
 
-    def update_song_result(self, task_id: str, result_data: dict[str, Any]) -> bool:
-        """Update song with completion results and create choices"""
+    def update_song_result(self, task_id: str, parsed_data: dict[str, Any]) -> bool:
+        """
+        Update song with completion results and create choices
+
+        IMPORTANT: This method expects PRE-PARSED data from SongOrchestrator.
+        All MUREKA response parsing is done in the business layer (SongMurekaTransformer).
+
+        Args:
+            task_id: Celery task ID
+            parsed_data: Pre-parsed data dict with keys:
+                - mureka_result: Complete MUREKA result object
+                - mureka_status: Status string
+                - model: Model name
+                - choices: List of choice dicts in DB format
+                - completed_at: Timestamp
+                - choices_count: Number of choices
+
+        Returns:
+            True if successful, False otherwise
+        """
         try:
             db = next(get_db())
             try:
@@ -168,49 +186,35 @@ class SongService:
                 # Update status to SUCCESS
                 song.status = SongStatus.SUCCESS.value
 
-                # Store complete MUREKA response
-                if "result" in result_data and result_data["result"]:
-                    mureka_result = result_data["result"]
-                    song.mureka_response = json.dumps(mureka_result)
-                    song.mureka_status = mureka_result.get("status")
+                # Store complete MUREKA response (already parsed by business layer)
+                if parsed_data.get("mureka_result") is not None:
+                    song.mureka_response = json.dumps(parsed_data["mureka_result"])
+                    song.mureka_status = parsed_data.get("mureka_status")
 
                     # Update model with the actual model used by Mureka (not the request model)
-                    if mureka_result.get("model"):
-                        song.model = mureka_result.get("model")
+                    if parsed_data.get("model"):
+                        song.model = parsed_data["model"]
                         logger.info("Song model updated", task_id=task_id, model=song.model)
 
-                    # Process choices array
-                    choices_data = mureka_result.get("choices", [])
-                    logger.info("Processing song choices", task_id=task_id, choices_count=len(choices_data))
+                # Create song choices from pre-transformed data
+                choices_data = parsed_data.get("choices", [])
+                logger.info("Creating song choices", task_id=task_id, choices_count=len(choices_data))
 
-                    for choice_data in choices_data:
-                        song_choice = SongChoice(
-                            song_id=song.id,
-                            mureka_choice_id=choice_data.get("id"),
-                            choice_index=choice_data.get("index"),
-                            mp3_url=choice_data.get("url"),
-                            flac_url=choice_data.get("flac_url"),
-                            video_url=choice_data.get("video_url"),
-                            image_url=choice_data.get("image_url"),
-                            duration=float(choice_data["duration"]) if choice_data.get("duration") else None,
-                            title=choice_data.get("title"),
-                            tags=",".join(choice_data["tags"])
-                            if choice_data.get("tags") and isinstance(choice_data["tags"], list)
-                            else None,
-                        )
-                        db.add(song_choice)
-                        logger.debug(
-                            "song_choice_created",
-                            task_id=task_id,
-                            choice_index=choice_data.get("index"),
-                            has_url=bool(choice_data.get("url")),
-                        )
+                for choice_dict in choices_data:
+                    song_choice = SongChoice(song_id=song.id, **choice_dict)
+                    db.add(song_choice)
+                    logger.debug(
+                        "Song choice created",
+                        task_id=task_id,
+                        choice_index=choice_dict.get("choice_index"),
+                        has_url=bool(choice_dict.get("mp3_url")),
+                    )
 
                 # Set completion timestamp
-                if "completed_at" in result_data:
+                if parsed_data.get("completed_at"):
                     from datetime import datetime
 
-                    song.completed_at = datetime.fromtimestamp(result_data["completed_at"])
+                    song.completed_at = datetime.fromtimestamp(parsed_data["completed_at"])
 
                 db.commit()
                 logger.info("Song result updated", task_id=task_id, choices_count=len(choices_data))
@@ -219,7 +223,7 @@ class SongService:
             except SQLAlchemyError as e:
                 db.rollback()
                 logger.error(
-                    "song_result_update_db_error",
+                    "Song result update DB error",
                     task_id=task_id,
                     error=str(e),
                     error_type=type(e).__name__,
@@ -231,7 +235,7 @@ class SongService:
 
         except Exception as e:
             logger.error(
-                "song_result_update_failed",
+                "Song result update failed",
                 task_id=task_id,
                 error=str(e),
                 error_type=type(e).__name__,

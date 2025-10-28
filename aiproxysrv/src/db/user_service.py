@@ -1,75 +1,54 @@
 """
-User Service for database operations and authentication logic
+User Service for database operations (CRUD only)
+
+Pure database operations - NO business logic, NO authentication logic
+All authentication logic moved to business.user_auth_service
 """
 
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 
-import bcrypt
-import jwt
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from config.settings import JWT_ALGORITHM, JWT_EXPIRATION_HOURS, JWT_SECRET_KEY
 from db.models import User
+from utils.logger import logger
 
 
 class UserService:
-    """Service class for user management and authentication"""
-
-    def __init__(self):
-        # JWT configuration from settings
-        self.jwt_secret = JWT_SECRET_KEY
-        self.jwt_algorithm = JWT_ALGORITHM
-        self.jwt_expiration_hours = JWT_EXPIRATION_HOURS
-
-    def hash_password(self, password: str) -> str:
-        """Hash a password using bcrypt"""
-        salt = bcrypt.gensalt()
-        hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
-        return hashed.decode("utf-8")
-
-    def verify_password(self, password: str, hashed_password: str) -> bool:
-        """Verify a password against its hash"""
-        try:
-            return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
-        except Exception:
-            return False
-
-    def generate_jwt_token(self, user_id: str, email: str) -> str:
-        """Generate JWT token for user authentication"""
-        payload = {
-            "user_id": str(user_id),
-            "email": email,
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(hours=self.jwt_expiration_hours),
-        }
-        return jwt.encode(payload, self.jwt_secret, algorithm=self.jwt_algorithm)
-
-    def verify_jwt_token(self, token: str) -> dict | None:
-        """Verify JWT token and return payload if valid"""
-        try:
-            payload = jwt.decode(token, self.jwt_secret, algorithms=[self.jwt_algorithm])
-            return payload
-        except jwt.ExpiredSignatureError:
-            return None
-        except jwt.InvalidTokenError:
-            return None
+    """User database operations (CRUD only)"""
 
     def create_user(
-        self, db: Session, email: str, password: str, first_name: str = None, last_name: str = None
+        self,
+        db: Session,
+        email: str,
+        password_hash: str,
+        first_name: str = None,
+        last_name: str = None,
     ) -> User | None:
-        """Create a new user"""
+        """
+        Create a new user (expects hashed password)
+
+        Args:
+            db: Database session
+            email: User email address
+            password_hash: Pre-hashed password from UserAuthService
+            first_name: Optional first name
+            last_name: Optional last name
+
+        Returns:
+            Created User object or None
+
+        Note: Password must be hashed by UserAuthService before calling this method
+        """
         try:
             # Check if user already exists
             existing_user = db.query(User).filter(User.email == email).first()
             if existing_user:
+                logger.warning("User creation failed - email already exists", email=email)
                 raise ValueError(f"User with email {email} already exists")
 
-            # Hash the password
-            password_hash = self.hash_password(password)
-
-            # Create the user
+            # Create the user with hashed password
             user = User(
                 id=uuid.uuid4(),
                 email=email,
@@ -77,58 +56,89 @@ class UserService:
                 first_name=first_name,
                 last_name=last_name,
                 is_active=True,
-                is_verified=False,  # Initially not verified
+                is_verified=False,
                 created_at=datetime.utcnow(),
             )
 
             db.add(user)
             db.commit()
             db.refresh(user)
+            logger.info("User created", user_id=str(user.id), email=email)
             return user
 
         except IntegrityError:
             db.rollback()
+            logger.error("User creation failed - integrity error", email=email)
             raise ValueError(f"User with email {email} already exists")
         except Exception as e:
             db.rollback()
+            logger.error("User creation failed", error=str(e), email=email)
             raise e
 
-    def authenticate_user(self, db: Session, email: str, password: str) -> User | None:
-        """Authenticate a user with email and password"""
-        user = db.query(User).filter(User.email == email, User.is_active).first()
-
-        if not user or not user.password_hash:
-            return None
-
-        if self.verify_password(password, user.password_hash):
-            # Update last login timestamp
-            user.last_login = datetime.utcnow()
-            db.commit()
-            return user
-
-        return None
-
     def get_user_by_id(self, db: Session, user_id: str) -> User | None:
-        """Get user by ID"""
+        """
+        Get user by ID
+
+        Args:
+            db: Database session
+            user_id: User UUID as string
+
+        Returns:
+            User object or None if not found
+        """
         try:
             user_uuid = uuid.UUID(user_id)
-            return db.query(User).filter(User.id == user_uuid, User.is_active).first()
-        except (ValueError, TypeError):
+            user = db.query(User).filter(User.id == user_uuid, User.is_active).first()
+            if user:
+                logger.debug("User retrieved by ID", user_id=user_id)
+            return user
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid user ID format", user_id=user_id, error=str(e))
             return None
 
     def get_user_by_email(self, db: Session, email: str) -> User | None:
-        """Get user by email"""
-        return db.query(User).filter(User.email == email, User.is_active).first()
+        """
+        Get user by email
+
+        Args:
+            db: Database session
+            email: User email address
+
+        Returns:
+            User object or None if not found
+        """
+        user = db.query(User).filter(User.email == email, User.is_active).first()
+        if user:
+            logger.debug("User retrieved by email", email=email, user_id=str(user.id))
+        return user
 
     def update_user(
-        self, db: Session, user_id: str, first_name: str = None, last_name: str = None, artist_name: str = None
+        self,
+        db: Session,
+        user_id: str,
+        first_name: str = None,
+        last_name: str = None,
+        artist_name: str = None,
     ) -> User | None:
-        """Update user information"""
+        """
+        Update user information
+
+        Args:
+            db: Database session
+            user_id: User UUID as string
+            first_name: Optional first name
+            last_name: Optional last name
+            artist_name: Optional artist name
+
+        Returns:
+            Updated User object or None if not found
+        """
         try:
             user_uuid = uuid.UUID(user_id)
             user = db.query(User).filter(User.id == user_uuid, User.is_active).first()
 
             if not user:
+                logger.warning("User update failed - user not found", user_id=user_id)
                 return None
 
             # Update fields if provided
@@ -142,76 +152,128 @@ class UserService:
             user.updated_at = datetime.utcnow()
             db.commit()
             db.refresh(user)
+            logger.info("User updated", user_id=user_id)
             return user
 
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid user ID format", user_id=user_id, error=str(e))
             return None
         except Exception as e:
             db.rollback()
+            logger.error("User update failed", error=str(e), user_id=user_id)
             raise e
 
-    def change_password(self, db: Session, user_id: str, old_password: str, new_password: str) -> bool:
-        """Change user password"""
+    def update_password_hash(self, db: Session, user_id: str, password_hash: str) -> bool:
+        """
+        Update user password hash (expects pre-hashed password)
+
+        Args:
+            db: Database session
+            user_id: User UUID as string
+            password_hash: Pre-hashed password from UserAuthService
+
+        Returns:
+            True if successful, False otherwise
+
+        Note: Password must be hashed by UserAuthService before calling this method
+        """
         try:
             user_uuid = uuid.UUID(user_id)
             user = db.query(User).filter(User.id == user_uuid, User.is_active).first()
 
-            if not user or not user.password_hash:
+            if not user:
+                logger.warning("Password update failed - user not found", user_id=user_id)
                 return False
 
-            # Verify old password
-            if not self.verify_password(old_password, user.password_hash):
-                return False
-
-            # Set new password
-            user.password_hash = self.hash_password(new_password)
+            user.password_hash = password_hash
             user.updated_at = datetime.utcnow()
             db.commit()
+            logger.info("User password updated", user_id=user_id)
+            return True
+
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid user ID format", user_id=user_id, error=str(e))
+            return False
+        except Exception as e:
+            db.rollback()
+            logger.error("Password update failed", error=str(e), user_id=user_id)
+            raise e
+
+    def update_last_login(self, db: Session, user_id: str) -> bool:
+        """
+        Update user's last login timestamp
+
+        Args:
+            db: Database session
+            user_id: User UUID as string
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            user_uuid = uuid.UUID(user_id)
+            user = db.query(User).filter(User.id == user_uuid, User.is_active).first()
+
+            if not user:
+                return False
+
+            user.last_login = datetime.utcnow()
+            db.commit()
+            logger.debug("Last login updated", user_id=user_id)
             return True
 
         except (ValueError, TypeError):
             return False
         except Exception as e:
             db.rollback()
-            raise e
-
-    def reset_password(self, db: Session, email: str, new_password: str) -> bool:
-        """Reset password (admin function)"""
-        try:
-            user = db.query(User).filter(User.email == email, User.is_active).first()
-
-            if not user:
-                return False
-
-            user.password_hash = self.hash_password(new_password)
-            user.updated_at = datetime.utcnow()
-            db.commit()
-            return True
-
-        except Exception as e:
-            db.rollback()
+            logger.error("Last login update failed", error=str(e), user_id=user_id)
             raise e
 
     def deactivate_user(self, db: Session, user_id: str) -> bool:
-        """Deactivate a user (soft delete)"""
+        """
+        Deactivate a user (soft delete)
+
+        Args:
+            db: Database session
+            user_id: User UUID as string
+
+        Returns:
+            True if successful, False otherwise
+        """
         try:
             user_uuid = uuid.UUID(user_id)
             user = db.query(User).filter(User.id == user_uuid).first()
 
             if not user:
+                logger.warning("User deactivation failed - user not found", user_id=user_id)
                 return False
 
             user.is_active = False
             user.updated_at = datetime.utcnow()
             db.commit()
+            logger.info("User deactivated", user_id=user_id)
             return True
 
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid user ID format", user_id=user_id, error=str(e))
             return False
         except Exception as e:
             db.rollback()
+            logger.error("User deactivation failed", error=str(e), user_id=user_id)
             raise e
 
     def list_users(self, db: Session, skip: int = 0, limit: int = 100) -> list[User]:
-        """List all active users"""
-        return db.query(User).filter(User.is_active).offset(skip).limit(limit).all()
+        """
+        List all active users
+
+        Args:
+            db: Database session
+            skip: Number of records to skip (pagination)
+            limit: Maximum number of records to return
+
+        Returns:
+            List of User objects
+        """
+        users = db.query(User).filter(User.is_active).offset(skip).limit(limit).all()
+        logger.debug("Users listed", count=len(users), skip=skip, limit=limit)
+        return users

@@ -54,8 +54,8 @@ def main():
     flask_logger.handlers = [LoguruHandler()]
     flask_logger.setLevel(LOG_LEVEL)
 
-    logger.info("*** AITESTMOCK STARTED ***")
-    logger.info(f"*** Version: {version} ***")
+    logger.info("AITESTMOCK started")
+    logger.info("Server version", version=version)
 
     app.run(host="0.0.0.0", port=3080, debug=app.config["DEBUG"])
 

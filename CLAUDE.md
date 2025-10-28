@@ -217,16 +217,29 @@ def get_user_profile():
 
 **Separation of Concerns:**
 ```
-Controller → Business Service → Repository
-(HTTP)       (Logic, Testable)  (DB CRUD)
+Controller → Orchestrator → Transformer/Normalizer + Repository
+(HTTP)       (Coordinates)  (Pure Functions)      (DB CRUD)
 ```
+
+**Naming Convention (CRITICAL!):**
+
+| File Pattern | Purpose | Testable? | Example |
+|--------------|---------|-----------|---------|
+| `*_orchestrator.py` | Coordinates services, NO business logic | ❌ No (only calls other services) | `SketchOrchestrator`, `SongOrchestrator` |
+| `*_transformer.py` | Pure functions: transformations, mappings | ✅ Yes (100% coverage) | `SongMurekaTransformer`, `ApiCostTransformer` |
+| `*_normalizer.py` | Pure functions: string normalization | ✅ Yes (100% coverage) | `SketchNormalizer` |
+| `*_auth_service.py` | Pure functions: authentication logic | ✅ Yes (100% coverage) | `UserAuthService` |
+| `*_enhancement_service.py` | Pure functions: enhancements | ✅ Yes (100% coverage) | `ImageEnhancementService` |
+| `*_service.py` (in `db/`) | CRUD operations only | ❌ No (infrastructure) | `SketchService`, `SongService` |
 
 **Layer Responsibilities:**
 
-**1. Business Layer** (`src/business/*_service.py`)
-- ✅ Business logic, calculations, transformations
+**1. Business Layer** (`src/business/`)
+- **Orchestrators** (`*_orchestrator.py`): Coordinate services (NOT testable, no business logic)
+- **Transformers/Normalizers**: Pure functions (100% unit-testable)
+- ✅ Business logic, calculations, transformations (in transformers/normalizers)
 - ✅ Pure functions (no DB, no file system)
-- ✅ **MUST be unit-testable** without mocks
+- ✅ **MUST be unit-testable** without mocks (transformers/normalizers only)
 - ❌ NO database queries
 - ❌ NO file system operations
 
@@ -240,7 +253,7 @@ Controller → Business Service → Repository
 **3. Controller Layer** (`src/api/controllers/*_controller.py`)
 - ✅ HTTP request/response handling
 - ✅ Input validation (Pydantic)
-- ✅ Call business layer
+- ✅ Call orchestrator or business services
 - ❌ NO business logic
 - ❌ NO direct DB queries
 
@@ -248,13 +261,14 @@ Controller → Business Service → Repository
 ```python
 # ✅ CORRECT: Separation of Concerns
 image_controller.py
-  └─> image_business_service.py
-       ├─ Validation, hashing, file management
-       ├─ Calls: image_enhancement_service.py (pure functions)
-       └─> image_service.py (DB CRUD only)
+  └─> image_orchestrator.py (coordinates services, NOT testable)
+       ├─ Calls: image_enhancement_service.py (pure functions, 100% tested)
+       ├─ Calls: file_management_service.py (infrastructure)
+       └─> image_service.py (DB CRUD only, NO tests)
 
 # Tests:
 # - image_enhancement_service.py: 100% coverage (pure functions)
+# - image_orchestrator.py: 0% coverage (orchestration, not testable)
 # - image_service.py: 0% coverage (CRUD, no tests)
 ```
 
@@ -432,19 +446,27 @@ Use **feature-grouped hierarchical keys** (max 3 levels):
 
 #### Rules
 - **ALWAYS** use `logger` from `utils.logger`, **NEVER** `print()`
+- **ALWAYS** use `from utils.logger import logger`, **NEVER** `import logging`
 - **ALWAYS** provide context via extra fields (NOT in the message string)
 - **ALWAYS** use human-readable messages (NOT `snake_case`)
+
+**CRITICAL:** Using `import logging` instead of `from utils.logger import logger` will cause crashes when using structured logging parameters (e.g., `logger.info("Message", param=value)`). Standard Python logger does NOT support named parameters!
 
 #### Patterns
 
 ```python
+# ✅ CORRECT: Use Loguru logger from utils
 from utils.logger import logger
 
-# ✅ CORRECT: Structured logging with context
 logger.debug("Sketch retrieved", sketch_id=sketch_id, workflow=workflow, user_id=user_id)
 logger.info("Song updated", song_id=song_id, fields_updated=list(update_data.keys()))
 logger.warning("Template not found", category=category, action=action)
 logger.error("Database error", error=str(e), error_type=type(e).__name__, sketch_id=sketch_id)
+
+# ❌ WRONG: Standard Python logging (CRASHES with structured parameters!)
+import logging
+logger = logging.getLogger(__name__)
+logger.info("Processing", task_id=task_id)  # TypeError: info() got unexpected keyword argument 'task_id'
 
 # ❌ WRONG: Snake-case messages (unreadable)
 logger.debug("sketch_retrieved_by_id", sketch_id=sketch_id)

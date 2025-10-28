@@ -241,33 +241,34 @@ class SketchService:
             # Track which fields are being updated
             updated_fields = []
 
-            # Update only provided fields (empty strings are converted to None for optional fields)
+            # Update only provided fields
+            # IMPORTANT: String normalization (trim, empty->None) is handled by business layer
             if title is not None:
-                sketch.title = title if title.strip() else None
+                sketch.title = title
                 updated_fields.append("title")
             if lyrics is not None:
-                sketch.lyrics = lyrics if lyrics.strip() else None
+                sketch.lyrics = lyrics
                 updated_fields.append("lyrics")
             if prompt is not None:
                 sketch.prompt = prompt
                 updated_fields.append("prompt")
             if tags is not None:
-                sketch.tags = tags if tags.strip() else None
+                sketch.tags = tags
                 updated_fields.append("tags")
             if workflow is not None:
                 sketch.workflow = workflow
                 updated_fields.append("workflow")
             if description_long is not None:
-                sketch.description_long = description_long if description_long.strip() else None
+                sketch.description_long = description_long
                 updated_fields.append("description_long")
             if description_short is not None:
-                sketch.description_short = description_short if description_short.strip() else None
+                sketch.description_short = description_short
                 updated_fields.append("description_short")
             if description_tags is not None:
-                sketch.description_tags = description_tags if description_tags.strip() else None
+                sketch.description_tags = description_tags
                 updated_fields.append("description_tags")
             if info is not None:
-                sketch.info = info if info.strip() else None
+                sketch.info = info
                 updated_fields.append("info")
 
             # Update timestamp

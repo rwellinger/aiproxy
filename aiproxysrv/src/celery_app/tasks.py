@@ -8,15 +8,16 @@ import traceback
 from celery.exceptions import SoftTimeLimitExceeded
 from requests import HTTPError
 
-from config.settings import MUREKA_CHOICES
-from db.song_service import song_service
-from mureka import (
+from adapters.mureka import (
     start_mureka_generation,
     start_mureka_instrumental_generation,
     wait_for_mureka_completion,
     wait_for_mureka_instrumental_completion,
 )
-from mureka.handlers import handle_http_error
+from adapters.mureka.handlers import handle_http_error
+from business.song_orchestrator import SongOrchestrator
+from config.settings import MUREKA_CHOICES
+from db.song_service import song_service
 from utils.logger import logger
 
 from .celery_config import celery_app
@@ -94,8 +95,9 @@ def generate_song_task(self, payload: dict) -> dict:
             "completed_at": time.time(),
         }
 
-        # Update song result in database
-        if song_service.update_song_result(task_id, success_result):
+        # Update song result in database (using business layer for MUREKA parsing)
+        song_orchestrator = SongOrchestrator()
+        if song_orchestrator.process_song_completion(task_id, success_result):
             logger.info("Successfully updated song result in database", extra={"task_id": task_id, "job_id": job_id})
             # Clean up Redis data after successful DB storage
             song_service.cleanup_redis_data(task_id)
@@ -129,7 +131,7 @@ def generate_song_task(self, payload: dict) -> dict:
             except ValueError:
                 error_message = e.response.text or e.response.reason
 
-            from mureka.handlers import analyze_429_error_type
+            from adapters.mureka.handlers import analyze_429_error_type
 
             error_type = analyze_429_error_type(error_message)
 
@@ -245,8 +247,9 @@ def generate_instrumental_task(self, payload: dict) -> dict:
             "is_instrumental": True,
         }
 
-        # Update song result in database with instrumental flag
-        if song_service.update_song_result(task_id, success_result):
+        # Update song result in database with instrumental flag (using business layer for MUREKA parsing)
+        song_orchestrator = SongOrchestrator()
+        if song_orchestrator.process_song_completion(task_id, success_result):
             logger.info(
                 "Successfully updated instrumental song result in database",
                 extra={"task_id": task_id, "job_id": job_id},
@@ -285,7 +288,7 @@ def generate_instrumental_task(self, payload: dict) -> dict:
             except ValueError:
                 error_message = e.response.text or e.response.reason
 
-            from mureka.handlers import analyze_429_error_type
+            from adapters.mureka.handlers import analyze_429_error_type
 
             error_type = analyze_429_error_type(error_message)
 
