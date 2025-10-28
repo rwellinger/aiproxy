@@ -1,14 +1,11 @@
 """Song Orchestrator - Coordinates song operations (no testable business logic)"""
 
-import logging
 from typing import Any
 
 from business.song_mureka_transformer import SongMurekaTransformer
 from business.song_transformer import SongTransformer
 from db.song_service import song_service
-
-
-logger = logging.getLogger(__name__)
+from utils.logger import logger
 
 
 class SongOrchestratorError(Exception):
