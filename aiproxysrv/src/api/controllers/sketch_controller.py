@@ -5,6 +5,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from business.sketch_business_service import SketchBusinessError, SketchBusinessService
 from db.sketch_service import sketch_service
 from schemas.common_schemas import PaginationMeta
 from schemas.sketch_schemas import (
@@ -22,7 +23,7 @@ class SketchController:
     @staticmethod
     def create_sketch(db: Session, sketch_data: SketchCreateRequest) -> tuple[dict[str, Any], int]:
         """
-        Create a new sketch
+        Create a new sketch (uses business layer for normalization)
 
         Args:
             db: Database session
@@ -32,7 +33,8 @@ class SketchController:
             Tuple of (response_data, status_code)
         """
         try:
-            sketch = sketch_service.create_sketch(
+            sketch_business_service = SketchBusinessService()
+            sketch = sketch_business_service.create_sketch(
                 db=db,
                 title=sketch_data.title,
                 lyrics=sketch_data.lyrics,
@@ -40,12 +42,12 @@ class SketchController:
                 tags=sketch_data.tags,
             )
 
-            if not sketch:
-                return {"error": "Failed to create sketch"}, 500
-
             response = SketchResponse.model_validate(sketch)
             return {"data": response.model_dump(), "message": "Sketch created successfully"}, 201
 
+        except SketchBusinessError as e:
+            logger.error("sketch_creation_error", error=str(e))
+            return {"error": f"Failed to create sketch: {str(e)}"}, 500
         except Exception as e:
             logger.error("sketch_creation_error", error=str(e), error_type=type(e).__name__)
             return {"error": f"Failed to create sketch: {str(e)}"}, 500
@@ -145,7 +147,7 @@ class SketchController:
     @staticmethod
     def update_sketch(db: Session, sketch_id: str, update_data: SketchUpdateRequest) -> tuple[dict[str, Any], int]:
         """
-        Update an existing sketch
+        Update an existing sketch (uses business layer for normalization)
 
         Args:
             db: Database session
@@ -170,14 +172,17 @@ class SketchController:
             if not update_dict:
                 return {"error": "No fields to update"}, 400
 
-            sketch = sketch_service.update_sketch(db=db, sketch_id=sketch_id, **update_dict)
-
-            if not sketch:
-                return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
+            sketch_business_service = SketchBusinessService()
+            sketch = sketch_business_service.update_sketch(db=db, sketch_id=sketch_id, update_data=update_dict)
 
             response = SketchResponse.model_validate(sketch)
             return {"data": response.model_dump(), "message": "Sketch updated successfully"}, 200
 
+        except SketchBusinessError as e:
+            if "not found" in str(e).lower():
+                return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
+            logger.error("sketch_update_error", sketch_id=sketch_id, error=str(e))
+            return {"error": f"Failed to update sketch: {str(e)}"}, 500
         except Exception as e:
             logger.error("sketch_update_error", sketch_id=sketch_id, error=str(e), error_type=type(e).__name__)
             return {"error": f"Failed to update sketch: {str(e)}"}, 500
