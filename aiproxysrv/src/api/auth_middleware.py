@@ -6,6 +6,7 @@ from functools import wraps
 
 from flask import g, jsonify, request
 
+from business.user_auth_service import UserAuthService
 from db.user_service import UserService
 
 
@@ -32,8 +33,11 @@ def jwt_required(f):
             return jsonify({"success": False, "error": "Authorization header must be in format 'Bearer <token>'"}), 401
 
         # Validate JWT token
+        auth_service = UserAuthService()
+        payload = auth_service.verify_jwt_token(token)
+
+        # User service for DB operations
         user_service = UserService()
-        payload = user_service.verify_jwt_token(token)
 
         if not payload:
             return jsonify({"success": False, "error": "Invalid or expired token"}), 401
