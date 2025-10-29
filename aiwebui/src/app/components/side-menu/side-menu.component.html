@@ -78,6 +78,23 @@
 
         <div class="nav-group">
             <span class="group-label">
+                <i class="fas fa-toolbox"></i>
+                {{ 'sideMenu.equipment' | translate }}
+            </span>
+            <div class="group-items">
+                <a routerLink="/equipment-gallery" routerLinkActive="active">
+                    <i class="fas fa-folder-open"></i>
+                    {{ 'sideMenu.equipmentGallery' | translate }}
+                </a>
+                <a routerLink="/equipment-editor" routerLinkActive="active">
+                    <i class="fas fa-plus"></i>
+                    {{ 'sideMenu.newEquipment' | translate }}
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <span class="group-label">
                 <i class="fas fa-cogs"></i>
                 {{ 'sideMenu.settings' | translate }}
             </span>

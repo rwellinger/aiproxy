@@ -121,6 +121,7 @@
     "edit": "Bearbeiten",
     "filter": "Filtern",
     "loading": "Laden...",
+    "none": "Keine",
     "pause": "Pause",
     "play": "Abspielen",
     "refresh": "Aktualisieren",
@@ -657,6 +658,8 @@
     "brandName": "thWelly's AI Toolbox",
     "createImage": "Erstellen",
     "createSong": "Song Erstellen",
+    "equipment": "Equipment",
+    "equipmentGallery": "Galerie",
     "gallery": "Galerie",
     "library": "Song Bibliothek",
     "login": "Anmelden",
@@ -665,6 +668,7 @@
     "lyricParsingRules": "Songtext-Parsing-Regeln",
     "music": "Musik",
     "musicStylePrompt": "Musikstil Prompt",
+    "newEquipment": "Neu",
     "newSketch": "Neue Skizze",
     "ollamaChat": "Ollama Chat",
     "openaiChat": "OpenAI Chat",
@@ -1415,6 +1419,98 @@
       "loadImagesFailed": "Fehler beim Laden der Bilder",
       "formInvalid": "Bitte fülle alle Pflichtfelder aus",
       "applyFailed": "Fehler beim Anwenden des Text-Overlays"
+    }
+  },
+  "equipment": {
+    "title": "Equipment Manager",
+    "gallery": {
+      "title": "Software & Plugin Galerie",
+      "subtitle": "Verwalte deine Software-Lizenzen und Plugin-Keys",
+      "search": "Equipment suchen...",
+      "items": "Einträge",
+      "loading": "Lade Equipment...",
+      "empty": "Kein Equipment gefunden",
+      "selectPrompt": "Wähle ein Equipment aus der Liste, um Details anzuzeigen",
+      "loadMore": "Mehr laden",
+      "filters": {
+        "all": "Alle",
+        "allStatuses": "Alle Status"
+      },
+      "actions": {
+        "new": "Neues Equipment",
+        "edit": "Bearbeiten",
+        "delete": "Löschen"
+      }
+    },
+    "editor": {
+      "createTitle": "Neues Equipment",
+      "editTitle": "Equipment bearbeiten",
+      "createSubtitle": "Neue Software oder Plugin zum Inventar hinzufügen",
+      "editSubtitle": "Equipment-Informationen aktualisieren",
+      "loading": "Lade Equipment-Daten...",
+      "saving": "Speichere...",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "type": "Typ",
+      "name": "Name",
+      "nameHint": "z.B. Logic Pro X, Serum, Omnisphere",
+      "description": "Beschreibung",
+      "softwareTags": "Software Tags",
+      "pluginTags": "Plugin Tags",
+      "tagsHint": "Kommagetrennt, z.B. DAW, VST3, AU",
+      "manufacturer": "Hersteller",
+      "url": "Webseite",
+      "urlHint": "Produkt-Webseite oder Download-Link",
+      "credentialsSection": "Login-Daten",
+      "username": "Benutzername",
+      "password": "Passwort",
+      "passwordHint": "Verschlüsselt in Datenbank",
+      "showPassword": "Anzeigen",
+      "hidePassword": "Verbergen",
+      "licenseSection": "Lizenz-Informationen",
+      "licenseManagement": "Lizenzverwaltung",
+      "licenseKey": "Lizenzschlüssel",
+      "showLicenseKey": "Anzeigen",
+      "hideLicenseKey": "Verbergen",
+      "licenseDescription": "Lizenzbeschreibung",
+      "licenseDescriptionHint": "Beschreibe den Lizenztyp oder die Aktivierungsmethode",
+      "purchaseSection": "Kaufinformationen",
+      "purchaseDate": "Kaufdatum",
+      "price": "Preis",
+      "priceHint": "z.B. 299,99 EUR",
+      "systemRequirements": "Systemanforderungen",
+      "systemRequirementsHint": "OS-Version, Abhängigkeiten, etc.",
+      "status": "Status"
+    },
+    "types": {
+      "software": "Software",
+      "plugin": "Plugin"
+    },
+    "licenseTypes": {
+      "online": "Online",
+      "ilok": "iLok",
+      "key": "Lizenzschlüssel",
+      "other": "Andere"
+    },
+    "statuses": {
+      "active": "Aktiv",
+      "trial": "Test",
+      "expired": "Abgelaufen",
+      "archived": "Archiviert"
+    },
+    "messages": {
+      "createSuccess": "Equipment erfolgreich erstellt",
+      "updateSuccess": "Equipment erfolgreich aktualisiert",
+      "deleteSuccess": "Equipment erfolgreich gelöscht",
+      "deleteConfirm": "Möchtest du dieses Equipment wirklich löschen?",
+      "loadError": "Fehler beim Laden des Equipments",
+      "saveError": "Fehler beim Speichern des Equipments",
+      "deleteError": "Fehler beim Löschen des Equipments"
+    },
+    "validation": {
+      "required": "Dieses Feld ist erforderlich",
+      "maxLength": "Maximal {{max}} Zeichen erlaubt",
+      "formInvalid": "Bitte fülle alle Pflichtfelder aus"
     }
   }
 }

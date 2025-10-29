@@ -1,0 +1,282 @@
+<div class="equipment-gallery-container master-detail-layout">
+  <!-- Left Side: Equipment List -->
+  <div class="list-section">
+    <mat-card class="list-card">
+      <!-- Header -->
+      <div class="list-header">
+        <div class="header-title">
+          <div class="header-title-group">
+            <h2>
+              <i class="fas fa-toolbox"></i>
+              {{ 'equipment.gallery.title' | translate }}
+            </h2>
+            <div class="equipment-count-badge" *ngIf="pagination.total > 0">
+              {{ pagination.total }} {{ 'equipment.gallery.items' | translate }}
+            </div>
+          </div>
+          <p class="subtitle">{{ 'equipment.gallery.subtitle' | translate }}</p>
+        </div>
+        <button
+          type="button"
+          class="action-button new-equipment-button"
+          (click)="createNew()">
+          <i class="fas fa-plus"></i>
+          <span>{{ 'equipment.gallery.actions.new' | translate }}</span>
+        </button>
+      </div>
+
+      <!-- Search and Filters -->
+      <div class="filters-section">
+        <!-- Search -->
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            [placeholder]="'equipment.gallery.search' | translate"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange($event)"
+            class="search-input">
+        </div>
+
+        <!-- Type Filter -->
+        <div class="type-filter">
+          <button
+            class="filter-btn"
+            [class.active]="selectedType === 'all'"
+            (click)="selectedType = 'all'; onTypeFilterChange()">
+            {{ 'equipment.gallery.filters.all' | translate }}
+          </button>
+          <button
+            class="filter-btn"
+            [class.active]="selectedType === EquipmentType.SOFTWARE"
+            (click)="selectedType = EquipmentType.SOFTWARE; onTypeFilterChange()">
+            <mat-icon>desktop_windows</mat-icon>
+            {{ 'equipment.types.software' | translate }}
+          </button>
+          <button
+            class="filter-btn"
+            [class.active]="selectedType === EquipmentType.PLUGIN"
+            (click)="selectedType = EquipmentType.PLUGIN; onTypeFilterChange()">
+            <mat-icon>extension</mat-icon>
+            {{ 'equipment.types.plugin' | translate }}
+          </button>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="status-filter">
+          <button
+            class="filter-btn status-all"
+            [class.active]="selectedStatus === 'all'"
+            (click)="selectedStatus = 'all'; onStatusFilterChange()">
+            {{ 'equipment.gallery.filters.allStatuses' | translate }}
+          </button>
+          <button
+            class="filter-btn status-active"
+            [class.active]="selectedStatus === EquipmentStatus.ACTIVE"
+            (click)="selectedStatus = EquipmentStatus.ACTIVE; onStatusFilterChange()">
+            {{ 'equipment.statuses.active' | translate }}
+          </button>
+          <button
+            class="filter-btn status-trial"
+            [class.active]="selectedStatus === EquipmentStatus.TRIAL"
+            (click)="selectedStatus = EquipmentStatus.TRIAL; onStatusFilterChange()">
+            {{ 'equipment.statuses.trial' | translate }}
+          </button>
+          <button
+            class="filter-btn status-expired"
+            [class.active]="selectedStatus === EquipmentStatus.EXPIRED"
+            (click)="selectedStatus = EquipmentStatus.EXPIRED; onStatusFilterChange()">
+            {{ 'equipment.statuses.expired' | translate }}
+          </button>
+          <button
+            class="filter-btn status-archived"
+            [class.active]="selectedStatus === EquipmentStatus.ARCHIVED"
+            (click)="selectedStatus = EquipmentStatus.ARCHIVED; onStatusFilterChange()">
+            {{ 'equipment.statuses.archived' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Equipment List -->
+      <div class="equipment-list">
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>{{ 'equipment.gallery.loading' | translate }}</p>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoading && equipmentList.length === 0" class="empty-state">
+          <i class="fas fa-toolbox"></i>
+          <p>{{ 'equipment.gallery.empty' | translate }}</p>
+          <button class="action-button" (click)="createNew()">
+            <i class="fas fa-plus"></i>
+            {{ 'equipment.gallery.actions.new' | translate }}
+          </button>
+        </div>
+
+        <!-- Equipment Items -->
+        <div
+          *ngFor="let equipment of equipmentList"
+          class="equipment-item"
+          [class.selected]="selectedEquipment?.id === equipment.id"
+          (click)="selectEquipment(equipment)">
+          <div class="equipment-item-header">
+            <div class="equipment-type-icon">
+              <mat-icon>{{ getTypeIcon(equipment.type) }}</mat-icon>
+            </div>
+            <div class="equipment-title-group">
+              <h4 class="equipment-title">{{ equipment.name }}</h4>
+              <p class="equipment-manufacturer" *ngIf="equipment.manufacturer">
+                {{ equipment.manufacturer }}
+              </p>
+            </div>
+            <span class="equipment-status" [class]="'status-' + equipment.status">
+              {{ 'equipment.statuses.' + equipment.status | translate }}
+            </span>
+          </div>
+          <div class="equipment-item-footer">
+            <span class="equipment-date">
+              {{ equipment.created_at | date:'short' }}
+            </span>
+            <div class="equipment-actions">
+              <button
+                class="icon-button edit-button"
+                (click)="editEquipment(equipment.id); $event.stopPropagation()"
+                [title]="'equipment.gallery.actions.edit' | translate">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                class="icon-button delete-button"
+                (click)="confirmDelete(equipment.id, $event)"
+                [title]="'equipment.gallery.actions.delete' | translate">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Load More Button -->
+      <div class="load-more-section" *ngIf="pagination.has_more && !isLoading">
+        <button class="action-button load-more-button" (click)="loadMore()">
+          <i class="fas fa-chevron-down"></i>
+          {{ 'equipment.gallery.loadMore' | translate }}
+        </button>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Right Side: Equipment Details -->
+  <div class="detail-section">
+    <mat-card class="detail-card" *ngIf="selectedEquipment">
+      <!-- Detail Header -->
+      <div class="detail-header">
+        <div class="detail-type-icon">
+          <mat-icon>{{ getTypeIcon(selectedEquipment.type) }}</mat-icon>
+        </div>
+        <div class="detail-title-group">
+          <h3>{{ selectedEquipment.name }}</h3>
+          <p class="detail-manufacturer" *ngIf="selectedEquipment.manufacturer">
+            {{ selectedEquipment.manufacturer }}
+          </p>
+        </div>
+        <span class="equipment-status" [class]="'status-' + selectedEquipment.status">
+          {{ 'equipment.statuses.' + selectedEquipment.status | translate }}
+        </span>
+      </div>
+
+      <!-- Detail Content -->
+      <div class="detail-content">
+        <!-- Description -->
+        <div class="detail-field" *ngIf="selectedEquipment.description">
+          <div class="detail-label">{{ 'equipment.editor.description' | translate }}</div>
+          <p>{{ selectedEquipment.description }}</p>
+        </div>
+
+        <!-- Tags -->
+        <div class="detail-field" *ngIf="selectedEquipment.software_tags">
+          <div class="detail-label">{{ 'equipment.editor.softwareTags' | translate }}</div>
+          <div class="tags-container">
+            <mat-chip *ngFor="let tag of selectedEquipment.software_tags.split(',')">
+              {{ tag.trim() }}
+            </mat-chip>
+          </div>
+        </div>
+
+        <div class="detail-field" *ngIf="selectedEquipment.plugin_tags">
+          <div class="detail-label">{{ 'equipment.editor.pluginTags' | translate }}</div>
+          <div class="tags-container">
+            <mat-chip *ngFor="let tag of selectedEquipment.plugin_tags.split(',')">
+              {{ tag.trim() }}
+            </mat-chip>
+          </div>
+        </div>
+
+        <!-- URL -->
+        <div class="detail-field" *ngIf="selectedEquipment.url">
+          <div class="detail-label">{{ 'equipment.editor.url' | translate }}</div>
+          <a [href]="selectedEquipment.url" target="_blank">{{ selectedEquipment.url }}</a>
+        </div>
+
+        <!-- License Management -->
+        <div class="detail-field" *ngIf="selectedEquipment.license_management">
+          <div class="detail-label">{{ 'equipment.editor.licenseManagement' | translate }}</div>
+          <p>{{ 'equipment.licenseTypes.' + selectedEquipment.license_management.toLowerCase() | translate }}</p>
+        </div>
+
+        <!-- Purchase Info -->
+        <div class="detail-field" *ngIf="selectedEquipment.purchase_date">
+          <div class="detail-label">{{ 'equipment.editor.purchaseDate' | translate }}</div>
+          <p>{{ selectedEquipment.purchase_date | date:'mediumDate' }}</p>
+        </div>
+
+        <div class="detail-field" *ngIf="selectedEquipment.price">
+          <div class="detail-label">{{ 'equipment.editor.price' | translate }}</div>
+          <p>{{ selectedEquipment.price }}</p>
+        </div>
+
+        <!-- System Requirements -->
+        <div class="detail-field" *ngIf="selectedEquipment.system_requirements">
+          <div class="detail-label">{{ 'equipment.editor.systemRequirements' | translate }}</div>
+          <p>{{ selectedEquipment.system_requirements }}</p>
+        </div>
+      </div>
+
+      <!-- Detail Actions -->
+      <div class="detail-actions">
+        <button class="action-button primary-button" (click)="editEquipment(selectedEquipment.id)">
+          <mat-icon>edit</mat-icon>
+          {{ 'equipment.gallery.actions.edit' | translate }}
+        </button>
+        <button class="action-button danger-button" (click)="confirmDelete(selectedEquipment.id, $event)">
+          <mat-icon>delete</mat-icon>
+          {{ 'equipment.gallery.actions.delete' | translate }}
+        </button>
+      </div>
+    </mat-card>
+
+    <!-- Empty State for Details -->
+    <mat-card class="detail-card empty-detail" *ngIf="!selectedEquipment && equipmentList.length > 0">
+      <div class="empty-detail-content">
+        <i class="fas fa-hand-pointer"></i>
+        <p>{{ 'equipment.gallery.selectPrompt' | translate }}</p>
+      </div>
+    </mat-card>
+  </div>
+</div>
+
+<!-- Delete Confirmation Dialog -->
+<div class="delete-confirmation-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
+  <div class="delete-confirmation-dialog" (click)="$event.stopPropagation()">
+    <h3>{{ 'equipment.messages.deleteConfirm' | translate }}</h3>
+    <div class="dialog-actions">
+      <button class="action-button secondary-button" (click)="cancelDelete()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button class="action-button danger-button" (click)="deleteEquipment()">
+        {{ 'common.delete' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

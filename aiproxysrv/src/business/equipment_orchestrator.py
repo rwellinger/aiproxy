@@ -60,13 +60,19 @@ class EquipmentOrchestrator:
             # 1. Normalize data
             normalized = EquipmentNormalizer.normalize_equipment_data(equipment_data)
 
-            # 2. Encrypt sensitive fields (if present)
-            if "password" in normalized and normalized["password"]:
-                normalized["password_encrypted"] = encryption_service.encrypt(normalized.pop("password"))
-            if "license_key" in normalized and normalized["license_key"]:
-                normalized["license_key_encrypted"] = encryption_service.encrypt(normalized.pop("license_key"))
-            if "price" in normalized and normalized["price"]:
-                normalized["price_encrypted"] = encryption_service.encrypt(normalized.pop("price"))
+            # 2. Encrypt sensitive fields and remove plaintext versions
+            # Always remove plaintext fields (even if None/empty) to avoid SQLAlchemy errors
+            password = normalized.pop("password", None)
+            if password:
+                normalized["password_encrypted"] = encryption_service.encrypt(password)
+
+            license_key = normalized.pop("license_key", None)
+            if license_key:
+                normalized["license_key_encrypted"] = encryption_service.encrypt(license_key)
+
+            price = normalized.pop("price", None)
+            if price:
+                normalized["price_encrypted"] = encryption_service.encrypt(price)
 
             # 3. Add user_id
             normalized["user_id"] = user_id
@@ -178,13 +184,22 @@ class EquipmentOrchestrator:
             # 1. Normalize data
             normalized = EquipmentNormalizer.normalize_equipment_data(update_data)
 
-            # 2. Encrypt sensitive fields (if present in update)
+            # 2. Encrypt sensitive fields and remove plaintext versions
+            # Always remove plaintext fields (even if None/empty) to avoid SQLAlchemy errors
             if "password" in normalized:
-                normalized["password_encrypted"] = encryption_service.encrypt(normalized.pop("password"))
+                password = normalized.pop("password")
+                if password:
+                    normalized["password_encrypted"] = encryption_service.encrypt(password)
+
             if "license_key" in normalized:
-                normalized["license_key_encrypted"] = encryption_service.encrypt(normalized.pop("license_key"))
+                license_key = normalized.pop("license_key")
+                if license_key:
+                    normalized["license_key_encrypted"] = encryption_service.encrypt(license_key)
+
             if "price" in normalized:
-                normalized["price_encrypted"] = encryption_service.encrypt(normalized.pop("price"))
+                price = normalized.pop("price")
+                if price:
+                    normalized["price_encrypted"] = encryption_service.encrypt(price)
 
             # 3. Update in database
             equipment = equipment_service.update_equipment(db, equipment_id, user_id, normalized)

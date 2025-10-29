@@ -12,7 +12,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiConfigService } from '../config/api-config.service';
 import {
-  Equipment,
   EquipmentCreateRequest,
   EquipmentDetailResponse,
   EquipmentListResponse,
