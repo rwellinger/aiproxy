@@ -1439,6 +1439,7 @@
       "actions": {
         "new": "Neues Equipment",
         "edit": "Bearbeiten",
+        "duplicate": "Duplizieren",
         "delete": "Löschen",
         "copy": "In Zwischenablage kopieren",
         "copyId": "ID in Zwischenablage kopiert",
@@ -1484,6 +1485,7 @@
       "nameHint": "z.B. Logic Pro X, Serum, Omnisphere",
       "version": "Version",
       "versionHint": "z.B. 10.8.1, 1.3.6, 2.9.0",
+      "versionInfo": "z.B. 10.8.1, 1.3.6, 2.9.0",
       "description": "Beschreibung",
       "softwareTags": "Software Tags",
       "pluginTags": "Plugin Tags",

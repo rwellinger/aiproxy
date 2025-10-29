@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { firstValueFrom, Subject, takeUntil } from 'rxjs';
 
 import { EquipmentService } from '../../services/business/equipment.service';
@@ -22,6 +23,7 @@ import {
   EquipmentCreateRequest,
   EquipmentUpdateRequest
 } from '../../models/equipment.model';
+import { InfoTooltipComponent } from '../../components/shared/info-tooltip/info-tooltip.component';
 
 @Component({
   selector: 'app-equipment-editor',
@@ -37,7 +39,9 @@ import {
     MatInputModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatExpansionModule,
+    InfoTooltipComponent
   ],
   templateUrl: './equipment-editor.component.html',
   styleUrl: './equipment-editor.component.scss'
@@ -76,6 +80,7 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initForm();
     this.loadEquipmentIfEditMode();
+    this.loadEquipmentIfDuplicateMode();
     this.setupConditionalValidation();
   }
 
@@ -183,6 +188,46 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Load equipment data if in duplicate mode.
+   */
+  private async loadEquipmentIfDuplicateMode(): Promise<void> {
+    const duplicateId = this.route.snapshot.queryParamMap.get('duplicate');
+
+    if (duplicateId) {
+      this.isLoading = true;
+
+      try {
+        const response = await firstValueFrom(
+          this.equipmentService.getEquipmentById(duplicateId)
+        );
+
+        // Patch form with selected fields only (duplicate mode)
+        this.equipmentForm.patchValue({
+          type: response.data.type,
+          software_tags: response.data.software_tags,
+          plugin_tags: response.data.plugin_tags,
+          manufacturer: response.data.manufacturer,
+          url: response.data.url,
+          username: response.data.username,
+          password: response.data.password,
+          system_requirements: response.data.system_requirements,
+          status: EquipmentStatus.ACTIVE
+        });
+        // Fields NOT copied (remain empty): name, version, description,
+        // license_management, license_key, license_description, price, purchase_date
+      } catch (error) {
+        console.error('Failed to load equipment for duplication:', error);
+        this.notificationService.error(
+          this.translate.instant('equipment.messages.loadError')
+        );
+        this.router.navigate(['/equipment-gallery']);
+      } finally {
+        this.isLoading = false;
+      }
+    }
+  }
+
+  /**
    * Toggle password visibility.
    */
   togglePasswordVisibility(): void {
@@ -243,6 +288,13 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
     try {
       const formData = this.equipmentForm.value;
 
+      // Clean up empty strings in optional fields (backend expects null or missing field, not empty string)
+      Object.keys(formData).forEach(key => {
+        if (formData[key] === '' || formData[key] === null) {
+          delete formData[key];
+        }
+      });
+
       // Convert date to ISO string if present
       if (formData.purchase_date) {
         formData.purchase_date = new Date(formData.purchase_date).toISOString().split('T')[0];
@@ -255,6 +307,16 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
       }
     } catch (error) {
       console.error('Failed to save equipment:', error);
+
+      // Parse backend validation errors for better UX
+      if (error && typeof error === 'object' && 'error' in error) {
+        const errorObj = error as { error?: { error?: string } };
+        if (errorObj.error?.error) {
+          this.notificationService.error(errorObj.error.error);
+          return;
+        }
+      }
+
       this.notificationService.error(
         this.translate.instant('equipment.messages.saveError')
       );

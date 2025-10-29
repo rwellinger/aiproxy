@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 import { EquipmentService } from '../../services/business/equipment.service';
 import { NotificationService } from '../../services/ui/notification.service';
@@ -33,7 +34,8 @@ import { Equipment, EquipmentType, EquipmentStatus, LicenseManagement } from '..
     MatInputModule,
     MatSelectModule,
     MatProgressSpinnerModule,
-    MatDialogModule
+    MatDialogModule,
+    MatExpansionModule
   ],
   templateUrl: './equipment-gallery.component.html',
   styleUrl: './equipment-gallery.component.scss'
@@ -195,6 +197,13 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Navigate to equipment editor (duplicate mode).
+   */
+  duplicateEquipment(id: string): void {
+    this.router.navigate(['/equipment-editor'], { queryParams: { duplicate: id } });
+  }
+
+  /**
    * Navigate to equipment editor (create mode).
    */
   createNew(): void {
@@ -275,6 +284,14 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Format date for display in list.
+   */
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  /**
    * Get color for status chip.
    */
   getStatusColor(status: EquipmentStatus): string {
@@ -325,5 +342,33 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
         this.translate.instant('equipment.messages.copyError')
       );
     }
+  }
+
+  /**
+   * Check if equipment has credential data.
+   */
+  hasCredentials(): boolean {
+    if (!this.selectedEquipment) return false;
+    return !!(
+      this.selectedEquipment.manufacturer ||
+      this.selectedEquipment.url ||
+      this.selectedEquipment.username ||
+      this.selectedEquipment.password
+    );
+  }
+
+  /**
+   * Check if equipment has license information.
+   */
+  hasLicenseInfo(): boolean {
+    if (!this.selectedEquipment) return false;
+    return !!this.selectedEquipment.license_management;
+  }
+
+  /**
+   * Check if both credentials and license sections should be shown as accordion.
+   */
+  shouldUseAccordion(): boolean {
+    return this.hasCredentials() && this.hasLicenseInfo();
   }
 }

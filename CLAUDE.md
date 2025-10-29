@@ -2,7 +2,7 @@
 
 **Author:** Rob
 **Language:** English
-**Last Updated:** 2025-10-24
+**Last Updated:** 2025-10-29
 
 ---
 
@@ -208,6 +208,68 @@ def get_user_profile():
 - `/api/v1/health`, `/api/v*/celery-health`
 
 **Frontend:** JWT token is **automatically** added via `authInterceptor`
+
+---
+
+## UI Patterns & Component Standards (CRITICAL!)
+
+**MANDATORY:** All new UI components **MUST** follow standardized patterns documented in `docs/UI_PATTERNS.md`.
+
+### Why This Matters
+
+**NEVER** create custom button styles, layouts, or patterns without following the standards:
+- ❌ Every new page with different button designs = inconsistent UX
+- ❌ Custom styles = maintenance nightmare
+- ✅ Reusable mixins = consistent, maintainable UI
+
+### Standard Mixins (MANDATORY)
+
+**ALWAYS use these button mixins** from `src/scss/_mixins.scss`:
+
+```scss
+.edit-button {
+  @include button-secondary('base');  // Gray button
+}
+
+.delete-button {
+  @include button-secondary('base');  // Gray button
+}
+
+.primary-action-button {
+  @include button-primary('base');    // Blue button
+}
+```
+
+**NEVER write custom button CSS:**
+```scss
+// ❌ WRONG: Custom styles
+.my-button {
+  background-color: #5a6268;
+  color: white;
+  padding: 8px 16px;
+}
+```
+
+### Reference Implementation
+
+**Equipment Gallery** (`aiwebui/src/app/pages/equipment-gallery/`) is the **current reference** for:
+- ✅ Master-Detail Layout
+- ✅ Button Standards (with mixins)
+- ✅ Detail Actions Pattern
+- ✅ Font Awesome Icons (NOT Material Icons)
+- ✅ Form Layouts
+
+### Quick Checklist for New Pages
+
+Before implementing a new page:
+- [ ] Review `docs/UI_PATTERNS.md` (COMPLETE documentation)
+- [ ] Check Equipment Gallery implementation as reference
+- [ ] Use `@include button-*` mixins for all buttons
+- [ ] Use Font Awesome icons (`<i class="fas fa-*">`)
+- [ ] Place actions in `detail-actions` section (NOT in list items)
+- [ ] Follow Master-Detail Layout structure
+
+**Full Documentation:** `docs/UI_PATTERNS.md`
 
 ---
 
@@ -725,6 +787,7 @@ npm run e2e                   # E2E tests
 
 # Additional Documentation
 
+- **UI Patterns**: `docs/UI_PATTERNS.md` **(CRITICAL - Read before creating new pages!)**
 - **Architecture Details**: `docs/ARCHITECTURE.md` → Links to `docs/arch42/README.md` (arc42 template with diagrams, DB schema, API endpoints)
 - **Code Patterns**: `docs/CODE_PATTERNS.md` (Complete code examples)
 - **Troubleshooting**: `docs/TROUBLESHOOTING.md` (Debug commands, common issues)

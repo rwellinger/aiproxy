@@ -286,48 +286,33 @@
 
 .equipment-item-footer {
   display: flex;
-  justify-content: space-between;
+  gap: $spacing-md;
   align-items: center;
   margin-top: $spacing-xs;
-}
+  flex-wrap: wrap;
 
-.equipment-date {
-  font-size: $font-sm;
-  color: $text-muted;
-}
+  .meta-date {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: 0.75rem;
+    color: $text-muted;
 
-.equipment-actions {
-  display: flex;
-  gap: $spacing-xs;
-}
-
-.icon-button {
-  padding: $spacing-xs;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
-  &.edit-button {
-    color: $primary-color;
-
-    &:hover {
-      background-color: rgba(25, 118, 210, 0.1);
+    i {
+      font-size: 0.7rem;
     }
   }
 
-  &.delete-button {
-    color: #f44336;
+  .meta-tags {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: 0.75rem;
+    color: $primary-color;
+    font-weight: 500;
 
-    &:hover {
-      background-color: rgba(244, 67, 54, 0.1);
+    i {
+      font-size: 0.7rem;
     }
   }
 }
@@ -465,7 +450,22 @@
 
 .detail-field-row {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .detail-field {
+    margin-bottom: 0;
+  }
+}
+
+.detail-field-row-3col {
+  display: grid;
+  grid-template-columns: auto 1fr 120px;
   gap: $spacing-md;
   margin-bottom: $spacing-md;
 
@@ -687,66 +687,48 @@
   gap: $spacing-sm;
   padding: $spacing-md;
   border-top: 1px solid $border-light;
+  justify-content: flex-end;
 }
 
 .action-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: $spacing-xs;
-  padding: $spacing-sm $spacing-md;
-  border: 1px solid $border-light;
-  border-radius: 8px;
-  background-color: $background-white;
-  color: $text-primary;
-  font-size: $font-sm;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+  font-weight: $font-weight-medium !important;
 
-  mat-icon,
   i {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    font-size: $font-base;
   }
 
-  &:hover {
-    border-color: $primary-color;
-    background-color: rgba(25, 118, 210, 0.05);
+  span {
+    display: inline-block;
   }
 
-  &.primary-button {
-    background-color: $primary-color;
-    color: white;
-    border-color: $primary-color;
-
-    &:hover {
-      background-color: darken($primary-color, 10%);
-    }
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
+}
 
-  &.danger-button {
-    color: #f44336;
+.new-equipment-button {
+  @include button-primary('base');
+}
 
-    &:hover {
-      background-color: rgba(244, 67, 54, 0.1);
-      border-color: #f44336;
-    }
-  }
+.edit-button {
+  @include button-secondary('base');
+}
 
-  &.new-equipment-button {
-    background-color: $primary-color;
-    color: white;
-    border-color: $primary-color;
+.duplicate-button {
+  @include button-secondary('base');
+}
 
-    &:hover {
-      background-color: darken($primary-color, 10%);
-    }
-  }
+.delete-button {
+  @include button-secondary('base');
+}
 
-  &.load-more-button {
-    width: 100%;
-  }
+.load-more-button {
+  @include button-primary('base');
+  width: 100%;
 }
 
 // Delete Confirmation Dialog

@@ -24,37 +24,60 @@
     <!-- Form -->
     <form [formGroup]="equipmentForm" (ngSubmit)="onSave()" *ngIf="!isLoading">
       <div class="form-content">
-        <!-- Type Selection -->
+        <!-- Status -->
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ 'equipment.editor.type' | translate }}</mat-label>
-          <mat-select formControlName="type" required>
-            <mat-option [value]="EquipmentType.SOFTWARE">
-              <mat-icon>desktop_windows</mat-icon>
-              {{ 'equipment.types.software' | translate }}
+          <mat-label>{{ 'equipment.editor.status' | translate }}</mat-label>
+          <mat-select formControlName="status" required>
+            <mat-option [value]="EquipmentStatus.ACTIVE">
+              {{ 'equipment.statuses.active' | translate }}
             </mat-option>
-            <mat-option [value]="EquipmentType.PLUGIN">
-              <mat-icon>extension</mat-icon>
-              {{ 'equipment.types.plugin' | translate }}
+            <mat-option [value]="EquipmentStatus.TRIAL">
+              {{ 'equipment.statuses.trial' | translate }}
+            </mat-option>
+            <mat-option [value]="EquipmentStatus.EXPIRED">
+              {{ 'equipment.statuses.expired' | translate }}
+            </mat-option>
+            <mat-option [value]="EquipmentStatus.ARCHIVED">
+              {{ 'equipment.statuses.archived' | translate }}
             </mat-option>
           </mat-select>
-          <mat-error>{{ getFieldError('type') }}</mat-error>
+          <mat-error>{{ getFieldError('status') }}</mat-error>
         </mat-form-field>
 
-        <!-- Name -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ 'equipment.editor.name' | translate }}</mat-label>
-          <input matInput formControlName="name" required maxlength="200">
-          <mat-hint>{{ 'equipment.editor.nameHint' | translate }}</mat-hint>
-          <mat-error>{{ getFieldError('name') }}</mat-error>
-        </mat-form-field>
+        <!-- Type, Name, Version Row -->
+        <div class="form-row">
+          <!-- Type Selection -->
+          <mat-form-field appearance="outline" class="form-row__type">
+            <mat-label>{{ 'equipment.editor.type' | translate }}</mat-label>
+            <mat-select formControlName="type" required>
+              <mat-option [value]="EquipmentType.SOFTWARE">
+                <mat-icon>desktop_windows</mat-icon>
+                {{ 'equipment.types.software' | translate }}
+              </mat-option>
+              <mat-option [value]="EquipmentType.PLUGIN">
+                <mat-icon>extension</mat-icon>
+                {{ 'equipment.types.plugin' | translate }}
+              </mat-option>
+            </mat-select>
+            <mat-error>{{ getFieldError('type') }}</mat-error>
+          </mat-form-field>
 
-        <!-- Version -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ 'equipment.editor.version' | translate }}</mat-label>
-          <input matInput formControlName="version" maxlength="100">
-          <mat-hint>{{ 'equipment.editor.versionHint' | translate }}</mat-hint>
-          <mat-error>{{ getFieldError('version') }}</mat-error>
-        </mat-form-field>
+          <!-- Name -->
+          <mat-form-field appearance="outline" class="form-row__name">
+            <mat-label>{{ 'equipment.editor.name' | translate }}</mat-label>
+            <input matInput formControlName="name" required maxlength="200">
+            <mat-hint>{{ 'equipment.editor.nameHint' | translate }}</mat-hint>
+            <mat-error>{{ getFieldError('name') }}</mat-error>
+          </mat-form-field>
+
+          <!-- Version -->
+          <mat-form-field appearance="outline" class="form-row__version">
+            <mat-label>{{ 'equipment.editor.version' | translate }}</mat-label>
+            <input matInput formControlName="version" maxlength="100">
+            <app-info-tooltip matSuffix [text]="'equipment.editor.versionInfo'"></app-info-tooltip>
+            <mat-error>{{ getFieldError('version') }}</mat-error>
+          </mat-form-field>
+        </div>
 
         <!-- Manufacturer -->
         <mat-form-field appearance="outline" class="full-width">
@@ -63,12 +86,22 @@
           <mat-error>{{ getFieldError('manufacturer') }}</mat-error>
         </mat-form-field>
 
-        <!-- Description -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ 'equipment.editor.description' | translate }}</mat-label>
-          <textarea matInput formControlName="description" rows="3"></textarea>
-          <mat-error>{{ getFieldError('description') }}</mat-error>
-        </mat-form-field>
+        <!-- Description & System Requirements Row -->
+        <div class="form-row">
+          <!-- Description -->
+          <mat-form-field appearance="outline" class="form-row__half">
+            <mat-label>{{ 'equipment.editor.description' | translate }}</mat-label>
+            <textarea matInput formControlName="description" rows="3"></textarea>
+            <mat-error>{{ getFieldError('description') }}</mat-error>
+          </mat-form-field>
+
+          <!-- System Requirements -->
+          <mat-form-field appearance="outline" class="form-row__half">
+            <mat-label>{{ 'equipment.editor.systemRequirements' | translate }}</mat-label>
+            <textarea matInput formControlName="system_requirements" rows="3"></textarea>
+            <mat-hint>{{ 'equipment.editor.systemRequirementsHint' | translate }}</mat-hint>
+          </mat-form-field>
+        </div>
 
         <!-- Software Tags (conditional) -->
         <mat-form-field appearance="outline" class="full-width" *ngIf="shouldShowSoftwareTags()">
@@ -93,8 +126,13 @@
         </mat-form-field>
 
         <!-- Credentials Section -->
-        <div class="form-section">
-          <h3>{{ 'equipment.editor.credentialsSection' | translate }}</h3>
+        <mat-expansion-panel class="form-section">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>key</mat-icon>
+              {{ 'equipment.editor.credentialsSection' | translate }}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
 
           <!-- Username -->
           <mat-form-field appearance="outline" class="full-width">
@@ -119,12 +157,18 @@
               <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
             </button>
             <mat-hint>{{ 'equipment.editor.passwordHint' | translate }}</mat-hint>
+            <mat-error>{{ getFieldError('password') }}</mat-error>
           </mat-form-field>
-        </div>
+        </mat-expansion-panel>
 
         <!-- License Section -->
-        <div class="form-section">
-          <h3>{{ 'equipment.editor.licenseSection' | translate }}</h3>
+        <mat-expansion-panel class="form-section">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>card_membership</mat-icon>
+              {{ 'equipment.editor.licenseSection' | translate }}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
 
           <!-- License Management -->
           <mat-form-field appearance="outline" class="full-width">
@@ -172,11 +216,16 @@
             <mat-hint>{{ 'equipment.editor.licenseDescriptionHint' | translate }}</mat-hint>
             <mat-error>{{ getFieldError('license_description') }}</mat-error>
           </mat-form-field>
-        </div>
+        </mat-expansion-panel>
 
         <!-- Purchase Section -->
-        <div class="form-section">
-          <h3>{{ 'equipment.editor.purchaseSection' | translate }}</h3>
+        <mat-expansion-panel class="form-section">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>shopping_cart</mat-icon>
+              {{ 'equipment.editor.purchaseSection' | translate }}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
 
           <!-- Purchase Date -->
           <mat-form-field appearance="outline" class="full-width">
@@ -184,6 +233,7 @@
             <input matInput [matDatepicker]="picker" formControlName="purchase_date">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
+            <mat-error>{{ getFieldError('purchase_date') }}</mat-error>
           </mat-form-field>
 
           <!-- Price -->
@@ -191,35 +241,9 @@
             <mat-label>{{ 'equipment.editor.price' | translate }}</mat-label>
             <input matInput formControlName="price">
             <mat-hint>{{ 'equipment.editor.priceHint' | translate }}</mat-hint>
+            <mat-error>{{ getFieldError('price') }}</mat-error>
           </mat-form-field>
-        </div>
-
-        <!-- System Requirements -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ 'equipment.editor.systemRequirements' | translate }}</mat-label>
-          <textarea matInput formControlName="system_requirements" rows="3"></textarea>
-          <mat-hint>{{ 'equipment.editor.systemRequirementsHint' | translate }}</mat-hint>
-        </mat-form-field>
-
-        <!-- Status -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ 'equipment.editor.status' | translate }}</mat-label>
-          <mat-select formControlName="status" required>
-            <mat-option [value]="EquipmentStatus.ACTIVE">
-              {{ 'equipment.statuses.active' | translate }}
-            </mat-option>
-            <mat-option [value]="EquipmentStatus.TRIAL">
-              {{ 'equipment.statuses.trial' | translate }}
-            </mat-option>
-            <mat-option [value]="EquipmentStatus.EXPIRED">
-              {{ 'equipment.statuses.expired' | translate }}
-            </mat-option>
-            <mat-option [value]="EquipmentStatus.ARCHIVED">
-              {{ 'equipment.statuses.archived' | translate }}
-            </mat-option>
-          </mat-select>
-          <mat-error>{{ getFieldError('status') }}</mat-error>
-        </mat-form-field>
+        </mat-expansion-panel>
       </div>
 
       <!-- Form Actions -->

@@ -84,6 +84,28 @@
   width: 100%;
 }
 
+.form-row {
+  display: flex;
+  gap: $spacing-md;
+  align-items: flex-start;
+}
+
+.form-row__type {
+  flex: 0 0 25%;
+}
+
+.form-row__name {
+  flex: 1;
+}
+
+.form-row__version {
+  flex: 0 0 20%;
+}
+
+.form-row__half {
+  flex: 1;
+}
+
 .form-section {
   margin-top: $spacing-lg;
   padding-top: $spacing-lg;
