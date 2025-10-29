@@ -132,6 +132,14 @@ def verify_schema() -> int:
                 ("total_cost", "NUMERIC"),
                 ("is_finalized", "BOOLEAN"),
             ],
+            "equipment": [
+                ("id", "UUID"),
+                ("type", "VARCHAR"),
+                ("name", "VARCHAR"),
+                ("version", "VARCHAR"),
+                ("status", "VARCHAR"),
+                ("user_id", "UUID"),
+            ],
         }
 
         for table_name, expected_columns in critical_checks.items():
@@ -158,6 +166,7 @@ def verify_schema() -> int:
             "messages": [("messages_conversation_id_fkey", "conversations")],
             "messages_archive": [("messages_archive_conversation_id_fkey", "conversations")],
             "conversations": [("conversations_user_id_fkey", "users")],
+            "equipment": [("equipment_user_id_fkey", "users")],
         }
 
         for table_name, expected_fks in critical_fks.items():

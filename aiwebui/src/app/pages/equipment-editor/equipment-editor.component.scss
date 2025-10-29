@@ -1,0 +1,227 @@
+@import '../../../scss/variables';
+@import '../../../scss/mixins';
+
+.equipment-editor-container {
+  min-height: 100vh;
+  padding: $spacing-lg;
+  background-color: $background-light;
+}
+
+.editor-card {
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: $spacing-lg;
+  border-bottom: 1px solid $border-light;
+}
+
+.header-title {
+  flex: 1;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin: 0 0 $spacing-xs 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-primary;
+
+    mat-icon {
+      color: $primary-color;
+    }
+  }
+
+  .subtitle {
+    margin: 0;
+    color: $text-muted;
+    font-size: $font-sm;
+  }
+}
+
+.close-button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: $spacing-xs;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    color: $text-muted;
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+
+    mat-icon {
+      color: $text-primary;
+    }
+  }
+}
+
+.loading-state {
+  padding: $spacing-lg;
+  text-align: center;
+  color: $text-muted;
+}
+
+.form-content {
+  padding: $spacing-lg;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-row {
+  display: flex;
+  gap: $spacing-md;
+  align-items: flex-start;
+}
+
+.form-row__type {
+  flex: 0 0 25%;
+}
+
+.form-row__name {
+  flex: 1;
+}
+
+.form-row__version {
+  flex: 0 0 20%;
+}
+
+.form-row__half {
+  flex: 1;
+}
+
+.form-section {
+  margin-top: $spacing-lg;
+  padding-top: $spacing-lg;
+  border-top: 1px solid $border-light;
+
+  h3 {
+    margin: 0 0 $spacing-md 0;
+    font-size: $font-lg;
+    font-weight: 600;
+    color: $text-primary;
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: $spacing-sm;
+  justify-content: flex-end;
+  padding: $spacing-lg;
+  border-top: 1px solid $border-light;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-lg;
+  border: 1px solid $border-light;
+  border-radius: 8px;
+  background-color: $background-white;
+  color: $text-primary;
+  font-size: $font-sm;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    border-color: $primary-color;
+    background-color: rgba(25, 118, 210, 0.05);
+  }
+
+  &.primary-button {
+    background-color: $primary-color;
+    color: white;
+    border-color: $primary-color;
+
+    &:not(:disabled):hover {
+      background-color: darken($primary-color, 10%);
+    }
+  }
+
+  &.secondary-button {
+    background-color: $background-light;
+    border-color: $border-light;
+
+    &:not(:disabled):hover {
+      background-color: darken($background-light, 5%);
+    }
+  }
+}
+
+// Material Form Field Customization
+mat-form-field {
+  margin-bottom: $spacing-sm;
+
+  &.full-width {
+    width: 100%;
+  }
+
+  mat-label {
+    font-weight: 500;
+  }
+
+  mat-hint {
+    font-size: 0.75rem;
+    color: $text-muted;
+  }
+
+  mat-error {
+    font-size: 0.75rem;
+    color: #f44336;
+  }
+}
+
+// Material Select with Icons
+mat-select {
+  mat-option {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// Password/License Key Toggle Button
+button[mat-icon-button] {
+  &[matSuffix] {
+    color: $text-muted;
+
+    &:hover {
+      color: $text-primary;
+    }
+  }
+}

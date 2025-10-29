@@ -52,8 +52,23 @@
                 </div>
             </div>
 
-            <!-- Detail Info -->
+            <!-- Meta Info -->
             <div class="song-meta-info">
+                <!-- ID Row (separate, full width) -->
+                <div class="meta-id-row" *ngIf="shouldShowMetaInfo('id') && song.id">
+                    <div class="meta-item-id">
+                        <i class="fas fa-fingerprint meta-icon"></i>
+                        <span class="meta-id" [title]="song.id">{{ song.id }}</span>
+                        <button type="button"
+                                class="copy-id-btn"
+                                (click)="copyToClipboard(song.id)"
+                                [title]="'songDetailPanel.copyId' | translate">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Other Meta Data Grid -->
                 <div class="meta-grid">
                     <div class="meta-item" *ngIf="shouldShowMetaInfo('job_id') && song.job_id">
                         <i class="fas fa-hashtag meta-icon"></i>

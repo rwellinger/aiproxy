@@ -120,6 +120,22 @@ export class ApiConfigService {
             update: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
             delete: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`
         },
+        equipment: {
+            create: () => `${this.baseUrl}/api/v1/equipment`,
+            list: (limit?: number, offset?: number, type?: string, status?: string, search?: string) => {
+                const params = new URLSearchParams();
+                if (limit !== undefined) params.append('limit', limit.toString());
+                if (offset !== undefined) params.append('offset', offset.toString());
+                if (type) params.append('type', type);
+                if (status) params.append('status', status);
+                if (search) params.append('search', search);
+                const query = params.toString();
+                return `${this.baseUrl}/api/v1/equipment${query ? '?' + query : ''}`;
+            },
+            detail: (id: string) => `${this.baseUrl}/api/v1/equipment/${id}`,
+            update: (id: string) => `${this.baseUrl}/api/v1/equipment/${id}`,
+            delete: (id: string) => `${this.baseUrl}/api/v1/equipment/${id}`
+        },
         user: {
             profile: `${this.baseUrl}/api/v1/user/profile`,
             update: `${this.baseUrl}/api/v1/user/profile`

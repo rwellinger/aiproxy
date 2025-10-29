@@ -6,6 +6,13 @@
 JWT_SECRET_KEY=
 
 # ==================================================
+# ENCRYPTION (Fernet symmetric encryption for Equipment)
+# ==================================================
+# Encryption Secret Key for reversible encryption (passwords, license keys, prices)
+# Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+ENCRYPTION_SECRET_KEY=
+
+# ==================================================
 # Image storage directory (defaults to "./images" in
 # debug mode, "/images" in production)
 # ==================================================

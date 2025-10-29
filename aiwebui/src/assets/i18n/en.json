@@ -121,6 +121,7 @@
     "edit": "Edit",
     "filter": "Filter",
     "loading": "Loading...",
+    "none": "None",
     "pause": "Pause",
     "play": "Play",
     "refresh": "Refresh",
@@ -657,6 +658,8 @@
     "brandName": "thWelly's AI Toolbox",
     "createImage": "Create",
     "createSong": "Create Song",
+    "equipment": "Equipment",
+    "equipmentGallery": "Gallery",
     "gallery": "Gallery",
     "library": "Song Library",
     "login": "Login",
@@ -665,6 +668,7 @@
     "lyricParsingRules": "Lyric Parsing Rules",
     "music": "Music",
     "musicStylePrompt": "Music Style Prompt",
+    "newEquipment": "New",
     "newSketch": "New Sketch",
     "ollamaChat": "Ollama Chat",
     "openaiChat": "OpenAI Chat",
@@ -694,7 +698,9 @@
       "thumbsUp": "Thumbs Up",
       "title": "Song Choices:"
     },
+    "copyId": "Copy ID to clipboard",
     "errors": {
+      "copyFailed": "Failed to copy to clipboard",
       "generateStem": "Error generating stem",
       "loadSong": "Failed to load song",
       "loadSongDetails": "Error loading song details",
@@ -705,6 +711,7 @@
       "updateTitle": "Error updating title",
       "updateWorkflow": "Error updating workflow"
     },
+    "idCopied": "ID copied to clipboard!",
     "loading": "Loading song details...",
     "lyrics": {
       "characters": "characters",
@@ -1412,6 +1419,131 @@
       "loadImagesFailed": "Failed to load images",
       "formInvalid": "Please fill in all required fields",
       "applyFailed": "Failed to apply text overlay"
+    }
+  },
+  "equipment": {
+    "title": "Equipment Manager",
+    "gallery": {
+      "title": "Software & Plugin Gallery",
+      "subtitle": "Manage your software licenses and plugin keys",
+      "search": "Search equipment...",
+      "items": "items",
+      "loading": "Loading equipment...",
+      "empty": "No equipment found",
+      "selectPrompt": "Select an equipment from the list to view details",
+      "loadMore": "Load More",
+      "filters": {
+        "all": "All",
+        "allStatuses": "All Statuses"
+      },
+      "actions": {
+        "new": "New Equipment",
+        "edit": "Edit",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "copy": "Copy to clipboard",
+        "copyId": "ID copied to clipboard",
+        "copyName": "Name copied to clipboard",
+        "copyDescription": "Description copied to clipboard",
+        "copySystemRequirements": "System requirements copied to clipboard",
+        "copyManufacturer": "Manufacturer copied to clipboard",
+        "copyUrl": "URL copied to clipboard",
+        "copyUsername": "Username copied to clipboard",
+        "copyPassword": "Password copied to clipboard",
+        "copyLicenseKey": "License key copied to clipboard",
+        "copyLicenseDescription": "License description copied to clipboard",
+        "copyPrice": "Price copied to clipboard",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "showLicenseKey": "Show license key",
+        "hideLicenseKey": "Hide license key"
+      },
+      "sections": {
+        "general": "General Information",
+        "metadata": "Metadata",
+        "credentials": "Login Credentials",
+        "license": "License Information",
+        "purchase": "Purchase Information"
+      },
+      "metadata": {
+        "created": "Created",
+        "updated": "Updated",
+        "tags": "Tags"
+      }
+    },
+    "editor": {
+      "createTitle": "New Equipment",
+      "editTitle": "Edit Equipment",
+      "createSubtitle": "Add new software or plugin to your inventory",
+      "editSubtitle": "Update equipment information",
+      "loading": "Loading equipment data...",
+      "saving": "Saving...",
+      "save": "Save",
+      "cancel": "Cancel",
+      "type": "Type",
+      "name": "Name",
+      "nameHint": "e.g., Logic Pro X, Serum, Omnisphere",
+      "version": "Version",
+      "versionHint": "e.g., 10.8.1, 1.3.6, 2.9.0",
+      "versionInfo": "e.g., 10.8.1, 1.3.6, 2.9.0",
+      "description": "Description",
+      "softwareTags": "Software Tags",
+      "pluginTags": "Plugin Tags",
+      "tagsHint": "Comma-separated, e.g., DAW, VST3, AU",
+      "manufacturer": "Manufacturer",
+      "url": "Website",
+      "urlHint": "Product website or download link",
+      "credentialsSection": "Login Credentials",
+      "username": "Username",
+      "password": "Password",
+      "passwordHint": "Encrypted in database",
+      "showPassword": "Show",
+      "hidePassword": "Hide",
+      "licenseSection": "License Information",
+      "licenseManagement": "License Management",
+      "licenseKey": "License Key",
+      "showLicenseKey": "Show",
+      "hideLicenseKey": "Hide",
+      "licenseDescription": "License Description",
+      "licenseDescriptionHint": "Describe the license type or activation method",
+      "purchaseSection": "Purchase Information",
+      "purchaseDate": "Purchase Date",
+      "price": "Price",
+      "priceHint": "e.g., 299.99 EUR",
+      "systemRequirements": "System Requirements",
+      "systemRequirementsHint": "OS version, dependencies, etc.",
+      "status": "Status"
+    },
+    "types": {
+      "software": "Software",
+      "plugin": "Plugin"
+    },
+    "licenseTypes": {
+      "online": "Online",
+      "ilok": "iLok",
+      "license_key": "License Key",
+      "other": "Other"
+    },
+    "statuses": {
+      "active": "Active",
+      "trial": "Trial",
+      "expired": "Expired",
+      "archived": "Archived"
+    },
+    "messages": {
+      "createSuccess": "Equipment created successfully",
+      "updateSuccess": "Equipment updated successfully",
+      "deleteSuccess": "Equipment deleted successfully",
+      "deleteConfirm": "Are you sure you want to delete this equipment?",
+      "loadError": "Failed to load equipment",
+      "saveError": "Failed to save equipment",
+      "deleteError": "Failed to delete equipment",
+      "copyError": "Failed to copy to clipboard"
+    },
+    "validation": {
+      "required": "This field is required",
+      "maxLength": "Maximum {{max}} characters allowed",
+      "formInvalid": "Please fill in all required fields"
     }
   }
 }

@@ -76,5 +76,20 @@ export const routes: Routes = [
         path: 'text-overlay-editor',
         canActivate: [AuthGuard],
         loadComponent: () => import('./pages/text-overlay-editor/text-overlay-editor.component').then(m => m.TextOverlayEditorComponent)
+    },
+    {
+        path: 'equipment-gallery',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/equipment-gallery/equipment-gallery.component').then(m => m.EquipmentGalleryComponent)
+    },
+    {
+        path: 'equipment-editor',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/equipment-editor/equipment-editor.component').then(m => m.EquipmentEditorComponent)
+    },
+    {
+        path: 'equipment-editor/:id',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/equipment-editor/equipment-editor.component').then(m => m.EquipmentEditorComponent)
     }
 ];
