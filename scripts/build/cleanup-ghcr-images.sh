@@ -104,20 +104,21 @@ get_latest_version() {
     local image=$1
     local package=$image
 
-    # Get the version ID that has the 'latest' tag
+    # Get the version ID that has the 'latest' tag (exact match)
     local latest_version_id=$(gh api -H "Accept: application/vnd.github+json" \
         "/user/packages/container/${package}/versions" \
-        --jq '.[] | select(.metadata.container.tags[] | contains("latest")) | .id' 2>/dev/null | head -1)
+        --jq '.[] | select(.metadata.container.tags[] == "latest") | .id' 2>/dev/null | head -1)
 
     if [ -z "$latest_version_id" ]; then
         echo ""
         return
     fi
 
-    # Get all tags for this version (usually includes both 'latest' and a version tag like 'v2.1.5')
+    # Get all tags for this version (usually includes both 'latest' and a version tag like 'v2.7.0')
+    # Sort version tags to get the highest version number
     gh api -H "Accept: application/vnd.github+json" \
         "/user/packages/container/${package}/versions" \
-        --jq ".[] | select(.id == ${latest_version_id}) | .metadata.container.tags[] | select(. != \"latest\")" 2>/dev/null | head -1
+        --jq ".[] | select(.id == ${latest_version_id}) | .metadata.container.tags[] | select(. != \"latest\")" 2>/dev/null | sort -V | tail -1
 }
 
 # Get version ID for a specific tag
