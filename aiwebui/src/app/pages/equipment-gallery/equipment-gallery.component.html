@@ -176,70 +176,205 @@
           <mat-icon>{{ getTypeIcon(selectedEquipment.type) }}</mat-icon>
         </div>
         <div class="detail-title-group">
-          <h3>{{ selectedEquipment.name }}</h3>
+          <h3>
+            {{ selectedEquipment.name }}
+            <span class="equipment-status" [class]="'status-' + selectedEquipment.status">
+              {{ 'equipment.statuses.' + selectedEquipment.status | translate }}
+            </span>
+          </h3>
           <p class="detail-manufacturer" *ngIf="selectedEquipment.manufacturer">
             {{ selectedEquipment.manufacturer }}
           </p>
         </div>
-        <span class="equipment-status" [class]="'status-' + selectedEquipment.status">
-          {{ 'equipment.statuses.' + selectedEquipment.status | translate }}
-        </span>
       </div>
 
       <!-- Detail Content -->
       <div class="detail-content">
-        <!-- Description -->
-        <div class="detail-field" *ngIf="selectedEquipment.description">
-          <div class="detail-label">{{ 'equipment.editor.description' | translate }}</div>
-          <p>{{ selectedEquipment.description }}</p>
-        </div>
+        <!-- Section 1: Allgemein -->
+        <div class="detail-section-block">
+          <h3 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            {{ 'equipment.gallery.sections.general' | translate }}
+          </h3>
 
-        <!-- Tags -->
-        <div class="detail-field" *ngIf="selectedEquipment.software_tags">
-          <div class="detail-label">{{ 'equipment.editor.softwareTags' | translate }}</div>
-          <div class="tags-container">
-            <mat-chip *ngFor="let tag of selectedEquipment.software_tags.split(',')">
-              {{ tag.trim() }}
-            </mat-chip>
+          <div class="detail-field-row">
+            <div class="detail-field">
+              <span class="field-label">{{ 'equipment.editor.name' | translate }}</span>
+              <div class="readonly-field">{{ selectedEquipment.name }}</div>
+            </div>
+
+            <div class="detail-field" *ngIf="selectedEquipment.version">
+              <span class="field-label">{{ 'equipment.editor.version' | translate }}</span>
+              <div class="readonly-field">{{ selectedEquipment.version }}</div>
+            </div>
+          </div>
+
+          <div class="detail-field">
+            <span class="field-label">{{ 'equipment.editor.type' | translate }}</span>
+            <div class="readonly-field">
+              <mat-icon class="type-icon">{{ getTypeIcon(selectedEquipment.type) }}</mat-icon>
+              {{ 'equipment.types.' + selectedEquipment.type.toLowerCase() | translate }}
+            </div>
+          </div>
+
+          <div class="detail-field" *ngIf="selectedEquipment.description">
+            <span class="field-label">{{ 'equipment.editor.description' | translate }}</span>
+            <div class="readonly-field multiline">{{ selectedEquipment.description }}</div>
+          </div>
+
+          <div class="detail-field" *ngIf="selectedEquipment.system_requirements">
+            <span class="field-label">{{ 'equipment.editor.systemRequirements' | translate }}</span>
+            <div class="readonly-field multiline">{{ selectedEquipment.system_requirements }}</div>
           </div>
         </div>
 
-        <div class="detail-field" *ngIf="selectedEquipment.plugin_tags">
-          <div class="detail-label">{{ 'equipment.editor.pluginTags' | translate }}</div>
-          <div class="tags-container">
-            <mat-chip *ngFor="let tag of selectedEquipment.plugin_tags.split(',')">
-              {{ tag.trim() }}
-            </mat-chip>
+        <!-- Section 2: Meta Daten (Icon-only, compact) -->
+        <div class="detail-section-block">
+          <h3 class="section-title">
+            <i class="fas fa-database"></i>
+            {{ 'equipment.gallery.sections.metadata' | translate }}
+          </h3>
+
+          <div class="metadata-compact">
+            <!-- ID Row -->
+            <div class="meta-id-row">
+              <i class="fas fa-fingerprint meta-icon"></i>
+              <span class="meta-id" [title]="selectedEquipment.id">{{ selectedEquipment.id }}</span>
+            </div>
+
+            <!-- Date Grid (Icons only) -->
+            <div class="meta-grid">
+              <div class="meta-item">
+                <i class="fas fa-calendar-plus meta-icon"></i>
+                <span class="meta-value">{{ selectedEquipment.created_at | date:'medium' }}</span>
+              </div>
+              <div class="meta-item" *ngIf="selectedEquipment.updated_at">
+                <i class="fas fa-calendar-check meta-icon"></i>
+                <span class="meta-value">{{ selectedEquipment.updated_at | date:'medium' }}</span>
+              </div>
+            </div>
+
+            <!-- Tags (Icons only) -->
+            <div class="meta-item" *ngIf="selectedEquipment.software_tags || selectedEquipment.plugin_tags">
+              <i class="fas fa-tags meta-icon"></i>
+              <div class="tags-container">
+                <mat-chip *ngFor="let tag of (selectedEquipment.software_tags || selectedEquipment.plugin_tags)!.split(',')">
+                  {{ tag.trim() }}
+                </mat-chip>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- URL -->
-        <div class="detail-field" *ngIf="selectedEquipment.url">
-          <div class="detail-label">{{ 'equipment.editor.url' | translate }}</div>
-          <a [href]="selectedEquipment.url" target="_blank">{{ selectedEquipment.url }}</a>
+        <!-- Section 3: Login Credentials -->
+        <div class="detail-section-block">
+          <h3 class="section-title">
+            <i class="fas fa-key"></i>
+            {{ 'equipment.gallery.sections.credentials' | translate }}
+          </h3>
+
+          <div class="detail-field" *ngIf="selectedEquipment.manufacturer">
+            <span class="field-label">{{ 'equipment.editor.manufacturer' | translate }}</span>
+            <div class="readonly-field">{{ selectedEquipment.manufacturer }}</div>
+          </div>
+
+          <div class="detail-field" *ngIf="selectedEquipment.url">
+            <div class="field-header">
+              <span class="field-label">{{ 'equipment.editor.url' | translate }}</span>
+              <button class="copy-icon-btn" (click)="copyToClipboard(selectedEquipment.url, 'Url')" [title]="'equipment.gallery.actions.copy' | translate">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+            <div class="readonly-field">
+              <a [href]="selectedEquipment.url" target="_blank">{{ selectedEquipment.url }}</a>
+            </div>
+          </div>
+
+          <div class="detail-field" *ngIf="selectedEquipment.username">
+            <div class="field-header">
+              <span class="field-label">{{ 'equipment.editor.username' | translate }}</span>
+              <button class="copy-icon-btn" (click)="copyToClipboard(selectedEquipment.username, 'Username')" [title]="'equipment.gallery.actions.copy' | translate">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+            <div class="readonly-field">{{ selectedEquipment.username }}</div>
+          </div>
+
+          <div class="detail-field sensitive-field" *ngIf="selectedEquipment.password">
+            <div class="field-header">
+              <span class="field-label">{{ 'equipment.editor.password' | translate }}</span>
+              <div class="field-actions">
+                <button class="visibility-toggle-btn" (click)="togglePasswordVisibility()" [title]="(showPassword ? 'equipment.gallery.actions.hidePassword' : 'equipment.gallery.actions.showPassword') | translate">
+                  <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </button>
+                <button class="copy-icon-btn" (click)="copyToClipboard(selectedEquipment.password, 'Password')" [title]="'equipment.gallery.actions.copy' | translate">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+            </div>
+            <div class="readonly-field sensitive-value" [class.masked]="!showPassword">
+              {{ showPassword ? selectedEquipment.password : '••••••••' }}
+            </div>
+          </div>
         </div>
 
-        <!-- License Management -->
-        <div class="detail-field" *ngIf="selectedEquipment.license_management">
-          <div class="detail-label">{{ 'equipment.editor.licenseManagement' | translate }}</div>
-          <p>{{ 'equipment.licenseTypes.' + selectedEquipment.license_management.toLowerCase() | translate }}</p>
+        <!-- Section 4: License Information -->
+        <div class="detail-section-block" *ngIf="selectedEquipment.license_management">
+          <h3 class="section-title">
+            <i class="fas fa-certificate"></i>
+            {{ 'equipment.gallery.sections.license' | translate }}
+          </h3>
+
+          <div class="detail-field">
+            <span class="field-label">{{ 'equipment.editor.licenseManagement' | translate }}</span>
+            <div class="readonly-field">{{ 'equipment.licenseTypes.' + selectedEquipment.license_management.toLowerCase() | translate }}</div>
+          </div>
+
+          <div class="detail-field sensitive-field" *ngIf="selectedEquipment.license_management === LicenseManagement.LICENSE_KEY && selectedEquipment.license_key">
+            <div class="field-header">
+              <span class="field-label">{{ 'equipment.editor.licenseKey' | translate }}</span>
+              <div class="field-actions">
+                <button class="visibility-toggle-btn" (click)="toggleLicenseKeyVisibility()" [title]="(showLicenseKey ? 'equipment.gallery.actions.hideLicenseKey' : 'equipment.gallery.actions.showLicenseKey') | translate">
+                  <i [class]="showLicenseKey ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </button>
+                <button class="copy-icon-btn" (click)="copyToClipboard(selectedEquipment.license_key, 'LicenseKey')" [title]="'equipment.gallery.actions.copy' | translate">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+            </div>
+            <div class="readonly-field sensitive-value" [class.masked]="!showLicenseKey">
+              {{ showLicenseKey ? selectedEquipment.license_key : '••••••••' }}
+            </div>
+          </div>
+
+          <div class="detail-field" *ngIf="selectedEquipment.license_management === LicenseManagement.OTHER && selectedEquipment.license_description">
+            <span class="field-label">{{ 'equipment.editor.licenseDescription' | translate }}</span>
+            <div class="readonly-field multiline">{{ selectedEquipment.license_description }}</div>
+          </div>
         </div>
 
-        <!-- Purchase Info -->
-        <div class="detail-field" *ngIf="selectedEquipment.purchase_date">
-          <div class="detail-label">{{ 'equipment.editor.purchaseDate' | translate }}</div>
-          <p>{{ selectedEquipment.purchase_date | date:'mediumDate' }}</p>
-        </div>
+        <!-- Section 5: Purchase Information -->
+        <div class="detail-section-block" *ngIf="selectedEquipment.purchase_date || selectedEquipment.price">
+          <h3 class="section-title">
+            <i class="fas fa-shopping-cart"></i>
+            {{ 'equipment.gallery.sections.purchase' | translate }}
+          </h3>
 
-        <div class="detail-field" *ngIf="selectedEquipment.price">
-          <div class="detail-label">{{ 'equipment.editor.price' | translate }}</div>
-          <p>{{ selectedEquipment.price }}</p>
-        </div>
+          <div class="detail-field" *ngIf="selectedEquipment.purchase_date">
+            <span class="field-label">{{ 'equipment.editor.purchaseDate' | translate }}</span>
+            <div class="readonly-field">
+              <i class="fas fa-calendar-alt"></i>
+              {{ selectedEquipment.purchase_date | date:'mediumDate' }}
+            </div>
+          </div>
 
-        <!-- System Requirements -->
-        <div class="detail-field" *ngIf="selectedEquipment.system_requirements">
-          <div class="detail-label">{{ 'equipment.editor.systemRequirements' | translate }}</div>
-          <p>{{ selectedEquipment.system_requirements }}</p>
+          <div class="detail-field" *ngIf="selectedEquipment.price">
+            <span class="field-label">{{ 'equipment.editor.price' | translate }}</span>
+            <div class="readonly-field price-value">
+              <i class="fas fa-dollar-sign"></i>
+              {{ selectedEquipment.price }}
+            </div>
+          </div>
         </div>
       </div>
 

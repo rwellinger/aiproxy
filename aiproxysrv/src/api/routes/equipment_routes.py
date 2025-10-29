@@ -18,13 +18,13 @@ Endpoints:
 from flask import Blueprint, jsonify, request
 from sqlalchemy.orm import Session
 
-from db.database import get_db
 from api.auth_middleware import get_current_user_id, jwt_required
 from api.controllers.equipment_controller import (
     EquipmentController,
     EquipmentCreateRequest,
     EquipmentUpdateRequest,
 )
+from db.database import get_db
 
 
 # Blueprint definition

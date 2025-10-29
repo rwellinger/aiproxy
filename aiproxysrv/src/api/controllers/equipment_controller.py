@@ -27,6 +27,7 @@ class EquipmentCreateRequest(BaseModel):
 
     type: str = Field(..., description="Equipment type: Software or Plugin", min_length=1, max_length=50)
     name: str = Field(..., description="Equipment name", min_length=1, max_length=200)
+    version: str | None = Field(None, description="Software/Plugin version", max_length=100)
     description: str | None = Field(None, description="Detailed description")
     software_tags: str | None = Field(None, description="Comma-separated software tags", max_length=1000)
     plugin_tags: str | None = Field(None, description="Comma-separated plugin tags", max_length=1000)
@@ -35,10 +36,10 @@ class EquipmentCreateRequest(BaseModel):
     username: str | None = Field(None, description="Login username", max_length=200)
     password: str | None = Field(None, description="Login password (will be encrypted)")
     license_management: str | None = Field(
-        None, description="License type: Online, iLok, Lizenzschlüssel, andere", max_length=100
+        None, description="License type: online, ilok, license_key, other", max_length=100
     )
     license_key: str | None = Field(None, description="License key (will be encrypted)")
-    license_description: str | None = Field(None, description="License description for 'andere' type")
+    license_description: str | None = Field(None, description="License description for 'other' type")
     purchase_date: date | None = Field(None, description="Purchase date (YYYY-MM-DD)")
     price: str | None = Field(None, description="Price with currency (e.g., 299.99 EUR) - will be encrypted")
     system_requirements: str | None = Field(None, description="System requirements")
@@ -49,6 +50,7 @@ class EquipmentUpdateRequest(BaseModel):
     """Schema for updating existing equipment (all fields optional)"""
 
     name: str | None = Field(None, min_length=1, max_length=200)
+    version: str | None = Field(None, max_length=100)
     description: str | None = None
     software_tags: str | None = Field(None, max_length=1000)
     plugin_tags: str | None = Field(None, max_length=1000)
@@ -71,6 +73,7 @@ class EquipmentResponse(BaseModel):
     id: str
     type: str
     name: str
+    version: str | None
     description: str | None
     software_tags: str | None
     plugin_tags: str | None

@@ -434,6 +434,7 @@ class Equipment(Base):
     # Core fields
     type = Column(String(50), nullable=False, index=True)  # 'Software' | 'Plugin'
     name = Column(String(200), nullable=False)
+    version = Column(String(100), nullable=True)
     description = Column(Text, nullable=True)
 
     # Tags (comma-separated)
@@ -449,7 +450,7 @@ class Equipment(Base):
     password_encrypted = Column(Text, nullable=True)
 
     # License management
-    license_management = Column(String(100), nullable=True)  # 'Online' | 'iLok' | 'Lizenzschlüssel' | 'andere'
+    license_management = Column(String(100), nullable=True)  # 'online' | 'ilok' | 'license_key' | 'other'
     license_key_encrypted = Column(Text, nullable=True)
     license_description = Column(Text, nullable=True)
 

@@ -48,6 +48,14 @@
           <mat-error>{{ getFieldError('name') }}</mat-error>
         </mat-form-field>
 
+        <!-- Version -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'equipment.editor.version' | translate }}</mat-label>
+          <input matInput formControlName="version" maxlength="100">
+          <mat-hint>{{ 'equipment.editor.versionHint' | translate }}</mat-hint>
+          <mat-error>{{ getFieldError('version') }}</mat-error>
+        </mat-form-field>
+
         <!-- Manufacturer -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>{{ 'equipment.editor.manufacturer' | translate }}</mat-label>
@@ -130,7 +138,7 @@
                 {{ 'equipment.licenseTypes.ilok' | translate }}
               </mat-option>
               <mat-option [value]="LicenseManagement.LICENSE_KEY">
-                {{ 'equipment.licenseTypes.key' | translate }}
+                {{ 'equipment.licenseTypes.license_key' | translate }}
               </mat-option>
               <mat-option [value]="LicenseManagement.OTHER">
                 {{ 'equipment.licenseTypes.other' | translate }}

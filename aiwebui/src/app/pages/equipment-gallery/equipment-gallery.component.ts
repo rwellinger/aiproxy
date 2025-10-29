@@ -16,7 +16,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 
 import { EquipmentService } from '../../services/business/equipment.service';
 import { NotificationService } from '../../services/ui/notification.service';
-import { Equipment, EquipmentType, EquipmentStatus } from '../../models/equipment.model';
+import { Equipment, EquipmentType, EquipmentStatus, LicenseManagement } from '../../models/equipment.model';
 
 @Component({
   selector: 'app-equipment-gallery',
@@ -59,9 +59,14 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
   showDeleteConfirm = false;
   deleteEquipmentId: string | null = null;
 
+  // Visibility toggles for sensitive fields
+  showPassword = false;
+  showLicenseKey = false;
+
   // Enums for template
   EquipmentType = EquipmentType;
   EquipmentStatus = EquipmentStatus;
+  LicenseManagement = LicenseManagement;
 
   // RxJS subjects
   private searchSubject = new Subject<string>();
@@ -119,6 +124,11 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
       this.equipmentList = response.data as Equipment[];
       this.pagination.total = response.pagination.total;
       this.pagination.has_more = response.pagination.has_more;
+
+      // Auto-select first equipment if list is not empty and nothing is selected
+      if (this.equipmentList.length > 0 && !this.selectedEquipment) {
+        this.selectEquipment(this.equipmentList[0]);
+      }
     } catch (error) {
       console.error('Failed to load equipment:', error);
       this.notificationService.error(
@@ -153,10 +163,28 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Select equipment to show details.
+   * Select equipment to show details (loads full data with decrypted fields).
    */
-  selectEquipment(equipment: Equipment): void {
-    this.selectedEquipment = equipment;
+  async selectEquipment(equipment: Equipment): Promise<void> {
+    try {
+      // Load full equipment details (includes decrypted password, license_key, price)
+      const response = await firstValueFrom(
+        this.equipmentService.getEquipmentById(equipment.id)
+      );
+
+      this.selectedEquipment = response.data;
+
+      // Reset visibility toggles when selecting new equipment
+      this.showPassword = false;
+      this.showLicenseKey = false;
+    } catch (error) {
+      console.error('Failed to load equipment details:', error);
+      this.notificationService.error(
+        this.translate.instant('equipment.messages.loadError')
+      );
+      // Fallback to list data if detail load fails
+      this.selectedEquipment = equipment;
+    }
   }
 
   /**
@@ -261,6 +289,41 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
         return '';
       default:
         return '';
+    }
+  }
+
+  /**
+   * Toggle password visibility.
+   */
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  /**
+   * Toggle license key visibility.
+   */
+  toggleLicenseKeyVisibility(): void {
+    this.showLicenseKey = !this.showLicenseKey;
+  }
+
+  /**
+   * Copy text to clipboard.
+   */
+  async copyToClipboard(text: string | undefined, fieldName: string): Promise<void> {
+    if (!text || !text.trim()) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      this.notificationService.success(
+        this.translate.instant(`equipment.gallery.actions.copy${fieldName}`)
+      );
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      this.notificationService.error(
+        this.translate.instant('equipment.messages.copyError')
+      );
     }
   }
 }

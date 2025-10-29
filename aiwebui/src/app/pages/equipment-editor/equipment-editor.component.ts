@@ -91,6 +91,7 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
     this.equipmentForm = this.fb.group({
       type: [EquipmentType.SOFTWARE, Validators.required],
       name: ['', [Validators.required, Validators.maxLength(200)]],
+      version: ['', Validators.maxLength(100)],
       description: [''],
       software_tags: [''],
       plugin_tags: [''],

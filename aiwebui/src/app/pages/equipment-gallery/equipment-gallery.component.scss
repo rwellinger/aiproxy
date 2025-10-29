@@ -439,31 +439,236 @@
   padding: $spacing-md;
 }
 
+// Section Blocks (Flat Design - matches Image/Song Gallery)
+.detail-section-block {
+  margin-bottom: $spacing-md;
+  padding: $spacing-md;
+  background-color: $background-light;
+  border-radius: 12px;
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    margin: 0 0 $spacing-md 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-primary;
+
+    i {
+      color: $primary-color;
+      font-size: 16px;
+      width: 16px;
+    }
+  }
+}
+
+.detail-field-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .detail-field {
+    margin-bottom: 0;
+  }
+}
+
 .detail-field {
   margin-bottom: $spacing-md;
 
-  .detail-label {
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .field-label {
     display: block;
     font-size: $font-sm;
     font-weight: 600;
-    color: $text-muted;
-    margin-bottom: $spacing-xs;
-    text-transform: uppercase;
-  }
-
-  p {
-    margin: 0;
     color: $text-primary;
-    white-space: pre-wrap;
+    margin-bottom: $spacing-xs;
   }
 
-  a {
-    color: $primary-color;
-    text-decoration: none;
+  .field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xs;
+  }
 
-    &:hover {
-      text-decoration: underline;
+  .readonly-field {
+    background: $background-light;
+    border: 1px solid $border-light;
+    border-radius: 8px;
+    padding: $spacing-sm;
+    font-size: $font-sm;
+    color: $text-primary;
+    word-wrap: break-word;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+
+    &.multiline {
+      white-space: pre-wrap;
+      line-height: 1.5;
+      max-height: 200px;
+      overflow-y: auto;
+      display: block;
     }
+
+    .type-icon {
+      color: $primary-color;
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+    }
+
+    a {
+      color: $primary-color;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .field-actions {
+    display: flex;
+    gap: $spacing-xs;
+  }
+}
+
+// Copy Button (Transparent - matches Image/Song Gallery)
+.copy-icon-btn,
+.copy-id-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  background-color: transparent;
+  color: $primary-color;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.6;
+
+  i {
+    font-size: 14px;
+  }
+
+  &:hover {
+    opacity: 1;
+    background-color: rgba(25, 118, 210, 0.1);
+  }
+}
+
+// Visibility Toggle Button (Transparent)
+.visibility-toggle-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  background-color: transparent;
+  color: $primary-color;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.6;
+
+  i {
+    font-size: 14px;
+  }
+
+  &:hover {
+    opacity: 1;
+    background-color: rgba(25, 118, 210, 0.1);
+  }
+}
+
+// Metadata Section (Icon-only, compact - matches Image Gallery)
+.metadata-compact {
+  background-color: $background-light;
+  padding: $spacing-sm $spacing-md;
+  border-radius: 12px;
+}
+
+.meta-id-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-sm;
+  padding-bottom: $spacing-sm;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+  .meta-icon {
+    color: $primary-color;
+    font-size: 14px;
+    width: 14px;
+    flex-shrink: 0;
+  }
+
+  .meta-id {
+    flex: 1;
+    font-family: monospace;
+    font-size: 11px;
+    color: $text-primary;
+    opacity: 0.7;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+
+  .meta-icon {
+    color: $primary-color;
+    font-size: 14px;
+    width: 14px;
+    flex-shrink: 0;
+  }
+
+  .meta-value {
+    color: $text-primary;
+    font-size: $font-sm;
+    font-weight: 500;
+  }
+}
+
+// Sensitive Fields (With readonly-field background)
+.sensitive-field {
+  .sensitive-value {
+    font-family: monospace;
+    font-size: $font-sm;
+    color: $text-primary;
+    transition: all 0.2s;
+
+    &.masked {
+      font-size: 1rem;
+      letter-spacing: 2px;
+      color: $text-muted;
+    }
+  }
+}
+
+// Price Value
+.price-value {
+  font-weight: 600;
+  color: #2e7d32;
+
+  i {
+    color: #2e7d32;
   }
 }
 

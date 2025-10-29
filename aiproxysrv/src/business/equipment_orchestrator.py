@@ -131,6 +131,7 @@ class EquipmentOrchestrator:
             "id": str(equipment.id),
             "type": equipment.type,
             "name": equipment.name,
+            "version": equipment.version,
             "description": equipment.description,
             "software_tags": equipment.software_tags,
             "plugin_tags": equipment.plugin_tags,

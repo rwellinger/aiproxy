@@ -1439,7 +1439,35 @@
       "actions": {
         "new": "Neues Equipment",
         "edit": "Bearbeiten",
-        "delete": "Löschen"
+        "delete": "Löschen",
+        "copy": "In Zwischenablage kopieren",
+        "copyId": "ID in Zwischenablage kopiert",
+        "copyName": "Name in Zwischenablage kopiert",
+        "copyDescription": "Beschreibung in Zwischenablage kopiert",
+        "copySystemRequirements": "Systemanforderungen in Zwischenablage kopiert",
+        "copyManufacturer": "Hersteller in Zwischenablage kopiert",
+        "copyUrl": "URL in Zwischenablage kopiert",
+        "copyUsername": "Benutzername in Zwischenablage kopiert",
+        "copyPassword": "Passwort in Zwischenablage kopiert",
+        "copyLicenseKey": "Lizenzschlüssel in Zwischenablage kopiert",
+        "copyLicenseDescription": "Lizenzbeschreibung in Zwischenablage kopiert",
+        "copyPrice": "Preis in Zwischenablage kopiert",
+        "showPassword": "Passwort anzeigen",
+        "hidePassword": "Passwort verbergen",
+        "showLicenseKey": "Lizenzschlüssel anzeigen",
+        "hideLicenseKey": "Lizenzschlüssel verbergen"
+      },
+      "sections": {
+        "general": "Allgemeine Informationen",
+        "metadata": "Metadaten",
+        "credentials": "Login-Daten",
+        "license": "Lizenz-Informationen",
+        "purchase": "Kaufinformationen"
+      },
+      "metadata": {
+        "created": "Erstellt",
+        "updated": "Aktualisiert",
+        "tags": "Tags"
       }
     },
     "editor": {
@@ -1454,6 +1482,8 @@
       "type": "Typ",
       "name": "Name",
       "nameHint": "z.B. Logic Pro X, Serum, Omnisphere",
+      "version": "Version",
+      "versionHint": "z.B. 10.8.1, 1.3.6, 2.9.0",
       "description": "Beschreibung",
       "softwareTags": "Software Tags",
       "pluginTags": "Plugin Tags",
@@ -1489,7 +1519,7 @@
     "licenseTypes": {
       "online": "Online",
       "ilok": "iLok",
-      "key": "Lizenzschlüssel",
+      "license_key": "Lizenzschlüssel",
       "other": "Andere"
     },
     "statuses": {
@@ -1505,7 +1535,8 @@
       "deleteConfirm": "Möchtest du dieses Equipment wirklich löschen?",
       "loadError": "Fehler beim Laden des Equipments",
       "saveError": "Fehler beim Speichern des Equipments",
-      "deleteError": "Fehler beim Löschen des Equipments"
+      "deleteError": "Fehler beim Löschen des Equipments",
+      "copyError": "Fehler beim Kopieren in die Zwischenablage"
     },
     "validation": {
       "required": "Dieses Feld ist erforderlich",

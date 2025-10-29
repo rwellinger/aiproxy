@@ -8,10 +8,10 @@ export enum EquipmentType {
 }
 
 export enum LicenseManagement {
-  ONLINE = 'Online',
-  ILOK = 'iLok',
-  LICENSE_KEY = 'Lizenzschlüssel',
-  OTHER = 'andere'
+  ONLINE = 'online',
+  ILOK = 'ilok',
+  LICENSE_KEY = 'license_key',
+  OTHER = 'other'
 }
 
 export enum EquipmentStatus {
@@ -25,6 +25,7 @@ export interface Equipment {
   id: string;
   type: EquipmentType;
   name: string;
+  version?: string;
   description?: string;
   software_tags?: string;
   plugin_tags?: string;
@@ -70,6 +71,7 @@ export interface EquipmentDetailResponse {
 export interface EquipmentCreateRequest {
   type: EquipmentType;
   name: string;
+  version?: string;
   description?: string;
   software_tags?: string;
   plugin_tags?: string;
@@ -88,6 +90,7 @@ export interface EquipmentCreateRequest {
 
 export interface EquipmentUpdateRequest {
   name?: string;
+  version?: string;
   description?: string;
   software_tags?: string;
   plugin_tags?: string;
