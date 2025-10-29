@@ -497,11 +497,12 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
 
   insertInfoTemplate(): void {
     const key = this.translate.instant('songSketch.creator.description.infoTemplateKey');
+    const tempo = this.translate.instant('songSketch.creator.description.infoTemplateTempo')
     const timeSignature = this.translate.instant('songSketch.creator.description.infoTemplateTimeSignature');
     const totalBars = this.translate.instant('songSketch.creator.description.infoTemplateTotalBars');
     const songLength = this.translate.instant('songSketch.creator.description.infoTemplateSongLength');
-
     const template = `${key}
+${tempo}
 ${timeSignature}
 ${totalBars}
 ${songLength}`;

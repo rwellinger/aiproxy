@@ -1218,6 +1218,7 @@
         "infoHint": "Insert template for key, tempo, bars, and length",
         "infoTemplateKey": "Key:",
         "infoTemplateTimeSignature": "Time Signature:",
+        "infoTemplateTempo": "Tempo (BPM):",
         "infoTemplateTotalBars": "Total Number of Bars:",
         "infoTemplateSongLength": "Song Length:",
         "generateLong": "Generate with AI",

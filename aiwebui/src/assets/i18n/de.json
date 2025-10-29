@@ -1218,6 +1218,7 @@
         "infoHint": "Vorlage für Tonart, Tempo, Takte und Länge einfügen",
         "infoTemplateKey": "Tonart:",
         "infoTemplateTimeSignature": "Taktart:",
+        "infoTemplateTempo": "Tempo (BPM) :",
         "infoTemplateTotalBars": "Total Anzahl Bars:",
         "infoTemplateSongLength": "Song Länge:",
         "generateLong": "Mit KI generieren",
