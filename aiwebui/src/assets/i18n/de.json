@@ -1084,6 +1084,8 @@
     "promptsPerPageHint": "5-100 Prompts pro Seite",
     "sketchesPerPage": "Sketches pro Seite",
     "sketchesPerPageHint": "5-100 Sketches pro Seite",
+    "equipmentPerPage": "Equipment pro Seite",
+    "equipmentPerPageHint": "5-100 Equipment pro Seite",
     "languageHint": "Wähle deine bevorzugte Sprache",
     "lastLogin": "Letzter Login:",
     "lastName": "Nachname",
@@ -1097,6 +1099,7 @@
       "languageUpdated": "Sprache aktualisiert",
       "promptListLimitUpdated": "Prompt-Listen-Limit aktualisiert",
       "sketchListLimitUpdated": "Sketch-Listen-Limit aktualisiert",
+      "equipmentListLimitUpdated": "Equipment-Listen-Limit aktualisiert",
       "settingsReset": "Einstellungen auf Standard zurückgesetzt",
       "songListLimitUpdated": "Song-Listen-Limit aktualisiert"
     },
@@ -1431,7 +1434,9 @@
       "loading": "Lade Equipment...",
       "empty": "Kein Equipment gefunden",
       "selectPrompt": "Wähle ein Equipment aus der Liste, um Details anzuzeigen",
-      "loadMore": "Mehr laden",
+      "pagination": {
+        "info": "Seite {{current}} von {{total}}"
+      },
       "filters": {
         "all": "Alle",
         "allStatuses": "Alle Status"

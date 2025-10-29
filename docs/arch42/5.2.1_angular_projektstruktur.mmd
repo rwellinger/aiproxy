@@ -1,13 +1,16 @@
 flowchart TB
-    subgraph PRESENTATION["🖥️ Presentation Layer - Pages (14)"]
+    subgraph PRESENTATION["🖥️ Presentation Layer - Pages (17)"]
         direction LR
         AI_CHAT[💬 AI Chat<br/>Ollama]
         OPENAI_CHAT[🤖 OpenAI Chat<br/>GPT]
         LYRIC_CREATION[✍️ Lyric Creation<br/>Editor]
         LYRIC_RULES[📜 Lyric Rules<br/>Regex Cleanup]
         MUSIC_STYLES[🎼 Music Styles<br/>Templates]
+        EQUIPMENT_GALLERY[🎛️ Equipment Gallery<br/>Inventory]
+        EQUIPMENT_EDITOR[⚙️ Equipment Editor<br/>Create/Edit]
         IMG_GEN[🖼️ Image Generator<br/>DALL-E]
         IMG_VIEW[👁️ Image View<br/>Gallery]
+        TEXT_OVERLAY[🖼️ Text Overlay<br/>Image Editor]
         SONG_GEN[🎵 Song Generator<br/>Mureka]
         SONG_VIEW[🎧 Song View<br/>Library]
         SONG_PROFILE[📊 Song Profile<br/>Mureka Account]
@@ -37,6 +40,7 @@ flowchart TB
             IMG_SVC[🖼️ Image Service]
             SONG_SVC[🎵 Song Service]
             SKETCH_SVC[📝 Sketch Service]
+            EQUIPMENT_SVC[🎛️ Equipment Service]
             CONV_SVC[💬 Conversation Service]
             AUTH_SVC[🔐 Auth Service]
             USER_SVC[👤 User Service]
@@ -84,8 +88,8 @@ flowchart TB
     classDef infrastructureStyle fill:#FCE4EC,stroke:#E91E63,stroke-width:2px
     classDef externalStyle fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
 
-    class AI_CHAT,OPENAI_CHAT,LYRIC_CREATION,LYRIC_RULES,MUSIC_STYLES,IMG_GEN,IMG_VIEW,SONG_GEN,SONG_VIEW,SONG_PROFILE,SKETCH_CREATOR,SKETCH_LIBRARY,USER_PROFILE,PROMPT_TEMPLATES presentationStyle
+    class AI_CHAT,OPENAI_CHAT,LYRIC_CREATION,LYRIC_RULES,MUSIC_STYLES,EQUIPMENT_GALLERY,EQUIPMENT_EDITOR,IMG_GEN,IMG_VIEW,TEXT_OVERLAY,SONG_GEN,SONG_VIEW,SONG_PROFILE,SKETCH_CREATOR,SKETCH_LIBRARY,USER_PROFILE,PROMPT_TEMPLATES presentationStyle
     class SIDE_MENU,IMAGE_DETAIL,SONG_DETAIL,LYRIC_ARCHITECT,MUSIC_CHOOSER_MODAL,MUSIC_CHOOSER_INLINE,SEARCH_REPLACE,PASSWORD_MODAL,AUDIO_PLAYER,PROGRESS componentStyle
-    class IMG_SVC,SONG_SVC,SKETCH_SVC,CONV_SVC,AUTH_SVC,USER_SVC,CHAT_EXPORT,OPENAI_SVC,API_CONFIG,CHAT_SVC,LYRIC_ARCH_SVC,PROGRESS_SVC,NOTIFY_SVC serviceStyle
+    class IMG_SVC,SONG_SVC,SKETCH_SVC,EQUIPMENT_SVC,CONV_SVC,AUTH_SVC,USER_SVC,CHAT_EXPORT,OPENAI_SVC,API_CONFIG,CHAT_SVC,LYRIC_ARCH_SVC,PROGRESS_SVC,NOTIFY_SVC serviceStyle
     class MODELS,PIPES,GUARDS,INTERCEPTORS,AUTH infrastructureStyle
     class BACKEND,OLLAMA,OPENAI_API,MUREKA_API externalStyle

@@ -160,6 +160,7 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
         this.equipmentForm.patchValue({
           type: response.data.type,
           name: response.data.name,
+          version: response.data.version,
           description: response.data.description,
           software_tags: response.data.software_tags,
           plugin_tags: response.data.plugin_tags,

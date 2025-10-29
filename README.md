@@ -30,6 +30,14 @@ A full-stack platform for AI-powered image and music generation with Python back
   - AI-powered title generation
   - Direct integration with Song Generator and Lyric Creator
   - Convert sketches to full songs with one click
+- **Equipment Management** - Organize music production software and plugins
+  - Master-detail gallery with search and filtering
+  - Track software licenses (online, iLok, license keys)
+  - Secure credential storage (encrypted passwords and license keys)
+  - Status tracking (active, trial, expired, archived)
+  - Purchase tracking with price and date
+  - Duplicate equipment entries for quick setup
+  - Tagging system for organization (software/plugin tags)
 - **Image Generation** via DALL·E 3 (OpenAI)
   - Fast Enhancement Mode: One-click AI-powered prompt optimization
   - Gallery view with filtering, search, and sorting
@@ -241,12 +249,29 @@ If GitHub Actions is unavailable, use manual scripts:
 mac_ki_service/
 ├── aiproxysrv/          # Python Backend (FastAPI)
 │   ├── src/
-│   │   ├── api/         # API routes & business logic
-│   │   ├── db/          # Database models & migrations
-│   │   ├── celery_app/  # Async worker (Mureka)
-│   │   ├── schemas/     # Pydantic models
+│   │   ├── adapters/    # External API Clients (Adapter Pattern)
+│   │   │   ├── mureka/        # Mureka API integration
+│   │   │   ├── ollama/        # Ollama API integration
+│   │   │   └── openai/        # OpenAI API integration
+│   │   ├── api/         # API Layer (HTTP & Routing)
+│   │   │   ├── controllers/   # HTTP Layer + Pydantic Schemas
+│   │   │   └── routes/        # API Endpoints
+│   │   ├── business/    # Core Business Logic (3-Layer Architecture)
+│   │   │   ├── *_orchestrator.py    # Coordination layer
+│   │   │   ├── *_transformer.py     # Pure functions (testable)
+│   │   │   ├── *_normalizer.py      # Pure functions (testable)
+│   │   │   └── *_service.py         # Pure functions (testable)
+│   │   ├── db/          # Repository Layer (CRUD only)
+│   │   │   ├── models.py            # SQLAlchemy models
+│   │   │   └── *_service.py         # CRUD operations
+│   │   ├── schemas/     # Pydantic Data Schemas
+│   │   ├── celery_app/  # Async Processing (Mureka)
+│   │   ├── config/      # Configuration (reads .env)
+│   │   ├── utils/       # Utility Functions
+│   │   ├── alembic/     # DB Migrations
 │   │   ├── server.py    # Dev server
-│   │   └── worker.py    # Celery worker
+│   │   ├── worker.py    # Celery worker
+│   │   └── wsgi.py      # Prod entry (Gunicorn)
 │   ├── docker-compose.yml
 │   ├── env_template
 │   ├── VERSION          # Version file for releases
@@ -254,23 +279,40 @@ mac_ki_service/
 │
 ├── aiwebui/             # Angular 18 Frontend
 │   ├── src/app/
-│   │   ├── pages/       # Feature pages
+│   │   ├── pages/       # Feature pages (17)
 │   │   │   ├── ai-chat/               # AI Chat conversations
+│   │   │   ├── openai-chat/           # OpenAI GPT chat
 │   │   │   ├── lyric-creation/        # Lyric editor with AI tools
+│   │   │   ├── lyric-parsing-rules/   # Regex-based lyric cleanup
 │   │   │   ├── song-sketch-creator/   # Create/edit song sketches
 │   │   │   ├── song-sketch-library/   # Manage song sketches
+│   │   │   ├── equipment-gallery/     # Equipment master-detail gallery
+│   │   │   ├── equipment-editor/      # Equipment create/edit/duplicate
 │   │   │   ├── image-generator/       # Image generation with fast enhancement
 │   │   │   ├── image-view/            # Image gallery with master-detail view
 │   │   │   ├── text-overlay-editor/   # Add text overlays to images
 │   │   │   ├── song-generator/        # Song generation UI
-│   │   │   └── ...
-│   │   ├── services/    # API services
-│   │   │   ├── business/         # Image, Conversation, Sketch & Song services
-│   │   │   └── config/           # Chat & API config
+│   │   │   ├── song-view/             # Display of generated songs
+│   │   │   ├── song-profile/          # Mureka account information
+│   │   │   ├── user-profile/          # User profile and settings
+│   │   │   ├── music-style-prompt/    # Music style template management
+│   │   │   └── prompt-templates/      # Template management for prompts
+│   │   ├── services/    # API Services & Business Logic
+│   │   │   ├── business/      # ImageService, ConversationService, SketchService,
+│   │   │   │                  # SongService, EquipmentService
+│   │   │   ├── config/        # ChatService, ApiConfigService
+│   │   │   └── ui/            # ProgressService, NotificationService
 │   │   ├── components/  # Shared components
 │   │   │   ├── image-detail-panel/    # Image detail view component
+│   │   │   ├── song-detail-panel/     # Song detail view component
+│   │   │   ├── lyric-architect-modal/ # Song architecture builder
 │   │   │   └── ...
 │   │   └── models/      # TypeScript interfaces
+│   │       ├── conversation.model.ts
+│   │       ├── equipment.model.ts
+│   │       ├── image-generation.model.ts
+│   │       ├── lyric-architecture.model.ts
+│   │       └── ...
 │   ├── package.json
 │   └── VERSION          # Version file for releases
 │
@@ -288,6 +330,7 @@ mac_ki_service/
 │   └── nginx/          # Nginx config
 │
 ├── aitestmock/          # Mock API (Testing)
+├── docs/                # Documentation (arc42, patterns, troubleshooting)
 └── develop-env/         # Development Docker setup
     └── docker-compose.yml
 ```

@@ -82,6 +82,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       imageListLimit: [10, [Validators.required, Validators.min(5), Validators.max(100)]],
       promptListLimit: [10, [Validators.required, Validators.min(5), Validators.max(100)]],
       sketchListLimit: [8, [Validators.required, Validators.min(5), Validators.max(100)]],
+      equipmentListLimit: [7, [Validators.required, Validators.min(5), Validators.max(100)]],
       language: ['en', [Validators.required]]
     });
   }
@@ -354,6 +355,17 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     if (value && value >= 5 && value <= 100) {
       this.settingsService.updateSketchListLimit(value);
       this.notificationService.success(this.translate.instant('userProfile.notifications.sketchListLimitUpdated'));
+    }
+  }
+
+  /**
+   * Update equipment list limit setting
+   */
+  public updateEquipmentListLimit(): void {
+    const value = this.settingsForm.get('equipmentListLimit')?.value;
+    if (value && value >= 5 && value <= 100) {
+      this.settingsService.updateEquipmentListLimit(value);
+      this.notificationService.success(this.translate.instant('userProfile.notifications.equipmentListLimitUpdated'));
     }
   }
 

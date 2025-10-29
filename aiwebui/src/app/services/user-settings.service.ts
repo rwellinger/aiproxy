@@ -42,6 +42,10 @@ export class UserSettingsService {
     this.updateSettings({ sketchListLimit: limit });
   }
 
+  updateEquipmentListLimit(limit: number): void {
+    this.updateSettings({ equipmentListLimit: limit });
+  }
+
   updateLanguage(language: Language): void {
     this.updateSettings({ language });
   }

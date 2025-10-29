@@ -148,11 +148,22 @@
         </div>
       </div>
 
-      <!-- Load More Button -->
-      <div class="load-more-section" *ngIf="pagination.has_more && !isLoading">
-        <button class="action-button load-more-button" (click)="loadMore()">
-          <i class="fas fa-chevron-down"></i>
-          {{ 'equipment.gallery.loadMore' | translate }}
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="pagination.total > pagination.limit">
+        <button
+          class="pagination-btn"
+          (click)="previousPage()"
+          [disabled]="currentPage === 0 || isLoading">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="pagination-info">
+          {{ 'equipment.gallery.pagination.info' | translate: {current: currentPage + 1, total: Math.ceil(pagination.total / pagination.limit)} }}
+        </span>
+        <button
+          class="pagination-btn"
+          (click)="nextPage()"
+          [disabled]="!pagination.has_more || isLoading">
+          <i class="fas fa-chevron-right"></i>
         </button>
       </div>
     </mat-card>

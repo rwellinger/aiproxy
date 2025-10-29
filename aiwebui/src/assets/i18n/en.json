@@ -1084,6 +1084,8 @@
     "promptsPerPageHint": "5-100 prompts per page",
     "sketchesPerPage": "Sketches per page",
     "sketchesPerPageHint": "5-100 sketches per page",
+    "equipmentPerPage": "Equipment per page",
+    "equipmentPerPageHint": "5-100 equipment per page",
     "languageHint": "Select your preferred language",
     "lastLogin": "Last login:",
     "lastName": "Last Name",
@@ -1097,6 +1099,7 @@
       "languageUpdated": "Language updated",
       "promptListLimitUpdated": "Prompt list limit updated",
       "sketchListLimitUpdated": "Sketch list limit updated",
+      "equipmentListLimitUpdated": "Equipment list limit updated",
       "settingsReset": "Settings reset to defaults",
       "songListLimitUpdated": "Song list limit updated"
     },
@@ -1431,7 +1434,9 @@
       "loading": "Loading equipment...",
       "empty": "No equipment found",
       "selectPrompt": "Select an equipment from the list to view details",
-      "loadMore": "Load More",
+      "pagination": {
+        "info": "Page {{current}} of {{total}}"
+      },
       "filters": {
         "all": "All",
         "allStatuses": "All Statuses"

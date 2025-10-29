@@ -145,8 +145,48 @@ erDiagram
         TIMESTAMP updated_at "Last update timestamp"
     }
 
+    equipment {
+        UUID id PK "Primary Key"
+        UUID user_id FK "Foreign Key to users (CASCADE DELETE)"
+        VARCHAR type "Equipment type: Software, Plugin"
+        VARCHAR name "Equipment name (required)"
+        VARCHAR version "Software/Plugin version"
+        TEXT description "Detailed description"
+        VARCHAR software_tags "Comma-separated software tags"
+        VARCHAR plugin_tags "Comma-separated plugin tags"
+        VARCHAR manufacturer "Manufacturer name"
+        VARCHAR url "Manufacturer website URL"
+        VARCHAR username "Login username"
+        TEXT password_encrypted "Encrypted password (Fernet)"
+        VARCHAR license_management "License type: online, ilok, license_key, other"
+        TEXT license_key_encrypted "Encrypted license key (Fernet)"
+        TEXT license_description "License description for other type"
+        DATE purchase_date "Purchase date"
+        TEXT price_encrypted "Encrypted price with currency (Fernet)"
+        TEXT system_requirements "System requirements"
+        VARCHAR status "Status: active, trial, expired, archived"
+        TIMESTAMP created_at "Creation timestamp"
+        TIMESTAMP updated_at "Last update timestamp"
+    }
+
+    api_costs_monthly {
+        UUID id PK "Primary Key"
+        VARCHAR provider "API provider (openai, mureka)"
+        VARCHAR organization_id "Optional organization identifier"
+        INTEGER year "Year (e.g., 2025)"
+        INTEGER month "Month (1-12)"
+        DECIMAL total_cost "Total cost in USD"
+        DECIMAL image_cost "Cost for DALL-E image generation"
+        DECIMAL chat_cost "Cost for GPT chat completions"
+        JSONB line_items "Detailed breakdown by model"
+        BOOLEAN is_finalized "TRUE for past months (cached forever)"
+        TIMESTAMP last_updated_at "Last update timestamp (for TTL)"
+        TIMESTAMP created_at "Creation timestamp"
+    }
+
     song_sketches ||--o{ songs : "used for generation"
     songs ||--o{ song_choices : "has choices"
     users ||--o{ conversations : "owns conversations"
+    users ||--o{ equipment : "owns equipment"
     conversations ||--o{ messages : "contains messages"
     conversations ||--o{ messages_archive : "has archived messages"

@@ -17,6 +17,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 
 import { EquipmentService } from '../../services/business/equipment.service';
 import { NotificationService } from '../../services/ui/notification.service';
+import { UserSettingsService } from '../../services/user-settings.service';
 import { Equipment, EquipmentType, EquipmentStatus, LicenseManagement } from '../../models/equipment.model';
 
 @Component({
@@ -44,6 +45,7 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
   // Equipment list and pagination
   equipmentList: Equipment[] = [];
   selectedEquipment: Equipment | null = null;
+  currentPage = 0;
   pagination = {
     total: 0,
     limit: 8,
@@ -70,12 +72,16 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
   EquipmentStatus = EquipmentStatus;
   LicenseManagement = LicenseManagement;
 
+  // Math for template
+  Math = Math;
+
   // RxJS subjects
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
   private equipmentService = inject(EquipmentService);
   private notificationService = inject(NotificationService);
+  private settingsService = inject(UserSettingsService);
   private translate = inject(TranslateService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
@@ -88,13 +94,25 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe(searchTerm => {
       this.searchTerm = searchTerm;
-      this.pagination.offset = 0;
-      this.loadEquipment();
+      this.loadEquipment(0);
     });
   }
 
   ngOnInit(): void {
+    this.loadUserSettings();
     this.loadEquipment();
+  }
+
+  /**
+   * Load user settings and apply equipment list limit.
+   */
+  private loadUserSettings(): void {
+    this.settingsService.getSettings()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(settings => {
+        this.pagination.limit = settings.equipmentListLimit;
+        this.loadEquipment(0);
+      });
   }
 
   ngOnDestroy(): void {
@@ -105,10 +123,11 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
   /**
    * Load equipment list with current filters and pagination.
    */
-  async loadEquipment(): Promise<void> {
+  async loadEquipment(page: number = 0): Promise<void> {
     this.isLoading = true;
 
     try {
+      const offset = page * this.pagination.limit;
       const typeFilter = this.selectedType === 'all' ? undefined : this.selectedType;
       const statusFilter = this.selectedStatus === 'all' ? undefined : this.selectedStatus;
       const searchQuery = this.searchTerm.trim() || undefined;
@@ -116,7 +135,7 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
       const response = await firstValueFrom(
         this.equipmentService.getEquipments(
           this.pagination.limit,
-          this.pagination.offset,
+          offset,
           typeFilter,
           statusFilter,
           searchQuery
@@ -124,8 +143,8 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
       );
 
       this.equipmentList = response.data as Equipment[];
-      this.pagination.total = response.pagination.total;
-      this.pagination.has_more = response.pagination.has_more;
+      this.pagination = response.pagination;
+      this.currentPage = page;
 
       // Auto-select first equipment if list is not empty and nothing is selected
       if (this.equipmentList.length > 0 && !this.selectedEquipment) {
@@ -152,16 +171,14 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
    * Handle type filter change.
    */
   onTypeFilterChange(): void {
-    this.pagination.offset = 0;
-    this.loadEquipment();
+    this.loadEquipment(0);
   }
 
   /**
    * Handle status filter change.
    */
   onStatusFilterChange(): void {
-    this.pagination.offset = 0;
-    this.loadEquipment();
+    this.loadEquipment(0);
   }
 
   /**
@@ -261,12 +278,21 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load more equipment (pagination).
+   * Navigate to next page.
    */
-  loadMore(): void {
-    if (!this.pagination.has_more || this.isLoading) return;
-    this.pagination.offset += this.pagination.limit;
-    this.loadEquipment();
+  nextPage(): void {
+    if (this.pagination.has_more && !this.isLoading) {
+      this.loadEquipment(this.currentPage + 1);
+    }
+  }
+
+  /**
+   * Navigate to previous page.
+   */
+  previousPage(): void {
+    if (this.currentPage > 0 && !this.isLoading) {
+      this.loadEquipment(this.currentPage - 1);
+    }
   }
 
   /**

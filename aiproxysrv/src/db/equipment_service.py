@@ -143,8 +143,8 @@ class EquipmentService:
             # Get total count
             total = query.count()
 
-            # Apply pagination
-            equipment_list = query.order_by(Equipment.created_at.desc()).offset(offset).limit(limit).all()
+            # Apply pagination (sorted alphabetically by name)
+            equipment_list = query.order_by(Equipment.name.asc()).offset(offset).limit(limit).all()
 
             logger.debug(
                 "Equipment list retrieved",

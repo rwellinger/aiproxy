@@ -87,6 +87,15 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
   - AI-powered title generation
   - Direct integration with Song Generator and Lyric Creator
   - Convert sketches to full songs with one click
+- **Equipment Management** - Organize music production software and plugins
+  - Master-detail gallery with search, filtering, and pagination
+  - Software and plugin inventory tracking
+  - Secure credential storage with encrypted passwords and license keys
+  - License management (online, iLok, license keys, other)
+  - Status tracking (active, trial, expired, archived)
+  - Purchase tracking with encrypted price and date
+  - Duplicate functionality for quick setup
+  - Tagging system for software and plugin organization
 - **Image Generation** via DALL-E 3 (OpenAI API)
   - Fast Enhancement Mode: One-click AI-powered prompt optimization via templates
   - Gallery view with filtering, search, and sorting
@@ -282,6 +291,8 @@ ApiCostService (src/db/api_cost_service.py)
   │   ├── lyric-parsing-rules/  # Manage regex-based lyric cleanup rules
   │   ├── song-sketch-creator/  # Create/edit song sketches
   │   ├── song-sketch-library/  # Manage song sketch library
+  │   ├── equipment-gallery/  # Equipment master-detail gallery with search & filtering
+  │   ├── equipment-editor/   # Equipment create/edit/duplicate
   │   ├── music-style-prompt/   # Music style template management
   │   ├── image-generator/    # Image generation with fast enhancement mode
   │   ├── image-view/         # Image gallery with master-detail layout
@@ -292,11 +303,12 @@ ApiCostService (src/db/api_cost_service.py)
   │   ├── user-profile/       # User profile page
   │   └── prompt-templates/   # Template management for prompts
   ├── services/      # API Services & Business Logic
-  │   ├── business/           # ImageService, ConversationService, SketchService, SongService
+  │   ├── business/           # ImageService, ConversationService, SketchService, SongService, EquipmentService
   │   ├── config/             # ChatService, ApiConfigService
   │   └── lyric-architecture.service.ts  # Song structure management & persistence
   ├── models/        # TypeScript Interfaces & Models
   │   ├── conversation.model.ts  # Conversation, Message, OllamaModel
+  │   ├── equipment.model.ts  # Equipment, EquipmentType, LicenseManagement, EquipmentStatus
   │   └── lyric-architecture.model.ts  # SongSection, SongSectionItem, Architecture config
   ├── pipes/         # Custom Angular Pipes
   │   └── message-content.pipe.ts  # Markdown & link formatting
@@ -415,25 +427,80 @@ Users can change the language in **User Profile → Settings → Language**. The
 - **Struktur**:
   ```
   src/
-  ├── api/           # API Layer (Business Logic & Routing)
-  │   ├── controllers/        # SketchController, ConversationController, ChatController
-  │   └── routes/             # sketch_routes, conversation_routes, chat_routes
-  ├── business/      # Core Business Logic Services
-  ├── db/            # Models & Database Connection
-  │   ├── models.py           # SongSketch, Song, Conversation, Message models
-  │   ├── sketch_service.py   # Sketch CRUD operations
-  │   └── song_service.py     # Song CRUD operations
-  ├── schemas/       # Pydantic Data Schemas
-  │   ├── sketch_schemas.py   # SketchCreate, SketchUpdate, SketchResponse
-  │   └── conversation_schemas.py  # Request/Response schemas
-  ├── celery_app/    # Async Processing (Mureka API)
-  ├── config/        # Configuration (reads .env)
-  ├── utils/         # Utility Functions
-  ├── mureka/        # Mureka Integration Functions
-  ├── alembic/       # DB Migrations
-  ├── server.py      # Dev Server (PyCharm)
-  ├── wsgi.py        # Prod Entry (Gunicorn)
-  └── worker.py      # Celery Worker
+  ├── adapters/               # External API Clients (Adapter Pattern)
+  │   ├── mureka/             # Mureka API integration
+  │   │   ├── base_client.py         # Base HTTP client
+  │   │   ├── generation_client.py   # Song generation client
+  │   │   ├── instrumental_client.py # Instrumental generation client
+  │   │   ├── handlers.py            # Response handlers
+  │   │   └── json_utils.py          # JSON utilities
+  │   ├── ollama/             # Ollama API integration
+  │   │   └── api_client.py          # Ollama HTTP client
+  │   └── openai/             # OpenAI API integration
+  │       └── api_client.py          # OpenAI HTTP client (DALL-E, GPT, Admin API)
+  │
+  ├── api/                    # API Layer (HTTP & Routing)
+  │   ├── controllers/        # HTTP Layer + Pydantic Schemas
+  │   │   ├── chat_controller.py
+  │   │   ├── conversation_controller.py
+  │   │   ├── equipment_controller.py
+  │   │   ├── image_controller.py
+  │   │   ├── sketch_controller.py
+  │   │   ├── song_controller.py
+  │   │   └── user_controller.py
+  │   └── routes/             # API Endpoints
+  │       ├── chat_routes.py
+  │       ├── conversation_routes.py
+  │       ├── equipment_routes.py
+  │       ├── image_routes.py
+  │       ├── sketch_routes.py
+  │       ├── song_routes.py
+  │       └── user_routes.py
+  │
+  ├── business/               # Core Business Logic (3-Layer Architecture)
+  │   ├── *_orchestrator.py   # Coordination layer (NOT testable, no business logic)
+  │   ├── *_transformer.py    # Pure functions: transformations, mappings (100% testable)
+  │   ├── *_normalizer.py     # Pure functions: string normalization (100% testable)
+  │   ├── *_auth_service.py   # Pure functions: authentication logic (100% testable)
+  │   ├── *_enhancement_service.py   # Pure functions: enhancements (100% testable)
+  │   └── *_validator.py      # Pure functions: validation (100% testable)
+  │
+  ├── db/                     # Repository Layer (CRUD only, NOT testable)
+  │   ├── models.py           # SQLAlchemy models (Song, Sketch, Equipment, Conversation, etc.)
+  │   ├── api_cost_service.py
+  │   ├── conversation_service.py
+  │   ├── equipment_service.py
+  │   ├── image_service.py
+  │   ├── sketch_service.py
+  │   ├── song_service.py
+  │   └── user_service.py
+  │
+  ├── schemas/                # Pydantic Data Schemas
+  │   ├── chat_schemas.py
+  │   ├── conversation_schemas.py
+  │   ├── image_schemas.py
+  │   ├── sketch_schemas.py
+  │   ├── song_schemas.py
+  │   └── user_schemas.py
+  │
+  ├── celery_app/             # Async Processing (Mureka API)
+  │   ├── celery_config.py
+  │   ├── slot_manager.py
+  │   └── tasks.py
+  │
+  ├── config/                 # Configuration (reads .env)
+  │   ├── model_context_windows.py
+  │   └── settings.py
+  │
+  ├── utils/                  # Utility Functions
+  │   └── logger.py
+  │
+  ├── alembic/                # DB Migrations
+  │   └── versions/           # Migration files
+  │
+  ├── server.py               # Dev Server (PyCharm)
+  ├── wsgi.py                 # Prod Entry (Gunicorn)
+  └── worker.py               # Celery Worker
   ```
 
 #### 5.2.3 aitestmock (Test Mock Server)
@@ -1027,6 +1094,14 @@ services:
 | **Position Markers** | Red crosshair indicators showing text anchor points on canvas preview           |
 | **Grid Positioning** | 3x3 predefined position system (top-left, center, bottom-right, etc.)          |
 | **Custom Positioning** | Percentage-based (0-100% X/Y) or pixel-based text placement                    |
+| **Equipment** | Software and plugin inventory management for music production tools             |
+| **Equipment Gallery** | Master-detail view for browsing and managing equipment with filtering           |
+| **Equipment Editor** | Form interface for creating/editing/duplicating equipment entries               |
+| **License Management** | Tracking system for software licenses: online, iLok, license key, other         |
+| **Equipment Status** | Lifecycle state: active, trial, expired, archived                               |
+| **Equipment Orchestrator** | Coordination layer for equipment operations (encryption, normalization)         |
+| **Equipment Normalizer** | Pure functions for string normalization in equipment data (100% testable)       |
+| **Fernet Encryption** | Symmetric encryption algorithm for sensitive equipment fields (password, license_key, price) |
 
 ---
 
@@ -1205,7 +1280,44 @@ services:
 | `updated_at` | TIMESTAMP | Last update timestamp |
 | `last_login` | TIMESTAMP | Last login timestamp |
 
-#### 13.2.10 lyric_parsing_rules
+#### 13.2.10 equipment
+**Purpose**: Music production software and plugin inventory management
+
+| Column | Type | Description |
+|--------|-----|-------------|
+| `id` | UUID | Primary Key |
+| `user_id` | UUID | Foreign Key to users.id (indexed, CASCADE DELETE) |
+| `type` | VARCHAR(50) | Equipment type: 'Software' or 'Plugin' (indexed) |
+| `name` | VARCHAR(200) | Equipment name (required) |
+| `version` | VARCHAR(100) | Software/Plugin version |
+| `description` | TEXT | Detailed description |
+| `software_tags` | VARCHAR(1000) | Comma-separated software tags |
+| `plugin_tags` | VARCHAR(1000) | Comma-separated plugin tags |
+| `manufacturer` | VARCHAR(200) | Manufacturer name |
+| `url` | VARCHAR(500) | Manufacturer website URL |
+| `username` | VARCHAR(200) | Login username for account |
+| `password_encrypted` | TEXT | Encrypted password (Fernet) |
+| `license_management` | VARCHAR(100) | License type: 'online', 'ilok', 'license_key', 'other' |
+| `license_key_encrypted` | TEXT | Encrypted license key (Fernet) |
+| `license_description` | TEXT | License description for 'other' type |
+| `purchase_date` | DATE | Purchase date |
+| `price_encrypted` | TEXT | Encrypted price with currency (e.g., "299.99 EUR") (Fernet) |
+| `system_requirements` | TEXT | System requirements |
+| `status` | VARCHAR(50) | Status: 'active', 'trial', 'expired', 'archived' (indexed, default: 'active') |
+| `created_at` | TIMESTAMP | Creation timestamp |
+| `updated_at` | TIMESTAMP | Last update timestamp |
+
+**Security Features:**
+- **Fernet Encryption**: Sensitive fields encrypted at rest (password, license_key, price)
+- **User Scoping**: All operations require matching user_id (JWT authentication)
+- **Transparent Decryption**: Backend handles encryption/decryption automatically
+
+**Indexes:**
+- `user_id` - Foreign key lookup performance
+- `type` - Filter by Software/Plugin
+- `status` - Filter by lifecycle state
+
+#### 13.2.11 lyric_parsing_rules
 **Purpose**: Configurable regex-based rules for lyric cleanup and section detection
 
 | Column | Type | Description |
@@ -1221,7 +1333,7 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update timestamp |
 
-#### 13.2.11 api_costs_monthly
+#### 13.2.12 api_costs_monthly
 **Purpose**: OpenAI API cost tracking with TTL-based caching strategy
 
 | Column | Type | Description |
@@ -1256,16 +1368,18 @@ services:
 - **conversations ↔ messages**: 1:N relationship with CASCADE DELETE
 - **conversations ↔ messages_archive**: 1:N relationship with CASCADE DELETE
 - **users ↔ conversations**: 1:N relationship (user_id references users.id)
+- **users ↔ equipment**: 1:N relationship (user_id references users.id, CASCADE DELETE)
 - **Unique Constraints**: `songs.task_id`, `generated_images.filename`, `users.email`
 - **Indexes**:
-  - Performance: `task_id`, `job_id`, `song_id`, `sketch_id`, `conversation_id`, `original_message_id`
-  - Lookup: `users.email`, `lyric_parsing_rules.active`, `lyric_parsing_rules.order`, `song_sketches.workflow`
+  - Performance: `task_id`, `job_id`, `song_id`, `sketch_id`, `conversation_id`, `original_message_id`, `equipment.user_id`
+  - Lookup: `users.email`, `lyric_parsing_rules.active`, `lyric_parsing_rules.order`, `song_sketches.workflow`, `equipment.type`, `equipment.status`
 - **Foreign Keys**:
   - `songs.sketch_id` → `song_sketches.id` (nullable)
   - `song_choices.song_id` → `songs.id`
   - `messages.conversation_id` → `conversations.id`
   - `messages_archive.conversation_id` → `conversations.id`
   - `conversations.user_id` → `users.id`
+  - `equipment.user_id` → `users.id` (CASCADE DELETE)
 
 ### 13.4 Migration and Maintenance
 
@@ -1290,6 +1404,6 @@ cd src && alembic current
 ---
 
 *Document created: 01.09.2025*
-*Last updated: 24.10.2025*
-*Version: 1.9*
+*Last updated: 29.10.2025*
+*Version: 2.0*
 *Author: Rob (rob.wellinger@gmail.com)*
