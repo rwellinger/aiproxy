@@ -3,7 +3,7 @@
 import uuid
 from enum import Enum
 
-from sqlalchemy import ARRAY, Boolean, Column, DateTime, Float, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import ARRAY, Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import JSON, JSONB, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -248,6 +248,7 @@ class User(Base):
 
     # Relationships
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
+    equipment = relationship("Equipment", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', active={self.is_active})>"
@@ -419,3 +420,60 @@ class ApiCostMonthly(Base):
 
     def __repr__(self):
         return f"<ApiCostMonthly(provider='{self.provider}', year={self.year}, month={self.month}, total={self.total_cost}, finalized={self.is_finalized})>"
+
+
+class Equipment(Base):
+    """Model for storing software and plugin licenses with encrypted sensitive data"""
+
+    __tablename__ = "equipment"
+    __table_args__ = {"extend_existing": True}
+
+    # Primary identifier
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+
+    # Core fields
+    type = Column(String(50), nullable=False, index=True)  # 'Software' | 'Plugin'
+    name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+
+    # Tags (comma-separated)
+    software_tags = Column(String(1000), nullable=True)
+    plugin_tags = Column(String(1000), nullable=True)
+
+    # Manufacturer info
+    manufacturer = Column(String(200), nullable=True)
+    url = Column(String(500), nullable=True)
+
+    # Credentials (encrypted with Fernet)
+    username = Column(String(200), nullable=True)
+    password_encrypted = Column(Text, nullable=True)
+
+    # License management
+    license_management = Column(String(100), nullable=True)  # 'Online' | 'iLok' | 'Lizenzschlüssel' | 'andere'
+    license_key_encrypted = Column(Text, nullable=True)
+    license_description = Column(Text, nullable=True)
+
+    # Purchase information
+    purchase_date = Column(Date, nullable=True)
+    price_encrypted = Column(Text, nullable=True)  # Format: "299.99 EUR" (encrypted)
+
+    # System requirements
+    system_requirements = Column(Text, nullable=True)
+
+    # Status (multi-state workflow like Sketch)
+    status = Column(
+        String(50), nullable=False, default="active", index=True
+    )  # 'active' | 'trial' | 'expired' | 'archived'
+
+    # User ownership (JWT-based access control)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationship
+    user = relationship("User", back_populates="equipment")
+
+    def __repr__(self):
+        return f"<Equipment(id={self.id}, type='{self.type}', name='{self.name}', status='{self.status}')>"

@@ -60,6 +60,61 @@
     min-width: fit-content;
 }
 
+/* ===== ID ROW (SPECIAL STYLING) ===== */
+.meta-id-row {
+    margin-bottom: $spacing-md;
+
+    .meta-item-id {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        padding: $spacing-xs 0;
+
+        .meta-icon {
+            color: $primary-color;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .meta-id {
+            font-family: 'Courier New', monospace;
+            font-size: $font-sm;
+            color: $text-secondary;
+            background: $background-light;
+            padding: 6px 12px;
+            border-radius: $border-radius-sm;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .copy-id-btn {
+            background: transparent;
+            border: none;
+            color: $text-secondary;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: $border-radius-sm;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+
+            &:hover {
+                background: $background-light;
+                color: $primary-color;
+            }
+
+            &:active {
+                transform: scale(0.95);
+            }
+
+            i {
+                font-size: 0.9rem;
+            }
+        }
+    }
+}
+
 /* Status styling */
 .status-success { color: $success-color; font-weight: $font-weight-semibold; }
 .status-completed { color: $success-color; font-weight: $font-weight-semibold; }

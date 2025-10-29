@@ -385,4 +385,17 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
             ? this.translate.instant('songDetailPanel.type.instrumental')
             : this.translate.instant('songDetailPanel.type.withVocals');
     }
+
+    // === Copy to Clipboard ===
+
+    copyToClipboard(text: string): void {
+        if (!text) return;
+
+        navigator.clipboard.writeText(text).then(() => {
+            this.notificationService.success(this.translate.instant('songDetailPanel.idCopied'));
+        }).catch(err => {
+            console.error('Failed to copy to clipboard:', err);
+            this.notificationService.error(this.translate.instant('songDetailPanel.errors.copyFailed'));
+        });
+    }
 }

@@ -25,6 +25,7 @@ dependencies = [
     "bcrypt>=4.0.0",
     "PyJWT>=2.8.0",
     "email-validator>=2.0.0",
+    "cryptography>=41.0.0",
     "tomli>=2.0.0",
     "loguru>=0.7.0",
     "tiktoken>=0.5.1",
@@ -149,6 +150,14 @@ markers = [
     "integration: Integration tests (test full controller flow with Pydantic validation)",
     "slow: Slow running tests",
 ]
+
+# ===================================
+# Pytest-Env Configuration (loads .env_test for tests)
+# ===================================
+[tool.pytest_env]
+# Specify which .env file to load for tests (prevents using production .env)
+# pytest-env will load .env_test instead of .env
+DOTENV_FILE = ".env_test"
 
 # ===================================
 # Coverage Configuration

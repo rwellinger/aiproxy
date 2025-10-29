@@ -694,7 +694,9 @@
       "thumbsUp": "Daumen hoch",
       "title": "Song-Auswahl:"
     },
+    "copyId": "ID in Zwischenablage kopieren",
     "errors": {
+      "copyFailed": "Fehler beim Kopieren in die Zwischenablage",
       "generateStem": "Fehler beim Erzeugen der Stems",
       "loadSong": "Fehler beim Laden des Songs",
       "loadSongDetails": "Fehler beim Laden der Song-Details",
@@ -705,6 +707,7 @@
       "updateTitle": "Fehler beim Aktualisieren des Titels",
       "updateWorkflow": "Fehler beim Aktualisieren des Workflows"
     },
+    "idCopied": "ID in Zwischenablage kopiert!",
     "loading": "Lade Song-Details...",
     "lyrics": {
       "characters": "Zeichen",
