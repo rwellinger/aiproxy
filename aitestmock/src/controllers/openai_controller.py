@@ -28,8 +28,8 @@ class OpenAIController:
 
     def organization_costs(self, start_time: int, end_time: int, limit: int):
         """Mock OpenAI Admin Cost API"""
-        # Simulate slow API response (15 seconds)
-        time.sleep(15)
+        # Simulate slow API response (5 seconds)
+        time.sleep(5)
 
         # Generate mock data (10 daily buckets)
         buckets = []
