@@ -1,0 +1,23 @@
+# Gitleaks configuration to prevent false-positives for test files
+# https://github.com/gitleaks/gitleaks
+
+[allowlist]
+  description = "Allowlist for test environment files"
+
+  # Exclude test environment files
+  paths = [
+    '''aiproxysrv/\.env_test''',
+    '''aitestmock/\.env_test''',
+    '''.*test.*\.py''',
+    '''.*spec\.ts''',
+  ]
+
+  # Exclude lines with explicit allow comments
+  regexes = [
+    '''gitleaks:allow''',
+  ]
+
+  # Exclude test keys (recognizable patterns)
+  [allowlist.regexTarget]
+    regex = '''(test-.*-key|test_.*|mock-.*)'''
+    description = "Test and mock credentials"
