@@ -4,7 +4,6 @@ import re
 import time
 from datetime import datetime
 from pathlib import Path
-
 from utils.logger import logger
 
 
@@ -79,6 +78,8 @@ class MurekaService:
         return self._load_mock_data("mureka", test_number, "query_song_status_suceeded")
 
     def get_billing_info(self):
+        logger.info("Mock will simulate backend processing with delay 5s")
+        time.sleep(5)
         return self._load_mock_data("mureka", "0001", "get_billing_info")
 
     def generate_instrumental(self, model="auto", prompt=None):
