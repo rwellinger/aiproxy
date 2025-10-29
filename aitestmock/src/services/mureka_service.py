@@ -4,6 +4,7 @@ import re
 import time
 from datetime import datetime
 from pathlib import Path
+
 from utils.logger import logger
 
 
@@ -172,13 +173,13 @@ class MurekaService:
                     "Not allowed timeout detected, using maximum",
                     requested_delay=f"{requested_delay}s",
                     max_allowed=f"{self.MAX_DELAY_SECONDS}s",
-                    will_use=f"{self.MAX_DELAY_SECONDS}s"
+                    will_use=f"{self.MAX_DELAY_SECONDS}s",
                 )
                 return self.MAX_DELAY_SECONDS
 
             logger.info(
                 "Mock will simulate backend processing with delay",
-                delay=f"{requested_delay}s"
+                delay=f"{requested_delay}s",
             )
             return requested_delay
 

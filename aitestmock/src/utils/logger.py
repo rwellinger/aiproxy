@@ -43,7 +43,9 @@ def format_record(record):
             format_str += "\n  <yellow>└─ Error:</yellow> <red>{extra[error]}</red>"
 
         if "stacktrace" in extra and extra["stacktrace"]:
-            format_str += "\n  <yellow>└─ Stacktrace:</yellow>\n<red>{extra[stacktrace]}</red>"
+            format_str += (
+                "\n  <yellow>└─ Stacktrace:</yellow>\n<red>{extra[stacktrace]}</red>"
+            )
 
         # Show other extra fields (except already handled ones)
         other_extras = {
@@ -112,7 +114,9 @@ class LoguruHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+        logger.opt(depth=depth, exception=record.exc_info).log(
+            level, record.getMessage()
+        )
 
 
 # Celery-Logging auf loguru umleiten

@@ -3,16 +3,16 @@ import os
 from pathlib import Path
 
 import tomli
-from config.settings import LOG_LEVEL
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
-from utils.logger import LoguruHandler, logger
 
 from api.chat import api_chat_mock
 from api.mureka import mureka_routes
 from api.openai import openai_routes
 from api.openai_chat_mock import api_openai_chat_mock
+from config.settings import LOG_LEVEL
+from utils.logger import LoguruHandler, logger
 
 
 try:
