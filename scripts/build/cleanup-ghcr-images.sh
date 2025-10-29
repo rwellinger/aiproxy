@@ -273,7 +273,7 @@ print_summary() {
     echo ""
     echo "Retention policy:"
     echo -e "  ${GREEN}✓${NC} :latest tag (always kept)"
-    echo -e "  ${GREEN}✓${NC} Version that :latest points to (e.g., v2.1.5)"
+    echo -e "  ${GREEN}✓${NC} Version that :latest points to latest version"
     echo -e "  ${RED}✗${NC} All other version tags (deleted)"
     echo ""
 }
