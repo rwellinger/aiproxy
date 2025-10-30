@@ -6,6 +6,7 @@
   cursor: help;
   transition: color $transition-fast;
   margin-left: $spacing-xs;
+  margin-right: $spacing-xs;
 
   &:hover {
     color: $primary-color;

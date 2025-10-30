@@ -4,8 +4,11 @@
 /* ===== PROMPT TEMPLATES CARD LAYOUT ===== */
 
 .prompt-templates-container {
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
+  padding: $spacing-md;
+  background: $background-white;
+  display: flex;
 
   &.master-detail-layout {
     display: grid;
@@ -64,7 +67,6 @@
 
       mat-card-content {
         padding: 0;
-        height: calc(100% - 120px);
         overflow: hidden;
       }
 
