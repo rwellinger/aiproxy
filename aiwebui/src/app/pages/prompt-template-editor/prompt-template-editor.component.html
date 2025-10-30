@@ -1,0 +1,156 @@
+<div class="prompt-editor-container">
+    <mat-card class="prompt-editor-card">
+        <mat-card-content>
+            <!-- Header (copied from lyric-creation.component.html line 4-31) -->
+            <div class="prompt-editor-header">
+                <div class="prompt-editor-title">
+                    <h2>
+                        <i class="fas fa-code"></i>
+                        {{ 'promptTemplateEditor.title' | translate }}
+                    </h2>
+                    <p class="template-identifier" *ngIf="category && action">
+                        {{ category }} / {{ action }}
+                    </p>
+                </div>
+                <div class="navigation-buttons">
+                    <button
+                        type="button"
+                        (click)="cancel()"
+                        class="cancel-button"
+                        [disabled]="isSaving"
+                        [title]="'common.cancel' | translate">
+                        <i class="fas fa-times"></i>
+                        <span>{{ 'common.cancel' | translate }}</span>
+                    </button>
+                    <button
+                        type="button"
+                        (click)="save()"
+                        class="apply-button"
+                        [disabled]="isSaving || editorForm.invalid"
+                        [title]="'common.apply' | translate">
+                        <i class="fas fa-check"></i>
+                        <span>{{ 'common.apply' | translate }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form Content (copied structure from lyric-creation.component.html) -->
+            <form [formGroup]="editorForm">
+                <!-- Metadata Section -->
+                <div class="metadata-section">
+                    <div class="metadata-row">
+                        <div class="metadata-field">
+                            <label for="description">{{ 'promptTemplateEditor.fields.description' | translate }}</label>
+                            <input
+                                type="text"
+                                id="description"
+                                formControlName="description"
+                                class="form-input"
+                                [placeholder]="'promptTemplateEditor.placeholders.description' | translate">
+                        </div>
+
+                        <div class="metadata-field">
+                            <label for="model">{{ 'promptTemplateEditor.fields.model' | translate }}</label>
+                            <input
+                                type="text"
+                                id="model"
+                                formControlName="model"
+                                class="form-input"
+                                [placeholder]="'promptTemplateEditor.placeholders.model' | translate">
+                        </div>
+                    </div>
+
+                    <div class="metadata-row">
+                        <div class="metadata-field">
+                            <label for="temperature">{{ 'promptTemplateEditor.fields.temperature' | translate }}</label>
+                            <input
+                                type="number"
+                                id="temperature"
+                                formControlName="temperature"
+                                class="form-input"
+                                step="0.1"
+                                min="0"
+                                max="2"
+                                [placeholder]="'promptTemplateEditor.placeholders.temperature' | translate">
+                        </div>
+
+                        <div class="metadata-field">
+                            <label for="maxTokens">{{ 'promptTemplateEditor.fields.maxTokens' | translate }}</label>
+                            <input
+                                type="number"
+                                id="maxTokens"
+                                formControlName="max_tokens"
+                                class="form-input"
+                                min="1"
+                                max="100000"
+                                [placeholder]="'promptTemplateEditor.placeholders.maxTokens' | translate">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conditions Section (2-column layout) -->
+                <div class="conditions-section">
+                    <!-- PRE-Condition -->
+                    <div class="condition-group">
+                        <label for="preCondition" class="condition-label">
+                            <i class="fas fa-arrow-right"></i>
+                            {{ 'promptTemplateEditor.fields.preCondition' | translate }}
+                            <span class="required-indicator">*</span>
+                        </label>
+                        <textarea
+                            id="preCondition"
+                            formControlName="pre_condition"
+                            class="condition-textarea"
+                            [placeholder]="'promptTemplateEditor.placeholders.preCondition' | translate"
+                            [disabled]="isImprovingPre">
+                        </textarea>
+                        <div class="condition-footer">
+                            <div class="char-count" *ngIf="characterCountPre > 0">
+                                {{ characterCountPre }} {{ 'promptTemplateEditor.charactersCount' | translate }}
+                            </div>
+                            <button
+                                type="button"
+                                class="improve-button"
+                                (click)="improvePreCondition()"
+                                [disabled]="isSaving || isImprovingPre || characterCountPre === 0"
+                                [title]="'promptTemplateEditor.actions.improvePre' | translate">
+                                <i class="fas" [class.fa-magic]="!isImprovingPre" [class.fa-spinner]="isImprovingPre" [class.fa-spin]="isImprovingPre"></i>
+                                <span>{{ 'promptTemplateEditor.actions.improvePre' | translate }}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- POST-Condition -->
+                    <div class="condition-group">
+                        <label for="postCondition" class="condition-label">
+                            <i class="fas fa-arrow-left"></i>
+                            {{ 'promptTemplateEditor.fields.postCondition' | translate }}
+                            <span class="required-indicator">*</span>
+                        </label>
+                        <textarea
+                            id="postCondition"
+                            formControlName="post_condition"
+                            class="condition-textarea"
+                            [placeholder]="'promptTemplateEditor.placeholders.postCondition' | translate"
+                            [disabled]="isImprovingPost">
+                        </textarea>
+                        <div class="condition-footer">
+                            <div class="char-count" *ngIf="characterCountPost > 0">
+                                {{ characterCountPost }} {{ 'promptTemplateEditor.charactersCount' | translate }}
+                            </div>
+                            <button
+                                type="button"
+                                class="improve-button"
+                                (click)="improvePostCondition()"
+                                [disabled]="isSaving || isImprovingPost || characterCountPost === 0"
+                                [title]="'promptTemplateEditor.actions.improvePost' | translate">
+                                <i class="fas" [class.fa-magic]="!isImprovingPost" [class.fa-spinner]="isImprovingPost" [class.fa-spin]="isImprovingPost"></i>
+                                <span>{{ 'promptTemplateEditor.actions.improvePost' | translate }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

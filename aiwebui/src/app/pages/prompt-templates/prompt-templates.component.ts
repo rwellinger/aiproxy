@@ -1,8 +1,9 @@
 import {Component, OnInit, OnDestroy, ViewChild, ElementRef, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {Router} from '@angular/router';
 import {Subject, debounceTime, distinctUntilChanged, takeUntil} from 'rxjs';
-import {PromptTemplate, PromptTemplateUpdate} from '../../models/prompt-template.model';
+import {PromptTemplate} from '../../models/prompt-template.model';
 import {PromptTemplateService} from '../../services/config/prompt-template.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {UserSettingsService} from '../../services/user-settings.service';
@@ -44,38 +45,13 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     // Make Math available in template
     Math = Math;
 
-    // Editing state
-    editingTemplate: PromptTemplate | null = null;
-    editForm = {
-        pre_condition: '',
-        post_condition: '',
-        description: '',
-        model: '',
-        temperature: null as number | null,
-        max_tokens: null as number | null
-    };
-
-    // Available models
-    availableModels = [
-        {value: 'llama3.2:3b', label: 'Llama 3.2 3B'},
-        {value: 'gpt-oss:20b', label: 'GPT-OSS 20B'},
-        {value: 'deepseek-r1:8b', label: 'DeepSeek R1 8B'},
-        {value: 'gemma3:4b', label: 'Gemma 3 4B'}
-    ];
-
-    // Temperature options (0.0 to 2.0 in 0.1 steps)
-    temperatureOptions = Array.from({length: 21}, (_, i) => {
-        const value = (i * 0.1);
-        return {value: Math.round(value * 10) / 10, label: value.toFixed(1)};
-    });
-
     @ViewChild('searchInput') searchInput!: ElementRef;
-    @ViewChild('preConditionTextarea') preConditionTextarea!: ElementRef;
 
     private promptService = inject(PromptTemplateService);
     private notificationService = inject(NotificationService);
     private settingsService = inject(UserSettingsService);
     private translate = inject(TranslateService);
+    private router = inject(Router);
 
     constructor() {
         // Setup search debouncing
@@ -174,82 +150,6 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
 
     selectTemplate(template: PromptTemplate): void {
         this.selectedTemplate = template;
-        this.cancelEdit(); // Clear any ongoing edits
-    }
-
-    startEdit(): void {
-        if (!this.selectedTemplate) return;
-
-        this.editingTemplate = {...this.selectedTemplate};
-        this.editForm = {
-            pre_condition: this.selectedTemplate.pre_condition,
-            post_condition: this.selectedTemplate.post_condition,
-            description: this.selectedTemplate.description || '',
-            model: this.selectedTemplate.model || '',
-            temperature: this.selectedTemplate.temperature || null,
-            max_tokens: this.selectedTemplate.max_tokens || null
-        };
-
-        // Focus pre_condition textarea after view updates
-        setTimeout(() => {
-            if (this.preConditionTextarea) {
-                this.preConditionTextarea.nativeElement.focus();
-            }
-        }, 100);
-    }
-
-    cancelEdit(): void {
-        this.editingTemplate = null;
-        this.editForm = {
-            pre_condition: '',
-            post_condition: '',
-            description: '',
-            model: '',
-            temperature: null,
-            max_tokens: null
-        };
-    }
-
-    async saveTemplate(): Promise<void> {
-        if (!this.selectedTemplate || !this.editingTemplate) return;
-
-        this.isLoading = true;
-        this.loadingMessage = this.translate.instant('promptTemplates.notifications.saving');
-
-        try {
-            const update: PromptTemplateUpdate = {
-                pre_condition: this.editForm.pre_condition.trim(),
-                post_condition: this.editForm.post_condition.trim(),
-                description: this.editForm.description.trim(),
-                model: this.editForm.model || undefined,
-                temperature: this.editForm.temperature || undefined,
-                max_tokens: this.editForm.max_tokens || undefined
-            };
-
-            const updatedTemplate = await this.promptService.updateTemplateAsync(
-                this.selectedTemplate.category,
-                this.selectedTemplate.action,
-                update
-            );
-
-            // Update local data
-            const templateIndex = this.templates.findIndex(t =>
-                t.category === this.selectedTemplate!.category &&
-                t.action === this.selectedTemplate!.action
-            );
-
-            if (templateIndex !== -1) {
-                this.templates[templateIndex] = updatedTemplate;
-                this.selectedTemplate = updatedTemplate;
-            }
-
-            this.applyFilter();
-            this.cancelEdit();
-        } catch (error: any) {
-            this.notificationService.error(this.translate.instant('promptTemplates.notifications.saveError', { message: error.message }));
-        } finally {
-            this.isLoading = false;
-        }
     }
 
     getTemplateDisplayName(template: PromptTemplate): string {
@@ -342,5 +242,17 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
 
     trackByPage(index: number, page: number | string): number | string {
         return page;
+    }
+
+    openAdvancedEditor(): void {
+        if (!this.selectedTemplate) return;
+
+        this.router.navigate(['/prompt-template-editor'], {
+            state: {
+                template: this.selectedTemplate,
+                category: this.selectedTemplate.category,
+                action: this.selectedTemplate.action
+            }
+        });
     }
 }

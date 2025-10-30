@@ -606,6 +606,7 @@
   },
   "promptTemplates": {
     "actions": {
+      "advancedEdit": "Erweiterter Editor",
       "cancel": "Abbrechen",
       "edit": "Bearbeiten",
       "save": "Speichern"
@@ -652,6 +653,39 @@
       "saving": "Speichere Vorlage..."
     },
     "title": "Prompt Vorlagen"
+  },
+  "promptTemplateEditor": {
+    "title": "Prompt Vorlagen Editor",
+    "fields": {
+      "description": "Beschreibung",
+      "model": "Modell",
+      "temperature": "Temperatur",
+      "maxTokens": "Max. Token",
+      "preCondition": "Vorbedingung",
+      "postCondition": "Nachbedingung"
+    },
+    "placeholders": {
+      "description": "Optionale Beschreibung...",
+      "model": "z.B. llama3.2:3b",
+      "temperature": "0.0 - 2.0",
+      "maxTokens": "z.B. 2048",
+      "preCondition": "Vorbedingung eingeben...",
+      "postCondition": "Nachbedingung eingeben..."
+    },
+    "actions": {
+      "improvePre": "Mit KI verbessern",
+      "improvePost": "Mit KI verbessern"
+    },
+    "charactersCount": "Zeichen",
+    "notifications": {
+      "saved": "Vorlage erfolgreich gespeichert",
+      "saveError": "Fehler beim Speichern der Vorlage: {{message}}",
+      "improved": "Prompt erfolgreich verbessert",
+      "improveError": "Fehler beim Verbessern des Prompts: {{message}}"
+    },
+    "errors": {
+      "noTemplate": "Keine Vorlage zum Bearbeiten vorhanden"
+    }
   },
   "sideMenu": {
     "aiChat": "AI Chat",

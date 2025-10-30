@@ -606,6 +606,7 @@
   },
   "promptTemplates": {
     "actions": {
+      "advancedEdit": "Advanced Editor",
       "cancel": "Cancel",
       "edit": "Edit",
       "save": "Save"
@@ -652,6 +653,39 @@
       "saving": "Saving template..."
     },
     "title": "Prompt Templates"
+  },
+  "promptTemplateEditor": {
+    "title": "Prompt Template Editor",
+    "fields": {
+      "description": "Description",
+      "model": "Model",
+      "temperature": "Temperature",
+      "maxTokens": "Max Tokens",
+      "preCondition": "Pre-Condition",
+      "postCondition": "Post-Condition"
+    },
+    "placeholders": {
+      "description": "Optional description...",
+      "model": "e.g., llama3.2:3b",
+      "temperature": "0.0 - 2.0",
+      "maxTokens": "e.g., 2048",
+      "preCondition": "Enter the pre-condition prompt...",
+      "postCondition": "Enter the post-condition prompt..."
+    },
+    "actions": {
+      "improvePre": "Improve with AI",
+      "improvePost": "Improve with AI"
+    },
+    "charactersCount": "characters",
+    "notifications": {
+      "saved": "Template saved successfully",
+      "saveError": "Error saving template: {{message}}",
+      "improved": "Prompt improved successfully",
+      "improveError": "Error improving prompt: {{message}}"
+    },
+    "errors": {
+      "noTemplate": "No template provided for editing"
+    }
   },
   "sideMenu": {
     "aiChat": "AI Chat",

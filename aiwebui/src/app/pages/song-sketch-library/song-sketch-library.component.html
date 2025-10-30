@@ -154,16 +154,8 @@
           </div>
         </div>
 
-        <!-- Detail Content with Tabs -->
+        <!-- Detail Content -->
         <div class="detail-content">
-          <mat-tab-group class="detail-tabs">
-            <!-- General Tab -->
-            <mat-tab>
-              <ng-template mat-tab-label>
-                <i class="fas fa-edit tab-icon"></i>
-                {{ 'songSketch.library.detail.tabs.general' | translate }}
-              </ng-template>
-              <div class="tab-content">
                 <!-- Metadata -->
                 <div class="detail-section-block">
                   <h3>{{ 'songSketch.library.detail.metadata' | translate }}</h3>
@@ -243,16 +235,7 @@
                     {{ 'songSketch.library.detail.noLyrics' | translate }}
                   </div>
                 </div>
-              </div>
-            </mat-tab>
 
-            <!-- Description Tab -->
-            <mat-tab>
-              <ng-template mat-tab-label>
-                <i class="fas fa-info-circle tab-icon"></i>
-                {{ 'songSketch.library.detail.tabs.description' | translate }}
-              </ng-template>
-              <div class="tab-content">
                 <!-- Description Long -->
                 <div class="detail-section-block">
                   <div class="section-header">
@@ -336,9 +319,6 @@
                     {{ 'songSketch.library.detail.noInfo' | translate }}
                   </div>
                 </div>
-              </div>
-            </mat-tab>
-          </mat-tab-group>
         </div>
       </mat-card-content>
 
