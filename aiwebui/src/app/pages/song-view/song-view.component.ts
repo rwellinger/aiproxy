@@ -325,7 +325,9 @@ export class SongViewComponent implements OnInit, OnDestroy {
           ...this.songs[songIndex],
           title: updatedSong.title
         };
-        this.loadSongs(0); // Refresh filtered list from server
+        // Stay on current page after update
+        const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+        this.loadSongs(currentPage);
       }
 
       this.editingTitle = false;
@@ -881,7 +883,9 @@ export class SongViewComponent implements OnInit, OnDestroy {
           ...this.songs[songIndex],
           workflow: updatedSong.workflow
         };
-        this.loadSongs(0); // Refresh filtered list from server
+        // Stay on current page after update
+        const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+        this.loadSongs(currentPage);
       }
     } catch (error: any) {
       this.notificationService.error(this.translate.instant('songView.errors.updatingWorkflow', { error: error.message }));

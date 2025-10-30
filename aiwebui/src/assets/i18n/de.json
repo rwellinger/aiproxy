@@ -650,7 +650,8 @@
       "loadError": "Fehler beim Laden der Vorlagen: {{message}}",
       "loading": "Lade Prompt Vorlagen...",
       "saveError": "Fehler beim Speichern der Vorlage: {{message}}",
-      "saving": "Speichere Vorlage..."
+      "saving": "Speichere Vorlage...",
+      "templateSaved": "Vorlage erfolgreich gespeichert"
     },
     "title": "Prompt Vorlagen"
   },
@@ -677,6 +678,18 @@
       "improvePost": "Mit KI verbessern"
     },
     "charactersCount": "Zeichen",
+    "temperature": {
+      "veryPrecise": "Sehr Präzise",
+      "veryPreciseDesc": "Deterministisch, konsistent. Für Fakten, technische Dokumentation, Code-Generierung",
+      "slightlyVariable": "Leicht Variabel",
+      "slightlyVariableDesc": "Strukturiert mit minimaler Variation. Für allgemeine Aufgaben, Zusammenfassungen",
+      "balanced": "Ausgewogen",
+      "balancedDesc": "Balance zwischen Präzision und Kreativität. Standard für die meisten Anwendungen",
+      "creative": "Kreativ",
+      "creativeDesc": "Vielfältig, interessant. Für Brainstorming, kreative Texte, Songwriting",
+      "veryCreative": "Sehr Kreativ",
+      "veryCreativeDesc": "Experimentell, künstlerisch. Für maximale Variation und Originalität"
+    },
     "notifications": {
       "saved": "Vorlage erfolgreich gespeichert",
       "saveError": "Fehler beim Speichern der Vorlage: {{message}}",
@@ -684,7 +697,8 @@
       "improveError": "Fehler beim Verbessern des Prompts: {{message}}"
     },
     "errors": {
-      "noTemplate": "Keine Vorlage zum Bearbeiten vorhanden"
+      "noTemplate": "Keine Vorlage zum Bearbeiten vorhanden",
+      "modelsFailed": "Fehler beim Laden der verfügbaren Modelle"
     }
   },
   "sideMenu": {
@@ -1396,7 +1410,8 @@
         "markedAsUsed": "Skizze als verwendet markiert",
         "markAsUsedError": "Fehler beim Markieren als verwendet",
         "markedAsDraft": "Skizze als Entwurf markiert",
-        "markAsDraftError": "Fehler beim Markieren als Entwurf"
+        "markAsDraftError": "Fehler beim Markieren als Entwurf",
+        "sketchSaved": "Skizze erfolgreich gespeichert"
       }
     },
     "workflow": {
@@ -1577,7 +1592,8 @@
       "loadError": "Fehler beim Laden des Equipments",
       "saveError": "Fehler beim Speichern des Equipments",
       "deleteError": "Fehler beim Löschen des Equipments",
-      "copyError": "Fehler beim Kopieren in die Zwischenablage"
+      "copyError": "Fehler beim Kopieren in die Zwischenablage",
+      "equipmentSaved": "Equipment erfolgreich gespeichert"
     },
     "validation": {
       "required": "Dieses Feld ist erforderlich",

@@ -650,7 +650,8 @@
       "loadError": "Error loading templates: {{message}}",
       "loading": "Loading prompt templates...",
       "saveError": "Error saving template: {{message}}",
-      "saving": "Saving template..."
+      "saving": "Saving template...",
+      "templateSaved": "Template saved successfully"
     },
     "title": "Prompt Templates"
   },
@@ -677,6 +678,18 @@
       "improvePost": "Improve with AI"
     },
     "charactersCount": "characters",
+    "temperature": {
+      "veryPrecise": "Very Precise",
+      "veryPreciseDesc": "Deterministic, consistent. For facts, technical documentation, code generation",
+      "slightlyVariable": "Slightly Variable",
+      "slightlyVariableDesc": "Structured with minimal variation. For general tasks, summaries",
+      "balanced": "Balanced",
+      "balancedDesc": "Balance between precision and creativity. Standard for most applications",
+      "creative": "Creative",
+      "creativeDesc": "Diverse, interesting. For brainstorming, creative texts, songwriting",
+      "veryCreative": "Very Creative",
+      "veryCreativeDesc": "Experimental, artistic. For maximum variation and originality"
+    },
     "notifications": {
       "saved": "Template saved successfully",
       "saveError": "Error saving template: {{message}}",
@@ -684,7 +697,8 @@
       "improveError": "Error improving prompt: {{message}}"
     },
     "errors": {
-      "noTemplate": "No template provided for editing"
+      "noTemplate": "No template provided for editing",
+      "modelsFailed": "Failed to load available models"
     }
   },
   "sideMenu": {
@@ -1396,7 +1410,8 @@
         "markedAsUsed": "Sketch marked as used",
         "markAsUsedError": "Error marking sketch as used",
         "markedAsDraft": "Sketch marked as draft",
-        "markAsDraftError": "Error marking sketch as draft"
+        "markAsDraftError": "Error marking sketch as draft",
+        "sketchSaved": "Sketch saved successfully"
       }
     },
     "workflow": {
@@ -1577,7 +1592,8 @@
       "loadError": "Failed to load equipment",
       "saveError": "Failed to save equipment",
       "deleteError": "Failed to delete equipment",
-      "copyError": "Failed to copy to clipboard"
+      "copyError": "Failed to copy to clipboard",
+      "equipmentSaved": "Equipment saved successfully"
     },
     "validation": {
       "required": "This field is required",

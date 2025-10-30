@@ -150,7 +150,7 @@
                                 <div class="detail-field">
                                     <span class="field-label">{{ 'promptTemplates.detail.fields.temperature' | translate }}</span>
                                     <div class="readonly-field">
-                                        {{ selectedTemplate.temperature !== null ? selectedTemplate.temperature : ('promptTemplates.detail.defaults.temperature' | translate) }}
+                                        {{ selectedTemplate.temperature !== null ? getTemperatureLabel(selectedTemplate.temperature) : ('promptTemplates.detail.defaults.temperature' | translate) }}
                                     </div>
                                 </div>
                             </div>

@@ -7,6 +7,7 @@ import {PromptTemplate} from '../../models/prompt-template.model';
 import {PromptTemplateService} from '../../services/config/prompt-template.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {UserSettingsService} from '../../services/user-settings.service';
+import {TemperatureOptionsService} from '../../services/config/temperature-options.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
@@ -42,6 +43,9 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     private searchSubject = new Subject<string>();
     private destroy$ = new Subject<void>();
 
+    // Navigation state (must be captured in constructor)
+    private navigationState: any = null;
+
     // Make Math available in template
     Math = Math;
 
@@ -52,8 +56,13 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     private settingsService = inject(UserSettingsService);
     private translate = inject(TranslateService);
     private router = inject(Router);
+    private temperatureOptionsService = inject(TemperatureOptionsService);
 
     constructor() {
+        // IMPORTANT: getCurrentNavigation() must be called in constructor!
+        const navigation = this.router.getCurrentNavigation();
+        this.navigationState = navigation?.extras?.state;
+
         // Setup search debouncing
         this.searchSubject.pipe(
             debounceTime(300),
@@ -95,8 +104,31 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
             this.templates = await this.promptService.getAllTemplates().toPromise() || [];
             this.applyFilter();
 
-            // Auto-select first template if available and none selected
-            if (this.filteredTemplates.length > 0 && !this.selectedTemplate) {
+            // Check if returning from editor with navigation state
+            const returnPage = this.navigationState?.['returnPage'];
+            const selectTemplate = this.navigationState?.['selectTemplate'];
+
+            // Navigate to return page if specified
+            if (returnPage !== undefined && returnPage !== null) {
+                this.goToPage(returnPage);
+            }
+
+            // Try to select template if specified
+            if (selectTemplate) {
+                const template = this.paginatedTemplates.find(t =>
+                    t.category === selectTemplate.category &&
+                    t.action === selectTemplate.action
+                );
+                if (template) {
+                    this.selectTemplate(template);
+                } else {
+                    // Template not on current page, notify user
+                    this.notificationService.info(
+                        this.translate.instant('promptTemplates.notifications.templateSaved')
+                    );
+                }
+            } else if (this.filteredTemplates.length > 0 && !this.selectedTemplate) {
+                // Auto-select first template if available and none selected
                 this.selectTemplate(this.filteredTemplates[0]);
             }
         } catch (error: any) {
@@ -181,6 +213,14 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
         return this.translate.instant('promptTemplates.detail.tokensHint', { words });
     }
 
+    getTemperatureLabel(temperature: number | null | undefined): string {
+        const label = this.temperatureOptionsService.getLabel(
+            temperature,
+            (key: string) => this.translate.instant(key)
+        );
+        return label || (temperature !== null && temperature !== undefined ? temperature.toString() : '');
+    }
+
     // Pagination methods
     getVisiblePages(): (number | string)[] {
         const totalPages = Math.ceil(this.pagination.total / this.pagination.limit);
@@ -247,11 +287,14 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     openAdvancedEditor(): void {
         if (!this.selectedTemplate) return;
 
+        const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+
         this.router.navigate(['/prompt-template-editor'], {
             state: {
                 template: this.selectedTemplate,
                 category: this.selectedTemplate.category,
-                action: this.selectedTemplate.action
+                action: this.selectedTemplate.action,
+                returnPage: currentPage
             }
         });
     }

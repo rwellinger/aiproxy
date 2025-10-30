@@ -549,7 +549,8 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
                     title: updatedImage.title,
                     tags: updatedImage.tags
                 };
-                this.loadImages(0); // Refresh filtered list
+                // Stay on current page after update
+                this.loadImages(this.currentPage);
             }
 
             this.editingTitle = false;

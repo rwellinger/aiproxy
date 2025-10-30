@@ -254,7 +254,10 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
 
       // Navigate to sketch library with saved sketch ID
       this.router.navigate(['/song-sketch-library'], {
-        state: { selectedSketchId: savedSketchId }
+        state: {
+          selectedSketchId: savedSketchId,
+          returnPage: this.navigationState?.['returnPage'] || 0
+        }
       });
     } catch (error: any) {
       const errorMessage = error?.error?.detail || error?.message ||
@@ -275,12 +278,19 @@ export class SongSketchCreatorComponent implements OnInit, OnDestroy {
 
   cancelEdit(): void {
     // Navigate back to library with current sketch ID (if in edit mode)
+    const returnPage = this.navigationState?.['returnPage'] || 0;
+
     if (this.isEditMode && this.currentSketchId) {
       this.router.navigate(['/song-sketch-library'], {
-        state: { selectedSketchId: this.currentSketchId }
+        state: {
+          selectedSketchId: this.currentSketchId,
+          returnPage: returnPage
+        }
       });
     } else {
-      this.router.navigate(['/song-sketch-library']);
+      this.router.navigate(['/song-sketch-library'], {
+        state: { returnPage: returnPage }
+      });
     }
   }
 

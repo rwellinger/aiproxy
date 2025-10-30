@@ -83,13 +83,19 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Check if returning from save/edit with a selected sketch ID
     const selectedSketchId = this.navigationState?.['selectedSketchId'];
+    const returnPage = this.navigationState?.['returnPage'] || 0;
 
-    this.loadSketches().then(() => {
+    this.loadSketches(returnPage).then(() => {
       // Re-select the sketch after save if ID was provided
       if (selectedSketchId) {
         const sketch = this.sketches.find(s => s.id === selectedSketchId);
         if (sketch) {
           this.selectSketch(sketch);
+        } else {
+          // Fallback: Sketch not on this page (e.g., filters changed)
+          this.notificationService.info(
+            this.translate.instant('songSketch.library.messages.sketchSaved')
+          );
         }
       }
     });
@@ -166,7 +172,8 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
     this.router.navigate(['/song-sketch-creator'], {
       state: {
         editMode: true,
-        sketchId: this.selectedSketch.id
+        sketchId: this.selectedSketch.id,
+        returnPage: this.currentPage
       }
     });
   }

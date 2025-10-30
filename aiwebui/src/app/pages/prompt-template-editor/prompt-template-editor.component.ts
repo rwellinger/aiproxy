@@ -2,15 +2,20 @@ import {Component, OnInit, OnDestroy, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
-import {Subject} from 'rxjs';
+import {Subject, takeUntil} from 'rxjs';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {MatCardModule} from '@angular/material/card';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatSelectModule} from '@angular/material/select';
+import {MatFormFieldModule} from '@angular/material/form-field';
 
 import {PromptTemplate, PromptTemplateUpdate} from '../../models/prompt-template.model';
 import {PromptTemplateService} from '../../services/config/prompt-template.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {ChatService} from '../../services/config/chat.service';
+import {ConversationService} from '../../services/business/conversation.service';
+import {OllamaChatModel} from '../../models/conversation.model';
+import {TemperatureOption, TemperatureOptionsService} from '../../services/config/temperature-options.service';
 
 @Component({
     selector: 'app-prompt-template-editor',
@@ -21,7 +26,9 @@ import {ChatService} from '../../services/config/chat.service';
         ReactiveFormsModule,
         TranslateModule,
         MatCardModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        MatSelectModule,
+        MatFormFieldModule
     ],
     templateUrl: './prompt-template-editor.component.html',
     styleUrl: './prompt-template-editor.component.scss'
@@ -35,11 +42,18 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
     category: string = '';
     action: string = '';
 
+    // Model data
+    models: OllamaChatModel[] = [];
+
+    // Temperature options
+    temperatureOptions: TemperatureOption[] = [];
+
     // UI state
     isLoading = false;
     isSaving = false;
     isImprovingPre = false;
     isImprovingPost = false;
+    isLoadingModels = false;
 
     // Navigation state (must be captured in constructor)
     private navigationState: any = null;
@@ -53,6 +67,8 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
     private notificationService = inject(NotificationService);
     private translate = inject(TranslateService);
     private chatService = inject(ChatService);
+    private conversationService = inject(ConversationService);
+    private temperatureOptionsService = inject(TemperatureOptionsService);
 
     constructor() {
         // IMPORTANT: getCurrentNavigation() must be called in constructor!
@@ -71,6 +87,12 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        // Load temperature options
+        this.temperatureOptions = this.temperatureOptionsService.getOptions();
+
+        // Load models
+        this.loadModels();
+
         // Load template from navigation state
         if (this.navigationState?.['template']) {
             this.loadTemplate(this.navigationState['template']);
@@ -86,6 +108,27 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
+    }
+
+    private loadModels(): void {
+        this.isLoadingModels = true;
+        this.conversationService
+            .getChatModels()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (models) => {
+                    this.models = models || [];
+                },
+                error: (error) => {
+                    console.error('Error loading models:', error);
+                    this.notificationService.error(
+                        this.translate.instant('promptTemplateEditor.errors.modelsFailed')
+                    );
+                },
+                complete: () => {
+                    this.isLoadingModels = false;
+                }
+            });
     }
 
     private loadTemplate(template: PromptTemplate): void {
@@ -143,8 +186,16 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
     }
 
     cancel(): void {
-        // Navigate back without changes
-        this.router.navigate(['/prompt-templates']);
+        // Navigate back without changes, re-select original template
+        this.router.navigate(['/prompt-templates'], {
+            state: {
+                returnPage: this.navigationState?.['returnPage'] || 0,
+                selectTemplate: {
+                    category: this.category,
+                    action: this.action
+                }
+            }
+        });
     }
 
     private navigateBackToPromptTemplates(updatedTemplate: PromptTemplate): void {
@@ -154,7 +205,8 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
                 selectTemplate: {
                     category: updatedTemplate.category,
                     action: updatedTemplate.action
-                }
+                },
+                returnPage: this.navigationState?.['returnPage'] || 0
             }
         });
     }

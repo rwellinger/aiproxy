@@ -4,12 +4,12 @@
             <!-- Header (copied from lyric-creation.component.html line 4-31) -->
             <div class="prompt-editor-header">
                 <div class="prompt-editor-title">
-                    <h2>
+                    <h2 *ngIf="category && action">
                         <i class="fas fa-code"></i>
-                        {{ 'promptTemplateEditor.title' | translate }}
-                    </h2>
-                    <p class="template-identifier" *ngIf="category && action">
                         {{ category }} / {{ action }}
+                    </h2>
+                    <p class="template-subtitle">
+                        {{ 'promptTemplateEditor.title' | translate }}
                     </p>
                 </div>
                 <div class="navigation-buttons">
@@ -51,27 +51,41 @@
 
                         <div class="metadata-field">
                             <label for="model">{{ 'promptTemplateEditor.fields.model' | translate }}</label>
-                            <input
-                                type="text"
-                                id="model"
-                                formControlName="model"
-                                class="form-input"
-                                [placeholder]="'promptTemplateEditor.placeholders.model' | translate">
+                            <mat-form-field appearance="outline" class="model-select">
+                                <mat-select
+                                    id="model"
+                                    formControlName="model"
+                                    [placeholder]="'promptTemplateEditor.placeholders.model' | translate">
+                                    @for (model of models; track model.name) {
+                                        <mat-option [value]="model.name">{{ model.name }}</mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
                         </div>
                     </div>
 
                     <div class="metadata-row">
                         <div class="metadata-field">
                             <label for="temperature">{{ 'promptTemplateEditor.fields.temperature' | translate }}</label>
-                            <input
-                                type="number"
-                                id="temperature"
-                                formControlName="temperature"
-                                class="form-input"
-                                step="0.1"
-                                min="0"
-                                max="2"
-                                [placeholder]="'promptTemplateEditor.placeholders.temperature' | translate">
+                            <mat-form-field appearance="outline" class="temperature-select">
+                                <mat-select
+                                    id="temperature"
+                                    formControlName="temperature"
+                                    [placeholder]="'promptTemplateEditor.placeholders.temperature' | translate">
+                                    @for (option of temperatureOptions; track option.value) {
+                                        <mat-option [value]="option.value">
+                                            <div class="temperature-option">
+                                                <div class="temperature-option__label">
+                                                    {{ option.value }} - {{ option.labelKey | translate }}
+                                                </div>
+                                                <div class="temperature-option__description">
+                                                    {{ option.descriptionKey | translate }}
+                                                </div>
+                                            </div>
+                                        </mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
                         </div>
 
                         <div class="metadata-field">
