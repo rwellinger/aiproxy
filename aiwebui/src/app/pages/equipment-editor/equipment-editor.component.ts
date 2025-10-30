@@ -69,6 +69,9 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
   licenseManagementTypes = Object.values(LicenseManagement);
   equipmentStatuses = Object.values(EquipmentStatus);
 
+  // Navigation state (must be captured in constructor)
+  private navigationState: any = null;
+
   private destroy$ = new Subject<void>();
   private fb = inject(FormBuilder);
   private router = inject(Router);
@@ -76,6 +79,12 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
   private equipmentService = inject(EquipmentService);
   private notificationService = inject(NotificationService);
   private translate = inject(TranslateService);
+
+  constructor() {
+    // IMPORTANT: getCurrentNavigation() must be called in constructor!
+    const navigation = this.router.getCurrentNavigation();
+    this.navigationState = navigation?.extras?.state;
+  }
 
   ngOnInit(): void {
     this.initForm();
@@ -330,13 +339,18 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
    * Create new equipment.
    */
   private async createEquipment(data: EquipmentCreateRequest): Promise<void> {
-    await firstValueFrom(this.equipmentService.createEquipment(data));
+    const response = await firstValueFrom(this.equipmentService.createEquipment(data));
 
     this.notificationService.success(
       this.translate.instant('equipment.messages.createSuccess')
     );
 
-    this.router.navigate(['/equipment-gallery']);
+    this.router.navigate(['/equipment-gallery'], {
+      state: {
+        selectedId: response.data.id,
+        returnPage: this.navigationState?.['returnPage'] || 0
+      }
+    });
   }
 
   /**
@@ -353,14 +367,23 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
       this.translate.instant('equipment.messages.updateSuccess')
     );
 
-    this.router.navigate(['/equipment-gallery']);
+    this.router.navigate(['/equipment-gallery'], {
+      state: {
+        selectedId: this.equipmentId,
+        returnPage: this.navigationState?.['returnPage'] || 0
+      }
+    });
   }
 
   /**
    * Cancel editing and return to gallery.
    */
   onCancel(): void {
-    this.router.navigate(['/equipment-gallery']);
+    this.router.navigate(['/equipment-gallery'], {
+      state: {
+        returnPage: this.navigationState?.['returnPage'] || 0
+      }
+    });
   }
 
   /**

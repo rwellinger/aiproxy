@@ -86,7 +86,19 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private dialog = inject(MatDialog);
 
+  // Navigation state (must be captured in constructor)
+  private navigationState: any = null;
+
+  // Track initial load for proper returnPage handling
+  private isInitialLoad = true;
+  private initialReturnPage = 0;
+  private initialSelectedId: string | null = null;
+
   constructor() {
+    // IMPORTANT: getCurrentNavigation() must be called in constructor!
+    const navigation = this.router.getCurrentNavigation();
+    this.navigationState = navigation?.extras?.state;
+
     // Setup search debouncing
     this.searchSubject.pipe(
       debounceTime(300),
@@ -99,19 +111,46 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Check if returning from editor with a selected equipment ID
+    this.initialReturnPage = this.navigationState?.['returnPage'] || 0;
+    this.initialSelectedId = this.navigationState?.['selectedId'];
+
+    // Load user settings (will trigger initial load with returnPage)
     this.loadUserSettings();
-    this.loadEquipment();
   }
 
   /**
    * Load user settings and apply equipment list limit.
+   * On initial load: uses returnPage from navigation state.
+   * On subsequent updates: reloads current page.
    */
   private loadUserSettings(): void {
     this.settingsService.getSettings()
       .pipe(takeUntil(this.destroy$))
       .subscribe(settings => {
         this.pagination.limit = settings.equipmentListLimit;
-        this.loadEquipment(0);
+
+        if (this.isInitialLoad) {
+          // First load: use returnPage from navigation state
+          this.isInitialLoad = false;
+          this.loadEquipment(this.initialReturnPage).then(() => {
+            // Re-select the equipment after save if ID was provided
+            if (this.initialSelectedId) {
+              const equipment = this.equipmentList.find(e => e.id === this.initialSelectedId);
+              if (equipment) {
+                this.selectEquipment(equipment);
+              } else {
+                // Fallback: Equipment not on this page (e.g., filters changed)
+                this.notificationService.info(
+                  this.translate.instant('equipment.messages.equipmentSaved')
+                );
+              }
+            }
+          });
+        } else {
+          // Subsequent loads: reload current page (when user changes settings)
+          this.loadEquipment(this.currentPage);
+        }
       });
   }
 
@@ -210,7 +249,9 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
    * Navigate to equipment editor (edit mode).
    */
   editEquipment(id: string): void {
-    this.router.navigate(['/equipment-editor', id]);
+    this.router.navigate(['/equipment-editor', id], {
+      state: { returnPage: this.currentPage }
+    });
   }
 
   /**

@@ -68,6 +68,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/prompt-templates/prompt-templates.component').then(m => m.PromptTemplatesComponent)
     },
     {
+        path: 'prompt-template-editor',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/prompt-template-editor/prompt-template-editor.component').then(m => m.PromptTemplateEditorComponent)
+    },
+    {
         path: 'lyric-parsing-rules',
         canActivate: [AuthGuard],
         loadComponent: () => import('./pages/lyric-parsing-rules/lyric-parsing-rules.component').then(m => m.LyricParsingRulesComponent)

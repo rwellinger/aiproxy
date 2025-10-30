@@ -283,7 +283,7 @@
 
 // Right Side: Detail Section
 .detail-section {
-  height: 100vh;
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   padding: $spacing-md;
@@ -359,23 +359,11 @@
 }
 
 .detail-content {
-  .detail-tabs {
-    .mat-mdc-tab-body-content {
-      padding-top: $spacing-md;
-    }
-
-    .tab-icon {
-      margin-right: $spacing-xs;
-      font-size: 1rem;
-    }
-  }
-
-  .tab-content {
-    padding: 0;
-  }
-
   .detail-section-block {
     margin-bottom: $spacing-lg;
+    padding: $spacing-md;
+    background-color: $background-light;
+    border-radius: 12px;
 
     h3 {
       margin: 0 0 $spacing-sm 0;
