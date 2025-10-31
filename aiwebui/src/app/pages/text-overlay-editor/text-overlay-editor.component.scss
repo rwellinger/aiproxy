@@ -437,6 +437,26 @@
 // because Angular Material custom elements require global CSS to override properly.
 // See docs/TROUBLESHOOTING.md - "Angular Material Styling Issues" for details.
 
+// MacBook Air 13" M4 2025 - Responsive breakpoint
+@media (max-width: 1470px) {
+  .text-overlay-editor-container.master-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    height: auto;
+  }
+
+  .editor-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .left-panel,
+  .right-panel {
+    max-height: 50vh;
+    padding: $spacing-sm;
+  }
+}
+
 // iPad & Touch Device Optimizations
 @media (max-width: 1024px) and (hover: none) {
   .editor-container {
@@ -496,5 +516,25 @@
 
   .left-panel {
     max-height: 50vh;
+  }
+}
+
+// Responsive - MacBook Air 13" M4 2025 - Height (956px)
+@media (max-height: 1000px) {
+  .text-overlay-editor-container {
+    height: auto;
+    overflow: visible;
+  }
+
+  .editor-container {
+    height: auto;
+    overflow: visible;
+  }
+
+  .left-panel,
+  .right-panel {
+    height: auto;
+    max-height: none;
+    overflow-y: auto;
   }
 }

@@ -305,3 +305,18 @@
     cursor: not-allowed;
   }
 }
+
+// MacBook Air 13" M4 2025 - Height adjustments
+@media (max-height: 1000px) {
+  .prompt-editor-card {
+    height: calc(100vh - 1.5rem);
+  }
+
+  .prompt-editor-textarea {
+    max-height: 400px;
+  }
+
+  .action-section {
+    padding: $spacing-sm;
+  }
+}

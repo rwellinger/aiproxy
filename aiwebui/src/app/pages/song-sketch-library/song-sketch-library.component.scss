@@ -703,6 +703,34 @@
   @include button-danger('base');
 }
 
+// MacBook Air 13" M4 2025 - Responsive breakpoint
+@media (max-width: 1470px) {
+  .sketch-library-container.master-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    height: auto;
+  }
+
+  .list-section {
+    height: auto;
+    max-height: 50vh;
+    border-right: none;
+    border-bottom: 1px solid $border-light;
+    padding: $spacing-sm;
+  }
+
+  .detail-section {
+    height: auto;
+    max-height: 50vh;
+    padding: $spacing-sm;
+  }
+
+  .list-card,
+  .detail-card {
+    height: auto;
+  }
+}
+
 // iPad & Touch Device Optimizations
 @media (max-width: 1024px) and (hover: none) {
   // Stack Master-Detail layout on iPad
@@ -795,5 +823,26 @@
     gap: $spacing-sm;
     padding: $spacing-md $spacing-lg;
     border-top: 1px solid $border-light;
+  }
+}
+
+// Responsive - MacBook Air 13" M4 2025 - Height (956px)
+@media (max-height: 1000px) {
+  .sketch-library-container {
+    height: auto;
+    overflow: visible;
+  }
+
+  .list-section,
+  .detail-section {
+    height: auto;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  .list-card,
+  .detail-card {
+    height: auto;
+    max-height: none;
   }
 }

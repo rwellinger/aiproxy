@@ -21,9 +21,9 @@
           <button
             type="button"
             class="action-button new-song-button"
-            (click)="navigateToSongGenerator()">
+            (click)="navigateToSongGenerator()"
+            [title]="'songView.actions.newSong' | translate">
             <i class="fas fa-plus"></i>
-            <span>{{ 'songView.actions.newSong' | translate }}</span>
           </button>
         </div>
 

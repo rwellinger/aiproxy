@@ -607,22 +607,31 @@ form .segment-control {
 /* ===== PROCESSING POPUP ===== */
 @include processing-popup();
 
-/* ===== RESPONSIVE ===== */
-/* ===== RESPONSIVE FOR CARD LAYOUT ===== */
-@media (max-width: 1200px) {
-  .song-generator-container {
-    .generator-grid {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
+/* ===== RESPONSIVE - MacBook Air 13" M4 2025 ===== */
+@media (max-width: 1470px) {
+  .song-generator-container.master-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    height: auto;
+  }
 
-      .song-creation-section {
-        order: 1;
-      }
+  .song-creation-section {
+    height: auto;
+    max-height: 50vh;
+    border-right: none;
+    border-bottom: 1px solid $border-light;
+    padding: $spacing-sm;
+  }
 
-      .generated-song-section {
-        order: 2;
-      }
-    }
+  .generated-song-section {
+    height: auto;
+    max-height: 50vh;
+    padding: $spacing-sm;
+  }
+
+  .song-creation-card,
+  .generated-song-card {
+    height: auto;
   }
 }
 
@@ -1058,5 +1067,26 @@ form .segment-control {
     .generator-title h2 {
       font-size: 1.25rem;
     }
+  }
+}
+
+// Responsive - MacBook Air 13" M4 2025 - Height (956px)
+@media (max-height: 1000px) {
+  .song-generator-container {
+    height: auto;
+    overflow: visible;
+  }
+
+  .song-creation-section,
+  .generated-song-section {
+    height: auto;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  .song-creation-card,
+  .generated-song-card {
+    height: auto;
+    max-height: none;
   }
 }

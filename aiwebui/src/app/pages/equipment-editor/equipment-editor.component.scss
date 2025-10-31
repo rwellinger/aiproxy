@@ -3,24 +3,30 @@
 
 .equipment-editor-container {
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
   padding: $spacing-md;
   background: $background-white;
   display: flex;
   justify-content: center;
   box-sizing: border-box;
+
+  // MacBook Air: Reduce container padding
+  @media (max-height: 1000px) {
+    padding: $spacing-sm;
+  }
 }
 
 .editor-card {
   max-width: 1000px;
   width: 100%;
-  height: 100%;
+  height: auto;
+  min-height: 100%;
   margin: 0 auto;
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .editor-header {
@@ -88,6 +94,11 @@
 
 .form-content {
   padding: $spacing-lg;
+
+  // MacBook Air: Reduce form padding
+  @media (max-height: 1000px) {
+    padding: $spacing-sm $spacing-md;
+  }
 }
 
 .full-width {
@@ -98,22 +109,44 @@
   display: flex;
   gap: $spacing-md;
   align-items: flex-start;
+
+  // iPad/Tablet: Stack form rows vertically
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    gap: 0;
+  }
 }
 
 .form-row__type {
   flex: 0 0 25%;
+
+  @media (max-width: 1024px) {
+    flex: 1 1 100%;
+  }
 }
 
 .form-row__name {
   flex: 1;
+
+  @media (max-width: 1024px) {
+    flex: 1 1 100%;
+  }
 }
 
 .form-row__version {
   flex: 0 0 20%;
+
+  @media (max-width: 1024px) {
+    flex: 1 1 100%;
+  }
 }
 
 .form-row__half {
   flex: 1;
+
+  @media (max-width: 1024px) {
+    flex: 1 1 100%;
+  }
 }
 
 .form-section {
@@ -126,6 +159,17 @@
     font-size: $font-lg;
     font-weight: 600;
     color: $text-primary;
+  }
+
+  // MacBook Air: Reduce section spacing
+  @media (max-height: 1000px) {
+    margin-top: $spacing-sm;
+    padding-top: $spacing-sm;
+
+    h3 {
+      margin: 0 0 $spacing-xs 0;
+      font-size: $font-base;
+    }
   }
 }
 
@@ -207,6 +251,11 @@ mat-form-field {
   mat-error {
     font-size: 0.75rem;
     color: #f44336;
+  }
+
+  // MacBook Air: Reduce field spacing
+  @media (max-height: 1000px) {
+    margin-bottom: $spacing-xs;
   }
 }
 
