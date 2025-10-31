@@ -17,6 +17,7 @@ from business.compression_transformer import (
 )
 from business.openai_chat_orchestrator import OpenAIChatOrchestrator
 from config.settings import OLLAMA_TIMEOUT, OLLAMA_URL
+from db.conversation_compression_service import ConversationCompressionService
 from db.conversation_service import ConversationService
 from db.message_service import MessageService
 from utils.logger import logger
@@ -28,6 +29,7 @@ class CompressionOrchestrator:
     def __init__(self):
         self.message_service = MessageService()
         self.conversation_service = ConversationService()
+        self.compression_service = ConversationCompressionService()
         self.openai_orchestrator = OpenAIChatOrchestrator()
 
     def compress_conversation(
@@ -90,40 +92,24 @@ class CompressionOrchestrator:
             # Format summary message using transformer
             formatted_message, prefix_token_count = format_summary_message(summary_content, len(old_messages))
 
-            # Create summary message
-            summary_message = self.message_service.create_message(
+            # Calculate total summary token count
+            total_summary_tokens = summary_token_count + prefix_token_count
+
+            # Calculate actual token count BEFORE commit (needs to include summary)
+            # Convert message objects to dict format for token counting
+            protected_dicts = [{"role": msg.role, "content": msg.content} for msg in protected_messages]
+            recent_dicts = [{"role": msg.role, "content": msg.content} for msg in recent_messages]
+            temp_messages = protected_dicts + recent_dicts + [{"role": "assistant", "content": formatted_message}]
+            actual_token_count = self._get_actual_token_count(temp_messages, conversation.model, conversation.provider)
+
+            # Commit compression (atomic transaction)
+            archived_count = self.compression_service.commit_compression(
                 db=db,
                 conversation_id=conversation_id,
-                role="assistant",  # Changed from 'system' to allow future compression
-                content=formatted_message,
-                token_count=summary_token_count + prefix_token_count,
-                is_summary=True,
-            )
-
-            if not summary_message:
-                raise Exception("Failed to create summary message")
-
-            # Archive old messages
-            archived_count = self.message_service.archive_messages(db, old_messages, summary_message.id)
-
-            # Recalculate actual token count
-            remaining_messages = self.message_service.get_conversation_messages(db, conversation_id)
-            verification_messages = [{"role": msg.role, "content": msg.content} for msg in remaining_messages]
-
-            actual_token_count = self._get_actual_token_count(
-                verification_messages, conversation.model, conversation.provider
-            )
-
-            # Update conversation token count
-            self.conversation_service.update_token_count(db, conversation_id, actual_token_count)
-
-            db.commit()
-
-            logger.info(
-                "Conversation compressed successfully",
-                conversation_id=str(conversation_id),
-                archived_count=archived_count,
-                new_token_count=actual_token_count,
+                summary_content=formatted_message,
+                summary_token_count=total_summary_tokens,
+                old_messages=old_messages,
+                actual_token_count=actual_token_count,
             )
 
             return {
@@ -135,7 +121,6 @@ class CompressionOrchestrator:
             }, 200
 
         except Exception as e:
-            db.rollback()
             logger.error(
                 "Error compressing conversation",
                 conversation_id=str(conversation_id),
@@ -287,25 +272,23 @@ class CompressionOrchestrator:
             # Get summary message ID to delete
             summary_id = archived_messages[0].summary_message_id if archived_messages else None
 
-            # Restore archived messages
-            restored_count = self.message_service.restore_archived_messages(db, conversation_id)
+            # Calculate token count BEFORE commit (sum all message tokens after restoration)
+            # We need to sum: current non-archived messages + archived messages (without summary)
+            current_messages = self.message_service.get_conversation_messages(db, conversation_id)
+            total_tokens = sum([m.token_count or 0 for m in current_messages + archived_messages])
 
-            # Delete summary message if exists
+            # Subtract summary token count if it exists
             if summary_id:
-                self.message_service.delete_message(db, summary_id)
+                summary_msg = next((m for m in current_messages if m.id == summary_id), None)
+                if summary_msg:
+                    total_tokens -= summary_msg.token_count or 0
 
-            # Recalculate token count
-            all_messages = self.message_service.get_conversation_messages(db, conversation_id)
-            total_tokens = sum([m.token_count or 0 for m in all_messages])
-
-            self.conversation_service.update_token_count(db, conversation_id, total_tokens)
-
-            db.commit()
-
-            logger.info(
-                "Archive restored successfully",
-                conversation_id=str(conversation_id),
-                restored_count=restored_count,
+            # Commit restoration (atomic transaction)
+            restored_count = self.compression_service.commit_restore(
+                db=db,
+                conversation_id=conversation_id,
+                summary_id=summary_id,
+                total_tokens=total_tokens,
             )
 
             return {
@@ -315,7 +298,6 @@ class CompressionOrchestrator:
             }, 200
 
         except Exception as e:
-            db.rollback()
             logger.error(
                 "Error restoring archive",
                 conversation_id=str(conversation_id),

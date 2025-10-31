@@ -2,7 +2,7 @@
 
 **Author:** Rob
 **Language:** English
-**Last Updated:** 2025-10-29
+**Last Updated:** 2025-10-31
 
 ---
 
@@ -362,6 +362,70 @@ If you find business logic in `src/db/*_service.py`:
 - [ ] Controller calls business layer (no direct DB)
 - [ ] Unit tests cover business logic (not infrastructure)
 
+### Automated Architecture Validation (CRITICAL!)
+
+**IMPORTANT:** Architecture rules are now **automatically enforced** via linters. Run these checks **BEFORE every commit**!
+
+#### Python Backend (import-linter)
+
+**Validates:**
+- ❌ Controllers MUST NOT import DB services directly (use business layer)
+- ❌ DB layer MUST NOT import business logic
+- ❌ Business layer MUST NOT import SQLAlchemy directly
+- ❌ Schemas MUST NOT depend on business/DB layers
+
+**Run validation:**
+```bash
+# From aiproxysrv/ directory
+lint-imports                    # Quick check
+make lint-all                   # Ruff + import-linter
+```
+
+**Configuration:** `aiproxysrv/.importlinter`
+
+**Common violations:**
+```bash
+# ERROR: Controllers must go through business layer, not directly to DB
+src.api.controllers.foo_controller -> src.db.bar_service
+
+# Fix: Use orchestrator as intermediary
+src.api.controllers.foo_controller -> src.business.foo_orchestrator -> src.db.bar_service
+```
+
+#### Angular Frontend (dependency-cruiser)
+
+**Validates:**
+- ❌ Services MUST NOT depend on Components/Pages
+- ❌ Services MUST use ApiConfigService (NOT environment.apiUrl)
+- ❌ Models MUST NOT depend on Services/Components
+- ❌ Guards/Interceptors MUST NOT depend on Components
+- ❌ No circular dependencies
+
+**Run validation:**
+```bash
+# From aiwebui/ directory
+npm run lint:arch               # Architecture only
+npm run lint:all                # TypeScript + SCSS + Architecture
+```
+
+**Configuration:** `aiwebui/.dependency-cruiser.js`
+
+**Common violations:**
+```bash
+# ERROR: Services must use ApiConfigService, NOT environment.apiUrl
+src/app/services/foo.service.ts -> environments/environment
+
+# Fix: Inject ApiConfigService
+private apiConfig = inject(ApiConfigService);
+this.http.get(this.apiConfig.endpoints.category.action);
+```
+
+**Integration Tips for Claude Code:**
+- When asked to "run lint", **ALWAYS include architecture checks** (`lint:all`, `make lint-all`)
+- **Violations appear in lint output** - no manual review needed
+- Fix violations **before marking tasks as completed**
+- Architecture errors are **build blockers** (treat like ESLint errors)
+
 ---
 
 ## Angular 18 Modern Patterns
@@ -384,9 +448,10 @@ npm run build && npm run lint:all
 ```
 
 **Available lint commands:**
-- `npm run lint:all` - TypeScript + SCSS (use this after changes!)
+- `npm run lint:all` - TypeScript + SCSS + Architecture (use this after changes!)
 - `npm run lint` - TypeScript only (ESLint)
 - `npm run lint:scss` - SCSS only (Stylelint)
+- `npm run lint:arch` - Architecture validation only (dependency-cruiser)
 - `npm run lint:scss:fix` - Auto-fix SCSS issues
 
 ---
@@ -731,8 +796,8 @@ npm run e2e                   # E2E tests
 
 ### Before Production Deploy
 1. ✅ Run `npm run build:prod` (from `aiwebui/`)
-2. ✅ Run `npm run lint:all` (from `aiwebui/`, TypeScript + SCSS, no errors)
-3. ✅ Run `ruff check . --fix && ruff format .` (from `aiproxysrv/`, no errors)
+2. ✅ Run `npm run lint:all` (from `aiwebui/`, TypeScript + SCSS + Architecture, no errors)
+3. ✅ Run `make lint-all` (from `aiproxysrv/`, Ruff + Architecture validation, no errors)
 4. ✅ Run `pytest` (from `aiproxysrv/`, all tests pass)
 5. ✅ Test language switch (EN ↔ DE)
 6. ✅ Verify all API endpoints use `ApiConfigService`
