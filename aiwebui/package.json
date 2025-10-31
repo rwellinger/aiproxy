@@ -15,7 +15,8 @@
     "lint:check": "ng lint --quiet",
     "lint:scss": "stylelint \"src/**/*.scss\"",
     "lint:scss:fix": "stylelint \"src/**/*.scss\" --fix",
-    "lint:all": "npm run lint && npm run lint:scss",
+    "lint:arch": "depcruise src --config .dependency-cruiser.js",
+    "lint:all": "npm run lint && npm run lint:scss && npm run lint:arch",
     "update-version": "node scripts/update-version.js"
   },
   "private": true,
@@ -47,6 +48,7 @@
     "@types/jasmine": "~5.1.0",
     "@types/marked": "^6.0.0",
     "angular-eslint": "20.3.0",
+    "dependency-cruiser": "^17.2.0",
     "eslint": "^9.35.0",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
