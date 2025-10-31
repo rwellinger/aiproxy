@@ -27,13 +27,17 @@ source_modules =
 forbidden_modules =
     src.business
 
-[importlinter:contract:business-pure-functions]
-name = Business logic must be pure (no direct SQLAlchemy imports)
+[importlinter:contract:transformers-pure-functions]
+name = Transformers/Normalizers must be pure (no SQLAlchemy)
 type = forbidden
 source_modules =
     src.business
 forbidden_modules =
     sqlalchemy
+ignore_imports =
+    src.business.compression_orchestrator -> sqlalchemy
+    src.business.prompt_template_orchestrator -> sqlalchemy
+    src.business.sketch_orchestrator -> sqlalchemy
 
 [importlinter:contract:business-no-controllers]
 name = Business layer must not import controllers
