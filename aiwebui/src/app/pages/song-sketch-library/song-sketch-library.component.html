@@ -19,9 +19,9 @@
         <button
           type="button"
           class="action-button new-sketch-button"
-          (click)="navigateToSketchCreator()">
+          (click)="navigateToSketchCreator()"
+          [title]="'songSketch.library.actions.newSketch' | translate">
           <i class="fas fa-plus"></i>
-          <span>{{ 'songSketch.library.actions.newSketch' | translate }}</span>
         </button>
       </div>
 

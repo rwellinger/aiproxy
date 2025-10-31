@@ -9,6 +9,13 @@
     display: grid;
     grid-template-columns: 35fr 65fr;
     gap: 0;
+
+    // MacBook Air 13" M4 2025: Stack layout at 1470px
+    @media (max-width: 1470px) {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      height: auto;
+    }
   }
 }
 
@@ -20,6 +27,15 @@
   padding: $spacing-md;
   border-right: 1px solid $border-light;
   background-color: $background-light;
+
+  // MacBook Air 13" M4 2025: Adjust height and border
+  @media (max-width: 1470px) {
+    height: auto;
+    max-height: 50vh;
+    border-right: none;
+    border-bottom: 1px solid $border-light;
+    padding: $spacing-sm;
+  }
 }
 
 .list-card {
@@ -379,6 +395,34 @@
   height: 100%;
   overflow-y: auto;
   padding: $spacing-md;
+
+  // MacBook Air 13" M4 2025: Adjust height
+  @media (max-width: 1470px) {
+    height: auto;
+    max-height: 50vh;
+    padding: $spacing-sm;
+  }
+}
+
+// Responsive - MacBook Air 13" M4 2025 - Height (956px)
+@media (max-height: 1000px) {
+  .equipment-gallery-container {
+    height: auto;
+    overflow: visible;
+  }
+
+  .list-section,
+  .detail-section {
+    height: auto;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  .list-card,
+  .detail-card {
+    height: auto;
+    max-height: none;
+  }
 }
 
 .detail-card {
