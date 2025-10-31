@@ -60,11 +60,6 @@
 - Redis & Services run locally via PyCharm (ARM64)
 - Python 3 with Miniconda3 → Conda env `mac_ki_service_py312`
 
-## Production
-- **Mac Studio M1 Max**, 32GB RAM
-- Docker (Colima) for complete stack
-- Ollama native, accessible via Open WebUI
-
 ---
 
 # Critical Rules
@@ -636,14 +631,42 @@ ERROR   | Database error
 ### Ruff (Linting & Formatting)
 **IMPORTANT:** All Python code MUST pass Ruff before commits.
 
+**CRITICAL: ALWAYS use `make` commands (NOT direct `ruff` calls)!**
+- ✅ `make` validates Conda environment first (prevents errors)
+- ✅ Runs architecture validation (`import-linter`) automatically
+- ❌ Direct `ruff` calls skip environment checks and architecture validation
+
 ```bash
 # From aiproxysrv directory
-pip install -e ".[dev]"        # Install ruff + pre-commit
-ruff check .                   # Check all files
-ruff check . --fix             # Auto-fix issues
-ruff format .                  # Format code
-pre-commit install             # Auto-run on git commit (optional)
+make lint-all                  # ✅ PREFERRED: Ruff + import-linter + Conda check
+make format                    # ✅ PREFERRED: Format with environment check
+make test                      # ✅ PREFERRED: pytest with environment check
+make install-dev               # Install ruff + pre-commit
+
+# ❌ DON'T use direct commands (skip environment + architecture validation):
+# ruff check .
+# ruff check . --fix
+# ruff format .
 ```
+
+**Available Makefile targets:**
+
+**Code Quality:**
+- `make check-conda` - Verify `mac_ki_service_py312` environment is active
+- `make lint-ruff` - Ruff linter only (with Conda check)
+- `make lint-imports` - Architecture validation only (with Conda check)
+- `make lint-all` - All linters (Ruff + import-linter, with Conda check)
+- `make format` - Auto-fix and format code (with Conda check)
+- `make test` - Run pytest (with Conda check)
+- `make install-dev` - Install development dependencies
+
+**Database Migrations:**
+- `make db-current` - Show current migration version
+- `make db-upgrade` - Upgrade database to latest version
+- `make db-downgrade` - Downgrade database by 1 revision
+- `make db-revision` - Create new migration (prompts for message)
+- `make db-history` - Show migration history
+- `make db-heads` - Show head revisions
 
 ### pytest (Unit Testing)
 **CRITICAL: Only test business logic, NEVER infrastructure!**
@@ -722,26 +745,32 @@ npm run test                   # Unit tests
 ### Backend (aiproxysrv)
 ```bash
 # Activate conda environment
-conda activate mac_ki_service
+conda activate mac_ki_service_py312
 
 # Development Server
 python src/server.py
 
-# Database Migrations
-# IMPORTANT: Run from aiproxysrv/ root (alembic.ini location)!
-alembic current                                  # Show current version
-alembic upgrade head                             # Apply migrations
-alembic revision --autogenerate -m "message"     # Create migration
+# Database Migrations (ALWAYS use make!)
+make db-current                # Show current version
+make db-upgrade                # Apply all pending migrations
+make db-downgrade              # Rollback 1 revision
+make db-revision               # Create new migration (prompts for message)
+make db-history                # Show migration history
+make db-heads                  # Show head revisions
 
 # Celery Worker
 python src/worker.py
 celery -A src.worker flower    # Monitor (http://localhost:5555)
 
-# Ruff (Linting)
-ruff check . --fix && ruff format .
+# Code Quality (ALWAYS use make!)
+make lint-all                  # ✅ Ruff + import-linter + Conda check
+make format                    # ✅ Auto-fix and format with checks
+make test                      # ✅ pytest with Conda check
+make check-conda               # Verify correct environment
 
-# pytest (Testing)
-pytest -v -s
+# ❌ DON'T use: ruff check . --fix && ruff format .
+# ❌ DON'T use: pytest -v -s
+# ❌ DON'T use: alembic upgrade head (use make db-upgrade)
 ```
 
 ### Database Seeding
@@ -769,7 +798,6 @@ psql -h localhost -U aiproxy -d aiproxysrv -f scripts/db/seed_prompts.sql
 ```bash
 # From project root
 docker compose up postgres     # Development (PostgreSQL only)
-docker compose up -d           # Production (Full stack)
 docker compose logs -f         # View logs
 docker compose ps              # Check containers
 ```
@@ -789,39 +817,6 @@ Testing without external API costs:
 npm run test -- --watch       # Unit tests
 npm run e2e                   # E2E tests
 ```
-
----
-
-## Deployment Checklist
-
-### Before Production Deploy
-1. ✅ Run `npm run build:prod` (from `aiwebui/`)
-2. ✅ Run `npm run lint:all` (from `aiwebui/`, TypeScript + SCSS + Architecture, no errors)
-3. ✅ Run `make lint-all` (from `aiproxysrv/`, Ruff + Architecture validation, no errors)
-4. ✅ Run `pytest` (from `aiproxysrv/`, all tests pass)
-5. ✅ Test language switch (EN ↔ DE)
-6. ✅ Verify all API endpoints use `ApiConfigService`
-7. ✅ Check no hardcoded URLs in frontend
-8. ✅ Verify `.env` not committed
-9. ✅ **Database Migrations** (from `aiproxysrv/`):
-   - `alembic current` - Check current version
-   - `alembic upgrade head` - Apply pending migrations
-10. ✅ **Schema Comparison** (PyCharm Database Tool):
-    - Compare DEV ↔ PROD structures
-    - Red/Green = critical differences (fix before deploy!)
-    - Blue = harmless (operator classes, extensions)
-11. ✅ Test with aitestmock first
-12. ✅ Check Docker containers start (`docker compose up -d`)
-13. ✅ Verify Nginx routing (forwardproxy)
-
-### After Production Deploy
-1. ✅ Run `alembic upgrade head` on PROD (if new migrations)
-2. ✅ Verify schema with PyCharm Compare (should be identical)
-3. ✅ Run seed scripts if needed (from project root):
-   ```bash
-   cat scripts/db/seed_prompts.sql | docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy
-   cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy
-   ```
 
 ---
 
