@@ -98,6 +98,17 @@ IMAGES_DIR = os.getenv("IMAGES_DIR", "./images" if DEBUG else "/images")
 DELETE_PHYSICAL_FILES = os.getenv("DELETE_PHYSICAL_FILES", "true").lower() == "true"
 
 # --------------------------------------------------
+# S3 Storage Config (MinIO / AWS / Backblaze / Wasabi)
+# --------------------------------------------------
+STORAGE_BACKEND = os.getenv("STORAGE_BACKEND", "s3")  # 's3' or 'filesystem'
+S3_PROVIDER = os.getenv("S3_PROVIDER", "minio")  # 'minio', 'aws', 'backblaze', 'wasabi'
+S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://localhost:9000")
+S3_BUCKET = os.getenv("S3_BUCKET", "aiproxy-media")
+S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "minioadmin")
+S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "minioadmin")
+S3_REGION = os.getenv("S3_REGION", "us-east-1")
+
+# --------------------------------------------------
 # Redis Config (falls verwendet)
 # --------------------------------------------------
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
