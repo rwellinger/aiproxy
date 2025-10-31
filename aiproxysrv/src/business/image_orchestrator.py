@@ -13,7 +13,7 @@ from utils.logger import logger
 
 if TYPE_CHECKING:
     from db.models import GeneratedImage
-from .file_management_service import FileManagementService
+from infrastructure.file_management_service import FileManagementService
 
 
 class ImageGenerationError(Exception):
@@ -350,6 +350,245 @@ class ImageOrchestrator:
         except Exception as e:
             logger.error("Error updating image", image_id=image_id, error_type=type(e).__name__, error=str(e))
             raise ImageGenerationError(f"Failed to update image: {e}") from e
+
+    def add_text_overlay_to_image(
+        self,
+        source_image_id: str,
+        title: str,
+        artist: str | None = None,
+        font_style: str = "bold",
+        title_position: str | dict[str, float] = "center",
+        title_font_size: float | int = 80,
+        title_color: str = "#FFFFFF",
+        title_outline_color: str = "#000000",
+        artist_position: str | dict[str, float] | None = None,
+        artist_font_size: float | int = 40,
+        artist_color: str | None = None,
+        artist_outline_color: str | None = None,
+        artist_font_style: str | None = None,
+        outline_width: int = 3,
+    ) -> dict[str, Any]:
+        """
+        Add text overlay to existing image (3-layer architecture)
+
+        Args:
+            source_image_id: ID of the source image
+            title: Title text (will be uppercase)
+            artist: Optional artist name (will be uppercase with "BY" prefix)
+            font_style: Font style for title (bold/elegant/light)
+            title_position: Grid position or custom dict
+            title_font_size: Font size (pixels or percentage)
+            title_color: Hex color for title
+            title_outline_color: Hex outline color for title
+            artist_position: Grid/custom position or None (below title)
+            artist_font_size: Font size (pixels or percentage)
+            artist_color: Hex color for artist (if None, uses title_color)
+            artist_outline_color: Hex outline for artist (if None, uses title_outline_color)
+            artist_font_style: Font style for artist (if None, uses same as title)
+            outline_width: Pixel width of outline
+
+        Returns:
+            {
+                "image_id": "new_image_id",
+                "image_url": "/api/v1/image/filename.png",
+                "metadata": {...}
+            }
+
+        Raises:
+            ImageGenerationError: If image not found or overlay fails
+        """
+        from PIL import ImageDraw
+
+        from business.image_text_overlay_transformer import ImageTextOverlayTransformer
+        from infrastructure.image_file_service import ImageFileService
+
+        try:
+            # Get source image from DB
+            source_image = ImageService.get_image_by_id(source_image_id)
+            if not source_image:
+                raise ImageGenerationError(f"Source image not found: {source_image_id}")
+
+            source_path = source_image.file_path
+            if not source_path:
+                raise ImageGenerationError("Source image file path not found")
+
+            logger.info("Adding text overlay", source_image_id=source_image_id, title=title)
+
+            # === INFRASTRUCTURE LAYER: Load image ===
+            img = ImageFileService.load_image(source_path)
+            draw = ImageDraw.Draw(img)
+
+            # === BUSINESS LAYER: Calculate title parameters ===
+            title_font_size_px = ImageTextOverlayTransformer.calculate_font_size(title_font_size, img.height)
+            title_text_rgb = ImageTextOverlayTransformer.hex_to_rgb(title_color)
+            title_outline_rgb = ImageTextOverlayTransformer.hex_to_rgb(title_outline_color)
+
+            # Get font path
+            title_font_path = ImageTextOverlayTransformer.get_font_path(font_style, ImageFileService.FONTS_DIR)
+            if not title_font_path.exists():
+                logger.warning("Title font not found, using default", font_path=str(title_font_path))
+                title_font_path = None
+
+            # === INFRASTRUCTURE LAYER: Load title font ===
+            title_font = ImageFileService.load_font(title_font_path, title_font_size_px)
+
+            # === INFRASTRUCTURE LAYER: Get text dimensions ===
+            title_text = title.upper()
+            title_dims = ImageFileService.get_text_dimensions(draw, title_text, title_font)
+
+            # === BUSINESS LAYER: Calculate title position ===
+            is_custom = isinstance(title_position, dict)
+            if is_custom:
+                grid_x, grid_y = ImageTextOverlayTransformer.get_custom_coordinates(title_position)
+                title_x, title_y = ImageTextOverlayTransformer.calculate_text_position_custom(
+                    img.width, img.height, grid_x, grid_y, title_dims["bbox_left_offset"]
+                )
+                title_anchor = "lt"  # Left-top anchor for custom
+            else:
+                grid_x, grid_y = ImageTextOverlayTransformer.get_grid_coordinates(title_position)
+                title_x, title_y = ImageTextOverlayTransformer.calculate_text_position_grid(
+                    img.width, img.height, grid_x, grid_y, title_dims["width"], title_dims["height"]
+                )
+                title_anchor = None  # Default anchor for grid
+
+            # === INFRASTRUCTURE LAYER: Draw title ===
+            ImageFileService.draw_text_with_outline(
+                draw,
+                (title_x, title_y),
+                title_text,
+                title_font,
+                title_text_rgb,
+                title_outline_rgb,
+                outline_width,
+                title_anchor,
+            )
+
+            # === ARTIST TEXT (if provided) ===
+            if artist:
+                artist_text = f"BY {artist.upper()}"
+
+                # Business logic: Artist parameters
+                actual_artist_color = artist_color if artist_color else title_color
+                actual_artist_outline = artist_outline_color if artist_outline_color else title_outline_color
+                actual_artist_pos = artist_position if artist_position else title_position
+                actual_artist_font_style = artist_font_style if artist_font_style else font_style
+
+                artist_font_size_px = ImageTextOverlayTransformer.calculate_font_size(artist_font_size, img.height)
+                artist_text_rgb = ImageTextOverlayTransformer.hex_to_rgb(actual_artist_color)
+                artist_outline_rgb = ImageTextOverlayTransformer.hex_to_rgb(actual_artist_outline)
+
+                # Get artist font
+                artist_font_path = ImageTextOverlayTransformer.get_font_path(
+                    actual_artist_font_style, ImageFileService.FONTS_DIR
+                )
+                if not artist_font_path.exists():
+                    logger.warning("Artist font not found, using default", font_path=str(artist_font_path))
+                    artist_font_path = None
+
+                # Infrastructure: Load artist font
+                artist_font = ImageFileService.load_font(artist_font_path, artist_font_size_px)
+
+                # Infrastructure: Get artist dimensions
+                artist_dims = ImageFileService.get_text_dimensions(draw, artist_text, artist_font)
+
+                # Business: Calculate artist position
+                is_custom_artist = isinstance(actual_artist_pos, dict)
+                if is_custom_artist:
+                    grid_x_a, grid_y_a = ImageTextOverlayTransformer.get_custom_coordinates(actual_artist_pos)
+                    artist_x, artist_y = ImageTextOverlayTransformer.calculate_text_position_custom(
+                        img.width, img.height, grid_x_a, grid_y_a, artist_dims["bbox_left_offset"]
+                    )
+                    artist_anchor = "lt"
+                else:
+                    grid_x_a, grid_y_a = ImageTextOverlayTransformer.get_grid_coordinates(actual_artist_pos)
+                    artist_x, artist_y = ImageTextOverlayTransformer.calculate_text_position_grid(
+                        img.width, img.height, grid_x_a, grid_y_a, artist_dims["width"], artist_dims["height"]
+                    )
+                    artist_anchor = None
+
+                # Business: Calculate offset (if artist follows title)
+                artist_offset = ImageTextOverlayTransformer.calculate_artist_offset(
+                    title_font_size, img.height, artist_position
+                )
+                artist_y += artist_offset
+
+                # Infrastructure: Draw artist
+                ImageFileService.draw_text_with_outline(
+                    draw,
+                    (artist_x, artist_y),
+                    artist_text,
+                    artist_font,
+                    artist_text_rgb,
+                    artist_outline_rgb,
+                    outline_width,
+                    artist_anchor,
+                )
+
+            # === INFRASTRUCTURE LAYER: Save image ===
+            output_path = ImageFileService.generate_unique_filename(source_path, "_with_text")
+            ImageFileService.save_image(img, output_path)
+
+            # === REPOSITORY LAYER: Create new DB record ===
+            output_filename = Path(output_path).name
+            new_image = ImageService.save_generated_image(
+                prompt=source_image.prompt,
+                size=source_image.size,
+                filename=output_filename,
+                file_path=output_path,
+                local_url=f"/api/v1/image/{output_filename}",
+                model_used=source_image.model_used,
+                prompt_hash=source_image.prompt_hash,
+                title=title,
+                user_prompt=source_image.user_prompt,
+                enhanced_prompt=source_image.enhanced_prompt,
+                artistic_style=source_image.artistic_style,
+                composition=source_image.composition,
+                lighting=source_image.lighting,
+                color_palette=source_image.color_palette,
+                detail_level=source_image.detail_level,
+            )
+
+            if not new_image:
+                raise ImageGenerationError("Failed to create new image record")
+
+            # Update text overlay metadata
+            from db.database import SessionLocal
+
+            db = SessionLocal()
+            try:
+                new_image.text_overlay_metadata = {
+                    "title": title,
+                    "artist": artist,
+                    "font_style": font_style,
+                    "title_position": title_position,
+                    "title_font_size": title_font_size,
+                    "title_color": title_color,
+                    "artist_position": artist_position,
+                    "artist_font_size": artist_font_size,
+                    "artist_color": artist_color,
+                    "artist_font_style": artist_font_style,
+                }
+                db.add(new_image)
+                db.commit()
+                db.refresh(new_image)
+            finally:
+                db.close()
+
+            logger.info("Text overlay added successfully", new_image_id=str(new_image.id), output_path=output_path)
+
+            return {
+                "image_id": str(new_image.id),
+                "image_url": new_image.local_url,
+                "metadata": new_image.text_overlay_metadata,
+            }
+
+        except ImageGenerationError:
+            raise
+        except Exception as e:
+            logger.error(
+                "Text overlay failed", source_image_id=source_image_id, error=str(e), error_type=type(e).__name__
+            )
+            raise ImageGenerationError(f"Failed to add text overlay: {e}") from e
 
     def _process_and_save_image(self, image_url: str, prompt: str) -> tuple[str, Path]:
         """Download and save image to filesystem"""

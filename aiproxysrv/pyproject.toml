@@ -144,7 +144,7 @@ addopts = [
     "--cov=src",                   # Coverage for src directory
     "--cov-report=term-missing",   # Show missing lines in terminal
     "--cov-report=html",           # Generate HTML coverage report
-    "--cov-fail-under=70",          # Fail if coverage below 4% (business logic only, infrastructure excluded)
+    "--cov-fail-under=90",         # Fail if coverage below 80% (business logic only, infrastructure excluded)
 ]
 markers = [
     "unit: Unit tests (no external dependencies)",
@@ -173,6 +173,7 @@ omit = [
     "*/.venv/*",
     # Infrastructure - not unit-testable per CLAUDE.md
     "src/db/*_service.py",                 # DB/CRUD services (no business logic)
+    "src/infrastructure/*.py",             # Infrastructure services (file I/O, PIL/Pillow - no business logic)
     "src/adapters/*/*.py",                 # External API adapters (OpenAI, Mureka, Ollama - infrastructure, mock hell)
     "src/celery_app/tasks.py",             # Celery tasks (infrastructure)
     "src/celery_app/slot_manager.py",      # Celery slot management (global state)

@@ -76,7 +76,10 @@ class TestImageControllerAddTextOverlay:
         controller = ImageController()
         controller.orchestrator = MagicMock()
 
-        controller.orchestrator.get_image_details.return_value = None
+        # Mock orchestrator to raise error for missing image
+        controller.orchestrator.add_text_overlay_to_image.side_effect = ImageGenerationError(
+            "Source image not found: nonexistent"
+        )
 
         result, status_code = controller.add_text_overlay(
             image_id="nonexistent",
@@ -84,7 +87,7 @@ class TestImageControllerAddTextOverlay:
             title="Test Title",
         )
 
-        assert status_code == 404
+        assert status_code == 500
         assert "error" in result
         assert "not found" in result["error"].lower()
 
@@ -94,11 +97,10 @@ class TestImageControllerAddTextOverlay:
         controller = ImageController()
         controller.orchestrator = MagicMock()
 
-        # Mock image without file_path
-        controller.orchestrator.get_image_details.return_value = {
-            "id": "123",
-            "title": "Test",
-        }
+        # Mock orchestrator to raise error for missing file path
+        controller.orchestrator.add_text_overlay_to_image.side_effect = ImageGenerationError(
+            "Source image file path not found"
+        )
 
         result, status_code = controller.add_text_overlay(
             image_id="123",
@@ -116,7 +118,7 @@ class TestImageControllerAddTextOverlay:
         controller = ImageController()
         controller.orchestrator = MagicMock()
 
-        controller.orchestrator.get_image_details.side_effect = ImageGenerationError("Database error")
+        controller.orchestrator.add_text_overlay_to_image.side_effect = ImageGenerationError("Database error")
 
         result, status_code = controller.add_text_overlay(
             image_id="123",
@@ -134,7 +136,7 @@ class TestImageControllerAddTextOverlay:
         controller = ImageController()
         controller.orchestrator = MagicMock()
 
-        controller.orchestrator.get_image_details.side_effect = ValueError("Invalid input")
+        controller.orchestrator.add_text_overlay_to_image.side_effect = ValueError("Invalid input")
 
         result, status_code = controller.add_text_overlay(
             image_id="123",

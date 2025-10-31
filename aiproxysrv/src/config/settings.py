@@ -3,11 +3,21 @@ Zentrale Konfiguration für alle Module
 """
 
 import os
+import sys
 
 from dotenv import load_dotenv
 
 
-load_dotenv()
+# Load correct .env file based on environment
+# Priority:
+# 1. DOTENV_FILE environment variable (e.g., DOTENV_FILE=.env_mock python src/server.py)
+# 2. pytest detected → .env_pytest (unit tests only, no DB)
+# 3. Default → .env (development/production)
+dotenv_file = os.getenv("DOTENV_FILE")
+if not dotenv_file:
+    dotenv_file = ".env_pytest" if "pytest" in sys.modules else ".env"
+
+load_dotenv(dotenv_file)
 
 # --------------------------------------------------
 # Celery Config

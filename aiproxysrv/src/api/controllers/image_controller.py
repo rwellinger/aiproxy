@@ -1,10 +1,8 @@
 """Image Controller - Handles HTTP requests for image operations"""
 
-from pathlib import Path
 from typing import Any
 
 from business.image_orchestrator import ImageGenerationError, ImageOrchestrator
-from business.image_text_overlay_service_v2 import ImageTextOverlayServiceV2
 from utils.logger import logger
 
 
@@ -243,7 +241,7 @@ class ImageController:
         title: str,
         artist: str | None = None,
         font_style: str = "bold",
-        # V2 parameters
+        # Current parameters
         title_position: str | dict[str, float] = "center",
         title_font_size: float = 0.08,
         title_color: str = "#FFFFFF",
@@ -253,50 +251,40 @@ class ImageController:
         artist_color: str | None = None,
         artist_outline_color: str | None = None,
         artist_font_style: str | None = None,
-        # Legacy (deprecated)
+        # Legacy (deprecated, ignored)
         position: str | None = None,
         text_color: str | None = None,
         outline_color: str | None = None,
     ) -> tuple[dict[str, Any], int]:
         """
-        Add text overlay to existing image (V2 - with separate title/artist controls)
+        Add text overlay to existing image (3-layer architecture)
 
         Args:
             image_id: ID of the source image
-            user_id: ID of the authenticated user
+            user_id: ID of the authenticated user (for auth)
             title: Title text to render
             artist: Optional artist name
-            font_style: Font style (bold/elegant/modern)
-            title_position: Grid position for title (e.g., "center", "top-left")
-            title_font_size: Font size as percentage (0.05 - 0.15)
+            font_style: Font style (bold/elegant/light)
+            title_position: Grid position or custom dict for title
+            title_font_size: Font size (pixels or percentage)
             title_color: Hex color for title
             title_outline_color: Hex outline color for title
-            artist_position: Grid position for artist (if None, below title)
-            artist_font_size: Font size as percentage (0.05 - 0.15)
+            artist_position: Grid/custom position or None (below title)
+            artist_font_size: Font size (pixels or percentage)
             artist_color: Hex color for artist (if None, uses title_color)
-            artist_outline_color: Hex outline color for artist (if None, uses title_outline_color)
-            position: DEPRECATED - use title_position
-            text_color: DEPRECATED - use title_color
-            outline_color: DEPRECATED - use title_outline_color
+            artist_outline_color: Hex outline for artist (if None, uses title_outline_color)
+            artist_font_style: Font style for artist (if None, uses title font)
+            position: DEPRECATED - ignored (use title_position)
+            text_color: DEPRECATED - ignored (use title_color)
+            outline_color: DEPRECATED - ignored (use title_outline_color)
 
         Returns:
             Tuple of (response_data, status_code)
         """
         try:
-            # Get original image details
-            original_image = self.orchestrator.get_image_details(image_id)
-
-            if original_image is None:
-                return {"error": "Image not found"}, 404
-
-            # Get file path from original image
-            file_path = original_image.get("file_path")
-            if not file_path:
-                return {"error": "Image file path not found"}, 500
-
-            # Add text overlay using V2 service (with separate controls)
-            result = ImageTextOverlayServiceV2.add_text_overlay(
-                image_path=file_path,
+            # Delegate to orchestrator (3-layer architecture)
+            result = self.orchestrator.add_text_overlay_to_image(
+                source_image_id=image_id,
                 title=title,
                 artist=artist,
                 font_style=font_style,
@@ -311,55 +299,20 @@ class ImageController:
                 artist_font_style=artist_font_style,
             )
 
-            # Create new image record (keep original untouched)
-            from db.image_service import ImageService
-
-            new_image = ImageService.save_generated_image(
-                prompt=original_image.get("prompt", ""),
-                size=original_image.get("size", "1024x1024"),
-                filename=Path(result["output_path"]).name,
-                file_path=result["output_path"],
-                local_url=f"/api/v1/image/{Path(result['output_path']).name}",
-                model_used=original_image.get("model_used", "dall-e-3"),
-                prompt_hash=original_image.get("prompt_hash", ""),
-                title=title,
-                user_prompt=original_image.get("user_prompt", ""),
-                enhanced_prompt=original_image.get("enhanced_prompt"),
-                artistic_style=original_image.get("artistic_style"),
-                composition=original_image.get("composition"),
-                lighting=original_image.get("lighting"),
-                color_palette=original_image.get("color_palette"),
-                detail_level=original_image.get("detail_level"),
-            )
-
-            # Update the new image with text_overlay_metadata
-            # (save_generated_image doesn't accept this parameter yet)
-            if new_image:
-                from db.database import SessionLocal
-
-                db = SessionLocal()
-                try:
-                    new_image.text_overlay_metadata = result["metadata"]
-                    db.add(new_image)
-                    db.commit()
-                    db.refresh(new_image)
-                finally:
-                    db.close()
-            else:
-                return {"error": "Failed to create new image record"}, 500
-
-            logger.info(f"Text overlay created successfully for image {image_id}, new image: {new_image.id}")
+            logger.info("Text overlay created successfully", source_image_id=image_id, new_image_id=result["image_id"])
 
             return {
                 "success": True,
-                "image_id": str(new_image.id),
-                "image_url": new_image.local_url,
+                "image_id": result["image_id"],
+                "image_url": result["image_url"],
                 "metadata": result["metadata"],
             }, 200
 
         except ImageGenerationError as e:
-            logger.error(f"Text overlay failed for image {image_id}: {e}")
+            logger.error("Text overlay failed", image_id=image_id, error=str(e))
             return {"error": str(e)}, 500
         except Exception as e:
-            logger.error(f"Unexpected error adding text overlay to image {image_id}: {type(e).__name__}: {e}")
+            logger.error(
+                "Unexpected error adding text overlay", image_id=image_id, error_type=type(e).__name__, error=str(e)
+            )
             return {"error": f"Internal server error: {str(e)}"}, 500
