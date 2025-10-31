@@ -146,3 +146,9 @@ POSTGRES_PASSWORD=
 #DATABASE_MAX_OVERFLOW=20
 #DATABASE_POOL_PRE_PING=true
 #DATABASE_POOL_RECYCLE=3600
+
+# ==================================================
+# Minio S3 Storage
+# ==================================================
+MINIO_ROOT_USER:
+MINIO_ROOT_PASSWORD:
