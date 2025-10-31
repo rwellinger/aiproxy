@@ -28,26 +28,33 @@
    - [7.1 Development Environment](#71-development-environment)
    - [7.2 Production Environment](#72-production-environment)
    - [7.3 Network Architecture](#73-network-architecture)
-8. [API Documentation](#8-api-documentation)
-9. [Deployment Diagrams](#9-deployment-diagrams)
-   - [9.1 Development Deployment](#91-development-deployment)
-   - [9.2 Production Deployment](#92-production-deployment)
-   - [9.3 Container Orchestration](#93-container-orchestration)
-10. [Key Processes](#10-key-processes)
-    - [10.1 Song Generation Workflow](#101-song-generation-workflow)
-    - [10.2 Error Handling & Retry Logic](#102-error-handling--retry-logic)
-    - [10.3 Health Check Process](#103-health-check-process)
-    - [10.4 Backup & Recovery Process](#104-backup--recovery-process)
-11. [Quality Requirements](#11-quality-requirements)
-    - [11.1 Performance](#111-performance)
-    - [11.2 Security](#112-security)
-    - [11.3 Monitoring](#113-monitoring)
-12. [Glossary](#12-glossary)
-13. [Database Schema](#13-database-schema)
-    - [13.1 Entity-Relationship Diagram](#131-entity-relationship-diagram)
-    - [13.2 Table Overview](#132-table-overview)
-    - [13.3 Relationships and Constraints](#133-relationships-and-constraints)
-    - [13.4 Migration and Maintenance](#134-migration-and-maintenance)
+8. [Architecture Decisions](#8-architecture-decisions)
+   - [8.1 3-Layer Architecture (Backend)](#81-3-layer-architecture-backend)
+   - [8.2 API Routing & Security](#82-api-routing--security)
+   - [8.3 Template-Driven AI Integration](#83-template-driven-ai-integration)
+   - [8.4 Frontend Patterns](#84-frontend-patterns)
+   - [8.5 Code Quality & Testing](#85-code-quality--testing)
+   - [8.6 Automated Architecture Validation](#86-automated-architecture-validation)
+9. [API Documentation](#9-api-documentation)
+10. [Deployment Diagrams](#10-deployment-diagrams)
+    - [10.1 Development Deployment](#101-development-deployment)
+    - [10.2 Production Deployment](#102-production-deployment)
+    - [10.3 Container Orchestration](#103-container-orchestration)
+11. [Key Processes](#11-key-processes)
+    - [11.1 Song Generation Workflow](#111-song-generation-workflow)
+    - [11.2 Error Handling & Retry Logic](#112-error-handling--retry-logic)
+    - [11.3 Health Check Process](#113-health-check-process)
+    - [11.4 Backup & Recovery Process](#114-backup--recovery-process)
+12. [Quality Requirements](#12-quality-requirements)
+    - [12.1 Performance](#121-performance)
+    - [12.2 Security](#122-security)
+    - [12.3 Monitoring](#123-monitoring)
+13. [Glossary](#13-glossary)
+14. [Database Schema](#14-database-schema)
+    - [14.1 Entity-Relationship Diagram](#141-entity-relationship-diagram)
+    - [14.2 Table Overview](#142-table-overview)
+    - [14.3 Relationships and Constraints](#143-relationships-and-constraints)
+    - [14.4 Migration and Maintenance](#144-migration-and-maintenance)
 
 ## Figure Index
 
@@ -58,13 +65,13 @@
 - [Figure 6.2: Music Generation (Asynchronous)](#62-music-generation-asynchronous) - `images/6.2_musikgenerierung.png`
 - [Figure 6.3: AI Chat Conversation (Persistent)](#63-ai-chat-conversation-persistent) - `images/6.3_ai_chat_workflow.png`
 - [Figure 7.3: Network Architecture](#73-network-architecture) - `images/7.3_netzwerk_architektur.png`
-- [Figure 9.1: Development Deployment](#91-development-deployment) - `images/9.1_entwicklungs_deployment.png`
-- [Figure 9.2: Production Deployment](#92-production-deployment) - `images/9.2_produktions_deployment.png`
-- [Figure 10.1: Song Generation Workflow](#101-song-generation-workflow) - `images/10.1_song_generierung_workflow.png`
-- [Figure 10.2: Error Handling & Retry Logic](#102-error-handling--retry-logic) - `images/10.2_error_handling.png`
-- [Figure 10.3: Health Check Process](#103-health-check-process) - `images/10.3_health_check.png`
-- [Figure 10.4: Backup & Recovery Process](#104-backup--recovery-process) - `images/10.4_backup_recovery.png`
-- [Figure 13.1: Database Schema](#131-entity-relationship-diagram) - `images/13_database_schema.png`
+- [Figure 10.1: Development Deployment](#101-development-deployment) - `images/9.1_entwicklungs_deployment.png`
+- [Figure 10.2: Production Deployment](#102-production-deployment) - `images/9.2_produktions_deployment.png`
+- [Figure 11.1: Song Generation Workflow](#111-song-generation-workflow) - `images/10.1_song_generierung_workflow.png`
+- [Figure 11.2: Error Handling & Retry Logic](#112-error-handling--retry-logic) - `images/10.2_error_handling.png`
+- [Figure 11.3: Health Check Process](#113-health-check-process) - `images/10.3_health_check.png`
+- [Figure 11.4: Backup & Recovery Process](#114-backup--recovery-process) - `images/10.4_backup_recovery.png`
+- [Figure 14.1: Database Schema](#141-entity-relationship-diagram) - `images/13_database_schema.png`
 
 ---
 
@@ -927,7 +934,460 @@ integrated directly into the thWelly Toolbox Angular frontend.
 
 ---
 
-## 8. API Documentation
+## 8. Architecture Decisions
+
+This section documents key architectural decisions (ADRs) that shape the system's design, development practices, and quality standards. These decisions are critical for maintaining consistency, scalability, and code quality across the project.
+
+### 8.1 3-Layer Architecture (Backend)
+
+**Context:**
+The backend codebase needed a clear separation of concerns to ensure testability, maintainability, and scalability. Without strict layer separation, business logic tends to mix with database operations, making code difficult to test and maintain.
+
+**Decision:**
+Implement a mandatory 3-layer architecture with strict naming conventions:
+
+```
+Controller → Orchestrator → Transformer/Normalizer + Repository
+(HTTP)       (Coordinates)  (Pure Functions)      (DB CRUD)
+```
+
+**Layer Responsibilities:**
+
+| Layer | Files | Testable? | Responsibilities |
+|-------|-------|-----------|-----------------|
+| **Controller** | `*_controller.py` | No | HTTP handling, validation (Pydantic), JWT auth |
+| **Orchestrator** | `*_orchestrator.py` | No | Coordinates services, NO business logic |
+| **Transformer** | `*_transformer.py` | ✅ Yes (100%) | Pure functions: transformations, mappings |
+| **Normalizer** | `*_normalizer.py` | ✅ Yes (100%) | Pure functions: string normalization |
+| **Repository** | `*_service.py` (in `db/`) | No | CRUD operations only (SQLAlchemy) |
+
+**Naming Convention Enforcement:**
+- `*_orchestrator.py` - Coordinates multiple services, NOT testable (orchestration layer)
+- `*_transformer.py` - Business logic transformations (testable)
+- `*_normalizer.py` - String/data normalization (testable)
+- `*_service.py` (in `db/`) - Database CRUD only (NOT testable)
+
+**Rationale:**
+- **Testability**: Business logic (transformers/normalizers) is 100% unit-testable without mocks
+- **Maintainability**: Clear separation makes refactoring safe and predictable
+- **Scalability**: Business logic can be reused across multiple controllers/orchestrators
+- **Code Review**: Violations are easily detectable (naming convention + architecture linter)
+
+**Consequences:**
+- ✅ All new features MUST follow this pattern
+- ✅ Business logic is pure functions (no DB, no file system)
+- ✅ Unit tests cover business logic only (not infrastructure)
+- ❌ NO business logic in DB services (only CRUD)
+- ❌ NO database queries in business layer
+
+**Enforcement:**
+- Architecture rules validated via `import-linter` (see [8.6](#86-automated-architecture-validation))
+- Controllers cannot import DB services directly (must use orchestrator/business layer)
+
+---
+
+### 8.2 API Routing & Security
+
+**Context:**
+Frontend services need a centralized, secure way to communicate with backend APIs and external services (OpenAI, Mureka, Ollama). Hardcoding URLs leads to production failures when environments change.
+
+**Decision:**
+Implement mandatory `ApiConfigService` for all HTTP calls:
+
+1. **All API endpoints MUST use ApiConfigService**
+   - **NEVER** hardcode URLs in Services (no `baseUrl`, no IPs)
+   - **NEVER** use `environment.apiUrl` directly in Services
+   - **ALL** endpoints defined in `aiwebui/src/app/services/config/api-config.service.ts`
+   - Services inject `ApiConfigService` and use `this.apiConfig.endpoints.*`
+
+2. **External APIs ONLY via aiproxysrv Proxy**
+   - **ALL** external calls (OpenAI, Mureka, Ollama) **MUST** go through aiproxysrv
+   - **NEVER** call external APIs directly from Angular (Browser ≠ HTTPS/CORS)
+   - **Why?** HTTPS/CORS handling, API Keys in Backend (not Browser), Centralized control
+
+3. **JWT Authentication REQUIRED for ALL Backend APIs**
+   - **ALL** backend endpoints (except login/register/health) **MUST** use `@jwt_required`
+   - User ID **MUST** be from JWT token via `get_current_user_id()`, **NOT** URL params
+   - **Why?** Prevents unauthorized access, URL manipulation
+
+**Implementation Example:**
+```typescript
+// ✅ CORRECT (Modern inject() style)
+private http = inject(HttpClient);
+private apiConfig = inject(ApiConfigService);
+
+getData() {
+  return this.http.get(this.apiConfig.endpoints.category.action);
+}
+
+// ❌ WRONG
+private baseUrl = 'http://localhost:5050/api';
+```
+
+**Backend Example:**
+```python
+# ✅ CORRECT
+@api_user_v1.route("/profile", methods=["GET"])
+@jwt_required
+def get_user_profile():
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+    return user_controller.get_user_profile(str(user_id))
+```
+
+**Rationale:**
+- **Security**: API keys never exposed to browser, JWT prevents unauthorized access
+- **Flexibility**: Environment changes (dev/prod) don't require code changes
+- **CORS**: Backend proxy handles cross-origin requests
+- **Centralization**: Single source of truth for all API endpoints
+
+**Consequences:**
+- ✅ All new services MUST inject `ApiConfigService`
+- ✅ All external API calls go through aiproxysrv
+- ✅ All backend endpoints (except auth) require JWT
+- ❌ NO direct Ollama/OpenAI/Mureka calls from frontend
+
+**Enforcement:**
+- Frontend architecture linter (`dependency-cruiser`) detects `environment.apiUrl` violations
+- Backend `@jwt_required` decorator enforces authentication
+- Code review checks for hardcoded URLs
+
+---
+
+### 8.3 Template-Driven AI Integration
+
+**Context:**
+Ollama integration needed a consistent, configurable way to enhance prompts with pre/post-conditions. Direct Ollama API calls scattered across the codebase would lead to inconsistent prompt quality and hard-to-maintain code.
+
+**Decision:**
+Implement a **Template-Driven Generation System** with mandatory workflow:
+
+```
+User Input → Load Template from DB → Validate → Unified Endpoint → Response
+```
+
+**Mandatory Rules:**
+- **ALL** Ollama calls with templates **MUST** use `/api/v1/ollama/chat/generate-unified`
+- **ALL** such operations **MUST** go through `ChatService` in the frontend
+- **NEVER** implement direct Ollama API calls in new services
+- **NEVER** use templates before they exist in DB (backend has no data!)
+
+**Template Structure:**
+Templates are stored in `prompt_templates` table with:
+- `category` + `action` - Unique identifier (e.g., `images`, `enhance`)
+- `pre_condition` - Text inserted before user input
+- `post_condition` - Text inserted after user input
+- `model`, `temperature`, `max_tokens` - Ollama parameters
+
+**Implementation Example:**
+```typescript
+// ✅ CORRECT: Simple case
+async myNewFeature(input: string): Promise<string> {
+  return this.chatService.validateAndCallUnified('category', 'action', input);
+}
+
+// ✅ CORRECT: Complex case (with custom logic)
+async myComplexFeature(input: string): Promise<string> {
+  // 1. Load template from DB
+  const template = await firstValueFrom(
+    this.promptConfig.getPromptTemplateAsync('category', 'action')
+  );
+  if (!template) {
+    throw new Error('Template not found');
+  }
+
+  // 2. Validate required fields
+  if (!template.model || template.temperature === null) {
+    throw new Error('Template missing parameters');
+  }
+
+  // 3. Build request
+  const request: UnifiedChatRequest = {
+    pre_condition: template.pre_condition,
+    post_condition: template.post_condition || '',
+    input_text: input,
+    temperature: template.temperature,
+    max_tokens: template.max_tokens,
+    model: template.model
+  };
+
+  // 4. Call unified endpoint
+  const data = await firstValueFrom(
+    this.http.post<ChatResponse>(
+      this.apiConfig.endpoints.ollama.chatGenerateUnified,
+      request
+    )
+  );
+  return data.response;
+}
+
+// ❌ WRONG: Direct Ollama call (bypasses template system!)
+async wrongImplementation(input: string): Promise<string> {
+  return this.http.post('http://localhost:11434/api/generate', {
+    model: 'llama2',  // ❌ Hardcoded, not from DB template!
+    prompt: input     // ❌ No pre/post conditions from template!
+  });
+}
+```
+
+**Rationale:**
+- **Templates MUST be in DB first** - backend loads config from `prompt_templates` table
+- **Centralized control** - all Ollama+Template calls go through one validated path
+- **Prevents Junior mistakes** - no ad-hoc Ollama integrations that bypass templates
+- **Consistency** - all AI operations use same prompt enhancement strategy
+
+**Consequences:**
+- ✅ All Ollama+Template operations use unified endpoint
+- ✅ Templates are versioned and auditable (in database)
+- ✅ Prompt quality is consistent across features
+- ❌ NO direct Ollama API calls in new services
+- ❌ Templates must exist in DB before use (seed scripts required)
+
+**Related:**
+- Reference implementation: `aiwebui/src/app/services/config/chat.service.ts`
+- Backend endpoint: `aiproxysrv/src/api/routes/chat_routes.py`
+- External API docs: https://github.com/ollama/ollama/blob/main/docs/api.md
+
+---
+
+### 8.4 Frontend Patterns
+
+**Context:**
+Without standardized UI patterns, every new page results in different button styles, layouts, and interaction patterns. This creates an inconsistent user experience and maintenance nightmare.
+
+**Decision:**
+Implement mandatory UI standards with reusable SCSS mixins and reference implementation.
+
+**Standard Button Mixins (MANDATORY):**
+All buttons MUST use mixins from `src/scss/_mixins.scss`:
+
+```scss
+.edit-button {
+  @include button-secondary('base');  // Gray button
+}
+
+.delete-button {
+  @include button-secondary('base');  // Gray button
+}
+
+.primary-action-button {
+  @include button-primary('base');    // Blue button
+}
+```
+
+**Reference Implementation:**
+**Equipment Gallery** (`aiwebui/src/app/pages/equipment-gallery/`) is the **current reference** for:
+- ✅ Master-Detail Layout
+- ✅ Button Standards (with mixins)
+- ✅ Detail Actions Pattern
+- ✅ Font Awesome Icons (NOT Material Icons)
+- ✅ Form Layouts
+
+**SCSS Nesting Rules:**
+- **Max 2 levels** for custom classes (use BEM to flatten hierarchy)
+- **Max 3 levels** for Angular Material overrides (`.feature mat-card mat-card-content { }`)
+- **Strict enforcement** for new components (with `_NEW_` or `-new-` in filename)
+- Use **BEM** (`.block__element--modifier`) instead of deep nesting
+
+**Internationalization (i18n):**
+- **MANDATORY** for all new components (ngx-translate)
+- **Feature-grouped hierarchical keys** (max 3 levels)
+- **BOTH** `en.json` AND `de.json` must be updated
+- **Example:** `{{ 'featureName.subsection.key' | translate }}`
+
+**Angular 18 Modern Patterns:**
+- **ALWAYS** use `inject()` function instead of constructor injection
+- Pattern: `private service = inject(ServiceName)`
+- Use Angular's `HttpClient` (NOT fetch API)
+
+**Rationale:**
+- **Consistency** - Reusable mixins ensure uniform UX
+- **Maintainability** - Standardized patterns reduce maintenance burden
+- **Scalability** - New features can reuse existing patterns
+- **Quality** - Flat SCSS hierarchy improves readability
+
+**Consequences:**
+- ✅ All new pages MUST follow Equipment Gallery reference
+- ✅ All buttons MUST use standard mixins
+- ✅ All UI text MUST use i18n (EN/DE)
+- ✅ All new components use `inject()` DI
+- ❌ NO custom button styles without mixins
+- ❌ NO SCSS nesting over 2-3 levels
+- ❌ NO hardcoded UI text strings
+
+**Documentation:**
+- Complete patterns: `docs/UI_PATTERNS.md`
+- Code examples: `docs/CODE_PATTERNS.md`
+
+---
+
+### 8.5 Code Quality & Testing
+
+**Context:**
+Without automated quality checks, code quality degrades over time. Manual reviews miss subtle violations. Testing infrastructure without clear rules leads to low-value tests (mocking SQLAlchemy instead of testing business logic).
+
+**Decision:**
+Implement automated code quality enforcement with clear testing strategy.
+
+**Python: Ruff (Linting & Formatting) + pytest**
+
+**Mandatory Workflow:**
+```bash
+# ✅ ALWAYS use `make` commands (validates Conda environment first!)
+make lint-all                  # Ruff + import-linter + Conda check
+make format                    # Auto-fix and format
+make test                      # pytest with coverage
+
+# ❌ NEVER use direct commands (skip environment checks):
+# ruff check . --fix
+# pytest -v -s
+```
+
+**Testing Strategy (CRITICAL RULES):**
+
+❌ **DO NOT write tests for:**
+- Database services (`src/db/*_service.py`) - Pure CRUD, no business logic
+- File system operations - Infrastructure, not logic
+- External API clients - Mock hell, no value
+- SQLAlchemy mocks - Testing mock setup, not real behavior
+
+✅ **DO write tests for:**
+- Business logic services (`src/business/*_transformer.py`, `*_normalizer.py`) - Pure functions
+- Validation logic - HTTP status codes, error messages
+- Utilities - String manipulation, data transformations
+- Complex algorithms - Conditional logic
+
+**Logging (Loguru):**
+- **ALWAYS** use `from utils.logger import logger`, **NEVER** `import logging`
+- **ALWAYS** provide context via extra fields (NOT in message string)
+- **CRITICAL:** Standard Python logger does NOT support structured logging!
+
+```python
+# ✅ CORRECT: Structured logging
+from utils.logger import logger
+logger.debug("Sketch retrieved", sketch_id=sketch_id, workflow=workflow)
+logger.error("Database error", error=str(e), sketch_id=sketch_id)
+
+# ❌ WRONG: Standard logging (CRASHES with structured parameters!)
+import logging
+logger = logging.getLogger(__name__)
+logger.info("Processing", task_id=task_id)  # TypeError!
+```
+
+**Angular: ESLint + Stylelint**
+
+**Mandatory Workflow:**
+```bash
+# From aiwebui/ directory
+npm run build && npm run lint:all  # TypeScript + SCSS + Architecture
+```
+
+**Available Commands:**
+- `npm run lint:all` - TypeScript + SCSS + Architecture (use this after changes!)
+- `npm run lint` - TypeScript only (ESLint)
+- `npm run lint:scss` - SCSS only (Stylelint)
+- `npm run lint:arch` - Architecture validation (dependency-cruiser)
+- `npm run lint:scss:fix` - Auto-fix SCSS issues
+
+**Rationale:**
+- **Automation** - Linters catch violations instantly (no manual review)
+- **Consistency** - Same standards enforced across all code
+- **Quality** - Tests cover business logic only (no infrastructure mocking)
+- **Safety** - Conda environment validation prevents dependency issues
+
+**Consequences:**
+- ✅ All commits MUST pass linters
+- ✅ Unit tests cover business logic only
+- ✅ Use `make` commands (NOT direct ruff/pytest)
+- ✅ Structured logging with Loguru
+- ❌ NO tests for pure CRUD (DB services)
+- ❌ NO SQLAlchemy mocks (integration tests only)
+
+---
+
+### 8.6 Automated Architecture Validation
+
+**Context:**
+Architecture rules documented in text are easy to violate and hard to enforce during code review. Manual checks are error-prone and time-consuming.
+
+**Decision:**
+Implement automated architecture linters that enforce layer separation and dependency rules.
+
+**Python Backend: import-linter**
+
+**Validates:**
+- ❌ Controllers MUST NOT import DB services directly (use business layer)
+- ❌ DB layer MUST NOT import business logic
+- ❌ Business layer MUST NOT import SQLAlchemy directly
+- ❌ Schemas MUST NOT depend on business/DB layers
+
+**Run validation:**
+```bash
+# From aiproxysrv/ directory
+lint-imports                    # Quick check
+make lint-all                   # Ruff + import-linter + Conda check
+```
+
+**Configuration:** `aiproxysrv/.importlinter`
+
+**Common violations:**
+```bash
+# ERROR: Controllers must go through business layer, not directly to DB
+src.api.controllers.foo_controller -> src.db.bar_service
+
+# Fix: Use orchestrator as intermediary
+src.api.controllers.foo_controller -> src.business.foo_orchestrator -> src.db.bar_service
+```
+
+**Angular Frontend: dependency-cruiser**
+
+**Validates:**
+- ❌ Services MUST NOT depend on Components/Pages
+- ❌ Services MUST use ApiConfigService (NOT environment.apiUrl)
+- ❌ Models MUST NOT depend on Services/Components
+- ❌ Guards/Interceptors MUST NOT depend on Components
+- ❌ No circular dependencies
+
+**Run validation:**
+```bash
+# From aiwebui/ directory
+npm run lint:arch               # Architecture only
+npm run lint:all                # TypeScript + SCSS + Architecture
+```
+
+**Configuration:** `aiwebui/.dependency-cruiser.js`
+
+**Common violations:**
+```bash
+# ERROR: Services must use ApiConfigService, NOT environment.apiUrl
+src/app/services/foo.service.ts -> environments/environment
+
+# Fix: Inject ApiConfigService
+private apiConfig = inject(ApiConfigService);
+this.http.get(this.apiConfig.endpoints.category.action);
+```
+
+**Rationale:**
+- **Automation** - Architecture violations detected instantly (no manual review)
+- **Prevention** - Linters block commits/builds with violations
+- **Documentation** - Rules are executable (not just text documents)
+- **Consistency** - Same standards enforced across all code
+
+**Consequences:**
+- ✅ Architecture rules are enforced at build time
+- ✅ Violations appear in lint output (automated detection)
+- ✅ Code review focuses on logic, not architecture compliance
+- ❌ Violations are build blockers (treat like ESLint errors)
+
+**Integration:**
+- Python: `import-linter` runs via `make lint-all`
+- Angular: `dependency-cruiser` runs via `npm run lint:all`
+- CI/CD: Linters run in GitHub Actions pipeline
+
+---
+
+## 9. API Documentation
 
 The complete API documentation is automatically generated and always available up-to-date:
 
@@ -939,21 +1399,21 @@ The documentation is automatically generated from the Python code (code-first ap
 
 ---
 
-## 9. Deployment Diagrams
+## 10. Deployment Diagrams
 
-### 9.1 Development Deployment
+### 10.1 Development Deployment
 
 ![Development Deployment](images/9.1_entwicklungs_deployment.png)
 
-*Figure 9.1: Development Deployment - Local development environment with mock services*
+*Figure 10.1: Development Deployment - Local development environment with mock services*
 
-### 9.2 Production Deployment
+### 10.2 Production Deployment
 
 ![Production Deployment](images/9.2_produktions_deployment.png)
 
-*Figure 9.2: Production Deployment - Complete Docker-based production environment*
+*Figure 10.2: Production Deployment - Complete Docker-based production environment*
 
-### 9.3 Container Orchestration
+### 10.3 Container Orchestration
 
 ```yaml
 # Simplified docker-compose.yml structure
@@ -1002,37 +1462,37 @@ services:
 
 ---
 
-## 10. Key Processes
+## 11. Key Processes
 
-### 10.1 Song Generation Workflow
+### 11.1 Song Generation Workflow
 
 ![Song Generation Workflow](images/10.1_song_generierung_workflow.png)
 
-*Figure 10.1: Song Generation Workflow - State diagram of the complete song generation process*
+*Figure 11.1: Song Generation Workflow - State diagram of the complete song generation process*
 
-### 10.2 Error Handling & Retry Logic
+### 11.2 Error Handling & Retry Logic
 
 ![Error Handling](images/10.2_error_handling.png)
 
-*Figure 10.2: Error Handling & Retry Logic - Flow diagram of error handling and retry mechanisms*
+*Figure 11.2: Error Handling & Retry Logic - Flow diagram of error handling and retry mechanisms*
 
-### 10.3 Health Check Process
+### 11.3 Health Check Process
 
 ![Health Check Process](images/10.3_health_check.png)
 
-*Figure 10.3: Health Check Process - Monitoring and supervision of all services*
+*Figure 11.3: Health Check Process - Monitoring and supervision of all services*
 
-### 10.4 Backup & Recovery Process
+### 11.4 Backup & Recovery Process
 
 ![Backup & Recovery](images/10.4_backup_recovery.png)
 
-*Figure 10.4: Backup & Recovery Process - Data backup and restoration*
+*Figure 11.4: Backup & Recovery Process - Data backup and restoration*
 
 ---
 
-## 11. Quality Requirements
+## 12. Quality Requirements
 
-### 11.1 Performance
+### 12.1 Performance
 - **API Response Time**: < 200ms for standard requests
 - **Image Generation**: < 30s for DALL-E 3 calls
 - **Song Generation**: 2-5 minutes (depending on Mureka)
@@ -1040,20 +1500,20 @@ services:
 - **Lyric AI Operations**: 2-8 seconds (improve/rewrite/extend via Ollama)
 - **Concurrent Users**: 1 (personal use)
 
-### 11.2 Security
+### 12.2 Security
 - **HTTPS**: TLS 1.3 encryption
 - **Rate Limiting**: 5 req/s via Nginx
 - **API Keys**: Secure storage in .env files
 - **CORS**: Configured for frontend domain
 
-### 11.3 Monitoring
+### 12.3 Monitoring
 - **Health Checks**: All services every 30s
 - **Logging**: Structured logs via Python logging
 - **Alerts**: Container restart on health check failures
 
 ---
 
-## 12. Glossary
+## 13. Glossary
 
 | Term           | Definition                                                                      |
 | -------------- | ------------------------------------------------------------------------------- |
@@ -1105,17 +1565,17 @@ services:
 
 ---
 
-## 13. Database Schema
+## 14. Database Schema
 
-### 13.1 Entity-Relationship Diagram
+### 14.1 Entity-Relationship Diagram
 
 ![Database Schema](images/13_database_schema.png)
 
-*Figure 13.1: Database Schema - Entity-relationship diagram of all tables and relationships*
+*Figure 14.1: Database Schema - Entity-relationship diagram of all tables and relationships*
 
-### 13.2 Table Overview
+### 14.2 Table Overview
 
-#### 13.2.1 songs
+#### 14.2.1 songs
 **Purpose**: Main table for song generation and management
 
 | Column | Type | Description |
@@ -1140,7 +1600,7 @@ services:
 | `updated_at` | TIMESTAMP | Last update |
 | `completed_at` | TIMESTAMP | Completion timestamp |
 
-#### 13.2.2 song_choices
+#### 14.2.2 song_choices
 **Purpose**: Individual song variants from MUREKA (1:N to songs)
 
 | Column | Type | Description |
@@ -1160,7 +1620,7 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
-#### 13.2.3 song_sketches
+#### 14.2.3 song_sketches
 **Purpose**: Song concept/draft management before generation (1:N to songs)
 
 | Column | Type | Description |
@@ -1174,7 +1634,7 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
-#### 13.2.4 generated_images
+#### 14.2.4 generated_images
 **Purpose**: Generated images and metadata
 
 | Column | Type | Description |
@@ -1201,7 +1661,7 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
-#### 13.2.5 prompt_templates
+#### 14.2.5 prompt_templates
 **Purpose**: AI prompt templates for various categories and actions
 
 | Column | Type | Description |
@@ -1220,7 +1680,7 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
-#### 13.2.6 conversations
+#### 14.2.6 conversations
 **Purpose**: AI Chat conversations with persistent context
 
 | Column | Type | Description |
@@ -1234,7 +1694,7 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update |
 
-#### 13.2.7 messages
+#### 14.2.7 messages
 **Purpose**: Individual messages within conversations (1:N to conversations)
 
 | Column | Type | Description |
@@ -1246,7 +1706,7 @@ services:
 | `token_count` | INTEGER | Token count for this message |
 | `created_at` | TIMESTAMP | Creation timestamp |
 
-#### 13.2.8 messages_archive
+#### 14.2.8 messages_archive
 **Purpose**: Archived messages from conversation compression (1:N to conversations)
 
 | Column | Type | Description |
@@ -1261,7 +1721,7 @@ services:
 | `archived_at` | TIMESTAMP | Archiving timestamp |
 | `summary_message_id` | UUID | Reference to summary message (if applicable) |
 
-#### 13.2.9 users
+#### 14.2.9 users
 **Purpose**: User accounts and authentication
 
 | Column | Type | Description |
@@ -1280,7 +1740,7 @@ services:
 | `updated_at` | TIMESTAMP | Last update timestamp |
 | `last_login` | TIMESTAMP | Last login timestamp |
 
-#### 13.2.10 equipment
+#### 14.2.10 equipment
 **Purpose**: Music production software and plugin inventory management
 
 | Column | Type | Description |
@@ -1317,7 +1777,7 @@ services:
 - `type` - Filter by Software/Plugin
 - `status` - Filter by lifecycle state
 
-#### 13.2.11 lyric_parsing_rules
+#### 14.2.11 lyric_parsing_rules
 **Purpose**: Configurable regex-based rules for lyric cleanup and section detection
 
 | Column | Type | Description |
@@ -1333,7 +1793,7 @@ services:
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update timestamp |
 
-#### 13.2.12 api_costs_monthly
+#### 14.2.12 api_costs_monthly
 **Purpose**: OpenAI API cost tracking with TTL-based caching strategy
 
 | Column | Type | Description |
@@ -1361,7 +1821,7 @@ services:
 - **Authentication**: `OPENAI_ADMIN_API_KEY` (separate from generation key)
 - **Pagination**: Handles 100+ line items per month
 
-### 13.3 Relationships and Constraints
+### 14.3 Relationships and Constraints
 
 - **song_sketches ↔ songs**: 1:N relationship (one sketch can be used for multiple songs)
 - **songs ↔ song_choices**: 1:N relationship with CASCADE DELETE
@@ -1381,7 +1841,7 @@ services:
   - `conversations.user_id` → `users.id`
   - `equipment.user_id` → `users.id` (CASCADE DELETE)
 
-### 13.4 Migration and Maintenance
+### 14.4 Migration and Maintenance
 
 **Migration Commands:**
 ```bash
@@ -1404,6 +1864,6 @@ cd src && alembic current
 ---
 
 *Document created: 01.09.2025*
-*Last updated: 29.10.2025*
-*Version: 2.0*
+*Last updated: 31.10.2025*
+*Version: 2.1*
 *Author: Rob (rob.wellinger@gmail.com)*
