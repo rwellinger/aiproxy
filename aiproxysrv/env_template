@@ -24,6 +24,7 @@ IMAGE_BASE_URL=http://localhost:5050/api/v1/image
 # S3 images: Moved to archive/ folder (soft delete, recoverable)
 # Filesystem images: Deleted permanently (old images)
 DELETE_PHYSICAL_FILES=true
+
 # Chat Debug Logging - Shows detailed prompt construction (true/false)
 CHAT_DEBUG_LOGGING=false
 LOG_LEVEL=INFO
