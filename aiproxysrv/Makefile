@@ -1,6 +1,6 @@
 # Makefile for aiproxysrv development tasks
 
-.PHONY: help check-conda lint lint-ruff lint-imports lint-all format test install-dev db-current db-upgrade db-downgrade db-revision db-history db-heads
+.PHONY: help check-conda lint lint-ruff lint-imports lint-all format format-check test install-dev db-current db-upgrade db-downgrade db-revision db-history db-heads
 
 # Default target
 help:
@@ -10,7 +10,8 @@ help:
 	@echo "  check-conda    - Verify correct Conda environment is activated"
 	@echo "  lint-ruff      - Run Ruff linter (code quality)"
 	@echo "  lint-imports   - Run import-linter (architecture validation)"
-	@echo "  lint-all       - Run all linters (Ruff + import-linter)"
+	@echo "  format-check   - Check code formatting (no auto-fix)"
+	@echo "  lint-all       - Run all linters (Ruff + import-linter + format-check)"
 	@echo "  format         - Format code with Ruff"
 	@echo "  test           - Run pytest"
 	@echo "  install-dev    - Install development dependencies"
@@ -46,8 +47,13 @@ lint-imports: check-conda
 	@echo "Running import-linter (architecture validation)..."
 	lint-imports
 
+# Format check (no auto-fix)
+format-check: check-conda
+	@echo "Checking code formatting with Ruff..."
+	ruff format --check .
+
 # Run all linters
-lint-all: check-conda lint-ruff lint-imports
+lint-all: check-conda lint-ruff lint-imports format-check
 	@echo "All linters passed!"
 
 # Format code
