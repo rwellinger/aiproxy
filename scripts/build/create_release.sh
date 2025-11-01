@@ -136,6 +136,17 @@ if ! make lint-ruff > /dev/null 2>&1; then
 fi
 print_success "Ruff Linting bestanden"
 
+# Ruff Formatting Check
+print_info "Prüfe Code Formatierung..."
+if ! ruff format --check . > /dev/null 2>&1; then
+    print_error "Code ist nicht formatiert!"
+    echo ""
+    echo "Formatierung korrigieren mit:"
+    echo "  ${YELLOW}cd aiproxysrv && make format${NC}"
+    exit 1
+fi
+print_success "Code Formatierung korrekt"
+
 # Architecture Validation (Import-Linter)
 print_info "Führe Architecture Validation aus..."
 if ! make lint-imports > /dev/null 2>&1; then

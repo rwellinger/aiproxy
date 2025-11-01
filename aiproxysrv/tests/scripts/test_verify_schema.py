@@ -49,9 +49,7 @@ def test_verify_schema_uses_real_engine():
         called_with = mock_inspect.call_args[0][0]
 
         # Real engine should be SQLAlchemy Engine instance
-        assert isinstance(
-            called_with, Engine
-        ), f"Expected SQLAlchemy Engine, got {type(called_with).__name__}"
+        assert isinstance(called_with, Engine), f"Expected SQLAlchemy Engine, got {type(called_with).__name__}"
 
 
 @pytest.mark.integration
@@ -64,9 +62,7 @@ def test_verify_schema_imports_get_engine():
     from scripts import verify_schema
 
     # Should have get_engine imported
-    assert hasattr(
-        verify_schema, "get_engine"
-    ), "verify_schema.py should import get_engine from db.database"
+    assert hasattr(verify_schema, "get_engine"), "verify_schema.py should import get_engine from db.database"
 
     # Should NOT import 'engine' lazy proxy
     # (This check is defensive - we can't easily detect what was imported)
