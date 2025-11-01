@@ -111,7 +111,7 @@ def serve_s3_image(image_id):
             return jsonify({"error": "Image not found"}), 404
 
         # Verify it's an S3 image
-        if image.storage_backend != 's3' or not image.s3_key:
+        if image.storage_backend != "s3" or not image.s3_key:
             return jsonify({"error": "Not an S3 image"}), 400
 
         # Stream from S3
@@ -119,20 +119,15 @@ def serve_s3_image(image_id):
         image_data = storage.download(image.s3_key)
 
         # Determine Content-Type from filename
-        content_type = 'image/png'
-        if image.filename.lower().endswith('.jpg') or image.filename.lower().endswith('.jpeg'):
-            content_type = 'image/jpeg'
-        elif image.filename.lower().endswith('.webp'):
-            content_type = 'image/webp'
+        content_type = "image/png"
+        if image.filename.lower().endswith(".jpg") or image.filename.lower().endswith(".jpeg"):
+            content_type = "image/jpeg"
+        elif image.filename.lower().endswith(".webp"):
+            content_type = "image/webp"
 
         logger.debug("Streaming S3 image", image_id=image_id, s3_key=image.s3_key, content_type=content_type)
 
-        return send_file(
-            BytesIO(image_data),
-            mimetype=content_type,
-            as_attachment=False,
-            download_name=image.filename
-        )
+        return send_file(BytesIO(image_data), mimetype=content_type, as_attachment=False, download_name=image.filename)
 
     except Exception as e:
         logger.error(

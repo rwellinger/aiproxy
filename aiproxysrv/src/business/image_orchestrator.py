@@ -259,7 +259,12 @@ class ImageOrchestrator:
             # Handle physical file deletion/archiving
             if DELETE_PHYSICAL_FILES:
                 # Check if S3 image
-                if hasattr(image, "storage_backend") and image.storage_backend == "s3" and hasattr(image, "s3_key") and image.s3_key:
+                if (
+                    hasattr(image, "storage_backend")
+                    and image.storage_backend == "s3"
+                    and hasattr(image, "s3_key")
+                    and image.s3_key
+                ):
                     # Archive S3 image: shared/{id}.png → archive/{id}.png
                     archive_key = image.s3_key.replace("shared/", "archive/", 1)
                     move_success = self.s3_storage.move(image.s3_key, archive_key)
@@ -317,12 +322,19 @@ class ImageOrchestrator:
                 # Delete/archive physical file if enabled
                 if DELETE_PHYSICAL_FILES:
                     # Check if S3 image
-                    if hasattr(image, "storage_backend") and image.storage_backend == "s3" and hasattr(image, "s3_key") and image.s3_key:
+                    if (
+                        hasattr(image, "storage_backend")
+                        and image.storage_backend == "s3"
+                        and hasattr(image, "s3_key")
+                        and image.s3_key
+                    ):
                         # Archive S3 image: shared/{id}.png → archive/{id}.png
                         archive_key = image.s3_key.replace("shared/", "archive/", 1)
                         move_success = self.s3_storage.move(image.s3_key, archive_key)
                         if not move_success:
-                            logger.warning("Failed to archive S3 image during bulk delete", image_id=image_id, s3_key=image.s3_key)
+                            logger.warning(
+                                "Failed to archive S3 image during bulk delete", image_id=image_id, s3_key=image.s3_key
+                            )
                     else:
                         # Delete filesystem image (old images)
                         self.file_service.delete_file_if_exists(image.file_path)
@@ -445,7 +457,7 @@ class ImageOrchestrator:
 
             from PIL import Image
 
-            if source_image.storage_backend == 's3' and source_image.s3_key:
+            if source_image.storage_backend == "s3" and source_image.s3_key:
                 # Load from S3
                 logger.debug("Loading source image from S3", s3_key=source_image.s3_key)
                 image_data = self.s3_storage.download(source_image.s3_key)
@@ -567,7 +579,7 @@ class ImageOrchestrator:
             # Convert PIL Image to bytes
             img_rgb = img.convert("RGB")
             output_buffer = io.BytesIO()
-            img_rgb.save(output_buffer, format='PNG')
+            img_rgb.save(output_buffer, format="PNG")
             image_data = output_buffer.getvalue()
 
             # Generate unique S3 key
@@ -597,7 +609,7 @@ class ImageOrchestrator:
                 color_palette=source_image.color_palette,
                 detail_level=source_image.detail_level,
                 s3_key=s3_key,
-                storage_backend='s3',
+                storage_backend="s3",
             )
 
             if not new_image:

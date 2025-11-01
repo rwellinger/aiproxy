@@ -299,7 +299,12 @@ class ImageController:
                 artist_font_style=artist_font_style,
             )
 
-            logger.info("Text overlay created successfully", source_image_id=image_id, new_image_id=result["image_id"], image_url=result["image_url"])
+            logger.info(
+                "Text overlay created successfully",
+                source_image_id=image_id,
+                new_image_id=result["image_id"],
+                image_url=result["image_url"],
+            )
 
             response_data = {
                 "success": True,
