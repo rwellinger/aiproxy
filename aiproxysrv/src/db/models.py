@@ -58,6 +58,9 @@ class SongSketch(Base):
     project_id = Column(
         UUID(as_uuid=True), ForeignKey("song_projects.id", ondelete="SET NULL"), nullable=True, index=True
     )
+    project_folder_id = Column(
+        UUID(as_uuid=True), ForeignKey("project_folders.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -66,6 +69,7 @@ class SongSketch(Base):
     # Relationships
     songs = relationship("Song", back_populates="sketch")
     project = relationship("SongProject", back_populates="sketches")
+    project_folder = relationship("ProjectFolder", foreign_keys=[project_folder_id])
 
     def __repr__(self):
         return f"<SongSketch(id={self.id}, title='{self.title}', workflow='{self.workflow}')>"
@@ -100,6 +104,9 @@ class Song(Base):
     project_id = Column(
         UUID(as_uuid=True), ForeignKey("song_projects.id", ondelete="SET NULL"), nullable=True, index=True
     )
+    project_folder_id = Column(
+        UUID(as_uuid=True), ForeignKey("project_folders.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     # Status tracking
     status = Column(String(50), nullable=False, default="PENDING")  # PENDING, PROGRESS, SUCCESS, FAILURE, CANCELLED
@@ -112,6 +119,7 @@ class Song(Base):
     )
     sketch = relationship("SongSketch", back_populates="songs")
     project = relationship("SongProject", back_populates="songs")
+    project_folder = relationship("ProjectFolder", foreign_keys=[project_folder_id])
 
     # MUREKA response data
     mureka_response = Column(Text, nullable=True)  # JSON string der kompletten MUREKA Response
@@ -194,16 +202,11 @@ class GeneratedImage(Base):
     detail_level = Column(String(50), nullable=True)  # minimal, moderate, highly-detailed
     text_overlay_metadata = Column(JSON, nullable=True)  # Metadata for text overlays (title, artist, font_style, etc.)
 
-    # Project relationship (optional)
-    project_id = Column(
-        UUID(as_uuid=True), ForeignKey("song_projects.id", ondelete="SET NULL"), nullable=True, index=True
-    )
-
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    # Relationships
-    project = relationship("SongProject", back_populates="images", foreign_keys=[project_id])
+    # Relationships (N:M via project_image_references)
+    project_references = relationship("ProjectImageReference", back_populates="image", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<GeneratedImage(id={self.id}, filename='{self.filename}', prompt='{self.prompt[:50]}...')>"
@@ -537,7 +540,7 @@ class SongProject(Base):
     files = relationship("ProjectFile", back_populates="project", cascade="all, delete-orphan")
     sketches = relationship("SongSketch", back_populates="project")
     songs = relationship("Song", back_populates="project")
-    images = relationship("GeneratedImage", back_populates="project", foreign_keys="GeneratedImage.project_id")
+    image_references = relationship("ProjectImageReference", back_populates="project", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<SongProject(id={self.id}, name='{self.project_name}', sync_status='{self.sync_status}')>"
@@ -608,3 +611,29 @@ class ProjectFile(Base):
 
     def __repr__(self):
         return f"<ProjectFile(id={self.id}, filename='{self.filename}', synced={self.is_synced}')>"
+
+
+class ProjectImageReference(Base):
+    """Model for N:M relationship between projects and images"""
+
+    __tablename__ = "project_image_references"
+    __table_args__ = {"extend_existing": True}
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    project_id = Column(
+        UUID(as_uuid=True), ForeignKey("song_projects.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    image_id = Column(
+        UUID(as_uuid=True), ForeignKey("generated_images.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    folder_id = Column(UUID(as_uuid=True), ForeignKey("project_folders.id", ondelete="SET NULL"), nullable=True)
+    display_order = Column(Integer, server_default="0", nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    project = relationship("SongProject", back_populates="image_references")
+    image = relationship("GeneratedImage", back_populates="project_references")
+    folder = relationship("ProjectFolder")
+
+    def __repr__(self):
+        return f"<ProjectImageReference(project_id={self.project_id}, image_id={self.image_id}, folder_id={self.folder_id})>"

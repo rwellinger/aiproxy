@@ -216,3 +216,65 @@ class SketchController:
         except Exception as e:
             logger.error("sketch_delete_error", sketch_id=sketch_id, error=str(e), error_type=type(e).__name__)
             return {"error": f"Failed to delete sketch: {str(e)}"}, 500
+
+    @staticmethod
+    def assign_to_project(
+        db: Session,
+        sketch_id: str,
+        project_id: str,
+        folder_id: str | None = None,
+    ) -> tuple[dict[str, Any], int]:
+        """
+        Assign sketch to a project (1:1 relationship)
+
+        Args:
+            db: Database session
+            sketch_id: Sketch UUID
+            project_id: Project UUID
+            folder_id: Optional folder UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            # Validate UUID formats
+            try:
+                UUID(sketch_id)
+                UUID(project_id)
+                if folder_id:
+                    UUID(folder_id)
+            except ValueError as e:
+                return {"error": f"Invalid UUID format: {str(e)}"}, 400
+
+            orchestrator = SketchOrchestrator()
+            result = orchestrator.assign_to_project(
+                db=db,
+                sketch_id=sketch_id,
+                project_id=project_id,
+                folder_id=folder_id,
+            )
+
+            if not result:
+                return {"error": "Sketch not found"}, 404
+
+            logger.info(
+                "Sketch assigned to project",
+                sketch_id=sketch_id,
+                project_id=project_id,
+                folder_id=folder_id,
+            )
+
+            return {"success": True, "data": result}, 200
+
+        except ValueError as e:
+            logger.warning("Sketch assignment validation failed", sketch_id=sketch_id, error=str(e))
+            return {"error": str(e)}, 404
+        except Exception as e:
+            logger.error(
+                "Failed to assign sketch to project",
+                sketch_id=sketch_id,
+                project_id=project_id,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Failed to assign sketch to project: {str(e)}"}, 500

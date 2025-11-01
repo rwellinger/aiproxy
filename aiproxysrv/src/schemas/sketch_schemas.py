@@ -76,6 +76,8 @@ class SketchUpdateRequest(BaseModel):
     description_tags: str | None = Field(None, max_length=1000, description="New release tags")
     info: str | None = Field(None, description="New working notes")
     workflow: str | None = Field(None, description="New workflow status")
+    project_id: str | None = Field(None, description="Song project ID to assign this sketch to")
+    project_folder_id: str | None = Field(None, description="Folder ID within the project")
 
     @field_validator("workflow")
     @classmethod

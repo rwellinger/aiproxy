@@ -111,6 +111,13 @@ def create_app():
         """OpenAPI JSON specification endpoint"""
         try:
             # Import and register schemas
+            # Equipment schemas (defined in controller)
+            from api.controllers.equipment_controller import (
+                EquipmentCreateRequest,
+                EquipmentListResponse,
+                EquipmentResponse,
+                EquipmentUpdateRequest,
+            )
             from schemas.chat_schemas import ChatErrorResponse, ChatRequest, ChatResponse, UnifiedChatRequest
             from schemas.common_schemas import (
                 BulkDeleteRequest,
@@ -157,6 +164,25 @@ def create_app():
                 PromptTemplateResponse,
                 PromptTemplatesGroupedResponse,
                 PromptTemplateUpdate,
+            )
+            from schemas.sketch_schemas import (
+                SketchCreateRequest,
+                SketchDeleteResponse,
+                SketchDetailResponse,
+                SketchListRequest,
+                SketchListResponse,
+                SketchResponse,
+                SketchUpdateRequest,
+            )
+            from schemas.song_project_schemas import (
+                FileResponse,
+                FileUploadResponse,
+                FolderResponse,
+                ProjectCreateRequest,
+                ProjectDetailResponse,
+                ProjectListResponse,
+                ProjectResponse,
+                ProjectUpdateRequest,
             )
             from schemas.song_schemas import (
                 CeleryHealthResponse,
@@ -289,6 +315,28 @@ def create_app():
                 ("UserListResponse", UserListResponse),
                 ("LogoutResponse", LogoutResponse),
                 ("TokenValidationResponse", TokenValidationResponse),
+                # Song Project schemas
+                ("ProjectCreateRequest", ProjectCreateRequest),
+                ("ProjectUpdateRequest", ProjectUpdateRequest),
+                ("ProjectResponse", ProjectResponse),
+                ("ProjectDetailResponse", ProjectDetailResponse),
+                ("ProjectListResponse", ProjectListResponse),
+                ("FolderResponse", FolderResponse),
+                ("FileResponse", FileResponse),
+                ("FileUploadResponse", FileUploadResponse),
+                # Sketch schemas
+                ("SketchCreateRequest", SketchCreateRequest),
+                ("SketchUpdateRequest", SketchUpdateRequest),
+                ("SketchResponse", SketchResponse),
+                ("SketchListRequest", SketchListRequest),
+                ("SketchListResponse", SketchListResponse),
+                ("SketchDetailResponse", SketchDetailResponse),
+                ("SketchDeleteResponse", SketchDeleteResponse),
+                # Equipment schemas
+                ("EquipmentCreateRequest", EquipmentCreateRequest),
+                ("EquipmentUpdateRequest", EquipmentUpdateRequest),
+                ("EquipmentResponse", EquipmentResponse),
+                ("EquipmentListResponse", EquipmentListResponse),
             ]
 
             # Only register schemas that aren't already registered
@@ -307,6 +355,7 @@ def create_app():
                     "api_image_v1": "Images",
                     "api_song_v1": "Songs",
                     "api_song_task_v1": "Song Tasks",
+                    "api_song_projects_v1": "Song Projects",
                     "api_sketch_v1": "Sketches",
                     "api_instrumental_v1": "Instrumentals",
                     "api_instrumental_task_v1": "Instrumental Tasks",
@@ -315,6 +364,9 @@ def create_app():
                     "api_redis_v1": "Redis/Celery",
                     "api_chat_v1": "Chat",
                     "api_conversation_v1": "Conversations",
+                    "api_openai_chat_v1": "OpenAI Chat",
+                    "api_openai_costs_v1": "OpenAI Costs",
+                    "api_equipment_v1": "Equipment",
                     "api_user_v1": "User Management",
                     "api_ollama_v1": "Ollama",
                     "api_v1": "System",
@@ -328,6 +380,8 @@ def create_app():
                         (
                             "api_image_v1",
                             "api_song_v1",
+                            "api_song_task_v1",
+                            "api_song_projects_v1",
                             "api_sketch_v1",
                             "api_instrumental_v1",
                             "api_instrumental_task_v1",
@@ -336,6 +390,9 @@ def create_app():
                             "api_redis_v1",
                             "api_chat_v1",
                             "api_conversation_v1",
+                            "api_openai_chat_v1",
+                            "api_openai_costs_v1",
+                            "api_equipment_v1",
                             "api_user_v1",
                             "api_ollama_v1",
                             "api_v1",

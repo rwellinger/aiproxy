@@ -39,6 +39,26 @@ class SongService:
         try:
             db = next(get_db())
             try:
+                # Auto-assign project from sketch if available
+                project_id = None
+                project_folder_id = None
+
+                if sketch_id:
+                    from uuid import UUID
+
+                    from db.models import SongSketch
+
+                    sketch = db.query(SongSketch).filter(SongSketch.id == UUID(sketch_id)).first()
+                    if sketch and sketch.project_id:
+                        project_id = sketch.project_id
+                        project_folder_id = sketch.project_folder_id
+                        logger.debug(
+                            "Auto-assigning song to project from sketch",
+                            sketch_id=sketch_id,
+                            project_id=str(project_id),
+                            project_folder_id=str(project_folder_id) if project_folder_id else None,
+                        )
+
                 song = Song(
                     task_id=task_id,
                     lyrics=lyrics,
@@ -48,6 +68,8 @@ class SongService:
                     is_instrumental=is_instrumental,
                     title=title,
                     sketch_id=sketch_id,
+                    project_id=project_id,
+                    project_folder_id=project_folder_id,
                 )
 
                 db.add(song)
@@ -61,6 +83,8 @@ class SongService:
                     model=model,
                     is_instrumental=is_instrumental,
                     sketch_id=sketch_id,
+                    project_id=str(project_id) if project_id else None,
+                    auto_assigned=bool(project_id),
                 )
                 return song
 

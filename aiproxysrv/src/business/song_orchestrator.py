@@ -297,3 +297,99 @@ class SongOrchestrator:
                 "Song completion processing failed", task_id=task_id, error=str(e), error_type=type(e).__name__
             )
             raise SongOrchestratorError(f"Failed to process song completion: {e}") from e
+
+    def update_song(self, song_id: str, update_data: dict) -> dict | None:
+        """
+        Update song metadata (includes project_id and project_folder_id)
+
+        Args:
+            song_id: Song UUID
+            update_data: Dict with fields to update
+
+        Returns:
+            dict: Updated song data or None if not found
+        """
+        from uuid import UUID
+
+        from db.database import get_db
+        from db.song_service import get_song_by_id, update_song
+
+        db = next(get_db())
+
+        try:
+            # Validate song exists
+            song = get_song_by_id(db, UUID(song_id))
+            if not song:
+                return None
+
+            # Validate project/folder if provided
+            if "project_id" in update_data and update_data["project_id"]:
+                from db.song_project_service import get_project_by_id
+
+                project = get_project_by_id(db, UUID(update_data["project_id"]))
+                if not project:
+                    raise ValueError(f"Project not found: {update_data['project_id']}")
+
+            if "project_folder_id" in update_data and update_data["project_folder_id"]:
+                from db.song_project_service import get_folder_by_id
+
+                folder = get_folder_by_id(db, UUID(update_data["project_folder_id"]))
+                if not folder:
+                    raise ValueError(f"Folder not found: {update_data['project_folder_id']}")
+
+            # Update song
+            updated_song = update_song(db, UUID(song_id), update_data)
+
+            if not updated_song:
+                return None
+
+            logger.info("Song updated", song_id=song_id, updated_fields=list(update_data.keys()))
+
+            return {
+                "id": str(updated_song.id),
+                "title": updated_song.title,
+                "project_id": str(updated_song.project_id) if updated_song.project_id else None,
+                "project_folder_id": str(updated_song.project_folder_id) if updated_song.project_folder_id else None,
+            }
+
+        finally:
+            db.close()
+
+    def assign_song_to_project(
+        self,
+        song_id: str,
+        project_id: str,
+        folder_id: str | None = None,
+    ) -> dict:
+        """
+        Assign a song to a project (1:1 relationship)
+
+        Args:
+            song_id: Song UUID
+            project_id: Project UUID
+            folder_id: Optional folder UUID
+
+        Returns:
+            dict: Assignment result
+
+        Raises:
+            ValueError: If song or project not found
+        """
+        update_data = {
+            "project_id": project_id,
+            "project_folder_id": folder_id,
+        }
+
+        result = self.update_song(song_id, update_data)
+
+        if not result:
+            raise ValueError(f"Song not found: {song_id}")
+
+        logger.info(
+            "Song assigned to project",
+            song_id=song_id,
+            project_id=project_id,
+            folder_id=folder_id,
+        )
+
+        return result
