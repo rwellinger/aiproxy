@@ -5,10 +5,12 @@ These tests verify that database schema verification works correctly.
 They are excluded from coverage reports as they test infrastructure, not business logic.
 """
 
+import contextlib
 import sys
 from pathlib import Path
 
 import pytest
+
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
@@ -26,8 +28,9 @@ def test_verify_schema_uses_real_engine():
 
     This test prevents regression of the lazy engine bug.
     """
+    from unittest.mock import MagicMock, patch
+
     from scripts.verify_schema import verify_schema
-    from unittest.mock import patch, MagicMock
     from sqlalchemy.engine import Engine
 
     # Mock the inspector to avoid real DB access
@@ -37,10 +40,9 @@ def test_verify_schema_uses_real_engine():
         mock_inspect.return_value = mock_inspector
 
         # This should NOT raise "NoInspectionAvailable" error
-        try:
+        with contextlib.suppress(Exception):
+            # Other errors are OK (e.g. no tables), we just check inspect() was called
             verify_schema()
-        except Exception:
-            pass  # Other errors are OK (e.g. no tables), we just check inspect() was called
 
         # Verify inspect() was called with a REAL engine (not lazy proxy)
         assert mock_inspect.called, "inspect() should have been called"

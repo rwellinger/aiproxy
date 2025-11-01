@@ -108,9 +108,91 @@ if git ls-remote --tags origin | grep -q "refs/tags/${VERSION}\$"; then
 fi
 print_success "Tag ${VERSION} ist verfügbar"
 
+# ══════════════════════════════════════════════════════════════
+# 4. QUALITY GATES - Backend (aiproxysrv)
+# ══════════════════════════════════════════════════════════════
+print_header "Quality Gates: Backend (aiproxysrv)"
+
+cd "$PROJECT_DIR/aiproxysrv"
+
+# Check Conda Environment
+print_info "Prüfe Conda Environment..."
+if ! conda env list | grep -q "mac_ki_service_py312.*\*"; then
+    print_error "Conda environment 'mac_ki_service_py312' ist nicht aktiv!"
+    print_error "Aktiviere es mit: conda activate mac_ki_service_py312"
+    exit 1
+fi
+print_success "Conda environment OK"
+
+# Ruff Linting
+print_info "Führe Ruff Linting aus..."
+if ! make lint-ruff > /dev/null 2>&1; then
+    print_error "Ruff Linting fehlgeschlagen!"
+    echo ""
+    echo "Fehler beheben mit:"
+    echo "  ${YELLOW}cd aiproxysrv && make lint-ruff${NC}"
+    echo "  ${YELLOW}cd aiproxysrv && make format${NC}"
+    exit 1
+fi
+print_success "Ruff Linting bestanden"
+
+# Architecture Validation (Import-Linter)
+print_info "Führe Architecture Validation aus..."
+if ! make lint-imports > /dev/null 2>&1; then
+    print_error "Architecture Validation fehlgeschlagen!"
+    echo ""
+    echo "Details anzeigen:"
+    echo "  ${YELLOW}cd aiproxysrv && make lint-imports${NC}"
+    exit 1
+fi
+print_success "Architecture Validation bestanden"
+
+# Unit Tests
+print_info "Führe Backend Tests aus..."
+if ! make test > /dev/null 2>&1; then
+    print_error "Backend Tests fehlgeschlagen!"
+    echo ""
+    echo "Tests ausführen:"
+    echo "  ${YELLOW}cd aiproxysrv && make test${NC}"
+    exit 1
+fi
+print_success "Backend Tests bestanden"
+
+# ══════════════════════════════════════════════════════════════
+# 5. QUALITY GATES - Frontend (aiwebui)
+# ══════════════════════════════════════════════════════════════
+print_header "Quality Gates: Frontend (aiwebui)"
+
+cd "$PROJECT_DIR/aiwebui"
+
+# TypeScript + SCSS + Architecture Linting
+print_info "Führe Frontend Linting aus (TypeScript + SCSS + Architecture)..."
+if ! npm run lint:all > /dev/null 2>&1; then
+    print_error "Frontend Linting fehlgeschlagen!"
+    echo ""
+    echo "Fehler beheben mit:"
+    echo "  ${YELLOW}cd aiwebui && npm run lint:all${NC}"
+    exit 1
+fi
+print_success "Frontend Linting bestanden"
+
+# Production Build Test
+print_info "Führe Production Build Test aus..."
+if ! npm run build > /dev/null 2>&1; then
+    print_error "Frontend Build fehlgeschlagen!"
+    echo ""
+    echo "Build-Fehler analysieren:"
+    echo "  ${YELLOW}cd aiwebui && npm run build${NC}"
+    exit 1
+fi
+print_success "Frontend Build bestanden"
+
+print_success "Alle Quality Gates bestanden! 🎉"
+
 # ──────────────────────────────────────
-# 4. VERSION Files aktualisieren
+# 6. VERSION Files aktualisieren
 # ──────────────────────────────────────
+cd "$PROJECT_DIR"
 print_info "Aktualisiere VERSION Files..."
 
 echo "${VERSION}" > "$PROJECT_DIR/aiproxysrv/VERSION"
@@ -120,7 +202,7 @@ echo "${VERSION}" > "$PROJECT_DIR/aiwebui/VERSION"
 print_success "aiwebui/VERSION → ${VERSION}"
 
 # ──────────────────────────────────────
-# 5. Änderungen committen
+# 7. Änderungen committen
 # ──────────────────────────────────────
 print_info "Committe VERSION Updates..."
 git add aiproxysrv/VERSION aiwebui/VERSION
@@ -128,7 +210,7 @@ git commit -m "Bump version to ${VERSION}"
 print_success "VERSION Files committed"
 
 # ──────────────────────────────────────
-# 6. Git Tag erstellen und pushen
+# 8. Git Tag erstellen und pushen
 # ──────────────────────────────────────
 print_info "Erstelle Git Tag ${VERSION}..."
 git tag ${VERSION} -m "Release ${VERSION}"
@@ -140,7 +222,7 @@ git push origin ${VERSION}
 print_success "Tag und Commit gepusht"
 
 # ──────────────────────────────────────────────────────────
-# 8. GitHub Actions Build
+# 9. GitHub Actions Build
 # ──────────────────────────────────────────────────────────
 print_header "GitHub Actions Build"
 print_info "Build wird automatisch in GitHub Actions gestartet..."
