@@ -39,7 +39,7 @@ class OllamaAPIClient:
             "model": model,
             "prompt": prompt,
             "stream": False,
-            "options": {"temperature": temperature, "max_tokens": max_tokens},
+            "options": {"temperature": temperature, "num_predict": max_tokens},
         }
 
         # Conditional logging based on CHAT_DEBUG_LOGGING
