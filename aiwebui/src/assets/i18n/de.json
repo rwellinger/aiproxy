@@ -405,6 +405,9 @@
     "compositionBadge": {
       "albumCover": "Album-Cover"
     },
+    "storageBadge": {
+      "s3": "S3"
+    },
     "title": "Bild-Galerie"
   },
   "lyricArchitect": {

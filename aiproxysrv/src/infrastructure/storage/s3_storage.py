@@ -130,3 +130,20 @@ class S3Storage(StorageInterface):
         except ClientError as e:
             logger.error("S3 list failed", prefix=prefix, error=str(e))
             return []
+
+    def move(self, source_key: str, dest_key: str) -> bool:
+        """Move file in S3 (copy + delete)"""
+        try:
+            # Copy to new location
+            copy_source = {"Bucket": self.bucket, "Key": source_key}
+            self.s3_client.copy_object(CopySource=copy_source, Bucket=self.bucket, Key=dest_key)
+            logger.debug("File copied in S3", source=source_key, dest=dest_key)
+
+            # Delete original
+            self.s3_client.delete_object(Bucket=self.bucket, Key=source_key)
+            logger.info("File moved in S3", source=source_key, dest=dest_key)
+            return True
+
+        except ClientError as e:
+            logger.error("S3 move failed", source=source_key, dest=dest_key, error=str(e))
+            return False

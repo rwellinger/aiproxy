@@ -87,3 +87,17 @@ class StorageInterface(ABC):
             List of storage keys
         """
         pass
+
+    @abstractmethod
+    def move(self, source_key: str, dest_key: str) -> bool:
+        """
+        Move/rename file within storage (copy + delete)
+
+        Args:
+            source_key: Current storage key
+            dest_key: New storage key
+
+        Returns:
+            True if successful, False otherwise
+        """
+        pass

@@ -179,6 +179,8 @@ class GeneratedImage(Base):
     filename = Column(String(255), nullable=False, unique=True)
     file_path = Column(String(500), nullable=False)
     local_url = Column(String(500), nullable=False)
+    s3_key = Column(String(500), nullable=True)  # S3 object key (for S3 storage)
+    storage_backend = Column(String(20), server_default="filesystem", nullable=False)  # 'filesystem' or 's3'
     model_used = Column(String(100), nullable=True)
     prompt_hash = Column(String(32), nullable=True)
     title = Column(String(255), nullable=True)  # Custom user title

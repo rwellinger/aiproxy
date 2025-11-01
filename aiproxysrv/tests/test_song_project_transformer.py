@@ -23,51 +23,57 @@ class TestGenerateS3Prefix:
     def test_basic_slug_generation(self):
         """Generate slug from simple project name"""
         project_name = "My Awesome Song"
+        user_id = "test-user-123"
 
-        result = generate_s3_prefix(project_name)
+        result = generate_s3_prefix(project_name, user_id)
 
-        assert result == "projects/my-awesome-song/"
+        assert result == "test-user-123/my-awesome-song/"
 
     def test_special_characters_removed(self):
         """Special characters are replaced with hyphens"""
         project_name = "Café Müller (2024)"
+        user_id = "test-user-123"
 
-        result = generate_s3_prefix(project_name)
+        result = generate_s3_prefix(project_name, user_id)
 
         # Umlauts and special chars are removed (not transliterated)
-        assert result == "projects/caf-m-ller-2024/"
+        assert result == "test-user-123/caf-m-ller-2024/"
 
     def test_multiple_spaces_collapsed(self):
         """Multiple spaces/hyphens are collapsed to single hyphen"""
         project_name = "My    Song  -  Project"
+        user_id = "test-user-123"
 
-        result = generate_s3_prefix(project_name)
+        result = generate_s3_prefix(project_name, user_id)
 
-        assert result == "projects/my-song-project/"
+        assert result == "test-user-123/my-song-project/"
 
     def test_leading_trailing_hyphens_removed(self):
         """Leading and trailing hyphens are removed"""
         project_name = "---My Song---"
+        user_id = "test-user-123"
 
-        result = generate_s3_prefix(project_name)
+        result = generate_s3_prefix(project_name, user_id)
 
-        assert result == "projects/my-song/"
+        assert result == "test-user-123/my-song/"
 
     def test_numbers_preserved(self):
         """Numbers are preserved in slug"""
         project_name = "Song 2024 v3"
+        user_id = "test-user-123"
 
-        result = generate_s3_prefix(project_name)
+        result = generate_s3_prefix(project_name, user_id)
 
-        assert result == "projects/song-2024-v3/"
+        assert result == "test-user-123/song-2024-v3/"
 
     def test_empty_string_handling(self):
-        """Empty string produces projects/ prefix"""
+        """Empty string produces user_id/ prefix with empty slug"""
         project_name = ""
+        user_id = "test-user-123"
 
-        result = generate_s3_prefix(project_name)
+        result = generate_s3_prefix(project_name, user_id)
 
-        assert result == "projects//"
+        assert result == "test-user-123//"
 
 
 class TestGetDefaultFolderStructure:
@@ -109,7 +115,7 @@ class TestGetDefaultFolderStructure:
         folder_types = [f["folder_type"] for f in result]
         assert "arrangement" in folder_types
         assert "ai" in folder_types
-        assert "cover" in folder_types
+        assert "pictures" in folder_types
 
     def test_icons_use_font_awesome(self):
         """Icons use Font Awesome classes"""

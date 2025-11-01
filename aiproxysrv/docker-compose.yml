@@ -34,15 +34,21 @@ services:
   minio:
     image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: minio
+    restart: unless-stopped
     ports:
       - "127.0.0.1:9000:9000"  # S3 API
       - "127.0.0.1:9001:9001"  # Web Console
     env_file: .env
     volumes:
-      - minio_data:/data
+      - /Users/Shared/minio/data:/data  # Host-Path (Time Machine backup)
     command: server /data --console-address ":9001"
     networks:
       - thwelly-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   db-migration:
     container_name: db-migration
@@ -126,7 +132,6 @@ services:
 volumes:
   postgres-data:
   redis-data:
-  images-data:
 
 networks:
   thwelly-net:

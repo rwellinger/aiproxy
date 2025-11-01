@@ -299,14 +299,17 @@ class ImageController:
                 artist_font_style=artist_font_style,
             )
 
-            logger.info("Text overlay created successfully", source_image_id=image_id, new_image_id=result["image_id"])
+            logger.info("Text overlay created successfully", source_image_id=image_id, new_image_id=result["image_id"], image_url=result["image_url"])
 
-            return {
+            response_data = {
                 "success": True,
                 "image_id": result["image_id"],
                 "image_url": result["image_url"],
                 "metadata": result["metadata"],
-            }, 200
+            }
+
+            logger.debug("Text overlay response", response_data=response_data)
+            return response_data, 200
 
         except ImageGenerationError as e:
             logger.error("Text overlay failed", image_id=image_id, error=str(e))
