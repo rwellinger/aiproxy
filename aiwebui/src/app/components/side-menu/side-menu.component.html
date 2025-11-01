@@ -78,6 +78,19 @@
 
         <div class="nav-group">
             <span class="group-label">
+                <i class="fas fa-folder-tree"></i>
+                {{ 'sideMenu.songProjects' | translate }}
+            </span>
+            <div class="group-items">
+                <a routerLink="/song-projects" routerLinkActive="active">
+                    <i class="fas fa-folder-open"></i>
+                    {{ 'sideMenu.songProjects' | translate }}
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <span class="group-label">
                 <i class="fas fa-toolbox"></i>
                 {{ 'sideMenu.equipment' | translate }}
             </span>

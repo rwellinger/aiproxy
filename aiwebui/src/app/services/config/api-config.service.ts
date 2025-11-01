@@ -144,6 +144,22 @@ export class ApiConfigService {
             openaiCurrent: `${this.baseUrl}/api/v1/openai/costs/current`,
             openaiMonth: (year: number, month: number) => `${this.baseUrl}/api/v1/openai/costs/${year}/${month}`,
             openaiAllTime: `${this.baseUrl}/api/v1/openai/costs/all-time`
+        },
+        songProject: {
+            create: `${this.baseUrl}/api/v1/song-projects`,
+            list: (limit?: number, offset?: number, search?: string, tags?: string) => {
+                const params = new URLSearchParams();
+                if (limit !== undefined) params.append('limit', limit.toString());
+                if (offset !== undefined) params.append('offset', offset.toString());
+                if (search) params.append('search', search);
+                if (tags) params.append('tags', tags);
+                const query = params.toString();
+                return `${this.baseUrl}/api/v1/song-projects${query ? '?' + query : ''}`;
+            },
+            detail: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}`,
+            update: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}`,
+            delete: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}`,
+            uploadFile: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}/files`
         }
     };
 

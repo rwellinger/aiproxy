@@ -96,5 +96,10 @@ export const routes: Routes = [
         path: 'equipment-editor/:id',
         canActivate: [AuthGuard],
         loadComponent: () => import('./pages/equipment-editor/equipment-editor.component').then(m => m.EquipmentEditorComponent)
+    },
+    {
+        path: 'song-projects',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/song-projects/song-projects.component').then(m => m.SongProjectsComponent)
     }
 ];

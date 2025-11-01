@@ -13,8 +13,13 @@ from utils.logger import logger
 class S3Storage(StorageInterface):
     """S3-compatible storage implementation (works with MinIO, AWS S3, Backblaze B2, Wasabi)"""
 
-    def __init__(self):
-        """Initialize S3 client"""
+    def __init__(self, bucket: str | None = None):
+        """
+        Initialize S3 client
+
+        Args:
+            bucket: Bucket name (optional). If None, uses S3_BUCKET from config.
+        """
         self.s3_client = boto3.client(
             "s3",
             endpoint_url=S3_ENDPOINT,
@@ -22,7 +27,7 @@ class S3Storage(StorageInterface):
             aws_secret_access_key=S3_SECRET_KEY,
             region_name=S3_REGION,
         )
-        self.bucket = S3_BUCKET
+        self.bucket = bucket or S3_BUCKET
 
         # Ensure bucket exists
         self._ensure_bucket_exists()

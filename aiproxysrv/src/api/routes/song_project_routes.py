@@ -8,12 +8,12 @@ CRITICAL:
 - Parameter validation (limit, offset)
 
 Endpoints:
-- POST   /api/v1/song-projects/projects              Create project
-- GET    /api/v1/song-projects/projects              List projects (paginated)
-- GET    /api/v1/song-projects/projects/{id}         Get project by ID (no details)
-- GET    /api/v1/song-projects/projects/{id}/details Get project with folders and files
-- PUT    /api/v1/song-projects/projects/{id}         Update project
-- DELETE /api/v1/song-projects/projects/{id}         Delete project (with S3 cleanup)
+- POST   /api/v1/song-projects              Create project
+- GET    /api/v1/song-projects              List projects (paginated)
+- GET    /api/v1/song-projects/{id}         Get project by ID (with folders and files)
+- PUT    /api/v1/song-projects/{id}         Update project
+- DELETE /api/v1/song-projects/{id}         Delete project (with S3 cleanup)
+- POST   /api/v1/song-projects/{id}/files   Upload file to project folder
 """
 
 from uuid import UUID
@@ -32,7 +32,7 @@ from schemas.song_project_schemas import ProjectCreateRequest, ProjectUpdateRequ
 api_song_projects_v1 = Blueprint("api_song_projects_v1", __name__, url_prefix="/api/v1/song-projects")
 
 
-@api_song_projects_v1.route("/projects", methods=["POST"])
+@api_song_projects_v1.route("", methods=["POST"])
 @jwt_required
 def create_project():
     """
@@ -47,7 +47,7 @@ def create_project():
         500: {'error': 'Failed to create project: ...'}
 
     Example:
-        POST /api/v1/song-projects/projects
+        POST /api/v1/song-projects
         Headers: Authorization: Bearer <JWT_TOKEN>
         Body: {
             "project_name": "My Awesome Song",
@@ -72,7 +72,7 @@ def create_project():
         db.close()
 
 
-@api_song_projects_v1.route("/projects", methods=["GET"])
+@api_song_projects_v1.route("", methods=["GET"])
 @jwt_required
 def list_projects():
     """
@@ -89,7 +89,7 @@ def list_projects():
         401: {'error': 'Unauthorized'}
 
     Example:
-        GET /api/v1/song-projects/projects?limit=10&offset=0&search=rock&tags=demo,wip
+        GET /api/v1/song-projects?limit=10&offset=0&search=rock&tags=demo,wip
     """
     user_id = get_current_user_id()
     if not user_id:
@@ -128,40 +128,11 @@ def list_projects():
         db.close()
 
 
-@api_song_projects_v1.route("/projects/<project_id>", methods=["GET"])
+@api_song_projects_v1.route("/<project_id>", methods=["GET"])
 @jwt_required
 def get_project(project_id: str):
     """
-    Get a specific project by ID (without details).
-
-    Path Parameters:
-        - project_id (UUID): Project ID
-
-    Response:
-        200: {'data': {...}}
-        404: {'error': 'Project not found with ID: ...'}
-        401: {'error': 'Unauthorized'}
-
-    Example:
-        GET /api/v1/song-projects/projects/550e8400-e29b-41d4-a716-446655440000
-    """
-    user_id = get_current_user_id()
-    if not user_id:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    db: Session = next(get_db())
-    try:
-        result, status_code = song_project_controller.get_project_by_id(db, UUID(user_id), project_id)
-        return jsonify(result), status_code
-    finally:
-        db.close()
-
-
-@api_song_projects_v1.route("/projects/<project_id>/details", methods=["GET"])
-@jwt_required
-def get_project_details(project_id: str):
-    """
-    Get a specific project with all folders and files.
+    Get a specific project by ID (with all folders and files).
 
     Path Parameters:
         - project_id (UUID): Project ID
@@ -172,7 +143,7 @@ def get_project_details(project_id: str):
         401: {'error': 'Unauthorized'}
 
     Example:
-        GET /api/v1/song-projects/projects/550e8400-e29b-41d4-a716-446655440000/details
+        GET /api/v1/song-projects/550e8400-e29b-41d4-a716-446655440000
     """
     user_id = get_current_user_id()
     if not user_id:
@@ -180,13 +151,14 @@ def get_project_details(project_id: str):
 
     db: Session = next(get_db())
     try:
+        # Always return project with details (folders and files)
         result, status_code = song_project_controller.get_project_with_details(db, UUID(user_id), project_id)
         return jsonify(result), status_code
     finally:
         db.close()
 
 
-@api_song_projects_v1.route("/projects/<project_id>", methods=["PUT"])
+@api_song_projects_v1.route("/<project_id>", methods=["PUT"])
 @jwt_required
 def update_project(project_id: str):
     """
@@ -204,7 +176,7 @@ def update_project(project_id: str):
         401: {'error': 'Unauthorized'}
 
     Example:
-        PUT /api/v1/song-projects/projects/550e8400-e29b-41d4-a716-446655440000
+        PUT /api/v1/song-projects/550e8400-e29b-41d4-a716-446655440000
         Body: {
             "project_name": "Updated Project Name",
             "tags": ["rock", "mastered"]
@@ -227,7 +199,7 @@ def update_project(project_id: str):
         db.close()
 
 
-@api_song_projects_v1.route("/projects/<project_id>", methods=["DELETE"])
+@api_song_projects_v1.route("/<project_id>", methods=["DELETE"])
 @jwt_required
 def delete_project(project_id: str):
     """
@@ -242,7 +214,7 @@ def delete_project(project_id: str):
         401: {'error': 'Unauthorized'}
 
     Example:
-        DELETE /api/v1/song-projects/projects/550e8400-e29b-41d4-a716-446655440000
+        DELETE /api/v1/song-projects/550e8400-e29b-41d4-a716-446655440000
     """
     user_id = get_current_user_id()
     if not user_id:
@@ -251,6 +223,60 @@ def delete_project(project_id: str):
     db: Session = next(get_db())
     try:
         result, status_code = song_project_controller.delete_project(db, UUID(user_id), project_id)
+        return jsonify(result), status_code
+    finally:
+        db.close()
+
+
+@api_song_projects_v1.route("/<project_id>/files", methods=["POST"])
+@jwt_required
+def upload_file(project_id: str):
+    """
+    Upload file to project folder.
+
+    Path Parameters:
+        - project_id (UUID): Project ID
+
+    Form Data:
+        - file: File to upload (multipart/form-data)
+        - folder_id (UUID): Target folder ID
+
+    Response:
+        201: {'data': {...}, 'message': 'File uploaded successfully'}
+        400: {'error': 'No file provided' | 'folder_id required' | 'Invalid ID format'}
+        404: {'error': 'Project not found or unauthorized' | 'Folder not found with ID: ...'}
+        401: {'error': 'Unauthorized'}
+        500: {'error': 'Failed to upload file: ...'}
+
+    Example:
+        POST /api/v1/song-projects/550e8400-e29b-41d4-a716-446655440000/files
+        Headers: Authorization: Bearer <JWT_TOKEN>
+        Form Data:
+            file: test.wav (binary)
+            folder_id: 123e4567-e89b-12d3-a456-426614174000
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+
+    file = request.files["file"]
+    folder_id = request.form.get("folder_id")
+
+    if not folder_id:
+        return jsonify({"error": "folder_id required"}), 400
+
+    # Read file data
+    file_data = file.read()
+    filename = file.filename
+
+    db: Session = next(get_db())
+    try:
+        result, status_code = song_project_controller.upload_file(
+            db, UUID(user_id), project_id, folder_id, filename, file_data
+        )
         return jsonify(result), status_code
     finally:
         db.close()

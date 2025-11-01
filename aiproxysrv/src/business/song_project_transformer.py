@@ -8,21 +8,22 @@ import re
 from typing import Any
 
 
-def generate_s3_prefix(project_name: str) -> str:
+def generate_s3_prefix(project_name: str, user_id: str) -> str:
     """
-    Generate S3 prefix from project name (slug-like)
+    Generate S3 prefix from user_id and project name (slug-like)
 
     Args:
         project_name: Project name (e.g., "My Awesome Song")
+        user_id: User UUID (for multi-tenant isolation)
 
     Returns:
-        S3 prefix (e.g., "projects/my-awesome-song/")
+        S3 prefix (e.g., "{user-id}/my-awesome-song/")
 
     Examples:
-        >>> generate_s3_prefix("My Awesome Song")
-        'projects/my-awesome-song/'
-        >>> generate_s3_prefix("Café Müller (2024)")
-        'projects/cafe-muller-2024/'
+        >>> generate_s3_prefix("My Awesome Song", "abc-123")
+        'abc-123/my-awesome-song/'
+        >>> generate_s3_prefix("Café Müller (2024)", "def-456")
+        'def-456/cafe-muller-2024/'
     """
     # Convert to lowercase
     slug = project_name.lower()
@@ -32,7 +33,7 @@ def generate_s3_prefix(project_name: str) -> str:
     slug = slug.strip("-")
     # Collapse multiple hyphens
     slug = re.sub(r"-+", "-", slug)
-    return f"projects/{slug}/"
+    return f"{user_id}/{slug}/"
 
 
 def get_default_folder_structure() -> list[dict[str, str]]:
@@ -50,7 +51,7 @@ def get_default_folder_structure() -> list[dict[str, str]]:
     return [
         {"folder_name": "01 Arrangement", "folder_type": "arrangement", "custom_icon": "fas fa-music"},
         {"folder_name": "02 AI", "folder_type": "ai", "custom_icon": "fas fa-robot"},
-        {"folder_name": "03 Cover", "folder_type": "cover", "custom_icon": "fas fa-image"},
+        {"folder_name": "03 Pictures", "folder_type": "pictures", "custom_icon": "fas fa-image"},
         {"folder_name": "04 Vocal", "folder_type": "vocal", "custom_icon": "fas fa-microphone"},
         {"folder_name": "05 Stems", "folder_type": "stems", "custom_icon": "fas fa-layer-group"},
         {"folder_name": "06 Mix", "folder_type": "mix", "custom_icon": "fas fa-sliders-h"},
@@ -239,12 +240,24 @@ def transform_project_detail_to_response(project: Any) -> dict[str, Any]:
 
     # Add folders with their files
     folders_data = []
+    total_files_live = 0
+    total_size_live = 0
+
     for folder in project.folders:
         folder_data = transform_folder_to_response(folder)
         folder_data["files"] = [transform_file_to_response(file) for file in folder.files]
         folders_data.append(folder_data)
 
+        # Calculate LIVE stats from actual files (Single Source of Truth)
+        total_files_live += len(folder.files)
+        total_size_live += sum(file.file_size_bytes for file in folder.files)
+
     response["folders"] = folders_data
+
+    # Override DB stats with LIVE calculated values (always correct!)
+    response["total_files"] = total_files_live
+    response["total_size_bytes"] = total_size_live
+
     return response
 
 

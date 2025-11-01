@@ -5,11 +5,14 @@ Business logic is in song_project_transformer.py (100% testable).
 This orchestrator is NOT unit-tested (orchestration only).
 """
 
+from __future__ import annotations
+
 import contextlib
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
-from infrastructure.storage.storage_factory import get_storage
+from config.settings import S3_SONG_PROJECTS_BUCKET
+from infrastructure.storage import get_storage
 
 
 if TYPE_CHECKING:
@@ -35,7 +38,7 @@ class SongProjectOrchestrator:
     def __init__(self):
         """Initialize orchestrator with services"""
         self.db_service = song_project_service
-        self.storage = get_storage()
+        self.storage = get_storage(bucket=S3_SONG_PROJECTS_BUCKET)
 
     def create_project_with_structure(
         self,
@@ -66,7 +69,7 @@ class SongProjectOrchestrator:
                 return None
 
             # 2. Generate S3 prefix (business logic in transformer)
-            s3_prefix = generate_s3_prefix(normalized_name)
+            s3_prefix = generate_s3_prefix(normalized_name, str(user_id))
 
             # 3. Create project in DB (CRUD in db_service)
             project = self.db_service.create_project(
@@ -429,6 +432,9 @@ class SongProjectOrchestrator:
                 return None
 
             logger.info("File uploaded to project", project_id=str(project_id), filename=filename, folder=folder_name)
+
+            # Note: Project stats (total_files, total_size_bytes) are calculated LIVE
+            # in transform_project_detail_to_response() from actual files (Single Source of Truth)
 
             # Generate download URL
             download_url = self.storage.get_url(s3_key, expires_in=3600)

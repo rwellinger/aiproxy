@@ -266,6 +266,65 @@ class SongProjectController:
             logger.error("Project deletion error", project_id=project_id, error=str(e), error_type=type(e).__name__)
             return {"error": f"Failed to delete project: {str(e)}"}, 500
 
+    @staticmethod
+    def upload_file(
+        db: Session, user_id: UUID, project_id: str, folder_id: str, filename: str, file_data: bytes
+    ) -> tuple[dict[str, Any], int]:
+        """
+        Upload file to project folder
+
+        Args:
+            db: Database session
+            user_id: User ID (from JWT)
+            project_id: Project UUID
+            folder_id: Folder UUID
+            filename: File name
+            file_data: File bytes
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            # Validate UUID formats
+            try:
+                project_uuid = UUID(project_id)
+                folder_uuid = UUID(folder_id)
+            except ValueError:
+                return {"error": "Invalid ID format"}, 400
+
+            # Get project with details to find folder name
+            project_details = song_project_orchestrator.get_project_with_details(
+                db=db, project_id=project_uuid, user_id=user_id
+            )
+
+            if not project_details:
+                return {"error": "Project not found or unauthorized"}, 404
+
+            # Find folder by ID (project_details is a dict, not an object)
+            folders = project_details.get("folders", [])
+            folder = next((f for f in folders if str(f.get("id")) == str(folder_uuid)), None)
+            if not folder:
+                return {"error": f"Folder not found with ID: {folder_id}"}, 404
+
+            # Upload via orchestrator
+            result = song_project_orchestrator.upload_file_to_project(
+                db=db,
+                project_id=project_uuid,
+                user_id=user_id,
+                folder_name=folder.get("folder_name"),
+                filename=filename,
+                file_data=file_data,
+            )
+
+            if not result:
+                return {"error": "Failed to upload file"}, 500
+
+            return {"data": result, "message": "File uploaded successfully"}, 201
+
+        except Exception as e:
+            logger.error("File upload error", project_id=project_id, error=str(e), error_type=type(e).__name__)
+            return {"error": f"Failed to upload file: {str(e)}"}, 500
+
 
 # Global controller instance
 song_project_controller = SongProjectController()
