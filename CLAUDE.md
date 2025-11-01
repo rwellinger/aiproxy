@@ -2,7 +2,32 @@
 
 **Author:** Rob
 **Language:** English
-**Last Updated:** 2025-10-31
+**Last Updated:** 2025-11-01
+
+---
+
+# Project Structure (CRITICAL!)
+
+**TWO SEPARATE REPOSITORIES:**
+
+## 1. mac_ki_service/ - DEVELOPMENT (Source Code)
+- **Location:** `/Users/robertw/Workspace/mac_ki_service`
+- **Purpose:** Source code, builds, CI/CD, development
+- **Contains:** Python/TypeScript/SCSS code, tests, build configs
+- **Git:** Commits allowed, active development
+- ✅ **Edit code here**
+
+## 2. thwelly_ki_app/ - PRODUCTION (Deployment Only)
+- **Location:** `/Users/robertw/Workspace/thwelly_ki_app`
+- **Purpose:** Production deployment configuration ONLY
+- **Contains:** docker-compose.yml, .env (secrets), runtime scripts, data volumes
+- **Git:** Separate repo, minimal commits
+- ⚠️ **NO source code editing! Only configs/secrets**
+- ⚠️ **FINGER WEG VON CODE - Deployment only!**
+
+**Workflow:**
+1. DEV (mac_ki_service): Code → Commit → CI builds Images → ghcr.io
+2. PROD (thwelly_ki_app): Update docker-compose.yml versions → `docker compose pull && up -d`
 
 ---
 

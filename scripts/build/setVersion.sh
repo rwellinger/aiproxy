@@ -3,7 +3,7 @@
 ###############################################################################
 # setVersion.sh
 #
-# Updates version number across all project configuration files
+# Updates version number across all SOURCE project configuration files
 # Usage: ./setVersion.sh <version>
 # Example: ./setVersion.sh 2.1.8
 #
@@ -11,8 +11,9 @@
 # - aiproxysrv/pyproject.toml
 # - aitestmock/pyproject.toml
 # - aiwebui/package.json
-# - aiproxysrv/docker-compose.yml (celery-worker-app, aiproxysrv-app)
-# - forwardproxy/docker-compose.yml (aiwebui-app)
+#
+# NOTE: Does NOT update production docker-compose.yml files
+#       (those are in separate deployment repo and updated manually)
 ###############################################################################
 
 set -e  # Exit on error
@@ -31,20 +32,19 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 AIPROXYSRV_TOML="$PROJECT_ROOT/aiproxysrv/pyproject.toml"
 AITESTMOCK_TOML="$PROJECT_ROOT/aitestmock/pyproject.toml"
 AIWEBUI_PACKAGE="$PROJECT_ROOT/aiwebui/package.json"
-AIPROXYSRV_COMPOSE="$PROJECT_ROOT/aiproxysrv/docker-compose.yml"
-FORWARDPROXY_COMPOSE="$PROJECT_ROOT/forwardproxy/docker-compose.yml"
 
 # Function to print usage
 usage() {
     echo -e "${YELLOW}Usage:${NC} $0 <version>"
     echo -e "${YELLOW}Example:${NC} $0 2.1.8"
     echo ""
-    echo "Updates version in:"
+    echo "Updates version in SOURCE files:"
     echo "  - aiproxysrv/pyproject.toml"
     echo "  - aitestmock/pyproject.toml"
     echo "  - aiwebui/package.json"
-    echo "  - aiproxysrv/docker-compose.yml (celery-worker-app, aiproxysrv-app)"
-    echo "  - forwardproxy/docker-compose.yml (aiwebui-app)"
+    echo ""
+    echo "Production docker-compose.yml files are in separate deployment repo"
+    echo "and must be updated manually after release."
     exit 1
 }
 
@@ -120,7 +120,7 @@ main() {
     validate_version "$NEW_VERSION"
 
     # Check if all files exist
-    for file in "$AIPROXYSRV_TOML" "$AITESTMOCK_TOML" "$AIWEBUI_PACKAGE" "$AIPROXYSRV_COMPOSE" "$FORWARDPROXY_COMPOSE"; do
+    for file in "$AIPROXYSRV_TOML" "$AITESTMOCK_TOML" "$AIWEBUI_PACKAGE"; do
         if [ ! -f "$file" ]; then
             echo -e "${RED}Error:${NC} File not found: $file"
             exit 1
@@ -128,17 +128,13 @@ main() {
     done
 
     echo ""
-    echo -e "${YELLOW}Updating version to ${GREEN}${NEW_VERSION}${NC}..."
+    echo -e "${YELLOW}Updating SOURCE version to ${GREEN}${NEW_VERSION}${NC}..."
     echo ""
 
-    # Update all files
+    # Update source files only
     update_pyproject "$AIPROXYSRV_TOML" "$NEW_VERSION"
     update_pyproject "$AITESTMOCK_TOML" "$NEW_VERSION"
     update_package_json "$AIWEBUI_PACKAGE" "$NEW_VERSION"
-    echo ""
-    update_docker_compose "$AIPROXYSRV_COMPOSE" "$NEW_VERSION" "celery-worker-app"
-    update_docker_compose "$AIPROXYSRV_COMPOSE" "$NEW_VERSION" "aiproxysrv-app"
-    update_docker_compose "$FORWARDPROXY_COMPOSE" "$NEW_VERSION" "aiwebui-app"
 
     echo ""
 
@@ -149,12 +145,17 @@ main() {
     echo -e "  Content: ${GREEN}v${NEW_VERSION}${NC}"
 
     echo ""
-    echo -e "${GREEN}✓ Successfully updated all version files to ${NEW_VERSION}${NC}"
+    echo -e "${GREEN}✓ Successfully updated all SOURCE version files to ${NEW_VERSION}${NC}"
     echo ""
     echo -e "${YELLOW}Next steps:${NC}"
     echo "  1. Review changes: git diff"
     echo "  2. Commit changes: git add . && git commit -m \"Bump version to v${NEW_VERSION}\""
     echo "  3. Create release: cd scripts/build && ./create_release.sh"
+    echo ""
+    echo -e "${YELLOW}⚠️  IMPORTANT:${NC}"
+    echo "  After release, manually update image versions in:"
+    echo "  - thwelly_ki_app/aiproxysrv/docker-compose.yml"
+    echo "  - thwelly_ki_app/forwardproxy/docker-compose.yml"
     echo ""
 }
 
