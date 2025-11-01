@@ -168,6 +168,7 @@ DOTENV_FILE = ".env_test"
 source = ["src"]
 omit = [
     "*/tests/*",
+    "tests/scripts/*",  # Integration tests for scripts (not unit tests, excluded from coverage)
     "*/alembic/*",
     "*/__pycache__/*",
     "*/venv/*",

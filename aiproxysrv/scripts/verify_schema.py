@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from sqlalchemy import inspect
 
-from db.database import engine
+from db.database import get_engine
 from db.models import Base
 
 
@@ -35,7 +35,7 @@ def verify_schema() -> int:
         0 if schema is consistent, 1 if inconsistencies found, 2 on error
     """
     try:
-        inspector = inspect(engine)
+        inspector = inspect(get_engine())
         errors = []
 
         # 1. Check all expected tables exist
