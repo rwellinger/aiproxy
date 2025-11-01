@@ -122,6 +122,7 @@ class ImageTransformer:
             "lighting": image.lighting,
             "color_palette": image.color_palette,
             "detail_level": image.detail_level,
+            "storage_backend": getattr(image, "storage_backend", "filesystem"),  # 's3' or 'filesystem'
         }
 
         if include_file_path:

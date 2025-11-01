@@ -1,0 +1,50 @@
+<h2 mat-dialog-title>
+  <i class="fas fa-folder-plus"></i>
+  {{ 'songProjects.editor.createTitle' | translate }}
+</h2>
+
+<mat-dialog-content>
+  <p class="dialog-subtitle">{{ 'songProjects.editor.createSubtitle' | translate }}</p>
+
+  <form [formGroup]="projectForm">
+    <!-- Project Name -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'songProjects.editor.projectName' | translate }}</mat-label>
+      <input
+        matInput
+        formControlName="project_name"
+        [placeholder]="'songProjects.editor.projectNameHint' | translate"
+        maxlength="100"
+      />
+      <mat-error *ngIf="getFieldError('project_name')">
+        {{ getFieldError('project_name') | translate }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Tags (Optional) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'songProjects.editor.tags' | translate }}</mat-label>
+      <input
+        matInput
+        formControlName="tags"
+        [placeholder]="'songProjects.editor.tagsHint' | translate"
+      />
+      <mat-hint>{{ 'songProjects.editor.tagsHint' | translate }}</mat-hint>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button type="button" class="cancel-button" (click)="onCancel()">
+    <span>{{ 'songProjects.editor.cancel' | translate }}</span>
+  </button>
+  <button
+    type="button"
+    class="save-button"
+    (click)="onSubmit()"
+    [disabled]="projectForm.invalid"
+  >
+    <i class="fas fa-save"></i>
+    <span>{{ 'songProjects.editor.save' | translate }}</span>
+  </button>
+</mat-dialog-actions>

@@ -54,12 +54,18 @@ class SongSketch(Base):
     # Workflow status
     workflow = Column(String(50), nullable=False, default="draft", index=True)
 
+    # Project relationship (optional)
+    project_id = Column(
+        UUID(as_uuid=True), ForeignKey("song_projects.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    # Relationship: Ein Sketch kann mehrere Songs haben
+    # Relationships
     songs = relationship("Song", back_populates="sketch")
+    project = relationship("SongProject", back_populates="sketches")
 
     def __repr__(self):
         return f"<SongSketch(id={self.id}, title='{self.title}', workflow='{self.workflow}')>"
@@ -90,18 +96,22 @@ class Song(Base):
     # Sketch relationship (optional - song can be created from sketch or directly)
     sketch_id = Column(UUID(as_uuid=True), ForeignKey("song_sketches.id"), nullable=True, index=True)
 
+    # Project relationship (optional)
+    project_id = Column(
+        UUID(as_uuid=True), ForeignKey("song_projects.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+
     # Status tracking
     status = Column(String(50), nullable=False, default="PENDING")  # PENDING, PROGRESS, SUCCESS, FAILURE, CANCELLED
     progress_info = Column(Text, nullable=True)  # JSON string for progress details
     error_message = Column(Text, nullable=True)
 
-    # Relation to song choices (1:n)
+    # Relationships
     choices = relationship(
         "SongChoice", back_populates="song", cascade="all, delete-orphan", order_by="SongChoice.choice_index"
     )
-
-    # Relation to sketch (n:1)
     sketch = relationship("SongSketch", back_populates="songs")
+    project = relationship("SongProject", back_populates="songs")
 
     # MUREKA response data
     mureka_response = Column(Text, nullable=True)  # JSON string der kompletten MUREKA Response
@@ -169,6 +179,8 @@ class GeneratedImage(Base):
     filename = Column(String(255), nullable=False, unique=True)
     file_path = Column(String(500), nullable=False)
     local_url = Column(String(500), nullable=False)
+    s3_key = Column(String(500), nullable=True)  # S3 object key (for S3 storage)
+    storage_backend = Column(String(20), server_default="filesystem", nullable=False)  # 'filesystem' or 's3'
     model_used = Column(String(100), nullable=True)
     prompt_hash = Column(String(32), nullable=True)
     title = Column(String(255), nullable=True)  # Custom user title
@@ -182,8 +194,16 @@ class GeneratedImage(Base):
     detail_level = Column(String(50), nullable=True)  # minimal, moderate, highly-detailed
     text_overlay_metadata = Column(JSON, nullable=True)  # Metadata for text overlays (title, artist, font_style, etc.)
 
+    # Project relationship (optional)
+    project_id = Column(
+        UUID(as_uuid=True), ForeignKey("song_projects.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    project = relationship("SongProject", back_populates="images", foreign_keys=[project_id])
 
     def __repr__(self):
         return f"<GeneratedImage(id={self.id}, filename='{self.filename}', prompt='{self.prompt[:50]}...')>"
@@ -249,6 +269,7 @@ class User(Base):
     # Relationships
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
     equipment = relationship("Equipment", back_populates="user", cascade="all, delete-orphan")
+    song_projects = relationship("SongProject", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', active={self.is_active})>"
@@ -478,3 +499,112 @@ class Equipment(Base):
 
     def __repr__(self):
         return f"<Equipment(id={self.id}, type='{self.type}', name='{self.name}', status='{self.status}')>"
+
+
+class SongProject(Base):
+    """Model for song project management with S3 storage"""
+
+    __tablename__ = "song_projects"
+    __table_args__ = {"extend_existing": True}
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    project_name = Column(String(255), nullable=False)
+
+    # Storage
+    s3_prefix = Column(String(255), nullable=True)
+    local_path = Column(String(500), nullable=True)
+
+    # Sync Status
+    sync_status = Column(String(20), server_default="local")  # 'local', 'cloud', 'synced', 'syncing'
+    last_sync_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Metadata
+    cover_image_id = Column(UUID(as_uuid=True), ForeignKey("generated_images.id", ondelete="SET NULL"), nullable=True)
+    tags = Column(ARRAY(String), server_default="{}")
+    description = Column(Text, nullable=True)
+
+    # Stats
+    total_files = Column(Integer, server_default="0")
+    total_size_bytes = Column(Integer, server_default="0")
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    user = relationship("User", back_populates="song_projects")
+    folders = relationship("ProjectFolder", back_populates="project", cascade="all, delete-orphan")
+    files = relationship("ProjectFile", back_populates="project", cascade="all, delete-orphan")
+    sketches = relationship("SongSketch", back_populates="project")
+    songs = relationship("Song", back_populates="project")
+    images = relationship("GeneratedImage", back_populates="project", foreign_keys="GeneratedImage.project_id")
+
+    def __repr__(self):
+        return f"<SongProject(id={self.id}, name='{self.project_name}', sync_status='{self.sync_status}')>"
+
+
+class ProjectFolder(Base):
+    """Model for project folder structure in S3"""
+
+    __tablename__ = "project_folders"
+    __table_args__ = {"extend_existing": True}
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    project_id = Column(
+        UUID(as_uuid=True), ForeignKey("song_projects.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+
+    folder_name = Column(String(255), nullable=False)
+    folder_type = Column(String(50), nullable=True)
+    s3_prefix = Column(String(255), nullable=True)
+    custom_icon = Column(String(50), nullable=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    project = relationship("SongProject", back_populates="folders")
+    files = relationship("ProjectFile", back_populates="folder", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<ProjectFolder(id={self.id}, name='{self.folder_name}', type='{self.folder_type}')>"
+
+
+class ProjectFile(Base):
+    """Model for files within song projects"""
+
+    __tablename__ = "project_files"
+    __table_args__ = {"extend_existing": True}
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    project_id = Column(
+        UUID(as_uuid=True), ForeignKey("song_projects.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    folder_id = Column(
+        UUID(as_uuid=True), ForeignKey("project_folders.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+
+    # File Info
+    filename = Column(String(255), nullable=False)
+    relative_path = Column(String(500), nullable=False)
+    file_type = Column(String(50), nullable=True)
+    mime_type = Column(String(100), nullable=True)
+
+    # Storage
+    s3_key = Column(String(255), nullable=True, index=True)
+    local_path = Column(String(500), nullable=True)
+    file_size_bytes = Column(Integer, nullable=True)
+    file_hash = Column(String(64), nullable=True)
+
+    # Sync
+    storage_backend = Column(String(20), server_default="s3")
+    is_synced = Column(Boolean, server_default="false")
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    project = relationship("SongProject", back_populates="files")
+    folder = relationship("ProjectFolder", back_populates="files")
+
+    def __repr__(self):
+        return f"<ProjectFile(id={self.id}, filename='{self.filename}', synced={self.is_synced}')>"

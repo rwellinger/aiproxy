@@ -405,6 +405,9 @@
     "compositionBadge": {
       "albumCover": "Album-Cover"
     },
+    "storageBadge": {
+      "s3": "S3"
+    },
     "title": "Bild-Galerie"
   },
   "lyricArchitect": {
@@ -725,6 +728,7 @@
     "promptTemplates": "Prompt Vorlagen",
     "settings": "Einstellungen",
     "sketchLibrary": "Skizzen-Bibliothek",
+    "songProjects": "Song Projekte",
     "textOverlayEditor": "Text-Overlay"
   },
   "songDetailPanel": {
@@ -1594,6 +1598,111 @@
       "deleteError": "Fehler beim Löschen des Equipments",
       "copyError": "Fehler beim Kopieren in die Zwischenablage",
       "equipmentSaved": "Equipment erfolgreich gespeichert"
+    },
+    "validation": {
+      "required": "Dieses Feld ist erforderlich",
+      "maxLength": "Maximal {{max}} Zeichen erlaubt",
+      "formInvalid": "Bitte fülle alle Pflichtfelder aus"
+    }
+  },
+  "songProjects": {
+    "title": "Song Projekte",
+    "list": {
+      "title": "Song Projekt Manager",
+      "subtitle": "Verwalte deine Song-Projekte und Dateien",
+      "search": "Projekte durchsuchen...",
+      "items": "Einträge",
+      "loading": "Projekte werden geladen...",
+      "empty": "Keine Projekte gefunden",
+      "selectPrompt": "Wähle ein Projekt aus der Liste aus, um Details anzuzeigen",
+      "actions": {
+        "new": "Neues Projekt",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "sync": "Synchronisieren",
+        "download": "Herunterladen"
+      },
+      "filters": {
+        "all": "Alle Projekte",
+        "byTag": "Nach Tag filtern"
+      }
+    },
+    "detail": {
+      "title": "Projekt Details",
+      "folders": "Ordner",
+      "files": "Dateien",
+      "noFiles": "Keine Dateien in diesem Ordner",
+      "stats": {
+        "totalFiles": "Dateien Gesamt",
+        "totalSize": "Gesamtgröße",
+        "created": "Erstellt",
+        "updated": "Aktualisiert",
+        "lastSync": "Letzte Synchronisation",
+        "syncStatus": "Sync-Status"
+      },
+      "actions": {
+        "uploadFile": "Datei hochladen",
+        "downloadFile": "Herunterladen",
+        "deleteFile": "Datei löschen",
+        "syncProject": "Projekt synchronisieren",
+        "editProject": "Projekt bearbeiten",
+        "deleteProject": "Projekt löschen",
+        "backToList": "Zurück zu Projekten"
+      },
+      "sections": {
+        "general": "Allgemeine Informationen",
+        "metadata": "Metadaten",
+        "files": "Dateien & Ordner"
+      }
+    },
+    "editor": {
+      "createTitle": "Neues Projekt",
+      "editTitle": "Projekt bearbeiten",
+      "createSubtitle": "Erstelle ein neues Song-Projekt",
+      "editSubtitle": "Projekt-Informationen aktualisieren",
+      "loading": "Projektdaten werden geladen...",
+      "saving": "Speichere...",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "projectName": "Projektname",
+      "projectNameHint": "z.B., Sommervibes 2024",
+      "tags": "Tags",
+      "tagsHint": "Komma-getrennt, z.B., pop, rock, veröffentlicht",
+      "syncStatus": "Sync-Status"
+    },
+    "syncStatus": {
+      "local": "Nur lokal",
+      "cloud": "Nur Cloud",
+      "synced": "Synchronisiert",
+      "syncing": "Synchronisiere..."
+    },
+    "folders": {
+      "arrangement": "Arrangement",
+      "ai": "KI",
+      "pictures": "Bilder",
+      "vocal": "Gesang",
+      "stems": "Stems",
+      "mix": "Mix",
+      "master": "Master",
+      "promotion": "Promotion",
+      "release": "Veröffentlichung",
+      "archive": "Archiv"
+    },
+    "messages": {
+      "createSuccess": "Projekt erfolgreich erstellt",
+      "updateSuccess": "Projekt erfolgreich aktualisiert",
+      "deleteSuccess": "Projekt erfolgreich gelöscht",
+      "deleteConfirm": "Möchtest du dieses Projekt wirklich löschen? Dies wird auch alle Dateien im Projekt löschen.",
+      "uploadSuccess": "Datei erfolgreich hochgeladen",
+      "uploadError": "Fehler beim Hochladen der Datei",
+      "fileTooLarge": "Datei ist zu groß (max {{size}})",
+      "downloadSuccess": "Datei heruntergeladen",
+      "downloadError": "Fehler beim Herunterladen der Datei",
+      "syncSuccess": "Projekt erfolgreich synchronisiert",
+      "syncError": "Fehler beim Synchronisieren des Projekts",
+      "loadError": "Fehler beim Laden des Projekts",
+      "saveError": "Fehler beim Speichern des Projekts",
+      "deleteError": "Fehler beim Löschen des Projekts"
     },
     "validation": {
       "required": "Dieses Feld ist erforderlich",

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aiproxysrv"
-version = "2.7.3"
+version = "2.8.0"
 dependencies = [
     "Flask>=3.1.2",
     "Flask-CORS>=4.0.0",
@@ -29,7 +29,8 @@ dependencies = [
     "tomli>=2.0.0",
     "loguru>=0.7.0",
     "tiktoken>=0.5.1",
-    "Pillow>=11.0.0"
+    "Pillow>=11.0.0",
+    "boto3>=1.34.0"
 ]
 
 [project.optional-dependencies]
@@ -174,6 +175,7 @@ omit = [
     # Infrastructure - not unit-testable per CLAUDE.md
     "src/db/*_service.py",                 # DB/CRUD services (no business logic)
     "src/infrastructure/*.py",             # Infrastructure services (file I/O, PIL/Pillow - no business logic)
+    "src/infrastructure/storage/*.py",     # Storage layer (S3, MinIO - infrastructure, no business logic)
     "src/adapters/*/*.py",                 # External API adapters (OpenAI, Mureka, Ollama - infrastructure, mock hell)
     "src/celery_app/tasks.py",             # Celery tasks (infrastructure)
     "src/celery_app/slot_manager.py",      # Celery slot management (global state)

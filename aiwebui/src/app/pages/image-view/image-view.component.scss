@@ -7,8 +7,12 @@
 
   &.master-detail-layout {
     display: grid;
-    grid-template-columns: 35fr 65fr;
+    grid-template-columns: 40fr 60fr;  // Gleiche Breite wie Song Gallery (mehr Platz für Buttons)
     gap: 0;
+
+    @media (max-width: 1200px) {
+      grid-template-columns: 1fr;  // Stacked layout on smaller screens
+    }
   }
 
   .image-grid {
@@ -204,6 +208,31 @@
 
       i {
         color: #9c27b0;
+      }
+    }
+
+    .storage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      white-space: nowrap;
+
+      i {
+        font-size: 0.75rem;
+      }
+    }
+
+    .s3-badge {
+      background-color: rgba(33, 150, 243, 0.1);
+      color: #2196f3;
+      border: 1px solid rgba(33, 150, 243, 0.3);
+
+      i {
+        color: #2196f3;
       }
     }
   }

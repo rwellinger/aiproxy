@@ -30,6 +30,8 @@ interface GeneratedImage {
   created_at: string;
   title?: string;
   composition?: string;
+  display_url?: string;  // Backend proxy URL for S3 images
+  url?: string;          // Alternative URL field
 }
 
 interface UserProfile {
@@ -185,7 +187,9 @@ export class TextOverlayEditorComponent implements OnInit {
     if (!ctx) return;
 
     // Fetch image as blob with JWT token (via HttpClient)
-    this.http.get(`${this.apiConfig.getBaseUrl()}/api/v1/image/${this.selectedImage.filename}`, {
+    // Use display_url for S3 images, fallback to filename-based URL for legacy filesystem images
+    const imageUrl = this.selectedImage.display_url ||  this.selectedImage.url || `/api/v1/image/${this.selectedImage.filename}`;
+    this.http.get(`${this.apiConfig.getBaseUrl()}${imageUrl}`, {
       responseType: 'blob'
     })
       .pipe(takeUntilDestroyed(this.destroyRef))

@@ -7,8 +7,12 @@
 
   &.master-detail-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 40fr 60fr;  // 40% Liste (mehr Platz für Buttons), 60% Detail
     gap: 0;
+
+    @media (max-width: 1200px) {
+      grid-template-columns: 1fr;  // Stacked layout on smaller screens
+    }
   }
 
   .song-grid {

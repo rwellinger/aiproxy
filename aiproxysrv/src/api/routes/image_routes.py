@@ -3,8 +3,9 @@ DALL-E Image Generation Routes with Pydantic validation
 """
 
 import traceback
+from io import BytesIO
 
-from flask import Blueprint, jsonify, request, send_from_directory
+from flask import Blueprint, jsonify, request, send_file, send_from_directory
 from flask_pydantic import validate
 
 from api.auth_middleware import get_current_user_id, jwt_required
@@ -78,7 +79,7 @@ def list_images_for_text_overlay():
 @api_image_v1.route("/<path:filename>")
 @jwt_required
 def serve_image(filename):
-    """Serve stored images"""
+    """Serve stored images from filesystem (backward compatibility)"""
     try:
         logger.debug("Serving image", filename=filename)
         return send_from_directory(IMAGES_DIR, filename)
@@ -91,6 +92,57 @@ def serve_image(filename):
             stacktrace=traceback.format_exc(),
         )
         return jsonify({"error": "Image not found"}), 404
+
+
+@api_image_v1.route("/s3/<string:image_id>", methods=["GET"])
+@jwt_required
+def serve_s3_image(image_id):
+    """Serve S3-stored images via backend proxy (streams from S3)"""
+    try:
+        from config.settings import S3_IMAGES_BUCKET
+        from db.image_service import ImageService
+        from infrastructure.storage import get_storage
+
+        logger.debug("Serving S3 image", image_id=image_id)
+
+        # Get image from DB
+        image = ImageService.get_image_by_id(image_id)
+        if not image:
+            return jsonify({"error": "Image not found"}), 404
+
+        # Verify it's an S3 image
+        if image.storage_backend != 's3' or not image.s3_key:
+            return jsonify({"error": "Not an S3 image"}), 400
+
+        # Stream from S3
+        storage = get_storage(bucket=S3_IMAGES_BUCKET)
+        image_data = storage.download(image.s3_key)
+
+        # Determine Content-Type from filename
+        content_type = 'image/png'
+        if image.filename.lower().endswith('.jpg') or image.filename.lower().endswith('.jpeg'):
+            content_type = 'image/jpeg'
+        elif image.filename.lower().endswith('.webp'):
+            content_type = 'image/webp'
+
+        logger.debug("Streaming S3 image", image_id=image_id, s3_key=image.s3_key, content_type=content_type)
+
+        return send_file(
+            BytesIO(image_data),
+            mimetype=content_type,
+            as_attachment=False,
+            download_name=image.filename
+        )
+
+    except Exception as e:
+        logger.error(
+            "Error serving S3 image",
+            image_id=image_id,
+            error=str(e),
+            error_type=type(e).__name__,
+            stacktrace=traceback.format_exc(),
+        )
+        return jsonify({"error": "Failed to load image from S3"}), 500
 
 
 @api_image_v1.route("/id/<string:image_id>", methods=["GET"])

@@ -405,6 +405,9 @@
     "compositionBadge": {
       "albumCover": "Album Cover"
     },
+    "storageBadge": {
+      "s3": "S3"
+    },
     "title": "Picture Gallery"
   },
   "lyricArchitect": {
@@ -725,6 +728,7 @@
     "promptTemplates": "Prompt Templates",
     "settings": "Settings",
     "sketchLibrary": "Sketch Library",
+    "songProjects": "Song Projects",
     "textOverlayEditor": "Text Overlay"
   },
   "songDetailPanel": {
@@ -1594,6 +1598,111 @@
       "deleteError": "Failed to delete equipment",
       "copyError": "Failed to copy to clipboard",
       "equipmentSaved": "Equipment saved successfully"
+    },
+    "validation": {
+      "required": "This field is required",
+      "maxLength": "Maximum {{max}} characters allowed",
+      "formInvalid": "Please fill in all required fields"
+    }
+  },
+  "songProjects": {
+    "title": "Song Projects",
+    "list": {
+      "title": "Song Project Manager",
+      "subtitle": "Manage your song projects and files",
+      "search": "Search projects...",
+      "items": "items",
+      "loading": "Loading projects...",
+      "empty": "No projects found",
+      "selectPrompt": "Select a project from the list to view details",
+      "actions": {
+        "new": "New Project",
+        "edit": "Edit",
+        "delete": "Delete",
+        "sync": "Sync",
+        "download": "Download"
+      },
+      "filters": {
+        "all": "All Projects",
+        "byTag": "Filter by tag"
+      }
+    },
+    "detail": {
+      "title": "Project Details",
+      "folders": "Folders",
+      "files": "Files",
+      "noFiles": "No files in this folder",
+      "stats": {
+        "totalFiles": "Total Files",
+        "totalSize": "Total Size",
+        "created": "Created",
+        "updated": "Updated",
+        "lastSync": "Last Sync",
+        "syncStatus": "Sync Status"
+      },
+      "actions": {
+        "uploadFile": "Upload File",
+        "downloadFile": "Download",
+        "deleteFile": "Delete File",
+        "syncProject": "Sync Project",
+        "editProject": "Edit Project",
+        "deleteProject": "Delete Project",
+        "backToList": "Back to Projects"
+      },
+      "sections": {
+        "general": "General Information",
+        "metadata": "Metadata",
+        "files": "Files & Folders"
+      }
+    },
+    "editor": {
+      "createTitle": "New Project",
+      "editTitle": "Edit Project",
+      "createSubtitle": "Create a new song project",
+      "editSubtitle": "Update project information",
+      "loading": "Loading project data...",
+      "saving": "Saving...",
+      "save": "Save",
+      "cancel": "Cancel",
+      "projectName": "Project Name",
+      "projectNameHint": "e.g., Summer Vibes 2024",
+      "tags": "Tags",
+      "tagsHint": "Comma-separated, e.g., pop, rock, released",
+      "syncStatus": "Sync Status"
+    },
+    "syncStatus": {
+      "local": "Local Only",
+      "cloud": "Cloud Only",
+      "synced": "Synced",
+      "syncing": "Syncing..."
+    },
+    "folders": {
+      "arrangement": "Arrangement",
+      "ai": "AI",
+      "pictures": "Pictures",
+      "vocal": "Vocal",
+      "stems": "Stems",
+      "mix": "Mix",
+      "master": "Master",
+      "promotion": "Promotion",
+      "release": "Release",
+      "archive": "Archive"
+    },
+    "messages": {
+      "createSuccess": "Project created successfully",
+      "updateSuccess": "Project updated successfully",
+      "deleteSuccess": "Project deleted successfully",
+      "deleteConfirm": "Are you sure you want to delete this project? This will also delete all files in the project.",
+      "uploadSuccess": "File uploaded successfully",
+      "uploadError": "Failed to upload file",
+      "fileTooLarge": "File is too large (max {{size}})",
+      "downloadSuccess": "File downloaded",
+      "downloadError": "Failed to download file",
+      "syncSuccess": "Project synced successfully",
+      "syncError": "Failed to sync project",
+      "loadError": "Failed to load project",
+      "saveError": "Failed to save project",
+      "deleteError": "Failed to delete project"
     },
     "validation": {
       "required": "This field is required",

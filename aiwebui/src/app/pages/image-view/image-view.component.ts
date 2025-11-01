@@ -40,6 +40,7 @@ interface ImageData {
     composition?: string;
     created_at: string;
     updated_at?: string;
+    storage_backend?: string;  // 's3' or 'filesystem'
 }
 
 interface PaginationInfo {

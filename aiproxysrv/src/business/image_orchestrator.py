@@ -6,8 +6,9 @@ from typing import TYPE_CHECKING, Any, Optional
 from business.bulk_delete_transformer import BulkDeleteTransformer, DeleteResult
 from business.image_transformer import ImageTransformer
 from business.image_validator import ImageValidator
-from config.settings import DELETE_PHYSICAL_FILES, IMAGE_BASE_URL, IMAGES_DIR, OPENAI_MODEL
+from config.settings import DELETE_PHYSICAL_FILES, IMAGES_DIR, OPENAI_MODEL, S3_IMAGES_BUCKET
 from db.image_service import ImageService
+from infrastructure.storage import get_storage
 from utils.logger import logger
 
 
@@ -26,9 +27,10 @@ class ImageOrchestrator:
     """Orchestrates image operations (calls services + repository)"""
 
     def __init__(self):
-        self.images_dir = Path(IMAGES_DIR)
+        self.images_dir = Path(IMAGES_DIR)  # Keep for backward compatibility (old filesystem images)
         self.images_dir.mkdir(parents=True, exist_ok=True)
         self.file_service = FileManagementService()
+        self.s3_storage = get_storage(bucket=S3_IMAGES_BUCKET)  # S3 storage for new images
 
     def generate_image(
         self,
@@ -96,11 +98,8 @@ class ImageOrchestrator:
             openai_service = OpenAIService()
             image_url = openai_service.generate_image(final_prompt, size)
 
-            # Download and save image
-            filename, file_path = self._process_and_save_image(image_url, prompt)
-
-            # Build local URL
-            local_url = f"{IMAGE_BASE_URL}/{filename}"
+            # Download and save image to S3
+            filename, s3_key = self._process_and_save_image(image_url, prompt)
 
             # Save metadata to database and get the generated image record
             generated_image = self._save_image_metadata(
@@ -109,18 +108,23 @@ class ImageOrchestrator:
                 enhanced_prompt=enhanced_prompt if enhanced_prompt != prompt else None,
                 size=size,
                 filename=filename,
-                file_path=file_path,
-                local_url=local_url,
+                file_path=s3_key,  # Store S3 key in file_path (for backward compatibility)
+                local_url="",  # Will be generated dynamically via backend proxy
                 title=title,
                 artistic_style=artistic_style,
                 composition=composition,
                 lighting=lighting,
                 color_palette=color_palette,
                 detail_level=detail_level,
+                s3_key=s3_key,
+                storage_backend="s3",
             )
 
+            # Generate relative backend proxy path (frontend adds base URL via ApiConfigService)
+            backend_path = f"/api/v1/image/s3/{generated_image.id}" if generated_image else ""
+
             logger.info(f"Image generated successfully: {filename}")
-            response = {"url": local_url, "saved_path": str(file_path)}
+            response = {"url": backend_path, "saved_path": s3_key}
 
             # Include image metadata if database save was successful
             if generated_image:
@@ -242,17 +246,33 @@ class ImageOrchestrator:
 
         Raises:
             ImageGenerationError: If deletion fails
+
+        Note:
+            - S3 images: Moved to archive/ folder (soft delete)
+            - Filesystem images: Deleted permanently (if DELETE_PHYSICAL_FILES=True)
         """
         try:
             image = ImageService.get_image_by_id(image_id)
             if not image:
                 return False
 
-            # Delete physical file if enabled
+            # Handle physical file deletion/archiving
             if DELETE_PHYSICAL_FILES:
-                self.file_service.delete_file_if_exists(image.file_path)
+                # Check if S3 image
+                if hasattr(image, "storage_backend") and image.storage_backend == "s3" and hasattr(image, "s3_key") and image.s3_key:
+                    # Archive S3 image: shared/{id}.png → archive/{id}.png
+                    archive_key = image.s3_key.replace("shared/", "archive/", 1)
+                    move_success = self.s3_storage.move(image.s3_key, archive_key)
+                    if move_success:
+                        logger.info("S3 image archived", image_id=image_id, source=image.s3_key, archive=archive_key)
+                    else:
+                        logger.warning("Failed to archive S3 image", image_id=image_id, s3_key=image.s3_key)
+                else:
+                    # Delete filesystem image (old images)
+                    self.file_service.delete_file_if_exists(image.file_path)
+                    logger.info("Filesystem image deleted", image_id=image_id, file_path=image.file_path)
             else:
-                logger.info("Skipping physical file deletion (disabled)", file_path=image.file_path)
+                logger.info("Skipping physical file deletion (disabled)", image_id=image_id)
 
             # Delete metadata from database
             success = ImageService.delete_image_metadata(image_id)
@@ -294,9 +314,18 @@ class ImageOrchestrator:
                     delete_results.append(DeleteResult(image_id, "not_found"))
                     continue
 
-                # Delete physical file if enabled
+                # Delete/archive physical file if enabled
                 if DELETE_PHYSICAL_FILES:
-                    self.file_service.delete_file_if_exists(image.file_path)
+                    # Check if S3 image
+                    if hasattr(image, "storage_backend") and image.storage_backend == "s3" and hasattr(image, "s3_key") and image.s3_key:
+                        # Archive S3 image: shared/{id}.png → archive/{id}.png
+                        archive_key = image.s3_key.replace("shared/", "archive/", 1)
+                        move_success = self.s3_storage.move(image.s3_key, archive_key)
+                        if not move_success:
+                            logger.warning("Failed to archive S3 image during bulk delete", image_id=image_id, s3_key=image.s3_key)
+                    else:
+                        # Delete filesystem image (old images)
+                        self.file_service.delete_file_if_exists(image.file_path)
 
                 # Delete metadata from database
                 success = ImageService.delete_image_metadata(image_id)
@@ -408,14 +437,24 @@ class ImageOrchestrator:
             if not source_image:
                 raise ImageGenerationError(f"Source image not found: {source_image_id}")
 
-            source_path = source_image.file_path
-            if not source_path:
-                raise ImageGenerationError("Source image file path not found")
-
             logger.info("Adding text overlay", source_image_id=source_image_id, title=title)
 
-            # === INFRASTRUCTURE LAYER: Load image ===
-            img = ImageFileService.load_image(source_path)
+            # === INFRASTRUCTURE LAYER: Load image (from S3 or filesystem) ===
+            import io
+            import uuid
+
+            from PIL import Image
+
+            if source_image.storage_backend == 's3' and source_image.s3_key:
+                # Load from S3
+                logger.debug("Loading source image from S3", s3_key=source_image.s3_key)
+                image_data = self.s3_storage.download(source_image.s3_key)
+                img = Image.open(io.BytesIO(image_data)).convert("RGBA")
+            else:
+                # Load from filesystem (backward compatibility)
+                logger.debug("Loading source image from filesystem", file_path=source_image.file_path)
+                img = ImageFileService.load_image(source_image.file_path)
+
             draw = ImageDraw.Draw(img)
 
             # === BUSINESS LAYER: Calculate title parameters ===
@@ -524,18 +563,29 @@ class ImageOrchestrator:
                     artist_anchor,
                 )
 
-            # === INFRASTRUCTURE LAYER: Save image ===
-            output_path = ImageFileService.generate_unique_filename(source_path, "_with_text")
-            ImageFileService.save_image(img, output_path)
+            # === INFRASTRUCTURE LAYER: Save image to S3 ===
+            # Convert PIL Image to bytes
+            img_rgb = img.convert("RGB")
+            output_buffer = io.BytesIO()
+            img_rgb.save(output_buffer, format='PNG')
+            image_data = output_buffer.getvalue()
+
+            # Generate unique S3 key
+            new_image_id = str(uuid.uuid4())
+            s3_key = f"shared/{new_image_id}.png"
+            output_filename = f"{new_image_id}_with_text.png"
+
+            # Upload to S3
+            self.s3_storage.upload(image_data, s3_key)
+            logger.info("Text overlay image saved to S3", s3_key=s3_key)
 
             # === REPOSITORY LAYER: Create new DB record ===
-            output_filename = Path(output_path).name
             new_image = ImageService.save_generated_image(
                 prompt=source_image.prompt,
                 size=source_image.size,
                 filename=output_filename,
-                file_path=output_path,
-                local_url=f"/api/v1/image/{output_filename}",
+                file_path=s3_key,  # Store S3 key
+                local_url="",  # Will be generated via backend proxy
                 model_used=source_image.model_used,
                 prompt_hash=source_image.prompt_hash,
                 title=title,
@@ -546,6 +596,8 @@ class ImageOrchestrator:
                 lighting=source_image.lighting,
                 color_palette=source_image.color_palette,
                 detail_level=source_image.detail_level,
+                s3_key=s3_key,
+                storage_backend='s3',
             )
 
             if not new_image:
@@ -574,11 +626,14 @@ class ImageOrchestrator:
             finally:
                 db.close()
 
-            logger.info("Text overlay added successfully", new_image_id=str(new_image.id), output_path=output_path)
+            # Generate relative backend proxy path (frontend adds base URL via ApiConfigService)
+            backend_path = f"/api/v1/image/s3/{new_image.id}"
+
+            logger.info("Text overlay added successfully", new_image_id=str(new_image.id), s3_key=s3_key)
 
             return {
                 "image_id": str(new_image.id),
-                "image_url": new_image.local_url,
+                "image_url": backend_path,
                 "metadata": new_image.text_overlay_metadata,
             }
 
@@ -590,24 +645,41 @@ class ImageOrchestrator:
             )
             raise ImageGenerationError(f"Failed to add text overlay: {e}") from e
 
-    def _process_and_save_image(self, image_url: str, prompt: str) -> tuple[str, Path]:
-        """Download and save image to filesystem"""
-        # Business logic: Generate filename (delegated to transformer)
+    def _process_and_save_image(self, image_url: str, prompt: str) -> tuple[str, str]:
+        """Download and save image to S3
+
+        Returns:
+            tuple: (filename, s3_key)
+        """
+        import uuid
+
+        import requests
+
+        # Generate unique ID and filename
+        image_id = str(uuid.uuid4())
         filename = ImageTransformer.generate_filename(prompt)
-        file_path = self.images_dir / filename
 
-        # Download and save
-        self.file_service.download_and_save_file(image_url, file_path)
+        # Download image from OpenAI
+        response = requests.get(image_url, timeout=30)
+        response.raise_for_status()
+        image_data = response.content
 
-        logger.info("Image stored", file_path=str(file_path), filename=filename)
-        return filename, file_path
+        # Generate S3 key: shared/{image_id}.png
+        # Note: Using "shared" prefix (no multi-tenant for images yet)
+        s3_key = f"shared/{image_id}.png"
+
+        # Upload to S3
+        self.s3_storage.upload(image_data, s3_key)
+
+        logger.info("Image stored in S3", s3_key=s3_key, filename=filename, bucket=S3_IMAGES_BUCKET)
+        return filename, s3_key
 
     def _save_image_metadata(
         self,
         prompt: str,
         size: str,
         filename: str,
-        file_path: Path,
+        file_path: str,
         local_url: str,
         title: str | None = None,
         user_prompt: str | None = None,
@@ -617,6 +689,8 @@ class ImageOrchestrator:
         lighting: str | None = None,
         color_palette: str | None = None,
         detail_level: str | None = None,
+        s3_key: str | None = None,
+        storage_backend: str = "filesystem",
     ) -> Optional["GeneratedImage"]:
         """Save image metadata to database"""
         # Business logic: Generate prompt hash (delegated to transformer)
@@ -628,7 +702,7 @@ class ImageOrchestrator:
             enhanced_prompt=enhanced_prompt,
             size=size,
             filename=filename,
-            file_path=str(file_path),
+            file_path=file_path,
             local_url=local_url,
             model_used=OPENAI_MODEL,
             prompt_hash=prompt_hash,
@@ -638,9 +712,26 @@ class ImageOrchestrator:
             lighting=lighting,
             color_palette=color_palette,
             detail_level=detail_level,
+            s3_key=s3_key,
+            storage_backend=storage_backend,
         )
 
     def _transform_image_to_api_format(self, image, include_file_path: bool = False) -> dict[str, Any]:
-        """Transform database image object to API response format"""
+        """Transform database image object to API response format with backend proxy URLs for S3"""
         # Business logic: Transform to API format (delegated to transformer)
-        return ImageTransformer.transform_image_to_api_format(image, include_file_path)
+        result = ImageTransformer.transform_image_to_api_format(image, include_file_path)
+
+        # Generate backend proxy URL for S3 images (streams via /api/v1/image/s3/<id>)
+        if (
+            hasattr(image, "storage_backend")
+            and image.storage_backend == "s3"
+            and hasattr(image, "s3_key")
+            and image.s3_key
+        ):
+            # Generate relative backend proxy path (frontend adds base URL via ApiConfigService)
+            backend_path = f"/api/v1/image/s3/{image.id}"
+            result["url"] = backend_path
+            result["display_url"] = backend_path
+            logger.debug("Generated backend proxy path for S3 image", image_id=str(image.id), s3_key=image.s3_key)
+
+        return result

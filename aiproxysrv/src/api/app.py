@@ -27,6 +27,7 @@ from .routes.openai_chat_routes import api_openai_chat_v1
 from .routes.prompt_routes import api_prompt_v1
 from .routes.redis_routes import api_redis_v1
 from .routes.sketch_routes import api_sketch_v1
+from .routes.song_project_routes import api_song_projects_v1
 from .routes.song_routes import api_song_task_v1, api_song_v1
 from .routes.user_routes import api_user_v1
 
@@ -553,6 +554,7 @@ def create_app():
     app.register_blueprint(api_image_v1)
     app.register_blueprint(api_song_v1)
     app.register_blueprint(api_song_task_v1)
+    app.register_blueprint(api_song_projects_v1)
     app.register_blueprint(api_sketch_v1)
     app.register_blueprint(api_instrumental_v1)
     app.register_blueprint(api_instrumental_task_v1)

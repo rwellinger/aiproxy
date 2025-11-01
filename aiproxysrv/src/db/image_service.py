@@ -25,6 +25,8 @@ class ImageService:
         lighting: str | None = None,
         color_palette: str | None = None,
         detail_level: str | None = None,
+        s3_key: str | None = None,
+        storage_backend: str = "filesystem",
     ) -> GeneratedImage | None:
         """
         Save generated image metadata to database
@@ -42,6 +44,8 @@ class ImageService:
                 filename=filename,
                 file_path=file_path,
                 local_url=local_url,
+                s3_key=s3_key,
+                storage_backend=storage_backend,
                 model_used=model_used,
                 prompt_hash=prompt_hash,
                 title=title,
