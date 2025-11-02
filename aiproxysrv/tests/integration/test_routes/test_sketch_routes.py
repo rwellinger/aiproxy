@@ -20,9 +20,24 @@ from schemas.sketch_schemas import SketchCreateRequest, SketchListResponse, Sket
 @pytest.fixture
 def mock_sketch_db_model():
     """Mock SongSketch database model instance"""
-    mock = MagicMock(spec=["id", "title", "lyrics", "prompt", "tags", "workflow",
-                           "description_long", "description_short", "description_tags",
-                           "info", "project_id", "project_name", "created_at", "updated_at"])
+    mock = MagicMock(
+        spec=[
+            "id",
+            "title",
+            "lyrics",
+            "prompt",
+            "tags",
+            "workflow",
+            "description_long",
+            "description_short",
+            "description_tags",
+            "info",
+            "project_id",
+            "project_name",
+            "created_at",
+            "updated_at",
+        ]
+    )
     mock.id = uuid4()
     mock.title = "Test Sketch"
     mock.lyrics = "[Verse 1]\nTest lyrics"
