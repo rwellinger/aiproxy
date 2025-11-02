@@ -1,5 +1,7 @@
 """Image database service layer"""
 
+from sqlalchemy.orm import joinedload
+
 from db.database import SessionLocal
 from db.models import GeneratedImage
 from utils.logger import logger
@@ -113,9 +115,11 @@ class ImageService:
         limit: int = 20, offset: int = 0, search: str = "", sort_by: str = "created_at", sort_direction: str = "desc"
     ) -> list[GeneratedImage]:
         """Get images with pagination, search and sorting"""
+        from sqlalchemy.orm import joinedload
+
         db = SessionLocal()
         try:
-            query = db.query(GeneratedImage)
+            query = db.query(GeneratedImage).options(joinedload(GeneratedImage.project_references))
 
             # Apply search filter if provided
             if search:
@@ -181,7 +185,12 @@ class ImageService:
         """Get image metadata by ID"""
         db = SessionLocal()
         try:
-            return db.query(GeneratedImage).filter(GeneratedImage.id == image_id).first()
+            return (
+                db.query(GeneratedImage)
+                .options(joinedload(GeneratedImage.project_references))
+                .filter(GeneratedImage.id == image_id)
+                .first()
+            )
         finally:
             db.close()
 
@@ -202,6 +211,7 @@ class ImageService:
 
             query = (
                 db.query(GeneratedImage)
+                .options(joinedload(GeneratedImage.project_references))  # Eager load to prevent lazy load errors
                 .filter(GeneratedImage.title.isnot(None))
                 .filter(GeneratedImage.title != "")
                 .filter(GeneratedImage.text_overlay_metadata.is_(None))  # Exclude overlay images
@@ -277,3 +287,41 @@ class ImageService:
             return False
         finally:
             db.close()
+
+    @staticmethod
+    def get_projects_for_image(image_id: str) -> list[dict]:
+        """
+        Get list of projects this image is assigned to.
+        Returns list of dicts with project_id and project_name.
+        """
+        from db.models import ProjectImageReference, SongProject
+
+        db = SessionLocal()
+        try:
+            # Query project_image_references joined with song_projects
+            references = (
+                db.query(ProjectImageReference, SongProject)
+                .join(SongProject, ProjectImageReference.project_id == SongProject.id)
+                .filter(ProjectImageReference.image_id == image_id)
+                .all()
+            )
+
+            projects = []
+            for _ref, project in references:
+                projects.append({"project_id": str(project.id), "project_name": project.project_name})
+
+            logger.debug("Projects retrieved for image", image_id=image_id, count=len(projects))
+            return projects
+        except Exception as e:
+            logger.error(
+                "Failed to get projects for image", image_id=image_id, error=str(e), error_type=type(e).__name__
+            )
+            return []
+        finally:
+            db.close()
+
+
+# Standalone wrapper function for orchestrator imports
+def get_image_by_id(_db, image_id):
+    """Wrapper function for ImageService.get_image_by_id (db parameter ignored, service uses own session)"""
+    return ImageService.get_image_by_id(image_id)

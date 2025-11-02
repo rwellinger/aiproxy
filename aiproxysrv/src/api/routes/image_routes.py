@@ -17,6 +17,7 @@ from schemas.image_schemas import (
     ImageListRequest,
     ImageUpdateRequest,
 )
+from schemas.project_asset_schemas import AssignToProjectRequest
 from utils.logger import logger
 
 
@@ -184,6 +185,33 @@ def update_image_metadata(image_id: str, body: ImageUpdateRequest):
     """Update image metadata (title and/or tags)"""
     try:
         response_data, status_code = image_controller.update_image_metadata(image_id, body.title, body.tags)
+        return jsonify(response_data), status_code
+    except Exception as e:
+        error_response = ErrorResponse(error=str(e))
+        return jsonify(error_response.dict()), 500
+
+
+@api_image_v1.route("/id/<string:image_id>/assign-to-project", methods=["POST"])
+@jwt_required
+@validate()
+def assign_to_project(image_id: str, body: AssignToProjectRequest):
+    """Assign image to project"""
+    try:
+        response_data, status_code = image_controller.assign_to_project(
+            image_id, str(body.project_id), str(body.folder_id) if body.folder_id else None
+        )
+        return jsonify(response_data), status_code
+    except Exception as e:
+        error_response = ErrorResponse(error=str(e))
+        return jsonify(error_response.dict()), 500
+
+
+@api_image_v1.route("/id/<string:image_id>/projects", methods=["GET"])
+@jwt_required
+def get_projects_for_image(image_id: str):
+    """Get list of projects this image is assigned to"""
+    try:
+        response_data, status_code = image_controller.get_projects_for_image(image_id)
         return jsonify(response_data), status_code
     except Exception as e:
         error_response = ErrorResponse(error=str(e))

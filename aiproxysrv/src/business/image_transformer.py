@@ -101,6 +101,11 @@ class ImageTransformer:
         has_text_overlay = image.text_overlay_metadata is not None
         display_url = ImageTransformer.get_display_url(image.local_url, has_text_overlay)
 
+        # Check if image has project references (N:M relationship)
+        projects_count = 0
+        if hasattr(image, "project_references") and image.project_references:
+            projects_count = len(image.project_references)
+
         image_data = {
             "id": str(image.id),
             "user_prompt": image.user_prompt,
@@ -114,6 +119,7 @@ class ImageTransformer:
             "title": image.title,
             "tags": image.tags,
             "text_overlay_metadata": image.text_overlay_metadata,
+            "projects_count": projects_count,  # Number of projects this image is assigned to
             "created_at": image.created_at.isoformat() if image.created_at else None,
             "updated_at": image.updated_at.isoformat() if image.updated_at else None,
             "prompt_hash": image.prompt_hash,

@@ -697,3 +697,29 @@
     50% { opacity: 1; }
     80%, 100% { opacity: 0; }
 }
+
+// ===== PROJECT BADGE STYLING =====
+// Badge for showing project assignment in galleries
+@mixin project-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    background-color: rgba($info-color, 0.1);
+    color: $info-color;
+    cursor: pointer;
+    transition: $transition-standard;
+
+    i {
+        font-size: 0.75rem;
+    }
+
+    &:hover {
+        background-color: $info-color;
+        color: $background-white;
+        transform: translateY(-1px);
+    }
+}

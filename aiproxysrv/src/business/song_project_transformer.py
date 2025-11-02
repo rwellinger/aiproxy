@@ -219,6 +219,7 @@ def transform_file_to_response(file: Any, download_url: str | None = None) -> di
         "mime_type": file.mime_type,
         "file_size_bytes": file.file_size_bytes,
         "storage_backend": file.storage_backend,
+        "s3_key": file.s3_key,
         "is_synced": file.is_synced,
         "download_url": download_url,
         "created_at": file.created_at.isoformat() if file.created_at else None,
@@ -325,3 +326,123 @@ def validate_sync_status(status: str) -> bool:
     """
     valid_statuses = {"local", "cloud", "synced", "syncing"}
     return status in valid_statuses
+
+
+def transform_song_to_assigned_response(song: Any) -> dict[str, Any]:  # pragma: no cover
+    """
+    Transform Song DB model to assigned song API response format (pure function)
+
+    NOTE: No unit tests - Simple attribute mapper without business logic.
+    Testing would only verify mock setup, not real behavior (CLAUDE.md rule).
+
+    Args:
+        song: Song DB model instance
+
+    Returns:
+        Dictionary with song data for API response
+
+    Examples:
+        >>> class MockSong:
+        ...     id = "abc-123"
+        ...     title = "Summer Vibes"
+        ...     workflow = "final"
+        ...     file_type = "flac"
+        ...     file_size_bytes = 3355443
+        ...     created_at = None
+        >>> transform_song_to_assigned_response(MockSong())
+        {'id': 'abc-123', 'title': 'Summer Vibes', 'workflow': 'final', 'file_type': 'flac', 'file_size_bytes': 3355443, 'created_at': None}
+    """
+    return {
+        "id": str(song.id),
+        "title": song.title,
+        "workflow": song.workflow if hasattr(song, "workflow") else None,
+        "file_type": song.file_type if hasattr(song, "file_type") else None,
+        "file_size_bytes": song.file_size_bytes if hasattr(song, "file_size_bytes") else None,
+        "created_at": song.created_at.isoformat() if song.created_at else None,
+    }
+
+
+def transform_sketch_to_assigned_response(sketch: Any) -> dict[str, Any]:  # pragma: no cover
+    """
+    Transform SongSketch DB model to assigned sketch API response format (pure function)
+
+    NOTE: No unit tests - Simple attribute mapper without business logic.
+    Testing would only verify mock setup, not real behavior (CLAUDE.md rule).
+
+    Args:
+        sketch: SongSketch DB model instance
+
+    Returns:
+        Dictionary with sketch data for API response
+
+    Examples:
+        >>> class MockSketch:
+        ...     id = "def-456"
+        ...     title = "Chorus Ideas"
+        ...     prompt = "upbeat pop"
+        ...     workflow = "draft"
+        ...     created_at = None
+        >>> transform_sketch_to_assigned_response(MockSketch())
+        {'id': 'def-456', 'title': 'Chorus Ideas', 'prompt': 'upbeat pop', 'workflow': 'draft', 'created_at': None}
+    """
+    return {
+        "id": str(sketch.id),
+        "title": sketch.title,
+        "prompt": sketch.prompt,
+        "workflow": sketch.workflow if hasattr(sketch, "workflow") else "draft",
+        "created_at": sketch.created_at.isoformat() if sketch.created_at else None,
+    }
+
+
+def transform_image_to_assigned_response(image: Any) -> dict[str, Any]:  # pragma: no cover
+    """
+    Transform GeneratedImage DB model to assigned image API response format (pure function)
+
+    NOTE: No unit tests - Simple attribute mapper without business logic.
+    Testing would only verify mock setup, not real behavior (CLAUDE.md rule).
+
+    Args:
+        image: GeneratedImage DB model instance
+
+    Returns:
+        Dictionary with image data for API response
+
+    Examples:
+        >>> class MockImage:
+        ...     id = "ghi-789"
+        ...     title = "Summer Sunset"
+        ...     prompt = "sunset landscape"
+        ...     composition = "rule of thirds"
+        ...     width = 1024
+        ...     height = 1024
+        ...     created_at = None
+        >>> transform_image_to_assigned_response(MockImage())
+        {'id': 'ghi-789', 'title': 'Summer Sunset', 'prompt': 'sunset landscape', 'composition': 'rule of thirds', 'width': 1024, 'height': 1024, 'created_at': None}
+    """
+    # Parse size if available (e.g., "1024x1024")
+    width = None
+    height = None
+    if hasattr(image, "size") and image.size:
+        try:
+            parts = str(image.size).split("x")
+            if len(parts) == 2:
+                width = int(parts[0])
+                height = int(parts[1])
+        except (ValueError, AttributeError):
+            pass
+
+    # Override with direct width/height attributes if available
+    if hasattr(image, "width") and image.width:
+        width = image.width
+    if hasattr(image, "height") and image.height:
+        height = image.height
+
+    return {
+        "id": str(image.id),
+        "title": image.title if hasattr(image, "title") else None,
+        "prompt": image.prompt if hasattr(image, "prompt") else None,
+        "composition": image.composition if hasattr(image, "composition") else None,
+        "width": width,
+        "height": height,
+        "created_at": image.created_at.isoformat() if image.created_at else None,
+    }

@@ -8,8 +8,10 @@ from flask_pydantic import validate
 from api.auth_middleware import jwt_required
 from api.controllers.song_controller import SongController
 from schemas.common_schemas import ErrorResponse
+from schemas.project_asset_schemas import AssignToProjectRequest
 from schemas.song_schemas import (
     SongGenerateRequest,
+    SongUpdateRequest,
     StemGenerateRequest,
 )
 
@@ -140,20 +142,6 @@ def get_song(song_id):
     return jsonify(response_data), status_code
 
 
-@api_song_v1.route("/id/<song_id>", methods=["PUT"])
-@jwt_required
-def update_song(song_id):
-    """Update song by ID"""
-    payload = request.get_json(force=True)
-
-    if not payload:
-        return jsonify({"error": "No data provided"}), 400
-
-    response_data, status_code = song_controller.update_song(song_id, payload)
-
-    return jsonify(response_data), status_code
-
-
 @api_song_v1.route("/id/<song_id>", methods=["DELETE"])
 @jwt_required
 def delete_song(song_id):
@@ -233,3 +221,31 @@ def queue_status():
     response_data, status_code = song_controller.get_queue_status()
 
     return jsonify(response_data), status_code
+
+
+@api_song_v1.route("/<string:song_id>", methods=["PUT"])
+@jwt_required
+@validate()
+def update_song(song_id: str, body: SongUpdateRequest):
+    """Update song metadata"""
+    try:
+        response_data, status_code = song_controller.update_song(song_id, body.dict(exclude_none=True))
+        return jsonify(response_data), status_code
+    except Exception as e:
+        error_response = ErrorResponse(error=str(e))
+        return jsonify(error_response.dict()), 500
+
+
+@api_song_v1.route("/<string:song_id>/assign-to-project", methods=["POST"])
+@jwt_required
+@validate()
+def assign_song_to_project(song_id: str, body: AssignToProjectRequest):
+    """Assign song to project"""
+    try:
+        response_data, status_code = song_controller.assign_to_project(
+            song_id, str(body.project_id), str(body.folder_id) if body.folder_id else None
+        )
+        return jsonify(response_data), status_code
+    except Exception as e:
+        error_response = ErrorResponse(error=str(e))
+        return jsonify(error_response.dict()), 500

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from api.auth_middleware import jwt_required
 from api.controllers.sketch_controller import SketchController
 from db.database import get_db
+from schemas.project_asset_schemas import AssignToProjectRequest
 from schemas.sketch_schemas import SketchCreateRequest, SketchUpdateRequest
 
 
@@ -118,6 +119,25 @@ def delete_sketch(sketch_id: str):
     db: Session = next(get_db())
     try:
         result, status_code = SketchController.delete_sketch(db, sketch_id)
+        return jsonify(result), status_code
+    finally:
+        db.close()
+
+
+@api_sketch_v1.route("/<sketch_id>/assign-to-project", methods=["POST"])
+@jwt_required
+def assign_to_project(sketch_id: str):
+    """Assign sketch to project"""
+    try:
+        assign_data = AssignToProjectRequest.model_validate(request.json)
+    except ValidationError as e:
+        return jsonify({"error": f"Validation error: {e}"}), 400
+
+    db: Session = next(get_db())
+    try:
+        result, status_code = SketchController.assign_to_project(
+            db, sketch_id, str(assign_data.project_id), str(assign_data.folder_id) if assign_data.folder_id else None
+        )
         return jsonify(result), status_code
     finally:
         db.close()

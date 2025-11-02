@@ -154,6 +154,8 @@ class SongUpdateRequest(BaseModel):
     workflow: str | None = Field(None, description="Workflow status")
     rating: int | None = Field(None, ge=1, le=5, description="User rating")
     tags: list[str] | None = Field(None, description="Song tags")
+    project_id: str | None = Field(None, description="Song project ID to assign this song to")
+    project_folder_id: str | None = Field(None, description="Folder ID within the project")
 
     @field_validator("workflow")
     @classmethod
@@ -169,6 +171,8 @@ class SongUpdateRequest(BaseModel):
                 "workflow": "inUse",
                 "rating": 5,
                 "tags": ["pop", "summer", "upbeat", "vacation"],
+                "project_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "project_folder_id": "f1f2f3f4-e5e6-7890-abcd-ef1234567890",
             }
         }
     )

@@ -14,10 +14,13 @@ import {HttpClient} from '@angular/common/http';
 import {Router} from '@angular/router';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {ImageBlobService} from '../../services/ui/image-blob.service';
+import {ImageService} from '../../services/business/image.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {UserSettingsService} from '../../services/user-settings.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatDialog} from '@angular/material/dialog';
+import {AssignToProjectDialogComponent} from '../../dialogs/assign-to-project-dialog/assign-to-project-dialog.component';
 import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
 import {DisplayNamePipe} from '../../pipes/display-name.pipe';
@@ -41,6 +44,7 @@ interface ImageData {
     created_at: string;
     updated_at?: string;
     storage_backend?: string;  // 's3' or 'filesystem'
+    projects_count?: number; // Number of projects this image is assigned to
 }
 
 interface PaginationInfo {
@@ -107,11 +111,13 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private http = inject(HttpClient);
     private imageBlobService = inject(ImageBlobService);
+    private imageService = inject(ImageService);
     private apiConfig = inject(ApiConfigService);
     private notificationService = inject(NotificationService);
     private settingsService = inject(UserSettingsService);
     private translate = inject(TranslateService);
     private router = inject(Router);
+    private dialog = inject(MatDialog);
 
     // Make Math available in template
     Math = Math;
@@ -582,5 +588,81 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     navigateToImageGenerator() {
         this.router.navigate(['/imagegen']);
+    }
+
+    /**
+     * Open dialog to assign image to a project
+     */
+    openAssignToProjectDialog() {
+        if (!this.selectedImage) {
+            return;
+        }
+
+        const dialogRef = this.dialog.open(AssignToProjectDialogComponent, {
+            width: '600px',
+            maxHeight: '90vh',
+            data: {
+                assetType: 'image',
+                assetId: this.selectedImage.id
+            }
+        });
+
+        dialogRef.afterClosed().subscribe(async (result) => {
+            if (result?.success) {
+                this.notificationService.success(
+                    this.translate.instant('assignToProject.success')
+                );
+                // Reload images to reflect updated project assignment
+                const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+                await this.loadImages(currentPage);
+            }
+        });
+    }
+
+    /**
+     * Navigate to project(s) containing this image
+     * If multiple projects: show selection dialog
+     * If single project: navigate directly
+     */
+    async navigateToFirstProject(image: any, event: Event): Promise<void> {
+        event.stopPropagation();
+
+        try {
+            // Fetch projects for this image
+            const projects = await this.imageService.getProjectsForImage(image.id);
+
+            if (projects.length === 0) {
+                this.notificationService.info(this.translate.instant('imageView.messages.noProjects'));
+                return;
+            }
+
+            if (projects.length === 1) {
+                // Single project: navigate directly
+                this.router.navigate(['/song-projects'], {
+                    state: { selectedProjectId: projects[0].project_id }
+                });
+            } else {
+                // Multiple projects: show selection dialog
+                const { SelectProjectDialogComponent } = await import('../../dialogs/select-project-dialog/select-project-dialog.component');
+                const dialogRef = this.dialog.open(SelectProjectDialogComponent, {
+                    width: '400px',
+                    data: {
+                        imageId: image.id,
+                        projects: projects
+                    }
+                });
+
+                dialogRef.afterClosed().subscribe(result => {
+                    if (result?.selectedProjectId) {
+                        this.router.navigate(['/song-projects'], {
+                            state: { selectedProjectId: result.selectedProjectId }
+                        });
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch projects for image:', error);
+            this.notificationService.error(this.translate.instant('imageView.messages.projectLoadError'));
+        }
     }
 }

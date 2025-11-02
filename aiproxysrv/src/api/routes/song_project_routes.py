@@ -280,3 +280,82 @@ def upload_file(project_id: str):
         return jsonify(result), status_code
     finally:
         db.close()
+
+
+@api_song_projects_v1.route("/<project_id>/folders/<folder_id>/files", methods=["GET"])
+@jwt_required
+def get_folder_files(project_id: str, folder_id: str):
+    """
+    Get all files in a project folder with download URLs (CLI download endpoint).
+
+    Path Parameters:
+        - project_id (UUID): Project ID
+        - folder_id (UUID): Folder ID
+
+    Response:
+        200: {'data': [{'id': '...', 'filename': '...', 'relative_path': '...', 'download_url': '...', 'file_size_bytes': 123}]}
+        404: {'error': 'Project not found or unauthorized' | 'Folder not found'}
+        401: {'error': 'Unauthorized'}
+
+    Example:
+        GET /api/v1/song-projects/550e8400-e29b-41d4-a716-446655440000/folders/123e4567-e89b-12d3-a456-426614174000/files
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    db: Session = next(get_db())
+    try:
+        result, status_code = song_project_controller.get_folder_files(db, UUID(user_id), project_id, folder_id)
+        return jsonify(result), status_code
+    finally:
+        db.close()
+
+
+@api_song_projects_v1.route("/<project_id>/folders/<folder_id>/batch-upload", methods=["POST"])
+@jwt_required
+def batch_upload_files(project_id: str, folder_id: str):
+    """
+    Upload multiple files to project folder (CLI endpoint).
+
+    Path Parameters:
+        - project_id (UUID): Project ID
+        - folder_id (UUID): Target folder ID
+
+    Form Data:
+        - files: Multiple files (multipart/form-data)
+
+    Response:
+        200: {'data': {'uploaded': 5, 'failed': 2, 'errors': [...]}, 'message': 'Batch upload completed'}
+        400: {'error': 'No files provided' | 'Invalid ID format'}
+        404: {'error': 'Project not found or unauthorized' | 'Folder not found: ...'}
+        401: {'error': 'Unauthorized'}
+        500: {'error': 'Batch upload failed: ...'}
+
+    Example:
+        POST /api/v1/song-projects/550e8400-e29b-41d4-a716-446655440000/folders/123e4567-e89b-12d3-a456-426614174000/batch-upload
+        Headers: Authorization: Bearer <JWT_TOKEN>
+        Form Data:
+            files: test1.wav, test2.mp3, test3.flac (multiple files)
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if "files" not in request.files:
+        return jsonify({"error": "No files provided"}), 400
+
+    files = request.files.getlist("files")
+
+    if not files:
+        return jsonify({"error": "No files provided"}), 400
+
+    db: Session = next(get_db())
+    try:
+        result, status_code = song_project_controller.batch_upload_files(
+            db, UUID(user_id), project_id, folder_id, files
+        )
+        return jsonify(result), status_code
+    finally:
+        db.close()

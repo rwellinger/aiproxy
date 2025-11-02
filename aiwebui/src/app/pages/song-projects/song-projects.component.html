@@ -4,8 +4,26 @@
     <mat-card class="list-card">
       <!-- List Header -->
       <div class="list-header">
-        <h2>{{ 'songProjects.list.title' | translate }}</h2>
-        <p class="subtitle">{{ 'songProjects.list.subtitle' | translate }}</p>
+        <div class="header-title">
+          <div class="header-title-group">
+            <h2>
+              <i class="fas fa-folder-open"></i>
+              {{ 'songProjects.list.title' | translate }}
+            </h2>
+            <div class="projects-count-badge" *ngIf="totalProjects > 0">
+              {{ totalProjects }}
+            </div>
+          </div>
+          <p class="subtitle">{{ 'songProjects.list.subtitle' | translate }}</p>
+        </div>
+        <button
+          type="button"
+          class="new-project-button"
+          (click)="createNewProject()"
+          [matTooltip]="'songProjects.list.actions.new' | translate"
+        >
+          <i class="fas fa-plus"></i>
+        </button>
       </div>
 
       <!-- Search -->
@@ -20,15 +38,6 @@
           />
           <i class="fas fa-search" matPrefix></i>
         </mat-form-field>
-
-        <button
-          type="button"
-          class="new-project-button"
-          (click)="createNewProject()"
-        >
-          <i class="fas fa-plus"></i>
-          <span>{{ 'songProjects.list.actions.new' | translate }}</span>
-        </button>
       </div>
 
       <!-- Loading State -->
@@ -106,7 +115,41 @@
         <div class="detail-header">
           <div class="header-title">
             <i class="fas fa-folder-open"></i>
-            <h2>{{ selectedProject.project_name }}</h2>
+            <!-- Non-Edit Mode -->
+            <h2 *ngIf="!isEditingProjectName">{{ selectedProject.project_name }}</h2>
+            <button
+              *ngIf="!isEditingProjectName"
+              type="button"
+              class="edit-project-name-button"
+              (click)="startEditProjectName()"
+              [matTooltip]="'songProjects.editor.editTitle' | translate">
+              <i class="fas fa-edit"></i>
+            </button>
+            <!-- Edit Mode -->
+            <input
+              *ngIf="isEditingProjectName"
+              type="text"
+              class="project-name-input"
+              [(ngModel)]="editProjectNameValue"
+              (keyup.enter)="saveProjectName()"
+              (keyup.escape)="cancelEditProjectName()"
+              [placeholder]="'songProjects.editor.projectName' | translate">
+            <button
+              *ngIf="isEditingProjectName"
+              type="button"
+              class="save-project-name-button"
+              (click)="saveProjectName()"
+              [matTooltip]="'common.save' | translate">
+              <i class="fas fa-check"></i>
+            </button>
+            <button
+              *ngIf="isEditingProjectName"
+              type="button"
+              class="cancel-project-name-button"
+              (click)="cancelEditProjectName()"
+              [matTooltip]="'common.cancel' | translate">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
           <span class="sync-badge" [ngClass]="getSyncStatusClass(selectedProject.sync_status)">
             {{ 'songProjects.syncStatus.' + selectedProject.sync_status | translate }}
@@ -176,13 +219,73 @@
                 <mat-panel-title>
                   <i class="fas fa-folder"></i>
                   <span>{{ folder.folder_name }}</span>
-                  <span class="file-count">({{ folder.files.length || 0 }} files)</span>
+                  <span class="file-count">({{ getFolderContentLabel(folder) }})</span>
                 </mat-panel-title>
               </mat-expansion-panel-header>
 
+              <!-- Assigned Assets Sections -->
+              <div class="assigned-assets-container">
+                <!-- Assigned Songs -->
+                <div *ngIf="folder.assigned_songs && folder.assigned_songs.length > 0" class="assigned-assets-section">
+                  <h4 class="assets-section-title">
+                    <i class="fas fa-music"></i>
+                    {{ 'songProjects.detail.assignedSongs' | translate }}
+                  </h4>
+                  <div *ngFor="let song of folder.assigned_songs" class="asset-item">
+                    <div class="asset-info">
+                      <i class="fas fa-music"></i>
+                      <span class="asset-title">{{ song.title || 'Untitled' }}</span>
+                      <span class="asset-badge">{{ song.workflow }}</span>
+                      <span *ngIf="song.file_type" class="asset-meta">{{ song.file_type.toUpperCase() }}</span>
+                      <span *ngIf="song.file_size_bytes" class="asset-meta">{{ formatFileSize(song.file_size_bytes) }}</span>
+                    </div>
+                    <button type="button" class="asset-action-button" (click)="openSong(song.id)" [matTooltip]="'songProjects.detail.actions.openSong' | translate">
+                      <i class="fas fa-external-link-alt"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Assigned Sketches -->
+                <div *ngIf="folder.assigned_sketches && folder.assigned_sketches.length > 0" class="assigned-assets-section">
+                  <h4 class="assets-section-title">
+                    <i class="fas fa-pencil-alt"></i>
+                    {{ 'songProjects.detail.assignedSketches' | translate }}
+                  </h4>
+                  <div *ngFor="let sketch of folder.assigned_sketches" class="asset-item">
+                    <div class="asset-info">
+                      <i class="fas fa-pencil-alt"></i>
+                      <span class="asset-title">{{ sketch.title || sketch.prompt }}</span>
+                      <span class="asset-badge">{{ sketch.workflow }}</span>
+                    </div>
+                    <button type="button" class="asset-action-button" (click)="openSketch(sketch.id)" [matTooltip]="'songProjects.detail.actions.openSketch' | translate">
+                      <i class="fas fa-external-link-alt"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Assigned Images -->
+                <div *ngIf="folder.assigned_images && folder.assigned_images.length > 0" class="assigned-assets-section">
+                  <h4 class="assets-section-title">
+                    <i class="fas fa-image"></i>
+                    {{ 'songProjects.detail.assignedImages' | translate }}
+                  </h4>
+                  <div *ngFor="let image of folder.assigned_images" class="asset-item">
+                    <div class="asset-info">
+                      <i class="fas fa-image"></i>
+                      <span class="asset-title">{{ image.title || image.prompt || 'Untitled' }}</span>
+                      <span *ngIf="image.composition" class="asset-meta">{{ image.composition }}</span>
+                      <span *ngIf="image.width && image.height" class="asset-meta">{{ image.width }}x{{ image.height }}</span>
+                    </div>
+                    <button type="button" class="asset-action-button" (click)="openImage(image.id)" [matTooltip]="'songProjects.detail.actions.openImage' | translate">
+                      <i class="fas fa-external-link-alt"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <!-- Files in Folder -->
               <div class="folder-files">
-                <!-- Upload Button -->
+                <!-- Upload & Download Buttons -->
                 <div class="folder-upload-section">
                   <button
                     type="button"
@@ -191,6 +294,24 @@
                   >
                     <i class="fas fa-upload"></i>
                     <span>{{ 'songProjects.detail.actions.uploadFile' | translate }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="copy-cli-button"
+                    (click)="copyCLICommand(folder)"
+                    [title]="'songProjects.detail.actions.copyCLIUploadCommand' | translate"
+                  >
+                    <i class="fas fa-terminal"></i>
+                    <span>{{ 'songProjects.detail.actions.copyCLIUploadCommand' | translate }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="copy-cli-download-button"
+                    (click)="copyCLIDownloadCommand(folder)"
+                    [title]="'songProjects.detail.actions.copyCLIDownloadCommand' | translate"
+                  >
+                    <i class="fas fa-download"></i>
+                    <span>{{ 'songProjects.detail.actions.copyCLIDownloadCommand' | translate }}</span>
                   </button>
                 </div>
 
@@ -201,7 +322,7 @@
                 <div *ngFor="let file of folder.files" class="file-item">
                   <div class="file-info">
                     <i class="fas fa-file"></i>
-                    <span class="filename">{{ file.filename }}</span>
+                    <span class="filename" [title]="file.relative_path">{{ getFilePathInFolder(file.relative_path, folder.folder_name) }}</span>
                     <span class="filesize">{{ formatFileSize(file.file_size_bytes) }}</span>
                   </div>
                   <button
@@ -224,6 +345,10 @@
 
         <!-- Detail Actions -->
         <div class="detail-actions">
+          <button type="button" class="action-button refresh-button" (click)="refreshProject()">
+            <i class="fas fa-sync-alt"></i>
+            <span>{{ 'common.refresh' | translate }}</span>
+          </button>
           <button type="button" class="action-button delete-button" (click)="deleteProject()">
             <i class="fas fa-trash"></i>
             <span>{{ 'songProjects.list.actions.delete' | translate }}</span>

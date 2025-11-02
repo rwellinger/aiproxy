@@ -5,7 +5,8 @@ h2[mat-dialog-title] {
   display: flex;
   align-items: center;
   gap: $spacing-sm;
-  margin: 0 0 $spacing-md 0;
+  margin: 0;
+  padding: $spacing-md;
   color: $text-primary;
 
   i {
@@ -16,7 +17,7 @@ h2[mat-dialog-title] {
 
 mat-dialog-content {
   min-width: 400px;
-  padding: $spacing-md 0;
+  padding: $spacing-md $spacing-lg;
 }
 
 .dialog-subtitle {
@@ -31,8 +32,10 @@ mat-dialog-content {
 }
 
 mat-dialog-actions {
-  padding: $spacing-md 0 0 0;
+  padding: $spacing-md $spacing-lg;
   gap: $spacing-sm;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .cancel-button {

@@ -460,19 +460,28 @@ this.http.get(this.apiConfig.endpoints.category.action);
 - Enables JWT injection via interceptors
 
 ### Always run build + lint
-**CRITICAL:** Always use `lint:all` to check BOTH TypeScript AND SCSS!
+**CRITICAL:** Always use `make lint-all` to check BOTH TypeScript AND SCSS!
 
 ```bash
 # From aiwebui directory
-npm run build && npm run lint:all
+make lint-all && make build-dev
+# Or for production (runs lint-all + test automatically):
+make build-prod
 ```
 
-**Available lint commands:**
-- `npm run lint:all` - TypeScript + SCSS + Architecture (use this after changes!)
-- `npm run lint` - TypeScript only (ESLint)
-- `npm run lint:scss` - SCSS only (Stylelint)
-- `npm run lint:arch` - Architecture validation only (dependency-cruiser)
-- `npm run lint:scss:fix` - Auto-fix SCSS issues
+**Available Makefile commands:**
+- `make lint-all` - TypeScript + SCSS + Architecture (use this after changes!)
+- `make lint-ts` - TypeScript only (ESLint)
+- `make lint-scss` - SCSS only (Stylelint)
+- `make lint-arch` - Architecture validation only (dependency-cruiser)
+- `make lint-fix` - Auto-fix TypeScript + SCSS issues
+
+**Legacy npm commands (if needed):**
+- `npm run lint:all` - TypeScript + SCSS + Architecture (use: make lint-all)
+- `npm run lint` - TypeScript only (use: make lint-ts)
+- `npm run lint:scss` - SCSS only (use: make lint-scss)
+- `npm run lint:arch` - Architecture validation (use: make lint-arch)
+- `npm run lint:scss:fix` - Auto-fix SCSS (use: make lint-fix)
 
 ---
 
@@ -758,13 +767,68 @@ class TestImageEnhancementService:
 ## Quick Commands
 
 ### Frontend (aiwebui)
+
+**CRITICAL: ALWAYS use `make` commands (NOT direct `npm` calls for critical tasks)!**
+- ✅ `make` validates Node.js environment first (prevents errors)
+- ✅ `make build-prod` runs ALL pre-checks (lint-all + test) before building
+- ✅ Consistent workflow across Frontend + Backend
+- ❌ Direct `npm run build:prod` skips validation!
+
 ```bash
-npm run dev                    # Development server
-npm run build:prod             # Production build → forwardproxy/html/aiwebui
-npm run lint:all               # TypeScript + SCSS (use this!)
-npm run lint                   # TypeScript only (ESLint)
-npm run lint:scss              # SCSS only (Stylelint)
-npm run test                   # Unit tests
+# From aiwebui directory
+
+# Code Quality (ALWAYS use make!)
+make lint-all                  # ✅ PREFERRED: TypeScript + SCSS + Architecture
+make lint-fix                  # ✅ Auto-fix TypeScript + SCSS issues
+make check-node                # Verify Node.js environment
+
+# Build (CRITICAL: use make for production!)
+make build-prod                # ✅ PREFERRED: Production build with ALL pre-checks
+make build-dev                 # Development build
+make validate                  # Pre-deployment check (lint-all)
+make deploy-check              # Verify build output
+
+# Development
+make dev                       # Development server (ng serve)
+make watch                     # Watch mode
+make install                   # Install npm dependencies
+make clean                     # Clean Angular cache
+
+# ❌ DON'T use direct commands for production (skip validation):
+# npm run build:prod           # ❌ No pre-checks!
+# npm run lint:all             # ❌ No Node.js check
+```
+
+**Available Makefile targets:**
+
+**Code Quality:**
+- `make check-node` - Verify Node.js and npm versions
+- `make lint-ts` - TypeScript/ESLint only
+- `make lint-scss` - Stylelint only
+- `make lint-arch` - Architecture validation (dependency-cruiser)
+- `make lint-all` - All linters (TypeScript + SCSS + Architecture)
+- `make lint-fix` - Auto-fix TypeScript + SCSS issues
+
+**Build & Deployment:**
+- `make build-dev` - Development build
+- `make build-prod` - Production build (with lint-all pre-check)
+- `make validate` - Pre-deployment validation (lint-all)
+- `make deploy-check` - Verify production build output
+
+**Development:**
+- `make dev` - Development server
+- `make watch` - Watch mode
+- `make install` - Install npm dependencies
+- `make clean` - Clean Angular cache and node_modules
+
+**Legacy npm commands (if needed):**
+```bash
+npm run dev                    # Development server (use: make dev)
+npm run build:prod             # Production build (use: make build-prod)
+npm run lint:all               # TypeScript + SCSS (use: make lint-all)
+npm run lint                   # TypeScript only (use: make lint-ts)
+npm run lint:scss              # SCSS only (use: make lint-scss)
+npm run test                   # Unit tests (use: make test)
 ```
 
 ### Backend (aiproxysrv)

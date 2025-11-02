@@ -78,9 +78,15 @@
             <h4 class="sketch-title">
               {{ sketch.title || ('songSketch.library.untitled' | translate) }}
             </h4>
-            <span class="workflow-badge" [ngClass]="getWorkflowClass(sketch.workflow)">
-              {{ getWorkflowLabel(sketch.workflow) }}
-            </span>
+            <div class="sketch-badges">
+              <span class="workflow-badge" [ngClass]="getWorkflowClass(sketch.workflow)">
+                {{ getWorkflowLabel(sketch.workflow) }}
+              </span>
+              <span *ngIf="sketch.project_id" class="project-badge" (click)="navigateToProject(sketch.project_id, $event)" [title]="'common.projectBadge.viewProject' | translate">
+                <i class="fas fa-folder-open"></i>
+                {{ sketch.project_name }}
+              </span>
+            </div>
           </div>
           <div class="sketch-item-meta">
             <span class="meta-date">
@@ -325,6 +331,16 @@
       <!-- Action Buttons at Bottom -->
       <mat-card-actions align="end">
         <div class="detail-actions">
+          <!-- Assign to Project Button -->
+          <button
+            type="button"
+            class="action-button assign-button"
+            (click)="openAssignToProjectDialog()"
+            [title]="'songSketch.library.actions.assignToProject' | translate">
+            <i class="fas fa-folder-plus"></i>
+            <span>{{ 'songSketch.library.actions.assignToProject' | translate }}</span>
+          </button>
+
           <!-- Edit Button - only enabled for draft sketches -->
           <button
             type="button"

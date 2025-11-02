@@ -174,3 +174,80 @@ class SketchOrchestrator:
         except Exception as e:
             logger.error("Failed to retrieve sketches", error=str(e), error_type=type(e).__name__)
             raise SketchOrchestratorError(f"Failed to retrieve sketches: {e}") from e
+
+    def assign_to_project(
+        self,
+        db: Session,
+        sketch_id: str,
+        project_id: str,
+        folder_id: str | None = None,
+    ) -> dict | None:
+        """
+        Assign sketch to a project (1:1 relationship)
+
+        Args:
+            db: Database session
+            sketch_id: Sketch UUID
+            project_id: Project UUID
+            folder_id: Optional folder UUID
+
+        Returns:
+            dict: Updated sketch data or None if not found
+
+        Raises:
+            ValueError: If project or folder not found
+        """
+        from uuid import UUID
+
+        from db.song_project_service import get_folder_by_id, get_project_by_id
+
+        try:
+            # Validate project exists
+            project = get_project_by_id(db, UUID(project_id))
+            if not project:
+                raise ValueError(f"Project not found: {project_id}")
+
+            # Validate folder if provided
+            if folder_id:
+                folder = get_folder_by_id(db, UUID(folder_id))
+                if not folder:
+                    raise ValueError(f"Folder not found: {folder_id}")
+                if folder.project_id != UUID(project_id):
+                    raise ValueError(f"Folder {folder_id} does not belong to project {project_id}")
+
+            # Update sketch
+            updated_sketch = sketch_service.update_sketch(
+                db=db,
+                sketch_id=sketch_id,
+                project_id=project_id,
+                project_folder_id=folder_id,
+            )
+
+            if not updated_sketch:
+                return None
+
+            logger.info(
+                "Sketch assigned to project",
+                sketch_id=sketch_id,
+                project_id=project_id,
+                folder_id=folder_id,
+            )
+
+            return {
+                "id": str(updated_sketch.id),
+                "title": updated_sketch.title,
+                "project_id": str(updated_sketch.project_id) if updated_sketch.project_id else None,
+                "project_folder_id": str(updated_sketch.project_folder_id)
+                if updated_sketch.project_folder_id
+                else None,
+            }
+
+        except Exception as e:
+            logger.error(
+                "Failed to assign sketch to project",
+                sketch_id=sketch_id,
+                project_id=project_id,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            raise

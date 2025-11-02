@@ -132,30 +132,30 @@ class SongController:
             logger.error(f"Unexpected error retrieving song {song_id}: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
-    def update_song(self, song_id: str, update_data: dict[str, Any]) -> tuple[dict[str, Any], int]:
+    def update_song(self, song_id: str, update_data: dict) -> tuple[dict, int]:
         """
-        Update song by ID
+        Update song metadata (title, workflow, rating, tags, project_id, project_folder_id)
 
         Args:
-            song_id: UUID of the song to update
-            update_data: Dictionary containing fields to update
+            song_id: Song UUID
+            update_data: Dict with update fields
 
         Returns:
             Tuple of (response_data, status_code)
         """
         try:
-            result = self.orchestrator.update_song_metadata(song_id, update_data)
+            result = self.orchestrator.update_song(song_id, update_data)
 
             if result is None:
                 return {"error": "Song not found"}, 404
 
-            return result, 200
+            return {"success": True, "data": result}, 200
 
-        except SongOrchestratorError as e:
-            logger.error(f"Failed to update song {song_id}: {e}")
-            return {"error": str(e)}, 400 if "No valid fields" in str(e) else 500
+        except ValueError as e:
+            logger.warning(f"Song update validation failed {song_id}: {e}")
+            return {"error": str(e)}, 400
         except Exception as e:
-            logger.error(f"Unexpected error updating song {song_id}: {type(e).__name__}: {e}")
+            logger.error(f"Failed to update song {song_id}: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
 
     def delete_song(self, song_id: str) -> tuple[dict[str, Any], int]:
@@ -247,4 +247,39 @@ class SongController:
             return {"error": str(e)}, 500
         except Exception as e:
             logger.error(f"Unexpected error updating choice rating {choice_id}: {type(e).__name__}: {e}")
+            return {"error": "Internal server error"}, 500
+
+    def assign_to_project(
+        self,
+        song_id: str,
+        project_id: str,
+        folder_id: str | None = None,
+    ) -> tuple[dict, int]:
+        """
+        Assign song to a project (1:1 relationship)
+
+        Args:
+            song_id: Song UUID
+            project_id: Project UUID
+            folder_id: Optional folder UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            result = self.orchestrator.assign_song_to_project(
+                song_id=song_id,
+                project_id=project_id,
+                folder_id=folder_id,
+            )
+
+            logger.info(f"Song assigned to project: {song_id} -> {project_id}")
+
+            return {"success": True, "data": result}, 200
+
+        except ValueError as e:
+            logger.warning(f"Song assignment validation failed {song_id}: {e}")
+            return {"error": str(e)}, 404
+        except Exception as e:
+            logger.error(f"Failed to assign song to project {song_id}: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
