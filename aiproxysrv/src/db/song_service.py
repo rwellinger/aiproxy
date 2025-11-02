@@ -433,7 +433,7 @@ class SongService:
         try:
             db = next(get_db())
             try:
-                query = db.query(Song).options(joinedload(Song.choices))
+                query = db.query(Song).options(joinedload(Song.choices), joinedload(Song.project))
 
                 # Apply status filter if provided
                 if status:
@@ -660,6 +660,10 @@ class SongService:
                     song.tags = update_data["tags"]
                 if "workflow" in update_data:
                     song.workflow = update_data["workflow"]
+                if "project_id" in update_data:
+                    song.project_id = update_data["project_id"]
+                if "project_folder_id" in update_data:
+                    song.project_folder_id = update_data["project_folder_id"]
 
                 # Update timestamp
                 song.updated_at = datetime.utcnow()
@@ -672,6 +676,8 @@ class SongService:
                     "title": song.title,
                     "tags": song.tags,
                     "workflow": song.workflow,
+                    "project_id": song.project_id,
+                    "project_folder_id": song.project_folder_id,
                     "updated_at": song.updated_at,
                 }
 
@@ -684,6 +690,8 @@ class SongService:
                         self.title = data["title"]
                         self.tags = data["tags"]
                         self.workflow = data["workflow"]
+                        self.project_id = data["project_id"]
+                        self.project_folder_id = data["project_folder_id"]
                         self.updated_at = data["updated_at"]
 
                 return UpdatedSong(updated_song_data)
@@ -785,3 +793,14 @@ class SongService:
 
 # Global service instance
 song_service = SongService()
+
+
+# Standalone wrapper functions for orchestrator imports
+def get_song_by_id(db, song_id):
+    """Wrapper function for service method"""
+    return song_service.get_song_by_id(db, song_id)
+
+
+def update_song(db, song_id, update_data):
+    """Wrapper function for service method"""
+    return song_service.update_song(db, song_id, update_data)

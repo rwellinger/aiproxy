@@ -1,6 +1,6 @@
 import {Injectable, inject} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {Observable, firstValueFrom} from 'rxjs';
 import {ApiConfigService} from '../config/api-config.service';
 
 /**
@@ -17,6 +17,8 @@ export interface Sketch {
   description_tags?: string;
   info?: string;
   workflow: 'draft' | 'used' | 'archived';
+  project_id?: string;
+  project_name?: string;
   created_at: string;
   updated_at?: string;
 }
@@ -102,6 +104,19 @@ export class SketchService {
   deleteSketch(id: string): Observable<{success: boolean; message?: string}> {
     return this.http.delete<{success: boolean; message?: string}>(
       this.apiConfig.endpoints.sketch.delete(id)
+    );
+  }
+
+  /**
+   * Assign a sketch to a project (with optional folder)
+   */
+  async assignToProject(sketchId: string, projectId: string, projectFolderId?: string): Promise<any> {
+    const body: any = {
+      project_id: projectId,
+      folder_id: projectFolderId || null
+    };
+    return firstValueFrom(
+      this.http.post(this.apiConfig.endpoints.sketch.assignToProject(sketchId), body)
     );
   }
 }

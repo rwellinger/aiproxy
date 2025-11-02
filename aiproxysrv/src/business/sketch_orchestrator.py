@@ -216,12 +216,12 @@ class SketchOrchestrator:
                     raise ValueError(f"Folder {folder_id} does not belong to project {project_id}")
 
             # Update sketch
-            update_data = {
-                "project_id": project_id,
-                "project_folder_id": folder_id,
-            }
-
-            updated_sketch = sketch_service.update_sketch(db, sketch_id, update_data)
+            updated_sketch = sketch_service.update_sketch(
+                db=db,
+                sketch_id=sketch_id,
+                project_id=project_id,
+                project_folder_id=folder_id,
+            )
 
             if not updated_sketch:
                 return None

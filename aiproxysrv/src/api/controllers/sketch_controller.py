@@ -91,8 +91,18 @@ class SketchController:
             sketches = result.get("items", [])
             total = result.get("total", 0)
 
+            # Enrich sketches with project_name from relationship
+            enriched_sketches = []
+            for sketch in sketches:
+                # Extract project_name from relationship if available
+                if hasattr(sketch, "project") and sketch.project:
+                    sketch.project_name = sketch.project.project_name
+                else:
+                    sketch.project_name = None
+                enriched_sketches.append(sketch)
+
             # Convert sketches to Pydantic models
-            sketch_responses = [SketchResponse.model_validate(sketch) for sketch in sketches]
+            sketch_responses = [SketchResponse.model_validate(sketch) for sketch in enriched_sketches]
 
             # Create pagination metadata
             pagination = PaginationMeta(

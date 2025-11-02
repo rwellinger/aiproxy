@@ -6,10 +6,12 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil, firstValueFrom 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 
 import { SketchService, Sketch } from '../../services/business/sketch.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import { UserSettingsService } from '../../services/user-settings.service';
+import { AssignToProjectDialogComponent } from '../../dialogs/assign-to-project-dialog/assign-to-project-dialog.component';
 
 @Component({
   selector: 'app-song-sketch-library',
@@ -59,6 +61,7 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
   private translate = inject(TranslateService);
   private router = inject(Router);
   private settingsService = inject(UserSettingsService);
+  private dialog = inject(MatDialog);
 
   constructor() {
     // IMPORTANT: getCurrentNavigation() must be called in constructor!
@@ -352,5 +355,44 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
         this.translate.instant('songSketch.library.messages.copyError')
       );
     }
+  }
+
+  /**
+   * Open dialog to assign sketch to a project
+   */
+  openAssignToProjectDialog() {
+    if (!this.selectedSketch) {
+      return;
+    }
+
+    const dialogRef = this.dialog.open(AssignToProjectDialogComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: {
+        assetType: 'sketch',
+        assetId: this.selectedSketch.id
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result?.success) {
+        this.notificationService.success(
+          this.translate.instant('assignToProject.success')
+        );
+        // Reload sketches to reflect updated project assignment
+        const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+        await this.loadSketches(currentPage);
+      }
+    });
+  }
+
+  /**
+   * Navigate to project overview with auto-selection
+   */
+  navigateToProject(projectId: string, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/song-projects'], {
+      state: { selectedProjectId: projectId }
+    });
   }
 }

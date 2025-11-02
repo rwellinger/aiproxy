@@ -179,4 +179,12 @@ export class SongService {
   async updateChoiceRating(choiceId: string, rating: number | null): Promise<any> {
     return this.httpWithTimeout<any>('PUT', this.apiConfig.endpoints.song.updateChoiceRating(choiceId), { rating }, 30000);
   }
+
+  async assignToProject(songId: string, projectId: string, projectFolderId?: string): Promise<any> {
+    const body: any = {
+      project_id: projectId,
+      folder_id: projectFolderId || null
+    };
+    return this.httpWithTimeout<any>('POST', this.apiConfig.endpoints.song.assignToProject(songId), body, 30000);
+  }
 }

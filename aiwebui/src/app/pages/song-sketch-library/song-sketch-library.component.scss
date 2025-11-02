@@ -179,6 +179,16 @@
       font-weight: 500;
       color: $text-primary;
     }
+
+    .sketch-badges {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+  }
+
+  .project-badge {
+    @include project-badge;
   }
 
   .sketch-item-meta {
@@ -673,6 +683,10 @@
 
 .new-sketch-button {
   @include button-primary('base');
+}
+
+.assign-button {
+  @include button-secondary('base');
 }
 
 .edit-button {

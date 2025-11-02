@@ -127,8 +127,35 @@
     "refresh": "Refresh",
     "reset": "Reset",
     "save": "Save",
+    "saving": "Saving...",
     "search": "Search",
-    "stop": "Stop"
+    "stop": "Stop",
+    "projectBadge": {
+      "inProject": "In {{count}} project",
+      "inProjects": "In {{count}} projects",
+      "viewProject": "View in project"
+    }
+  },
+  "selectProject": {
+    "title": "Select Project",
+    "subtitle": "This image is assigned to multiple projects. Please select one:"
+  },
+  "assignToProject": {
+    "title": {
+      "image": "Assign Image to Project",
+      "song": "Assign Song to Project",
+      "sketch": "Assign Sketch to Project"
+    },
+    "selectProject": "Select Project",
+    "selectFolder": "Select Folder (Optional)",
+    "noFolder": "No Folder",
+    "noFoldersAvailable": "No folders available in this project",
+    "success": "Successfully assigned to project",
+    "errors": {
+      "loadProjectsFailed": "Failed to load projects",
+      "loadFoldersFailed": "Failed to load folders",
+      "assignFailed": "Failed to assign to project"
+    }
   },
   "detailPanel": {
     "addTag": "Add tag...",
@@ -335,6 +362,7 @@
   },
   "imageView": {
     "actions": {
+      "assignToProject": "Assign to Project",
       "delete": "Delete",
       "deleteCount": "Delete ({{count}})",
       "deselectAll": "Deselect All",
@@ -377,7 +405,9 @@
       "loadingImages": "Loading pictures...",
       "noImagesInDb": "No pictures found in the database.",
       "noSearchResults": "No pictures match your search criteria.",
-      "selectImagePlaceholder": "Select an picture from the list to view details"
+      "selectImagePlaceholder": "Select an picture from the list to view details",
+      "noProjects": "This image is not assigned to any project",
+      "projectLoadError": "Failed to load projects for this image"
     },
     "noImages": "No pictures found",
     "orientation": {
@@ -990,6 +1020,7 @@
   },
   "songView": {
     "actions": {
+      "assignToProject": "Assign to Project",
       "close": "Close",
       "copyAll": "Copy All",
       "copyLyrics": "Copy Lyrics",
@@ -1353,6 +1384,7 @@
         "archived": "Archived"
       },
       "actions": {
+        "assignToProject": "Assign to Project",
         "newSketch": "New Sketch",
         "createFirst": "Create Your First Sketch",
         "edit": "Edit",

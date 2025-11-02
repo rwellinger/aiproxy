@@ -65,16 +65,23 @@
                    [title]="hasTextOverlay(image) ? ('imageView.tooltips.withOverlay' | translate) : ('imageView.tooltips.original' | translate)"></i>
                 {{ getDisplayTitle(image) }}
               </h4>
-              <!-- Album Cover Badge -->
-              <span *ngIf="image.composition === 'album-cover'" class="composition-badge album-cover-badge">
-                <i class="fas fa-compact-disc"></i>
-                {{ 'imageView.compositionBadge.albumCover' | translate }}
-              </span>
-              <!-- Storage Backend Badge (S3 only) -->
-              <span *ngIf="image.storage_backend === 's3'" class="storage-badge s3-badge">
-                <i class="fas fa-cloud"></i>
-                {{ 'imageView.storageBadge.s3' | translate }}
-              </span>
+              <div class="image-badges">
+                <!-- Album Cover Badge -->
+                <span *ngIf="image.composition === 'album-cover'" class="composition-badge album-cover-badge">
+                  <i class="fas fa-compact-disc"></i>
+                  {{ 'imageView.compositionBadge.albumCover' | translate }}
+                </span>
+                <!-- Storage Backend Badge (S3 only) -->
+                <span *ngIf="image.storage_backend === 's3'" class="storage-badge s3-badge">
+                  <i class="fas fa-cloud"></i>
+                  {{ 'imageView.storageBadge.s3' | translate }}
+                </span>
+                <!-- Project Badge -->
+                <span *ngIf="image.projects_count && image.projects_count > 0" class="project-badge" (click)="navigateToFirstProject(image, $event)" [title]="'common.projectBadge.viewProject' | translate">
+                  <i class="fas fa-folder-open"></i>
+                  {{ image.projects_count === 1 ? ('common.projectBadge.inProject' | translate:{count: image.projects_count}) : ('common.projectBadge.inProjects' | translate:{count: image.projects_count}) }}
+                </span>
+              </div>
             </div>
             <div class="image-item-meta">
               <span class="meta-date">
@@ -176,6 +183,9 @@
         </mat-card-content>
         <mat-card-actions align="end">
           <div class="detail-actions" *ngIf="selectedImage">
+            <button mat-button type="button" (click)="openAssignToProjectDialog()">
+              <i class="fas fa-folder-plus"></i> {{ 'imageView.actions.assignToProject' | translate }}
+            </button>
             <button mat-button type="button" (click)="onDownloadImage()">
               <i class="fas fa-download"></i> {{ 'imageView.actions.downloadOriginal' | translate }}
             </button>

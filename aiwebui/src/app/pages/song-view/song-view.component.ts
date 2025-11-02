@@ -12,7 +12,9 @@ import {UserSettingsService} from '../../services/user-settings.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
+import {MatDialog} from '@angular/material/dialog';
 import {SongDetailPanelComponent} from '../../components/song-detail-panel/song-detail-panel.component';
+import {AssignToProjectDialogComponent} from '../../dialogs/assign-to-project-dialog/assign-to-project-dialog.component';
 
 @Component({
   selector: 'app-song-view',
@@ -109,6 +111,7 @@ export class SongViewComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private translate = inject(TranslateService);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   constructor() {
     // Setup search debouncing
@@ -990,5 +993,44 @@ export class SongViewComponent implements OnInit, OnDestroy {
 
   navigateToSongGenerator() {
     this.router.navigate(['/songgen']);
+  }
+
+  /**
+   * Open dialog to assign song to a project
+   */
+  openAssignToProjectDialog() {
+    if (!this.selectedSong) {
+      return;
+    }
+
+    const dialogRef = this.dialog.open(AssignToProjectDialogComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: {
+        assetType: 'song',
+        assetId: this.selectedSong.id
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result?.success) {
+        this.notificationService.success(
+          this.translate.instant('assignToProject.success')
+        );
+        // Reload songs to reflect updated project assignment
+        const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+        await this.loadSongs(currentPage);
+      }
+    });
+  }
+
+  /**
+   * Navigate to project overview with auto-selection
+   */
+  navigateToProject(projectId: string, event: Event): void {
+    event.stopPropagation(); // Prevent song selection
+    this.router.navigate(['/song-projects'], {
+      state: { selectedProjectId: projectId }
+    });
   }
 }

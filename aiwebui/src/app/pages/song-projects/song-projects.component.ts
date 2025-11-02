@@ -77,6 +77,15 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private dialog = inject(MatDialog);
 
+  // Navigation state (must be captured in constructor)
+  private navigationState: any = null;
+
+  constructor() {
+    // IMPORTANT: getCurrentNavigation() must be called in constructor!
+    const navigation = this.router.getCurrentNavigation();
+    this.navigationState = navigation?.extras?.state;
+  }
+
   ngOnInit(): void {
     // Setup search debounce
     this.searchSubject
@@ -91,8 +100,13 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
         this.loadProjects();
       });
 
-    // Load initial data
-    this.loadProjects();
+    // Load initial data and auto-select project if provided via state
+    this.loadProjects().then(() => {
+      const selectedProjectId = this.navigationState?.['selectedProjectId'];
+      if (selectedProjectId) {
+        this.selectProjectById(selectedProjectId);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -136,6 +150,28 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
     try {
       const response = await firstValueFrom(
         this.projectService.getProjectById(project.id)
+      );
+
+      this.selectedProject = response.data;
+    } catch (error) {
+      console.error('Failed to load project details:', error);
+      this.notificationService.error(
+        this.translate.instant('songProjects.messages.loadError')
+      );
+    } finally {
+      this.isLoadingDetail = false;
+    }
+  }
+
+  /**
+   * Select a project by ID (for auto-selection from router state).
+   */
+  async selectProjectById(projectId: string): Promise<void> {
+    this.isLoadingDetail = true;
+
+    try {
+      const response = await firstValueFrom(
+        this.projectService.getProjectById(projectId)
       );
 
       this.selectedProject = response.data;

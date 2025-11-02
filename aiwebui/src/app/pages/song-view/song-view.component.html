@@ -104,9 +104,15 @@
                    [title]="song.is_instrumental === true ? ('songView.tooltips.instrumental' | translate) : ('songView.tooltips.withVocals' | translate)"></i>
                 {{ getDisplayTitle(song) }}
               </h4>
-              <span class="workflow-badge" [ngClass]="getWorkflowClass(song.workflow)">
-                {{ getWorkflowLabel(song.workflow) }}
-              </span>
+              <div class="song-badges">
+                <span class="workflow-badge" [ngClass]="getWorkflowClass(song.workflow)">
+                  {{ getWorkflowLabel(song.workflow) }}
+                </span>
+                <span *ngIf="song.project_id" class="project-badge" (click)="navigateToProject(song.project_id, $event)" [title]="'common.projectBadge.viewProject' | translate">
+                  <i class="fas fa-folder-open"></i>
+                  {{ song.project_name }}
+                </span>
+              </div>
             </div>
             <div class="song-item-meta">
               <span class="meta-date">
@@ -218,6 +224,17 @@
         </mat-card-content>
         <mat-card-actions align="end">
           <div class="detail-actions">
+            <!-- Assign to Project Button -->
+            <button
+              *ngIf="selectedSong"
+              type="button"
+              class="assign-to-project-button"
+              (click)="openAssignToProjectDialog()"
+              [title]="'songView.actions.assignToProject' | translate">
+              <i class="fas fa-folder-plus"></i>
+              {{ 'songView.actions.assignToProject' | translate }}
+            </button>
+
             <!-- Audio Player -->
             <div class="player-bar">
               <!-- Hidden Audio Element -->

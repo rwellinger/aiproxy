@@ -312,33 +312,29 @@ class SongOrchestrator:
         from uuid import UUID
 
         from db.database import get_db
-        from db.song_service import get_song_by_id, update_song
+        from db.song_project_service import get_folder_by_id, get_project_by_id
 
         db = next(get_db())
 
         try:
             # Validate song exists
-            song = get_song_by_id(db, UUID(song_id))
+            song = song_service.get_song_by_id(song_id)
             if not song:
                 return None
 
             # Validate project/folder if provided
             if "project_id" in update_data and update_data["project_id"]:
-                from db.song_project_service import get_project_by_id
-
                 project = get_project_by_id(db, UUID(update_data["project_id"]))
                 if not project:
                     raise ValueError(f"Project not found: {update_data['project_id']}")
 
             if "project_folder_id" in update_data and update_data["project_folder_id"]:
-                from db.song_project_service import get_folder_by_id
-
                 folder = get_folder_by_id(db, UUID(update_data["project_folder_id"]))
                 if not folder:
                     raise ValueError(f"Folder not found: {update_data['project_folder_id']}")
 
-            # Update song
-            updated_song = update_song(db, UUID(song_id), update_data)
+            # Update song (using service instance, NOT wrapper function)
+            updated_song = song_service.update_song(song_id, update_data)
 
             if not updated_song:
                 return None

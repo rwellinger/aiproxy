@@ -186,6 +186,12 @@
       }
     }
 
+    .image-badges {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
     .composition-badge {
       display: inline-flex;
       align-items: center;
@@ -199,6 +205,10 @@
       i {
         font-size: 0.75rem;
       }
+    }
+
+    .project-badge {
+      @include project-badge;
     }
 
     .album-cover-badge {

@@ -7,7 +7,7 @@ from uuid import UUID
 
 from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from db.models import SongSketch
 from utils.logger import logger
@@ -131,7 +131,7 @@ class SketchService:
             Dictionary with 'items' (list of sketches) and 'total' (count)
         """
         try:
-            query = db.query(SongSketch)
+            query = db.query(SongSketch).options(joinedload(SongSketch.project))
 
             # Apply workflow filter
             if workflow:
@@ -212,6 +212,8 @@ class SketchService:
         description_short: str | None = None,
         description_tags: str | None = None,
         info: str | None = None,
+        project_id: str | None = None,
+        project_folder_id: str | None = None,
     ) -> SongSketch | None:
         """
         Update an existing sketch
@@ -270,6 +272,12 @@ class SketchService:
             if info is not None:
                 sketch.info = info
                 updated_fields.append("info")
+            if project_id is not None:
+                sketch.project_id = project_id
+                updated_fields.append("project_id")
+            if project_folder_id is not None:
+                sketch.project_folder_id = project_folder_id
+                updated_fields.append("project_folder_id")
 
             # Update timestamp
             sketch.updated_at = datetime.utcnow()

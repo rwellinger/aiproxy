@@ -454,6 +454,39 @@ class SongProjectService:
             logger.error("File creation failed", error=str(e), error_type=type(e).__name__)
             return None
 
+    def get_folder_by_id(self, db: Session, folder_id: UUID) -> ProjectFolder | None:
+        """
+        Get a folder by its ID
+
+        Args:
+            db: Database session
+            folder_id: Folder UUID
+
+        Returns:
+            ProjectFolder instance if found, None otherwise
+        """
+        try:
+            folder = db.query(ProjectFolder).filter(ProjectFolder.id == folder_id).first()
+            if folder:
+                logger.debug("Folder retrieved", folder_id=str(folder_id))
+            return folder
+        except SQLAlchemyError as e:
+            logger.error(
+                "Failed to get folder by ID", error=str(e), error_type=type(e).__name__, folder_id=str(folder_id)
+            )
+            return None
+
 
 # Global service instance
 song_project_service = SongProjectService()
+
+
+# Standalone wrapper functions for orchestrator imports
+def get_project_by_id(db: Session, project_id: UUID) -> SongProject | None:
+    """Wrapper function for service method"""
+    return song_project_service.get_project_by_id(db, project_id)
+
+
+def get_folder_by_id(db: Session, folder_id: UUID) -> ProjectFolder | None:
+    """Wrapper function for service method"""
+    return song_project_service.get_folder_by_id(db, folder_id)

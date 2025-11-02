@@ -3,6 +3,7 @@
 from typing import Any
 
 from business.image_orchestrator import ImageGenerationError, ImageOrchestrator
+from db.image_service import ImageService
 from utils.logger import logger
 
 
@@ -369,5 +370,25 @@ class ImageController:
                 project_id=project_id,
                 error_type=type(e).__name__,
                 error=str(e),
+            )
+            return {"error": f"Internal server error: {str(e)}"}, 500
+
+    def get_projects_for_image(self, image_id: str) -> tuple[dict[str, Any], int]:
+        """
+        Get list of projects this image is assigned to.
+
+        Args:
+            image_id: Image UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            projects = ImageService.get_projects_for_image(image_id)
+            return {"projects": projects}, 200
+
+        except Exception as e:
+            logger.error(
+                "Failed to get projects for image", image_id=image_id, error_type=type(e).__name__, error=str(e)
             )
             return {"error": f"Internal server error: {str(e)}"}, 500
