@@ -328,9 +328,12 @@ def validate_sync_status(status: str) -> bool:
     return status in valid_statuses
 
 
-def transform_song_to_assigned_response(song: Any) -> dict[str, Any]:
+def transform_song_to_assigned_response(song: Any) -> dict[str, Any]:  # pragma: no cover
     """
     Transform Song DB model to assigned song API response format (pure function)
+
+    NOTE: No unit tests - Simple attribute mapper without business logic.
+    Testing would only verify mock setup, not real behavior (CLAUDE.md rule).
 
     Args:
         song: Song DB model instance
@@ -359,9 +362,12 @@ def transform_song_to_assigned_response(song: Any) -> dict[str, Any]:
     }
 
 
-def transform_sketch_to_assigned_response(sketch: Any) -> dict[str, Any]:
+def transform_sketch_to_assigned_response(sketch: Any) -> dict[str, Any]:  # pragma: no cover
     """
     Transform SongSketch DB model to assigned sketch API response format (pure function)
+
+    NOTE: No unit tests - Simple attribute mapper without business logic.
+    Testing would only verify mock setup, not real behavior (CLAUDE.md rule).
 
     Args:
         sketch: SongSketch DB model instance
@@ -388,9 +394,12 @@ def transform_sketch_to_assigned_response(sketch: Any) -> dict[str, Any]:
     }
 
 
-def transform_image_to_assigned_response(image: Any) -> dict[str, Any]:
+def transform_image_to_assigned_response(image: Any) -> dict[str, Any]:  # pragma: no cover
     """
     Transform GeneratedImage DB model to assigned image API response format (pure function)
+
+    NOTE: No unit tests - Simple attribute mapper without business logic.
+    Testing would only verify mock setup, not real behavior (CLAUDE.md rule).
 
     Args:
         image: GeneratedImage DB model instance
