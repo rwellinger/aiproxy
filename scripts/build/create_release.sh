@@ -124,39 +124,17 @@ if ! conda env list | grep -q "mac_ki_service_py312.*\*"; then
 fi
 print_success "Conda environment OK"
 
-# Ruff Linting
-print_info "Führe Ruff Linting aus..."
-if ! make lint-ruff > /dev/null 2>&1; then
-    print_error "Ruff Linting fehlgeschlagen!"
+# Backend Linting (Ruff + Import-Linter + Format Check)
+print_info "Führe Backend Linting aus (Ruff + Architecture + Format)..."
+if ! make lint-all > /dev/null 2>&1; then
+    print_error "Backend Linting fehlgeschlagen!"
     echo ""
     echo "Fehler beheben mit:"
-    echo "  ${YELLOW}cd aiproxysrv && make lint-ruff${NC}"
+    echo "  ${YELLOW}cd aiproxysrv && make lint-all${NC}"
     echo "  ${YELLOW}cd aiproxysrv && make format${NC}"
     exit 1
 fi
-print_success "Ruff Linting bestanden"
-
-# Ruff Formatting Check
-print_info "Prüfe Code Formatierung..."
-if ! ruff format --check . > /dev/null 2>&1; then
-    print_error "Code ist nicht formatiert!"
-    echo ""
-    echo "Formatierung korrigieren mit:"
-    echo "  ${YELLOW}cd aiproxysrv && make format${NC}"
-    exit 1
-fi
-print_success "Code Formatierung korrekt"
-
-# Architecture Validation (Import-Linter)
-print_info "Führe Architecture Validation aus..."
-if ! make lint-imports > /dev/null 2>&1; then
-    print_error "Architecture Validation fehlgeschlagen!"
-    echo ""
-    echo "Details anzeigen:"
-    echo "  ${YELLOW}cd aiproxysrv && make lint-imports${NC}"
-    exit 1
-fi
-print_success "Architecture Validation bestanden"
+print_success "Backend Linting bestanden (Ruff + Architecture + Format)"
 
 # Unit Tests
 print_info "Führe Backend Tests aus..."
@@ -176,24 +154,36 @@ print_header "Quality Gates: Frontend (aiwebui)"
 
 cd "$PROJECT_DIR/aiwebui"
 
-# TypeScript + SCSS + Architecture Linting
+# Check Node.js Environment
+print_info "Prüfe Node.js Environment..."
+if ! make check-node > /dev/null 2>&1; then
+    print_error "Node.js Environment Check fehlgeschlagen!"
+    echo ""
+    echo "Details anzeigen:"
+    echo "  ${YELLOW}cd aiwebui && make check-node${NC}"
+    exit 1
+fi
+print_success "Node.js environment OK"
+
+# Frontend Linting (TypeScript + SCSS + Architecture)
 print_info "Führe Frontend Linting aus (TypeScript + SCSS + Architecture)..."
-if ! npm run lint:all > /dev/null 2>&1; then
+if ! make lint-all > /dev/null 2>&1; then
     print_error "Frontend Linting fehlgeschlagen!"
     echo ""
     echo "Fehler beheben mit:"
-    echo "  ${YELLOW}cd aiwebui && npm run lint:all${NC}"
+    echo "  ${YELLOW}cd aiwebui && make lint-all${NC}"
+    echo "  ${YELLOW}cd aiwebui && make lint-fix${NC}"
     exit 1
 fi
 print_success "Frontend Linting bestanden"
 
 # Production Build Test
 print_info "Führe Production Build Test aus..."
-if ! npm run build > /dev/null 2>&1; then
+if ! make build-dev > /dev/null 2>&1; then
     print_error "Frontend Build fehlgeschlagen!"
     echo ""
     echo "Build-Fehler analysieren:"
-    echo "  ${YELLOW}cd aiwebui && npm run build${NC}"
+    echo "  ${YELLOW}cd aiwebui && make build-dev${NC}"
     exit 1
 fi
 print_success "Frontend Build bestanden"
