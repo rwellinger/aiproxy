@@ -301,8 +301,10 @@ def upload(project_id, folder_id, local_path, debug):
         console.print(f"[dim]Ignored {len(ignored_files)} files based on .aiproxyignore[/dim]")
     console.print()
 
-    # Upload files in batches (10 files per request for smoother progress)
-    BATCH_SIZE = 10
+    # Upload files in batches (3 files per request to avoid 413 errors with large FLAC files)
+    # CRITICAL: 10 × 100MB FLAC = 1GB exceeds Nginx limit!
+    # Conservative batch size: 3 × 150MB = 450MB (under 500MB Nginx limit)
+    BATCH_SIZE = 3
     uploaded = 0
     failed = 0
     errors = []
