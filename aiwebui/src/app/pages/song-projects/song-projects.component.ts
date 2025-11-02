@@ -64,6 +64,10 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   isLoading = false;
   isLoadingDetail = false;
 
+  // Edit state
+  isEditingProjectName = false;
+  editProjectNameValue = '';
+
   // Enums for template
   SyncStatus = SyncStatus;
 
@@ -362,5 +366,140 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
         );
       }
     });
+  }
+
+  /**
+   * Navigate to Song View with song ID in state.
+   */
+  openSong(songId: string): void {
+    this.router.navigate(['/songview'], {
+      state: { selectedSongId: songId }
+    });
+  }
+
+  /**
+   * Navigate to Sketch Library with sketch ID in state.
+   */
+  openSketch(sketchId: string): void {
+    this.router.navigate(['/song-sketch-library'], {
+      state: { selectedSketchId: sketchId }
+    });
+  }
+
+  /**
+   * Navigate to Image View with image ID in state.
+   */
+  openImage(imageId: string): void {
+    this.router.navigate(['/imageview'], {
+      state: { selectedImageId: imageId }
+    });
+  }
+
+  /**
+   * Get smart folder content label (e.g., "2 images", "3 assets, 1 file").
+   */
+  getFolderContentLabel(folder: any): string {
+    const fileCount = folder.files?.length || 0;
+    const songCount = folder.assigned_songs?.length || 0;
+    const sketchCount = folder.assigned_sketches?.length || 0;
+    const imageCount = folder.assigned_images?.length || 0;
+    const totalAssets = songCount + sketchCount + imageCount;
+
+    // Only images (specific type)
+    if (totalAssets > 0 && fileCount === 0 && songCount === 0 && sketchCount === 0 && imageCount > 0) {
+      return this.translate.instant('songProjects.detail.folderContent.images', { count: imageCount });
+    }
+
+    // Only songs (specific type)
+    if (totalAssets > 0 && fileCount === 0 && songCount > 0 && sketchCount === 0 && imageCount === 0) {
+      return this.translate.instant('songProjects.detail.folderContent.songs', { count: songCount });
+    }
+
+    // Only sketches (specific type)
+    if (totalAssets > 0 && fileCount === 0 && songCount === 0 && sketchCount > 0 && imageCount === 0) {
+      return this.translate.instant('songProjects.detail.folderContent.sketches', { count: sketchCount });
+    }
+
+    // Mixed assets only
+    if (totalAssets > 0 && fileCount === 0) {
+      return this.translate.instant('songProjects.detail.folderContent.assets', { count: totalAssets });
+    }
+
+    // Assets + files
+    if (totalAssets > 0 && fileCount > 0) {
+      return this.translate.instant('songProjects.detail.folderContent.assetsAndFiles', {
+        assetCount: totalAssets,
+        fileCount: fileCount
+      });
+    }
+
+    // Only files
+    if (fileCount > 0) {
+      return this.translate.instant('songProjects.detail.folderContent.files', { count: fileCount });
+    }
+
+    // Empty
+    return this.translate.instant('songProjects.detail.folderContent.empty');
+  }
+
+  /**
+   * Start editing project name.
+   */
+  startEditProjectName(): void {
+    if (!this.selectedProject) return;
+    this.editProjectNameValue = this.selectedProject.project_name;
+    this.isEditingProjectName = true;
+  }
+
+  /**
+   * Cancel editing project name.
+   */
+  cancelEditProjectName(): void {
+    this.isEditingProjectName = false;
+    this.editProjectNameValue = '';
+  }
+
+  /**
+   * Save edited project name.
+   */
+  async saveProjectName(): Promise<void> {
+    if (!this.selectedProject || !this.editProjectNameValue.trim()) {
+      this.cancelEditProjectName();
+      return;
+    }
+
+    const newName = this.editProjectNameValue.trim();
+    if (newName === this.selectedProject.project_name) {
+      this.cancelEditProjectName();
+      return;
+    }
+
+    try {
+      await firstValueFrom(
+        this.projectService.updateProject(this.selectedProject.id, {
+          project_name: newName
+        })
+      );
+
+      this.notificationService.success(
+        this.translate.instant('songProjects.messages.updateSuccess')
+      );
+
+      // Update local state
+      this.selectedProject.project_name = newName;
+
+      // Update in list
+      const projectInList = this.projectList.find(p => p.id === this.selectedProject!.id);
+      if (projectInList) {
+        projectInList.project_name = newName;
+      }
+
+      this.cancelEditProjectName();
+    } catch (error) {
+      console.error('Failed to update project name:', error);
+      this.notificationService.error(
+        this.translate.instant('songProjects.messages.saveError')
+      );
+    }
   }
 }

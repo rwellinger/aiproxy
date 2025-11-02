@@ -218,6 +218,7 @@
     display: flex;
     align-items: center;
     gap: $spacing-sm;
+    flex: 1;
 
     i {
       font-size: 1.5rem;
@@ -227,6 +228,109 @@
     h2 {
       margin: 0;
       color: $text-primary;
+    }
+
+    .edit-project-name-button {
+      background-color: transparent;
+      border: 1px solid $border-light;
+      color: $primary-color;
+      padding: $spacing-xs !important;
+      min-width: auto !important;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: $border-radius-sm;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      i {
+        font-size: $font-sm;
+        margin: 0;
+        color: $primary-color;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: $primary-color;
+        border-color: $primary-color;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+
+        i {
+          color: white;
+        }
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .project-name-input {
+      flex: 1;
+      padding: $spacing-xs $spacing-sm;
+      border: 2px solid $primary-color;
+      border-radius: $border-radius-sm;
+      font-size: $font-lg;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      background-color: $background-white;
+      outline: none;
+      transition: border-color 0.2s ease;
+
+      &:focus {
+        border-color: darken($primary-color, 10%);
+      }
+
+      &::placeholder {
+        color: $text-muted;
+      }
+    }
+
+    .save-project-name-button {
+      @include button-primary('base');
+      padding: $spacing-xs !important;
+      min-width: auto !important;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      i {
+        font-size: $font-sm;
+        margin: 0;
+        color: white;
+      }
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    .cancel-project-name-button {
+      @include button-secondary('base');
+      padding: $spacing-xs !important;
+      min-width: auto !important;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      i {
+        font-size: $font-sm;
+        margin: 0;
+        color: $text-secondary;
+      }
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
     }
   }
 }
@@ -402,6 +506,106 @@ mat-accordion {
 
   i {
     font-size: $font-sm;
+  }
+}
+
+// Assigned Assets Section
+.assigned-assets-container {
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1px solid $border-light;
+}
+
+.assigned-assets-section {
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.assets-section-title {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin: 0 0 $spacing-sm 0;
+  color: $text-primary;
+  font-size: $font-base;
+  font-weight: $font-weight-semibold;
+
+  i {
+    color: $primary-color;
+    font-size: $font-sm;
+  }
+}
+
+.asset-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm;
+  margin-bottom: $spacing-xs;
+  background-color: $background-light;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-sm;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: $background-selected;
+    border-color: $primary-color;
+  }
+}
+
+.asset-info {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex: 1;
+
+  i {
+    color: $primary-color;
+    font-size: $font-sm;
+  }
+
+  .asset-title {
+    color: $text-primary;
+    font-weight: $font-weight-medium;
+    font-size: $font-sm;
+  }
+
+  .asset-badge {
+    padding: 2px 6px;
+    background-color: #e0e7ff;
+    color: #3730a3;
+    border-radius: $border-radius-sm;
+    font-size: $font-xs;
+    font-weight: $font-weight-medium;
+  }
+
+  .asset-meta {
+    color: $text-muted;
+    font-size: $font-xs;
+  }
+}
+
+.asset-action-button {
+  @include button-secondary('base');
+  padding: $spacing-xs !important;
+  min-width: auto !important;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: $font-xs;
+    margin: 0;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 }
 

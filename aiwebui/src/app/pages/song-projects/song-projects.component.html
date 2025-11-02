@@ -115,7 +115,41 @@
         <div class="detail-header">
           <div class="header-title">
             <i class="fas fa-folder-open"></i>
-            <h2>{{ selectedProject.project_name }}</h2>
+            <!-- Non-Edit Mode -->
+            <h2 *ngIf="!isEditingProjectName">{{ selectedProject.project_name }}</h2>
+            <button
+              *ngIf="!isEditingProjectName"
+              type="button"
+              class="edit-project-name-button"
+              (click)="startEditProjectName()"
+              [matTooltip]="'songProjects.editor.editTitle' | translate">
+              <i class="fas fa-edit"></i>
+            </button>
+            <!-- Edit Mode -->
+            <input
+              *ngIf="isEditingProjectName"
+              type="text"
+              class="project-name-input"
+              [(ngModel)]="editProjectNameValue"
+              (keyup.enter)="saveProjectName()"
+              (keyup.escape)="cancelEditProjectName()"
+              [placeholder]="'songProjects.editor.projectName' | translate">
+            <button
+              *ngIf="isEditingProjectName"
+              type="button"
+              class="save-project-name-button"
+              (click)="saveProjectName()"
+              [matTooltip]="'common.save' | translate">
+              <i class="fas fa-check"></i>
+            </button>
+            <button
+              *ngIf="isEditingProjectName"
+              type="button"
+              class="cancel-project-name-button"
+              (click)="cancelEditProjectName()"
+              [matTooltip]="'common.cancel' | translate">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
           <span class="sync-badge" [ngClass]="getSyncStatusClass(selectedProject.sync_status)">
             {{ 'songProjects.syncStatus.' + selectedProject.sync_status | translate }}
@@ -185,7 +219,7 @@
                 <mat-panel-title>
                   <i class="fas fa-folder"></i>
                   <span>{{ folder.folder_name }}</span>
-                  <span class="file-count">({{ folder.files.length || 0 }} files)</span>
+                  <span class="file-count">({{ getFolderContentLabel(folder) }})</span>
                 </mat-panel-title>
               </mat-expansion-panel-header>
 
@@ -221,6 +255,66 @@
                   >
                     <i class="fas fa-download"></i>
                   </button>
+                </div>
+              </div>
+
+              <!-- Assigned Assets Sections -->
+              <div class="assigned-assets-container">
+                <!-- Assigned Songs -->
+                <div *ngIf="folder.assigned_songs && folder.assigned_songs.length > 0" class="assigned-assets-section">
+                  <h4 class="assets-section-title">
+                    <i class="fas fa-music"></i>
+                    {{ 'songProjects.detail.assignedSongs' | translate }}
+                  </h4>
+                  <div *ngFor="let song of folder.assigned_songs" class="asset-item">
+                    <div class="asset-info">
+                      <i class="fas fa-music"></i>
+                      <span class="asset-title">{{ song.title || 'Untitled' }}</span>
+                      <span class="asset-badge">{{ song.workflow }}</span>
+                      <span *ngIf="song.file_type" class="asset-meta">{{ song.file_type.toUpperCase() }}</span>
+                      <span *ngIf="song.file_size_bytes" class="asset-meta">{{ formatFileSize(song.file_size_bytes) }}</span>
+                    </div>
+                    <button type="button" class="asset-action-button" (click)="openSong(song.id)" [matTooltip]="'songProjects.detail.actions.openSong' | translate">
+                      <i class="fas fa-external-link-alt"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Assigned Sketches -->
+                <div *ngIf="folder.assigned_sketches && folder.assigned_sketches.length > 0" class="assigned-assets-section">
+                  <h4 class="assets-section-title">
+                    <i class="fas fa-pencil-alt"></i>
+                    {{ 'songProjects.detail.assignedSketches' | translate }}
+                  </h4>
+                  <div *ngFor="let sketch of folder.assigned_sketches" class="asset-item">
+                    <div class="asset-info">
+                      <i class="fas fa-pencil-alt"></i>
+                      <span class="asset-title">{{ sketch.title || sketch.prompt }}</span>
+                      <span class="asset-badge">{{ sketch.workflow }}</span>
+                    </div>
+                    <button type="button" class="asset-action-button" (click)="openSketch(sketch.id)" [matTooltip]="'songProjects.detail.actions.openSketch' | translate">
+                      <i class="fas fa-external-link-alt"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Assigned Images -->
+                <div *ngIf="folder.assigned_images && folder.assigned_images.length > 0" class="assigned-assets-section">
+                  <h4 class="assets-section-title">
+                    <i class="fas fa-image"></i>
+                    {{ 'songProjects.detail.assignedImages' | translate }}
+                  </h4>
+                  <div *ngFor="let image of folder.assigned_images" class="asset-item">
+                    <div class="asset-info">
+                      <i class="fas fa-image"></i>
+                      <span class="asset-title">{{ image.title || image.prompt || 'Untitled' }}</span>
+                      <span *ngIf="image.composition" class="asset-meta">{{ image.composition }}</span>
+                      <span *ngIf="image.width && image.height" class="asset-meta">{{ image.width }}x{{ image.height }}</span>
+                    </div>
+                    <button type="button" class="asset-action-button" (click)="openImage(image.id)" [matTooltip]="'songProjects.detail.actions.openImage' | translate">
+                      <i class="fas fa-external-link-alt"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </mat-expansion-panel>

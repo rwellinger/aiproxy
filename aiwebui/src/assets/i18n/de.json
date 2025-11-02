@@ -1664,6 +1664,19 @@
       "folders": "Ordner",
       "files": "Dateien",
       "noFiles": "Keine Dateien in diesem Ordner",
+      "assignedSongs": "Zugewiesene Songs",
+      "assignedSketches": "Zugewiesene Sketches",
+      "assignedImages": "Zugewiesene Bilder",
+      "noAssignedAssets": "Keine zugewiesenen Assets in diesem Ordner",
+      "folderContent": {
+        "images": "{{count}} Bilder",
+        "songs": "{{count}} Songs",
+        "sketches": "{{count}} Sketches",
+        "assets": "{{count}} Assets",
+        "assetsAndFiles": "{{assetCount}} Assets, {{fileCount}} Dateien",
+        "files": "{{count}} Dateien",
+        "empty": "leer"
+      },
       "stats": {
         "totalFiles": "Dateien Gesamt",
         "totalSize": "Gesamtgröße",
@@ -1679,7 +1692,10 @@
         "syncProject": "Projekt synchronisieren",
         "editProject": "Projekt bearbeiten",
         "deleteProject": "Projekt löschen",
-        "backToList": "Zurück zu Projekten"
+        "backToList": "Zurück zu Projekten",
+        "openSong": "Song öffnen",
+        "openSketch": "Sketch öffnen",
+        "openImage": "Bild öffnen"
       },
       "sections": {
         "general": "Allgemeine Informationen",
@@ -1689,7 +1705,7 @@
     },
     "editor": {
       "createTitle": "Neues Projekt",
-      "editTitle": "Projekt bearbeiten",
+      "editTitle": "Projektnamen bearbeiten",
       "createSubtitle": "Erstelle ein neues Song-Projekt",
       "editSubtitle": "Projekt-Informationen aktualisieren",
       "loading": "Projektdaten werden geladen...",

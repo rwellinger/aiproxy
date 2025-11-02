@@ -53,12 +53,45 @@ export interface ProjectFile {
   updated_at: string; // ISO format
 }
 
+export interface AssignedSong {
+  id: string;
+  title: string | null;
+  workflow: string;
+  file_type?: string | null;
+  file_size_bytes?: number | null;
+  created_at: string | null;
+}
+
+export interface AssignedSketch {
+  id: string;
+  title: string | null;
+  prompt: string;
+  workflow: string;
+  created_at: string | null;
+}
+
+export interface AssignedImage {
+  id: string;
+  title: string | null;
+  prompt: string | null;
+  composition: string | null;
+  width?: number | null;
+  height?: number | null;
+  created_at: string | null;
+}
+
 export interface ProjectFolderWithFiles extends ProjectFolder {
   files: ProjectFile[];
 }
 
+export interface ProjectFolderWithAssets extends ProjectFolderWithFiles {
+  assigned_songs?: AssignedSong[];
+  assigned_sketches?: AssignedSketch[];
+  assigned_images?: AssignedImage[];
+}
+
 export interface SongProjectDetail extends SongProject {
-  folders: ProjectFolderWithFiles[];
+  folders: ProjectFolderWithAssets[];
 }
 
 export interface SongProjectListItem {

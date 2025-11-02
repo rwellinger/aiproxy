@@ -25,8 +25,11 @@ from business.song_project_transformer import (
     get_default_folder_structure,
     get_mime_type,
     normalize_project_name,
+    transform_image_to_assigned_response,
     transform_project_detail_to_response,
     transform_project_to_response,
+    transform_sketch_to_assigned_response,
+    transform_song_to_assigned_response,
 )
 from db.song_project_service import song_project_service
 from utils.logger import logger
@@ -164,9 +167,59 @@ class SongProjectOrchestrator:
             )
             return None
 
+    def _load_assigned_assets_for_folders(
+        self, db: Session, project_id: UUID, folders_data: list[dict[str, Any]]
+    ) -> None:
+        """
+        Load assigned assets (songs, sketches, images) for all folders (coordination only)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            folders_data: List of folder dictionaries (will be modified in-place)
+
+        Note:
+            This method modifies folders_data in-place by adding assigned_songs,
+            assigned_sketches, and assigned_images lists to each folder.
+        """
+        try:
+            for folder_data in folders_data:
+                folder_id = UUID(folder_data["id"])
+
+                # Load assigned songs from DB
+                songs = self.db_service.get_assigned_songs_for_folder(db, project_id, folder_id)
+                folder_data["assigned_songs"] = [transform_song_to_assigned_response(song) for song in songs]
+
+                # Load assigned sketches from DB
+                sketches = self.db_service.get_assigned_sketches_for_folder(db, project_id, folder_id)
+                folder_data["assigned_sketches"] = [
+                    transform_sketch_to_assigned_response(sketch) for sketch in sketches
+                ]
+
+                # Load assigned images from DB
+                images = self.db_service.get_assigned_images_for_folder(db, project_id, folder_id)
+                folder_data["assigned_images"] = [transform_image_to_assigned_response(image) for image in images]
+
+                logger.debug(
+                    "Assigned assets loaded for folder",
+                    folder_id=str(folder_id),
+                    songs_count=len(songs),
+                    sketches_count=len(sketches),
+                    images_count=len(images),
+                )
+
+        except Exception as e:
+            logger.error(
+                "Failed to load assigned assets",
+                project_id=str(project_id),
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            # Don't fail the entire request, just log the error
+
     def get_project_with_details(self, db: Session, project_id: UUID, user_id: UUID) -> dict[str, Any] | None:
         """
-        Get project with all folders and files
+        Get project with all folders, files, and assigned assets
 
         Args:
             db: Database session
@@ -174,7 +227,7 @@ class SongProjectOrchestrator:
             user_id: User ID (for ownership check)
 
         Returns:
-            Project data with folders and files, or None if not found/unauthorized
+            Project data with folders, files, and assigned assets, or None if not found/unauthorized
         """
         try:
             # Get project with details from DB
@@ -189,8 +242,13 @@ class SongProjectOrchestrator:
                 logger.warning("Unauthorized project access", project_id=str(project_id), user_id=str(user_id))
                 return None
 
-            # Transform to response
-            return transform_project_detail_to_response(project)
+            # Transform to response (includes folders and files)
+            response = transform_project_detail_to_response(project)
+
+            # Load assigned assets for all folders (coordination)
+            self._load_assigned_assets_for_folders(db, project_id, response["folders"])
+
+            return response
 
         except Exception as e:
             logger.error(
