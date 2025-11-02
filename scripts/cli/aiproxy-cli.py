@@ -241,7 +241,8 @@ def login(api_url):
 @click.argument("project_id")
 @click.argument("folder_id")
 @click.argument("local_path", type=click.Path(exists=True), default=".")
-def upload(project_id, folder_id, local_path):
+@click.option("--debug", is_flag=True, help="Show debug output (request/response details)")
+def upload(project_id, folder_id, local_path, debug):
     """Upload files recursively to song project folder
 
     If local_path is omitted, uses current directory (.)
@@ -355,6 +356,10 @@ def upload(project_id, folder_id, local_path):
                 # Show intermediate progress while uploading
                 progress.update(task, description=f"Uploading batch {i//BATCH_SIZE + 1}/{(len(files) + BATCH_SIZE - 1)//BATCH_SIZE}...")
 
+                if debug:
+                    console.print(f"[dim]DEBUG: POST {url}[/dim]")
+                    console.print(f"[dim]DEBUG: Files in batch: {len(file_objects)}[/dim]")
+
                 response = requests.post(
                     url,
                     files=file_objects,
@@ -363,6 +368,11 @@ def upload(project_id, folder_id, local_path):
                     timeout=600,  # 10min timeout for large uploads
                 )
 
+                if debug:
+                    console.print(f"[dim]DEBUG: HTTP {response.status_code}[/dim]")
+                    console.print(f"[dim]DEBUG: Content-Type: {response.headers.get('Content-Type', 'N/A')}[/dim]")
+                    console.print(f"[dim]DEBUG: Response preview: {response.text[:300]}[/dim]")
+
                 # Close file handles
                 for _, (_, fh) in file_objects:
                     try:
@@ -370,15 +380,28 @@ def upload(project_id, folder_id, local_path):
                     except Exception:
                         pass
 
+                # Parse response with proper error handling
+                try:
+                    response_data = response.json()
+                except json.JSONDecodeError:
+                    # Server returned HTML instead of JSON (likely Nginx error page)
+                    failed += len(batch)
+                    error_preview = response.text[:200].replace("\n", " ")
+                    errors.append({
+                        "error": f"Server error (HTTP {response.status_code}): Response is not JSON. Preview: {error_preview}"
+                    })
+                    progress.update(task, advance=len(batch), description="Uploading files...")
+                    continue
+
                 if response.status_code == 200:
-                    result = response.json()["data"]
+                    result = response_data["data"]
                     uploaded += result["uploaded"]
                     failed += result["failed"]
                     errors.extend(result["errors"])
                 else:
                     # Batch upload failed
                     failed += len(batch)
-                    error_msg = response.json().get("error", f"HTTP {response.status_code}")
+                    error_msg = response_data.get("error", f"HTTP {response.status_code}")
                     errors.append({"error": f"Batch upload failed: {error_msg}"})
 
             except requests.exceptions.Timeout:
