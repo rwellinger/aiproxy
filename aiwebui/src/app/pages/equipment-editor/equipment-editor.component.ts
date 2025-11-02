@@ -23,7 +23,7 @@ import {
   EquipmentCreateRequest,
   EquipmentUpdateRequest
 } from '../../models/equipment.model';
-import { InfoTooltipComponent } from '../../components/shared/info-tooltip/info-tooltip.component';
+import { InfoTooltipComponent } from '../../components/info-tooltip/info-tooltip.component';
 
 @Component({
   selector: 'app-equipment-editor',

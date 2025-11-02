@@ -107,6 +107,14 @@
 
 .search-field {
   width: 100%;
+
+  .mat-mdc-form-field-icon-prefix {
+    padding-left: $spacing-md !important;
+  }
+
+  i.fas.fa-search {
+    margin-left: $spacing-sm;
+  }
 }
 
 // Projects List

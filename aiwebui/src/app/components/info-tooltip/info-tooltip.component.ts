@@ -2,7 +2,7 @@ import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DeviceService } from '../../../services/ui/device.service';
+import { DeviceService } from '../../services/ui/device.service';
 
 @Component({
   selector: 'app-info-tooltip',
