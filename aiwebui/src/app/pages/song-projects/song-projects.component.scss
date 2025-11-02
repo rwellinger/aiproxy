@@ -438,10 +438,35 @@ mat-accordion {
   margin-bottom: $spacing-md;
   padding-bottom: $spacing-sm;
   border-bottom: 1px solid $border-light;
+  display: flex;
+  gap: $spacing-sm;
 }
 
 .upload-button {
   @include button-primary('base');
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-weight: $font-weight-medium !important;
+
+  i {
+    font-size: $font-sm;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.copy-cli-button,
+.copy-cli-download-button {
+  @include button-secondary('base');
   display: inline-flex;
   align-items: center;
   gap: $spacing-xs;
@@ -637,6 +662,10 @@ mat-accordion {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
+}
+
+.refresh-button {
+  @include button-secondary('base');
 }
 
 .delete-button {

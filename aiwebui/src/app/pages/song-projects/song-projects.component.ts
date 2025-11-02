@@ -211,6 +211,26 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Refresh current project details.
+   */
+  async refreshProject(): Promise<void> {
+    if (!this.selectedProject) return;
+
+    try {
+      this.isLoadingDetail = true;
+      await this.selectProject(this.selectedProject);
+      this.notificationService.success(
+        this.translate.instant('common.refreshSuccess')
+      );
+    } catch (error) {
+      console.error('Failed to refresh project:', error);
+      this.notificationService.error(
+        this.translate.instant('songProjects.messages.loadError')
+      );
+    }
+  }
+
+  /**
    * Delete project with confirmation.
    */
   async deleteProject(): Promise<void> {
@@ -270,6 +290,24 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  }
+
+  /**
+   * Get file path relative to folder (strips folder name prefix).
+   * Example: "01 Arrangement/Media/drums.wav" → "Media/drums.wav"
+   *
+   * @param relativePath Full relative path (e.g., "01 Arrangement/Media/drums.wav")
+   * @param folderName Folder name (e.g., "01 Arrangement")
+   * @returns Path within folder (e.g., "Media/drums.wav")
+   */
+  getFilePathInFolder(relativePath: string, folderName: string): string {
+    // Remove folder name prefix if present
+    const prefix = folderName + '/';
+    if (relativePath.startsWith(prefix)) {
+      return relativePath.substring(prefix.length);
+    }
+    // Fallback: return full path if prefix doesn't match
+    return relativePath;
   }
 
   /**
@@ -345,6 +383,48 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
 
     // Trigger file selection dialog
     input.click();
+  }
+
+  /**
+   * Copy CLI upload command to clipboard.
+   */
+  async copyCLICommand(folder: any): Promise<void> {
+    if (!this.selectedProject) return;
+
+    const command = `aiproxy-cli upload ${this.selectedProject.id} ${folder.id}`;
+
+    try {
+      await navigator.clipboard.writeText(command);
+      this.notificationService.success(
+        this.translate.instant('songProjects.messages.cliUploadCommandCopied')
+      );
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      this.notificationService.error(
+        this.translate.instant('songProjects.messages.clipboardError')
+      );
+    }
+  }
+
+  /**
+   * Copy CLI download command to clipboard.
+   */
+  async copyCLIDownloadCommand(folder: any): Promise<void> {
+    if (!this.selectedProject) return;
+
+    const command = `aiproxy-cli download ${this.selectedProject.id} ${folder.id}`;
+
+    try {
+      await navigator.clipboard.writeText(command);
+      this.notificationService.success(
+        this.translate.instant('songProjects.messages.cliDownloadCommandCopied')
+      );
+    } catch (error) {
+      console.error('Clipboard copy failed:', error);
+      this.notificationService.error(
+        this.translate.instant('songProjects.messages.cliCommandCopyFailed')
+      );
+    }
   }
 
   /**

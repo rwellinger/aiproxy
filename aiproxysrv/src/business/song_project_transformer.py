@@ -219,6 +219,7 @@ def transform_file_to_response(file: Any, download_url: str | None = None) -> di
         "mime_type": file.mime_type,
         "file_size_bytes": file.file_size_bytes,
         "storage_backend": file.storage_backend,
+        "s3_key": file.s3_key,
         "is_synced": file.is_synced,
         "download_url": download_url,
         "created_at": file.created_at.isoformat() if file.created_at else None,

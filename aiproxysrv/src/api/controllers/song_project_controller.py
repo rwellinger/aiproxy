@@ -325,6 +325,137 @@ class SongProjectController:
             logger.error("File upload error", project_id=project_id, error=str(e), error_type=type(e).__name__)
             return {"error": f"Failed to upload file: {str(e)}"}, 500
 
+    @staticmethod
+    def batch_upload_files(
+        db: Session, user_id: UUID, project_id: str, folder_id: str, files: list
+    ) -> tuple[dict[str, Any], int]:
+        """
+        Batch upload multiple files to project folder
+
+        Args:
+            db: Database session
+            user_id: User ID (from JWT)
+            project_id: Project UUID
+            folder_id: Folder UUID
+            files: List of FileStorage objects from request.files.getlist()
+
+        Returns:
+            Tuple of (response_data, status_code)
+            response_data: {'data': {'uploaded': int, 'failed': int, 'errors': [...]}, 'message': str}
+        """
+        try:
+            # Validate UUID formats
+            try:
+                project_uuid = UUID(project_id)
+                folder_uuid = UUID(folder_id)
+            except ValueError:
+                return {"error": "Invalid ID format"}, 400
+
+            # Get project with details to find folder name
+            project_details = song_project_orchestrator.get_project_with_details(
+                db=db, project_id=project_uuid, user_id=user_id
+            )
+
+            if not project_details:
+                return {"error": "Project not found or unauthorized"}, 404
+
+            # Find folder by ID
+            folders = project_details.get("folders", [])
+            folder = next((f for f in folders if str(f.get("id")) == str(folder_uuid)), None)
+            if not folder:
+                return {"error": f"Folder not found: {folder_id}"}, 404
+
+            # Orchestrator handles batch upload
+            result = song_project_orchestrator.batch_upload_files_to_project(
+                db=db,
+                project_id=project_uuid,
+                user_id=user_id,
+                folder_name=folder.get("folder_name"),
+                files=files,
+            )
+
+            return {"data": result, "message": "Batch upload completed"}, 200
+
+        except Exception as e:
+            logger.error("Batch upload error", project_id=project_id, error=str(e), error_type=type(e).__name__)
+            return {"error": f"Batch upload failed: {str(e)}"}, 500
+
+    @staticmethod
+    def get_folder_files(db: Session, user_id: UUID, project_id: str, folder_id: str) -> tuple[dict[str, Any], int]:
+        """
+        Get all files in a folder with download URLs (for CLI download)
+
+        Args:
+            db: Database session
+            user_id: User ID (from JWT)
+            project_id: Project UUID
+            folder_id: Folder UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+            response_data: {'data': [{'id': '...', 'filename': '...', 'relative_path': '...', 'download_url': '...', 'file_size_bytes': 123}]}
+        """
+        try:
+            # Validate UUID formats
+            try:
+                project_uuid = UUID(project_id)
+                folder_uuid = UUID(folder_id)
+            except ValueError:
+                return {"error": "Invalid ID format"}, 400
+
+            # Get project details (checks ownership)
+            project_details = song_project_orchestrator.get_project_with_details(
+                db=db, project_id=project_uuid, user_id=user_id
+            )
+
+            if not project_details:
+                return {"error": "Project not found or unauthorized"}, 404
+
+            # Find folder by ID
+            folders = project_details.get("folders", [])
+            folder = next((f for f in folders if str(f.get("id")) == str(folder_uuid)), None)
+            if not folder:
+                return {"error": f"Folder not found: {folder_id}"}, 404
+
+            # Get files from folder
+            files = folder.get("files", [])
+
+            # Generate fresh download URLs (existing URLs might be expired)
+            file_list = []
+            for f in files:
+                s3_key = f.get("s3_key")
+                download_url = None
+
+                # Generate fresh presigned URL (valid for 1 hour)
+                if s3_key:
+                    try:
+                        download_url = song_project_orchestrator.storage.get_url(s3_key, expires_in=3600)
+                    except Exception as e:
+                        logger.error(
+                            "Failed to generate download URL",
+                            s3_key=s3_key,
+                            filename=f.get("filename"),
+                            error=str(e),
+                            error_type=type(e).__name__,
+                        )
+
+                file_list.append(
+                    {
+                        "id": f.get("id"),
+                        "filename": f.get("filename"),
+                        "relative_path": f.get("relative_path"),
+                        "download_url": download_url,
+                        "file_size_bytes": f.get("file_size_bytes"),
+                        "s3_key": s3_key,
+                    }
+                )
+
+            return {"data": file_list}, 200
+
+        except Exception as e:
+            logger.error("Get folder files error", project_id=project_id, error=str(e), error_type=type(e).__name__)
+            return {"error": f"Failed to get folder files: {str(e)}"}, 500
+
 
 # Global controller instance
 song_project_controller = SongProjectController()

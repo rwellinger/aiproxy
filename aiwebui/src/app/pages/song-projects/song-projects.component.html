@@ -223,41 +223,6 @@
                 </mat-panel-title>
               </mat-expansion-panel-header>
 
-              <!-- Files in Folder -->
-              <div class="folder-files">
-                <!-- Upload Button -->
-                <div class="folder-upload-section">
-                  <button
-                    type="button"
-                    class="upload-button"
-                    (click)="uploadFile(folder)"
-                  >
-                    <i class="fas fa-upload"></i>
-                    <span>{{ 'songProjects.detail.actions.uploadFile' | translate }}</span>
-                  </button>
-                </div>
-
-                <div *ngIf="!folder.files || folder.files.length === 0" class="empty-folder">
-                  <p>{{ 'songProjects.detail.noFiles' | translate }}</p>
-                </div>
-
-                <div *ngFor="let file of folder.files" class="file-item">
-                  <div class="file-info">
-                    <i class="fas fa-file"></i>
-                    <span class="filename">{{ file.filename }}</span>
-                    <span class="filesize">{{ formatFileSize(file.file_size_bytes) }}</span>
-                  </div>
-                  <button
-                    *ngIf="file.download_url"
-                    type="button"
-                    class="file-download-button"
-                    (click)="downloadFile(file.download_url!)"
-                  >
-                    <i class="fas fa-download"></i>
-                  </button>
-                </div>
-              </div>
-
               <!-- Assigned Assets Sections -->
               <div class="assigned-assets-container">
                 <!-- Assigned Songs -->
@@ -317,6 +282,59 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Files in Folder -->
+              <div class="folder-files">
+                <!-- Upload & Download Buttons -->
+                <div class="folder-upload-section">
+                  <button
+                    type="button"
+                    class="upload-button"
+                    (click)="uploadFile(folder)"
+                  >
+                    <i class="fas fa-upload"></i>
+                    <span>{{ 'songProjects.detail.actions.uploadFile' | translate }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="copy-cli-button"
+                    (click)="copyCLICommand(folder)"
+                    [title]="'songProjects.detail.actions.copyCLIUploadCommand' | translate"
+                  >
+                    <i class="fas fa-terminal"></i>
+                    <span>{{ 'songProjects.detail.actions.copyCLIUploadCommand' | translate }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="copy-cli-download-button"
+                    (click)="copyCLIDownloadCommand(folder)"
+                    [title]="'songProjects.detail.actions.copyCLIDownloadCommand' | translate"
+                  >
+                    <i class="fas fa-download"></i>
+                    <span>{{ 'songProjects.detail.actions.copyCLIDownloadCommand' | translate }}</span>
+                  </button>
+                </div>
+
+                <div *ngIf="!folder.files || folder.files.length === 0" class="empty-folder">
+                  <p>{{ 'songProjects.detail.noFiles' | translate }}</p>
+                </div>
+
+                <div *ngFor="let file of folder.files" class="file-item">
+                  <div class="file-info">
+                    <i class="fas fa-file"></i>
+                    <span class="filename" [title]="file.relative_path">{{ getFilePathInFolder(file.relative_path, folder.folder_name) }}</span>
+                    <span class="filesize">{{ formatFileSize(file.file_size_bytes) }}</span>
+                  </div>
+                  <button
+                    *ngIf="file.download_url"
+                    type="button"
+                    class="file-download-button"
+                    (click)="downloadFile(file.download_url!)"
+                  >
+                    <i class="fas fa-download"></i>
+                  </button>
+                </div>
+              </div>
             </mat-expansion-panel>
           </mat-accordion>
 
@@ -327,6 +345,10 @@
 
         <!-- Detail Actions -->
         <div class="detail-actions">
+          <button type="button" class="action-button refresh-button" (click)="refreshProject()">
+            <i class="fas fa-sync-alt"></i>
+            <span>{{ 'common.refresh' | translate }}</span>
+          </button>
           <button type="button" class="action-button delete-button" (click)="deleteProject()">
             <i class="fas fa-trash"></i>
             <span>{{ 'songProjects.list.actions.delete' | translate }}</span>

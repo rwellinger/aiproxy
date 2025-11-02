@@ -43,6 +43,7 @@ export interface ProjectFile {
   project_id: string;
   folder_id: string;
   filename: string;
+  relative_path: string; // Full path with subdirectories (e.g., "Audio Files/Drums/Kick.wav")
   s3_key: string;
   file_size_bytes: number;
   file_hash?: string;

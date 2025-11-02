@@ -87,14 +87,14 @@ clean:
 # Development build
 build-dev: check-node
 	@echo "Running development build..."
-	npm run build
+	@npm run build || (echo ""; echo "❌ BUILD FAILED! Fix TypeScript compilation errors above."; exit 1)
 
 # Production build (CRITICAL: with all pre-checks!)
 build-prod: check-node lint-all
 	@echo "Running production build..."
-	npm run build:prod
+	@npm run build:prod || (echo ""; echo "❌ BUILD FAILED! Fix TypeScript compilation errors above."; exit 1)
 	@echo ""
-	@echo "Production build complete!"
+	@echo "✅ Production build complete!"
 	@echo "Output location: dist/aiwebui/"
 	@echo "Deployment target: ../forwardproxy/html/aiwebui/"
 	@echo ""

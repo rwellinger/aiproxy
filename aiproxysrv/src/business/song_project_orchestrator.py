@@ -453,13 +453,31 @@ class SongProjectOrchestrator:
                 logger.warning("Folder not found", folder_name=folder_name, project_id=str(project_id))
                 return None
 
-            # Detect file type and MIME type (business logic in transformer)
-            file_type = detect_file_type(filename)
-            mime_type = get_mime_type(filename)
+            # Extract actual filename from path (if filename contains subdirectories)
+            # Example: "Drums/Kick.wav" → filename="Kick.wav", subdir="Drums/"
+            from pathlib import Path as PathLib
 
-            # Generate S3 key
-            s3_key = f"{folder.s3_prefix}{filename}"
-            relative_path = f"{folder_name}/{filename}"
+            file_path_obj = PathLib(filename)
+            actual_filename = file_path_obj.name  # Just the filename
+            subdir = str(file_path_obj.parent) if file_path_obj.parent != PathLib(".") else ""
+
+            # Detect file type and MIME type (business logic in transformer)
+            file_type = detect_file_type(actual_filename)
+            mime_type = get_mime_type(actual_filename)
+
+            # Generate S3 key with subdirectories preserved
+            # Example: folder.s3_prefix = "user_123/project_456/Audio Files/"
+            # filename = "Drums/Kick.wav" → s3_key = "user_123/project_456/Audio Files/Drums/Kick.wav"
+            if subdir:
+                # Normalize subdirectory path (forward slashes)
+                subdir_normalized = subdir.replace("\\", "/")
+                if not subdir_normalized.endswith("/"):
+                    subdir_normalized += "/"
+                s3_key = f"{folder.s3_prefix}{subdir_normalized}{actual_filename}"
+                relative_path = f"{folder_name}/{subdir_normalized}{actual_filename}"
+            else:
+                s3_key = f"{folder.s3_prefix}{actual_filename}"
+                relative_path = f"{folder_name}/{actual_filename}"
 
             # Upload to S3
             try:
@@ -469,12 +487,14 @@ class SongProjectOrchestrator:
                 return None
 
             # Create file record in DB
+            # filename = just the filename (no subdirs)
+            # relative_path = full path including subdirs (e.g., "Audio Files/Drums/Kick.wav")
             file_record = self.db_service.create_file(
                 db=db,
                 project_id=project_id,
                 folder_id=folder.id,
-                filename=filename,
-                relative_path=relative_path,
+                filename=actual_filename,  # Just the filename
+                relative_path=relative_path,  # Full path with subdirs
                 s3_key=s3_key,
                 file_type=file_type,
                 mime_type=mime_type,
@@ -489,7 +509,13 @@ class SongProjectOrchestrator:
                     self.storage.delete(s3_key)
                 return None
 
-            logger.info("File uploaded to project", project_id=str(project_id), filename=filename, folder=folder_name)
+            logger.info(
+                "File uploaded to project",
+                project_id=str(project_id),
+                filename=actual_filename,
+                relative_path=relative_path,
+                folder=folder_name,
+            )
 
             # Note: Project stats (total_files, total_size_bytes) are calculated LIVE
             # in transform_project_detail_to_response() from actual files (Single Source of Truth)
@@ -507,6 +533,80 @@ class SongProjectOrchestrator:
                 "Upload file to project failed", project_id=str(project_id), error=str(e), error_type=type(e).__name__
             )
             return None
+
+    def batch_upload_files_to_project(
+        self,
+        db: Session,
+        project_id: UUID,
+        user_id: UUID,
+        folder_name: str,
+        files: list,
+    ) -> dict[str, Any]:
+        """
+        Upload multiple files to project folder
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            user_id: User ID (for ownership check)
+            folder_name: Target folder name
+            files: List of FileStorage objects from request.files.getlist()
+
+        Returns:
+            Dictionary with upload results:
+            {
+                'uploaded': int,
+                'failed': int,
+                'errors': [{'filename': str, 'error': str}, ...]
+            }
+        """
+        uploaded = 0
+        failed = 0
+        errors = []
+
+        for file in files:
+            try:
+                filename = file.filename
+                file_data = file.read()
+
+                # Reuse existing single-file upload logic
+                result = self.upload_file_to_project(
+                    db=db,
+                    project_id=project_id,
+                    user_id=user_id,
+                    folder_name=folder_name,
+                    filename=filename,
+                    file_data=file_data,
+                )
+
+                if result:
+                    uploaded += 1
+                    logger.debug("File uploaded", filename=filename, project_id=str(project_id))
+                else:
+                    failed += 1
+                    errors.append({"filename": filename, "error": "Upload failed"})
+                    logger.warning("File upload failed", filename=filename, project_id=str(project_id))
+
+            except Exception as e:
+                failed += 1
+                errors.append({"filename": file.filename, "error": str(e)})
+                logger.error(
+                    "File upload error in batch",
+                    filename=file.filename,
+                    project_id=str(project_id),
+                    error=str(e),
+                    error_type=type(e).__name__,
+                )
+
+        logger.info(
+            "Batch upload completed",
+            project_id=str(project_id),
+            uploaded=uploaded,
+            failed=failed,
+            total=len(files),
+        )
+
+        return {"uploaded": uploaded, "failed": failed, "errors": errors}
 
 
 # Global orchestrator instance

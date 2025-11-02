@@ -12,7 +12,7 @@ class TestTransformSongToListFormat:
     def test_transform_song_to_list_format_complete(self):
         """Test transforming song with all fields"""
         # Arrange
-        song = Mock()
+        song = Mock(spec=["id", "lyrics", "title", "model", "tags", "workflow", "is_instrumental", "created_at"])
         song.id = 123
         song.lyrics = "Test lyrics"
         song.title = "Test Song"
@@ -34,13 +34,15 @@ class TestTransformSongToListFormat:
             "tags": "pop,rock",
             "workflow": "simple",
             "is_instrumental": False,
+            "project_id": None,
+            "project_name": None,
             "created_at": "2024-01-15T10:30:00",
         }
 
     def test_transform_song_to_list_format_minimal(self):
         """Test transforming song with minimal fields"""
         # Arrange
-        song = Mock()
+        song = Mock(spec=["id", "lyrics", "title", "model", "tags", "workflow", "is_instrumental", "created_at"])
         song.id = 456
         song.lyrics = None
         song.title = None
@@ -62,6 +64,8 @@ class TestTransformSongToListFormat:
             "tags": None,
             "workflow": "draft",
             "is_instrumental": True,
+            "project_id": None,
+            "project_name": None,
             "created_at": None,
         }
 
