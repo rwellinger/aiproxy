@@ -3,6 +3,7 @@
 from typing import Any
 
 from business.image_orchestrator import ImageGenerationError, ImageOrchestrator
+from db.image_service import ImageService
 from utils.logger import logger
 
 
@@ -322,5 +323,72 @@ class ImageController:
         except Exception as e:
             logger.error(
                 "Unexpected error adding text overlay", image_id=image_id, error_type=type(e).__name__, error=str(e)
+            )
+            return {"error": f"Internal server error: {str(e)}"}, 500
+
+    def assign_to_project(
+        self,
+        image_id: str,
+        project_id: str,
+        folder_id: str | None = None,
+    ) -> tuple[dict[str, Any], int]:
+        """
+        Assign image to a project (N:M relationship via project_image_references)
+
+        Args:
+            image_id: Image UUID
+            project_id: Project UUID
+            folder_id: Optional folder UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            result = self.orchestrator.assign_image_to_project(
+                image_id=image_id,
+                project_id=project_id,
+                folder_id=folder_id,
+            )
+
+            logger.info(
+                "Image assigned to project",
+                image_id=image_id,
+                project_id=project_id,
+                folder_id=folder_id,
+                reference_id=result.get("reference_id"),
+            )
+
+            return {"success": True, "data": result}, 200
+
+        except ValueError as e:
+            logger.warning("Image assignment validation failed", image_id=image_id, project_id=project_id, error=str(e))
+            return {"error": str(e)}, 404
+        except Exception as e:
+            logger.error(
+                "Failed to assign image to project",
+                image_id=image_id,
+                project_id=project_id,
+                error_type=type(e).__name__,
+                error=str(e),
+            )
+            return {"error": f"Internal server error: {str(e)}"}, 500
+
+    def get_projects_for_image(self, image_id: str) -> tuple[dict[str, Any], int]:
+        """
+        Get list of projects this image is assigned to.
+
+        Args:
+            image_id: Image UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            projects = ImageService.get_projects_for_image(image_id)
+            return {"projects": projects}, 200
+
+        except Exception as e:
+            logger.error(
+                "Failed to get projects for image", image_id=image_id, error_type=type(e).__name__, error=str(e)
             )
             return {"error": f"Internal server error: {str(e)}"}, 500

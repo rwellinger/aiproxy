@@ -454,6 +454,145 @@ class SongProjectService:
             logger.error("File creation failed", error=str(e), error_type=type(e).__name__)
             return None
 
+    def get_folder_by_id(self, db: Session, folder_id: UUID) -> ProjectFolder | None:
+        """
+        Get a folder by its ID
+
+        Args:
+            db: Database session
+            folder_id: Folder UUID
+
+        Returns:
+            ProjectFolder instance if found, None otherwise
+        """
+        try:
+            folder = db.query(ProjectFolder).filter(ProjectFolder.id == folder_id).first()
+            if folder:
+                logger.debug("Folder retrieved", folder_id=str(folder_id))
+            return folder
+        except SQLAlchemyError as e:
+            logger.error(
+                "Failed to get folder by ID", error=str(e), error_type=type(e).__name__, folder_id=str(folder_id)
+            )
+            return None
+
+    def get_assigned_songs_for_folder(self, db: Session, project_id: UUID, folder_id: UUID) -> list[Any]:
+        """
+        Get all assigned songs for a project folder (CRUD only)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            folder_id: Folder UUID
+
+        Returns:
+            List of Song instances
+        """
+        try:
+            from db.models import Song
+
+            songs = (
+                db.query(Song)
+                .filter(Song.project_id == project_id, Song.project_folder_id == folder_id)
+                .order_by(Song.created_at.desc())
+                .all()
+            )
+            logger.debug(
+                "Assigned songs retrieved", project_id=str(project_id), folder_id=str(folder_id), count=len(songs)
+            )
+            return songs
+        except SQLAlchemyError as e:
+            logger.error(
+                "Failed to get assigned songs",
+                error=str(e),
+                error_type=type(e).__name__,
+                project_id=str(project_id),
+                folder_id=str(folder_id),
+            )
+            return []
+
+    def get_assigned_sketches_for_folder(self, db: Session, project_id: UUID, folder_id: UUID) -> list[Any]:
+        """
+        Get all assigned sketches for a project folder (CRUD only)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            folder_id: Folder UUID
+
+        Returns:
+            List of SongSketch instances
+        """
+        try:
+            from db.models import SongSketch
+
+            sketches = (
+                db.query(SongSketch)
+                .filter(SongSketch.project_id == project_id, SongSketch.project_folder_id == folder_id)
+                .order_by(SongSketch.created_at.desc())
+                .all()
+            )
+            logger.debug(
+                "Assigned sketches retrieved", project_id=str(project_id), folder_id=str(folder_id), count=len(sketches)
+            )
+            return sketches
+        except SQLAlchemyError as e:
+            logger.error(
+                "Failed to get assigned sketches",
+                error=str(e),
+                error_type=type(e).__name__,
+                project_id=str(project_id),
+                folder_id=str(folder_id),
+            )
+            return []
+
+    def get_assigned_images_for_folder(self, db: Session, project_id: UUID, folder_id: UUID) -> list[Any]:
+        """
+        Get all assigned images for a project folder (CRUD only)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            folder_id: Folder UUID
+
+        Returns:
+            List of GeneratedImage instances
+        """
+        try:
+            from db.models import GeneratedImage, ProjectImageReference
+
+            images = (
+                db.query(GeneratedImage)
+                .join(ProjectImageReference, ProjectImageReference.image_id == GeneratedImage.id)
+                .filter(ProjectImageReference.project_id == project_id, ProjectImageReference.folder_id == folder_id)
+                .order_by(GeneratedImage.created_at.desc())
+                .all()
+            )
+            logger.debug(
+                "Assigned images retrieved", project_id=str(project_id), folder_id=str(folder_id), count=len(images)
+            )
+            return images
+        except SQLAlchemyError as e:
+            logger.error(
+                "Failed to get assigned images",
+                error=str(e),
+                error_type=type(e).__name__,
+                project_id=str(project_id),
+                folder_id=str(folder_id),
+            )
+            return []
+
 
 # Global service instance
 song_project_service = SongProjectService()
+
+
+# Standalone wrapper functions for orchestrator imports
+def get_project_by_id(db: Session, project_id: UUID) -> SongProject | None:
+    """Wrapper function for service method"""
+    return song_project_service.get_project_by_id(db, project_id)
+
+
+def get_folder_by_id(db: Session, folder_id: UUID) -> ProjectFolder | None:
+    """Wrapper function for service method"""
+    return song_project_service.get_folder_by_id(db, folder_id)

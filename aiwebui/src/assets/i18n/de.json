@@ -125,10 +125,38 @@
     "pause": "Pause",
     "play": "Abspielen",
     "refresh": "Aktualisieren",
+    "refreshSuccess": "Erfolgreich aktualisiert",
     "reset": "Zurücksetzen",
     "save": "Speichern",
+    "saving": "Speichert...",
     "search": "Suchen",
-    "stop": "Stopp"
+    "stop": "Stopp",
+    "projectBadge": {
+      "inProject": "In {{count}} Projekt",
+      "inProjects": "In {{count}} Projekten",
+      "viewProject": "Im Projekt anzeigen"
+    }
+  },
+  "selectProject": {
+    "title": "Projekt auswählen",
+    "subtitle": "Dieses Bild ist mehreren Projekten zugewiesen. Bitte wählen Sie eines aus:"
+  },
+  "assignToProject": {
+    "title": {
+      "image": "Bild zu Projekt zuweisen",
+      "song": "Song zu Projekt zuweisen",
+      "sketch": "Sketch zu Projekt zuweisen"
+    },
+    "selectProject": "Projekt auswählen",
+    "selectFolder": "Ordner auswählen (Optional)",
+    "noFolder": "Kein Ordner",
+    "noFoldersAvailable": "Keine Ordner in diesem Projekt verfügbar",
+    "success": "Erfolgreich zu Projekt zugewiesen",
+    "errors": {
+      "loadProjectsFailed": "Projekte konnten nicht geladen werden",
+      "loadFoldersFailed": "Ordner konnten nicht geladen werden",
+      "assignFailed": "Zuweisung zum Projekt fehlgeschlagen"
+    }
   },
   "detailPanel": {
     "addTag": "Tag hinzufügen...",
@@ -335,6 +363,7 @@
   },
   "imageView": {
     "actions": {
+      "assignToProject": "Zu Projekt zuweisen",
       "delete": "Löschen",
       "deleteCount": "Löschen ({{count}})",
       "deselectAll": "Alle abwählen",
@@ -377,7 +406,9 @@
       "loadingImages": "Lade Bilder...",
       "noImagesInDb": "Keine Bilder in der Datenbank gefunden.",
       "noSearchResults": "Keine Bilder entsprechen deinen Suchkriterien.",
-      "selectImagePlaceholder": "Wähle ein Bild aus der Liste, um Details anzuzeigen"
+      "selectImagePlaceholder": "Wähle ein Bild aus der Liste, um Details anzuzeigen",
+      "noProjects": "Dieses Bild ist keinem Projekt zugewiesen",
+      "projectLoadError": "Fehler beim Laden der Projekte für dieses Bild"
     },
     "noImages": "Keine Bilder gefunden",
     "orientation": {
@@ -990,6 +1021,7 @@
   },
   "songView": {
     "actions": {
+      "assignToProject": "Zu Projekt zuweisen",
       "close": "Schließen",
       "copyAll": "Alles kopieren",
       "copyLyrics": "Text kopieren",
@@ -1353,6 +1385,7 @@
         "archived": "Archiviert"
       },
       "actions": {
+        "assignToProject": "Zu Projekt zuweisen",
         "newSketch": "Neue Skizze",
         "createFirst": "Erste Skizze erstellen",
         "edit": "Bearbeiten",
@@ -1632,6 +1665,19 @@
       "folders": "Ordner",
       "files": "Dateien",
       "noFiles": "Keine Dateien in diesem Ordner",
+      "assignedSongs": "Zugewiesene Songs",
+      "assignedSketches": "Zugewiesene Sketches",
+      "assignedImages": "Zugewiesene Bilder",
+      "noAssignedAssets": "Keine zugewiesenen Assets in diesem Ordner",
+      "folderContent": {
+        "images": "{{count}} Bilder",
+        "songs": "{{count}} Songs",
+        "sketches": "{{count}} Sketches",
+        "assets": "{{count}} Assets",
+        "assetsAndFiles": "{{assetCount}} Assets, {{fileCount}} Dateien",
+        "files": "{{count}} Dateien",
+        "empty": "leer"
+      },
       "stats": {
         "totalFiles": "Dateien Gesamt",
         "totalSize": "Gesamtgröße",
@@ -1642,12 +1688,17 @@
       },
       "actions": {
         "uploadFile": "Datei hochladen",
+        "copyCLIUploadCommand": "Upload Befehl kopieren",
+        "copyCLIDownloadCommand": "Download Befehl kopieren",
         "downloadFile": "Herunterladen",
         "deleteFile": "Datei löschen",
         "syncProject": "Projekt synchronisieren",
         "editProject": "Projekt bearbeiten",
         "deleteProject": "Projekt löschen",
-        "backToList": "Zurück zu Projekten"
+        "backToList": "Zurück zu Projekten",
+        "openSong": "Song öffnen",
+        "openSketch": "Sketch öffnen",
+        "openImage": "Bild öffnen"
       },
       "sections": {
         "general": "Allgemeine Informationen",
@@ -1657,7 +1708,7 @@
     },
     "editor": {
       "createTitle": "Neues Projekt",
-      "editTitle": "Projekt bearbeiten",
+      "editTitle": "Projektnamen bearbeiten",
       "createSubtitle": "Erstelle ein neues Song-Projekt",
       "editSubtitle": "Projekt-Informationen aktualisieren",
       "loading": "Projektdaten werden geladen...",
@@ -1696,6 +1747,10 @@
       "uploadSuccess": "Datei erfolgreich hochgeladen",
       "uploadError": "Fehler beim Hochladen der Datei",
       "fileTooLarge": "Datei ist zu groß (max {{size}})",
+      "cliUploadCommandCopied": "CLI Upload-Befehl kopiert! Im Terminal einfügen um Dateien hochzuladen.",
+      "cliDownloadCommandCopied": "CLI Download-Befehl kopiert! Im Terminal einfügen um Dateien herunterzuladen.",
+      "cliCommandCopyFailed": "Fehler beim Kopieren des Befehls in die Zwischenablage",
+      "clipboardError": "Fehler beim Kopieren in die Zwischenablage",
       "downloadSuccess": "Datei heruntergeladen",
       "downloadError": "Fehler beim Herunterladen der Datei",
       "syncSuccess": "Projekt erfolgreich synchronisiert",

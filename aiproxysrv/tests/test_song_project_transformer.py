@@ -319,6 +319,7 @@ class TestTransformFileToResponse:
         file.mime_type = "audio/mpeg"
         file.file_size_bytes = 5000000
         file.storage_backend = "s3"
+        file.s3_key = "user-id/project/01 Arrangement/song.mp3"
         file.is_synced = True
         file.created_at = Mock()
         file.created_at.isoformat.return_value = "2024-01-01T12:00:00"
@@ -334,6 +335,7 @@ class TestTransformFileToResponse:
         assert result["mime_type"] == "audio/mpeg"
         assert result["file_size_bytes"] == 5000000
         assert result["storage_backend"] == "s3"
+        assert result["s3_key"] == "user-id/project/01 Arrangement/song.mp3"
         assert result["is_synced"] is True
         assert result["download_url"] == "https://s3.example.com/song.mp3"
 
@@ -347,12 +349,14 @@ class TestTransformFileToResponse:
         file.mime_type = "audio/mpeg"
         file.file_size_bytes = 5000000
         file.storage_backend = "s3"
+        file.s3_key = "user-id/project/song.mp3"
         file.is_synced = False
         file.created_at = None
         file.updated_at = None
 
         result = transform_file_to_response(file)
 
+        assert result["s3_key"] == "user-id/project/song.mp3"
         assert result["download_url"] is None
 
 
@@ -370,6 +374,7 @@ class TestTransformProjectDetailToResponse:
         file.mime_type = "audio/mpeg"
         file.file_size_bytes = 5000000
         file.storage_backend = "s3"
+        file.s3_key = "user-id/project/01 Arrangement/song.mp3"
         file.is_synced = True
         file.created_at = None
         file.updated_at = None

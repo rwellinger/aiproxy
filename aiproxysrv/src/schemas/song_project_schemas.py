@@ -53,6 +53,9 @@ class FolderResponse(BaseModel):
     custom_icon: str | None
     created_at: str | None
     files: list["FileResponse"] | None = None
+    assigned_songs: list["AssignedSongResponse"] | None = None
+    assigned_sketches: list["AssignedSketchResponse"] | None = None
+    assigned_images: list["AssignedImageResponse"] | None = None
 
     class Config:
         from_attributes = True
@@ -72,6 +75,48 @@ class FileResponse(BaseModel):
     download_url: str | None
     created_at: str | None
     updated_at: str | None
+
+    class Config:
+        from_attributes = True
+
+
+class AssignedSongResponse(BaseModel):
+    """Response schema for an assigned song"""
+
+    id: str
+    title: str | None
+    workflow: str
+    file_type: str | None
+    file_size_bytes: int | None
+    created_at: str | None
+
+    class Config:
+        from_attributes = True
+
+
+class AssignedSketchResponse(BaseModel):
+    """Response schema for an assigned sketch"""
+
+    id: str
+    title: str | None
+    prompt: str
+    workflow: str
+    created_at: str | None
+
+    class Config:
+        from_attributes = True
+
+
+class AssignedImageResponse(BaseModel):
+    """Response schema for an assigned image"""
+
+    id: str
+    title: str | None
+    prompt: str | None
+    composition: str | None
+    width: int | None
+    height: int | None
+    created_at: str | None
 
     class Config:
         from_attributes = True

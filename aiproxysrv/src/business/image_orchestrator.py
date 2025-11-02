@@ -747,3 +747,79 @@ class ImageOrchestrator:
             logger.debug("Generated backend proxy path for S3 image", image_id=str(image.id), s3_key=image.s3_key)
 
         return result
+
+    def assign_image_to_project(
+        self,
+        image_id: str,
+        project_id: str,
+        folder_id: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Assign an image to a project (N:M relationship)
+
+        Args:
+            image_id: Image UUID
+            project_id: Project UUID
+            folder_id: Optional folder UUID
+
+        Returns:
+            dict: Assignment result with reference_id
+
+        Raises:
+            ValueError: If image or project not found
+        """
+        from uuid import UUID
+
+        from db.database import get_db
+        from db.image_service import get_image_by_id
+        from db.project_asset_service import create_image_reference
+        from db.song_project_service import get_project_by_id
+
+        db = next(get_db())
+
+        try:
+            # Validate image exists
+            image = get_image_by_id(db, UUID(image_id))
+            if not image:
+                raise ValueError(f"Image not found: {image_id}")
+
+            # Validate project exists
+            project = get_project_by_id(db, UUID(project_id))
+            if not project:
+                raise ValueError(f"Project not found: {project_id}")
+
+            # Validate folder if provided
+            if folder_id:
+                from db.song_project_service import get_folder_by_id
+
+                folder = get_folder_by_id(db, UUID(folder_id))
+                if not folder:
+                    raise ValueError(f"Folder not found: {folder_id}")
+                if folder.project_id != UUID(project_id):
+                    raise ValueError(f"Folder {folder_id} does not belong to project {project_id}")
+
+            # Create reference (or update existing)
+            reference = create_image_reference(
+                db=db,
+                project_id=UUID(project_id),
+                image_id=UUID(image_id),
+                folder_id=UUID(folder_id) if folder_id else None,
+            )
+
+            logger.info(
+                "Image assigned to project",
+                reference_id=str(reference.id),
+                image_id=image_id,
+                project_id=project_id,
+                folder_id=folder_id,
+            )
+
+            return {
+                "reference_id": str(reference.id),
+                "project_id": str(reference.project_id),
+                "image_id": str(reference.image_id),
+                "folder_id": str(reference.folder_id) if reference.folder_id else None,
+            }
+
+        finally:
+            db.close()

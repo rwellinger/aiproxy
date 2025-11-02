@@ -154,6 +154,7 @@ class TestTransformImageToApiFormat:
             "color_palette": "vibrant",
             "detail_level": "highly-detailed",
             "file_path": "/path/to/test.png",
+            "project_references": [],  # Empty list for project references
         }
         defaults.update(kwargs)
 

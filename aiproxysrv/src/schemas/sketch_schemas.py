@@ -47,13 +47,15 @@ class SketchResponse(BaseModel):
     description_tags: str | None = Field(None, description="Release tags (comma-separated)")
     info: str | None = Field(None, description="Working notes (key, tempo, bars, length)")
     workflow: str = Field(..., description="Workflow status")
+    project_id: UUID | None = Field(None, description="Project ID (if assigned)")
+    project_name: str | None = Field(None, description="Project name (if assigned)")
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime | None = Field(None, description="Last update timestamp")
 
-    @field_serializer("id")
-    def serialize_id(self, value: UUID) -> str:
+    @field_serializer("id", "project_id")
+    def serialize_uuid(self, value: UUID | None) -> str | None:
         """Convert UUID to string for JSON serialization"""
-        return str(value)
+        return str(value) if value else None
 
     @field_validator("workflow")
     @classmethod
@@ -76,6 +78,8 @@ class SketchUpdateRequest(BaseModel):
     description_tags: str | None = Field(None, max_length=1000, description="New release tags")
     info: str | None = Field(None, description="New working notes")
     workflow: str | None = Field(None, description="New workflow status")
+    project_id: str | None = Field(None, description="Song project ID to assign this sketch to")
+    project_folder_id: str | None = Field(None, description="Folder ID within the project")
 
     @field_validator("workflow")
     @classmethod

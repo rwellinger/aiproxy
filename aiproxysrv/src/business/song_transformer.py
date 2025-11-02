@@ -19,6 +19,15 @@ class SongTransformer:
         Returns:
             Dict with list format fields
         """
+        # Extract project info if available (relationship may be lazy-loaded)
+        project_id = None
+        project_name = None
+        if hasattr(song, "project_id") and song.project_id:
+            project_id = str(song.project_id)
+            # Try to get project name from relationship (if eager-loaded)
+            if hasattr(song, "project") and song.project:
+                project_name = song.project.project_name
+
         return {
             "id": str(song.id),
             "lyrics": song.lyrics,
@@ -27,6 +36,8 @@ class SongTransformer:
             "tags": song.tags,
             "workflow": song.workflow,
             "is_instrumental": song.is_instrumental,
+            "project_id": project_id,
+            "project_name": project_name,
             "created_at": song.created_at.isoformat() if song.created_at else None,
         }
 

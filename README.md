@@ -4,6 +4,33 @@
 
 A full-stack platform for AI-powered image and music generation with Python backend (FastAPI) and Angular 18 frontend.
 
+---
+
+## 📁 Repository Structure
+
+**IMPORTANT:** This project is split into two separate repositories:
+
+### 1. **mac_ki_service/** - DEVELOPMENT (this repository)
+- **Location:** `/Users/robertw/Workspace/mac_ki_service`
+- **Purpose:** Source code, builds, CI/CD, development
+- **Contains:** Python/TypeScript/SCSS code, tests, build configs
+- **Git:** Active development, commits allowed
+- ✅ **Edit code here**
+
+### 2. **thwelly_ki_app/** - PRODUCTION
+- **Location:** `/Users/robertw/Workspace/thwelly_ki_app`
+- **Purpose:** Production deployment configuration ONLY
+- **Contains:** docker-compose.yml, .env (secrets), runtime scripts, data volumes
+- **Git:** Separate repository, minimal commits
+- ⚠️ **NO source code editing! Only configs/secrets**
+- ⚠️ **FINGER WEG VON CODE - Deployment only!**
+
+**Workflow:**
+1. **DEV (mac_ki_service):** Code → Commit → CI builds Images → ghcr.io
+2. **PROD (thwelly_ki_app):** Update docker-compose.yml versions → `docker compose pull && up -d`
+
+---
+
 ## 🎯 Features
 
 - **AI Chat Conversations** - Interactive chat with Ollama LLMs (llama3.2:3b, gpt-oss:20b and others)

@@ -1,0 +1,168 @@
+import {Component, OnInit, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {MAT_DIALOG_DATA, MatDialogRef, MatDialogModule} from '@angular/material/dialog';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {MatButtonModule} from '@angular/material/button';
+import {TranslateModule} from '@ngx-translate/core';
+import {firstValueFrom} from 'rxjs';
+
+import {SongProjectService} from '../../services/business/song-project.service';
+import {SongService} from '../../services/business/song.service';
+import {ImageService} from '../../services/business/image.service';
+import {SketchService} from '../../services/business/sketch.service';
+
+export interface AssignToProjectDialogData {
+  assetType: 'image' | 'song' | 'sketch';
+  assetId: string;
+}
+
+interface ProjectListItem {
+  id: string;
+  project_name: string;
+}
+
+interface ProjectFolder {
+  id: string;
+  folder_name: string;
+}
+
+@Component({
+  selector: 'app-assign-to-project-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatButtonModule,
+    TranslateModule
+  ],
+  templateUrl: './assign-to-project-dialog.component.html',
+  styleUrl: './assign-to-project-dialog.component.scss'
+})
+export class AssignToProjectDialogComponent implements OnInit {
+  projects: ProjectListItem[] = [];
+  folders: ProjectFolder[] = [];
+  selectedProjectId: string | null = null;
+  selectedFolderId: string | null = null;
+  loading = false;
+  errorMessage = '';
+
+  private dialogRef = inject(MatDialogRef<AssignToProjectDialogComponent>);
+  protected data = inject<AssignToProjectDialogData>(MAT_DIALOG_DATA);
+  private projectService = inject(SongProjectService);
+  private songService = inject(SongService);
+  private imageService = inject(ImageService);
+  private sketchService = inject(SketchService);
+
+  async ngOnInit(): Promise<void> {
+    await this.loadProjects();
+  }
+
+  /**
+   * Load all projects from backend
+   */
+  async loadProjects(): Promise<void> {
+    this.loading = true;
+    this.errorMessage = '';
+    try {
+      const response = await firstValueFrom(
+        this.projectService.getProjects(100, 0)
+      );
+      this.projects = response.data || [];
+    } catch (error) {
+      console.error('Failed to load projects', error);
+      this.errorMessage = 'assignToProject.errors.loadProjectsFailed';
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  /**
+   * Load folders when a project is selected
+   */
+  async onProjectChange(): Promise<void> {
+    this.folders = [];
+    this.selectedFolderId = null;
+
+    if (!this.selectedProjectId) {
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+    try {
+      const response = await firstValueFrom(
+        this.projectService.getProjectById(this.selectedProjectId)
+      );
+      this.folders = response.data?.folders || [];
+
+      // Sort folders numerically by folder_name (e.g., "01 Arrangement", "02 AI", ...)
+      this.folders.sort((a, b) =>
+        a.folder_name.localeCompare(b.folder_name, undefined, { numeric: true })
+      );
+    } catch (error) {
+      console.error('Failed to load folders', error);
+      this.errorMessage = 'assignToProject.errors.loadFoldersFailed';
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  /**
+   * Save assignment and close dialog
+   */
+  async save(): Promise<void> {
+    if (!this.selectedProjectId) {
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    try {
+      // Call the appropriate service based on asset type
+      switch (this.data.assetType) {
+        case 'song':
+          await this.songService.assignToProject(
+            this.data.assetId,
+            this.selectedProjectId,
+            this.selectedFolderId || undefined
+          );
+          break;
+        case 'image':
+          await this.imageService.assignToProject(
+            this.data.assetId,
+            this.selectedProjectId,
+            this.selectedFolderId || undefined
+          );
+          break;
+        case 'sketch':
+          await this.sketchService.assignToProject(
+            this.data.assetId,
+            this.selectedProjectId,
+            this.selectedFolderId || undefined
+          );
+          break;
+      }
+
+      // Close dialog with success flag
+      this.dialogRef.close({success: true});
+    } catch (error) {
+      console.error('Failed to assign asset to project', error);
+      this.errorMessage = 'assignToProject.errors.assignFailed';
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  /**
+   * Cancel and close dialog
+   */
+  cancel(): void {
+    this.dialogRef.close();
+  }
+}

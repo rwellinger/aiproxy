@@ -1,5 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { StylePreferences, DEFAULT_STYLE_PREFERENCES } from '../../models/image-generation.model';
+import { ApiConfigService } from '../config/api-config.service';
+import { firstValueFrom } from 'rxjs';
 
 interface ImageFormData extends Record<string, unknown> {
   prompt?: string;
@@ -10,6 +13,9 @@ interface ImageFormData extends Record<string, unknown> {
   providedIn: 'root',
 })
 export class ImageService {
+  private http = inject(HttpClient);
+  private apiConfig = inject(ApiConfigService);
+
   private readonly STORAGE_KEY = 'imageFormData';
   private readonly STYLE_PREFERENCES_KEY = 'imageStylePreferences';
 
@@ -56,5 +62,30 @@ export class ImageService {
    */
   clearStylePreferences(): void {
     localStorage.removeItem(this.STYLE_PREFERENCES_KEY);
+  }
+
+  /**
+   * Assign an image to a project (with optional folder)
+   */
+  async assignToProject(imageId: string, projectId: string, projectFolderId?: string): Promise<any> {
+    const body: any = {
+      project_id: projectId,
+      folder_id: projectFolderId || null
+    };
+    return firstValueFrom(
+      this.http.post(this.apiConfig.endpoints.image.assignToProject(imageId), body)
+    );
+  }
+
+  async getProjectsForImage(imageId: string): Promise<{project_id: string; project_name: string}[]> {
+    interface ProjectResponse {
+      projects: {project_id: string; project_name: string}[];
+    }
+    const response = await firstValueFrom(
+      this.http.get<ProjectResponse>(
+        this.apiConfig.endpoints.image.getProjects(imageId)
+      )
+    );
+    return response.projects;
   }
 }

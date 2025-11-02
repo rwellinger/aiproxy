@@ -24,6 +24,9 @@
    - [6.2 Music Generation (Asynchronous)](#62-music-generation-asynchronous)
    - [6.3 AI Chat Conversation (Persistent)](#63-ai-chat-conversation-persistent)
    - [6.4 Lyric Creation Workflow](#64-lyric-creation-workflow)
+   - [6.5 Text Overlay Workflow](#65-text-overlay-workflow)
+   - [6.6 S3 Storage Migration (Hybrid Storage Architecture)](#66-s3-storage-migration-hybrid-storage-architecture)
+   - [6.7 Lyric Parsing Rules Engine](#67-lyric-parsing-rules-engine)
 7. [Deployment View](#7-deployment-view)
    - [7.1 Development Environment](#71-development-environment)
    - [7.2 Production Environment](#72-production-environment)
@@ -64,6 +67,8 @@
 - [Figure 6.1: Image Generation (Synchronous)](#61-image-generation-synchronous) - `images/6.1_bildgenerierung.png`
 - [Figure 6.2: Music Generation (Asynchronous)](#62-music-generation-asynchronous) - `images/6.2_musikgenerierung.png`
 - [Figure 6.3: AI Chat Conversation (Persistent)](#63-ai-chat-conversation-persistent) - `images/6.3_ai_chat_workflow.png`
+- [Figure 6.6.1: Storage Migration Architecture](#66-s3-storage-migration-hybrid-storage-architecture) - `images/6.7_storage_migration.png`
+- [Figure 6.6.2: S3 Migration Workflow](#66-s3-storage-migration-hybrid-storage-architecture) - `images/6.8_s3_migration_workflow.png`
 - [Figure 7.3: Network Architecture](#73-network-architecture) - `images/7.3_netzwerk_architektur.png`
 - [Figure 10.1: Development Deployment](#101-development-deployment) - `images/9.1_entwicklungs_deployment.png`
 - [Figure 10.2: Production Deployment](#102-production-deployment) - `images/9.2_produktions_deployment.png`
@@ -153,6 +158,9 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
 
 ### 2.2 Organizational Constraints
 - Personal project (no team development)
+- **Repository Separation**: Two separate Git repositories for DEV and PROD environments
+  - **mac_ki_service/** - Development repository (source code, CI/CD, builds)
+  - **thwelly_ki_app/** - Production repository (deployment configs, secrets, data volumes)
 - Development and production environments separated
 - .env files not in Git (API keys, passwords)
 
@@ -255,6 +263,7 @@ ApiCostService (src/db/api_cost_service.py)
 - **Frontend**: Angular 18.2.13 + TypeScript + Angular Material + SCSS + RxJS
 - **Backend**: Python 3.12.12 + FastAPI + SQLAlchemy 2.0 + Pydantic 2.0 + Alembic 1.13
 - **Image Processing**: Pillow (PIL) 11.0.0 - Text overlay rendering, font handling, image manipulation
+- **Object Storage**: Boto3 + S3-compatible storage (MinIO, AWS S3, Backblaze B2, Wasabi)
 - **API Documentation**: OpenAPI/Swagger (auto-generated)
 - **Authentication**: PyJWT + BCrypt
 - **Async Processing**: Celery 5.4 + Redis 5.0
@@ -781,7 +790,142 @@ The `composition` field in the `generated_images` table is used to categorize im
 - **User Model** (`users` table): `artist_name` field provides default artist name
 - **GeneratedImage Model** (`generated_images` table): `composition` field enables composition-based filtering
 
-### 6.6 Lyric Parsing Rules Engine
+### 6.6 S3 Storage Migration (Hybrid Storage Architecture)
+
+**Overview**: The system supports dual storage backends (Filesystem + S3) for seamless migration from local file storage to cloud-based object storage. New files default to S3, while legacy files remain accessible via the filesystem.
+
+![Storage Migration Architecture](images/6.7_storage_migration.png)
+
+*Figure 6.6.1: Storage Architecture - Dual backend system with S3 as default*
+
+**Key Components:**
+
+1. **Storage Interface** (`infrastructure/storage/storage_interface.py`)
+   - Abstract base class defining storage operations
+   - Methods: `upload()`, `download()`, `delete()`, `exists()`, `get_url()`, `list_files()`, `move()`
+   - Enables pluggable storage backends
+
+2. **S3 Storage Implementation** (`infrastructure/storage/s3_storage.py`)
+   - S3-compatible storage (MinIO, AWS S3, Backblaze B2, Wasabi)
+   - Boto3-based client with automatic bucket creation
+   - Pre-signed URLs for secure file access (1h TTL)
+   - Supports all major S3-compatible providers
+
+3. **Filesystem Storage** (Legacy)
+   - Local disk storage in `/images` directory
+   - Backward compatibility for existing files
+   - No new files written to filesystem
+
+**Database Schema Changes:**
+
+**Migration:** `281d8c3887b4_add_s3_storage_fields_to_images.py`
+
+**`generated_images` table:**
+- `storage_backend` (VARCHAR(20), default: 'filesystem') - 'filesystem' or 's3'
+- `s3_key` (VARCHAR(500), nullable) - S3 object key (e.g., `images/uuid.png`)
+- `file_path` (VARCHAR(500)) - Legacy filesystem path (still used for old images)
+
+**`project_files` table:**
+- `storage_backend` (VARCHAR(20), default: 's3') - New projects default to S3
+- `s3_key` (VARCHAR(255), indexed) - S3 object key
+- `local_path` (VARCHAR(500), nullable) - Legacy filesystem path
+- `is_synced` (BOOLEAN) - Sync status for hybrid storage
+
+**Migration Strategy:**
+
+![S3 Migration Workflow](images/6.8_s3_migration_workflow.png)
+
+*Figure 6.6.2: S3 Migration Workflow - Hybrid storage operations with backward compatibility*
+
+**Phase 1: Dual Backend Support (Current)**
+- ✅ New uploads → S3 (default)
+- ✅ Old files → Filesystem (backward compatible)
+- ✅ Read operations check `storage_backend` field
+- ✅ Cross-backend operations (e.g., Text Overlay: read from filesystem, save to S3)
+
+**Phase 2: Background Migration (Future)**
+- Copy existing filesystem images to S3
+- Update `storage_backend` and `s3_key` in database
+- Verify checksums
+- Keep filesystem files as backup
+
+**Phase 3: S3-Only (Final)**
+- Remove filesystem fallback code
+- Delete local files after successful migration
+- All operations use S3 exclusively
+
+**Configuration:**
+
+Environment variables (`.env`):
+```bash
+# S3-Compatible Storage
+S3_ENDPOINT=http://localhost:9000  # MinIO default (self-hosted)
+S3_ACCESS_KEY=minioadmin
+S3_SECRET_KEY=minioadmin
+S3_BUCKET=aiproxy-media
+S3_REGION=us-east-1
+```
+
+**Supported Providers:**
+- **MinIO** (self-hosted, default development)
+- **AWS S3** (production cloud)
+- **Backblaze B2** (cost-effective cloud)
+- **Wasabi** (fast cloud storage)
+
+**Benefits:**
+- **Scalability**: No local disk space limitations
+- **Durability**: Cloud provider handles backups and replication
+- **Multi-server**: Multiple backend instances can share storage
+- **CDN Integration**: Pre-signed URLs enable direct client downloads
+- **Cost**: Pay-per-use pricing (especially with Backblaze B2)
+- **Backward Compatibility**: Zero downtime migration path
+
+**Technical Details:**
+
+- **Pre-signed URLs**: 1-hour TTL for secure file access without authentication
+- **Boto3 Client**: Standard AWS SDK for S3-compatible storage
+- **Content-Type**: Automatic MIME type detection for proper browser rendering
+- **Error Handling**: Graceful fallback with structured logging (Loguru)
+- **Bucket Management**: Automatic bucket creation on first use
+
+**Example Usage:**
+
+```python
+# Upload new image (defaults to S3)
+from infrastructure.storage.s3_storage import S3Storage
+
+s3_storage = S3Storage()
+s3_key = s3_storage.upload(image_data, "images/uuid.png", content_type="image/png")
+
+# Save to database
+image = GeneratedImage(
+    filename="uuid.png",
+    storage_backend="s3",
+    s3_key=s3_key,
+    file_path="",  # Not used for S3
+    ...
+)
+
+# Read image (dual backend support)
+if image.storage_backend == "s3" and image.s3_key:
+    presigned_url = s3_storage.get_url(image.s3_key, expires_in=3600)
+    # Return presigned URL to frontend
+elif image.file_path:
+    # Legacy: read from filesystem
+    with open(image.file_path, "rb") as f:
+        image_data = f.read()
+```
+
+**Related Files:**
+- `aiproxysrv/src/infrastructure/storage/storage_interface.py` - Abstract interface
+- `aiproxysrv/src/infrastructure/storage/s3_storage.py` - S3 implementation
+- `aiproxysrv/src/business/image_orchestrator.py` - Image operations with dual backend
+- `aiproxysrv/src/business/song_project_orchestrator.py` - Song project file management
+- `aiproxysrv/src/alembic/versions/281d8c3887b4_*.py` - Database migration
+
+---
+
+### 6.7 Lyric Parsing Rules Engine
 
 **Overview**: The Lyric Parsing Rules Engine provides configurable regex-based text processing for lyric cleanup and section detection. Rules are stored in the database and dynamically applied without hardcoded logic.
 
@@ -883,6 +1027,10 @@ The fundamental difference is that **RegEx patterns have an interpreter (the Reg
 ## 7. Deployment View
 
 ### 7.1 Development Environment
+
+**Repository:** `mac_ki_service/` (Development)
+**Location:** `/Users/robertw/Workspace/mac_ki_service`
+
 ```
 MacBook Air M4 (32GB RAM)
 ├── Host macOS
@@ -899,7 +1047,13 @@ MacBook Air M4 (32GB RAM)
     └── .env files with Mock-API URLs instead of real OpenAI/Mureka APIs
 ```
 
+**Purpose:** Source code development, testing, CI/CD
+
 ### 7.2 Production Environment
+
+**Repository:** `thwelly_ki_app/` (Production - Separate Repository!)
+**Location:** `/Users/robertw/Workspace/thwelly_ki_app`
+
 ```
 Mac Studio M1 Max (32GB RAM) - IP: 10.0.1.120
 ├── Host macOS
@@ -921,10 +1075,19 @@ Mac Studio M1 Max (32GB RAM) - IP: 10.0.1.120
     └── images-data (Volume)
 
 All images built via GitHub Actions (Multi-platform: AMD64 + ARM64)
+Images pulled from GitHub Container Registry (GHCR)
 
-Note: Chat functionality previously provided by Open WebUI is now
-integrated directly into the thWelly Toolbox Angular frontend.
+⚠️ NO SOURCE CODE in this repository!
+Only deployment configuration: docker-compose.yml, .env, runtime scripts
 ```
+
+**Purpose:** Production deployment only (configs, secrets, data volumes)
+
+**Workflow:**
+1. **DEV (mac_ki_service):** Code changes → Commit → GitHub Actions builds images → Push to GHCR
+2. **PROD (thwelly_ki_app):** Update docker-compose.yml image versions → `docker compose pull` → `docker compose up -d`
+
+**Note:** Chat functionality previously provided by Open WebUI is now integrated directly into the thWelly Toolbox Angular frontend.
 
 ### 7.3 Network Architecture
 
@@ -1562,6 +1725,13 @@ services:
 | **Equipment Orchestrator** | Coordination layer for equipment operations (encryption, normalization)         |
 | **Equipment Normalizer** | Pure functions for string normalization in equipment data (100% testable)       |
 | **Fernet Encryption** | Symmetric encryption algorithm for sensitive equipment fields (password, license_key, price) |
+| **S3 Storage** | S3-compatible object storage for scalable file management (MinIO, AWS, Backblaze, Wasabi) |
+| **MinIO** | Self-hosted S3-compatible object storage (default for development)             |
+| **Storage Backend** | Database field indicating storage location: 'filesystem' (legacy) or 's3' (new) |
+| **Pre-signed URL** | Temporary URL for secure S3 file access without authentication (1h TTL)         |
+| **Hybrid Storage** | Dual backend system supporting both filesystem and S3 during migration          |
+| **Storage Interface** | Abstract base class for pluggable storage backends (filesystem, S3)            |
+| **Boto3** | AWS SDK for Python, used for S3-compatible storage operations                  |
 
 ---
 

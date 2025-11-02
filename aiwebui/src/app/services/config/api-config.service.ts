@@ -26,7 +26,8 @@ export class ApiConfigService {
             delete: (songId: string) => `${this.baseUrl}/api/v1/song/id/${songId}`,
             update: (songId: string) => `${this.baseUrl}/api/v1/song/id/${songId}`,
             updateChoiceRating: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/rating`,
-            bulkDelete: `${this.baseUrl}/api/v1/song/bulk-delete`
+            bulkDelete: `${this.baseUrl}/api/v1/song/bulk-delete`,
+            assignToProject: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}/assign-to-project`
         },
         image: {
             generate: `${this.baseUrl}/api/v1/image/generate`,
@@ -38,7 +39,9 @@ export class ApiConfigService {
             delete: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}`,
             update: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}`,
             bulkDelete: `${this.baseUrl}/api/v1/image/bulk-delete`,
-            addTextOverlay: `${this.baseUrl}/api/v1/image/add-text-overlay`
+            addTextOverlay: `${this.baseUrl}/api/v1/image/add-text-overlay`,
+            assignToProject: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}/assign-to-project`,
+            getProjects: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}/projects`
         },
         redis: {
             keys: `${this.baseUrl}/api/v1/redis/list/keys`,
@@ -118,7 +121,8 @@ export class ApiConfigService {
             },
             detail: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
             update: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
-            delete: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`
+            delete: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
+            assignToProject: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}/assign-to-project`
         },
         equipment: {
             create: () => `${this.baseUrl}/api/v1/equipment`,

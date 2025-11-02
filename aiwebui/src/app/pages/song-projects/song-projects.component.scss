@@ -3,15 +3,17 @@
 
 .song-projects-container {
   display: grid;
-  grid-template-columns: 400px 1fr;
-  gap: $spacing-lg;
-  padding: $spacing-lg;
+  grid-template-columns: 35fr 65fr;
+  gap: 0;
   min-height: calc(100vh - 100px);
 }
 
 .list-section {
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid $border-light;
 }
 
 .detail-section {
@@ -27,49 +29,84 @@
 }
 
 .list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: $spacing-md;
   border-bottom: 1px solid $border-light;
 
-  h2 {
-    margin: 0 0 $spacing-xs 0;
-    color: $text-primary;
+  .header-title {
+    flex: 1;
+
+    .header-title-group {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+    }
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      margin: 0 0 $spacing-xs 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $text-primary;
+
+      i {
+        color: $primary-color;
+      }
+    }
+
+    .projects-count-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #1976d2;
+      background-color: #e3f2fd;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: $text-secondary;
+      font-size: $font-sm;
+    }
   }
 
-  .subtitle {
-    margin: 0;
-    color: $text-secondary;
-    font-size: $font-sm;
+  .new-project-button {
+    @include button-primary('base');
+    min-width: auto !important;
+    width: 40px;
+    height: 40px;
+    padding: 0 !important;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      font-size: $font-lg;
+      margin: 0;
+    }
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
   }
 }
 
 // Filters Section
 .filters-section {
-  display: flex;
-  gap: $spacing-md;
   padding: $spacing-md;
   border-bottom: 1px solid $border-light;
 }
 
 .search-field {
-  flex: 1;
-}
-
-.new-project-button {
-  @include button-primary('base');
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-xs;
-  font-weight: $font-weight-medium !important;
-  white-space: nowrap;
-
-  i {
-    font-size: $font-base;
-  }
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
+  width: 100%;
 }
 
 // Projects List
@@ -181,6 +218,7 @@
     display: flex;
     align-items: center;
     gap: $spacing-sm;
+    flex: 1;
 
     i {
       font-size: 1.5rem;
@@ -190,6 +228,109 @@
     h2 {
       margin: 0;
       color: $text-primary;
+    }
+
+    .edit-project-name-button {
+      background-color: transparent;
+      border: 1px solid $border-light;
+      color: $primary-color;
+      padding: $spacing-xs !important;
+      min-width: auto !important;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: $border-radius-sm;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      i {
+        font-size: $font-sm;
+        margin: 0;
+        color: $primary-color;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: $primary-color;
+        border-color: $primary-color;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+
+        i {
+          color: white;
+        }
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .project-name-input {
+      flex: 1;
+      padding: $spacing-xs $spacing-sm;
+      border: 2px solid $primary-color;
+      border-radius: $border-radius-sm;
+      font-size: $font-lg;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      background-color: $background-white;
+      outline: none;
+      transition: border-color 0.2s ease;
+
+      &:focus {
+        border-color: darken($primary-color, 10%);
+      }
+
+      &::placeholder {
+        color: $text-muted;
+      }
+    }
+
+    .save-project-name-button {
+      @include button-primary('base');
+      padding: $spacing-xs !important;
+      min-width: auto !important;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      i {
+        font-size: $font-sm;
+        margin: 0;
+        color: white;
+      }
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    .cancel-project-name-button {
+      @include button-secondary('base');
+      padding: $spacing-xs !important;
+      min-width: auto !important;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      i {
+        font-size: $font-sm;
+        margin: 0;
+        color: $text-secondary;
+      }
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
     }
   }
 }
@@ -297,10 +438,35 @@ mat-accordion {
   margin-bottom: $spacing-md;
   padding-bottom: $spacing-sm;
   border-bottom: 1px solid $border-light;
+  display: flex;
+  gap: $spacing-sm;
 }
 
 .upload-button {
   @include button-primary('base');
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-weight: $font-weight-medium !important;
+
+  i {
+    font-size: $font-sm;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.copy-cli-button,
+.copy-cli-download-button {
+  @include button-secondary('base');
   display: inline-flex;
   align-items: center;
   gap: $spacing-xs;
@@ -368,12 +534,113 @@ mat-accordion {
   }
 }
 
+// Assigned Assets Section
+.assigned-assets-container {
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1px solid $border-light;
+}
+
+.assigned-assets-section {
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.assets-section-title {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin: 0 0 $spacing-sm 0;
+  color: $text-primary;
+  font-size: $font-base;
+  font-weight: $font-weight-semibold;
+
+  i {
+    color: $primary-color;
+    font-size: $font-sm;
+  }
+}
+
+.asset-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm;
+  margin-bottom: $spacing-xs;
+  background-color: $background-light;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-sm;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: $background-selected;
+    border-color: $primary-color;
+  }
+}
+
+.asset-info {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex: 1;
+
+  i {
+    color: $primary-color;
+    font-size: $font-sm;
+  }
+
+  .asset-title {
+    color: $text-primary;
+    font-weight: $font-weight-medium;
+    font-size: $font-sm;
+  }
+
+  .asset-badge {
+    padding: 2px 6px;
+    background-color: #e0e7ff;
+    color: #3730a3;
+    border-radius: $border-radius-sm;
+    font-size: $font-xs;
+    font-weight: $font-weight-medium;
+  }
+
+  .asset-meta {
+    color: $text-muted;
+    font-size: $font-xs;
+  }
+}
+
+.asset-action-button {
+  @include button-secondary('base');
+  padding: $spacing-xs !important;
+  min-width: auto !important;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: $font-xs;
+    margin: 0;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
 // Detail Actions
 .detail-actions {
   display: flex;
   gap: $spacing-sm;
   padding: $spacing-md;
   border-top: 1px solid $border-light;
+  background-color: #f8f9fa;
   justify-content: flex-end;
 }
 
@@ -395,6 +662,10 @@ mat-accordion {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
+}
+
+.refresh-button {
+  @include button-secondary('base');
 }
 
 .delete-button {
