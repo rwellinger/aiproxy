@@ -536,7 +536,9 @@ class SongProject(Base):
 
     # Relationships
     user = relationship("User", back_populates="song_projects")
-    folders = relationship("ProjectFolder", back_populates="project", cascade="all, delete-orphan")
+    folders = relationship(
+        "ProjectFolder", back_populates="project", cascade="all, delete-orphan", order_by="ProjectFolder.folder_name"
+    )
     files = relationship("ProjectFile", back_populates="project", cascade="all, delete-orphan")
     sketches = relationship("SongSketch", back_populates="project")
     songs = relationship("Song", back_populates="project")

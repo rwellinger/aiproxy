@@ -99,6 +99,11 @@ export class AssignToProjectDialogComponent implements OnInit {
         this.projectService.getProjectById(this.selectedProjectId)
       );
       this.folders = response.data?.folders || [];
+
+      // Sort folders numerically by folder_name (e.g., "01 Arrangement", "02 AI", ...)
+      this.folders.sort((a, b) =>
+        a.folder_name.localeCompare(b.folder_name, undefined, { numeric: true })
+      );
     } catch (error) {
       console.error('Failed to load folders', error);
       this.errorMessage = 'assignToProject.errors.loadFoldersFailed';

@@ -164,6 +164,13 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
       );
 
       this.selectedProject = response.data;
+
+      // Sort folders numerically by folder_name (e.g., "01 Arrangement", "02 AI", ...)
+      if (this.selectedProject?.folders) {
+        this.selectedProject.folders.sort((a, b) =>
+          a.folder_name.localeCompare(b.folder_name, undefined, { numeric: true })
+        );
+      }
     } catch (error) {
       console.error('Failed to load project details:', error);
       this.notificationService.error(
@@ -186,6 +193,13 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
       );
 
       this.selectedProject = response.data;
+
+      // Sort folders numerically by folder_name (e.g., "01 Arrangement", "02 AI", ...)
+      if (this.selectedProject?.folders) {
+        this.selectedProject.folders.sort((a, b) =>
+          a.folder_name.localeCompare(b.folder_name, undefined, { numeric: true })
+        );
+      }
     } catch (error) {
       console.error('Failed to load project details:', error);
       this.notificationService.error(

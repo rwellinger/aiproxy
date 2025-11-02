@@ -51,7 +51,7 @@
     mat-raised-button
     color="primary"
     (click)="save()"
-    [disabled]="!selectedProjectId || loading"
+    [disabled]="!selectedProjectId || !selectedFolderId || loading"
     class="save-button">
     {{ loading ? ('common.saving' | translate) : ('common.save' | translate) }}
   </button>
