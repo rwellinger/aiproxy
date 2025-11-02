@@ -3,15 +3,17 @@
 
 .song-projects-container {
   display: grid;
-  grid-template-columns: 400px 1fr;
-  gap: $spacing-lg;
-  padding: $spacing-lg;
+  grid-template-columns: 35fr 65fr;
+  gap: 0;
   min-height: calc(100vh - 100px);
 }
 
 .list-section {
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid $border-light;
 }
 
 .detail-section {
@@ -27,49 +29,84 @@
 }
 
 .list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: $spacing-md;
   border-bottom: 1px solid $border-light;
 
-  h2 {
-    margin: 0 0 $spacing-xs 0;
-    color: $text-primary;
+  .header-title {
+    flex: 1;
+
+    .header-title-group {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+    }
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      margin: 0 0 $spacing-xs 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $text-primary;
+
+      i {
+        color: $primary-color;
+      }
+    }
+
+    .projects-count-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #1976d2;
+      background-color: #e3f2fd;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: $text-secondary;
+      font-size: $font-sm;
+    }
   }
 
-  .subtitle {
-    margin: 0;
-    color: $text-secondary;
-    font-size: $font-sm;
+  .new-project-button {
+    @include button-primary('base');
+    min-width: auto !important;
+    width: 40px;
+    height: 40px;
+    padding: 0 !important;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      font-size: $font-lg;
+      margin: 0;
+    }
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
   }
 }
 
 // Filters Section
 .filters-section {
-  display: flex;
-  gap: $spacing-md;
   padding: $spacing-md;
   border-bottom: 1px solid $border-light;
 }
 
 .search-field {
-  flex: 1;
-}
-
-.new-project-button {
-  @include button-primary('base');
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-xs;
-  font-weight: $font-weight-medium !important;
-  white-space: nowrap;
-
-  i {
-    font-size: $font-base;
-  }
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
+  width: 100%;
 }
 
 // Projects List
@@ -374,6 +411,7 @@ mat-accordion {
   gap: $spacing-sm;
   padding: $spacing-md;
   border-top: 1px solid $border-light;
+  background-color: #f8f9fa;
   justify-content: flex-end;
 }
 

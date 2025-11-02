@@ -4,8 +4,26 @@
     <mat-card class="list-card">
       <!-- List Header -->
       <div class="list-header">
-        <h2>{{ 'songProjects.list.title' | translate }}</h2>
-        <p class="subtitle">{{ 'songProjects.list.subtitle' | translate }}</p>
+        <div class="header-title">
+          <div class="header-title-group">
+            <h2>
+              <i class="fas fa-folder-open"></i>
+              {{ 'songProjects.list.title' | translate }}
+            </h2>
+            <div class="projects-count-badge" *ngIf="totalProjects > 0">
+              {{ totalProjects }}
+            </div>
+          </div>
+          <p class="subtitle">{{ 'songProjects.list.subtitle' | translate }}</p>
+        </div>
+        <button
+          type="button"
+          class="new-project-button"
+          (click)="createNewProject()"
+          [matTooltip]="'songProjects.list.actions.new' | translate"
+        >
+          <i class="fas fa-plus"></i>
+        </button>
       </div>
 
       <!-- Search -->
@@ -20,15 +38,6 @@
           />
           <i class="fas fa-search" matPrefix></i>
         </mat-form-field>
-
-        <button
-          type="button"
-          class="new-project-button"
-          (click)="createNewProject()"
-        >
-          <i class="fas fa-plus"></i>
-          <span>{{ 'songProjects.list.actions.new' | translate }}</span>
-        </button>
       </div>
 
       <!-- Loading State -->

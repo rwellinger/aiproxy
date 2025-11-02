@@ -211,6 +211,7 @@ class ImageService:
 
             query = (
                 db.query(GeneratedImage)
+                .options(joinedload(GeneratedImage.project_references))  # Eager load to prevent lazy load errors
                 .filter(GeneratedImage.title.isnot(None))
                 .filter(GeneratedImage.title != "")
                 .filter(GeneratedImage.text_overlay_metadata.is_(None))  # Exclude overlay images

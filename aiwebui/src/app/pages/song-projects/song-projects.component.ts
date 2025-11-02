@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { SongProjectService } from '../../services/business/song-project.service';
 import { NotificationService } from '../../services/ui/notification.service';
@@ -38,7 +39,8 @@ import {
     MatInputModule,
     MatProgressSpinnerModule,
     MatExpansionModule,
-    MatDialogModule
+    MatDialogModule,
+    MatTooltipModule
   ],
   templateUrl: './song-projects.component.html',
   styleUrl: './song-projects.component.scss'
@@ -47,6 +49,7 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   // Project list and pagination
   projectList: SongProjectListItem[] = [];
   selectedProject: SongProjectDetail | null = null;
+  totalProjects = 0;
   pagination = {
     total: 0,
     limit: 20,
@@ -105,6 +108,9 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
       const selectedProjectId = this.navigationState?.['selectedProjectId'];
       if (selectedProjectId) {
         this.selectProjectById(selectedProjectId);
+      } else if (this.projectList.length > 0 && !this.selectedProject) {
+        // Auto-select first project if no navigation state
+        this.selectProject(this.projectList[0]);
       }
     });
   }
@@ -131,6 +137,7 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
 
       this.projectList = response.data;
       this.pagination = response.pagination;
+      this.totalProjects = response.pagination.total;
     } catch (error) {
       console.error('Failed to load projects:', error);
       this.notificationService.error(
@@ -327,7 +334,8 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
    */
   createNewProject(): void {
     const dialogRef = this.dialog.open(CreateProjectDialogComponent, {
-      width: '500px',
+      width: '600px',
+      minHeight: '400px',
       disableClose: false
     });
 
