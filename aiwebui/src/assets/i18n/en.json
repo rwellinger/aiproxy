@@ -1688,8 +1688,10 @@
       },
       "actions": {
         "uploadFile": "Upload File",
+        "cliCommands": "CLI Commands",
         "copyCLIUploadCommand": "Copy Upload Command",
         "copyCLIDownloadCommand": "Copy Download Command",
+        "copyCLIMirrorCommand": "Copy Mirror Command",
         "downloadFile": "Download",
         "deleteFile": "Delete File",
         "syncProject": "Sync Project",
@@ -1700,6 +1702,7 @@
         "openSketch": "Open Sketch",
         "openImage": "Open Image"
       },
+      "copyCompleteClone": "Copy Clone Command",
       "sections": {
         "general": "General Information",
         "metadata": "Metadata",
@@ -1727,6 +1730,9 @@
       "synced": "Synced",
       "syncing": "Syncing..."
     },
+    "storageProvider": {
+      "filesystem": "Local Filesystem"
+    },
     "folders": {
       "arrangement": "Arrangement",
       "ai": "AI",
@@ -1749,6 +1755,8 @@
       "fileTooLarge": "File is too large (max {{size}})",
       "cliUploadCommandCopied": "CLI upload command copied! Paste in terminal to upload files.",
       "cliDownloadCommandCopied": "CLI download command copied! Paste in terminal to download files.",
+      "cliMirrorCommandCopied": "CLI mirror command copied! Run with --dry-run first to preview changes.",
+      "cliCompleteCloneCommandCopied": "Complete clone command copied! This downloads all folders and files with full directory structure.",
       "cliCommandCopyFailed": "Failed to copy command to clipboard",
       "clipboardError": "Failed to copy to clipboard",
       "downloadSuccess": "File downloaded",

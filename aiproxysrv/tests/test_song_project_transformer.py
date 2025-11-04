@@ -3,6 +3,7 @@
 from unittest.mock import Mock
 
 from business.song_project_transformer import (
+    calculate_file_hash,
     calculate_pagination_meta,
     detect_file_type,
     generate_s3_prefix,
@@ -490,3 +491,72 @@ class TestValidateSyncStatus:
         """Validation is case-sensitive"""
         assert validate_sync_status("LOCAL") is False
         assert validate_sync_status("Cloud") is False
+
+
+class TestCalculateFileHash:
+    """Test calculate_file_hash() - SHA256 hash calculation for Mirror sync"""
+
+    def test_basic_hash_calculation(self):
+        """Calculates SHA256 hash for simple input"""
+        file_data = b"Hello World"
+
+        result = calculate_file_hash(file_data)
+
+        assert result == "a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e"
+
+    def test_empty_file(self):
+        """Handles empty file (0 bytes)"""
+        file_data = b""
+
+        result = calculate_file_hash(file_data)
+
+        assert result == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+    def test_hash_length(self):
+        """Hash is always 64 characters (SHA256 hex)"""
+        file_data = b"Test data"
+
+        result = calculate_file_hash(file_data)
+
+        assert len(result) == 64
+
+    def test_deterministic_hash(self):
+        """Same input produces same hash (deterministic)"""
+        file_data = b"Consistent data"
+
+        result1 = calculate_file_hash(file_data)
+        result2 = calculate_file_hash(file_data)
+
+        assert result1 == result2
+
+    def test_different_input_different_hash(self):
+        """Different inputs produce different hashes"""
+        data1 = b"File version 1"
+        data2 = b"File version 2"
+
+        hash1 = calculate_file_hash(data1)
+        hash2 = calculate_file_hash(data2)
+
+        assert hash1 != hash2
+
+    def test_binary_data(self):
+        """Handles binary data (not just text)"""
+        # Simulate FLAC header bytes
+        file_data = b"\x66\x4c\x61\x43\x00\x00\x00\x22"
+
+        result = calculate_file_hash(file_data)
+
+        assert len(result) == 64
+        assert isinstance(result, str)
+
+    def test_large_file_simulation(self):
+        """Handles larger data chunks (simulate file data)"""
+        # Simulate 1MB of data
+        file_data = b"A" * (1024 * 1024)
+
+        result = calculate_file_hash(file_data)
+
+        assert len(result) == 64
+        # Verify deterministic (same input = same hash)
+        result2 = calculate_file_hash(file_data)
+        assert result == result2

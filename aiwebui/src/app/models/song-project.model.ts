@@ -14,6 +14,13 @@ export enum StorageBackend {
   LOCAL = 'local'
 }
 
+export enum StorageProvider {
+  MINIO = 'minio',
+  AWS = 'aws',
+  BACKBLAZE = 'backblaze',
+  WASABI = 'wasabi'
+}
+
 export interface SongProject {
   id: string;
   user_id: string;
@@ -23,6 +30,8 @@ export interface SongProject {
   tags: string[];
   total_files: number;
   total_size_bytes: number;
+  storage_backend: string;  // 's3' or 'filesystem'
+  storage_provider: string;  // 'minio', 'aws', 'backblaze', 'wasabi'
   created_at: string; // ISO format
   updated_at: string; // ISO format
   last_sync_at?: string; // ISO format
@@ -102,6 +111,8 @@ export interface SongProjectListItem {
   tags: string[];
   total_files: number;
   total_size_bytes: number;
+  storage_backend: string;
+  storage_provider: string;
   created_at: string;
   updated_at: string;
 }

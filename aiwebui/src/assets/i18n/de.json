@@ -1688,8 +1688,10 @@
       },
       "actions": {
         "uploadFile": "Datei hochladen",
+        "cliCommands": "CLI Befehle",
         "copyCLIUploadCommand": "Upload Befehl kopieren",
         "copyCLIDownloadCommand": "Download Befehl kopieren",
+        "copyCLIMirrorCommand": "Mirror Befehl kopieren",
         "downloadFile": "Herunterladen",
         "deleteFile": "Datei löschen",
         "syncProject": "Projekt synchronisieren",
@@ -1700,6 +1702,7 @@
         "openSketch": "Sketch öffnen",
         "openImage": "Bild öffnen"
       },
+      "copyCompleteClone": "Clone Command kopieren",
       "sections": {
         "general": "Allgemeine Informationen",
         "metadata": "Metadaten",
@@ -1727,6 +1730,9 @@
       "synced": "Synchronisiert",
       "syncing": "Synchronisiere..."
     },
+    "storageProvider": {
+      "filesystem": "Lokales Dateisystem"
+    },
     "folders": {
       "arrangement": "Arrangement",
       "ai": "KI",
@@ -1749,6 +1755,8 @@
       "fileTooLarge": "Datei ist zu groß (max {{size}})",
       "cliUploadCommandCopied": "CLI Upload-Befehl kopiert! Im Terminal einfügen um Dateien hochzuladen.",
       "cliDownloadCommandCopied": "CLI Download-Befehl kopiert! Im Terminal einfügen um Dateien herunterzuladen.",
+      "cliMirrorCommandCopied": "CLI Mirror-Befehl kopiert! Führe zuerst mit --dry-run aus um Änderungen zu prüfen.",
+      "cliCompleteCloneCommandCopied": "Complete Clone-Befehl kopiert! Lädt alle Ordner und Dateien mit vollständiger Verzeichnisstruktur herunter.",
       "cliCommandCopyFailed": "Fehler beim Kopieren des Befehls in die Zwischenablage",
       "clipboardError": "Fehler beim Kopieren in die Zwischenablage",
       "downloadSuccess": "Datei heruntergeladen",

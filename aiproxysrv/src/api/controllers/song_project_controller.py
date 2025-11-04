@@ -8,6 +8,11 @@ from sqlalchemy.orm import Session
 from business.song_project_orchestrator import song_project_orchestrator
 from schemas.common_schemas import PaginationMeta
 from schemas.song_project_schemas import (
+    BatchDeleteRequest,
+    BatchDeleteResponse,
+    MirrorRequest,
+    MirrorResponse,
+    ProjectCompleteDownloadResponse,
     ProjectCreateRequest,
     ProjectDetailResponse,
     ProjectListResponse,
@@ -455,6 +460,139 @@ class SongProjectController:
         except Exception as e:
             logger.error("Get folder files error", project_id=project_id, error=str(e), error_type=type(e).__name__)
             return {"error": f"Failed to get folder files: {str(e)}"}, 500
+
+    @staticmethod
+    def mirror_compare(
+        db: Session, user_id: UUID, project_id: str, folder_id: str, mirror_data: MirrorRequest
+    ) -> tuple[dict[str, Any], int]:
+        """
+        Compare local files vs remote files (for Mirror sync)
+
+        Args:
+            db: Database session
+            user_id: User ID (from JWT)
+            project_id: Project UUID string
+            folder_id: Folder UUID string
+            mirror_data: Mirror request data (local files with hashes)
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            # Convert string UUIDs to UUID objects
+            project_uuid = UUID(project_id)
+            folder_uuid = UUID(folder_id)
+
+            # Convert Pydantic models to dicts
+            local_files = [
+                {"relative_path": f.relative_path, "file_hash": f.file_hash, "file_size_bytes": f.file_size_bytes}
+                for f in mirror_data.files
+            ]
+
+            # Call orchestrator
+            result = song_project_orchestrator.mirror_compare_files(
+                db=db, project_id=project_uuid, user_id=user_id, folder_id=folder_uuid, local_files=local_files
+            )
+
+            if not result:
+                return {"error": "Mirror compare failed"}, 500
+
+            # Convert to response model
+            response = MirrorResponse(**result)
+            return {"data": response.model_dump()}, 200
+
+        except ValueError as e:
+            logger.error("Mirror compare validation error", error=str(e))
+            return {"error": f"Invalid UUID: {str(e)}"}, 400
+        except Exception as e:
+            logger.error(
+                "Mirror compare error",
+                project_id=project_id,
+                folder_id=folder_id,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Mirror compare failed: {str(e)}"}, 500
+
+    @staticmethod
+    def batch_delete_files(
+        db: Session, user_id: UUID, project_id: str, delete_data: BatchDeleteRequest
+    ) -> tuple[dict[str, Any], int]:
+        """
+        Delete multiple files from project (S3 + DB)
+
+        Args:
+            db: Database session
+            user_id: User ID (from JWT)
+            project_id: Project UUID string
+            delete_data: Batch delete request data (file IDs)
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            # Convert string UUID to UUID object
+            project_uuid = UUID(project_id)
+
+            # Call orchestrator
+            result = song_project_orchestrator.batch_delete_files(
+                db=db, project_id=project_uuid, user_id=user_id, file_ids=delete_data.file_ids
+            )
+
+            # Convert to response model
+            response = BatchDeleteResponse(**result)
+            return {"data": response.model_dump()}, 200
+
+        except ValueError as e:
+            logger.error("Batch delete validation error", error=str(e))
+            return {"error": f"Invalid UUID: {str(e)}"}, 400
+        except Exception as e:
+            logger.error(
+                "Batch delete error",
+                project_id=project_id,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Batch delete failed: {str(e)}"}, 500
+
+    @staticmethod
+    def get_all_project_files_with_urls(db: Session, user_id: UUID, project_id: str) -> tuple[dict[str, Any], int]:
+        """
+        Get all files from all folders for complete project download
+
+        Args:
+            db: Database session
+            user_id: User ID (from JWT)
+            project_id: Project UUID string
+
+        Returns:
+            Tuple of (response_data, status_code)
+            response_data: {'data': {'project_name': str, 'folders': [...]}}
+        """
+        try:
+            # Validate UUID format
+            try:
+                project_uuid = UUID(project_id)
+            except ValueError:
+                return {"error": "Invalid project ID format"}, 400
+
+            # Call orchestrator
+            result = song_project_orchestrator.get_all_project_files_with_urls(
+                db=db, project_id=project_uuid, user_id=user_id
+            )
+
+            if not result:
+                return {"error": f"Project not found or unauthorized: {project_id}"}, 404
+
+            # Convert to response model
+            response = ProjectCompleteDownloadResponse(**result)
+            return {"data": response.model_dump()}, 200
+
+        except Exception as e:
+            logger.error(
+                "Get all project files error", project_id=project_id, error=str(e), error_type=type(e).__name__
+            )
+            return {"error": f"Failed to get all project files: {str(e)}"}, 500
 
 
 # Global controller instance
