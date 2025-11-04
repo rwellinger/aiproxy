@@ -25,7 +25,7 @@ from sqlalchemy.orm import Session
 from api.auth_middleware import get_current_user_id, jwt_required
 from api.controllers.song_project_controller import song_project_controller
 from db.database import get_db
-from schemas.song_project_schemas import ProjectCreateRequest, ProjectUpdateRequest
+from schemas.song_project_schemas import BatchDeleteRequest, MirrorRequest, ProjectCreateRequest, ProjectUpdateRequest
 
 
 # Blueprint definition
@@ -356,6 +356,158 @@ def batch_upload_files(project_id: str, folder_id: str):
         result, status_code = song_project_controller.batch_upload_files(
             db, UUID(user_id), project_id, folder_id, files
         )
+        return jsonify(result), status_code
+    finally:
+        db.close()
+
+
+@api_song_projects_v1.route("/<project_id>/folders/<folder_id>/mirror", methods=["POST"])
+@jwt_required
+def mirror_compare(project_id: str, folder_id: str):
+    """
+    Compare local files vs remote files (for Mirror sync).
+
+    Request Body:
+        MirrorRequest (JSON): {files: [{relative_path, file_hash, file_size_bytes}]}
+
+    Response:
+        200: {
+            'data': {
+                'to_upload': ['file1.wav', ...],
+                'to_update': ['file2.wav', ...],
+                'to_delete': [{'file_id': '...', 'relative_path': '...'}],
+                'unchanged': ['file3.wav', ...]
+            }
+        }
+        401: {'error': 'Unauthorized'}
+        400: {'error': 'Validation error: ...'}
+        500: {'error': 'Mirror compare failed: ...'}
+
+    Example:
+        POST /api/v1/song-projects/{id}/folders/{folder_id}/mirror
+        Headers: Authorization: Bearer <JWT_TOKEN>
+        Body: {
+            "files": [
+                {"relative_path": "01 Arrangement/drums.flac", "file_hash": "abc123...", "file_size_bytes": 123456},
+                {"relative_path": "01 Arrangement/bass.flac", "file_hash": "def456...", "file_size_bytes": 234567}
+            ]
+        }
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        mirror_data = MirrorRequest.model_validate(request.json)
+    except ValidationError as e:
+        return jsonify({"error": f"Validation error: {e}"}), 400
+
+    db: Session = next(get_db())
+    try:
+        result, status_code = song_project_controller.mirror_compare(
+            db, UUID(user_id), project_id, folder_id, mirror_data
+        )
+        return jsonify(result), status_code
+    finally:
+        db.close()
+
+
+@api_song_projects_v1.route("/<project_id>/files/batch-delete", methods=["DELETE"])
+@jwt_required
+def batch_delete_files(project_id: str):
+    """
+    Delete multiple files from project (S3 + DB).
+
+    Request Body:
+        BatchDeleteRequest (JSON): {file_ids: ["uuid1", "uuid2", ...]}
+
+    Response:
+        200: {
+            'data': {
+                'deleted': 3,
+                'failed': 1,
+                'errors': [{'file_id': '...', 'error': '...'}]
+            }
+        }
+        401: {'error': 'Unauthorized'}
+        400: {'error': 'Validation error: ...'}
+        500: {'error': 'Batch delete failed: ...'}
+
+    Example:
+        DELETE /api/v1/song-projects/{id}/files/batch-delete
+        Headers: Authorization: Bearer <JWT_TOKEN>
+        Body: {
+            "file_ids": [
+                "550e8400-e29b-41d4-a716-446655440000",
+                "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+            ]
+        }
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        delete_data = BatchDeleteRequest.model_validate(request.json)
+    except ValidationError as e:
+        return jsonify({"error": f"Validation error: {e}"}), 400
+
+    db: Session = next(get_db())
+    try:
+        result, status_code = song_project_controller.batch_delete_files(db, UUID(user_id), project_id, delete_data)
+        return jsonify(result), status_code
+    finally:
+        db.close()
+
+
+@api_song_projects_v1.route("/<project_id>/files/all", methods=["GET"])
+@jwt_required
+def get_all_project_files(project_id: str):
+    """
+    Get all files from all folders for complete project download (CLI endpoint).
+
+    Path Parameters:
+        - project_id (UUID): Project ID
+
+    Response:
+        200: {
+            'data': {
+                'project_name': 'My Project',
+                'folders': [
+                    {
+                        'folder_name': '01 Arrangement',
+                        'files': [
+                            {
+                                'filename': 'drums.flac',
+                                'relative_path': '01 Arrangement/Media/drums.flac',
+                                'download_url': 'https://s3...',
+                                'size': 1234567
+                            }
+                        ]
+                    },
+                    {
+                        'folder_name': '02 AI',
+                        'files': []
+                    }
+                ]
+            }
+        }
+        404: {'error': 'Project not found or unauthorized: ...'}
+        401: {'error': 'Unauthorized'}
+        400: {'error': 'Invalid project ID format'}
+        500: {'error': 'Failed to get all project files: ...'}
+
+    Example:
+        GET /api/v1/song-projects/550e8400-e29b-41d4-a716-446655440000/files/all
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    db: Session = next(get_db())
+    try:
+        result, status_code = song_project_controller.get_all_project_files_with_urls(db, UUID(user_id), project_id)
         return jsonify(result), status_code
     finally:
         db.close()

@@ -36,6 +36,8 @@ class ProjectResponse(BaseModel):
     description: str | None
     total_files: int
     total_size_bytes: int
+    storage_backend: str  # 's3' or 'filesystem'
+    storage_provider: str  # 'minio', 'aws', 'backblaze', 'wasabi'
     created_at: str | None
     updated_at: str | None
 
@@ -159,6 +161,102 @@ class FileUploadResponse(BaseModel):
 
     file: FileResponse
     message: str
+
+    class Config:
+        from_attributes = True
+
+
+class MirrorFileRequest(BaseModel):
+    """Schema for a single file in mirror request"""
+
+    relative_path: str = Field(..., description="File path relative to folder (e.g., 'Media/drums.flac')")
+    file_hash: str = Field(..., min_length=64, max_length=64, description="SHA256 hash (64 hex chars)")
+    file_size_bytes: int = Field(..., ge=0, description="File size in bytes")
+
+    class Config:
+        from_attributes = True
+
+
+class MirrorRequest(BaseModel):
+    """Request schema for mirror endpoint (compare local vs remote)"""
+
+    files: list[MirrorFileRequest] = Field(..., description="List of local files with hashes")
+
+    class Config:
+        from_attributes = True
+
+
+class MirrorFileAction(BaseModel):
+    """Schema for a single file action in mirror response"""
+
+    relative_path: str
+    file_hash: str | None = None
+    file_size_bytes: int | None = None
+    file_id: str | None = None  # For deletions
+
+    class Config:
+        from_attributes = True
+
+
+class MirrorResponse(BaseModel):
+    """Response schema for mirror endpoint (diff result)"""
+
+    to_upload: list[str] = Field(default_factory=list, description="Files to upload (not on remote)")
+    to_update: list[str] = Field(default_factory=list, description="Files to update (hash mismatch)")
+    to_delete: list[MirrorFileAction] = Field(default_factory=list, description="Files to delete (only on remote)")
+    unchanged: list[str] = Field(default_factory=list, description="Files unchanged (hash match)")
+
+    class Config:
+        from_attributes = True
+
+
+class BatchDeleteRequest(BaseModel):
+    """Request schema for batch delete endpoint"""
+
+    file_ids: list[str] = Field(..., min_length=1, description="List of file UUIDs to delete")
+
+    class Config:
+        from_attributes = True
+
+
+class BatchDeleteResponse(BaseModel):
+    """Response schema for batch delete endpoint"""
+
+    deleted: int = Field(..., description="Number of files successfully deleted")
+    failed: int = Field(..., description="Number of files that failed to delete")
+    errors: list[dict[str, str]] = Field(default_factory=list, description="List of errors")
+
+    class Config:
+        from_attributes = True
+
+
+class CompleteDownloadFileResponse(BaseModel):
+    """Response schema for a single file in complete project download"""
+
+    filename: str
+    relative_path: str
+    download_url: str
+    size: int
+
+    class Config:
+        from_attributes = True
+
+
+class CompleteDownloadFolderResponse(BaseModel):
+    """Response schema for a folder in complete project download"""
+
+    folder_name: str
+    files: list[CompleteDownloadFileResponse]
+
+    class Config:
+        from_attributes = True
+
+
+class ProjectCompleteDownloadResponse(BaseModel):
+    """Response schema for complete project download (all folders and files)"""
+
+    project_name: str
+    folders: list[CompleteDownloadFolderResponse]
 
     class Config:
         from_attributes = True

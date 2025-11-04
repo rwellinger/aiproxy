@@ -425,6 +425,13 @@ class SongProjectService:
             ProjectFile instance if successful, None otherwise
         """
         try:
+            logger.debug(
+                "Creating file record",
+                filename=filename,
+                has_file_hash=file_hash is not None,
+                hash_length=len(file_hash) if file_hash else 0,
+            )
+
             file = ProjectFile(
                 project_id=project_id,
                 folder_id=folder_id,
@@ -443,7 +450,13 @@ class SongProjectService:
             db.commit()
             db.refresh(file)
 
-            logger.info("File created", file_id=str(file.id), filename=filename, project_id=str(project_id))
+            logger.info(
+                "File created",
+                file_id=str(file.id),
+                filename=filename,
+                project_id=str(project_id),
+                hash_in_db=file.file_hash is not None,
+            )
             return file
 
         except SQLAlchemyError as e:
@@ -453,6 +466,86 @@ class SongProjectService:
         except Exception as e:
             logger.error("File creation failed", error=str(e), error_type=type(e).__name__)
             return None
+
+    def get_files_by_folder(self, db: Session, folder_id: UUID) -> list[ProjectFile]:
+        """
+        Get all files in a specific folder (for Mirror compare)
+
+        Args:
+            db: Database session
+            folder_id: Folder UUID
+
+        Returns:
+            List of ProjectFile instances
+        """
+        try:
+            files = db.query(ProjectFile).filter(ProjectFile.folder_id == folder_id).all()
+            return files or []
+
+        except SQLAlchemyError as e:
+            logger.error(
+                "Get files by folder DB error", folder_id=str(folder_id), error=str(e), error_type=type(e).__name__
+            )
+            return []
+        except Exception as e:
+            logger.error(
+                "Get files by folder failed", folder_id=str(folder_id), error=str(e), error_type=type(e).__name__
+            )
+            return []
+
+    def get_file_by_id(self, db: Session, file_id: UUID) -> ProjectFile | None:
+        """
+        Get a file by its ID
+
+        Args:
+            db: Database session
+            file_id: File UUID
+
+        Returns:
+            ProjectFile instance if found, None otherwise
+        """
+        try:
+            file = db.query(ProjectFile).filter(ProjectFile.id == file_id).first()
+            return file
+
+        except SQLAlchemyError as e:
+            logger.error("Get file by ID DB error", file_id=str(file_id), error=str(e), error_type=type(e).__name__)
+            return None
+        except Exception as e:
+            logger.error("Get file by ID failed", file_id=str(file_id), error=str(e), error_type=type(e).__name__)
+            return None
+
+    def delete_file(self, db: Session, file_id: UUID) -> bool:
+        """
+        Delete a file record from database
+
+        Args:
+            db: Database session
+            file_id: File UUID
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            file = db.query(ProjectFile).filter(ProjectFile.id == file_id).first()
+
+            if not file:
+                logger.debug("File not found for deletion", file_id=str(file_id))
+                return False
+
+            db.delete(file)
+            db.commit()
+
+            logger.info("File deleted", file_id=str(file_id), filename=file.filename)
+            return True
+
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error("File deletion DB error", file_id=str(file_id), error=str(e), error_type=type(e).__name__)
+            return False
+        except Exception as e:
+            logger.error("File deletion failed", file_id=str(file_id), error=str(e), error_type=type(e).__name__)
+            return False
 
     def get_folder_by_id(self, db: Session, folder_id: UUID) -> ProjectFolder | None:
         """

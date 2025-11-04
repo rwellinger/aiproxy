@@ -237,12 +237,12 @@
     }
 
     .s3-badge {
-      background-color: rgba(33, 150, 243, 0.1);
-      color: #2196f3;
-      border: 1px solid rgba(33, 150, 243, 0.3);
+      background-color: $storage-bg;
+      color: $storage-text;
+      border: 1px solid rgba(146, 64, 14, 0.3);
 
       i {
-        color: #2196f3;
+        color: $storage-text;
       }
     }
   }

@@ -188,8 +188,8 @@
   font-weight: $font-weight-medium;
 
   &.status-local {
-    background-color: #fef3c7;
-    color: #92400e;
+    background-color: $storage-bg;
+    color: $storage-text;
   }
 
   &.status-cloud {
@@ -472,6 +472,42 @@ mat-accordion {
   }
 }
 
+.cli-commands-button {
+  @include button-storage('base');
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-weight: $font-weight-medium !important;
+
+  i {
+    font-size: $font-sm;
+  }
+
+  .dropdown-icon {
+    margin-left: 4px;
+    font-size: 0.75rem;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Target the specific menu items in the CLI dropdown
+::ng-deep .mat-mdc-menu-panel {
+  .mat-mdc-menu-item-text {
+    i.fas {
+      margin-right: $spacing-sm !important;
+    }
+  }
+}
+
 .copy-cli-button,
 .copy-cli-download-button {
   @include button-secondary('base');
@@ -674,6 +710,10 @@ mat-accordion {
 
 .refresh-button {
   @include button-secondary('base');
+}
+
+.complete-clone-button {
+  @include button-storage('base');
 }
 
 .delete-button {

@@ -70,6 +70,11 @@
     @include button-size($size);
 }
 
+@mixin button-storage($size: 'base') {
+    @include button-style($storage-bg, $storage-text, $storage-hover-bg);
+    @include button-size($size);
+}
+
 // 2. Card/Panel Container
 @mixin card-container($border-color: $border-light, $bg-color: $background-white, $padding: 15px) {
     background: $bg-color;

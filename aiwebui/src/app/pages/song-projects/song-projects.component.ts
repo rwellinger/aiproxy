@@ -14,6 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { SongProjectService } from '../../services/business/song-project.service';
 import { NotificationService } from '../../services/ui/notification.service';
@@ -40,7 +41,8 @@ import {
     MatProgressSpinnerModule,
     MatExpansionModule,
     MatDialogModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatMenuModule
   ],
   templateUrl: './song-projects.component.html',
   styleUrl: './song-projects.component.scss'
@@ -424,6 +426,75 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
       this.notificationService.error(
         this.translate.instant('songProjects.messages.cliCommandCopyFailed')
       );
+    }
+  }
+
+  /**
+   * Copy CLI mirror command to clipboard.
+   */
+  async copyCLIMirrorCommand(folder: any): Promise<void> {
+    if (!this.selectedProject) return;
+
+    const command = `aiproxy-cli mirror ${this.selectedProject.id} ${folder.id} . --dry-run`;
+
+    try {
+      await navigator.clipboard.writeText(command);
+      this.notificationService.success(
+        this.translate.instant('songProjects.messages.cliMirrorCommandCopied')
+      );
+    } catch (error) {
+      console.error('Clipboard copy failed:', error);
+      this.notificationService.error(
+        this.translate.instant('songProjects.messages.cliCommandCopyFailed')
+      );
+    }
+  }
+
+  /**
+   * Copy CLI clone command to clipboard (complete clone).
+   */
+  async copyCLICompleteCloneCommand(): Promise<void> {
+    if (!this.selectedProject) return;
+
+    const command = `aiproxy-cli clone ${this.selectedProject.id} .`;
+
+    try {
+      await navigator.clipboard.writeText(command);
+      this.notificationService.success(
+        this.translate.instant('songProjects.messages.cliCompleteCloneCommandCopied')
+      );
+    } catch (error) {
+      console.error('Clipboard copy failed:', error);
+      this.notificationService.error(
+        this.translate.instant('songProjects.messages.cliCommandCopyFailed')
+      );
+    }
+  }
+
+  /**
+   * Get display name for storage provider
+   */
+  getStorageProviderDisplayName(project: SongProjectListItem | SongProjectDetail | null): string {
+    if (!project) return '';
+
+    // If backend is filesystem, show "Local Only"
+    if (project.storage_backend === 'filesystem') {
+      return this.translate.instant('songProjects.storageProvider.filesystem');
+    }
+
+    // Otherwise show provider name (MinIO, AWS S3, etc.)
+    const provider = project.storage_provider?.toLowerCase();
+    switch (provider) {
+      case 'minio':
+        return 'MinIO';
+      case 'aws':
+        return 'AWS S3';
+      case 'backblaze':
+        return 'Backblaze B2';
+      case 'wasabi':
+        return 'Wasabi';
+      default:
+        return project.storage_provider || 'S3';
     }
   }
 

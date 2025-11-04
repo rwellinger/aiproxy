@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 from business.song_project_transformer import (
+    calculate_file_hash,
     calculate_pagination_meta,
     detect_file_type,
     generate_s3_prefix,
@@ -479,6 +480,15 @@ class SongProjectOrchestrator:
                 s3_key = f"{folder.s3_prefix}{actual_filename}"
                 relative_path = f"{folder_name}/{actual_filename}"
 
+            # Calculate file hash (for Mirror sync comparison)
+            file_hash = calculate_file_hash(file_data)
+            logger.debug(
+                "File hash calculated",
+                filename=actual_filename,
+                hash_length=len(file_hash) if file_hash else 0,
+                hash_preview=file_hash[:16] if file_hash else "None",
+            )
+
             # Upload to S3
             try:
                 self.storage.upload(file_data, s3_key, content_type=mime_type)
@@ -499,6 +509,7 @@ class SongProjectOrchestrator:
                 file_type=file_type,
                 mime_type=mime_type,
                 file_size_bytes=len(file_data),
+                file_hash=file_hash,  # SHA256 for Mirror comparison
                 storage_backend="s3",
             )
 
@@ -607,6 +618,315 @@ class SongProjectOrchestrator:
         )
 
         return {"uploaded": uploaded, "failed": failed, "errors": errors}
+
+    def mirror_compare_files(
+        self,
+        db: Session,
+        project_id: UUID,
+        user_id: UUID,
+        folder_id: UUID,
+        local_files: list[dict[str, Any]],
+    ) -> dict[str, Any] | None:
+        """
+        Compare local files vs remote files (for Mirror sync)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            user_id: User ID (for ownership check)
+            folder_id: Folder UUID
+            local_files: List of dicts with keys: relative_path, file_hash, file_size_bytes
+
+        Returns:
+            Dictionary with diff:
+            {
+                'to_upload': [relative_path, ...],  # New files
+                'to_update': [relative_path, ...],  # Changed files (hash mismatch)
+                'to_delete': [{'file_id': uuid, 'relative_path': str}, ...],  # Remote only
+                'unchanged': [relative_path, ...]  # Hash match
+            }
+        """
+        try:
+            # Get project for ownership check
+            project = self.db_service.get_project_by_id(db, project_id)
+            if not project or project.user_id != user_id:
+                logger.warning("Unauthorized mirror compare", project_id=str(project_id), user_id=str(user_id))
+                return None
+
+            # Get folder to extract folder_name (needed for path normalization)
+            folder = self.db_service.get_folder_by_id(db, folder_id)
+            if not folder:
+                logger.warning("Folder not found", folder_id=str(folder_id))
+                return None
+
+            folder_name = folder.folder_name
+
+            # Get all remote files for this folder
+            remote_files = self.db_service.get_files_by_folder(db, folder_id)
+
+            # Build lookup maps
+            # IMPORTANT: Remote files have relative_path like "01 Arrangement/Bounces/file.wav"
+            # but CLI sends "Bounces/file.wav" (without folder_name prefix).
+            # We need to strip the folder_name prefix from remote paths for comparison!
+            local_map = {f["relative_path"]: f for f in local_files}
+            remote_map = {}
+            for f in remote_files:
+                # Strip folder_name prefix (e.g., "01 Arrangement/" → "")
+                normalized_path = f.relative_path
+                if normalized_path.startswith(f"{folder_name}/"):
+                    normalized_path = normalized_path[len(folder_name) + 1 :]  # +1 for trailing slash
+                remote_map[normalized_path] = f
+
+            # Calculate diff
+            to_upload = []
+            to_update = []
+            to_delete = []
+            unchanged = []
+
+            # Check local files vs remote
+            for rel_path, local_file in local_map.items():
+                if rel_path not in remote_map:
+                    # File exists locally but not remotely → upload
+                    to_upload.append(rel_path)
+                else:
+                    remote_file = remote_map[rel_path]
+                    # Compare hashes
+                    if local_file["file_hash"] != remote_file.file_hash:
+                        # Hash mismatch → update
+                        to_update.append(rel_path)
+                    else:
+                        # Hash match → unchanged
+                        unchanged.append(rel_path)
+
+            # Check remote files not in local (leichen!)
+            for rel_path, remote_file in remote_map.items():
+                if rel_path not in local_map:
+                    # File exists remotely but not locally → delete
+                    to_delete.append(
+                        {
+                            "file_id": str(remote_file.id),
+                            "relative_path": rel_path,
+                            "file_size_bytes": remote_file.file_size_bytes,
+                        }
+                    )
+
+            logger.info(
+                "Mirror compare completed",
+                project_id=str(project_id),
+                folder_id=str(folder_id),
+                to_upload=len(to_upload),
+                to_update=len(to_update),
+                to_delete=len(to_delete),
+                unchanged=len(unchanged),
+            )
+
+            return {
+                "to_upload": to_upload,
+                "to_update": to_update,
+                "to_delete": to_delete,
+                "unchanged": unchanged,
+            }
+
+        except Exception as e:
+            logger.error(
+                "Mirror compare failed",
+                project_id=str(project_id),
+                folder_id=str(folder_id),
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return None
+
+    def batch_delete_files(
+        self,
+        db: Session,
+        project_id: UUID,
+        user_id: UUID,
+        file_ids: list[str],
+    ) -> dict[str, Any]:
+        """
+        Delete multiple files from project (S3 + DB)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            user_id: User ID (for ownership check)
+            file_ids: List of file UUID strings
+
+        Returns:
+            Dictionary with deletion results:
+            {
+                'deleted': int,
+                'failed': int,
+                'errors': [{'file_id': str, 'error': str}, ...]
+            }
+        """
+        deleted = 0
+        failed = 0
+        errors = []
+
+        try:
+            # Get project for ownership check
+            project = self.db_service.get_project_by_id(db, project_id)
+            if not project or project.user_id != user_id:
+                logger.warning("Unauthorized batch delete", project_id=str(project_id), user_id=str(user_id))
+                return {
+                    "deleted": 0,
+                    "failed": len(file_ids),
+                    "errors": [{"file_id": fid, "error": "Unauthorized"} for fid in file_ids],
+                }
+
+            # Delete each file
+            for file_id_str in file_ids:
+                try:
+                    file_id = UUID(file_id_str)
+
+                    # Get file record for S3 key
+                    file_record = self.db_service.get_file_by_id(db, file_id)
+
+                    if not file_record:
+                        failed += 1
+                        errors.append({"file_id": file_id_str, "error": "File not found"})
+                        logger.warning("File not found for deletion", file_id=file_id_str)
+                        continue
+
+                    # Check ownership (file belongs to this project)
+                    if file_record.project_id != project_id:
+                        failed += 1
+                        errors.append({"file_id": file_id_str, "error": "File does not belong to this project"})
+                        logger.warning("File ownership mismatch", file_id=file_id_str, project_id=str(project_id))
+                        continue
+
+                    # Delete from S3
+                    try:
+                        if file_record.s3_key:
+                            self.storage.delete(file_record.s3_key)
+                    except Exception as e:
+                        logger.warning("S3 delete failed", file_id=file_id_str, s3_key=file_record.s3_key, error=str(e))
+                        # Continue with DB deletion even if S3 fails
+
+                    # Delete from DB
+                    if self.db_service.delete_file(db, file_id):
+                        deleted += 1
+                        logger.debug("File deleted", file_id=file_id_str, filename=file_record.filename)
+                    else:
+                        failed += 1
+                        errors.append({"file_id": file_id_str, "error": "Database deletion failed"})
+
+                except ValueError:
+                    failed += 1
+                    errors.append({"file_id": file_id_str, "error": "Invalid UUID"})
+                    logger.warning("Invalid file UUID", file_id=file_id_str)
+                except Exception as e:
+                    failed += 1
+                    errors.append({"file_id": file_id_str, "error": str(e)})
+                    logger.error("File deletion error", file_id=file_id_str, error=str(e), error_type=type(e).__name__)
+
+            logger.info(
+                "Batch delete completed",
+                project_id=str(project_id),
+                deleted=deleted,
+                failed=failed,
+                total=len(file_ids),
+            )
+
+            return {"deleted": deleted, "failed": failed, "errors": errors}
+
+        except Exception as e:
+            logger.error(
+                "Batch delete failed",
+                project_id=str(project_id),
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {
+                "deleted": deleted,
+                "failed": len(file_ids) - deleted,
+                "errors": [{"file_id": "unknown", "error": f"Batch delete orchestration failed: {str(e)}"}],
+            }
+
+    def get_all_project_files_with_urls(self, db: Session, project_id: UUID, user_id: UUID) -> dict[str, Any] | None:
+        """
+        Get all files from all folders for complete project download
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            user_id: User ID (for ownership check)
+
+        Returns:
+            Dictionary with project_name and folders (with download URLs) or None if failed
+            Structure:
+            {
+                'project_name': str,
+                'folders': [
+                    {
+                        'folder_name': str,
+                        'files': [
+                            {
+                                'filename': str,
+                                'relative_path': str,
+                                'download_url': str,
+                                'size': int
+                            }
+                        ]
+                    }
+                ]
+            }
+        """
+        try:
+            # Get project with details from DB
+            project = self.db_service.get_project_with_details(db, project_id)
+
+            if not project:
+                logger.debug("Project not found", project_id=str(project_id))
+                return None
+
+            # Check ownership
+            if project.user_id != user_id:
+                logger.warning(
+                    "Unauthorized complete download access", project_id=str(project_id), user_id=str(user_id)
+                )
+                return None
+
+            # Build response structure
+            folders_data = []
+
+            # Iterate over all folders (including empty ones)
+            for folder in project.folders:
+                files_data = []
+
+                # Get files for this folder
+                for file in folder.files:
+                    # Generate pre-signed download URL (1 hour expiry)
+                    download_url = self.storage.get_url(file.s3_key, expires_in=3600)
+
+                    files_data.append(
+                        {
+                            "filename": file.filename,
+                            "relative_path": file.relative_path,
+                            "download_url": download_url,
+                            "size": file.file_size_bytes or 0,
+                        }
+                    )
+
+                # Add folder to response (even if files list is empty)
+                folders_data.append({"folder_name": folder.folder_name, "files": files_data})
+
+            logger.info(
+                "Complete download data prepared",
+                project_id=str(project_id),
+                folders_count=len(folders_data),
+                total_files=sum(len(f["files"]) for f in folders_data),
+            )
+
+            return {"project_name": project.project_name, "folders": folders_data}
+
+        except Exception as e:
+            logger.error(
+                "Get all project files failed", project_id=str(project_id), error=str(e), error_type=type(e).__name__
+            )
+            return None
 
 
 # Global orchestrator instance

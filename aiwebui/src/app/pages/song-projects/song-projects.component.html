@@ -68,7 +68,12 @@
             <div class="title-group">
               <h4>{{ project.project_name }}</h4>
               <span class="sync-badge" [ngClass]="getSyncStatusClass(project.sync_status)">
-                {{ 'songProjects.syncStatus.' + project.sync_status | translate }}
+                <ng-container *ngIf="project.sync_status === 'local'; else defaultSyncStatus">
+                  {{ getStorageProviderDisplayName(project) }}
+                </ng-container>
+                <ng-template #defaultSyncStatus>
+                  {{ 'songProjects.syncStatus.' + project.sync_status | translate }}
+                </ng-template>
               </span>
             </div>
           </div>
@@ -152,7 +157,12 @@
             </button>
           </div>
           <span class="sync-badge" [ngClass]="getSyncStatusClass(selectedProject.sync_status)">
-            {{ 'songProjects.syncStatus.' + selectedProject.sync_status | translate }}
+            <ng-container *ngIf="selectedProject.sync_status === 'local'; else detailDefaultSyncStatus">
+              {{ getStorageProviderDisplayName(selectedProject) }}
+            </ng-container>
+            <ng-template #detailDefaultSyncStatus>
+              {{ 'songProjects.syncStatus.' + selectedProject.sync_status | translate }}
+            </ng-template>
           </span>
         </div>
 
@@ -285,7 +295,7 @@
 
               <!-- Files in Folder -->
               <div class="folder-files">
-                <!-- Upload & Download Buttons -->
+                <!-- Upload & CLI Commands -->
                 <div class="folder-upload-section">
                   <button
                     type="button"
@@ -297,22 +307,28 @@
                   </button>
                   <button
                     type="button"
-                    class="copy-cli-button"
-                    (click)="copyCLICommand(folder)"
-                    [title]="'songProjects.detail.actions.copyCLIUploadCommand' | translate"
+                    class="cli-commands-button"
+                    [matMenuTriggerFor]="cliMenu"
+                    [title]="'songProjects.detail.actions.cliCommands' | translate"
                   >
-                    <i class="fas fa-terminal"></i>
-                    <span>{{ 'songProjects.detail.actions.copyCLIUploadCommand' | translate }}</span>
+                    <i class="fas fa-code"></i>
+                    <span>{{ 'songProjects.detail.actions.cliCommands' | translate }}</span>
+                    <i class="fas fa-angle-down dropdown-icon"></i>
                   </button>
-                  <button
-                    type="button"
-                    class="copy-cli-download-button"
-                    (click)="copyCLIDownloadCommand(folder)"
-                    [title]="'songProjects.detail.actions.copyCLIDownloadCommand' | translate"
-                  >
-                    <i class="fas fa-download"></i>
-                    <span>{{ 'songProjects.detail.actions.copyCLIDownloadCommand' | translate }}</span>
-                  </button>
+                  <mat-menu #cliMenu="matMenu">
+                    <button mat-menu-item (click)="copyCLICommand(folder)">
+                      <i class="fas fa-upload"></i>
+                      <span>{{ 'songProjects.detail.actions.copyCLIUploadCommand' | translate }}</span>
+                    </button>
+                    <button mat-menu-item (click)="copyCLIDownloadCommand(folder)">
+                      <i class="fas fa-download"></i>
+                      <span>{{ 'songProjects.detail.actions.copyCLIDownloadCommand' | translate }}</span>
+                    </button>
+                    <button mat-menu-item (click)="copyCLIMirrorCommand(folder)">
+                      <i class="fas fa-sync-alt"></i>
+                      <span>{{ 'songProjects.detail.actions.copyCLIMirrorCommand' | translate }}</span>
+                    </button>
+                  </mat-menu>
                 </div>
 
                 <div *ngIf="!folder.files || folder.files.length === 0" class="empty-folder">
@@ -348,6 +364,10 @@
           <button type="button" class="action-button refresh-button" (click)="refreshProject()">
             <i class="fas fa-sync-alt"></i>
             <span>{{ 'common.refresh' | translate }}</span>
+          </button>
+          <button type="button" class="action-button complete-clone-button" (click)="copyCLICompleteCloneCommand()">
+            <i class="fas fa-code"></i>
+            <span>{{ 'songProjects.detail.copyCompleteClone' | translate }}</span>
           </button>
           <button type="button" class="action-button delete-button" (click)="deleteProject()">
             <i class="fas fa-trash"></i>

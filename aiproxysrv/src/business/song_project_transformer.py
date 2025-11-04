@@ -4,8 +4,11 @@ IMPORTANT: This module contains ONLY pure functions (100% unit-testable).
 NO database operations, NO file system operations, NO external dependencies.
 """
 
+import hashlib
 import re
 from typing import Any
+
+from config.settings import S3_PROVIDER, STORAGE_BACKEND
 
 
 def generate_s3_prefix(project_name: str, user_id: str) -> str:
@@ -175,6 +178,8 @@ def transform_project_to_response(project: Any) -> dict[str, Any]:
         "description": project.description,
         "total_files": project.total_files,
         "total_size_bytes": project.total_size_bytes,
+        "storage_backend": STORAGE_BACKEND,  # 's3' or 'filesystem'
+        "storage_provider": S3_PROVIDER,  # 'minio', 'aws', 'backblaze', 'wasabi'
         "created_at": project.created_at.isoformat() if project.created_at else None,
         "updated_at": project.updated_at.isoformat() if project.updated_at else None,
     }
@@ -306,6 +311,25 @@ def normalize_project_name(project_name: str) -> str:
         ''
     """
     return project_name.strip()
+
+
+def calculate_file_hash(file_data: bytes) -> str:
+    """
+    Calculate SHA256 hash of file data (for Mirror sync comparison)
+
+    Args:
+        file_data: Raw file bytes
+
+    Returns:
+        SHA256 hash as hex string (64 characters)
+
+    Examples:
+        >>> calculate_file_hash(b"Hello World")
+        'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e'
+        >>> calculate_file_hash(b"")
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+    """
+    return hashlib.sha256(file_data).hexdigest()
 
 
 def validate_sync_status(status: str) -> bool:
