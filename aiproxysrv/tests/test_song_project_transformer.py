@@ -14,7 +14,6 @@ from business.song_project_transformer import (
     transform_folder_to_response,
     transform_project_detail_to_response,
     transform_project_to_response,
-    validate_sync_status,
 )
 
 
@@ -234,8 +233,6 @@ class TestTransformProjectToResponse:
         project.id = "550e8400-e29b-41d4-a716-446655440000"
         project.project_name = "My Project"
         project.s3_prefix = "projects/my-project/"
-        project.local_path = None
-        project.sync_status = "local"
         project.last_sync_at = None
         project.cover_image_id = None
         project.tags = ["rock", "demo"]
@@ -252,12 +249,12 @@ class TestTransformProjectToResponse:
         assert result["id"] == "550e8400-e29b-41d4-a716-446655440000"
         assert result["project_name"] == "My Project"
         assert result["s3_prefix"] == "projects/my-project/"
-        assert result["sync_status"] == "local"
         assert result["tags"] == ["rock", "demo"]
         assert result["description"] == "A test project"
         assert result["total_files"] == 5
         assert result["total_size_bytes"] == 1024000
         assert result["created_at"] == "2024-01-01T12:00:00"
+        assert result["updated_at"] == "2024-01-02T12:00:00"
 
     def test_null_timestamps(self):
         """Handles None timestamps correctly"""
@@ -265,8 +262,6 @@ class TestTransformProjectToResponse:
         project.id = "550e8400-e29b-41d4-a716-446655440000"
         project.project_name = "Test"
         project.s3_prefix = None
-        project.local_path = None
-        project.sync_status = "local"
         project.last_sync_at = None
         project.cover_image_id = None
         project.tags = []
@@ -319,8 +314,6 @@ class TestTransformFileToResponse:
         file.file_type = "audio"
         file.mime_type = "audio/mpeg"
         file.file_size_bytes = 5000000
-        file.storage_backend = "s3"
-        file.s3_key = "user-id/project/01 Arrangement/song.mp3"
         file.is_synced = True
         file.created_at = Mock()
         file.created_at.isoformat.return_value = "2024-01-01T12:00:00"
@@ -335,10 +328,10 @@ class TestTransformFileToResponse:
         assert result["file_type"] == "audio"
         assert result["mime_type"] == "audio/mpeg"
         assert result["file_size_bytes"] == 5000000
-        assert result["storage_backend"] == "s3"
-        assert result["s3_key"] == "user-id/project/01 Arrangement/song.mp3"
         assert result["is_synced"] is True
         assert result["download_url"] == "https://s3.example.com/song.mp3"
+        assert result["created_at"] == "2024-01-01T12:00:00"
+        assert result["updated_at"] == "2024-01-02T12:00:00"
 
     def test_without_download_url(self):
         """Handles missing download URL"""
@@ -349,15 +342,14 @@ class TestTransformFileToResponse:
         file.file_type = "audio"
         file.mime_type = "audio/mpeg"
         file.file_size_bytes = 5000000
-        file.storage_backend = "s3"
-        file.s3_key = "user-id/project/song.mp3"
         file.is_synced = False
         file.created_at = None
         file.updated_at = None
 
         result = transform_file_to_response(file)
 
-        assert result["s3_key"] == "user-id/project/song.mp3"
+        assert result["filename"] == "song.mp3"
+        assert result["is_synced"] is False
         assert result["download_url"] is None
 
 
@@ -469,28 +461,6 @@ class TestNormalizeProjectName:
     def test_no_changes_needed(self):
         """Returns unchanged if already normalized"""
         assert normalize_project_name("My Project") == "My Project"
-
-
-class TestValidateSyncStatus:
-    """Test validate_sync_status() - sync status validation"""
-
-    def test_valid_statuses(self):
-        """Returns True for valid sync statuses"""
-        assert validate_sync_status("local") is True
-        assert validate_sync_status("cloud") is True
-        assert validate_sync_status("synced") is True
-        assert validate_sync_status("syncing") is True
-
-    def test_invalid_status(self):
-        """Returns False for invalid sync status"""
-        assert validate_sync_status("invalid") is False
-        assert validate_sync_status("pending") is False
-        assert validate_sync_status("") is False
-
-    def test_case_sensitive(self):
-        """Validation is case-sensitive"""
-        assert validate_sync_status("LOCAL") is False
-        assert validate_sync_status("Cloud") is False
 
 
 class TestCalculateFileHash:

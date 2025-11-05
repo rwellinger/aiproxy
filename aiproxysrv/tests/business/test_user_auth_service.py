@@ -177,8 +177,20 @@ class TestUserAuthService:
 
         token = auth_service.generate_jwt_token(user_id, email)
 
-        # Tamper with token (change last character)
-        tampered_token = token[:-1] + ("A" if token[-1] != "A" else "B")
+        # Tamper with token by modifying the signature part (after last dot)
+        parts = token.split(".")
+        if len(parts) == 3:
+            # Change a character in the middle of the signature (not at the end)
+            signature = parts[2]
+            if len(signature) > 10:
+                tampered_signature = signature[:5] + ("X" if signature[5] != "X" else "Y") + signature[6:]
+                tampered_token = f"{parts[0]}.{parts[1]}.{tampered_signature}"
+            else:
+                # Fallback: append extra character
+                tampered_token = token + "X"
+        else:
+            # Fallback: append extra character
+            tampered_token = token + "X"
 
         payload = auth_service.verify_jwt_token(tampered_token)
 
