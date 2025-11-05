@@ -21,8 +21,7 @@ import { NotificationService } from '../../services/ui/notification.service';
 import { CreateProjectDialogComponent } from '../../dialogs/create-project-dialog/create-project-dialog.component';
 import {
   SongProjectDetail,
-  SongProjectListItem,
-  SyncStatus
+  SongProjectListItem
 } from '../../models/song-project.model';
 
 @Component({
@@ -69,9 +68,6 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   // Edit state
   isEditingProjectName = false;
   editProjectNameValue = '';
-
-  // Enums for template
-  SyncStatus = SyncStatus;
 
   // Math for template
   Math = Math;
@@ -313,20 +309,6 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get sync status badge class.
-   */
-  getSyncStatusClass(status: SyncStatus): string {
-    const statusMap: Record<SyncStatus, string> = {
-      [SyncStatus.LOCAL]: 'status-local',
-      [SyncStatus.CLOUD]: 'status-cloud',
-      [SyncStatus.SYNCED]: 'status-synced',
-      [SyncStatus.SYNCING]: 'status-syncing'
-    };
-
-    return statusMap[status] || 'status-local';
-  }
-
-  /**
    * Download file (opens pre-signed URL).
    */
   downloadFile(downloadUrl: string): void {
@@ -471,32 +453,6 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Get display name for storage provider
-   */
-  getStorageProviderDisplayName(project: SongProjectListItem | SongProjectDetail | null): string {
-    if (!project) return '';
-
-    // If backend is filesystem, show "Local Only"
-    if (project.storage_backend === 'filesystem') {
-      return this.translate.instant('songProjects.storageProvider.filesystem');
-    }
-
-    // Otherwise show provider name (MinIO, AWS S3, etc.)
-    const provider = project.storage_provider?.toLowerCase();
-    switch (provider) {
-      case 'minio':
-        return 'MinIO';
-      case 'aws':
-        return 'AWS S3';
-      case 'backblaze':
-        return 'Backblaze B2';
-      case 'wasabi':
-        return 'Wasabi';
-      default:
-        return project.storage_provider || 'S3';
-    }
-  }
 
   /**
    * Open dialog to create new project.

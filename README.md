@@ -87,11 +87,10 @@ A full-stack platform for AI-powered image and music generation with Python back
 - **Song Generation** via Mureka API (asynchronous with Celery)
 - **Song Projects** - Complete project management for music production workflows
   - Hierarchical folder structure (Arrangement, Mixing, Mastering, Stems, References, etc.)
-  - S3-backed file storage with batch upload/download
+  - S3 cloud storage with batch upload/download
   - File management: Upload, download, delete, mirror sync
   - Asset assignment: Link songs, sketches, and images to project folders
   - Project metadata: Tags, descriptions, cover images, sync status
-  - Multi-storage provider support (MinIO, AWS S3, Backblaze B2, Wasabi)
   - CLI integration for local workflow (clone, mirror, batch operations)
 - **PostgreSQL** database for persistent storage
 - **Angular 18** frontend with Material Design

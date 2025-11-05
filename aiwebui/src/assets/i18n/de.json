@@ -436,9 +436,6 @@
     "compositionBadge": {
       "albumCover": "Album-Cover"
     },
-    "storageBadge": {
-      "s3": "S3"
-    },
     "title": "Bild-Galerie"
   },
   "lyricArchitect": {
@@ -1683,8 +1680,7 @@
         "totalSize": "Gesamtgröße",
         "created": "Erstellt",
         "updated": "Aktualisiert",
-        "lastSync": "Letzte Synchronisation",
-        "syncStatus": "Sync-Status"
+        "lastSync": "Letzte Synchronisation"
       },
       "actions": {
         "uploadFile": "Datei hochladen",
@@ -1721,14 +1717,7 @@
       "projectName": "Projektname",
       "projectNameHint": "z.B., Sommervibes 2024",
       "tags": "Tags",
-      "tagsHint": "Komma-getrennt, z.B., pop, rock, veröffentlicht",
-      "syncStatus": "Sync-Status"
-    },
-    "syncStatus": {
-      "local": "Nur lokal",
-      "cloud": "Nur Cloud",
-      "synced": "Synchronisiert",
-      "syncing": "Synchronisiere..."
+      "tagsHint": "Komma-getrennt, z.B., pop, rock, veröffentlicht"
     },
     "storageProvider": {
       "filesystem": "Lokales Dateisystem"

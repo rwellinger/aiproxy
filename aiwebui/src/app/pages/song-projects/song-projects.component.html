@@ -67,14 +67,6 @@
             </div>
             <div class="title-group">
               <h4>{{ project.project_name }}</h4>
-              <span class="sync-badge" [ngClass]="getSyncStatusClass(project.sync_status)">
-                <ng-container *ngIf="project.sync_status === 'local'; else defaultSyncStatus">
-                  {{ getStorageProviderDisplayName(project) }}
-                </ng-container>
-                <ng-template #defaultSyncStatus>
-                  {{ 'songProjects.syncStatus.' + project.sync_status | translate }}
-                </ng-template>
-              </span>
             </div>
           </div>
 
@@ -156,14 +148,6 @@
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <span class="sync-badge" [ngClass]="getSyncStatusClass(selectedProject.sync_status)">
-            <ng-container *ngIf="selectedProject.sync_status === 'local'; else detailDefaultSyncStatus">
-              {{ getStorageProviderDisplayName(selectedProject) }}
-            </ng-container>
-            <ng-template #detailDefaultSyncStatus>
-              {{ 'songProjects.syncStatus.' + selectedProject.sync_status | translate }}
-            </ng-template>
-          </span>
         </div>
 
         <!-- Project Stats -->
@@ -173,7 +157,7 @@
             {{ 'songProjects.detail.sections.metadata' | translate }}
           </h3>
 
-          <div class="detail-field-row-3col">
+          <div class="detail-field-row-2col">
             <div class="detail-field">
               <span class="field-label">{{ 'songProjects.detail.stats.totalFiles' | translate }}</span>
               <div class="readonly-field">{{ selectedProject.total_files }}</div>
@@ -182,13 +166,6 @@
             <div class="detail-field">
               <span class="field-label">{{ 'songProjects.detail.stats.totalSize' | translate }}</span>
               <div class="readonly-field">{{ formatFileSize(selectedProject.total_size_bytes) }}</div>
-            </div>
-
-            <div class="detail-field">
-              <span class="field-label">{{ 'songProjects.detail.stats.syncStatus' | translate }}</span>
-              <div class="readonly-field">
-                {{ 'songProjects.syncStatus.' + selectedProject.sync_status | translate }}
-              </div>
             </div>
           </div>
 

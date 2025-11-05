@@ -1,12 +1,11 @@
 """Image Orchestrator - Coordinates image operations (no testable business logic)"""
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
 from business.bulk_delete_transformer import BulkDeleteTransformer, DeleteResult
 from business.image_transformer import ImageTransformer
 from business.image_validator import ImageValidator
-from config.settings import DELETE_PHYSICAL_FILES, IMAGES_DIR, OPENAI_MODEL, S3_IMAGES_BUCKET
+from config.settings import DELETE_PHYSICAL_FILES, OPENAI_MODEL, S3_IMAGES_BUCKET
 from db.image_service import ImageService
 from infrastructure.storage import get_storage
 from utils.logger import logger
@@ -14,7 +13,6 @@ from utils.logger import logger
 
 if TYPE_CHECKING:
     from db.models import GeneratedImage
-from infrastructure.file_management_service import FileManagementService
 
 
 class ImageGenerationError(Exception):
@@ -27,10 +25,7 @@ class ImageOrchestrator:
     """Orchestrates image operations (calls services + repository)"""
 
     def __init__(self):
-        self.images_dir = Path(IMAGES_DIR)  # Keep for backward compatibility (old filesystem images)
-        self.images_dir.mkdir(parents=True, exist_ok=True)
-        self.file_service = FileManagementService()
-        self.s3_storage = get_storage(bucket=S3_IMAGES_BUCKET)  # S3 storage for new images
+        self.s3_storage = get_storage(bucket=S3_IMAGES_BUCKET)
 
     def generate_image(
         self,
@@ -108,8 +103,8 @@ class ImageOrchestrator:
                 enhanced_prompt=enhanced_prompt if enhanced_prompt != prompt else None,
                 size=size,
                 filename=filename,
-                file_path=s3_key,  # Store S3 key in file_path (for backward compatibility)
-                local_url="",  # Will be generated dynamically via backend proxy
+                file_path=s3_key,
+                local_url="",
                 title=title,
                 artistic_style=artistic_style,
                 composition=composition,
@@ -117,7 +112,6 @@ class ImageOrchestrator:
                 color_palette=color_palette,
                 detail_level=detail_level,
                 s3_key=s3_key,
-                storage_backend="s3",
             )
 
             # Generate relative backend proxy path (frontend adds base URL via ApiConfigService)
@@ -246,36 +240,21 @@ class ImageOrchestrator:
 
         Raises:
             ImageGenerationError: If deletion fails
-
-        Note:
-            - S3 images: Moved to archive/ folder (soft delete)
-            - Filesystem images: Deleted permanently (if DELETE_PHYSICAL_FILES=True)
         """
         try:
             image = ImageService.get_image_by_id(image_id)
             if not image:
                 return False
 
-            # Handle physical file deletion/archiving
-            if DELETE_PHYSICAL_FILES:
-                # Check if S3 image
-                if (
-                    hasattr(image, "storage_backend")
-                    and image.storage_backend == "s3"
-                    and hasattr(image, "s3_key")
-                    and image.s3_key
-                ):
-                    # Archive S3 image: shared/{id}.png → archive/{id}.png
-                    archive_key = image.s3_key.replace("shared/", "archive/", 1)
-                    move_success = self.s3_storage.move(image.s3_key, archive_key)
-                    if move_success:
-                        logger.info("S3 image archived", image_id=image_id, source=image.s3_key, archive=archive_key)
-                    else:
-                        logger.warning("Failed to archive S3 image", image_id=image_id, s3_key=image.s3_key)
+            # Archive S3 image if physical deletion is enabled
+            if DELETE_PHYSICAL_FILES and image.s3_key:
+                # Archive S3 image: shared/{id}.png → archive/{id}.png
+                archive_key = image.s3_key.replace("shared/", "archive/", 1)
+                move_success = self.s3_storage.move(image.s3_key, archive_key)
+                if move_success:
+                    logger.info("S3 image archived", image_id=image_id, source=image.s3_key, archive=archive_key)
                 else:
-                    # Delete filesystem image (old images)
-                    self.file_service.delete_file_if_exists(image.file_path)
-                    logger.info("Filesystem image deleted", image_id=image_id, file_path=image.file_path)
+                    logger.warning("Failed to archive S3 image", image_id=image_id, s3_key=image.s3_key)
             else:
                 logger.info("Skipping physical file deletion (disabled)", image_id=image_id)
 
@@ -319,25 +298,15 @@ class ImageOrchestrator:
                     delete_results.append(DeleteResult(image_id, "not_found"))
                     continue
 
-                # Delete/archive physical file if enabled
-                if DELETE_PHYSICAL_FILES:
-                    # Check if S3 image
-                    if (
-                        hasattr(image, "storage_backend")
-                        and image.storage_backend == "s3"
-                        and hasattr(image, "s3_key")
-                        and image.s3_key
-                    ):
-                        # Archive S3 image: shared/{id}.png → archive/{id}.png
-                        archive_key = image.s3_key.replace("shared/", "archive/", 1)
-                        move_success = self.s3_storage.move(image.s3_key, archive_key)
-                        if not move_success:
-                            logger.warning(
-                                "Failed to archive S3 image during bulk delete", image_id=image_id, s3_key=image.s3_key
-                            )
-                    else:
-                        # Delete filesystem image (old images)
-                        self.file_service.delete_file_if_exists(image.file_path)
+                # Archive physical file if enabled
+                if DELETE_PHYSICAL_FILES and image.s3_key:
+                    # Archive S3 image: shared/{id}.png → archive/{id}.png
+                    archive_key = image.s3_key.replace("shared/", "archive/", 1)
+                    move_success = self.s3_storage.move(image.s3_key, archive_key)
+                    if not move_success:
+                        logger.warning(
+                            "Failed to archive S3 image during bulk delete", image_id=image_id, s3_key=image.s3_key
+                        )
 
                 # Delete metadata from database
                 success = ImageService.delete_image_metadata(image_id)
@@ -451,21 +420,15 @@ class ImageOrchestrator:
 
             logger.info("Adding text overlay", source_image_id=source_image_id, title=title)
 
-            # === INFRASTRUCTURE LAYER: Load image (from S3 or filesystem) ===
+            # === INFRASTRUCTURE LAYER: Load image from S3 ===
             import io
             import uuid
 
             from PIL import Image
 
-            if source_image.storage_backend == "s3" and source_image.s3_key:
-                # Load from S3
-                logger.debug("Loading source image from S3", s3_key=source_image.s3_key)
-                image_data = self.s3_storage.download(source_image.s3_key)
-                img = Image.open(io.BytesIO(image_data)).convert("RGBA")
-            else:
-                # Load from filesystem (backward compatibility)
-                logger.debug("Loading source image from filesystem", file_path=source_image.file_path)
-                img = ImageFileService.load_image(source_image.file_path)
+            logger.debug("Loading source image from S3", s3_key=source_image.s3_key)
+            image_data = self.s3_storage.download(source_image.s3_key)
+            img = Image.open(io.BytesIO(image_data)).convert("RGBA")
 
             draw = ImageDraw.Draw(img)
 
@@ -596,8 +559,8 @@ class ImageOrchestrator:
                 prompt=source_image.prompt,
                 size=source_image.size,
                 filename=output_filename,
-                file_path=s3_key,  # Store S3 key
-                local_url="",  # Will be generated via backend proxy
+                file_path=s3_key,
+                local_url="",
                 model_used=source_image.model_used,
                 prompt_hash=source_image.prompt_hash,
                 title=title,
@@ -609,7 +572,6 @@ class ImageOrchestrator:
                 color_palette=source_image.color_palette,
                 detail_level=source_image.detail_level,
                 s3_key=s3_key,
-                storage_backend="s3",
             )
 
             if not new_image:
@@ -702,7 +664,6 @@ class ImageOrchestrator:
         color_palette: str | None = None,
         detail_level: str | None = None,
         s3_key: str | None = None,
-        storage_backend: str = "filesystem",
     ) -> Optional["GeneratedImage"]:
         """Save image metadata to database"""
         # Business logic: Generate prompt hash (delegated to transformer)
@@ -725,26 +686,18 @@ class ImageOrchestrator:
             color_palette=color_palette,
             detail_level=detail_level,
             s3_key=s3_key,
-            storage_backend=storage_backend,
         )
 
     def _transform_image_to_api_format(self, image, include_file_path: bool = False) -> dict[str, Any]:
-        """Transform database image object to API response format with backend proxy URLs for S3"""
+        """Transform database image object to API response format with backend proxy URLs"""
         # Business logic: Transform to API format (delegated to transformer)
         result = ImageTransformer.transform_image_to_api_format(image, include_file_path)
 
-        # Generate backend proxy URL for S3 images (streams via /api/v1/image/s3/<id>)
-        if (
-            hasattr(image, "storage_backend")
-            and image.storage_backend == "s3"
-            and hasattr(image, "s3_key")
-            and image.s3_key
-        ):
-            # Generate relative backend proxy path (frontend adds base URL via ApiConfigService)
-            backend_path = f"/api/v1/image/s3/{image.id}"
-            result["url"] = backend_path
-            result["display_url"] = backend_path
-            logger.debug("Generated backend proxy path for S3 image", image_id=str(image.id), s3_key=image.s3_key)
+        # Generate backend proxy URL (streams via /api/v1/image/s3/<id>)
+        backend_path = f"/api/v1/image/s3/{image.id}"
+        result["url"] = backend_path
+        result["display_url"] = backend_path
+        logger.debug("Generated backend proxy path for image", image_id=str(image.id), s3_key=image.s3_key)
 
         return result
 

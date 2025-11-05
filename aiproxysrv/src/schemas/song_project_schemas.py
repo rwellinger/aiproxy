@@ -29,15 +29,12 @@ class ProjectResponse(BaseModel):
     project_name: str
     s3_prefix: str | None
     local_path: str | None
-    sync_status: str
     last_sync_at: str | None
     cover_image_id: str | None
     tags: list[str]
     description: str | None
     total_files: int
     total_size_bytes: int
-    storage_backend: str  # 's3' or 'filesystem'
-    storage_provider: str  # 'minio', 'aws', 'backblaze', 'wasabi'
     created_at: str | None
     updated_at: str | None
 
@@ -72,7 +69,6 @@ class FileResponse(BaseModel):
     file_type: str | None
     mime_type: str | None
     file_size_bytes: int | None
-    storage_backend: str
     is_synced: bool
     download_url: str | None
     created_at: str | None
@@ -131,7 +127,6 @@ class ProjectDetailResponse(BaseModel):
     project_name: str
     s3_prefix: str | None
     local_path: str | None
-    sync_status: str
     last_sync_at: str | None
     cover_image_id: str | None
     tags: list[str]

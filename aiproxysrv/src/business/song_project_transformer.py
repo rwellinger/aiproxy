@@ -8,8 +8,6 @@ import hashlib
 import re
 from typing import Any
 
-from config.settings import S3_PROVIDER, STORAGE_BACKEND
-
 
 def generate_s3_prefix(project_name: str, user_id: str) -> str:
     """
@@ -178,8 +176,6 @@ def transform_project_to_response(project: Any) -> dict[str, Any]:
         "description": project.description,
         "total_files": project.total_files,
         "total_size_bytes": project.total_size_bytes,
-        "storage_backend": STORAGE_BACKEND,  # 's3' or 'filesystem'
-        "storage_provider": S3_PROVIDER,  # 'minio', 'aws', 'backblaze', 'wasabi'
         "created_at": project.created_at.isoformat() if project.created_at else None,
         "updated_at": project.updated_at.isoformat() if project.updated_at else None,
     }

@@ -43,7 +43,6 @@ interface ImageData {
     composition?: string;
     created_at: string;
     updated_at?: string;
-    storage_backend?: string;  // 's3' or 'filesystem'
     projects_count?: number; // Number of projects this image is assigned to
 }
 

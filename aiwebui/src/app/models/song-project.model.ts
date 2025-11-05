@@ -2,36 +2,14 @@
  * Song Project Models - TypeScript interfaces and enums for song project management.
  */
 
-export enum SyncStatus {
-  LOCAL = 'local',
-  CLOUD = 'cloud',
-  SYNCED = 'synced',
-  SYNCING = 'syncing'
-}
-
-export enum StorageBackend {
-  S3 = 's3',
-  LOCAL = 'local'
-}
-
-export enum StorageProvider {
-  MINIO = 'minio',
-  AWS = 'aws',
-  BACKBLAZE = 'backblaze',
-  WASABI = 'wasabi'
-}
-
 export interface SongProject {
   id: string;
   user_id: string;
   project_name: string;
   s3_prefix: string;
-  sync_status: SyncStatus;
   tags: string[];
   total_files: number;
   total_size_bytes: number;
-  storage_backend: string;  // 's3' or 'filesystem'
-  storage_provider: string;  // 'minio', 'aws', 'backblaze', 'wasabi'
   created_at: string; // ISO format
   updated_at: string; // ISO format
   last_sync_at?: string; // ISO format
@@ -56,7 +34,6 @@ export interface ProjectFile {
   s3_key: string;
   file_size_bytes: number;
   file_hash?: string;
-  storage_backend: StorageBackend;
   is_synced: boolean;
   download_url?: string;
   created_at: string; // ISO format
@@ -107,12 +84,9 @@ export interface SongProjectDetail extends SongProject {
 export interface SongProjectListItem {
   id: string;
   project_name: string;
-  sync_status: SyncStatus;
   tags: string[];
   total_files: number;
   total_size_bytes: number;
-  storage_backend: string;
-  storage_provider: string;
   created_at: string;
   updated_at: string;
 }
@@ -140,7 +114,6 @@ export interface SongProjectCreateRequest {
 export interface SongProjectUpdateRequest {
   project_name?: string;
   tags?: string[];
-  sync_status?: SyncStatus;
 }
 
 export interface FileUploadRequest {
