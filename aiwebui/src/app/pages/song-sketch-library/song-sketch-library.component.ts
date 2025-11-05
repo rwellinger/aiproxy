@@ -6,6 +6,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil, firstValueFrom 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog } from '@angular/material/dialog';
 
 import { SketchService, Sketch } from '../../services/business/sketch.service';
@@ -21,7 +22,8 @@ import { AssignToProjectDialogComponent } from '../../dialogs/assign-to-project-
     FormsModule,
     TranslateModule,
     MatCardModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTabsModule
   ],
   templateUrl: './song-sketch-library.component.html',
   styleUrl: './song-sketch-library.component.scss',
