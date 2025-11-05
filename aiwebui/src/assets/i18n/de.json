@@ -1719,9 +1719,6 @@
       "tags": "Tags",
       "tagsHint": "Komma-getrennt, z.B., pop, rock, veröffentlicht"
     },
-    "storageProvider": {
-      "filesystem": "Lokales Dateisystem"
-    },
     "folders": {
       "arrangement": "Arrangement",
       "ai": "KI",

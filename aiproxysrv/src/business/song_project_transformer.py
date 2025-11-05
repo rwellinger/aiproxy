@@ -168,8 +168,6 @@ def transform_project_to_response(project: Any) -> dict[str, Any]:
         "id": str(project.id),
         "project_name": project.project_name,
         "s3_prefix": project.s3_prefix,
-        "local_path": project.local_path,
-        "sync_status": project.sync_status,
         "last_sync_at": project.last_sync_at.isoformat() if project.last_sync_at else None,
         "cover_image_id": str(project.cover_image_id) if project.cover_image_id else None,
         "tags": project.tags,
@@ -219,8 +217,6 @@ def transform_file_to_response(file: Any, download_url: str | None = None) -> di
         "file_type": file.file_type,
         "mime_type": file.mime_type,
         "file_size_bytes": file.file_size_bytes,
-        "storage_backend": file.storage_backend,
-        "s3_key": file.s3_key,
         "is_synced": file.is_synced,
         "download_url": download_url,
         "created_at": file.created_at.isoformat() if file.created_at else None,
@@ -326,26 +322,6 @@ def calculate_file_hash(file_data: bytes) -> str:
         'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
     """
     return hashlib.sha256(file_data).hexdigest()
-
-
-def validate_sync_status(status: str) -> bool:
-    """
-    Validate sync status value
-
-    Args:
-        status: Sync status to validate
-
-    Returns:
-        True if valid, False otherwise
-
-    Examples:
-        >>> validate_sync_status("local")
-        True
-        >>> validate_sync_status("invalid")
-        False
-    """
-    valid_statuses = {"local", "cloud", "synced", "syncing"}
-    return status in valid_statuses
 
 
 def transform_song_to_assigned_response(song: Any) -> dict[str, Any]:  # pragma: no cover

@@ -28,7 +28,6 @@ class ProjectResponse(BaseModel):
     id: str
     project_name: str
     s3_prefix: str | None
-    local_path: str | None
     last_sync_at: str | None
     cover_image_id: str | None
     tags: list[str]
@@ -126,7 +125,6 @@ class ProjectDetailResponse(BaseModel):
     id: str
     project_name: str
     s3_prefix: str | None
-    local_path: str | None
     last_sync_at: str | None
     cover_image_id: str | None
     tags: list[str]

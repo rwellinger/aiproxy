@@ -1719,9 +1719,6 @@
       "tags": "Tags",
       "tagsHint": "Comma-separated, e.g., pop, rock, released"
     },
-    "storageProvider": {
-      "filesystem": "Local Filesystem"
-    },
     "folders": {
       "arrangement": "Arrangement",
       "ai": "AI",
