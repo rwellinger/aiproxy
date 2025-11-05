@@ -85,6 +85,14 @@ A full-stack platform for AI-powered image and music generation with Python back
     - Monthly and all-time aggregation
     - Displayed in User Profile
 - **Song Generation** via Mureka API (asynchronous with Celery)
+- **Song Projects** - Complete project management for music production workflows
+  - Hierarchical folder structure (Arrangement, Mixing, Mastering, Stems, References, etc.)
+  - S3-backed file storage with batch upload/download
+  - File management: Upload, download, delete, mirror sync
+  - Asset assignment: Link songs, sketches, and images to project folders
+  - Project metadata: Tags, descriptions, cover images, sync status
+  - Multi-storage provider support (MinIO, AWS S3, Backblaze B2, Wasabi)
+  - CLI integration for local workflow (clone, mirror, batch operations)
 - **PostgreSQL** database for persistent storage
 - **Angular 18** frontend with Material Design
 - **Redis & Celery** for asynchronous task processing
@@ -321,12 +329,13 @@ mac_ki_service/
 │   │   │   ├── song-generator/        # Song generation UI
 │   │   │   ├── song-view/             # Display of generated songs
 │   │   │   ├── song-profile/          # Mureka account information
+│   │   │   ├── song-projects/         # Song project management (master-detail)
 │   │   │   ├── user-profile/          # User profile and settings
 │   │   │   ├── music-style-prompt/    # Music style template management
 │   │   │   └── prompt-templates/      # Template management for prompts
 │   │   ├── services/    # API Services & Business Logic
 │   │   │   ├── business/      # ImageService, ConversationService, SketchService,
-│   │   │   │                  # SongService, EquipmentService
+│   │   │   │                  # SongService, EquipmentService, SongProjectService
 │   │   │   ├── config/        # ChatService, ApiConfigService
 │   │   │   └── ui/            # ProgressService, NotificationService
 │   │   ├── components/  # Shared components
@@ -339,18 +348,28 @@ mac_ki_service/
 │   │       ├── equipment.model.ts
 │   │       ├── image-generation.model.ts
 │   │       ├── lyric-architecture.model.ts
+│   │       ├── song-project.model.ts
 │   │       └── ...
 │   ├── package.json
 │   └── VERSION          # Version file for releases
 │
-├── scripts/build/       # Release & Build automation
-│   ├── create_release.sh           # Create versioned release
-│   ├── build-and-push-aiproxysrv.sh
-│   ├── build-and-push-aiwebui.sh
-│   ├── cleanup-docker-images.sh
-│   ├── cleanup-tags.sh
-│   ├── cleanup-branchs.sh
-│   └── gitcleanup.sh
+├── scripts/
+│   ├── build/           # Release & Build automation
+│   │   ├── create_release.sh           # Create versioned release
+│   │   ├── build-and-push-aiproxysrv.sh
+│   │   ├── build-and-push-aiwebui.sh
+│   │   ├── cleanup-docker-images.sh
+│   │   ├── cleanup-tags.sh
+│   │   ├── cleanup-branchs.sh
+│   │   └── gitcleanup.sh
+│   ├── cli/             # CLI Tool
+│   │   ├── aiproxy-cli.py          # Main CLI script (1177 lines)
+│   │   ├── README.md               # CLI user documentation
+│   │   ├── requirements.txt        # Python dependencies (Click, rich, requests)
+│   │   └── .aiproxyignore.default  # Default ignore patterns
+│   └── db/              # Database seeding (SQL-based)
+│       ├── seed_prompts.sql
+│       └── seed_lyric_parsing_rules.sql
 │
 ├── forwardproxy/        # Nginx reverse proxy (Production)
 │   ├── html/           # Angular build output
@@ -558,6 +577,191 @@ python src/worker.py
 - **Reverse Proxy**: Nginx
 - **Container**: Docker + Colima
 - **Orchestration**: Docker Compose
+
+---
+
+## 🖥️ CLI Tool (aiproxy-cli)
+
+**AiProxy CLI** - Command-line tool for managing song projects, uploading files, and syncing with the backend.
+
+### Installation
+
+```bash
+# Via Makefile (recommended)
+make install-cli              # Install CLI without config
+make install-cli-dev          # Install + DEV config (localhost:5050)
+make install-cli-prod         # Install + PROD config (macstudio)
+
+# Manual installation
+mkdir -p ~/bin
+cp scripts/cli/aiproxy-cli.py ~/bin/aiproxy-cli
+chmod +x ~/bin/aiproxy-cli
+pip install -r scripts/cli/requirements.txt
+
+# Add to PATH (in ~/.zshrc or ~/.bashrc)
+export PATH="$HOME/bin:$PATH"
+```
+
+### Commands
+
+#### 1. `login` - Authenticate with JWT Token
+
+```bash
+aiproxy-cli login [--api-url URL]
+
+# Interactive: Enter email + password
+# Stores JWT token in ~/.aiproxy/config.json (0600 permissions)
+```
+
+#### 2. `upload` - Upload Files to Project Folder
+
+```bash
+aiproxy-cli upload <PROJECT_ID> <FOLDER_ID> [LOCAL_PATH] [--debug]
+
+# Examples:
+aiproxy-cli upload 550e8400-... 01-arrangement ~/Music/songs/
+aiproxy-cli upload proj-id folder-id . --debug  # Current dir with debug
+
+# Features:
+# - Recursive directory scan
+# - .aiproxyignore pattern support (global + local)
+# - Batch upload (3 files/batch, max 500MB)
+# - Progress bar with percentage
+# - Preserves directory structure
+```
+
+#### 3. `download` - Download Folder Files
+
+```bash
+aiproxy-cli download <PROJECT_ID> <FOLDER_ID> [LOCAL_PATH]
+
+# Example:
+aiproxy-cli download 550e8400-... 01-arrangement ~/Downloads/
+
+# Features:
+# - Reconstructs directory structure (without folder prefix)
+# - Streaming download (8KB chunks)
+# - Progress bar
+```
+
+#### 4. `clone` - Clone Complete Project
+
+```bash
+aiproxy-cli clone <PROJECT_ID> [LOCAL_PATH] [-d/--create-dir]
+
+# Examples:
+aiproxy-cli clone 550e8400-... ~/Projects/
+aiproxy-cli clone proj-id . -d  # Creates subdirectory with project name
+
+# Features:
+# - Clones ALL folders + files (including empty folders)
+# - Preserves complete S3 directory structure
+# - 1:1 replication of project structure
+# - Use case: "Create in Web UI → Clone → Ready to work!"
+```
+
+#### 5. `mirror` - One-Way Sync (Local → Remote)
+
+```bash
+aiproxy-cli mirror <PROJECT_ID> <FOLDER_ID> <LOCAL_PATH> [OPTIONS]
+
+# Options:
+#   --dry-run    Preview changes without executing
+#   --yes        Skip confirmation (for automation)
+#   --debug      Show request/response details
+
+# Examples:
+aiproxy-cli mirror proj-id folder-id ~/Music/ --dry-run  # Preview
+aiproxy-cli mirror proj-id folder-id ~/Music/ --yes      # Auto-confirm
+
+# Features:
+# - SHA256 hash-based comparison
+# - Three operations: Upload (new), Update (changed), Delete (remote-only)
+# - .aiproxyignore support
+# - Interactive confirmation (shows files to delete!)
+# - Batch upload + batch delete
+```
+
+### .aiproxyignore Patterns
+
+**Global:** `~/.aiproxy/.aiproxyignore`
+**Local:** `{upload_dir}/.aiproxyignore` (higher priority)
+
+**Syntax (gitignore-style):**
+```
+.DS_Store          # Exact match
+Icon*              # Wildcard
+*.tmp              # File extension
+.git/              # Directories (ends with /)
+node_modules/
+__pycache__/
+*.log
+```
+
+### Configuration
+
+**File:** `~/.aiproxy/config.json` (0600 permissions)
+
+```json
+{
+  "api_url": "https://macstudio/aiproxysrv",
+  "jwt_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "email": "user@example.com",
+  "expires_at": "2024-11-03T10:30:00Z",
+  "ssl_verify": false
+}
+```
+
+### Workflow Example
+
+```bash
+# 1. Login
+aiproxy-cli login
+
+# 2. Clone project from Web UI
+aiproxy-cli clone 550e8400-e29b-41d4-a716-446655440000 ~/Projects/ -d
+# → Creates ~/Projects/My Song Project/
+
+# 3. Work locally (edit files, add stems, mix, etc.)
+# [edit files in ~/Projects/My Song Project/]
+
+# 4. Preview sync changes
+aiproxy-cli mirror proj-id 01-arrangement ~/Projects/"My Song Project"/01-arrangement --dry-run
+
+# 5. Sync with server (upload new, update changed, delete remote-only)
+aiproxy-cli mirror proj-id 01-arrangement ~/Projects/"My Song Project"/01-arrangement --yes
+```
+
+### Technical Details
+
+- **Technology:** Python Click 8.1.0+ CLI framework
+- **HTTP Client:** requests 2.31.0+ with SSL self-signed cert support
+- **Terminal UI:** rich 13.7.0+ for progress bars and formatting
+- **Batch Size:** 3 files per upload (max 500MB Nginx limit)
+- **Timeout:** 10 minutes per batch/download
+- **Hash Algorithm:** SHA256 for mirror comparison
+- **File Permissions:** Config file secured with 0600 (owner-only)
+
+### Security Notes
+
+⚠️ **JWT Token Storage:**
+- Token stored in plaintext in `~/.aiproxy/config.json`
+- File permissions: 0600 (owner read/write only)
+- **NOT** for use on multi-user systems
+- **DO NOT** sync `~/.aiproxy/` with cloud services (Dropbox, iCloud)
+- Token expiry: 24 hours (re-login required)
+
+### API Endpoints Used
+
+| Command | Backend Endpoint |
+|---------|-----------------|
+| `login` | `POST /api/v1/user/login` |
+| `upload` | `POST /api/v1/song-projects/{id}/folders/{folder_id}/batch-upload` |
+| `download` | `GET /api/v1/song-projects/{id}/folders/{folder_id}/files` |
+| `clone` | `GET /api/v1/song-projects/{id}/files/all` |
+| `mirror` | `POST /api/v1/song-projects/{id}/folders/{folder_id}/mirror`<br>`DELETE /api/v1/song-projects/{id}/files/batch-delete` |
+
+**Documentation:** `scripts/cli/README.md`
 
 ---
 

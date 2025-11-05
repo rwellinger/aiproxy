@@ -27,6 +27,8 @@
    - [6.5 Text Overlay Workflow](#65-text-overlay-workflow)
    - [6.6 S3 Storage Migration (Hybrid Storage Architecture)](#66-s3-storage-migration-hybrid-storage-architecture)
    - [6.7 Lyric Parsing Rules Engine](#67-lyric-parsing-rules-engine)
+   - [6.8 CLI Tool (aiproxy-cli)](#68-cli-tool-aiproxy-cli)
+   - [6.9 Song Projects (Music Production Project Management)](#69-song-projects-music-production-project-management)
 7. [Deployment View](#7-deployment-view)
    - [7.1 Development Environment](#71-development-environment)
    - [7.2 Production Environment](#72-production-environment)
@@ -69,6 +71,7 @@
 - [Figure 6.3: AI Chat Conversation (Persistent)](#63-ai-chat-conversation-persistent) - `images/6.3_ai_chat_workflow.png`
 - [Figure 6.6.1: Storage Migration Architecture](#66-s3-storage-migration-hybrid-storage-architecture) - `images/6.7_storage_migration.png`
 - [Figure 6.6.2: S3 Migration Workflow](#66-s3-storage-migration-hybrid-storage-architecture) - `images/6.8_s3_migration_workflow.png`
+- [Figure 6.8: CLI Tool Workflow](#68-cli-tool-aiproxy-cli) - Command-line interaction diagrams
 - [Figure 7.3: Network Architecture](#73-network-architecture) - `images/7.3_netzwerk_architektur.png`
 - [Figure 10.1: Development Deployment](#101-development-deployment) - `images/9.1_entwicklungs_deployment.png`
 - [Figure 10.2: Production Deployment](#102-production-deployment) - `images/9.2_produktions_deployment.png`
@@ -1024,6 +1027,733 @@ The fundamental difference is that **RegEx patterns have an interpreter (the Reg
 
 ---
 
+### 6.8 CLI Tool (aiproxy-cli)
+
+**Overview**: Command-line tool for managing song projects, batch uploading/downloading files, and one-way syncing with the backend. Built with Python Click framework for local file operations with S3-backed remote storage.
+
+**Location:** `scripts/cli/aiproxy-cli.py` (1,177 lines)
+
+**Key Components:**
+
+1. **CLI Framework & Dependencies**
+   - **Technology:** Python Click 8.1.0+ (command-line interface framework)
+   - **HTTP Client:** requests 2.31.0+ with SSL self-signed certificate support
+   - **Terminal UI:** rich 13.7.0+ for progress bars, color output, and formatting
+   - **Hashing:** hashlib (SHA256) for file comparison in mirror operations
+   - **Configuration:** JSON-based config in `~/.aiproxy/config.json` (0600 permissions)
+
+2. **Authentication System**
+   - JWT token-based authentication via `/api/v1/user/login`
+   - Token storage: `~/.aiproxy/config.json` with strict file permissions (0600)
+   - Token expiry tracking (ISO 8601 or RFC 2822 format)
+   - Pre-flight token validation before all commands (except `login`)
+   - SSL verification configurable (disabled for self-signed certs in dev)
+
+3. **Ignore Pattern Engine**
+   - Global ignore file: `~/.aiproxy/.aiproxyignore`
+   - Local ignore file: `{upload_dir}/.aiproxyignore` (higher priority)
+   - Gitignore-compatible syntax (wildcards, directory patterns, exact matches)
+   - Patterns applied recursively during directory scans
+
+**Commands:**
+
+#### 6.8.1 `login` - JWT Authentication
+
+**Endpoint:** `POST /api/v1/user/login`
+
+**Workflow:**
+1. User provides email + password (interactive input)
+2. POST credentials to backend API
+3. Receive JWT token + expiry timestamp
+4. Store in `~/.aiproxy/config.json` with 0600 permissions
+5. Future commands use token via `Authorization: Bearer {jwt_token}` header
+
+**Configuration Structure:**
+```json
+{
+  "api_url": "https://macstudio/aiproxysrv",
+  "jwt_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "email": "user@example.com",
+  "expires_at": "2024-11-03T10:30:00Z",
+  "ssl_verify": false
+}
+```
+
+#### 6.8.2 `upload` - Batch File Upload
+
+**Endpoint:** `POST /api/v1/song-projects/{id}/folders/{folder_id}/batch-upload`
+
+**Parameters:**
+- `PROJECT_ID` (required): Projekt-UUID
+- `FOLDER_ID` (required): Ordner-UUID (e.g., "01-arrangement", "02-mixing")
+- `LOCAL_PATH` (optional, default: "."): Local directory to upload
+- `--debug` (flag): Show HTTP request/response details
+
+**Workflow:**
+1. **Directory Scan:** Recursively collect all files from `LOCAL_PATH`
+2. **Ignore Filter:** Apply `.aiproxyignore` patterns (global + local merge)
+3. **Batch Grouping:** Group files into batches of 3 (conservative: 3 × 150MB = 450MB < 500MB Nginx limit)
+4. **Upload:** For each batch:
+   - Open files as `multipart/form-data`
+   - Send POST with relative paths preserved (e.g., "Media/drums.flac")
+   - Timeout: 10 minutes per batch
+   - Parse response: `{"uploaded": 3, "failed": 0, "errors": []}`
+5. **Progress:** Rich library progress bar with file count + percentage
+6. **Summary:** Total uploaded + failed files
+
+**Why Batch Size = 3?**
+- Nginx `client_max_body_size` limit: 500MB
+- Typical FLAC stems: ~150MB each
+- 3 files = 450MB (safe margin below limit)
+
+**Error Handling:**
+- Individual file failures tracked in batch response
+- Maximum 10 failed file details shown in summary
+- Continues with remaining batches after failure
+
+#### 6.8.3 `download` - Folder Download
+
+**Endpoint:** `GET /api/v1/song-projects/{id}/folders/{folder_id}/files`
+
+**Parameters:**
+- `PROJECT_ID` (required): Projekt-UUID
+- `FOLDER_ID` (required): Ordner-UUID
+- `LOCAL_PATH` (optional, default: "."): Local destination directory
+
+**Workflow:**
+1. **Fetch File List:** GET folder metadata with all file records
+2. **Path Transformation:**
+   - Backend returns: `relative_path = "01 Arrangement/Media/drums.wav"`
+   - CLI removes folder prefix: `"Media/drums.wav"`
+   - Local path: `{LOCAL_PATH}/Media/drums.wav`
+3. **Download:** Stream files in chunks (8KB per chunk)
+4. **Progress:** Rich library progress bar with file count
+5. **Timeout:** 10 minutes per file
+
+**Path Reconstruction:**
+```python
+# Backend: relative_path = "01 Arrangement/Media/stems/kick.flac"
+# CLI: strip "01 Arrangement/" → "Media/stems/kick.flac"
+# Local: ~/Downloads/Media/stems/kick.flac
+```
+
+#### 6.8.4 `clone` - Complete Project Clone
+
+**Endpoint:** `GET /api/v1/song-projects/{id}/files/all`
+
+**Parameters:**
+- `PROJECT_ID` (required): Projekt-UUID
+- `LOCAL_PATH` (optional, default: "."): Local destination
+- `-d, --create-dir` (flag): Auto-create subdirectory with project name
+
+**Workflow:**
+1. **Fetch Complete Structure:** GET all folders + files in project
+2. **Create Folders:** Create all folder paths (including empty folders)
+3. **Download Files:** Stream all files with **full relative paths preserved**
+   - **CRITICAL:** Unlike `download`, does NOT trim folder prefix!
+   - Backend path: `"01 Arrangement/Media/drums.flac"`
+   - Local path: `{LOCAL_PATH}/01 Arrangement/Media/drums.flac`
+4. **Use Case:** "Create project in Web UI → Clone → Ready to work locally!"
+
+**Difference from `download`:**
+- `download`: Downloads single folder, strips folder prefix from paths
+- `clone`: Downloads entire project, preserves complete S3 structure 1:1
+
+#### 6.8.5 `mirror` - One-Way Sync (Local → Remote)
+
+**Endpoints:**
+- Phase 1: `POST /api/v1/song-projects/{id}/folders/{folder_id}/mirror` (compare)
+- Phase 2: `POST /api/v1/song-projects/{id}/folders/{folder_id}/batch-upload` (upload)
+- Phase 3: `DELETE /api/v1/song-projects/{id}/files/batch-delete` (delete)
+
+**Parameters:**
+- `PROJECT_ID` (required): Projekt-UUID
+- `FOLDER_ID` (required): Ordner-UUID
+- `LOCAL_PATH` (required): Local sync directory
+- `--dry-run` (flag): Preview changes without execution
+- `--yes` (flag): Skip confirmation prompt (automation)
+- `--debug` (flag): Show HTTP details
+
+**Workflow:**
+
+**Phase 1: Local Analysis**
+1. Scan directory recursively
+2. Calculate SHA256 hash for each file
+3. Apply `.aiproxyignore` patterns
+4. Collect file metadata: `{path: str, hash: str, size: int}`
+
+**Phase 2: Remote Comparison**
+1. POST local file list to `/mirror` endpoint
+2. Backend compares with remote files (S3-backed)
+3. Response contains:
+   - `to_upload`: New files (not in remote)
+   - `to_update`: Hash mismatch (content changed)
+   - `to_delete`: Remote-only files (not in local)
+   - `unchanged`: Identical (no action needed)
+
+**Phase 3: Preview**
+```
+📊 Mirror Preview:
+  ✅ Unchanged: 125 files
+  ⬆️  Upload: 5 files (new)
+  🔄 Update: 2 files (hash mismatch)
+  🗑️  Delete: 3 files (remote only)
+
+Files to DELETE:
+  - old_mix_v2.flac
+  - unused_stem.wav
+  - backup/archive.zip
+```
+
+**Phase 4: Confirmation**
+- `--dry-run`: Exit after preview (no changes)
+- `--yes`: Skip confirmation (proceed automatically)
+- Default: Interactive prompt with file list to delete
+
+**Phase 5: Execution**
+1. **Upload:** Batch upload new + updated files (same as `upload` command)
+2. **Delete:** Batch delete remote-only files via `/batch-delete` endpoint
+3. **Summary:** Display counts for uploaded/updated/deleted/unchanged
+
+**Security Warning:**
+- Mirror is **destructive** (deletes remote files!)
+- Always use `--dry-run` first
+- Confirmation shows files to delete before proceeding
+
+**Use Case:**
+```bash
+# Workflow: Local editing with periodic sync
+aiproxy-cli clone proj-id ~/Projects/ -d           # Initial clone
+# [work locally, edit stems, add effects, export]
+aiproxy-cli mirror proj-id 01-arrangement ~/Projects/"My Song"/01-arrangement --dry-run  # Preview
+aiproxy-cli mirror proj-id 01-arrangement ~/Projects/"My Song"/01-arrangement --yes      # Sync
+```
+
+**Technical Details:**
+
+**File Comparison:**
+```python
+# SHA256 hash for content comparison (NOT modification time!)
+import hashlib
+
+def calculate_hash(file_path):
+    sha256 = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            sha256.update(chunk)
+    return sha256.hexdigest()
+```
+
+**Batch Upload Format:**
+```python
+# multipart/form-data with relative paths
+files = [
+    ("files", ("Media/stems/kick.flac", open("kick.flac", "rb"))),
+    ("files", ("Media/stems/snare.flac", open("snare.flac", "rb"))),
+    ("files", ("Media/stems/bass.flac", open("bass.flac", "rb")))
+]
+```
+
+**Backend Integration:**
+
+| CLI Operation | Backend Controller | Database Table | S3 Storage |
+|---------------|-------------------|----------------|-----------|
+| `login` | `UserController.login()` | `users` | - |
+| `upload` | `SongProjectController.batch_upload()` | `project_files` | ✅ Upload to S3 |
+| `download` | `SongProjectController.get_folder_files()` | `project_files` | ✅ Download from S3 |
+| `clone` | `SongProjectController.get_all_files()` | `project_files` + `project_folders` | ✅ Download from S3 |
+| `mirror` | `SongProjectController.mirror_folder()`<br>`SongProjectController.batch_delete()` | `project_files` | ✅ Upload/Delete in S3 |
+
+**Security:**
+
+| Risk | Mitigation |
+|------|-----------|
+| JWT Token Plaintext | File permissions: 0600 (owner-only) |
+| Token on Shared System | Documentation warning: NOT for multi-user systems |
+| Token in Cloud Sync | Documentation warning: Exclude `~/.aiproxy/` from Dropbox/iCloud |
+| SSL Man-in-the-Middle | SSL verification configurable (dev: disabled, prod: enabled) |
+| Token Expiry | 24h TTL, automatic expiry check before commands |
+
+**Installation:**
+
+**Via Makefile (Recommended):**
+```bash
+make install-cli              # CLI only
+make install-cli-dev          # CLI + DEV config (localhost:5050)
+make install-cli-prod         # CLI + PROD config (macstudio)
+```
+
+**Manual:**
+```bash
+mkdir -p ~/bin
+cp scripts/cli/aiproxy-cli.py ~/bin/aiproxy-cli
+chmod +x ~/bin/aiproxy-cli
+pip install -r scripts/cli/requirements.txt
+
+# Add to PATH (in ~/.zshrc or ~/.bashrc)
+export PATH="$HOME/bin:$PATH"
+```
+
+**Configuration Files:**
+- CLI script: `scripts/cli/aiproxy-cli.py` (1,177 lines)
+- User docs: `scripts/cli/README.md`
+- Dependencies: `scripts/cli/requirements.txt`
+- Default ignores: `scripts/cli/.aiproxyignore.default`
+- Runtime config: `~/.aiproxy/config.json` (created on first login)
+
+**Related Database Tables:**
+- `project_files` - File metadata (path, size, hash, S3 key)
+- `project_folders` - Folder structure (name, order, parent relationships)
+- `song_projects` - Project metadata (name, description, user_id)
+
+**Architecture Pattern:**
+
+```
+┌─────────────────────────────────────────────────────┐
+│         aiproxy-cli (Python Click CLI)              │
+├─────────────────────────────────────────────────────┤
+│  Commands:                                          │
+│  ├── login    → JWT Auth                            │
+│  ├── upload   → Batch Upload (3 files/batch)        │
+│  ├── download → Folder Download                     │
+│  ├── clone    → Complete Project Clone              │
+│  └── mirror   → One-Way Sync (Hash-based)           │
+│                                                     │
+├─────────────────────────────────────────────────────┤
+│              Config Management                      │
+│  - ~/.aiproxy/config.json (0600)                   │
+│  - Token Expiry Check                              │
+│  - .aiproxyignore Pattern Loading                  │
+│                                                     │
+├─────────────────────────────────────────────────────┤
+│            HTTP Client (requests)                   │
+│  - SSL Self-Signed Support                         │
+│  - JWT Bearer Token Auth                           │
+│  - Multipart Form Data Upload                      │
+│  - Stream Download (8KB Chunks)                    │
+│                                                     │
+├─────────────────────────────────────────────────────┤
+│     Backend API (aiproxysrv)                       │
+│  - /api/v1/user/login                              │
+│  - /api/v1/song-projects/{id}/folders/{id}/       │
+│    - batch-upload (POST)                           │
+│    - files (GET)                                   │
+│    - mirror (POST)                                 │
+│  - /api/v1/song-projects/{id}/files/               │
+│    - all (GET)                                     │
+│    - batch-delete (DELETE)                         │
+│                                                     │
+├─────────────────────────────────────────────────────┤
+│        S3-Compatible Storage (Backend)             │
+│  - MinIO (Dev)                                     │
+│  - AWS S3 / Backblaze B2 / Wasabi (Prod)          │
+│  - Pre-signed URLs (1h TTL)                        │
+│  - Storage Backend: `storage_backend='s3'`         │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+### 6.9 Song Projects (Music Production Project Management)
+
+**Overview**: Complete project management system for music production workflows, enabling users to organize songs, sketches, stems, references, and images in a hierarchical folder structure with S3-backed cloud storage.
+
+**Purpose**: Bridge the gap between song generation (Mureka API) and professional DAW workflows (Logic Pro, Ableton, FL Studio) by providing a centralized repository for all project assets with local/cloud synchronization.
+
+**Database Tables:**
+- `song_projects` - Project metadata, sync status, storage configuration
+- `project_folders` - Hierarchical folder structure (Arrangement, Mixing, Stems, etc.)
+- `project_files` - File metadata with S3 keys and hash-based sync tracking
+- `project_image_references` - N:M relationship between projects and generated images
+
+**Key Features:**
+
+#### 6.9.1 Project Structure & Folder Management
+
+**Hierarchical Organization:**
+```
+Song Project: "My Epic Rock Song"
+├── 01 Arrangement/          (ProjectFolder)
+│   ├── Media/               (subdirectory in S3)
+│   │   ├── drums.flac
+│   │   └── bass.flac
+│   └── project.logicx
+├── 02 Mixing/               (ProjectFolder)
+│   └── mixdown_v3.wav
+├── 03 Mastering/            (ProjectFolder)
+│   └── master_final.wav
+├── 04 Stems/                (ProjectFolder)
+│   ├── kick.wav
+│   ├── snare.wav
+│   └── bass.wav
+└── 05 References/           (ProjectFolder)
+    └── inspiration.mp3
+```
+
+**Folder Types:**
+- Standard folders: User-defined names
+- Custom icons: Optional Font Awesome icons for visual identification
+- S3 Prefix: Each folder has unique S3 prefix for storage isolation
+
+**Backend Model (`ProjectFolder`):**
+```python
+class ProjectFolder(Base):
+    __tablename__ = "project_folders"
+
+    id = Column(UUID, primary_key=True)
+    project_id = Column(UUID, ForeignKey("song_projects.id"))
+    folder_name = Column(String(255))      # e.g., "01 Arrangement"
+    folder_type = Column(String(50))       # e.g., "arrangement", "mixing"
+    s3_prefix = Column(String(255))        # S3 path prefix
+    custom_icon = Column(String(50))       # Font Awesome icon class
+```
+
+#### 6.9.2 File Management with S3 Storage
+
+**File Metadata Tracking:**
+
+Backend Model (`ProjectFile`):
+```python
+class ProjectFile(Base):
+    __tablename__ = "project_files"
+
+    id = Column(UUID, primary_key=True)
+    project_id = Column(UUID, ForeignKey("song_projects.id"))
+    folder_id = Column(UUID, ForeignKey("project_folders.id"))
+
+    # File Info
+    filename = Column(String(255))              # "drums.flac"
+    relative_path = Column(String(500))         # "Media/drums.flac"
+    file_type = Column(String(50))              # "audio", "project", "image"
+    mime_type = Column(String(100))             # "audio/flac"
+
+    # Storage (S3-backed)
+    s3_key = Column(String(255), index=True)    # "projects/{uuid}/01-arrangement/Media/drums.flac"
+    file_size_bytes = Column(Integer)           # File size for stats
+    file_hash = Column(String(64))              # SHA256 for mirror sync
+
+    # Sync Status
+    storage_backend = Column(String(20), default="s3")  # 's3' or 'filesystem' (legacy)
+    is_synced = Column(Boolean, default=False)          # Local/cloud sync status
+```
+
+**File Operations:**
+
+**1. Upload (Single File):**
+```
+POST /api/v1/song-projects/{id}/files
+- Multipart form upload
+- Extracts MIME type, calculates SHA256 hash
+- Uploads to S3 with project/folder prefix
+- Creates ProjectFile record
+- Updates project stats (total_files, total_size_bytes)
+```
+
+**2. Batch Upload (CLI Integration):**
+```
+POST /api/v1/song-projects/{id}/folders/{folder_id}/batch-upload
+- Accepts 3 files per batch (Nginx 500MB limit)
+- Preserves relative paths (subdirectories)
+- Response: {"uploaded": 3, "failed": 0, "errors": []}
+```
+
+**3. Download (Pre-signed S3 URLs):**
+```
+GET /api/v1/song-projects/{id}/files/{file_id}/download
+- Generates 1-hour pre-signed S3 URL
+- Direct download from S3 (no backend proxy)
+- Bandwidth-efficient
+```
+
+**4. Mirror Sync (Hash-based Comparison):**
+```
+POST /api/v1/song-projects/{id}/folders/{folder_id}/mirror
+Request: [{"path": "drums.flac", "hash": "abc123", "size": 1024000}, ...]
+Response: {
+  "to_upload": ["new_file.wav"],
+  "to_update": ["modified.flac"],
+  "to_delete": ["old_version.mp3"],
+  "unchanged": ["existing.wav"]
+}
+```
+
+**5. Batch Delete:**
+```
+DELETE /api/v1/song-projects/{id}/files/batch-delete
+Request: {"file_ids": ["uuid1", "uuid2", "uuid3"]}
+- Deletes files from S3
+- Removes ProjectFile records
+- Updates project stats
+```
+
+#### 6.9.3 Asset Assignment (Songs, Sketches, Images)
+
+**Purpose**: Link generated content (songs, sketches, images) to project folders for organization.
+
+**Use Cases:**
+- Assign generated song to "01 Arrangement" folder
+- Link sketch to "00 Ideas" folder
+- Attach cover image to "05 Artwork" folder
+
+**Backend Relationships:**
+```python
+class SongSketch(Base):
+    # Optional project assignment
+    project_id = Column(UUID, ForeignKey("song_projects.id"))
+    project_folder_id = Column(UUID, ForeignKey("project_folders.id"))
+
+class Song(Base):
+    # Optional project assignment
+    project_id = Column(UUID, ForeignKey("song_projects.id"))
+    project_folder_id = Column(UUID, ForeignKey("project_folders.id"))
+
+class ProjectImageReference(Base):
+    # N:M relationship for images
+    project_id = Column(UUID, ForeignKey("song_projects.id"))
+    image_id = Column(UUID, ForeignKey("generated_images.id"))
+    folder_id = Column(UUID, ForeignKey("project_folders.id"))
+    display_order = Column(Integer, default=0)
+```
+
+**Frontend API Response (`ProjectFolderWithAssets`):**
+```typescript
+interface ProjectFolderWithAssets {
+  id: string;
+  folder_name: string;
+  files: ProjectFile[];
+  assigned_songs?: AssignedSong[];       // Songs linked to this folder
+  assigned_sketches?: AssignedSketch[];  // Sketches linked to this folder
+  assigned_images?: AssignedImage[];     // Images linked to this folder
+}
+```
+
+#### 6.9.4 Project Metadata & Sync Status
+
+**SongProject Model:**
+```python
+class SongProject(Base):
+    __tablename__ = "song_projects"
+
+    id = Column(UUID, primary_key=True)
+    user_id = Column(UUID, ForeignKey("users.id"))
+    project_name = Column(String(255))         # "My Epic Rock Song"
+
+    # Storage Configuration
+    s3_prefix = Column(String(255))            # "projects/{uuid}/"
+    storage_backend = Column(String(20))       # 's3' (default)
+    storage_provider = Column(String(50))      # 'minio', 'aws', 'backblaze', 'wasabi'
+
+    # Sync Status
+    sync_status = Column(String(20), default="local")  # 'local', 'cloud', 'synced', 'syncing'
+    last_sync_at = Column(DateTime)                   # Last sync timestamp
+
+    # Metadata
+    tags = Column(ARRAY(String), default=[])          # ['rock', 'demo', 'wip']
+    description = Column(Text)                        # Long description
+    cover_image_id = Column(UUID, ForeignKey("generated_images.id"))  # Optional cover
+
+    # Statistics
+    total_files = Column(Integer, default=0)          # Auto-updated on upload/delete
+    total_size_bytes = Column(Integer, default=0)     # Total storage used
+```
+
+**Sync Status Workflow:**
+```
+local   → Project created locally, no files in S3
+cloud   → Files exist in S3, not downloaded locally
+synced  → Local and S3 are in sync (hash-based verification)
+syncing → Active sync operation in progress
+```
+
+#### 6.9.5 API Endpoints
+
+**Project CRUD:**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/song-projects` | Create project with default folders |
+| GET | `/api/v1/song-projects` | List projects (paginated, searchable) |
+| GET | `/api/v1/song-projects/{id}` | Get project details (folders + files) |
+| PUT | `/api/v1/song-projects/{id}` | Update project metadata |
+| DELETE | `/api/v1/song-projects/{id}` | Delete project (cascade S3 cleanup) |
+
+**File Operations:**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/song-projects/{id}/files` | Upload single file |
+| POST | `/api/v1/song-projects/{id}/folders/{folder_id}/batch-upload` | Batch upload (3 files) |
+| GET | `/api/v1/song-projects/{id}/folders/{folder_id}/files` | List folder files |
+| GET | `/api/v1/song-projects/{id}/files/all` | Get all files (for clone) |
+| GET | `/api/v1/song-projects/{id}/files/{file_id}/download` | Generate pre-signed URL |
+| DELETE | `/api/v1/song-projects/{id}/files/{file_id}` | Delete single file |
+| DELETE | `/api/v1/song-projects/{id}/files/batch-delete` | Batch delete files |
+
+**Sync Operations:**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/song-projects/{id}/folders/{folder_id}/mirror` | Compare local/remote (returns diff) |
+
+**Asset Assignment:**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/song-projects/{id}/folders/{folder_id}/assign-song` | Link song to folder |
+| POST | `/api/v1/song-projects/{id}/folders/{folder_id}/assign-sketch` | Link sketch to folder |
+| POST | `/api/v1/song-projects/{id}/assign-image` | Link image to project/folder |
+
+#### 6.9.6 Frontend Implementation
+
+**Page Component:** `aiwebui/src/app/pages/song-projects/song-projects.component.ts`
+
+**Layout:** Master-Detail Pattern (similar to Equipment Gallery)
+- **Master Panel** (left): List of projects with search, filter, pagination
+- **Detail Panel** (right): Project details with folder structure, files, assigned assets
+
+**Service:** `aiwebui/src/app/services/business/song-project.service.ts`
+- CRUD operations via ApiConfigService
+- File upload with progress tracking
+- Pre-signed URL download handling
+
+**Models:** `aiwebui/src/app/models/song-project.model.ts`
+- `SongProject`, `ProjectFolder`, `ProjectFile`
+- `ProjectFolderWithAssets`, `SongProjectDetail`
+- Enums: `SyncStatus`, `StorageBackend`, `StorageProvider`
+
+#### 6.9.7 Workflow Example: DAW Integration
+
+**Use Case:** User creates song in Web UI → Works in DAW → Syncs back to cloud
+
+**Step 1: Create Project in Web UI**
+```
+User: Creates project "My Rock Song" with default folders
+Backend: Creates SongProject + 5 ProjectFolders
+S3: Empty folders (metadata only)
+```
+
+**Step 2: Generate Song via Mureka**
+```
+User: Generates song → Assigns to "01 Arrangement" folder
+Backend: Creates Song record with project_id + folder_id
+Frontend: Shows song in project folder's assigned_songs list
+```
+
+**Step 3: Clone Project via CLI**
+```bash
+aiproxy-cli clone proj-id ~/Music/Projects/ -d
+# → Creates ~/Music/Projects/My Rock Song/
+# → Downloads all files with full directory structure
+```
+
+**Step 4: Work in DAW (Logic Pro)**
+```
+User: Opens project in Logic Pro
+User: Adds stems, mixes tracks, exports mixdown
+Local: ~/Music/Projects/My Rock Song/02 Mixing/mixdown_v3.wav
+```
+
+**Step 5: Mirror Sync via CLI**
+```bash
+aiproxy-cli mirror proj-id 02-mixing ~/Music/Projects/"My Rock Song"/02 Mixing/ --dry-run
+# Output:
+# ⬆️  Upload: 1 file (new): mixdown_v3.wav
+# ✅ Unchanged: 0 files
+
+aiproxy-cli mirror proj-id 02-mixing ~/Music/Projects/"My Rock Song"/02 Mixing/ --yes
+# Uploads mixdown_v3.wav to S3
+# Creates ProjectFile record
+# Updates project stats
+```
+
+**Step 6: Access from Another Machine**
+```
+User: Opens Web UI on MacBook
+Frontend: Shows "My Rock Song" project with mixdown_v3.wav in 02 Mixing folder
+User: Downloads via pre-signed URL
+```
+
+#### 6.9.8 Architecture Integration
+
+**Backend Layers:**
+
+```
+song_project_controller.py (HTTP Layer)
+  ├─ Pydantic validation (ProjectCreateRequest, ProjectUpdateRequest)
+  ├─ JWT authentication (@jwt_required)
+  └─> song_project_orchestrator.py (Coordination Layer)
+       ├─ Coordinates: song_project_service.py (DB CRUD)
+       ├─ Coordinates: S3Storage (file upload/download)
+       └─ Calls: song_project_transformer.py (Business Logic, 100% tested)
+            └─ Pure functions: path transformations, metadata mapping
+```
+
+**S3 Storage Integration:**
+
+```
+ProjectFile Upload Flow:
+1. HTTP POST /files → multipart/form-data
+2. Orchestrator: Extract file, calculate SHA256
+3. S3Storage.upload(file_data, s3_key, content_type)
+4. song_project_service.create_file() → DB insert
+5. Update project stats (total_files, total_size_bytes)
+```
+
+**CLI Integration:**
+
+```
+CLI Commands → Backend API → S3 Storage
+  ├─ aiproxy-cli upload   → POST /batch-upload → S3
+  ├─ aiproxy-cli download → GET /files → S3 pre-signed URL
+  ├─ aiproxy-cli clone    → GET /files/all → S3 batch download
+  └─ aiproxy-cli mirror   → POST /mirror → Compare → Upload/Delete
+```
+
+#### 6.9.9 Storage Providers
+
+**Supported Providers:**
+- **MinIO** (default dev): Self-hosted, S3-compatible, `http://localhost:9000`
+- **AWS S3**: Production cloud storage
+- **Backblaze B2**: Cost-effective alternative to AWS
+- **Wasabi**: Fast cloud storage with no egress fees
+
+**Configuration** (`.env`):
+```bash
+S3_ENDPOINT=http://localhost:9000
+S3_ACCESS_KEY=minioadmin
+S3_SECRET_KEY=minioadmin
+S3_BUCKET=aiproxy-media
+S3_REGION=us-east-1
+```
+
+**Pre-signed URLs:**
+- TTL: 1 hour (configurable)
+- Direct download from S3 (no backend proxy)
+- Automatic MIME type detection
+- No authentication required (URL contains temporary credentials)
+
+#### 6.9.10 Security & Permissions
+
+**Access Control:**
+- All endpoints require JWT authentication (`@jwt_required`)
+- User ID extracted from JWT token via `get_current_user_id()`
+- Projects scoped to user: `WHERE user_id = {jwt_user_id}`
+- No cross-user access (enforced at DB query level)
+
+**File Security:**
+- S3 bucket: Private (not publicly accessible)
+- Access via pre-signed URLs only
+- URLs expire after 1 hour
+- SHA256 hash verification for mirror sync
+
+**Data Protection:**
+- CASCADE DELETE: Deleting project removes all folders, files, and S3 objects
+- Orphan prevention: Foreign key constraints
+- Soft delete option: `archived` status (future feature)
+
+---
+
 ## 7. Deployment View
 
 ### 7.1 Development Environment
@@ -1732,6 +2462,25 @@ services:
 | **Hybrid Storage** | Dual backend system supporting both filesystem and S3 during migration          |
 | **Storage Interface** | Abstract base class for pluggable storage backends (filesystem, S3)            |
 | **Boto3** | AWS SDK for Python, used for S3-compatible storage operations                  |
+| **aiproxy-cli** | Command-line tool for song project file management (upload, download, clone, mirror) |
+| **CLI Login** | JWT-based authentication command storing token in `~/.aiproxy/config.json`      |
+| **Batch Upload** | CLI upload strategy grouping 3 files/batch (450MB) to comply with Nginx 500MB limit |
+| **Mirror Command** | One-way sync (local → remote) with SHA256 hash-based comparison and destructive delete |
+| **Clone Command** | Complete project download preserving full S3 directory structure (1:1 replication) |
+| **.aiproxyignore** | Gitignore-style pattern file for excluding files from CLI upload operations      |
+| **Click Framework** | Python CLI framework (8.1.0+) used for aiproxy-cli command-line interface       |
+| **Rich Library** | Python terminal UI library (13.7.0+) providing progress bars and color formatting |
+| **SHA256 Hash** | File content hashing algorithm used by mirror command for change detection       |
+| **Dry-Run Mode** | CLI mirror preview mode showing changes without executing upload/delete operations |
+| **JWT Token Expiry** | 24-hour token lifetime with automatic validation before each CLI command         |
+| **Song Project** | Complete music production project management with hierarchical folders and S3 storage |
+| **Project Folder** | Organizational unit within project (Arrangement, Mixing, Stems, etc.) with S3 prefix |
+| **Project File** | File metadata record tracking S3 storage, hash, size, and sync status             |
+| **Asset Assignment** | Linking songs, sketches, or images to project folders for organization            |
+| **Sync Status** | Project state: local (not synced), cloud (S3 only), synced, or syncing            |
+| **Storage Provider** | S3-compatible service: MinIO (dev), AWS S3, Backblaze B2, or Wasabi (prod)        |
+| **DAW Integration** | Workflow enabling local work in Logic Pro/Ableton with cloud sync via CLI         |
+| **Project Image Reference** | N:M relationship table linking generated images to projects and folders           |
 
 ---
 
