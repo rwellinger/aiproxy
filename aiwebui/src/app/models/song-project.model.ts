@@ -8,11 +8,10 @@ export interface SongProject {
   project_name: string;
   s3_prefix: string;
   tags: string[];
-  total_files: number;
-  total_size_bytes: number;
+  description?: string;
+  project_status: 'new' | 'progress' | 'archived';
   created_at: string; // ISO format
   updated_at: string; // ISO format
-  last_sync_at?: string; // ISO format
 }
 
 export interface ProjectFolder {
@@ -78,6 +77,8 @@ export interface ProjectFolderWithAssets extends ProjectFolderWithFiles {
 }
 
 export interface SongProjectDetail extends SongProject {
+  total_files: number;  // Live calculated
+  total_size_bytes: number;  // Live calculated
   folders: ProjectFolderWithAssets[];
 }
 
@@ -109,11 +110,15 @@ export interface SongProjectDetailResponse {
 export interface SongProjectCreateRequest {
   project_name: string;
   tags?: string[];
+  description?: string;
 }
 
 export interface SongProjectUpdateRequest {
   project_name?: string;
   tags?: string[];
+  description?: string;
+  cover_image_id?: string;
+  project_status?: 'new' | 'progress' | 'archived';
 }
 
 export interface FileUploadRequest {

@@ -594,6 +594,57 @@ class SongProjectController:
             )
             return {"error": f"Failed to get all project files: {str(e)}"}, 500
 
+    @staticmethod
+    def clear_folder_files(
+        db: Session,
+        user_id: UUID,
+        project_id: str,
+        folder_id: str,
+    ) -> tuple[dict[str, Any], int]:
+        """
+        Clear all files in a folder
+
+        Args:
+            db: Database session
+            user_id: User ID (from JWT)
+            project_id: Project UUID
+            folder_id: Folder UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            # Validate UUID formats
+            try:
+                project_uuid = UUID(project_id)
+                folder_uuid = UUID(folder_id)
+            except ValueError:
+                return {"error": "Invalid project or folder ID format"}, 400
+
+            # Call orchestrator
+            result = song_project_orchestrator.clear_folder_files(
+                db=db,
+                project_id=project_uuid,
+                folder_id=folder_uuid,
+                user_id=user_id,
+            )
+
+            return {"data": result, "message": f"{result['deleted']} files deleted successfully"}, 200
+
+        except ValueError as e:
+            # Validation errors (archived project, not found, etc.)
+            logger.warning("Clear folder validation error", error=str(e))
+            return {"error": str(e)}, 403
+        except Exception as e:
+            logger.error(
+                "Clear folder error",
+                project_id=project_id,
+                folder_id=folder_id,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Failed to clear folder: {str(e)}"}, 500
+
 
 # Global controller instance
 song_project_controller = SongProjectController()

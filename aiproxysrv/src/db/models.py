@@ -518,18 +518,13 @@ class SongProject(Base):
     s3_prefix = Column(String(255), nullable=True)
     local_path = Column(String(500), nullable=True)
 
-    # Sync Status
-    sync_status = Column(String(20), server_default="local")  # 'local', 'cloud', 'synced', 'syncing'
-    last_sync_at = Column(DateTime(timezone=True), nullable=True)
+    # Project Status
+    project_status = Column(String(20), nullable=False, server_default="progress")  # 'new', 'progress', 'archived'
 
     # Metadata
     cover_image_id = Column(UUID(as_uuid=True), ForeignKey("generated_images.id", ondelete="SET NULL"), nullable=True)
     tags = Column(ARRAY(String), server_default="{}")
     description = Column(Text, nullable=True)
-
-    # Stats
-    total_files = Column(Integer, server_default="0")
-    total_size_bytes = Column(Integer, server_default="0")
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -545,7 +540,7 @@ class SongProject(Base):
     image_references = relationship("ProjectImageReference", back_populates="project", cascade="all, delete-orphan")
 
     def __repr__(self):
-        return f"<SongProject(id={self.id}, name='{self.project_name}', sync_status='{self.sync_status}')>"
+        return f"<SongProject(id={self.id}, name='{self.project_name}', status='{self.project_status}')>"
 
 
 class ProjectFolder(Base):

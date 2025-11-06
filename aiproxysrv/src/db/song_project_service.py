@@ -24,6 +24,7 @@ class SongProjectService:
         s3_prefix: str | None = None,
         tags: list[str] | None = None,
         description: str | None = None,
+        project_status: str = "new",
     ) -> SongProject | None:
         """
         Create a new song project record
@@ -35,6 +36,7 @@ class SongProjectService:
             s3_prefix: S3 prefix for storage
             tags: List of tags
             description: Project description
+            project_status: Project status ('new', 'progress', 'archived')
 
         Returns:
             SongProject instance if successful, None otherwise
@@ -46,7 +48,7 @@ class SongProjectService:
                 s3_prefix=s3_prefix,
                 tags=tags or [],
                 description=description,
-                sync_status="local",
+                project_status=project_status,
             )
 
             db.add(project)
@@ -54,7 +56,11 @@ class SongProjectService:
             db.refresh(project)
 
             logger.info(
-                "Song project created", project_id=str(project.id), project_name=project_name, user_id=str(user_id)
+                "Song project created",
+                project_id=str(project.id),
+                project_name=project_name,
+                user_id=str(user_id),
+                status=project_status,
             )
             return project
 
@@ -221,14 +227,8 @@ class SongProjectService:
         self,
         db: Session,
         project_id: UUID,
-        project_name: str | None = None,
-        tags: list[str] | None = None,
-        description: str | None = None,
-        sync_status: str | None = None,
-        last_sync_at: datetime | None = None,
-        cover_image_id: UUID | None = None,
-        total_files: int | None = None,
-        total_size_bytes: int | None = None,
+        user_id: UUID,
+        update_data: dict[str, Any],
     ) -> SongProject | None:
         """
         Update an existing project
@@ -236,14 +236,8 @@ class SongProjectService:
         Args:
             db: Database session
             project_id: Project UUID
-            project_name: New project name (optional)
-            tags: New tags list (optional)
-            description: New description (optional)
-            sync_status: New sync status (optional)
-            last_sync_at: Last sync timestamp (optional)
-            cover_image_id: Cover image UUID (optional)
-            total_files: Total file count (optional)
-            total_size_bytes: Total size in bytes (optional)
+            user_id: User ID (for ownership check)
+            update_data: Dictionary with fields to update
 
         Returns:
             Updated SongProject instance if successful, None otherwise
@@ -254,34 +248,26 @@ class SongProjectService:
                 logger.warning("Project not found for update", project_id=str(project_id))
                 return None
 
+            # Ownership check
+            if project.user_id != user_id:
+                logger.warning("Unauthorized project update", project_id=str(project_id), user_id=str(user_id))
+                return None
+
+            # Validate project_status if provided
+            if "project_status" in update_data:
+                from business.song_project_transformer import validate_project_status
+
+                if not validate_project_status(update_data["project_status"]):
+                    raise ValueError(f"Invalid project_status: {update_data['project_status']}")
+
             # Track which fields are being updated
             updated_fields = []
 
             # Update only provided fields
-            if project_name is not None:
-                project.project_name = project_name
-                updated_fields.append("project_name")
-            if tags is not None:
-                project.tags = tags
-                updated_fields.append("tags")
-            if description is not None:
-                project.description = description
-                updated_fields.append("description")
-            if sync_status is not None:
-                project.sync_status = sync_status
-                updated_fields.append("sync_status")
-            if last_sync_at is not None:
-                project.last_sync_at = last_sync_at
-                updated_fields.append("last_sync_at")
-            if cover_image_id is not None:
-                project.cover_image_id = cover_image_id
-                updated_fields.append("cover_image_id")
-            if total_files is not None:
-                project.total_files = total_files
-                updated_fields.append("total_files")
-            if total_size_bytes is not None:
-                project.total_size_bytes = total_size_bytes
-                updated_fields.append("total_size_bytes")
+            for field, value in update_data.items():
+                if hasattr(project, field):
+                    setattr(project, field, value)
+                    updated_fields.append(field)
 
             # Update timestamp
             project.updated_at = datetime.utcnow()
@@ -292,6 +278,10 @@ class SongProjectService:
             logger.info("Project updated", project_id=str(project_id), fields_updated=updated_fields)
             return project
 
+        except ValueError as e:
+            db.rollback()
+            logger.error("Project update validation error", error=str(e), error_type=type(e).__name__)
+            return None
         except SQLAlchemyError as e:
             db.rollback()
             logger.error(

@@ -511,3 +511,39 @@ def get_all_project_files(project_id: str):
         return jsonify(result), status_code
     finally:
         db.close()
+
+
+@api_song_projects_v1.route("/<project_id>/folders/<folder_id>/clear", methods=["DELETE"])
+@jwt_required
+def clear_folder_files(project_id: str, folder_id: str):
+    """
+    Clear all files in a folder (Bereinigung).
+
+    Path Parameters:
+        - project_id (UUID): Project ID
+        - folder_id (UUID): Folder ID
+
+    Response:
+        200: {
+            'data': {'deleted': 5, 'errors': []},
+            'message': '5 files deleted successfully'
+        }
+        403: {'error': 'Cannot clear folder in archived project'}
+        401: {'error': 'Unauthorized'}
+        400: {'error': 'Invalid project or folder ID format'}
+        500: {'error': 'Failed to clear folder: ...'}
+
+    Example:
+        DELETE /api/v1/song-projects/550e8400-e29b-41d4-a716-446655440000/folders/abc123.../clear
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    db: Session = next(get_db())
+    try:
+        result, status_code = song_project_controller.clear_folder_files(db, UUID(user_id), project_id, folder_id)
+        return jsonify(result), status_code
+    finally:
+        db.close()

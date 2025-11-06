@@ -14,6 +14,7 @@ from business.song_project_transformer import (
     transform_folder_to_response,
     transform_project_detail_to_response,
     transform_project_to_response,
+    validate_project_status,
 )
 
 
@@ -233,12 +234,10 @@ class TestTransformProjectToResponse:
         project.id = "550e8400-e29b-41d4-a716-446655440000"
         project.project_name = "My Project"
         project.s3_prefix = "projects/my-project/"
-        project.last_sync_at = None
         project.cover_image_id = None
         project.tags = ["rock", "demo"]
         project.description = "A test project"
-        project.total_files = 5
-        project.total_size_bytes = 1024000
+        project.project_status = "progress"
         project.created_at = Mock()
         project.created_at.isoformat.return_value = "2024-01-01T12:00:00"
         project.updated_at = Mock()
@@ -251,8 +250,7 @@ class TestTransformProjectToResponse:
         assert result["s3_prefix"] == "projects/my-project/"
         assert result["tags"] == ["rock", "demo"]
         assert result["description"] == "A test project"
-        assert result["total_files"] == 5
-        assert result["total_size_bytes"] == 1024000
+        assert result["project_status"] == "progress"
         assert result["created_at"] == "2024-01-01T12:00:00"
         assert result["updated_at"] == "2024-01-02T12:00:00"
 
@@ -262,20 +260,18 @@ class TestTransformProjectToResponse:
         project.id = "550e8400-e29b-41d4-a716-446655440000"
         project.project_name = "Test"
         project.s3_prefix = None
-        project.last_sync_at = None
         project.cover_image_id = None
         project.tags = []
         project.description = None
-        project.total_files = 0
-        project.total_size_bytes = 0
+        project.project_status = "new"
         project.created_at = None
         project.updated_at = None
 
         result = transform_project_to_response(project)
 
-        assert result["last_sync_at"] is None
         assert result["created_at"] is None
         assert result["updated_at"] is None
+        assert result["project_status"] == "new"
 
 
 class TestTransformFolderToResponse:
@@ -530,3 +526,33 @@ class TestCalculateFileHash:
         # Verify deterministic (same input = same hash)
         result2 = calculate_file_hash(file_data)
         assert result == result2
+
+
+class TestValidateProjectStatus:
+    """Test validate_project_status() - Enum validation for project status"""
+
+    def test_valid_status_new(self):
+        """Validates 'new' status"""
+        assert validate_project_status("new") is True
+
+    def test_valid_status_progress(self):
+        """Validates 'progress' status"""
+        assert validate_project_status("progress") is True
+
+    def test_valid_status_archived(self):
+        """Validates 'archived' status"""
+        assert validate_project_status("archived") is True
+
+    def test_invalid_status(self):
+        """Rejects invalid status"""
+        assert validate_project_status("invalid") is False
+
+    def test_invalid_status_empty(self):
+        """Rejects empty status"""
+        assert validate_project_status("") is False
+
+    def test_invalid_status_case_sensitive(self):
+        """Status validation is case-sensitive"""
+        assert validate_project_status("NEW") is False
+        assert validate_project_status("Progress") is False
+        assert validate_project_status("ARCHIVED") is False
