@@ -151,19 +151,21 @@ export class ApiConfigService {
         },
         songProject: {
             create: `${this.baseUrl}/api/v1/song-projects`,
-            list: (limit?: number, offset?: number, search?: string, tags?: string) => {
+            list: (limit?: number, offset?: number, search?: string, tags?: string, projectStatus?: string) => {
                 const params = new URLSearchParams();
                 if (limit !== undefined) params.append('limit', limit.toString());
                 if (offset !== undefined) params.append('offset', offset.toString());
                 if (search) params.append('search', search);
                 if (tags) params.append('tags', tags);
+                if (projectStatus) params.append('project_status', projectStatus);
                 const query = params.toString();
                 return `${this.baseUrl}/api/v1/song-projects${query ? '?' + query : ''}`;
             },
             detail: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}`,
             update: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}`,
             delete: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}`,
-            uploadFile: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}/files`
+            uploadFile: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}/files`,
+            clearFolder: (projectId: string, folderId: string) => `${this.baseUrl}/api/v1/song-projects/${projectId}/folders/${folderId}/clear`
         }
     };
 

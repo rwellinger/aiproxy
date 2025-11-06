@@ -20,6 +20,7 @@ class ProjectUpdateRequest(BaseModel):
     tags: list[str] | None = Field(default=None, description="New tags list")
     description: str | None = Field(default=None, max_length=5000, description="New description")
     cover_image_id: str | None = Field(default=None, description="Cover image UUID")
+    project_status: str | None = Field(default=None, description="Project status: 'new', 'progress', 'archived'")
 
 
 class ProjectResponse(BaseModel):
@@ -28,12 +29,10 @@ class ProjectResponse(BaseModel):
     id: str
     project_name: str
     s3_prefix: str | None
-    last_sync_at: str | None
     cover_image_id: str | None
     tags: list[str]
     description: str | None
-    total_files: int
-    total_size_bytes: int
+    project_status: str
     created_at: str | None
     updated_at: str | None
 
@@ -125,10 +124,10 @@ class ProjectDetailResponse(BaseModel):
     id: str
     project_name: str
     s3_prefix: str | None
-    last_sync_at: str | None
     cover_image_id: str | None
     tags: list[str]
     description: str | None
+    project_status: str
     total_files: int
     total_size_bytes: int
     created_at: str | None

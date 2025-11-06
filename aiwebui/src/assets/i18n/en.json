@@ -1654,7 +1654,13 @@
       },
       "filters": {
         "all": "All Projects",
+        "new": "New",
+        "progress": "In Progress",
+        "archived": "Archived",
         "byTag": "Filter by tag"
+      },
+      "pagination": {
+        "info": "Page {{current}} of {{total}}"
       }
     },
     "detail": {
@@ -1731,11 +1737,44 @@
       "release": "Release",
       "archive": "Archive"
     },
+    "status": {
+      "new": "New",
+      "progress": "In Progress",
+      "archived": "Archived"
+    },
+    "fields": {
+      "name": "Project Name",
+      "tags": "Tags",
+      "description": "Description"
+    },
+    "actions": {
+      "edit": "Edit Project",
+      "archive": "Archive Project",
+      "unarchive": "Unarchive Project",
+      "clearFolder": "Clear Folder"
+    },
+    "warnings": {
+      "uploadBlocked": "Project is archived. Unarchive it first to upload files.",
+      "deleteBlocked": "Cannot delete archived project. Unarchive it first."
+    },
+    "dialogs": {
+      "editProject": {
+        "title": "Edit Project"
+      },
+      "clearFolder": {
+        "title": "Clear Folder",
+        "message": "Delete all files in folder \"{{folderName}}\"? This cannot be undone!",
+        "confirm": "Delete All Files"
+      }
+    },
     "messages": {
       "createSuccess": "Project created successfully",
       "updateSuccess": "Project updated successfully",
       "deleteSuccess": "Project deleted successfully",
       "deleteConfirm": "Are you sure you want to delete this project? This will also delete all files in the project.",
+      "statusUpdated": "Project status updated",
+      "projectUpdated": "Project updated successfully",
+      "filesDeleted": "{{count}} files deleted",
       "uploadSuccess": "File uploaded successfully",
       "uploadError": "Failed to upload file",
       "fileTooLarge": "File is too large (max {{size}})",

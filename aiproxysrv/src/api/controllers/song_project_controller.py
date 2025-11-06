@@ -65,6 +65,7 @@ class SongProjectController:
         offset: int = 0,
         search: str = "",
         tags: str | None = None,
+        project_status: str | None = None,
     ) -> tuple[dict[str, Any], int]:
         """
         Get list of projects for user (paginated)
@@ -76,6 +77,7 @@ class SongProjectController:
             offset: Offset for pagination
             search: Search term
             tags: Comma-separated tags
+            project_status: Status filter ('new', 'progress', 'archived', or None for all non-archived)
 
         Returns:
             Tuple of (response_data, status_code)
@@ -88,6 +90,7 @@ class SongProjectController:
                 offset=offset,
                 search=search,
                 tags=tags,
+                project_status=project_status,
             )
 
             projects = result.get("projects", [])
@@ -256,6 +259,11 @@ class SongProjectController:
             except ValueError:
                 return {"error": "Invalid project ID format"}, 400
 
+            # Check if project is archived
+            project = song_project_orchestrator.get_project_by_id(db=db, project_id=project_uuid, user_id=user_id)
+            if project and project.get("project_status") == "archived":
+                return {"error": "Cannot delete archived project. Unarchive it first."}, 403
+
             success = song_project_orchestrator.delete_project_with_cleanup(
                 db=db,
                 project_id=project_uuid,
@@ -304,6 +312,10 @@ class SongProjectController:
 
             if not project_details:
                 return {"error": "Project not found or unauthorized"}, 404
+
+            # Check if project is archived
+            if project_details.get("project_status") == "archived":
+                return {"error": "Cannot upload to archived project. Unarchive it first."}, 403
 
             # Find folder by ID (project_details is a dict, not an object)
             folders = project_details.get("folders", [])
@@ -483,6 +495,11 @@ class SongProjectController:
             project_uuid = UUID(project_id)
             folder_uuid = UUID(folder_id)
 
+            # Check if project is archived
+            project = song_project_orchestrator.get_project_by_id(db=db, project_id=project_uuid, user_id=user_id)
+            if project and project.get("project_status") == "archived":
+                return {"error": "Cannot mirror to archived project. Unarchive it first."}, 403
+
             # Convert Pydantic models to dicts
             local_files = [
                 {"relative_path": f.relative_path, "file_hash": f.file_hash, "file_size_bytes": f.file_size_bytes}
@@ -593,6 +610,57 @@ class SongProjectController:
                 "Get all project files error", project_id=project_id, error=str(e), error_type=type(e).__name__
             )
             return {"error": f"Failed to get all project files: {str(e)}"}, 500
+
+    @staticmethod
+    def clear_folder_files(
+        db: Session,
+        user_id: UUID,
+        project_id: str,
+        folder_id: str,
+    ) -> tuple[dict[str, Any], int]:
+        """
+        Clear all files in a folder
+
+        Args:
+            db: Database session
+            user_id: User ID (from JWT)
+            project_id: Project UUID
+            folder_id: Folder UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            # Validate UUID formats
+            try:
+                project_uuid = UUID(project_id)
+                folder_uuid = UUID(folder_id)
+            except ValueError:
+                return {"error": "Invalid project or folder ID format"}, 400
+
+            # Call orchestrator
+            result = song_project_orchestrator.clear_folder_files(
+                db=db,
+                project_id=project_uuid,
+                folder_id=folder_uuid,
+                user_id=user_id,
+            )
+
+            return {"data": result, "message": f"{result['deleted']} files deleted successfully"}, 200
+
+        except ValueError as e:
+            # Validation errors (archived project, not found, etc.)
+            logger.warning("Clear folder validation error", error=str(e))
+            return {"error": str(e)}, 403
+        except Exception as e:
+            logger.error(
+                "Clear folder error",
+                project_id=project_id,
+                folder_id=folder_id,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Failed to clear folder: {str(e)}"}, 500
 
 
 # Global controller instance

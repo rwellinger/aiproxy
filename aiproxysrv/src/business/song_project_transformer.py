@@ -154,6 +154,29 @@ def get_mime_type(filename: str) -> str | None:
     return mime_map.get(extension)
 
 
+def validate_project_status(status: str) -> bool:
+    """
+    Validate project status enum
+
+    Args:
+        status: Project status string
+
+    Returns:
+        True if valid status, False otherwise
+
+    Examples:
+        >>> validate_project_status('new')
+        True
+        >>> validate_project_status('progress')
+        True
+        >>> validate_project_status('archived')
+        True
+        >>> validate_project_status('invalid')
+        False
+    """
+    return status in ["new", "progress", "archived"]
+
+
 def transform_project_to_response(project: Any) -> dict[str, Any]:
     """
     Transform SongProject DB model to API response format
@@ -168,12 +191,10 @@ def transform_project_to_response(project: Any) -> dict[str, Any]:
         "id": str(project.id),
         "project_name": project.project_name,
         "s3_prefix": project.s3_prefix,
-        "last_sync_at": project.last_sync_at.isoformat() if project.last_sync_at else None,
         "cover_image_id": str(project.cover_image_id) if project.cover_image_id else None,
         "tags": project.tags,
         "description": project.description,
-        "total_files": project.total_files,
-        "total_size_bytes": project.total_size_bytes,
+        "project_status": project.project_status,
         "created_at": project.created_at.isoformat() if project.created_at else None,
         "updated_at": project.updated_at.isoformat() if project.updated_at else None,
     }
@@ -252,7 +273,7 @@ def transform_project_detail_to_response(project: Any) -> dict[str, Any]:
 
     response["folders"] = folders_data
 
-    # Override DB stats with LIVE calculated values (always correct!)
+    # Add LIVE calculated values (always correct!)
     response["total_files"] = total_files_live
     response["total_size_bytes"] = total_size_live
 

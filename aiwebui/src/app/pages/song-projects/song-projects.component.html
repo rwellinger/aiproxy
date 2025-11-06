@@ -26,18 +26,54 @@
         </button>
       </div>
 
-      <!-- Search -->
+      <!-- Search and Filters -->
       <div class="filters-section">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>{{ 'songProjects.list.search' | translate }}</mat-label>
+        <!-- Search -->
+        <div class="search-box">
+          <i class="fas fa-search"></i>
           <input
-            matInput
+            type="text"
+            [placeholder]="'songProjects.list.search' | translate"
             [(ngModel)]="searchTerm"
             (ngModelChange)="onSearchChange($event)"
-            [placeholder]="'songProjects.list.search' | translate"
-          />
-          <i class="fas fa-search" matPrefix></i>
-        </mat-form-field>
+            class="search-input">
+        </div>
+
+        <!-- Status Filter -->
+        <div class="status-filter">
+          <button
+            type="button"
+            class="filter-btn"
+            [class.active]="currentStatus === 'all'"
+            (click)="onStatusChange('all')"
+          >
+            {{ 'songProjects.list.filters.all' | translate }}
+          </button>
+          <button
+            type="button"
+            class="filter-btn"
+            [class.active]="currentStatus === 'new'"
+            (click)="onStatusChange('new')"
+          >
+            {{ 'songProjects.list.filters.new' | translate }}
+          </button>
+          <button
+            type="button"
+            class="filter-btn"
+            [class.active]="currentStatus === 'progress'"
+            (click)="onStatusChange('progress')"
+          >
+            {{ 'songProjects.list.filters.progress' | translate }}
+          </button>
+          <button
+            type="button"
+            class="filter-btn"
+            [class.active]="currentStatus === 'archived'"
+            (click)="onStatusChange('archived')"
+          >
+            {{ 'songProjects.list.filters.archived' | translate }}
+          </button>
+        </div>
       </div>
 
       <!-- Loading State -->
@@ -67,6 +103,9 @@
             </div>
             <div class="title-group">
               <h4>{{ project.project_name }}</h4>
+              <span class="status-badge status-badge--{{ project.project_status }}">
+                {{ 'songProjects.status.' + project.project_status | translate }}
+              </span>
             </div>
           </div>
 
@@ -75,17 +114,25 @@
               <mat-chip *ngFor="let tag of project.tags">{{ tag }}</mat-chip>
             </mat-chip-set>
           </div>
-
-          <div class="project-item__footer">
-            <span class="date">{{ project.updated_at | date:'short' }}</span>
-          </div>
         </div>
       </div>
 
-      <!-- Load More Button -->
-      <div *ngIf="pagination.has_more && !isLoading" class="load-more-section">
-        <button type="button" class="load-more-button" (click)="loadMore()">
-          <span>{{ 'common.loadMore' | translate }}</span>
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button
+          class="pagination-btn"
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 0 || isLoading">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="pagination-info">
+          {{ 'songProjects.list.pagination.info' | translate: {current: currentPage + 1, total: totalPages} }}
+        </span>
+        <button
+          class="pagination-btn"
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage >= totalPages - 1 || isLoading">
+          <i class="fas fa-chevron-right"></i>
         </button>
       </div>
     </mat-card>
@@ -278,6 +325,8 @@
                     type="button"
                     class="upload-button"
                     (click)="uploadFile(folder)"
+                    [disabled]="selectedProject.project_status === 'archived'"
+                    [matTooltip]="selectedProject.project_status === 'archived' ? ('songProjects.warnings.uploadBlocked' | translate) : ''"
                   >
                     <i class="fas fa-upload"></i>
                     <span>{{ 'songProjects.detail.actions.uploadFile' | translate }}</span>
@@ -293,7 +342,12 @@
                     <i class="fas fa-angle-down dropdown-icon"></i>
                   </button>
                   <mat-menu #cliMenu="matMenu">
-                    <button mat-menu-item (click)="copyCLICommand(folder)">
+                    <button
+                      mat-menu-item
+                      (click)="copyCLICommand(folder)"
+                      [disabled]="selectedProject.project_status === 'archived'"
+                      [matTooltip]="selectedProject.project_status === 'archived' ? ('songProjects.warnings.uploadBlocked' | translate) : ''"
+                    >
                       <i class="fas fa-upload"></i>
                       <span>{{ 'songProjects.detail.actions.copyCLIUploadCommand' | translate }}</span>
                     </button>
@@ -301,7 +355,12 @@
                       <i class="fas fa-download"></i>
                       <span>{{ 'songProjects.detail.actions.copyCLIDownloadCommand' | translate }}</span>
                     </button>
-                    <button mat-menu-item (click)="copyCLIMirrorCommand(folder)">
+                    <button
+                      mat-menu-item
+                      (click)="copyCLIMirrorCommand(folder)"
+                      [disabled]="selectedProject.project_status === 'archived'"
+                      [matTooltip]="selectedProject.project_status === 'archived' ? ('songProjects.warnings.uploadBlocked' | translate) : ''"
+                    >
                       <i class="fas fa-sync-alt"></i>
                       <span>{{ 'songProjects.detail.actions.copyCLIMirrorCommand' | translate }}</span>
                     </button>
@@ -346,7 +405,31 @@
             <i class="fas fa-code"></i>
             <span>{{ 'songProjects.detail.copyCompleteClone' | translate }}</span>
           </button>
-          <button type="button" class="action-button delete-button" (click)="deleteProject()">
+          <button
+            type="button"
+            class="action-button archive-button"
+            (click)="toggleProjectStatus()"
+            *ngIf="selectedProject.project_status !== 'archived'"
+          >
+            <i class="fas fa-archive"></i>
+            <span>{{ 'songProjects.actions.archive' | translate }}</span>
+          </button>
+          <button
+            type="button"
+            class="action-button unarchive-button"
+            (click)="toggleProjectStatus()"
+            *ngIf="selectedProject.project_status === 'archived'"
+          >
+            <i class="fas fa-box-open"></i>
+            <span>{{ 'songProjects.actions.unarchive' | translate }}</span>
+          </button>
+          <button
+            type="button"
+            class="action-button delete-button"
+            (click)="deleteProject()"
+            [disabled]="selectedProject.project_status === 'archived'"
+            [matTooltip]="selectedProject.project_status === 'archived' ? ('songProjects.warnings.deleteBlocked' | translate) : ''"
+          >
             <i class="fas fa-trash"></i>
             <span>{{ 'songProjects.list.actions.delete' | translate }}</span>
           </button>

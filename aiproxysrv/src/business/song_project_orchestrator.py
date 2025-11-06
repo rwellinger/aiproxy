@@ -265,6 +265,7 @@ class SongProjectOrchestrator:
         offset: int = 0,
         search: str = "",
         tags: str | None = None,
+        project_status: str | None = None,
     ) -> dict[str, Any]:
         """
         List projects for user (paginated)
@@ -276,6 +277,7 @@ class SongProjectOrchestrator:
             offset: Offset for pagination
             search: Search term
             tags: Comma-separated tags
+            project_status: Status filter ('new', 'progress', 'archived', or None for all non-archived)
 
         Returns:
             Dictionary with projects and pagination meta
@@ -289,6 +291,7 @@ class SongProjectOrchestrator:
                 offset=offset,
                 search=search,
                 tags=tags,
+                project_status=project_status,
             )
 
             # Transform projects to response
@@ -345,7 +348,7 @@ class SongProjectOrchestrator:
                 update_data["project_name"] = normalize_project_name(update_data["project_name"])
 
             # Update project in DB
-            updated_project = self.db_service.update_project(db, project_id, **update_data)
+            updated_project = self.db_service.update_project(db, project_id, user_id, update_data)
 
             if not updated_project:
                 logger.error("Failed to update project in DB", project_id=str(project_id))
@@ -380,6 +383,15 @@ class SongProjectOrchestrator:
             # Check ownership
             if project.user_id != user_id:
                 logger.warning("Unauthorized project deletion", project_id=str(project_id), user_id=str(user_id))
+                return False
+
+            # Prevent deletion of archived projects
+            if project.project_status == "archived":
+                logger.warning(
+                    "Cannot delete archived project",
+                    project_id=str(project_id),
+                    project_status=project.project_status,
+                )
                 return False
 
             # Delete S3 files if s3_prefix exists
@@ -927,6 +939,90 @@ class SongProjectOrchestrator:
                 "Get all project files failed", project_id=str(project_id), error=str(e), error_type=type(e).__name__
             )
             return None
+
+    def clear_folder_files(
+        self,
+        db: Session,
+        project_id: UUID,
+        folder_id: UUID,
+        user_id: UUID,
+    ) -> dict[str, Any]:
+        """
+        Clear all files in a folder (MinIO + DB)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            folder_id: Folder UUID
+            user_id: User ID (from JWT, for ownership check)
+
+        Returns:
+            {"deleted": int, "errors": list}
+        """
+        try:
+            # Load project (ownership check via user_id)
+            project = self.db_service.get_project_by_id(db, project_id)
+            if not project or project.user_id != user_id:
+                raise ValueError("Project not found or unauthorized")
+
+            # Check if project is archived
+            if project.project_status == "archived":
+                raise ValueError("Cannot clear folder in archived project")
+
+            # Load folder
+            folder = self.db_service.get_folder_by_id(db, folder_id)
+            if not folder or folder.project_id != project.id:
+                raise ValueError("Folder not found")
+
+            # Get all files in folder
+            files = self.db_service.get_files_by_folder(db, folder_id)
+
+            if not files:
+                logger.info("Folder is already empty", folder_id=str(folder_id))
+                return {"deleted": 0, "errors": []}
+
+            # Delete from S3 (batch) and DB
+            deleted_count = 0
+            errors = []
+
+            for file in files:
+                try:
+                    # Delete from S3
+                    if file.s3_key:
+                        self.storage.delete(file.s3_key)
+
+                    # Delete from DB
+                    self.db_service.delete_file(db, file.id)
+                    deleted_count += 1
+
+                except Exception as e:
+                    logger.error(
+                        "Failed to delete file",
+                        file_id=str(file.id),
+                        filename=file.filename,
+                        error=str(e),
+                        error_type=type(e).__name__,
+                    )
+                    errors.append({"file_id": str(file.id), "filename": file.filename, "error": str(e)})
+
+            db.commit()
+
+            logger.info(
+                "Folder cleared",
+                folder_id=str(folder_id),
+                folder_name=folder.folder_name,
+                deleted=deleted_count,
+                errors_count=len(errors),
+            )
+
+            return {"deleted": deleted_count, "errors": errors}
+
+        except ValueError as e:
+            logger.warning("Clear folder validation failed", error=str(e))
+            raise
+        except Exception as e:
+            logger.error("Clear folder failed", folder_id=str(folder_id), error=str(e), error_type=type(e).__name__)
+            raise
 
 
 # Global orchestrator instance
