@@ -83,13 +83,14 @@ def list_projects():
         - offset (int): Offset for pagination (default: 0)
         - search (str): Search term (project_name, description)
         - tags (str): Comma-separated tags filter
+        - project_status (str): Status filter ('new', 'progress', 'archived', or None for all non-archived)
 
     Response:
         200: {'data': [...], 'pagination': {...}}
         401: {'error': 'Unauthorized'}
 
     Example:
-        GET /api/v1/song-projects?limit=10&offset=0&search=rock&tags=demo,wip
+        GET /api/v1/song-projects?limit=10&offset=0&search=rock&tags=demo,wip&project_status=new
     """
     user_id = get_current_user_id()
     if not user_id:
@@ -112,6 +113,7 @@ def list_projects():
     # Parse search and filter parameters
     search = request.args.get("search", "").strip()
     tags = request.args.get("tags", None)
+    project_status = request.args.get("project_status", None)
 
     db: Session = next(get_db())
     try:
@@ -122,6 +124,7 @@ def list_projects():
             offset=offset,
             search=search,
             tags=tags,
+            project_status=project_status,
         )
         return jsonify(result), status_code
     finally:

@@ -65,6 +65,7 @@ class SongProjectController:
         offset: int = 0,
         search: str = "",
         tags: str | None = None,
+        project_status: str | None = None,
     ) -> tuple[dict[str, Any], int]:
         """
         Get list of projects for user (paginated)
@@ -76,6 +77,7 @@ class SongProjectController:
             offset: Offset for pagination
             search: Search term
             tags: Comma-separated tags
+            project_status: Status filter ('new', 'progress', 'archived', or None for all non-archived)
 
         Returns:
             Tuple of (response_data, status_code)
@@ -88,6 +90,7 @@ class SongProjectController:
                 offset=offset,
                 search=search,
                 tags=tags,
+                project_status=project_status,
             )
 
             projects = result.get("projects", [])
@@ -256,6 +259,11 @@ class SongProjectController:
             except ValueError:
                 return {"error": "Invalid project ID format"}, 400
 
+            # Check if project is archived
+            project = song_project_orchestrator.get_project_by_id(db=db, project_id=project_uuid, user_id=user_id)
+            if project and project.get("project_status") == "archived":
+                return {"error": "Cannot delete archived project. Unarchive it first."}, 403
+
             success = song_project_orchestrator.delete_project_with_cleanup(
                 db=db,
                 project_id=project_uuid,
@@ -304,6 +312,10 @@ class SongProjectController:
 
             if not project_details:
                 return {"error": "Project not found or unauthorized"}, 404
+
+            # Check if project is archived
+            if project_details.get("project_status") == "archived":
+                return {"error": "Cannot upload to archived project. Unarchive it first."}, 403
 
             # Find folder by ID (project_details is a dict, not an object)
             folders = project_details.get("folders", [])
@@ -482,6 +494,11 @@ class SongProjectController:
             # Convert string UUIDs to UUID objects
             project_uuid = UUID(project_id)
             folder_uuid = UUID(folder_id)
+
+            # Check if project is archived
+            project = song_project_orchestrator.get_project_by_id(db=db, project_id=project_uuid, user_id=user_id)
+            if project and project.get("project_status") == "archived":
+                return {"error": "Cannot mirror to archived project. Unarchive it first."}, 403
 
             # Convert Pydantic models to dicts
             local_files = [

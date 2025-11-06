@@ -54,10 +54,11 @@ export class SongProjectService {
    * @param offset Pagination offset (default 0)
    * @param search Search term for project_name (optional)
    * @param tags Comma-separated tags filter (optional)
+   * @param projectStatus Status filter ('new', 'progress', 'archived', or undefined for all non-archived)
    * @returns Observable of SongProjectListResponse
    *
    * @example
-   * this.songProjectService.getProjects(20, 0, 'Summer', 'pop,rock')
+   * this.songProjectService.getProjects(20, 0, 'Summer', 'pop,rock', 'new')
    *   .subscribe(response => {
    *     console.log('Total:', response.pagination.total);
    *     console.log('Items:', response.data);
@@ -67,10 +68,11 @@ export class SongProjectService {
     limit: number = 20,
     offset: number = 0,
     search?: string,
-    tags?: string
+    tags?: string,
+    projectStatus?: string
   ): Observable<SongProjectListResponse> {
     return this.http.get<SongProjectListResponse>(
-      this.apiConfig.endpoints.songProject.list(limit, offset, search, tags)
+      this.apiConfig.endpoints.songProject.list(limit, offset, search, tags, projectStatus)
     );
   }
 
@@ -156,6 +158,25 @@ export class SongProjectService {
     return this.http.post<{ message: string; file_id: string }>(
       this.apiConfig.endpoints.songProject.uploadFile(projectId),
       formData
+    );
+  }
+
+  /**
+   * Clear all files in a folder (Bereinigung).
+   *
+   * @param projectId Project UUID
+   * @param folderId Folder UUID
+   * @returns Observable of clear result
+   *
+   * @example
+   * this.songProjectService.clearFolder(projectId, folderId).subscribe({
+   *   next: (result) => console.log(`${result.deleted} files deleted`),
+   *   error: (error) => console.error('Failed:', error)
+   * });
+   */
+  clearFolder(projectId: string, folderId: string): Observable<{ data: { deleted: number; errors: unknown[] } }> {
+    return this.http.delete<{ data: { deleted: number; errors: unknown[] } }>(
+      this.apiConfig.endpoints.songProject.clearFolder(projectId, folderId)
     );
   }
 }

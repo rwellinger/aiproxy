@@ -86,6 +86,7 @@ export interface SongProjectListItem {
   id: string;
   project_name: string;
   tags: string[];
+  project_status: 'new' | 'progress' | 'archived';
   total_files: number;
   total_size_bytes: number;
   created_at: string;

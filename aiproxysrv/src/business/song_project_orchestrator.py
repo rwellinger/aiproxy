@@ -265,6 +265,7 @@ class SongProjectOrchestrator:
         offset: int = 0,
         search: str = "",
         tags: str | None = None,
+        project_status: str | None = None,
     ) -> dict[str, Any]:
         """
         List projects for user (paginated)
@@ -276,6 +277,7 @@ class SongProjectOrchestrator:
             offset: Offset for pagination
             search: Search term
             tags: Comma-separated tags
+            project_status: Status filter ('new', 'progress', 'archived', or None for all non-archived)
 
         Returns:
             Dictionary with projects and pagination meta
@@ -289,6 +291,7 @@ class SongProjectOrchestrator:
                 offset=offset,
                 search=search,
                 tags=tags,
+                project_status=project_status,
             )
 
             # Transform projects to response
@@ -345,7 +348,7 @@ class SongProjectOrchestrator:
                 update_data["project_name"] = normalize_project_name(update_data["project_name"])
 
             # Update project in DB
-            updated_project = self.db_service.update_project(db, project_id, **update_data)
+            updated_project = self.db_service.update_project(db, project_id, user_id, update_data)
 
             if not updated_project:
                 logger.error("Failed to update project in DB", project_id=str(project_id))
@@ -380,6 +383,15 @@ class SongProjectOrchestrator:
             # Check ownership
             if project.user_id != user_id:
                 logger.warning("Unauthorized project deletion", project_id=str(project_id), user_id=str(user_id))
+                return False
+
+            # Prevent deletion of archived projects
+            if project.project_status == "archived":
+                logger.warning(
+                    "Cannot delete archived project",
+                    project_id=str(project_id),
+                    project_status=project.project_status,
+                )
                 return False
 
             # Delete S3 files if s3_prefix exists

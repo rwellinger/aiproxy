@@ -8,8 +8,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -18,6 +16,7 @@ import { MatMenuModule } from '@angular/material/menu';
 
 import { SongProjectService } from '../../services/business/song-project.service';
 import { NotificationService } from '../../services/ui/notification.service';
+import { UserSettingsService } from '../../services/user-settings.service';
 import { CreateProjectDialogComponent } from '../../dialogs/create-project-dialog/create-project-dialog.component';
 import {
   SongProjectDetail,
@@ -35,8 +34,6 @@ import {
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatProgressSpinnerModule,
     MatExpansionModule,
     MatDialogModule,
@@ -60,6 +57,7 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
 
   // Search and filter
   searchTerm = '';
+  currentStatus: 'all' | 'new' | 'progress' | 'archived' = 'all';
 
   // UI state
   isLoading = false;
@@ -68,6 +66,12 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   // Edit state
   isEditingProjectName = false;
   editProjectNameValue = '';
+  isEditingProject = false;
+  editProjectForm: {
+    name: string;
+    tags: string[];
+    description: string;
+  } | null = null;
 
   // Math for template
   Math = Math;
@@ -81,6 +85,7 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   private translate = inject(TranslateService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
+  private settingsService = inject(UserSettingsService);
 
   // Navigation state (must be captured in constructor)
   private navigationState: any = null;
@@ -89,6 +94,10 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
     // IMPORTANT: getCurrentNavigation() must be called in constructor!
     const navigation = this.router.getCurrentNavigation();
     this.navigationState = navigation?.extras?.state;
+
+    // Load user settings for page size
+    const settings = this.settingsService.getCurrentSettings();
+    this.pagination.limit = settings.projectListLimit;
   }
 
   ngOnInit(): void {
@@ -125,20 +134,26 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   /**
    * Load projects list from API.
    */
-  async loadProjects(): Promise<void> {
+  async loadProjects(page = 0): Promise<void> {
     this.isLoading = true;
 
     try {
+      const offset = page * this.pagination.limit;
+      const statusParam = this.currentStatus === 'all' ? undefined : this.currentStatus;
+
       const response = await firstValueFrom(
         this.projectService.getProjects(
           this.pagination.limit,
-          this.pagination.offset,
-          this.searchTerm || undefined
+          offset,
+          this.searchTerm || undefined,
+          undefined, // tags
+          statusParam
         )
       );
 
       this.projectList = response.data;
       this.pagination = response.pagination;
+      this.pagination.offset = offset;
       this.totalProjects = response.pagination.total;
     } catch (error) {
       console.error('Failed to load projects:', error);
@@ -268,13 +283,33 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load more projects (pagination).
+   * Handle status filter change.
    */
-  loadMore(): void {
-    if (this.pagination.has_more && !this.isLoading) {
-      this.pagination.offset += this.pagination.limit;
-      this.loadProjects();
-    }
+  onStatusChange(status: 'all' | 'new' | 'progress' | 'archived'): void {
+    this.currentStatus = status;
+    this.pagination.offset = 0;
+    this.loadProjects();
+  }
+
+  /**
+   * Change page (pagination).
+   */
+  async changePage(page: number): Promise<void> {
+    await this.loadProjects(page);
+  }
+
+  /**
+   * Get current page number (0-indexed).
+   */
+  get currentPage(): number {
+    return Math.floor(this.pagination.offset / this.pagination.limit);
+  }
+
+  /**
+   * Get total number of pages.
+   */
+  get totalPages(): number {
+    return Math.ceil(this.pagination.total / this.pagination.limit);
   }
 
   /**
@@ -321,6 +356,14 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
    * Upload file to project folder.
    */
   async uploadFile(folder: any): Promise<void> {
+    // Check if uploads are allowed
+    if (!this.canUploadFiles()) {
+      this.notificationService.error(
+        this.translate.instant('songProjects.warnings.uploadBlocked')
+      );
+      return;
+    }
+
     // Create hidden file input
     const input = document.createElement('input');
     input.type = 'file';
@@ -622,5 +665,136 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
         this.translate.instant('songProjects.messages.saveError')
       );
     }
+  }
+
+  /**
+   * Toggle project archive status
+   */
+  async toggleProjectStatus(): Promise<void> {
+    if (!this.selectedProject) return;
+
+    const newStatus = this.selectedProject.project_status === 'archived' ? 'progress' : 'archived';
+
+    try {
+      await firstValueFrom(
+        this.projectService.updateProject(this.selectedProject.id, {
+          project_status: newStatus
+        })
+      );
+
+      this.selectedProject.project_status = newStatus;
+      this.notificationService.success(
+        this.translate.instant('songProjects.messages.statusUpdated')
+      );
+    } catch (error) {
+      console.error('Failed to update project status:', error);
+      this.notificationService.error(
+        this.translate.instant('common.error')
+      );
+    }
+  }
+
+  /**
+   * Open edit project dialog
+   */
+  openEditProjectDialog(): void {
+    if (!this.selectedProject) return;
+
+    this.editProjectForm = {
+      name: this.selectedProject.project_name,
+      tags: [...this.selectedProject.tags],
+      description: this.selectedProject.description || ''
+    };
+    this.isEditingProject = true;
+  }
+
+  /**
+   * Save project changes from edit dialog
+   */
+  async saveProjectChanges(): Promise<void> {
+    if (!this.editProjectForm || !this.selectedProject) return;
+
+    try {
+      await firstValueFrom(
+        this.projectService.updateProject(this.selectedProject.id, {
+          project_name: this.editProjectForm.name,
+          tags: this.editProjectForm.tags,
+          description: this.editProjectForm.description
+        })
+      );
+
+      // Update local state
+      this.selectedProject.project_name = this.editProjectForm.name;
+      this.selectedProject.tags = this.editProjectForm.tags;
+      this.selectedProject.description = this.editProjectForm.description;
+
+      // Update in list
+      const projectInList = this.projectList.find(p => p.id === this.selectedProject!.id);
+      if (projectInList) {
+        projectInList.project_name = this.editProjectForm.name;
+        projectInList.tags = this.editProjectForm.tags;
+      }
+
+      this.isEditingProject = false;
+      this.editProjectForm = null;
+
+      this.notificationService.success(
+        this.translate.instant('songProjects.messages.projectUpdated')
+      );
+    } catch (error) {
+      console.error('Failed to update project:', error);
+      this.notificationService.error(
+        this.translate.instant('common.error')
+      );
+    }
+  }
+
+  /**
+   * Cancel edit project dialog
+   */
+  cancelEditProject(): void {
+    this.isEditingProject = false;
+    this.editProjectForm = null;
+  }
+
+  /**
+   * Clear all files in a folder
+   */
+  async clearFolder(folderId: string): Promise<void> {
+    if (!this.selectedProject) return;
+
+    const folder = this.selectedProject.folders.find(f => f.id === folderId);
+    if (!folder) return;
+
+    // Confirmation dialog
+    const message = this.translate.instant('songProjects.dialogs.clearFolder.message', { folderName: folder.folder_name });
+    const confirmed = window.confirm(message);
+
+    if (!confirmed) return;
+
+    try {
+      const response = await firstValueFrom(
+        this.projectService.clearFolder(this.selectedProject.id, folderId)
+      );
+
+      // Refresh project to show updated file list
+      await this.selectProject(this.selectedProject);
+
+      this.notificationService.success(
+        this.translate.instant('songProjects.messages.filesDeleted', { count: response.data.deleted })
+      );
+    } catch (error) {
+      console.error('Failed to clear folder:', error);
+      this.notificationService.error(
+        this.translate.instant('common.error')
+      );
+    }
+  }
+
+  /**
+   * Check if uploads are allowed (not archived)
+   */
+  canUploadFiles(): boolean {
+    return this.selectedProject?.project_status !== 'archived';
   }
 }

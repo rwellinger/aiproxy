@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import or_
+from sqlalchemy import case, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
 
@@ -141,6 +141,7 @@ class SongProjectService:
         offset: int = 0,
         search: str = "",
         tags: str | None = None,
+        project_status: str | None = None,
         sort_by: str = "created_at",
         sort_direction: str = "desc",
     ) -> dict[str, Any]:
@@ -154,6 +155,7 @@ class SongProjectService:
             offset: Number of projects to skip
             search: Search term (project_name, description)
             tags: Comma-separated tags for filtering
+            project_status: Status filter ('new', 'progress', 'archived', or None for all non-archived)
             sort_by: Field to sort by (created_at, updated_at, project_name)
             sort_direction: Sort direction (asc, desc)
 
@@ -162,6 +164,13 @@ class SongProjectService:
         """
         try:
             query = db.query(SongProject).filter(SongProject.user_id == user_id)
+
+            # Apply status filter
+            if project_status:
+                query = query.filter(SongProject.project_status == project_status)
+            else:
+                # Default: exclude archived projects (for 'all' tab)
+                query = query.filter(SongProject.project_status != "archived")
 
             # Apply search filter
             if search:
@@ -182,7 +191,11 @@ class SongProjectService:
             # Get total count before pagination
             total_count = query.count()
 
-            # Apply sorting
+            # Apply sorting (COALESCE: updated_at if exists, else created_at)
+            effective_date = case(
+                (SongProject.updated_at.is_(None), SongProject.created_at), else_=SongProject.updated_at
+            )
+
             if sort_by == "project_name":
                 if sort_direction == "desc":
                     query = query.order_by(SongProject.project_name.desc())
@@ -190,14 +203,14 @@ class SongProjectService:
                     query = query.order_by(SongProject.project_name.asc())
             elif sort_by == "updated_at":
                 if sort_direction == "desc":
-                    query = query.order_by(SongProject.updated_at.desc().nullslast())
+                    query = query.order_by(effective_date.desc())
                 else:
-                    query = query.order_by(SongProject.updated_at.asc().nullsfirst())
-            else:  # default to created_at
+                    query = query.order_by(effective_date.asc())
+            else:  # default to created_at (but use effective_date for consistency)
                 if sort_direction == "desc":
-                    query = query.order_by(SongProject.created_at.desc())
+                    query = query.order_by(effective_date.desc())
                 else:
-                    query = query.order_by(SongProject.created_at.asc())
+                    query = query.order_by(effective_date.asc())
 
             # Apply pagination
             projects = query.limit(limit).offset(offset).all()
@@ -211,6 +224,7 @@ class SongProjectService:
                 user_id=str(user_id),
                 search=search,
                 tags=tags,
+                project_status=project_status,
             )
 
             return {"items": projects, "total": total_count}

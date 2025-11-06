@@ -6,6 +6,7 @@ export interface UserSettings {
   promptListLimit: number;
   sketchListLimit: number;
   equipmentListLimit: number;
+  projectListLimit: number;
   language: Language;
 }
 
@@ -15,5 +16,6 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   promptListLimit: 8,
   sketchListLimit: 8,
   equipmentListLimit: 7,
+  projectListLimit: 8,
   language: 'en'
 };

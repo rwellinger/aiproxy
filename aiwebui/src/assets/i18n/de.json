@@ -1654,7 +1654,13 @@
       },
       "filters": {
         "all": "Alle Projekte",
+        "new": "Neu",
+        "progress": "In Bearbeitung",
+        "archived": "Archiviert",
         "byTag": "Nach Tag filtern"
+      },
+      "pagination": {
+        "info": "Seite {{current}} von {{total}}"
       }
     },
     "detail": {
@@ -1731,11 +1737,44 @@
       "release": "Veröffentlichung",
       "archive": "Archiv"
     },
+    "status": {
+      "new": "Neu",
+      "progress": "In Bearbeitung",
+      "archived": "Archiviert"
+    },
+    "fields": {
+      "name": "Projektname",
+      "tags": "Tags",
+      "description": "Beschreibung"
+    },
+    "actions": {
+      "edit": "Projekt bearbeiten",
+      "archive": "Projekt archivieren",
+      "unarchive": "Projekt aktivieren",
+      "clearFolder": "Ordner bereinigen"
+    },
+    "warnings": {
+      "uploadBlocked": "Projekt ist archiviert. Aktiviere es zuerst, um Dateien hochzuladen.",
+      "deleteBlocked": "Archivierte Projekte können nicht gelöscht werden. Aktiviere es zuerst."
+    },
+    "dialogs": {
+      "editProject": {
+        "title": "Projekt bearbeiten"
+      },
+      "clearFolder": {
+        "title": "Ordner bereinigen",
+        "message": "Alle Dateien im Ordner \"{{folderName}}\" löschen? Dies kann nicht rückgängig gemacht werden!",
+        "confirm": "Alle Dateien löschen"
+      }
+    },
     "messages": {
       "createSuccess": "Projekt erfolgreich erstellt",
       "updateSuccess": "Projekt erfolgreich aktualisiert",
       "deleteSuccess": "Projekt erfolgreich gelöscht",
       "deleteConfirm": "Möchtest du dieses Projekt wirklich löschen? Dies wird auch alle Dateien im Projekt löschen.",
+      "statusUpdated": "Projektstatus aktualisiert",
+      "projectUpdated": "Projekt erfolgreich aktualisiert",
+      "filesDeleted": "{{count}} Dateien gelöscht",
       "uploadSuccess": "Datei erfolgreich hochgeladen",
       "uploadError": "Fehler beim Hochladen der Datei",
       "fileTooLarge": "Datei ist zu groß (max {{size}})",

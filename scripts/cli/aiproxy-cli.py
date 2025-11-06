@@ -277,6 +277,25 @@ def upload(project_id, folder_id, local_path, debug):
         console.print("[yellow]Run: aiproxy-cli login[/yellow]")
         sys.exit(1)
 
+    # Check if project is archived
+    try:
+        url = f"{config['api_url']}/api/v1/song-projects/{project_id}"
+        response = requests.get(
+            url,
+            headers={"Authorization": f"Bearer {config['jwt_token']}"},
+            verify=config.get("ssl_verify", False),
+            timeout=30,
+        )
+        if response.status_code == 200:
+            project_data = response.json().get("data", {})
+            project_name = project_data.get("project_name", "Unknown")
+            if project_data.get("project_status") == "archived":
+                console.print(f"[red]✗ Upload denied: Project '{project_name}' is archived.[/red]")
+                console.print("[yellow]  → Unarchive the project first to enable uploads.[/yellow]")
+                sys.exit(1)
+    except Exception as e:
+        console.print(f"[yellow]Warning: Could not check project status: {str(e)}[/yellow]")
+
     # Scan directory recursively
     local_path = Path(local_path)
     files = []
@@ -840,6 +859,25 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
     if not check_token_expiry(config):
         console.print("[yellow]Run: aiproxy-cli login[/yellow]")
         sys.exit(1)
+
+    # Check if project is archived
+    try:
+        url = f"{config['api_url']}/api/v1/song-projects/{project_id}"
+        response = requests.get(
+            url,
+            headers={"Authorization": f"Bearer {config['jwt_token']}"},
+            verify=config.get("ssl_verify", False),
+            timeout=30,
+        )
+        if response.status_code == 200:
+            project_data = response.json().get("data", {})
+            project_name = project_data.get("project_name", "Unknown")
+            if project_data.get("project_status") == "archived":
+                console.print(f"[red]✗ Mirror denied: Project '{project_name}' is archived.[/red]")
+                console.print("[yellow]  → Unarchive the project first to enable mirroring.[/yellow]")
+                sys.exit(1)
+    except Exception as e:
+        console.print(f"[yellow]Warning: Could not check project status: {str(e)}[/yellow]")
 
     local_path = Path(local_path)
 
