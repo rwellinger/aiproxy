@@ -5,11 +5,49 @@ AiProxy CLI Tool - Song Project Upload
 Command-line tool for uploading files to Song Projects.
 """
 
+# ============================================================
+# Environment Validation (MUST be FIRST - before any imports!)
+# ============================================================
+
+import os
+import sys
+
+REQUIRED_CONDA_ENV = "mac_ki_service_py312"
+
+
+def check_conda_environment():
+    """
+    Verify that the required Conda environment is active.
+
+    Exits with error if wrong environment or no Conda environment is active.
+    """
+    conda_env = os.environ.get("CONDA_DEFAULT_ENV")
+
+    if not conda_env:
+        print("\033[91m✗ No Conda environment active!\033[0m")
+        print(f"\033[93mPlease activate the required environment:\033[0m")
+        print(f"  conda activate {REQUIRED_CONDA_ENV}")
+        sys.exit(1)
+
+    if conda_env != REQUIRED_CONDA_ENV:
+        print(f"\033[91m✗ Wrong Conda environment active: {conda_env}\033[0m")
+        print(f"\033[93mRequired environment:\033[0m {REQUIRED_CONDA_ENV}")
+        print(f"\033[93mPlease switch to the correct environment:\033[0m")
+        print(f"  conda activate {REQUIRED_CONDA_ENV}")
+        sys.exit(1)
+
+
+# Check environment BEFORE importing any third-party packages!
+check_conda_environment()
+
+
+# ============================================================
+# Imports (AFTER environment validation)
+# ============================================================
+
 import click
 import requests
 import json
-import os
-import sys
 import hashlib
 from pathlib import Path
 from rich.console import Console
@@ -176,6 +214,7 @@ def check_token_expiry(config):
 @click.group()
 def cli():
     """AiProxy CLI Tool - Song Project Management"""
+    # Environment already checked at import time
     pass
 
 
