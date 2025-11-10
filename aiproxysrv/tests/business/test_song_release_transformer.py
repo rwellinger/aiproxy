@@ -4,8 +4,6 @@ from datetime import date, datetime
 from unittest.mock import Mock
 from uuid import UUID
 
-import pytest
-
 from business.song_release_transformer import (
     generate_s3_cover_key,
     get_presigned_cover_url_placeholder,

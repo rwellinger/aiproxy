@@ -25,14 +25,14 @@ def check_conda_environment():
 
     if not conda_env:
         print("\033[91m✗ No Conda environment active!\033[0m")
-        print(f"\033[93mPlease activate the required environment:\033[0m")
+        print("\033[93mPlease activate the required environment:\033[0m")
         print(f"  conda activate {REQUIRED_CONDA_ENV}")
         sys.exit(1)
 
     if conda_env != REQUIRED_CONDA_ENV:
         print(f"\033[91m✗ Wrong Conda environment active: {conda_env}\033[0m")
         print(f"\033[93mRequired environment:\033[0m {REQUIRED_CONDA_ENV}")
-        print(f"\033[93mPlease switch to the correct environment:\033[0m")
+        print("\033[93mPlease switch to the correct environment:\033[0m")
         print(f"  conda activate {REQUIRED_CONDA_ENV}")
         sys.exit(1)
 
@@ -44,6 +44,8 @@ check_conda_environment()
 # ============================================================
 # Imports (AFTER environment validation)
 # ============================================================
+# ruff: noqa: E402
+# E402 (imports not at top) is intentional: environment check must run BEFORE importing third-party packages
 
 import click
 import requests
@@ -329,11 +331,17 @@ def upload(project_id, folder_id, local_path, debug):
             project_data = response.json().get("data", {})
             project_name = project_data.get("project_name", "Unknown")
             if project_data.get("project_status") == "archived":
-                console.print(f"[red]✗ Upload denied: Project '{project_name}' is archived.[/red]")
-                console.print("[yellow]  → Unarchive the project first to enable uploads.[/yellow]")
+                console.print(
+                    f"[red]✗ Upload denied: Project '{project_name}' is archived.[/red]"
+                )
+                console.print(
+                    "[yellow]  → Unarchive the project first to enable uploads.[/yellow]"
+                )
                 sys.exit(1)
     except Exception as e:
-        console.print(f"[yellow]Warning: Could not check project status: {str(e)}[/yellow]")
+        console.print(
+            f"[yellow]Warning: Could not check project status: {str(e)}[/yellow]"
+        )
 
     # Scan directory recursively
     local_path = Path(local_path)
@@ -912,11 +920,17 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
             project_data = response.json().get("data", {})
             project_name = project_data.get("project_name", "Unknown")
             if project_data.get("project_status") == "archived":
-                console.print(f"[red]✗ Mirror denied: Project '{project_name}' is archived.[/red]")
-                console.print("[yellow]  → Unarchive the project first to enable mirroring.[/yellow]")
+                console.print(
+                    f"[red]✗ Mirror denied: Project '{project_name}' is archived.[/red]"
+                )
+                console.print(
+                    "[yellow]  → Unarchive the project first to enable mirroring.[/yellow]"
+                )
                 sys.exit(1)
     except Exception as e:
-        console.print(f"[yellow]Warning: Could not check project status: {str(e)}[/yellow]")
+        console.print(
+            f"[yellow]Warning: Could not check project status: {str(e)}[/yellow]"
+        )
 
     local_path = Path(local_path)
 
