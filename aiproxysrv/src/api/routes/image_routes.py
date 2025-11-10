@@ -3,9 +3,8 @@ DALL-E Image Generation Routes with Pydantic validation
 """
 
 import traceback
-from io import BytesIO
 
-from flask import Blueprint, jsonify, request, send_file, send_from_directory
+from flask import Blueprint, jsonify, request, send_from_directory
 from flask_pydantic import validate
 
 from api.auth_middleware import get_current_user_id, jwt_required
@@ -100,9 +99,9 @@ def serve_image(filename):
 def serve_s3_image(image_id):
     """Serve S3-stored images via backend proxy (streams from S3)"""
     try:
+        from adapters.s3.s3_proxy_service import s3_proxy_service
         from config.settings import S3_IMAGES_BUCKET
         from db.image_service import ImageService
-        from infrastructure.storage import get_storage
 
         logger.debug("Serving S3 image", image_id=image_id)
 
@@ -115,20 +114,10 @@ def serve_s3_image(image_id):
         if image.storage_backend != "s3" or not image.s3_key:
             return jsonify({"error": "Not an S3 image"}), 400
 
-        # Stream from S3
-        storage = get_storage(bucket=S3_IMAGES_BUCKET)
-        image_data = storage.download(image.s3_key)
-
-        # Determine Content-Type from filename
-        content_type = "image/png"
-        if image.filename.lower().endswith(".jpg") or image.filename.lower().endswith(".jpeg"):
-            content_type = "image/jpeg"
-        elif image.filename.lower().endswith(".webp"):
-            content_type = "image/webp"
-
-        logger.debug("Streaming S3 image", image_id=image_id, s3_key=image.s3_key, content_type=content_type)
-
-        return send_file(BytesIO(image_data), mimetype=content_type, as_attachment=False, download_name=image.filename)
+        # Stream from S3 using generic proxy service
+        return s3_proxy_service.serve_resource(
+            bucket=S3_IMAGES_BUCKET, s3_key=image.s3_key, filename=image.filename
+        )
 
     except Exception as e:
         logger.error(

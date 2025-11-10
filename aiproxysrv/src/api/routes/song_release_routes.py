@@ -307,3 +307,68 @@ def delete_release(release_id: str):
         return jsonify(result), status_code
     finally:
         db.close()
+
+
+@api_song_releases_v1.route("/<release_id>/cover", methods=["GET"])
+@jwt_required
+def serve_cover(release_id: str):
+    """
+    Serve release cover image via backend proxy (streams from S3).
+
+    CRITICAL: This is a backend proxy route - NEVER return presigned URLs to frontend!
+
+    Path Parameters:
+        - release_id (UUID): Release ID
+
+    Response:
+        200: Binary image data (image/jpeg, image/png, etc.)
+        401: {'error': 'Unauthorized'}
+        404: {'error': 'Release not found' | 'Cover not found'}
+        500: {'error': 'Failed to load cover from S3'}
+
+    Example:
+        GET /api/v1/song-releases/550e8400-e29b-41d4-a716-446655440000/cover
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        from adapters.s3.s3_proxy_service import s3_proxy_service
+        from config.settings import S3_SONG_RELEASES_BUCKET
+        from db.song_release_service import song_release_service
+
+        release_uuid = UUID(release_id)
+
+        logger.debug("Serving release cover", release_id=release_id, user_id=user_id)
+
+        # Get release from DB
+        db: Session = next(get_db())
+        try:
+            release = song_release_service.get_release_by_id(db, release_uuid, UUID(user_id))
+            if not release:
+                return jsonify({"error": "Release not found"}), 404
+
+            # Verify release has cover
+            if not release.cover_s3_key:
+                return jsonify({"error": "Cover not found"}), 404
+
+            # Stream from S3 using generic proxy service
+            return s3_proxy_service.serve_resource(
+                bucket=S3_SONG_RELEASES_BUCKET, s3_key=release.cover_s3_key, filename="cover.jpg"
+            )
+
+        finally:
+            db.close()
+
+    except ValueError:
+        return jsonify({"error": "Invalid release ID format"}), 400
+    except Exception as e:
+        logger.error(
+            "Error serving release cover",
+            release_id=release_id,
+            error=str(e),
+            error_type=type(e).__name__,
+        )
+        return jsonify({"error": "Failed to load cover from S3"}), 500

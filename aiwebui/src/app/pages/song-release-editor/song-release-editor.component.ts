@@ -14,6 +14,7 @@ import { MatDialog } from '@angular/material/dialog';
 
 import { SongReleaseService } from '../../services/business/song-release.service';
 import { NotificationService } from '../../services/ui/notification.service';
+import { ImageBlobService } from '../../services/ui/image-blob.service';
 import { AssignToProjectDialogComponent } from '../../dialogs/assign-to-project-dialog/assign-to-project-dialog.component';
 import { ReleaseType, ReleaseStatus, SongRelease } from '../../models/song-release.model';
 
@@ -68,6 +69,7 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private releaseService = inject(SongReleaseService);
   private notificationService = inject(NotificationService);
+  private imageBlobService = inject(ImageBlobService);
   private translate = inject(TranslateService);
   private dialog = inject(MatDialog);
 
@@ -161,8 +163,18 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
       }
 
       // Load cover preview if exists
+      // CRITICAL: Use blob URL for authenticated image access
       if (this.selectedRelease.cover_url) {
-        this.coverPreviewUrl = this.selectedRelease.cover_url;
+        this.imageBlobService.getImageBlobUrl(this.selectedRelease.cover_url)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (blobUrl) => {
+              this.coverPreviewUrl = blobUrl;
+            },
+            error: () => {
+              this.coverPreviewUrl = '';
+            }
+          });
       }
 
       // Update validators based on status
@@ -328,14 +340,21 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
   private offerProjectNameForSingle(): void {
     const currentName = this.releaseForm.get('name')?.value;
 
-    // Only offer if name is empty
-    if (!currentName && this.assignedProjectNames.length === 1) {
+    // Always offer if exactly 1 project is assigned (even if name already exists)
+    if (this.assignedProjectNames.length === 1) {
+      const projectName = this.assignedProjectNames[0];
+
+      // Skip if project name is already the release name
+      if (currentName === projectName) {
+        return;
+      }
+
       const message = this.translate.instant('songRelease.messages.useProjectName', {
-        projectName: this.assignedProjectNames[0]
+        projectName: projectName
       });
 
       if (confirm(message)) {
-        this.releaseForm.patchValue({ name: this.assignedProjectNames[0] });
+        this.releaseForm.patchValue({ name: projectName });
       }
     }
   }

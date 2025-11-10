@@ -2,7 +2,7 @@
 
 **Author:** Rob
 **Language:** English
-**Last Updated:** 2025-11-01
+**Last Updated:** 2025-11-10
 
 ---
 
@@ -13,15 +13,11 @@
 ## 1. mac_ki_service/ - DEVELOPMENT (Source Code)
 - **Location:** `/Users/robertw/Workspace/mac_ki_service`
 - **Purpose:** Source code, builds, CI/CD, development
-- **Contains:** Python/TypeScript/SCSS code, tests, build configs
-- **Git:** Commits allowed, active development
 - ✅ **Edit code here**
 
 ## 2. thwelly_ki_app/ - PRODUCTION (Deployment Only)
 - **Location:** `/Users/robertw/Workspace/thwelly_ki_app`
 - **Purpose:** Production deployment configuration ONLY
-- **Contains:** docker-compose.yml, .env (secrets), runtime scripts, data volumes
-- **Git:** Separate repo, minimal commits
 - ⚠️ **NO source code editing! Only configs/secrets**
 - ⚠️ **FINGER WEG VON CODE - Deployment only!**
 
@@ -33,57 +29,26 @@
 
 # System & Communication
 
-- Never assume agreement; state your own position if needed.
-- Do not use polite forms ("please", "thank you", etc.).
-- Offer critical viewpoints when relevant, without softening or beautifying.
-- Stick to the facts, even if the answer is negative or counterintuitive.
 - Call me "Rob"
-- Be factual, precise, and to the point
-- **CRITICAL:** Follow Clean Code Patterns and standard ICT best practices
-- My nativ language is german so if possible give you answers in german.
-
-## Language Rules
-
-- **Conversation with Claude**: German
-- **Code Classes, Functions, Attributes, Variables, Comments**: English only (Python, TypeScript, Scripts, SCSS)
-- **UI Texts**: English only (Buttons, Labels, Messages)
-- **Documentation**: English only (README, inline docs)
-- **Implementation**: Always present analysis, plan & effort estimation first
+- Conversation: German
+- Code/Comments/Docs: English only
+- No polite forms, be factual and direct
+- Always present analysis, plan & effort estimation first
 
 ---
 
 # Project Overview
 
-**Multi-AI Creative Platform** for Image/Song Generation, Chat and Prompt Management.
+**Multi-AI Creative Platform** - Image/Song Generation, Chat, Prompt Management
 
-## Tech Stack
+**Tech Stack:**
+- **Frontend:** Angular 18, Material, SCSS, TypeScript, RxJS, ngx-translate
+- **Backend:** FastAPI, Python 3.12.12, Celery, SQLAlchemy, Alembic
+- **Database:** PostgreSQL, Redis
+- **Deployment:** Docker (Colima), Nginx
+- **Hardware:** Apple Silicon M4, Conda env `mac_ki_service_py312`
 
-**Frontend:** Angular 18, Material Design, SCSS, TypeScript, RxJS, ngx-translate
-**Backend:** FastAPI, Python 3.12.12, Celery, SQLAlchemy, Alembic
-**Database:** PostgreSQL, Redis
-**Deployment:** Docker (Colima), Nginx (Production)
-**Hardware:** Apple Silicon (M1/M4)
-
-## Core Features
-
-- **Image Generation** (DALL-E/OpenAI): Fast Enhancement, Gallery, Detail View
-- **Song Generation** (Mureka API): Sketches, Styles, FLAC/MP3/Stems, Playback
-- **Lyric Creation**: AI-assisted editor, Lyric Architect, Parsing Rules
-- **Chat**: Ollama (local) & OpenAI, Multi-conversation, Streaming, Export
-- **Prompt Management**: Templates, Categories, Pre/post-conditions
-- **User Profiles**: JWT Auth, Language Preferences (EN/DE)
-
-> **Detaillierte Architektur**: siehe `docs/ARCHITECTURE.md`
-
----
-
-# Environments
-
-## Development
-- **MacBook Air M4**, 32GB RAM
-- Docker (Colima) for PostgreSQL only
-- Redis & Services run locally via PyCharm (ARM64)
-- Python 3 with Miniconda3 → Conda env `mac_ki_service_py312`
+> **Details:** siehe `docs/ARCHITECTURE.md`
 
 ---
 
@@ -93,21 +58,14 @@
 
 ### 1. All API Endpoints MUST use ApiConfigService
 - **NEVER** hardcode URLs in Services (no `baseUrl`, no IPs)
-- **NEVER** use `environment.apiUrl` directly in Services
+- **NEVER** use `environment.apiUrl` directly
 - **ALL** endpoints in `aiwebui/src/app/services/config/api-config.service.ts`
-- Services inject `ApiConfigService` and use `this.apiConfig.endpoints.*`
 
-### 2. External APIs ONLY via aiproxysrv Proxy
-- **ALL** external calls (OpenAI, Mureka, Ollama) **MUST** go through aiproxysrv
-- **NEVER** call external APIs directly from Angular (Browser ≠ HTTPS access)
-- **Why?** HTTPS/CORS, API Keys in Backend (not Browser), Centralized control
-
-**Example:**
 ```typescript
 // ❌ WRONG
 private baseUrl = 'http://localhost:5050/api';
 
-// ✅ CORRECT (Modern inject() style)
+// ✅ CORRECT
 private http = inject(HttpClient);
 private apiConfig = inject(ApiConfigService);
 
@@ -115,6 +73,17 @@ getData() {
   return this.http.get(this.apiConfig.endpoints.category.action);
 }
 ```
+
+### 2. External APIs ONLY via aiproxysrv Proxy (CRITICAL!)
+- **ALL** external calls (OpenAI, Mureka, Ollama, **S3/MinIO**) **MUST** go through aiproxysrv
+- **NEVER** call external APIs directly from Angular
+- **NEVER** use S3 presigned URLs in Angular (Browser can't access internal MinIO!)
+- **Why?** HTTPS/CORS, API Keys in Backend (not Browser), Centralized control, Internal services not accessible from Browser
+
+**CRITICAL - S3/MinIO:**
+- Browser **CANNOT** access internal MinIO (https://minio:9000/...)
+- **ALWAYS** use Backend proxy routes (e.g., `/api/v1/images/{id}`, `/api/v1/releases/{id}/cover`)
+- See "Pre-Implementation Checkliste" below for S3 resource handling
 
 **External API Docs:**
 - **OLLAMA**: https://github.com/ollama/ollama/blob/main/docs/api.md
@@ -125,18 +94,16 @@ getData() {
 
 **CRITICAL:** This is NOT a direct Ollama proxy - it's a **Template-Driven Generation System**.
 
-**Mandatory Workflow (NO EXCEPTIONS!):**
+**Mandatory Workflow:**
 ```
 User Input → Load Template from DB → Validate → Unified Endpoint → Response
 ```
 
 **Rules:**
-- **ALL** Ollama calls with templates **MUST** use `/api/v1/ollama/chat/generate-unified`
-- **ALL** such operations **MUST** go through `ChatService` in the frontend
-- **NEVER** implement direct Ollama API calls in new services
-- **NEVER** use templates before they exist in DB (backend has no data!)
-
-**Implementation:**
+- **ALL** Ollama+Template calls **MUST** use `/api/v1/ollama/chat/generate-unified`
+- **ALL** operations **MUST** go through `ChatService` in frontend
+- **NEVER** implement direct Ollama API calls
+- **NEVER** use templates before they exist in DB
 
 ```typescript
 // ✅ CORRECT: Simple case
@@ -144,74 +111,23 @@ async myNewFeature(input: string): Promise<string> {
   return this.chatService.validateAndCallUnified('category', 'action', input);
 }
 
-// ✅ CORRECT: Complex case (with custom logic)
-async myComplexFeature(input: string, customParam: string): Promise<string> {
-  // 1. Load template from DB
-  const template = await firstValueFrom(
-    this.promptConfig.getPromptTemplateAsync('category', 'action')
-  );
-  if (!template) {
-    throw new Error('Template category/action not found in database');
-  }
-
-  // 2. Validate required fields
-  if (!template.model || template.temperature === null || !template.max_tokens) {
-    throw new Error('Template is missing required parameters');
-  }
-
-  // 3. Build request (can enhance pre_condition/post_condition here)
-  const request: UnifiedChatRequest = {
-    pre_condition: template.pre_condition + '\n' + customParam,
-    post_condition: template.post_condition || '',
-    input_text: input,
-    temperature: template.temperature,
-    max_tokens: template.max_tokens,
-    model: template.model
-  };
-
-  // 4. Call unified endpoint
-  const data = await firstValueFrom(
-    this.http.post<ChatResponse>(
-      this.apiConfig.endpoints.ollama.chatGenerateUnified,
-      request
-    )
-  );
-  return data.response;
-}
-
 // ❌ WRONG: Direct Ollama call (bypasses template system!)
 async wrongImplementation(input: string): Promise<string> {
   return this.http.post('http://localhost:11434/api/generate', {
-    model: 'llama2',  // ❌ Hardcoded, not from DB template!
-    prompt: input     // ❌ No pre/post conditions from template!
-  });
-}
-
-// ❌ WRONG: Custom endpoint (templates don't exist in DB yet!)
-async wrongBackendCall(input: string): Promise<string> {
-  return this.http.post('/api/v1/my-custom-ollama-endpoint', {
-    prompt: input  // ❌ Backend has no template configuration!
+    model: 'llama2',  // ❌ Hardcoded, not from DB!
+    prompt: input
   });
 }
 ```
 
-**Why this matters:**
-1. **Templates MUST be in DB first** - backend loads config from `prompt_templates` table
-2. **Centralized control** - all Ollama+Template calls go through one validated path
-3. **Prevents Junior mistakes** - no ad-hoc Ollama integrations that bypass templates
-
-**See also:**
-- `aiwebui/src/app/services/config/chat.service.ts` - Reference implementation
-- `aiproxysrv/src/api/routes/chat_routes.py` - Backend unified endpoint
+**See:** `aiwebui/src/app/services/config/chat.service.ts` (Reference implementation)
 
 ---
 
-### 4. JWT Authentication REQUIRED for ALL Backend APIs
+### 4. JWT Authentication REQUIRED
 - **ALL** backend endpoints (except login/register/health) **MUST** use `@jwt_required`
 - User ID **MUST** be from JWT token via `get_current_user_id()`, **NOT** URL params
-- **Why?** Prevents unauthorized access, URL manipulation
 
-**Backend Example:**
 ```python
 # ✅ CORRECT
 @api_user_v1.route("/profile", methods=["GET"])
@@ -223,79 +139,80 @@ def get_user_profile():
     return user_controller.get_user_profile(str(user_id))
 ```
 
-**Exceptions (no JWT required):**
-- `/api/v1/user/login`, `/api/v1/user/create`
-- `/api/v1/health`, `/api/v*/celery-health`
+---
 
-**Frontend:** JWT token is **automatically** added via `authInterceptor`
+### 5. Pre-Implementation Checkliste (MANDATORY for External Resources!)
+
+**CRITICAL:** Before implementing ANY feature that returns external resources (files, images, URLs):
+
+#### Step 1: Pattern Search (MANDATORY!)
+```
+1. Does a similar feature exist? (Images, Files, etc.)
+   → grep -r "serve.*s3\|proxy.*resource" src/
+
+2. Found existing pattern?
+   → COPY the pattern 1:1
+   → DO NOT reinvent the wheel
+```
+
+#### Step 2: Backend Proxy Pattern (MANDATORY!)
+```
+✅ CORRECT:
+Frontend → /api/v1/resource/{id} → Backend loads from S3 → Binary Response
+
+❌ WRONG:
+Frontend ← MinIO presigned URL (https://minio:9000/...) ← Backend
+          └─ Browser CAN'T access internal MinIO!
+```
+
+#### Reference Implementations
+```
+✅ Image S3 Proxy:
+   - Route: api/routes/image_routes.py → serve_s3_image()
+   - Service: adapters/s3/s3_proxy_service.py → serve_resource()
+
+✅ Song Release Cover Proxy:
+   - Route: api/routes/song_release_routes.py → serve_cover()
+   - Service: adapters/s3/s3_proxy_service.py → serve_resource()
+```
+
+**WHY:** Browser CAN'T access internal services, Backend proxy = centralized security
 
 ---
 
 ## UI Patterns & Component Standards (CRITICAL!)
 
-**MANDATORY:** All new UI components **MUST** follow standardized patterns documented in `docs/UI_PATTERNS.md`.
-
-### Why This Matters
-
-**NEVER** create custom button styles, layouts, or patterns without following the standards:
-- ❌ Every new page with different button designs = inconsistent UX
-- ❌ Custom styles = maintenance nightmare
-- ✅ Reusable mixins = consistent, maintainable UI
+**MANDATORY:** All new UI components **MUST** follow `docs/UI_PATTERNS.md`
 
 ### Standard Mixins (MANDATORY)
 
-**ALWAYS use these button mixins** from `src/scss/_mixins.scss`:
-
 ```scss
-.edit-button {
-  @include button-secondary('base');  // Gray button
-}
+// ✅ ALWAYS use these mixins from src/scss/_mixins.scss
+.edit-button { @include button-secondary('base'); }
+.delete-button { @include button-secondary('base'); }
+.primary-action-button { @include button-primary('base'); }
 
-.delete-button {
-  @include button-secondary('base');  // Gray button
-}
-
-.primary-action-button {
-  @include button-primary('base');    // Blue button
-}
-```
-
-**NEVER write custom button CSS:**
-```scss
-// ❌ WRONG: Custom styles
+// ❌ NEVER write custom button CSS
 .my-button {
-  background-color: #5a6268;
-  color: white;
-  padding: 8px 16px;
+  background-color: #5a6268;  // ❌ WRONG
 }
 ```
 
 ### Reference Implementation
+**Equipment Gallery** (`aiwebui/src/app/pages/equipment-gallery/`) - Master-Detail Layout, Button Standards, Font Awesome Icons
 
-**Equipment Gallery** (`aiwebui/src/app/pages/equipment-gallery/`) is the **current reference** for:
-- ✅ Master-Detail Layout
-- ✅ Button Standards (with mixins)
-- ✅ Detail Actions Pattern
-- ✅ Font Awesome Icons (NOT Material Icons)
-- ✅ Form Layouts
-
-### Quick Checklist for New Pages
-
-Before implementing a new page:
-- [ ] Review `docs/UI_PATTERNS.md` (COMPLETE documentation)
-- [ ] Check Equipment Gallery implementation as reference
-- [ ] Use `@include button-*` mixins for all buttons
+**Checklist for New Pages:**
+- [ ] Review `docs/UI_PATTERNS.md`
+- [ ] Check Equipment Gallery as reference
+- [ ] Use `@include button-*` mixins
 - [ ] Use Font Awesome icons (`<i class="fas fa-*">`)
-- [ ] Place actions in `detail-actions` section (NOT in list items)
-- [ ] Follow Master-Detail Layout structure
-
-**Full Documentation:** `docs/UI_PATTERNS.md`
+- [ ] Place actions in `detail-actions` section
 
 ---
 
 ## Architecture Principles (CRITICAL!)
 
-### 3-Layer Architecture (MANDATORY for all new features)
+### 3-Layer Architecture (MANDATORY)
 
 **Separation of Concerns:**
 ```
@@ -307,108 +224,75 @@ Controller → Orchestrator → Transformer/Normalizer + Repository
 
 | File Pattern | Purpose | Testable? | Example |
 |--------------|---------|-----------|---------|
-| `*_orchestrator.py` | Coordinates services, NO business logic | ❌ No (only calls other services) | `SketchOrchestrator`, `SongOrchestrator` |
-| `*_transformer.py` | Pure functions: transformations, mappings | ✅ Yes (100% coverage) | `SongMurekaTransformer`, `ApiCostTransformer` |
+| `*_orchestrator.py` | Coordinates services, NO business logic | ❌ No | `SketchOrchestrator` |
+| `*_transformer.py` | Pure functions: transformations, mappings | ✅ Yes (100% coverage) | `SongMurekaTransformer` |
 | `*_normalizer.py` | Pure functions: string normalization | ✅ Yes (100% coverage) | `SketchNormalizer` |
-| `*_auth_service.py` | Pure functions: authentication logic | ✅ Yes (100% coverage) | `UserAuthService` |
-| `*_enhancement_service.py` | Pure functions: enhancements | ✅ Yes (100% coverage) | `ImageEnhancementService` |
-| `*_service.py` (in `db/`) | CRUD operations only | ❌ No (infrastructure) | `SketchService`, `SongService` |
+| `*_service.py` (in `db/`) | CRUD operations only | ❌ No (infrastructure) | `SketchService` |
 
 **Layer Responsibilities:**
 
 **1. Business Layer** (`src/business/`)
-- **Orchestrators** (`*_orchestrator.py`): Coordinate services (NOT testable, no business logic)
+- **Orchestrators**: Coordinate services (NOT testable, no business logic)
 - **Transformers/Normalizers**: Pure functions (100% unit-testable)
-- ✅ Business logic, calculations, transformations (in transformers/normalizers)
-- ✅ Pure functions (no DB, no file system)
-- ✅ **MUST be unit-testable** without mocks (transformers/normalizers only)
+- ✅ Business logic in transformers/normalizers
 - ❌ NO database queries
 - ❌ NO file system operations
 
 **2. Repository Layer** (`src/db/*_service.py`)
 - ✅ CRUD operations only
-- ✅ SQLAlchemy queries
 - ❌ NO business logic
-- ❌ NO transformations (use business layer)
-- ❌ **NO unit tests** (pure CRUD, not testable without DB)
+- ❌ NO transformations
+- ❌ **NO unit tests** (infrastructure)
 
 **3. Controller Layer** (`src/api/controllers/*_controller.py`)
-- ✅ HTTP request/response handling
-- ✅ Input validation (Pydantic)
-- ✅ Call orchestrator or business services
+- ✅ HTTP request/response, call orchestrator
 - ❌ NO business logic
 - ❌ NO direct DB queries
 
-**Example (Images - CORRECT Pattern):**
+**Example:**
 ```python
-# ✅ CORRECT: Separation of Concerns
+# ✅ CORRECT
 image_controller.py
-  └─> image_orchestrator.py (coordinates services, NOT testable)
+  └─> image_orchestrator.py (coordinates, NOT testable)
        ├─ Calls: image_enhancement_service.py (pure functions, 100% tested)
-       ├─ Calls: file_management_service.py (infrastructure)
-       └─> image_service.py (DB CRUD only, NO tests)
+       └─> image_service.py (DB CRUD, NO tests)
 
-# Tests:
-# - image_enhancement_service.py: 100% coverage (pure functions)
-# - image_orchestrator.py: 0% coverage (orchestration, not testable)
-# - image_service.py: 0% coverage (CRUD, no tests)
-```
-
-**Anti-Pattern (WRONG):**
-```python
-# ❌ WRONG: Business logic mixed with DB
+# ❌ WRONG: Business logic in DB service
 class SomeService:
     def get_data(self, db: Session):
-        result = db.query(...).first()  # DB query
-
-        # ❌ Business logic in DB service!
-        return {
-            "total": float(result.total),  # Transformation
-            "image": costs.get("image", 0)  # Defaults
-        }
+        result = db.query(...).first()
+        return {"total": float(result.total)}  # ❌ Transformation in DB layer!
 ```
 
-**Refactoring Guide:**
-
-If you find business logic in `src/db/*_service.py`:
-1. Create `src/business/*_transformer.py` for transformations
-2. Extract pure functions (transformations, defaults, calculations)
-3. Write unit tests for business layer
-4. Keep DB layer as pure CRUD
-
-**Checklist for NEW Services:**
+**Checklist:**
 - [ ] Business logic in `src/business/` (unit-testable)
 - [ ] DB operations in `src/db/` (CRUD only, no tests)
 - [ ] Controller calls business layer (no direct DB)
-- [ ] Unit tests cover business logic (not infrastructure)
+
+---
 
 ### Automated Architecture Validation (CRITICAL!)
 
-**IMPORTANT:** Architecture rules are now **automatically enforced** via linters. Run these checks **BEFORE every commit**!
+**IMPORTANT:** Architecture rules are **automatically enforced** via linters!
 
 #### Python Backend (import-linter)
 
 **Validates:**
-- ❌ Controllers MUST NOT import DB services directly (use business layer)
+- ❌ Controllers MUST NOT import DB services directly
 - ❌ DB layer MUST NOT import business logic
 - ❌ Business layer MUST NOT import SQLAlchemy directly
-- ❌ Schemas MUST NOT depend on business/DB layers
 
-**Run validation:**
 ```bash
-# From aiproxysrv/ directory
-lint-imports                    # Quick check
+# From aiproxysrv/
 make lint-all                   # Ruff + import-linter
 ```
 
-**Configuration:** `aiproxysrv/.importlinter`
-
 **Common violations:**
 ```bash
-# ERROR: Controllers must go through business layer, not directly to DB
+# ERROR: Controllers must go through business layer
 src.api.controllers.foo_controller -> src.db.bar_service
 
-# Fix: Use orchestrator as intermediary
+# Fix: Use orchestrator
 src.api.controllers.foo_controller -> src.business.foo_orchestrator -> src.db.bar_service
 ```
 
@@ -417,22 +301,17 @@ src.api.controllers.foo_controller -> src.business.foo_orchestrator -> src.db.ba
 **Validates:**
 - ❌ Services MUST NOT depend on Components/Pages
 - ❌ Services MUST use ApiConfigService (NOT environment.apiUrl)
-- ❌ Models MUST NOT depend on Services/Components
-- ❌ Guards/Interceptors MUST NOT depend on Components
 - ❌ No circular dependencies
 
-**Run validation:**
 ```bash
-# From aiwebui/ directory
+# From aiwebui/
 npm run lint:arch               # Architecture only
-npm run lint:all                # TypeScript + SCSS + Architecture
+make lint-all                   # TypeScript + SCSS + Architecture
 ```
-
-**Configuration:** `aiwebui/.dependency-cruiser.js`
 
 **Common violations:**
 ```bash
-# ERROR: Services must use ApiConfigService, NOT environment.apiUrl
+# ERROR: Services must use ApiConfigService
 src/app/services/foo.service.ts -> environments/environment
 
 # Fix: Inject ApiConfigService
@@ -440,249 +319,88 @@ private apiConfig = inject(ApiConfigService);
 this.http.get(this.apiConfig.endpoints.category.action);
 ```
 
-**Integration Tips for Claude Code:**
-- When asked to "run lint", **ALWAYS include architecture checks** (`lint:all`, `make lint-all`)
-- **Violations appear in lint output** - no manual review needed
-- Fix violations **before marking tasks as completed**
+**Integration:**
 - Architecture errors are **build blockers** (treat like ESLint errors)
+- Fix violations **before marking tasks completed**
 
 ---
 
 ## Angular 18 Modern Patterns
 
 ### Always use inject() for DI
-- **ALWAYS** use `inject()` function instead of constructor injection
-- Pattern: `private service = inject(ServiceName)`
-- Avoids ESLint warning `@angular-eslint/prefer-inject`
+```typescript
+// ✅ CORRECT
+private http = inject(HttpClient);
+private apiConfig = inject(ApiConfigService);
 
-### Use HttpClient (not fetch)
-- Use Angular's `HttpClient` for all HTTP requests
-- Enables JWT injection via interceptors
-
-### Always run build + lint
-**CRITICAL:** Always use `make lint-all` to check BOTH TypeScript AND SCSS!
-
-```bash
-# From aiwebui directory
-make lint-all && make build-dev
-# Or for production (runs lint-all + test automatically):
-make build-prod
+// ❌ WRONG: Constructor injection
+constructor(private http: HttpClient) {}
 ```
 
-**Available Makefile commands:**
-- `make lint-all` - TypeScript + SCSS + Architecture (use this after changes!)
-- `make lint-ts` - TypeScript only (ESLint)
-- `make lint-scss` - SCSS only (Stylelint)
-- `make lint-arch` - Architecture validation only (dependency-cruiser)
-- `make lint-fix` - Auto-fix TypeScript + SCSS issues
+### Always run lint + build
+```bash
+# From aiwebui/
+make lint-all && make build-dev  # Development
+make build-prod                   # Production (runs lint-all + test automatically)
+```
 
-**Legacy npm commands (if needed):**
-- `npm run lint:all` - TypeScript + SCSS + Architecture (use: make lint-all)
-- `npm run lint` - TypeScript only (use: make lint-ts)
-- `npm run lint:scss` - SCSS only (use: make lint-scss)
-- `npm run lint:arch` - Architecture validation (use: make lint-arch)
-- `npm run lint:scss:fix` - Auto-fix SCSS (use: make lint-fix)
+**Available commands:**
+- `make lint-all` - TypeScript + SCSS + Architecture
+- `make lint-fix` - Auto-fix issues
+- `make build-prod` - Production build with ALL pre-checks
+- `make test` - Run unit tests
 
 ---
 
-## TypeScript Unit Testing (NEW!)
+## TypeScript Unit Testing
 
 **IMPORTANT:** All new services with business logic MUST have unit tests.
 
-### Testing Strategy (Analog to Python Backend)
+### What to Test
 
-**What to Test:**
 ✅ **DO write tests for:**
-- **Business Services** (`services/business/*.service.ts`) - Pure functions, transformations, logic
-- **Utility Services** (`services/utils/*.service.ts`) - String manipulation, conversions, calculations
-- **Pure functions** - Any method without HTTP calls, DOM manipulation, or external dependencies
-- **Complex logic** - Conditional logic, data transformations, validation rules
+- Business Services (`services/business/*.service.ts`) - Pure functions, transformations
+- Utility Services (`services/utils/*.service.ts`) - String manipulation, calculations
+- Pure functions - No HTTP calls, DOM manipulation
 
 ❌ **DO NOT write tests for:**
-- **HTTP Services** - Services that only make API calls (mock hell, no value)
-- **Config Services** - Services that only read/provide configuration
-- **Simple getters/setters** - No logic to test
-- **Angular Components** - Use manual testing unless critical business logic
+- HTTP Services - Services that only make API calls
+- Config Services - Services that only read configuration
+- Angular Components - Use manual testing
 
-### Test Location Rules
+### Test Location (CRITICAL!)
 
-**CRITICAL:** Test files MUST be co-located with the service they test!
-
+Test files MUST be co-located with service:
 ```
-✅ CORRECT: Test next to service
+✅ CORRECT:
 src/app/services/business/
   ├── chat-export.service.ts
-  ├── chat-export.service.spec.ts       // ✅ Same directory
-  ├── song-release.service.ts
-  └── song-release.service.spec.ts
+  └── chat-export.service.spec.ts       // ✅ Same directory
 
-src/app/services/utils/
-  ├── html-to-text.service.ts
-  └── html-to-text.service.spec.ts      // ✅ Same directory
-
-❌ WRONG: Test in wrong location
+❌ WRONG:
 src/app/services/
-  ├── song.service.spec.ts              // ❌ Service is in business/ subdirectory!
-  └── business/
-      └── song.service.ts
+  ├── song.service.spec.ts              // ❌ Wrong location!
+  └── business/song.service.ts
 ```
 
 ### Running Tests
 
-**CRITICAL: ALWAYS use `make` commands (NOT direct `npm` calls)!**
-- ✅ `make` validates Node.js environment first (prevents errors)
-- ✅ Consistent workflow across Frontend + Backend
-
 ```bash
-# From aiwebui directory
-
-# Run all tests (single run, headless browser)
-make test
-
-# Run tests in watch mode (development)
-make test-watch
-
-# Run tests with coverage report
-make test-coverage
+# From aiwebui/
+make test                      # Run all tests (single run)
+make test-watch               # Watch mode (development)
+make test-coverage            # With coverage report
 ```
-
-**Available Makefile targets:**
-- `make test` - Run all unit tests (single run, CI-ready)
-- `make test-watch` - Run tests in watch mode (development)
-- `make test-coverage` - Run tests with coverage report
-
-**Legacy npm commands (if needed):**
-```bash
-npm run test                           # Interactive mode (use: make test-watch)
-npm run test -- --watch=false          # Single run (use: make test)
-```
-
-### Test Examples
-
-**Example 1: Testing Pure Functions (ChatExportService)**
-
-```typescript
-// services/business/chat-export.service.spec.ts
-import { TestBed } from '@angular/core/testing';
-import { ChatExportService } from './chat-export.service';
-
-describe('ChatExportService - generateFilename', () => {
-  let service: ChatExportService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [ChatExportService]
-    });
-    service = TestBed.inject(ChatExportService);
-  });
-
-  it('should sanitize special characters from filename', () => {
-    // Test via public API (exportToMarkdown calls private generateFilename)
-    const downloadSpy = spyOn<any>(service as any, 'downloadFile');
-
-    service.exportToMarkdown({
-      title: 'Test@Chat#With$Special%Characters!',
-      // ... other required fields
-    }, []);
-
-    const filename = downloadSpy.calls.mostRecent().args[1];
-    expect(filename).not.toContain('@');
-    expect(filename).not.toContain('#');
-  });
-
-  it('should preserve German umlauts', () => {
-    const downloadSpy = spyOn<any>(service as any, 'downloadFile');
-
-    service.exportToMarkdown({
-      title: 'Testöäü ÖÄÜß Chat',
-      // ... other required fields
-    }, []);
-
-    const filename = downloadSpy.calls.mostRecent().args[1];
-    expect(filename).toContain('öäü');
-    expect(filename).toContain('ÖÄÜß');
-  });
-});
-```
-
-**Example 2: Testing String Transformations (HtmlToTextService)**
-
-```typescript
-// services/utils/html-to-text.service.spec.ts
-describe('HtmlToTextService', () => {
-  let service: HtmlToTextService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(HtmlToTextService);
-  });
-
-  it('should convert unordered list with bullets', () => {
-    const html = '<ul><li>Item 1</li><li>Item 2</li></ul>';
-    const result = service.convert(html);
-
-    expect(result).toContain('• Item 1');
-    expect(result).toContain('• Item 2');
-  });
-
-  it('should handle nested lists with indentation', () => {
-    const html = `
-      <ul>
-        <li>Top level
-          <ul>
-            <li>Nested item</li>
-          </ul>
-        </li>
-      </ul>
-    `;
-    const result = service.convert(html);
-
-    expect(result).toContain('• Top level');
-    expect(result).toContain('  • Nested item');  // 2 spaces indent
-  });
-});
-```
-
-### Testing Best Practices
-
-1. **Test pure functions** - Methods without side effects are easiest to test
-2. **Test via public API** - Don't test private methods directly (test through public interface)
-3. **Use descriptive test names** - "should sanitize special characters from filename"
-4. **Mock external dependencies** - HTTP services, LocalStorage, etc.
-5. **One assertion per concept** - Multiple `expect()` calls are OK if testing same concept
-6. **Use `beforeEach`** - Setup shared test fixtures
-7. **Avoid integration tests** - Test services in isolation
-
-### When to Write Tests
-
-- **New Features**: Write tests for new services with business logic
-- **Bug Fixes**: Add test case that reproduces the bug (if logic-related)
-- **Refactoring**: Extend existing tests if logic changes
-- **Quality Issues**: When team quality drops, tests catch regressions
-
-### What We Test (Examples from Implementation)
-
-**ChatExportService** (43 tests):
-- Filename sanitization (special chars, umlauts, length limits)
-- Markdown generation (headers, metadata, message formatting)
-- Export functionality (full export, filtering summaries)
-
-**HtmlToTextService** (50+ tests):
-- HTML to text conversion (paragraphs, lists, tables)
-- Text formatting (bold, italic, code blocks)
-- Edge cases (empty input, malformed HTML, entities)
 
 ---
 
 ## SCSS Guidelines
 
-### Nesting Rules
+### Nesting Rules (CRITICAL!)
 - **Max 2 levels** for custom classes
 - **Exception:** Angular Material (`mat-*`) may use 3 levels
-- Use **BEM** (`.block__element--modifier`) to flatten hierarchy
-- No generic selectors (`div > p`, `h2`) - always use classes
+- Use **BEM** (`.block__element--modifier`)
 
-**Example:**
 ```scss
 // ❌ BAD: Deep nesting
 .player-bar {
@@ -691,72 +409,32 @@ describe('HtmlToTextService', () => {
   }
 }
 
-// ✅ GOOD: Flattened with BEM
+// ✅ GOOD: BEM
 .player-bar { }
 .player-bar__content { }
 .player-bar__song-info { }
 ```
 
-### Cleanup
-- Remove unused styles after changes
-- No inline styles
-- Comply with Stylelint rules
-
-### SCSS Architecture for NEW Components (CRITICAL!)
-
-**New components (with `_NEW_` or `-new-` in filename) have STRICT rules enforced by Stylelint:**
-
-**Rules:**
-1. **BEM for custom elements** - Max 2 levels
-   - `.feature__element`, `.feature__element--modifier`
-
-2. **Material overrides** - Max 3 levels, ONLY for `mat-*`
-   - `.feature mat-card mat-card-content { }` ✅
-
-3. **NO custom nesting over 2 levels**
-   - Use flat BEM classes instead of nesting
-
-**Example:**
-```scss
-// ✅ CORRECT: BEM with max 2 levels
-.product-list { }
-.product-list__item { }
-.product-list__item--active { }
-
-// ✅ CORRECT: Material override max 3
-.product-list {
-  mat-card {                    // +1
-    mat-card-content {          // +2
-      padding: 1rem;            // Styling (no +3!)
-    }
-  }
-}
-
-// ❌ BUILD FAILS: Custom nesting over 2
-.product-list {
-  .content {
-    .item {                     // ❌ ERROR: 3 custom levels
-      .child { }
-    }
-  }
-}
-```
-
-**Naming convention for strict rules:**
-- `product-list-new.component.scss` ✅ Strict
-- `_NEW_customer.component.scss` ✅ Strict
-- `payment.component.scss` ⚠️ Warnings only
-
-**Old components** are ignored by Stylelint to avoid breaking changes.
+### NEW Components (Strict Rules)
+Components with `_NEW_` or `-new-` in filename have STRICT Stylelint enforcement:
+- BEM max 2 levels for custom elements
+- Material overrides max 3 levels (only for `mat-*`)
 
 ---
 
 ## Internationalization (i18n)
 
-**IMPORTANT:** All new components MUST use i18n (ngx-translate)
+**MANDATORY:** All new components use ngx-translate
 
-### Key Structure
-Use **feature-grouped hierarchical keys** (max 3 levels):
+```typescript
+// Template
+<h2>{{ 'featureName.subsection.key' | translate }}</h2>
+
+// With parameters
+<span>{{ 'chat.warnings.memoryLow' | translate:{percent: 85} }}</span>
+```
+
+**Key Structure:** Max 3 levels, feature-grouped
 ```json
 {
   "featureName": {
@@ -767,187 +445,55 @@ Use **feature-grouped hierarchical keys** (max 3 levels):
 }
 ```
 
-### Implementation
-```typescript
-// Template
-<h2>{{ 'featureName.subsection.key' | translate }}</h2>
-
-// With parameters
-<span>{{ 'chat.warnings.memoryLow' | translate:{percent: 85} }}</span>
-```
-
-### Don'ts
-- ❌ DON'T hardcode UI text strings
-- ❌ DON'T use flat keys (`buttonSave` instead of `common.save`)
-- ❌ DON'T forget to update BOTH `en.json` AND `de.json`
-- ❌ DON'T nest deeper than 3 levels
+**Don'ts:**
+- ❌ Hardcode UI text
+- ❌ Use flat keys
+- ❌ Update only one language file
 
 ---
 
-## Python Code Quality & Testing
+## Python Code Quality
 
 ### Logging (Loguru)
-**IMPORTANT:** All backend code MUST use structured logging with context.
-
-#### Rules
-- **ALWAYS** use `logger` from `utils.logger`, **NEVER** `print()`
-- **ALWAYS** use `from utils.logger import logger`, **NEVER** `import logging`
-- **ALWAYS** provide context via extra fields (NOT in the message string)
-- **ALWAYS** use human-readable messages (NOT `snake_case`)
-
-**CRITICAL:** Using `import logging` instead of `from utils.logger import logger` will cause crashes when using structured logging parameters (e.g., `logger.info("Message", param=value)`). Standard Python logger does NOT support named parameters!
-
-#### Patterns
 
 ```python
-# ✅ CORRECT: Use Loguru logger from utils
+# ✅ CORRECT
 from utils.logger import logger
 
-logger.debug("Sketch retrieved", sketch_id=sketch_id, workflow=workflow, user_id=user_id)
-logger.info("Song updated", song_id=song_id, fields_updated=list(update_data.keys()))
-logger.warning("Template not found", category=category, action=action)
-logger.error("Database error", error=str(e), error_type=type(e).__name__, sketch_id=sketch_id)
+logger.debug("Sketch retrieved", sketch_id=sketch_id, user_id=user_id)
+logger.error("Database error", error=str(e), sketch_id=sketch_id)
 
-# ❌ WRONG: Standard Python logging (CRASHES with structured parameters!)
+# ❌ WRONG: Standard logging (CRASHES!)
 import logging
 logger = logging.getLogger(__name__)
-logger.info("Processing", task_id=task_id)  # TypeError: info() got unexpected keyword argument 'task_id'
+logger.info("Processing", task_id=task_id)  # TypeError!
 
-# ❌ WRONG: Snake-case messages (unreadable)
-logger.debug("sketch_retrieved_by_id", sketch_id=sketch_id)
-logger.info("song_updated", song_id=song_id)
-
-# ❌ WRONG: Context in message string (not parseable)
+# ❌ WRONG: Context in message string
 logger.debug(f"Sketch retrieved: {sketch_id}")
-logger.info(f"Song updated with fields: {update_data.keys()}")
-
-# ❌ WRONG: Using print()
-print(f"Processing sketch {sketch_id}")
 ```
 
-#### Log Levels
-- **DEBUG:** Development details with all context fields (visible only in dev)
-- **INFO:** Production events, message only (no context fields shown)
-- **WARNING:** Unexpected conditions, message only
-- **ERROR:** Failures with full context (multi-line format with error details)
+**CRITICAL:** Using `import logging` causes crashes with structured parameters!
 
-#### Output Examples
-
-**Development (LOG_LEVEL=DEBUG):**
-```
-DEBUG | Prompt template loaded category=image action=enhance model=llama3.2:3b temperature=0.7 max_tokens=500 version=1.0
-DEBUG | Sketch retrieved sketch_id=395efa8b workflow=draft user_id=1
-INFO  | Sketch updated
-```
-
-**Production (LOG_LEVEL=WARNING):**
-```
-WARNING | Template not found
-ERROR   | Database error
-  └─ Type: OperationalError
-  └─ Error: connection timeout
-  └─ sketch_id: 395efa8b
-```
-
----
-
-### Ruff (Linting & Formatting)
-**IMPORTANT:** All Python code MUST pass Ruff before commits.
-
-**CRITICAL: ALWAYS use `make` commands (NOT direct `ruff` calls)!**
-- ✅ `make` validates Conda environment first (prevents errors)
-- ✅ Runs architecture validation (`import-linter`) automatically
-- ❌ Direct `ruff` calls skip environment checks and architecture validation
+### Ruff + pytest
 
 ```bash
-# From aiproxysrv directory
-make lint-all                  # ✅ PREFERRED: Ruff + import-linter + Conda check
-make format                    # ✅ PREFERRED: Format with environment check
-make test                      # ✅ PREFERRED: pytest with environment check
-make install-dev               # Install ruff + pre-commit
-
-# ❌ DON'T use direct commands (skip environment + architecture validation):
-# ruff check .
-# ruff check . --fix
-# ruff format .
+# From aiproxysrv/
+make lint-all                  # Ruff + import-linter + Conda check
+make format                    # Auto-fix and format
+make test                      # pytest
 ```
 
-**Available Makefile targets:**
+**What to Test:**
 
-**Code Quality:**
-- `make check-conda` - Verify `mac_ki_service_py312` environment is active
-- `make lint-ruff` - Ruff linter only (with Conda check)
-- `make lint-imports` - Architecture validation only (with Conda check)
-- `make lint-all` - All linters (Ruff + import-linter, with Conda check)
-- `make format` - Auto-fix and format code (with Conda check)
-- `make test` - Run pytest (with Conda check)
-- `make install-dev` - Install development dependencies
+❌ **DO NOT test:**
+- Database services (`src/db/*_service.py`) - Pure CRUD, no logic
+- File system operations
+- SQLAlchemy mocks
 
-**Database Migrations:**
-- `make db-current` - Show current migration version
-- `make db-upgrade` - Upgrade database to latest version
-- `make db-downgrade` - Downgrade database by 1 revision
-- `make db-revision` - Create new migration (prompts for message)
-- `make db-history` - Show migration history
-- `make db-heads` - Show head revisions
-
-### pytest (Unit Testing)
-**CRITICAL: Only test business logic, NEVER infrastructure!**
-
-```bash
-# From aiproxysrv directory
-pytest                         # Run all tests
-pytest -v -s                   # Verbose output
-pytest tests/test_health.py    # Run specific file
-pytest -k "test_name"          # Run tests matching pattern
-pytest --cov=src               # Coverage report
-```
-
-**What to Test (CRITICAL RULES):**
-
-❌ **DO NOT write tests for:**
-- **Database services** (`src/db/*_service.py`) - Pure CRUD operations, no business logic
-- **File system operations** - Infrastructure, not logic
-- **External API clients** - Mock hell, no value
-- **SQLAlchemy mocks** - Testing mock setup, not real behavior
-- **Controllers with only DB calls** - Integration tests, not unit tests
-
-✅ **DO write tests for:**
-- **Business logic services** (`src/business/*_service.py`) - Pure functions, calculations
-- **Validation logic** - HTTP status codes, error messages
-- **Utilities** - String manipulation, data transformations, calculations
-- **Complex algorithms** - Anything with conditional logic
-
-**Example:**
-```python
-# ❌ BAD: Testing DB service (no business logic, only CRUD)
-class TestApiCostService:
-    def test_get_cached_month(self, mock_db_session):
-        # Testing SQLAlchemy mock setup = USELESS!
-        # If DB schema changes, test breaks but gives no safety
-        mock_db_session.query().filter().first()
-
-# ✅ GOOD: Testing business logic (pure function)
-class TestImageEnhancementService:
-    def test_hex_to_rgb_conversion(self):
-        # Real logic, no infrastructure
-        assert hex_to_rgb("#FF5733") == (255, 87, 51)
-```
-
-**When to Write Tests:**
-- **New Features**: Write tests for business logic only
-- **Bug Fixes**: Add test case that reproduces the bug (if logic-related)
-- **Refactoring**: Extend existing tests if logic changes
-
----
-
-## General Don'ts
-
-- ❌ NEVER commit `.env` to repo
-- ❌ NEVER use emojis (unless explicitly requested)
-- ❌ NEVER create unnecessary markdown files
-- ❌ NEVER skip linting before commits
-- ❌ NEVER skip unit tests before commits
+✅ **DO test:**
+- Business services (`src/business/*_service.py`) - Pure functions
+- Validation logic
+- Complex algorithms
 
 ---
 
@@ -957,70 +503,25 @@ class TestImageEnhancementService:
 
 ### Frontend (aiwebui)
 
-**CRITICAL: ALWAYS use `make` commands (NOT direct `npm` calls for critical tasks)!**
-- ✅ `make` validates Node.js environment first (prevents errors)
-- ✅ `make build-prod` runs ALL pre-checks (lint-all + test) before building
-- ✅ Consistent workflow across Frontend + Backend
-- ❌ Direct `npm run build:prod` skips validation!
+**CRITICAL: ALWAYS use `make` (NOT direct `npm` for production)!**
 
 ```bash
-# From aiwebui directory
+# Code Quality
+make lint-all                  # TypeScript + SCSS + Architecture
+make lint-fix                  # Auto-fix issues
 
-# Code Quality (ALWAYS use make!)
-make lint-all                  # ✅ PREFERRED: TypeScript + SCSS + Architecture
-make lint-fix                  # ✅ Auto-fix TypeScript + SCSS issues
-make check-node                # Verify Node.js environment
-
-# Build (CRITICAL: use make for production!)
-make build-prod                # ✅ PREFERRED: Production build with ALL pre-checks
-make build-dev                 # Development build
-make validate                  # Pre-deployment check (lint-all)
-make deploy-check              # Verify build output
+# Build (CRITICAL: use make!)
+make build-prod                # Production with ALL pre-checks
+make build-dev                 # Development
 
 # Development
-make dev                       # Development server (ng serve)
-make watch                     # Watch mode
-make install                   # Install npm dependencies
-make clean                     # Clean Angular cache
-
-# ❌ DON'T use direct commands for production (skip validation):
-# npm run build:prod           # ❌ No pre-checks!
-# npm run lint:all             # ❌ No Node.js check
-```
-
-**Available Makefile targets:**
-
-**Code Quality:**
-- `make check-node` - Verify Node.js and npm versions
-- `make lint-ts` - TypeScript/ESLint only
-- `make lint-scss` - Stylelint only
-- `make lint-arch` - Architecture validation (dependency-cruiser)
-- `make lint-all` - All linters (TypeScript + SCSS + Architecture)
-- `make lint-fix` - Auto-fix TypeScript + SCSS issues
-
-**Build & Deployment:**
-- `make build-dev` - Development build
-- `make build-prod` - Production build (with lint-all pre-check)
-- `make validate` - Pre-deployment validation (lint-all)
-- `make deploy-check` - Verify production build output
-
-**Development:**
-- `make dev` - Development server
-- `make watch` - Watch mode
-- `make install` - Install npm dependencies
-- `make clean` - Clean Angular cache and node_modules
-
-**Legacy npm commands (if needed):**
-```bash
-npm run dev                    # Development server (use: make dev)
-npm run build:prod             # Production build (use: make build-prod)
-npm run lint:all               # TypeScript + SCSS (use: make lint-all)
-npm run lint                   # TypeScript only (use: make lint-ts)
-npm run lint:scss              # SCSS only (use: make lint-scss)
-npm run test                   # Unit tests (use: make test)
+make dev                       # Dev server
+make test                      # Unit tests
+make test-watch               # Tests in watch mode
 ```
 
 ### Backend (aiproxysrv)
+
 ```bash
 # Activate conda environment
 conda activate mac_ki_service_py312
@@ -1030,70 +531,34 @@ python src/server.py
 
 # Database Migrations (ALWAYS use make!)
 make db-current                # Show current version
-make db-upgrade                # Apply all pending migrations
-make db-downgrade              # Rollback 1 revision
-make db-revision               # Create new migration (prompts for message)
-make db-history                # Show migration history
-make db-heads                  # Show head revisions
+make db-upgrade                # Apply migrations
+make db-revision               # Create new migration
 
 # Celery Worker
 python src/worker.py
-celery -A src.worker flower    # Monitor (http://localhost:5555)
 
 # Code Quality (ALWAYS use make!)
-make lint-all                  # ✅ Ruff + import-linter + Conda check
-make format                    # ✅ Auto-fix and format with checks
-make test                      # ✅ pytest with Conda check
-make check-conda               # Verify correct environment
-
-# ❌ DON'T use: ruff check . --fix && ruff format .
-# ❌ DON'T use: pytest -v -s
-# ❌ DON'T use: alembic upgrade head (use make db-upgrade)
+make lint-all                  # Ruff + import-linter
+make format                    # Auto-fix and format
+make test                      # pytest
 ```
 
 ### Database Seeding
+
 ```bash
 # From project root (mac_ki_service/)
-# IMPORTANT: All seed scripts are SQL-based (not Python) for Docker compatibility
-
-# Seed Prompt Templates
 cat scripts/db/seed_prompts.sql | docker exec -i postgres psql -U aiproxy -d aiproxysrv
-
-# Seed Image Fast Enhancement Template
 cat scripts/db/seed_prompts_image_fast.sql | docker exec -i postgres psql -U aiproxy -d aiproxysrv
-
-# Seed Lyric Parsing Rules
 cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i postgres psql -U aiproxy -d aiproxysrv
-
-# Local PostgreSQL (without Docker)
-psql -h localhost -U aiproxy -d aiproxysrv -f scripts/db/seed_prompts.sql
 ```
 
-**DB Credentials** (from `aiproxysrv/.env_postgres`):
-- **Service**: `postgres`, **DB**: `aiproxysrv`, **User**: `aiproxy`, **Password**: `aiproxy123`
+**DB Credentials:** Service: `postgres`, DB: `aiproxysrv`, User: `aiproxy`, Password: `aiproxy123`
 
 ### Docker
+
 ```bash
-# From project root
 docker compose up postgres     # Development (PostgreSQL only)
 docker compose logs -f         # View logs
-docker compose ps              # Check containers
-```
-
----
-
-## Testing Strategy
-
-### Mock API (aitestmock)
-Testing without external API costs:
-- Image: `"0001"` → OK, `"0002"` → Error
-- Song: `"0001"` → OK, `"0002"` → Error, `"30s"` → 30s delay
-
-### Frontend Testing
-```bash
-# From aiwebui/
-npm run test -- --watch       # Unit tests
-npm run e2e                   # E2E tests
 ```
 
 ---
@@ -1101,32 +566,38 @@ npm run e2e                   # E2E tests
 ## Common Pitfalls
 
 ### Frontend
-1. **Forgetting i18n**: Hardcoding UI text instead of `{{ 'key' | translate }}`
-2. **Constructor DI**: Using constructor injection instead of `inject()`
-3. **Hardcoded URLs**: Not using `ApiConfigService`
-4. **Deep SCSS nesting**: Going beyond 2-3 levels
-5. **Missing cleanup**: Not unsubscribing with `takeUntil(destroy$)`
+1. Forgetting i18n - Hardcoding text instead of `{{ 'key' | translate }}`
+2. Constructor DI - Use `inject()` instead
+3. Hardcoded URLs - Not using `ApiConfigService`
+4. Deep SCSS nesting - Beyond 2-3 levels
 
 ### Backend
-1. **Missing migrations**: Running code before `alembic upgrade head`
-2. **Celery not running**: Async tasks fail silently
-3. **DB connection leaks**: Not closing sessions properly
-4. **Missing error handling**: No try/catch in routes
-5. **Missing JWT protection**: Unprotected API endpoints
-6. **Architecture violations**: Business logic in DB layer (Code Review catches this)
+1. Missing migrations - Run `make db-upgrade` first
+2. Celery not running - Async tasks fail silently
+3. Missing JWT protection - Unprotected endpoints
+4. Architecture violations - Business logic in DB layer
 
 ### Both
-1. **Ignoring linter warnings**: ESLint/Stylelint/Ruff errors
-2. **Not testing language switch**: Only testing in one language
-3. **Committing `.env`**: Security breach!
-4. **Skipping builds/tests**: Not running validation before commits
+1. Ignoring linter warnings
+2. Not testing language switch
+3. Committing `.env`
+4. Skipping builds/tests before commits
+
+---
+
+## General Don'ts
+
+- ❌ NEVER commit `.env` to repo
+- ❌ NEVER use emojis (unless requested)
+- ❌ NEVER create unnecessary docs
+- ❌ NEVER skip linting/tests before commits
 
 ---
 
 # Additional Documentation
 
-- **UI Patterns**: `docs/UI_PATTERNS.md` **(CRITICAL - Read before creating new pages!)**
-- **Architecture Details**: `docs/ARCHITECTURE.md` → Links to `docs/arch42/README.md` (arc42 template with diagrams, DB schema, API endpoints)
-- **Code Patterns**: `docs/CODE_PATTERNS.md` (Complete code examples)
-- **Troubleshooting**: `docs/TROUBLESHOOTING.md` (Debug commands, common issues)
-- **CI/CD**: `docs/CI_CD.md` (GitHub Actions, build pipeline)
+- **UI Patterns**: `docs/UI_PATTERNS.md` **(CRITICAL - Read before new pages!)**
+- **Architecture**: `docs/ARCHITECTURE.md` → `docs/arch42/README.md`
+- **Code Patterns**: `docs/CODE_PATTERNS.md`
+- **Troubleshooting**: `docs/TROUBLESHOOTING.md`
+- **CI/CD**: `docs/CI_CD.md`

@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 
 import { SongReleaseService } from '../../services/business/song-release.service';
 import { NotificationService } from '../../services/ui/notification.service';
+import { ImageBlobService } from '../../services/ui/image-blob.service';
 import { SongRelease, SongReleaseListItem, ReleaseType, ReleaseStatus } from '../../models/song-release.model';
 
 @Component({
@@ -26,6 +27,8 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
   // Release list and pagination
   releaseList: SongReleaseListItem[] = [];
   selectedRelease: SongRelease | null = null;
+  selectedReleaseCoverBlobUrl: string = '';
+  listItemCoverBlobUrls = new Map<string, string>(); // Map: release.id -> blob URL
   currentPage = 0;
   pagination = {
     total: 0,
@@ -54,6 +57,7 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
 
   private releaseService = inject(SongReleaseService);
   private notificationService = inject(NotificationService);
+  private imageBlobService = inject(ImageBlobService);
   private translate = inject(TranslateService);
   private router = inject(Router);
 
@@ -98,6 +102,9 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
     this.currentPage = page;
     this.pagination.offset = page * this.pagination.limit;
 
+    // Clear previous list item cover blob URLs
+    this.listItemCoverBlobUrls.clear();
+
     try {
       const response = await this.releaseService.getReleases(
         this.pagination.limit,
@@ -109,6 +116,24 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
       if (response) {
         this.releaseList = response.items || [];
         this.pagination.total = response.total || 0;
+
+        // Load cover blob URLs for all list items
+        this.releaseList.forEach(release => {
+          if (release.cover_url) {
+            this.imageBlobService.getImageBlobUrl(release.cover_url)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe({
+                next: (blobUrl) => {
+                  if (blobUrl) {
+                    this.listItemCoverBlobUrls.set(release.id, blobUrl);
+                  }
+                },
+                error: () => {
+                  // Silently fail - placeholder will be shown
+                }
+              });
+          }
+        });
       } else {
         this.releaseList = [];
         this.pagination.total = 0;
@@ -128,11 +153,26 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
    */
   async selectRelease(release: SongReleaseListItem): Promise<void> {
     this.isLoadingDetail = true;
+    this.selectedReleaseCoverBlobUrl = ''; // Reset blob URL
 
     try {
       const response = await this.releaseService.getReleaseById(release.id).toPromise();
       if (response?.data) {
         this.selectedRelease = response.data;
+
+        // Load cover blob URL for authenticated image access
+        if (this.selectedRelease.cover_url) {
+          this.imageBlobService.getImageBlobUrl(this.selectedRelease.cover_url)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (blobUrl) => {
+                this.selectedReleaseCoverBlobUrl = blobUrl;
+              },
+              error: () => {
+                this.selectedReleaseCoverBlobUrl = '';
+              }
+            });
+        }
       }
     } catch (error) {
       console.error('Failed to load release details:', error);
@@ -305,5 +345,12 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
     this.router.navigate(['/song-projects'], {
       state: { selectedProjectId: projectId }
     });
+  }
+
+  /**
+   * Get cover blob URL for list item
+   */
+  getListItemCoverUrl(releaseId: string): string {
+    return this.listItemCoverBlobUrls.get(releaseId) || '';
   }
 }

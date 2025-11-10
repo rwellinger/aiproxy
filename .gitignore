@@ -38,3 +38,4 @@ dump.rdb
 /develop-env/.env-dev
 /aiproxysrv/htmlcov/
 /logs/
+/CLAUDE.md.orgi

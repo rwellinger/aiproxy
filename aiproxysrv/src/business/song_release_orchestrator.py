@@ -159,9 +159,10 @@ class SongReleaseOrchestrator:
             # 8. Transform to response (business logic in transformer)
             response = transform_release_to_response(release, projects)
 
-            # 9. Replace S3 placeholder with presigned URL
+            # 9. Replace S3 placeholder with backend proxy path
+            # CRITICAL: NEVER return presigned URLs - use backend proxy route!
             if release.cover_s3_key:
-                response["cover_url"] = self.storage.get_url(release.cover_s3_key)
+                response["cover_url"] = f"/api/v1/song-releases/{release.id}/cover"
 
             logger.info("Release created with projects", release_id=str(release.id), project_count=len(project_ids))
             return response, None
@@ -195,9 +196,10 @@ class SongReleaseOrchestrator:
             # 3. Transform to response (business logic in transformer)
             response = transform_release_to_response(release, projects)
 
-            # 4. Replace S3 placeholder with presigned URL
+            # 4. Replace S3 placeholder with backend proxy path
+            # CRITICAL: NEVER return presigned URLs - use backend proxy route!
             if release.cover_s3_key:
-                response["cover_url"] = self.storage.get_url(release.cover_s3_key)
+                response["cover_url"] = f"/api/v1/song-releases/{release_id}/cover"
 
             return response
 
@@ -237,10 +239,11 @@ class SongReleaseOrchestrator:
             # 2. Transform to list responses (business logic in transformer)
             items = [transform_release_to_list_response(release) for release in releases]
 
-            # 3. Add presigned URLs for covers
+            # 3. Add backend proxy paths for covers
+            # CRITICAL: NEVER return presigned URLs - use backend proxy route!
             for i, release in enumerate(releases):
                 if release.cover_s3_key:
-                    items[i]["cover_url"] = self.storage.get_url(release.cover_s3_key)
+                    items[i]["cover_url"] = f"/api/v1/song-releases/{release.id}/cover"
 
             return {"items": items, "total": total, "limit": limit, "offset": offset}
 

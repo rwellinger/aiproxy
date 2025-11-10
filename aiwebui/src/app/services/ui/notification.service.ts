@@ -16,7 +16,7 @@ export class NotificationService {
 
     private snackBar = inject(MatSnackBar);
 
-    success(message: string, duration: number = 3000): void {
+    success(message: string, duration: number = 2000): void {
         this.dismissLoading();
         this.snackBar.open(message, 'Close', {
             duration: duration,
@@ -26,10 +26,10 @@ export class NotificationService {
         });
     }
 
-    error(message: string, duration: number = 8000): void {
+    error(message: string, duration: number = 0): void {
         this.dismissLoading();
         this.snackBar.open(message, 'Close', {
-            duration: duration,
+            duration: duration,  // 0 = indefinite (user must click Close button)
             panelClass: ['error-snackbar'],
             verticalPosition: 'top',
             horizontalPosition: 'right'

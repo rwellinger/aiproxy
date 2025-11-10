@@ -98,6 +98,14 @@ export class ChatService {
     const data: ChatResponse = await firstValueFrom(
       this.http.post<ChatResponse>(this.apiConfig.endpoints.ollama.chatGenerateUnified, request)
     );
+
+    // Validate response is not empty (can happen with large models hitting token limits)
+    if (!data.response || data.response.trim() === '') {
+      throw new Error(
+        `AI Model returned empty response. Try switching to "Fast" mode under "AI Enhancement Quality".`
+      );
+    }
+
     return data.response;
   }
 

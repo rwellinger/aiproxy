@@ -100,8 +100,9 @@
           (click)="selectRelease(release)">
           <div class="release-item-header">
             <div class="release-cover">
-              <img *ngIf="release.cover_url" [src]="release.cover_url" alt="Cover">
-              <div *ngIf="!release.cover_url" class="cover-placeholder" [style.background-color]="getColorFromString(release.name)">
+              <!-- List view: Show cover if available, otherwise placeholder -->
+              <img *ngIf="getListItemCoverUrl(release.id)" [src]="getListItemCoverUrl(release.id)" alt="Cover">
+              <div *ngIf="!getListItemCoverUrl(release.id)" class="cover-placeholder" [style.background-color]="getColorFromString(release.name)">
                 <span class="initials">{{ getInitials(release.name) }}</span>
               </div>
             </div>
@@ -163,8 +164,9 @@
         <!-- Detail Header with Cover -->
         <div class="detail-header">
           <div class="detail-cover">
-            <img *ngIf="selectedRelease.cover_url" [src]="selectedRelease.cover_url" alt="Cover">
-            <div *ngIf="!selectedRelease.cover_url" class="cover-placeholder-large" [style.background-color]="getColorFromString(selectedRelease.name)">
+            <!-- Detail view: Show blob URL (authenticated) -->
+            <img *ngIf="selectedReleaseCoverBlobUrl" [src]="selectedReleaseCoverBlobUrl" alt="Cover">
+            <div *ngIf="!selectedReleaseCoverBlobUrl" class="cover-placeholder-large" [style.background-color]="getColorFromString(selectedRelease.name)">
               <span class="initials">{{ getInitials(selectedRelease.name) }}</span>
             </div>
           </div>
