@@ -69,7 +69,18 @@ print_header "Release ${VERSION} erstellen"
 
 cd "$PROJECT_DIR"
 
-git fetch
+# ──────────────────────────────────────
+# 0. Git fetch (optional - darf fehlschlagen)
+# ──────────────────────────────────────
+REMOTE_AVAILABLE=true
+print_info "Aktualisiere Remote-Status..."
+if ! git fetch 2>&1; then
+    REMOTE_AVAILABLE=false
+    print_warning "Git fetch fehlgeschlagen (Netzwerk-Problem?)"
+    print_warning "Fahre trotzdem fort - lokale Checks werden durchgeführt"
+else
+    print_success "Remote-Status aktualisiert"
+fi
 
 # ──────────────────────────────────────
 # 1. Prüfe, ob der Arbeitsbaum sauber ist
@@ -84,14 +95,18 @@ print_success "Arbeitsbaum ist sauber"
 # ──────────────────────────────────────
 # 2. Prüfe, ob noch unpushed Commits existieren
 # ──────────────────────────────────────
-if git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
-    if git rev-list @{u}..HEAD | grep -q .; then
-        print_error "Es gibt lokale Commits, die noch nicht gepusht wurden."
-        exit 1
+if [ "$REMOTE_AVAILABLE" = true ]; then
+    if git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+        if git rev-list @{u}..HEAD | grep -q .; then
+            print_error "Es gibt lokale Commits, die noch nicht gepusht wurden."
+            exit 1
+        fi
+        print_success "Alle Commits sind gepusht"
+    else
+        print_warning "Kein Upstream Remote gesetzt – Push Check übersprungen"
     fi
-    print_success "Alle Commits sind gepusht"
 else
-    print_warning "Kein Upstream Remote gesetzt – Push Check übersprungen"
+    print_warning "Remote nicht erreichbar - Push Check übersprungen"
 fi
 
 # ──────────────────────────────────────
@@ -102,11 +117,16 @@ if git show-ref --verify --quiet "refs/tags/${VERSION}"; then
     print_error "Tag ${VERSION} existiert bereits (lokal)."
     exit 1
 fi
-if git ls-remote --tags origin | grep -q "refs/tags/${VERSION}\$"; then
-    print_error "Tag ${VERSION} existiert bereits (remote)."
-    exit 1
+if [ "$REMOTE_AVAILABLE" = true ]; then
+    if git ls-remote --tags origin | grep -q "refs/tags/${VERSION}\$"; then
+        print_error "Tag ${VERSION} existiert bereits (remote)."
+        exit 1
+    fi
+    print_success "Tag ${VERSION} ist verfügbar (lokal + remote)"
+else
+    print_warning "Remote nicht erreichbar - nur lokaler Tag-Check durchgeführt"
+    print_success "Tag ${VERSION} ist lokal verfügbar"
 fi
-print_success "Tag ${VERSION} ist verfügbar"
 
 # ══════════════════════════════════════════════════════════════
 # 4. QUALITY GATES - Backend (aiproxysrv)
@@ -228,26 +248,42 @@ print_info "Erstelle Git Tag ${VERSION}..."
 git tag ${VERSION} -m "Release ${VERSION}"
 print_success "Tag ${VERSION} erstellt"
 
-print_info "Pushe Commit und Tag..."
-git push origin main
-git push origin ${VERSION}
-print_success "Tag und Commit gepusht"
+if [ "$REMOTE_AVAILABLE" = true ]; then
+    print_info "Pushe Commit und Tag..."
+    git push origin main
+    git push origin ${VERSION}
+    print_success "Tag und Commit gepusht"
+else
+    print_warning "Remote nicht erreichbar - Push übersprungen!"
+    print_warning "Bitte manuell pushen wenn Netzwerk verfügbar:"
+    echo "  ${YELLOW}git push origin main${NC}"
+    echo "  ${YELLOW}git push origin ${VERSION}${NC}"
+fi
 
 # ──────────────────────────────────────────────────────────
 # 9. GitHub Actions Build
 # ──────────────────────────────────────────────────────────
 print_header "GitHub Actions Build"
-print_info "Build wird automatisch in GitHub Actions gestartet..."
-echo ""
-echo "  🔗 Build Status: ${BLUE}https://github.com/rwellinger/thwelly_ai_tools/actions${NC}"
-echo ""
-print_info "GitHub Actions wird folgende Images bauen und pushen:"
-echo "  • ghcr.io/rwellinger/aiproxysrv-app:${VERSION}"
-echo "  • ghcr.io/rwellinger/celery-worker-app:${VERSION}"
-echo "  • ghcr.io/rwellinger/aiwebui-app:${VERSION}"
-echo ""
-print_info "Erwartete Build-Zeit: ~10-12 Minuten"
-echo ""
+
+if [ "$REMOTE_AVAILABLE" = true ]; then
+    print_info "Build wird automatisch in GitHub Actions gestartet..."
+    echo ""
+    echo "  🔗 Build Status: ${BLUE}https://github.com/rwellinger/thwelly_ai_tools/actions${NC}"
+    echo ""
+    print_info "GitHub Actions wird folgende Images bauen und pushen:"
+    echo "  • ghcr.io/rwellinger/aiproxysrv-app:${VERSION}"
+    echo "  • ghcr.io/rwellinger/celery-worker-app:${VERSION}"
+    echo "  • ghcr.io/rwellinger/aiwebui-app:${VERSION}"
+    echo ""
+    print_info "Erwartete Build-Zeit: ~10-12 Minuten"
+    echo ""
+else
+    print_warning "Kein Push durchgeführt - GitHub Actions Build NICHT gestartet!"
+    echo ""
+    print_warning "Nach manuellem Push werden Images automatisch gebaut."
+    echo ""
+fi
+
 print_warning "Manuelle Builds sind weiterhin möglich (Fallback):"
 echo "  ./scripts/build/build-and-push-aiproxysrv.sh ${VERSION}"
 echo "  ./scripts/build/build-and-push-aiwebui.sh ${VERSION}"
