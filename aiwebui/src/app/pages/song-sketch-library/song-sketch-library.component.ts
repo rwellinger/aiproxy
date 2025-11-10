@@ -152,6 +152,11 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
     this.searchSubject.next(searchTerm);
   }
 
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.searchSubject.next('');
+  }
+
   onWorkflowChange(workflow: 'all' | 'draft' | 'used' | 'archived'): void {
     this.currentWorkflow = workflow;
     this.pagination.offset = 0;

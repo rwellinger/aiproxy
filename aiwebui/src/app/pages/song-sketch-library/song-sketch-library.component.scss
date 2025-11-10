@@ -94,7 +94,7 @@
   position: relative;
   margin-bottom: $spacing-sm;
 
-  i {
+  i.fa-search {
     position: absolute;
     left: $spacing-sm;
     top: 50%;
@@ -113,6 +113,40 @@
       outline: none;
       border-color: $primary-color;
     }
+  }
+}
+
+.clear-search-button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: $text-secondary;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 2;
+
+  &:hover:not(:disabled) {
+    background-color: rgba(0,0,0,0.1);
+    color: $text-primary;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  i {
+    font-size: 12px;
   }
 }
 

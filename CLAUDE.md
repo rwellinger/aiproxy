@@ -159,13 +159,13 @@ grep -r "serve.*s3\|proxy.*resource" src/
 ## Frontend (aiwebui)
 
 ```bash
-# Code Quality
-make lint-all                  # TypeScript + SCSS + Architecture
+# Code Quality & Build (ALWAYS run before commit!)
+make build-prod                # Production build (linters + tests + compilation)
+make lint-all                  # TypeScript + SCSS + Architecture only
 make lint-fix                  # Auto-fix issues
 
-# Build (CRITICAL: use make, NOT npm!)
-make build-prod                # Production with ALL pre-checks
-make build-dev                 # Development
+# Build
+make build-dev                 # Development build
 
 # Development
 make dev                       # Dev server
@@ -221,7 +221,7 @@ cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i postgres psql -U ai
 - ❌ NO constructor DI (use `inject()`)
 - ❌ NO hardcoded text (use `{{ 'key' | translate }}`)
 - ❌ NO deep SCSS nesting (max 2-3 levels)
-- ❌ NO commits without `make lint-all`
+- ❌ NO commits without `make build-prod` (runs linters + tests + production build)
 
 ## General
 - ❌ NO `.env` files in commits
@@ -254,7 +254,11 @@ cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i postgres psql -U ai
 1. **Check:** Does pattern exist? → Look at reference implementations
 2. **Check:** S3 involved? → Use backend proxy pattern
 3. **Check:** New UI page? → Read `docs/UI_PATTERNS.md` first
-4. **Implement** → Run linters → Done
+4. **Implement** → Code changes
+5. **Validate:**
+   - Frontend: `make build-prod` (linters + tests + compilation)
+   - Backend: `make lint-all` (Ruff + import-linter)
+6. **Done** → Ready for manual testing & commit
 
 **When I need business context:**
 → I'll ask you! (Just-in-time explanation)

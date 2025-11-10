@@ -283,6 +283,14 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Clear search input.
+   */
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.searchSubject.next('');
+  }
+
+  /**
    * Handle status filter change.
    */
   onStatusChange(status: 'all' | 'new' | 'progress' | 'archived'): void {

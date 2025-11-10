@@ -38,6 +38,13 @@
               [(ngModel)]="searchTerm"
               (ngModelChange)="onSearchChange($event)"
               class="search-input">
+            <button type="button"
+                    class="clear-search-button"
+                    *ngIf="searchTerm"
+                    (click)="clearSearch()"
+                    [title]="'songView.library.clearSearch' | translate">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
 
           <!-- Workflow Filter -->

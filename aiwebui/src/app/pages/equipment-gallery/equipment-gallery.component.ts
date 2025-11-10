@@ -207,6 +207,14 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Clear search input.
+   */
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.searchSubject.next('');
+  }
+
+  /**
    * Handle type filter change.
    */
   onTypeFilterChange(): void {
