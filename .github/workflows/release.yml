@@ -36,6 +36,10 @@ jobs:
         working-directory: aiwebui
         run: npm run lint
 
+      - name: Run Unit Tests
+        working-directory: aiwebui
+        run: npm run test -- --watch=false --browsers=ChromeHeadless
+
   # ─────────────────────────────────────────────────────────
   # Code Quality: Backend (Ruff + pytest)
   # ─────────────────────────────────────────────────────────

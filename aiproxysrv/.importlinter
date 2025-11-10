@@ -34,11 +34,15 @@ source_modules =
     src.business
 forbidden_modules =
     sqlalchemy
+# EXCEPTION: Orchestrators use TYPE_CHECKING imports for Session type hints
+# These imports are NOT executed at runtime (only for type checkers)
+# Pattern: if TYPE_CHECKING: from sqlalchemy.orm import Session
 ignore_imports =
     src.business.compression_orchestrator -> sqlalchemy
     src.business.prompt_template_orchestrator -> sqlalchemy
     src.business.sketch_orchestrator -> sqlalchemy
     src.business.song_project_orchestrator -> sqlalchemy
+    src.business.song_release_orchestrator -> sqlalchemy
 
 [importlinter:contract:business-no-controllers]
 name = Business layer must not import controllers

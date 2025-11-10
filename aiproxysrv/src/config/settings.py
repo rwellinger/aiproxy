@@ -105,6 +105,7 @@ S3_PROVIDER = os.getenv("S3_PROVIDER", "minio")  # 'minio', 'aws', 'backblaze', 
 S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://localhost:9000")
 S3_BUCKET = os.getenv("S3_BUCKET", "aiproxy-media")  # Default bucket for songs, etc.
 S3_SONG_PROJECTS_BUCKET = os.getenv("S3_SONG_PROJECTS_BUCKET", "song-projects")  # Dedicated bucket for song projects
+S3_SONG_RELEASES_BUCKET = os.getenv("S3_SONG_RELEASES_BUCKET", "song-releases")  # Dedicated bucket for song releases
 S3_IMAGES_BUCKET = os.getenv("S3_IMAGES_BUCKET", "ai-generated-images")  # Dedicated bucket for AI-generated images
 S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "minioadmin")
 S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "minioadmin")

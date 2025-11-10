@@ -273,6 +273,7 @@ class User(Base):
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
     equipment = relationship("Equipment", back_populates="user", cascade="all, delete-orphan")
     song_projects = relationship("SongProject", back_populates="user", cascade="all, delete-orphan")
+    song_releases = relationship("SongRelease", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', active={self.is_active})>"
@@ -538,6 +539,7 @@ class SongProject(Base):
     sketches = relationship("SongSketch", back_populates="project")
     songs = relationship("Song", back_populates="project")
     image_references = relationship("ProjectImageReference", back_populates="project", cascade="all, delete-orphan")
+    release_references = relationship("ReleaseProjectReference", back_populates="project", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<SongProject(id={self.id}, name='{self.project_name}', status='{self.project_status}')>"
@@ -634,3 +636,76 @@ class ProjectImageReference(Base):
 
     def __repr__(self):
         return f"<ProjectImageReference(project_id={self.project_id}, image_id={self.image_id}, folder_id={self.folder_id})>"
+
+
+class SongRelease(Base):
+    """Model for song release tracking (Single/Album)"""
+
+    __tablename__ = "song_releases"
+    __table_args__ = {"extend_existing": True}
+
+    # Primary identifier
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Core fields
+    type = Column(String(20), nullable=False, index=True)  # 'single', 'album'
+    name = Column(String(255), nullable=False)
+    status = Column(String(50), nullable=False, server_default="draft", index=True)
+    # Status: 'draft', 'arranging', 'mixing', 'mastering', 'rejected', 'uploaded', 'released', 'downtaken', 'archived'
+
+    # Metadata
+    description = Column(Text, nullable=True)
+    genre = Column(String(100), nullable=False)
+    tags = Column(String(500), nullable=True)  # Comma-separated
+
+    # Dates
+    upload_date = Column(Date, nullable=True)
+    release_date = Column(Date, nullable=True)
+    downtaken_date = Column(Date, nullable=True)
+
+    # Reasons
+    downtaken_reason = Column(Text, nullable=True)
+    rejected_reason = Column(Text, nullable=True)
+
+    # Industry identifiers
+    upc = Column(String(50), nullable=True)  # Universal Product Code
+    isrc = Column(String(50), nullable=True)  # International Standard Recording Code
+    copyright_info = Column(Text, nullable=True)
+
+    # Cover image (S3 upload, not generated_images)
+    cover_s3_key = Column(String(500), nullable=True)
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    user = relationship("User", back_populates="song_releases")
+    project_references = relationship("ReleaseProjectReference", back_populates="release", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<SongRelease(id={self.id}, name='{self.name}', type='{self.type}', status='{self.status}')>"
+
+
+class ReleaseProjectReference(Base):
+    """Model for N:M relationship between releases and song projects"""
+
+    __tablename__ = "release_project_references"
+    __table_args__ = {"extend_existing": True}
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    release_id = Column(
+        UUID(as_uuid=True), ForeignKey("song_releases.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    project_id = Column(
+        UUID(as_uuid=True), ForeignKey("song_projects.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    release = relationship("SongRelease", back_populates="project_references")
+    project = relationship("SongProject", back_populates="release_references")
+
+    def __repr__(self):
+        return f"<ReleaseProjectReference(release_id={self.release_id}, project_id={self.project_id})>"

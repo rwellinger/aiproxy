@@ -679,6 +679,40 @@ class SongProjectService:
             )
             return []
 
+    def get_assigned_releases_for_project(self, db: Session, project_id: UUID) -> list[Any]:
+        """
+        Get all releases assigned to a project
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+
+        Returns:
+            List of SongRelease instances
+        """
+        try:
+            from db.models import ReleaseProjectReference, SongRelease
+
+            releases = (
+                db.query(SongRelease)
+                .join(ReleaseProjectReference, ReleaseProjectReference.release_id == SongRelease.id)
+                .filter(ReleaseProjectReference.project_id == project_id)
+                .order_by(SongRelease.name)
+                .all()
+            )
+
+            logger.debug("Assigned releases retrieved", project_id=str(project_id), count=len(releases))
+            return releases
+
+        except SQLAlchemyError as e:
+            logger.error(
+                "Failed to get assigned releases",
+                error=str(e),
+                error_type=type(e).__name__,
+                project_id=str(project_id),
+            )
+            return []
+
 
 # Global service instance
 song_project_service = SongProjectService()

@@ -485,6 +485,195 @@ make build-prod
 
 ---
 
+## TypeScript Unit Testing (NEW!)
+
+**IMPORTANT:** All new services with business logic MUST have unit tests.
+
+### Testing Strategy (Analog to Python Backend)
+
+**What to Test:**
+✅ **DO write tests for:**
+- **Business Services** (`services/business/*.service.ts`) - Pure functions, transformations, logic
+- **Utility Services** (`services/utils/*.service.ts`) - String manipulation, conversions, calculations
+- **Pure functions** - Any method without HTTP calls, DOM manipulation, or external dependencies
+- **Complex logic** - Conditional logic, data transformations, validation rules
+
+❌ **DO NOT write tests for:**
+- **HTTP Services** - Services that only make API calls (mock hell, no value)
+- **Config Services** - Services that only read/provide configuration
+- **Simple getters/setters** - No logic to test
+- **Angular Components** - Use manual testing unless critical business logic
+
+### Test Location Rules
+
+**CRITICAL:** Test files MUST be co-located with the service they test!
+
+```
+✅ CORRECT: Test next to service
+src/app/services/business/
+  ├── chat-export.service.ts
+  ├── chat-export.service.spec.ts       // ✅ Same directory
+  ├── song-release.service.ts
+  └── song-release.service.spec.ts
+
+src/app/services/utils/
+  ├── html-to-text.service.ts
+  └── html-to-text.service.spec.ts      // ✅ Same directory
+
+❌ WRONG: Test in wrong location
+src/app/services/
+  ├── song.service.spec.ts              // ❌ Service is in business/ subdirectory!
+  └── business/
+      └── song.service.ts
+```
+
+### Running Tests
+
+**CRITICAL: ALWAYS use `make` commands (NOT direct `npm` calls)!**
+- ✅ `make` validates Node.js environment first (prevents errors)
+- ✅ Consistent workflow across Frontend + Backend
+
+```bash
+# From aiwebui directory
+
+# Run all tests (single run, headless browser)
+make test
+
+# Run tests in watch mode (development)
+make test-watch
+
+# Run tests with coverage report
+make test-coverage
+```
+
+**Available Makefile targets:**
+- `make test` - Run all unit tests (single run, CI-ready)
+- `make test-watch` - Run tests in watch mode (development)
+- `make test-coverage` - Run tests with coverage report
+
+**Legacy npm commands (if needed):**
+```bash
+npm run test                           # Interactive mode (use: make test-watch)
+npm run test -- --watch=false          # Single run (use: make test)
+```
+
+### Test Examples
+
+**Example 1: Testing Pure Functions (ChatExportService)**
+
+```typescript
+// services/business/chat-export.service.spec.ts
+import { TestBed } from '@angular/core/testing';
+import { ChatExportService } from './chat-export.service';
+
+describe('ChatExportService - generateFilename', () => {
+  let service: ChatExportService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [ChatExportService]
+    });
+    service = TestBed.inject(ChatExportService);
+  });
+
+  it('should sanitize special characters from filename', () => {
+    // Test via public API (exportToMarkdown calls private generateFilename)
+    const downloadSpy = spyOn<any>(service as any, 'downloadFile');
+
+    service.exportToMarkdown({
+      title: 'Test@Chat#With$Special%Characters!',
+      // ... other required fields
+    }, []);
+
+    const filename = downloadSpy.calls.mostRecent().args[1];
+    expect(filename).not.toContain('@');
+    expect(filename).not.toContain('#');
+  });
+
+  it('should preserve German umlauts', () => {
+    const downloadSpy = spyOn<any>(service as any, 'downloadFile');
+
+    service.exportToMarkdown({
+      title: 'Testöäü ÖÄÜß Chat',
+      // ... other required fields
+    }, []);
+
+    const filename = downloadSpy.calls.mostRecent().args[1];
+    expect(filename).toContain('öäü');
+    expect(filename).toContain('ÖÄÜß');
+  });
+});
+```
+
+**Example 2: Testing String Transformations (HtmlToTextService)**
+
+```typescript
+// services/utils/html-to-text.service.spec.ts
+describe('HtmlToTextService', () => {
+  let service: HtmlToTextService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(HtmlToTextService);
+  });
+
+  it('should convert unordered list with bullets', () => {
+    const html = '<ul><li>Item 1</li><li>Item 2</li></ul>';
+    const result = service.convert(html);
+
+    expect(result).toContain('• Item 1');
+    expect(result).toContain('• Item 2');
+  });
+
+  it('should handle nested lists with indentation', () => {
+    const html = `
+      <ul>
+        <li>Top level
+          <ul>
+            <li>Nested item</li>
+          </ul>
+        </li>
+      </ul>
+    `;
+    const result = service.convert(html);
+
+    expect(result).toContain('• Top level');
+    expect(result).toContain('  • Nested item');  // 2 spaces indent
+  });
+});
+```
+
+### Testing Best Practices
+
+1. **Test pure functions** - Methods without side effects are easiest to test
+2. **Test via public API** - Don't test private methods directly (test through public interface)
+3. **Use descriptive test names** - "should sanitize special characters from filename"
+4. **Mock external dependencies** - HTTP services, LocalStorage, etc.
+5. **One assertion per concept** - Multiple `expect()` calls are OK if testing same concept
+6. **Use `beforeEach`** - Setup shared test fixtures
+7. **Avoid integration tests** - Test services in isolation
+
+### When to Write Tests
+
+- **New Features**: Write tests for new services with business logic
+- **Bug Fixes**: Add test case that reproduces the bug (if logic-related)
+- **Refactoring**: Extend existing tests if logic changes
+- **Quality Issues**: When team quality drops, tests catch regressions
+
+### What We Test (Examples from Implementation)
+
+**ChatExportService** (43 tests):
+- Filename sanitization (special chars, umlauts, length limits)
+- Markdown generation (headers, metadata, message formatting)
+- Export functionality (full export, filtering summaries)
+
+**HtmlToTextService** (50+ tests):
+- HTML to text conversion (paragraphs, lists, tables)
+- Text formatting (bold, italic, code blocks)
+- Edge cases (empty input, malformed HTML, entities)
+
+---
+
 ## SCSS Guidelines
 
 ### Nesting Rules

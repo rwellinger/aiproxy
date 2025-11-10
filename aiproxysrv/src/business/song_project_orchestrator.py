@@ -29,6 +29,7 @@ from business.song_project_transformer import (
     transform_image_to_assigned_response,
     transform_project_detail_to_response,
     transform_project_to_response,
+    transform_release_to_assigned_response,
     transform_sketch_to_assigned_response,
     transform_song_to_assigned_response,
 )
@@ -218,6 +219,39 @@ class SongProjectOrchestrator:
             )
             # Don't fail the entire request, just log the error
 
+    def _load_assigned_releases(self, db: Session, project_id: UUID, response_data: dict[str, Any]) -> None:
+        """
+        Load assigned releases for project (coordination only)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            response_data: Response dictionary (will be modified in-place)
+
+        Note:
+            This method modifies response_data in-place by adding assigned_releases list
+        """
+        try:
+            # Load assigned releases from DB
+            releases = self.db_service.get_assigned_releases_for_project(db, project_id)
+            response_data["assigned_releases"] = [
+                transform_release_to_assigned_response(release) for release in releases
+            ]
+
+            logger.debug(
+                "Assigned releases loaded for project", project_id=str(project_id), releases_count=len(releases)
+            )
+
+        except Exception as e:
+            logger.error(
+                "Failed to load assigned releases",
+                project_id=str(project_id),
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            # Don't fail the entire request, just log the error
+            response_data["assigned_releases"] = []
+
     def get_project_with_details(self, db: Session, project_id: UUID, user_id: UUID) -> dict[str, Any] | None:
         """
         Get project with all folders, files, and assigned assets
@@ -248,6 +282,9 @@ class SongProjectOrchestrator:
 
             # Load assigned assets for all folders (coordination)
             self._load_assigned_assets_for_folders(db, project_id, response["folders"])
+
+            # Load assigned releases for project (coordination)
+            self._load_assigned_releases(db, project_id, response)
 
             return response
 

@@ -145,9 +145,12 @@
     "title": {
       "image": "Bild zu Projekt zuweisen",
       "song": "Song zu Projekt zuweisen",
-      "sketch": "Sketch zu Projekt zuweisen"
+      "sketch": "Sketch zu Projekt zuweisen",
+      "release": "Release zu Projekt zuweisen"
     },
     "selectProject": "Projekt auswählen",
+    "selectProjects": "Projekte auswählen",
+    "albumMultiSelectHint": "Alben können mehreren Projekten zugewiesen werden",
     "selectFolder": "Ordner auswählen (Optional)",
     "noFolder": "Kein Ordner",
     "noFoldersAvailable": "Keine Ordner in diesem Projekt verfügbar",
@@ -155,7 +158,9 @@
     "errors": {
       "loadProjectsFailed": "Projekte konnten nicht geladen werden",
       "loadFoldersFailed": "Ordner konnten nicht geladen werden",
-      "assignFailed": "Zuweisung zum Projekt fehlgeschlagen"
+      "assignFailed": "Zuweisung zum Projekt fehlgeschlagen",
+      "noProjectSelected": "Bitte wähle mindestens ein Projekt aus",
+      "singleOneProject": "Singles können nur einem Projekt zugewiesen werden"
     }
   },
   "detailPanel": {
@@ -757,6 +762,7 @@
     "settings": "Einstellungen",
     "sketchLibrary": "Skizzen-Bibliothek",
     "songProjects": "Song Projekte",
+    "songReleases": "Song-Releases",
     "textOverlayEditor": "Text-Overlay"
   },
   "songDetailPanel": {
@@ -1635,6 +1641,128 @@
       "formInvalid": "Bitte fülle alle Pflichtfelder aus"
     }
   },
+  "songRelease": {
+    "title": "Song-Releases",
+    "gallery": {
+      "title": "Release-Manager",
+      "subtitle": "Verwalte deine Singles und Alben",
+      "search": "Releases durchsuchen...",
+      "items": "Einträge",
+      "loading": "Lade Releases...",
+      "empty": "Keine Releases gefunden",
+      "selectPrompt": "Wähle ein Release aus der Liste, um Details anzuzeigen",
+      "pagination": {
+        "info": "Seite {{current}} von {{total}}"
+      },
+      "filters": {
+        "all": "Alle",
+        "progress": "In Arbeit",
+        "uploaded": "Hochgeladen",
+        "released": "Veröffentlicht",
+        "archive": "Archiv"
+      },
+      "actions": {
+        "new": "Neues Release",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "copy": "In Zwischenablage kopieren",
+        "uploadCover": "Cover hochladen",
+        "replaceCover": "Cover ersetzen",
+        "openProject": "Projekt öffnen"
+      },
+      "sections": {
+        "general": "Allgemeine Informationen",
+        "metadata": "Metadaten",
+        "projects": "Zugewiesene Projekte",
+        "industry": "Industrie-Kennungen",
+        "dates": "Wichtige Termine",
+        "reasons": "Ablehnungs-/Entfernungsgründe",
+        "cover": "Cover-Bild"
+      },
+      "metadata": {
+        "created": "Erstellt",
+        "updated": "Aktualisiert"
+      }
+    },
+    "editor": {
+      "titleCreate": "Neues Release erstellen",
+      "titleEdit": "Release bearbeiten",
+      "loading": "Lade Release-Daten...",
+      "sections": {
+        "basic": "Grundlegende Informationen",
+        "projects": "Projekt-Zuweisung",
+        "industry": "Industrie-Metadaten",
+        "dates": "Veröffentlichungsdaten",
+        "reasons": "Status-Begründungen",
+        "cover": "Cover-Bild"
+      },
+      "type": "Typ",
+      "status": "Status",
+      "name": "Name",
+      "genre": "Genre",
+      "description": "Beschreibung",
+      "tags": "Tags",
+      "tagsPlaceholder": "Tags kommagetrennt eingeben",
+      "tagsHint": "Kommagetrennt, z.B., rock, indie, summer",
+      "noProjectsAssigned": "Noch keine Projekte zugewiesen",
+      "assignProjects": "Zu Projekten zuweisen",
+      "upc": "UPC (Universal Product Code)",
+      "isrc": "ISRC (International Standard Recording Code)",
+      "copyrightInfo": "Copyright-Information",
+      "uploadDate": "Upload-Datum",
+      "releaseDate": "Release-Datum",
+      "downtakenDate": "Entfernungs-Datum",
+      "rejectedReason": "Ablehnungsgrund",
+      "downtakenReason": "Entfernungsgrund",
+      "uploadCover": "Cover-Bild auswählen",
+      "coverHint": "Empfohlene Größe: 200x200 Pixel (JPG/PNG)",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "saving": "Speichere..."
+    },
+    "types": {
+      "single": "Single",
+      "album": "Album"
+    },
+    "statuses": {
+      "draft": "Entwurf",
+      "arranging": "Arrangement",
+      "mixing": "Mixing",
+      "mastering": "Mastering",
+      "rejected": "Abgelehnt",
+      "uploaded": "Hochgeladen",
+      "released": "Veröffentlicht",
+      "downtaken": "Entfernt",
+      "archived": "Archiviert"
+    },
+    "messages": {
+      "createSuccess": "Release erfolgreich erstellt",
+      "updateSuccess": "Release erfolgreich aktualisiert",
+      "deleteSuccess": "Release erfolgreich gelöscht",
+      "deleteConfirm": "Bist du sicher, dass du dieses Release löschen möchtest?",
+      "loadError": "Fehler beim Laden des Releases",
+      "saveError": "Fehler beim Speichern des Releases",
+      "deleteError": "Fehler beim Löschen des Releases",
+      "coverValidationError": "Cover-Bild muss 200x200 Pixel sein",
+      "coverRequired": "Cover-Bild ist für diesen Status erforderlich",
+      "releaseSaved": "Release erfolgreich gespeichert",
+      "projectsAssigned": "Projekte erfolgreich zugewiesen",
+      "useProjectName": "Projektname '{{projectName}}' für diese Single verwenden?",
+      "unsavedChanges": "Du hast ungespeicherte Änderungen. Änderungen verwerfen?"
+    },
+    "validation": {
+      "required": "Dieses Feld ist erforderlich",
+      "maxLength": "Maximal {{max}} Zeichen erlaubt",
+      "formInvalid": "Bitte fülle alle Pflichtfelder aus",
+      "invalidForm": "Bitte korrigiere die Fehler im Formular",
+      "selectTypeFirst": "Bitte wähle zuerst den Release-Typ aus",
+      "noProjectAssigned": "Bitte weise mindestens ein Projekt zu",
+      "singleOneProject": "Singles können nur einem Projekt zugewiesen werden",
+      "uploadDateRequired": "Upload-Datum ist für Status 'uploaded' erforderlich",
+      "releaseDateRequired": "Release-Datum ist für Status 'released' erforderlich",
+      "coverRequired": "Cover-Bild ist für diesen Status erforderlich"
+    }
+  },
   "songProjects": {
     "title": "Song Projekte",
     "list": {
@@ -1671,6 +1799,7 @@
       "assignedSongs": "Zugewiesene Songs",
       "assignedSketches": "Zugewiesene Sketches",
       "assignedImages": "Zugewiesene Bilder",
+      "assignedReleases": "Zugewiesene Releases",
       "noAssignedAssets": "Keine zugewiesenen Assets in diesem Ordner",
       "folderContent": {
         "images": "{{count}} Bilder",
@@ -1702,7 +1831,8 @@
         "backToList": "Zurück zu Projekten",
         "openSong": "Song öffnen",
         "openSketch": "Sketch öffnen",
-        "openImage": "Bild öffnen"
+        "openImage": "Bild öffnen",
+        "viewRelease": "Release anzeigen"
       },
       "copyCompleteClone": "Clone Command kopieren",
       "sections": {

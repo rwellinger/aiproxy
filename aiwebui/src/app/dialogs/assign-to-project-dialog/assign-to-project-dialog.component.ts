@@ -12,10 +12,14 @@ import {SongProjectService} from '../../services/business/song-project.service';
 import {SongService} from '../../services/business/song.service';
 import {ImageService} from '../../services/business/image.service';
 import {SketchService} from '../../services/business/sketch.service';
+import {SongReleaseService} from '../../services/business/song-release.service';
+import {ReleaseType} from '../../models/song-release.model';
 
 export interface AssignToProjectDialogData {
-  assetType: 'image' | 'song' | 'sketch';
+  assetType: 'image' | 'song' | 'sketch' | 'release';
   assetId: string;
+  releaseType?: ReleaseType; // For release: SINGLE or ALBUM
+  currentProjectIds?: string[]; // For release: already assigned projects
 }
 
 interface ProjectListItem {
@@ -47,9 +51,14 @@ export class AssignToProjectDialogComponent implements OnInit {
   projects: ProjectListItem[] = [];
   folders: ProjectFolder[] = [];
   selectedProjectId: string | null = null;
+  selectedProjectIds: string[] = []; // For release multi-select (Album)
   selectedFolderId: string | null = null;
   loading = false;
   errorMessage = '';
+
+  // Release-specific properties
+  ReleaseType = ReleaseType;
+  isMultiSelect = false;
 
   private dialogRef = inject(MatDialogRef<AssignToProjectDialogComponent>);
   protected data = inject<AssignToProjectDialogData>(MAT_DIALOG_DATA);
@@ -57,8 +66,18 @@ export class AssignToProjectDialogComponent implements OnInit {
   private songService = inject(SongService);
   private imageService = inject(ImageService);
   private sketchService = inject(SketchService);
+  private releaseService = inject(SongReleaseService);
 
   async ngOnInit(): Promise<void> {
+    // Determine if multi-select is needed (Album releases)
+    if (this.data.assetType === 'release' && this.data.releaseType === ReleaseType.ALBUM) {
+      this.isMultiSelect = true;
+      // Load current project assignments for Album
+      if (this.data.currentProjectIds) {
+        this.selectedProjectIds = [...this.data.currentProjectIds];
+      }
+    }
+
     await this.loadProjects();
   }
 
@@ -113,11 +132,54 @@ export class AssignToProjectDialogComponent implements OnInit {
   }
 
   /**
+   * Check if save button should be disabled
+   */
+  getSaveButtonDisabled(): boolean {
+    if (this.loading) {
+      return true;
+    }
+
+    // For release assets, no folder is required
+    if (this.data.assetType === 'release') {
+      // Multi-select (Album): need at least one project
+      if (this.isMultiSelect) {
+        return this.selectedProjectIds.length === 0;
+      }
+      // Single-select: need exactly one project
+      return !this.selectedProjectId;
+    }
+
+    // For non-release assets (song, image, sketch): need project AND folder
+    return !this.selectedProjectId || !this.selectedFolderId;
+  }
+
+  /**
    * Save assignment and close dialog
    */
   async save(): Promise<void> {
-    if (!this.selectedProjectId) {
-      return;
+    // Validation for release
+    if (this.data.assetType === 'release') {
+      // Validate project selection for release
+      if (this.isMultiSelect && this.selectedProjectIds.length === 0) {
+        this.errorMessage = 'assignToProject.errors.noProjectSelected';
+        return;
+      }
+
+      if (!this.isMultiSelect && !this.selectedProjectId) {
+        this.errorMessage = 'assignToProject.errors.noProjectSelected';
+        return;
+      }
+
+      // Validation: Single releases can only have 1 project
+      if (this.data.releaseType === ReleaseType.SINGLE && this.selectedProjectIds.length > 1) {
+        this.errorMessage = 'assignToProject.errors.singleOneProject';
+        return;
+      }
+    } else {
+      // For non-release assets
+      if (!this.selectedProjectId) {
+        return;
+      }
     }
 
     this.loading = true;
@@ -129,27 +191,42 @@ export class AssignToProjectDialogComponent implements OnInit {
         case 'song':
           await this.songService.assignToProject(
             this.data.assetId,
-            this.selectedProjectId,
+            this.selectedProjectId!,
             this.selectedFolderId || undefined
           );
           break;
         case 'image':
           await this.imageService.assignToProject(
             this.data.assetId,
-            this.selectedProjectId,
+            this.selectedProjectId!,
             this.selectedFolderId || undefined
           );
           break;
         case 'sketch':
           await this.sketchService.assignToProject(
             this.data.assetId,
-            this.selectedProjectId,
+            this.selectedProjectId!,
             this.selectedFolderId || undefined
           );
           break;
+        case 'release': {
+          // For release, return selected project IDs to editor
+          const projectIds = this.isMultiSelect ? this.selectedProjectIds : [this.selectedProjectId!];
+          const projectNames = projectIds.map(id => {
+            const project = this.projects.find(p => p.id === id);
+            return project?.project_name || '';
+          }).filter(name => name);
+
+          this.dialogRef.close({
+            success: true,
+            projectIds: projectIds,
+            projectNames: projectNames
+          });
+          return;
+        }
       }
 
-      // Close dialog with success flag
+      // Close dialog with success flag for non-release assets
       this.dialogRef.close({success: true});
     } catch (error) {
       console.error('Failed to assign asset to project', error);

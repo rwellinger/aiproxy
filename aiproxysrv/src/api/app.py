@@ -28,6 +28,7 @@ from .routes.prompt_routes import api_prompt_v1
 from .routes.redis_routes import api_redis_v1
 from .routes.sketch_routes import api_sketch_v1
 from .routes.song_project_routes import api_song_projects_v1
+from .routes.song_release_routes import api_song_releases_v1
 from .routes.song_routes import api_song_task_v1, api_song_v1
 from .routes.user_routes import api_user_v1
 
@@ -356,6 +357,7 @@ def create_app():
                     "api_song_v1": "Songs",
                     "api_song_task_v1": "Song Tasks",
                     "api_song_projects_v1": "Song Projects",
+                    "api_song_releases_v1": "Song Releases",
                     "api_sketch_v1": "Sketches",
                     "api_instrumental_v1": "Instrumentals",
                     "api_instrumental_task_v1": "Instrumental Tasks",
@@ -382,6 +384,7 @@ def create_app():
                             "api_song_v1",
                             "api_song_task_v1",
                             "api_song_projects_v1",
+                            "api_song_releases_v1",
                             "api_sketch_v1",
                             "api_instrumental_v1",
                             "api_instrumental_task_v1",
@@ -612,6 +615,7 @@ def create_app():
     app.register_blueprint(api_song_v1)
     app.register_blueprint(api_song_task_v1)
     app.register_blueprint(api_song_projects_v1)
+    app.register_blueprint(api_song_releases_v1)
     app.register_blueprint(api_sketch_v1)
     app.register_blueprint(api_instrumental_v1)
     app.register_blueprint(api_instrumental_task_v1)

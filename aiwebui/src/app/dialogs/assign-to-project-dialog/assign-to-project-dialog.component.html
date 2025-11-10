@@ -6,8 +6,8 @@
     {{ errorMessage | translate }}
   </div>
 
-  <!-- Project Selection -->
-  <mat-form-field appearance="outline" class="full-width">
+  <!-- Project Selection (Single-Select for non-release or Single release) -->
+  <mat-form-field *ngIf="!isMultiSelect" appearance="outline" class="full-width">
     <mat-label>{{ 'assignToProject.selectProject' | translate }}</mat-label>
     <mat-select
       [(ngModel)]="selectedProjectId"
@@ -19,9 +19,25 @@
     </mat-select>
   </mat-form-field>
 
-  <!-- Folder Selection (only if project selected and folders exist) -->
+  <!-- Project Selection (Multi-Select for Album release) -->
+  <mat-form-field *ngIf="isMultiSelect" appearance="outline" class="full-width">
+    <mat-label>{{ 'assignToProject.selectProjects' | translate }}</mat-label>
+    <mat-select
+      [(ngModel)]="selectedProjectIds"
+      [multiple]="true"
+      [disabled]="loading">
+      <mat-option *ngFor="let project of projects" [value]="project.id">
+        {{ project.project_name }}
+      </mat-option>
+    </mat-select>
+    <mat-hint *ngIf="data.releaseType === ReleaseType.ALBUM">
+      {{ 'assignToProject.albumMultiSelectHint' | translate }}
+    </mat-hint>
+  </mat-form-field>
+
+  <!-- Folder Selection (only for non-release assets) -->
   <mat-form-field
-    *ngIf="selectedProjectId && folders.length > 0"
+    *ngIf="data.assetType !== 'release' && selectedProjectId && folders.length > 0"
     appearance="outline"
     class="full-width">
     <mat-label>{{ 'assignToProject.selectFolder' | translate }}</mat-label>
@@ -33,8 +49,8 @@
     </mat-select>
   </mat-form-field>
 
-  <!-- No Folders Info -->
-  <div *ngIf="selectedProjectId && folders.length === 0 && !loading" class="info-message">
+  <!-- No Folders Info (only for non-release assets) -->
+  <div *ngIf="data.assetType !== 'release' && selectedProjectId && folders.length === 0 && !loading" class="info-message">
     {{ 'assignToProject.noFoldersAvailable' | translate }}
   </div>
 </mat-dialog-content>
@@ -51,7 +67,7 @@
     mat-raised-button
     color="primary"
     (click)="save()"
-    [disabled]="!selectedProjectId || !selectedFolderId || loading"
+    [disabled]="getSaveButtonDisabled()"
     class="save-button">
     {{ loading ? ('common.saving' | translate) : ('common.save' | translate) }}
   </button>

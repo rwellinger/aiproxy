@@ -395,6 +395,32 @@
           </div>
         </div>
 
+        <!-- Assigned Releases -->
+        <div class="detail-section-block" *ngIf="selectedProject.assigned_releases && selectedProject.assigned_releases.length > 0">
+          <h3 class="section-title">
+            <i class="fas fa-compact-disc"></i>
+            {{ 'songProjects.detail.assignedReleases' | translate }}
+          </h3>
+          <div class="assigned-releases-list">
+            <div *ngFor="let release of selectedProject.assigned_releases" class="release-item">
+              <div class="release-info">
+                <i class="fas fa-compact-disc"></i>
+                <span class="release-name">{{ release.name }}</span>
+                <span class="release-badge">{{ release.type }}</span>
+                <span class="release-meta">{{ release.genre }}</span>
+                <span class="release-status" [class]="getStatusBadgeClass(release.status)">{{ release.status }}</span>
+              </div>
+              <button
+                type="button"
+                class="asset-action-button"
+                (click)="openRelease(release.id)"
+                [matTooltip]="'songProjects.detail.actions.viewRelease' | translate">
+                <i class="fas fa-external-link-alt"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Detail Actions -->
         <div class="detail-actions">
           <button type="button" class="action-button refresh-button" (click)="refreshProject()">

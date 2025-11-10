@@ -1,6 +1,6 @@
 # Makefile for aiwebui development tasks
 
-.PHONY: help check-node lint-ts lint-scss lint-arch lint-all lint-fix build-dev build-prod install dev clean validate deploy-check
+.PHONY: help check-node lint-ts lint-scss lint-arch lint-all lint-fix test test-watch test-coverage build-dev build-prod install dev clean validate deploy-check
 
 # Default target
 help:
@@ -14,6 +14,11 @@ help:
 	@echo "  lint-all       - Run all linters (TypeScript + SCSS + Architecture)"
 	@echo "  lint-fix       - Auto-fix all linter issues (TypeScript + SCSS)"
 	@echo "  install        - Install npm dependencies"
+	@echo ""
+	@echo "Testing:"
+	@echo "  test           - Run all unit tests (single run)"
+	@echo "  test-watch     - Run tests in watch mode (development)"
+	@echo "  test-coverage  - Run tests with coverage report"
 	@echo ""
 	@echo "Development:"
 	@echo "  dev            - Start development server (ng serve)"
@@ -128,3 +133,44 @@ deploy-check:
 		echo "WARNING: Deployment directory not found: ../forwardproxy/html/aiwebui/"; \
 		echo "Create it first or adjust deployment target."; \
 	fi
+
+# Run unit tests (single run)
+test: check-node
+	@echo "Running unit tests..."
+	@if [ -f "/Applications/Chromium.app/Contents/MacOS/Chromium" ]; then \
+		CHROME_BIN="/Applications/Chromium.app/Contents/MacOS/Chromium" npm run test -- --watch=false --browsers=ChromeHeadless; \
+	elif [ -f "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]; then \
+		CHROME_BIN="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npm run test -- --watch=false --browsers=ChromeHeadless; \
+	else \
+		echo "ERROR: Neither Chromium nor Chrome found!"; \
+		echo "Install with: brew install --cask chromium"; \
+		exit 1; \
+	fi
+
+# Run tests in watch mode (development)
+test-watch: check-node
+	@echo "Running tests in watch mode..."
+	@if [ -f "/Applications/Chromium.app/Contents/MacOS/Chromium" ]; then \
+		CHROME_BIN="/Applications/Chromium.app/Contents/MacOS/Chromium" npm run test; \
+	elif [ -f "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]; then \
+		CHROME_BIN="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npm run test; \
+	else \
+		echo "ERROR: Neither Chromium nor Chrome found!"; \
+		echo "Install with: brew install --cask chromium"; \
+		exit 1; \
+	fi
+
+# Run tests with coverage report
+test-coverage: check-node
+	@echo "Running tests with coverage..."
+	@if [ -f "/Applications/Chromium.app/Contents/MacOS/Chromium" ]; then \
+		CHROME_BIN="/Applications/Chromium.app/Contents/MacOS/Chromium" npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage; \
+	elif [ -f "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]; then \
+		CHROME_BIN="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage; \
+	else \
+		echo "ERROR: Neither Chromium nor Chrome found!"; \
+		echo "Install with: brew install --cask chromium"; \
+		exit 1; \
+	fi
+	@echo ""
+	@echo "Coverage report generated at: coverage/"
