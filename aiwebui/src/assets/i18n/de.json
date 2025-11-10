@@ -735,6 +735,9 @@
     "errors": {
       "noTemplate": "Keine Vorlage zum Bearbeiten vorhanden",
       "modelsFailed": "Fehler beim Laden der verfügbaren Modelle"
+    },
+    "hints": {
+      "maxTokens": "Gesamt-Output-Grenze (inkl. internes Reasoning). Response-Länge via Zeichen-Limits in Nachbedingung steuern (z.B. 'Maximum 400 Zeichen')."
     }
   },
   "sideMenu": {

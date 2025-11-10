@@ -1,7 +1,8 @@
 -- ============================================================
 -- Prompt Templates Seeding Script
 -- ============================================================
--- Exported from Dev-DB on 2025-10-26
+-- Exported from Dev-DB on 2025-11-10
+-- Updated: Fixed max_tokens for gpt-oss:20b templates (Chain-of-Thought support)
 -- This script seeds/updates all production prompt templates
 --
 -- Usage (PostgreSQL):
@@ -73,7 +74,7 @@ $$ LANGUAGE plpgsql;
 -- DESCRIPTION TEMPLATES
 -- ============================================================
 
--- description/generate-long (v1.0)
+-- description/generate-long (v1.1)
 SELECT upsert_prompt_template(
     'description',
     'generate-long',
@@ -108,14 +109,14 @@ Example (English lyrics → English description):
 Input: "**VERSE1** Walking through the empty streets at dawn..."
 Output: A reflective journey through solitude and self-discovery. This song paints vivid imagery of urban landscapes at dawn, exploring themes of loneliness, hope, and renewal. The lyrics balance melancholic introspection with optimistic undertones.',
     'Generates long release descriptions from song lyrics (max 1000 chars)',
-    '1.0',
+    '1.1',
     'gpt-oss:20b',
     0.7,
     512,
     true
 );
 
--- description/generate-short (v1.0)
+-- description/generate-short (v1.1)
 SELECT upsert_prompt_template(
     'description',
     'generate-short',
@@ -147,14 +148,14 @@ Output: Poetische Reise durch die Nacht – melancholisch, hoffnungsvoll, atmosp
 Input (English): "A reflective journey through solitude and self-discovery. This song paints vivid imagery of urban landscapes at dawn..."
 Output: Dawn-lit reflections on solitude, hope, and urban renewal.',
     'Generates short release descriptions from long descriptions (max 150 chars)',
-    '1.0',
+    '1.1',
     'gpt-oss:20b',
     0.6,
-    100,
+    1024,
     true
 );
 
--- description/generate-tags (v1.0)
+-- description/generate-tags (v1.1)
 SELECT upsert_prompt_template(
     'description',
     'generate-tags',
@@ -192,10 +193,10 @@ Output: Nacht, Atmosphärisch, Melancholisch, Poetisch, Stille, Mondlicht, Intro
 Input (English): "A reflective journey through solitude and self-discovery. This song paints vivid imagery of urban landscapes..."
 Output: Reflective, Solitude, Urban, Dawn, Self-Discovery, Melancholic, Hopeful, Introspective, Atmospheric, Cinematic',
     'Generates 10 searchable release tags from song description',
-    '1.0',
+    '1.1',
     'gpt-oss:20b',
     0.6,
-    150,
+    1024,
     true
 );
 
@@ -203,7 +204,7 @@ Output: Reflective, Solitude, Urban, Dawn, Self-Discovery, Melancholic, Hopeful,
 -- IMAGE TEMPLATES
 -- ============================================================
 
--- image/enhance (v7.1)
+-- image/enhance (v7.6)
 SELECT upsert_prompt_template(
     'image',
     'enhance',
@@ -246,14 +247,14 @@ Output: "Breathtaking sunset over snow-capped mountain peaks, golden hour lighti
 Input: "futuristic city"
 Output: "Futuristic metropolis with glass skyscrapers, neon lights, flying vehicles, cyberpunk aesthetic, moody blue lighting, cinematic wide shot, highly detailed digital art"',
     'Enhances image generation prompts for DALL-E 3 with minimal hallucination - stays true to input',
-    '7.1',
+    '7.6',
     'gpt-oss:20b',
     0.7,
-    200,
+    1024,
     true
 );
 
--- image/enhance-cover (v2.0)
+-- image/enhance-cover (v2.1)
 SELECT upsert_prompt_template(
     'image',
     'enhance-cover',
@@ -303,10 +304,10 @@ Output: "Futuristic neon cityscape at night, vibrant pink and cyan lights, wet r
 Input: "Abstract geometric shapes"
 Output: "Bold abstract geometric shapes, vibrant color palette, clean minimalist composition, sharp edges, modern digital art, balanced symmetrical layout, high contrast"',
     'Enhances prompts for album cover artwork without text - optimized for Text Overlay integration',
-    '2.0',
+    '2.1',
     'gpt-oss:20b',
     0.7,
-    200,
+    1024,
     true
 );
 
@@ -351,7 +352,7 @@ Output: "A clown character, vibrant costume, expressive face paint, centered por
     true
 );
 
--- image/interpret-lyric (v1.0)
+-- image/interpret-lyric (v1.1)
 SELECT upsert_prompt_template(
     'image',
     'interpret-lyric',
@@ -393,14 +394,14 @@ Output: "A serene spring meadow with freshly cut grass glistening after rainfall
 Input (English lyrics): "They lower their gazes, listening to the trees'' soft murmur as ancient guardians whisper stories to the wind..."
 Output: "An enchanted forest clearing where ethereal translucent figures appear among towering ancient trees, gentle wind curling around a lone person in reverent pose, soft luminous light filtering through dense canopy, mystical atmosphere of wonder and mindfulness, nature as living storyteller, dreamy surreal composition"',
     'Interprets song lyrics and transforms them into focused visual scene descriptions for DALL-E 3',
-    '1.0',
+    '1.1',
     'gpt-oss:20b',
     0.8,
-    300,
+    1024,
     true
 );
 
--- image/translate (v3.0)
+-- image/translate (v3.1)
 SELECT upsert_prompt_template(
     'image',
     'translate',
@@ -424,10 +425,10 @@ Output: "Stunning sunset over the ocean"
 Input (German): "Futuristische Stadt bei Nacht mit vielen Lichtern"
 Output: "Futuristic city at night with bright lights"',
     'Translates image prompts to natural, idiomatic English for DALL-E 3',
-    '3.0',
+    '3.1',
     'gpt-oss:20b',
     0.5,
-    256,
+    1024,
     true
 );
 
@@ -435,7 +436,7 @@ Output: "Futuristic city at night with bright lights"',
 -- LYRICS TEMPLATES
 -- ============================================================
 
--- lyrics/extend-section (v1.3)
+-- lyrics/extend-section (v1.4)
 SELECT upsert_prompt_template(
     'lyrics',
     'extend-section',
@@ -449,10 +450,10 @@ SELECT upsert_prompt_template(
 Build upon what is already there to create a longer, more developed section.',
     'Return the COMPLETE extended section (original + new lines) as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.',
     'Extends a lyric section by adding more lines that match style and theme',
-    '1.3',
+    '1.4',
     'gpt-oss:20b',
     0.7,
-    512,
+    1024,
     true
 );
 
@@ -499,7 +500,7 @@ Do not include any other explanations, comments, or metadata in your output.',
     true
 );
 
--- lyrics/improve-section (v1.4)
+-- lyrics/improve-section (v1.5)
 SELECT upsert_prompt_template(
     'lyrics',
     'improve-section',
@@ -511,13 +512,13 @@ SELECT upsert_prompt_template(
 - Flow and pacing
 - Fluent language
 
-Keep the same general length and structure. Only improve the quality, do not change the fundamental meaning or add new concepts.',
-    'Return ONLY the improved section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name (like "Verse1:") in your output. Keep all lines together as one continuous block of text.',
+Keep the same general length and structure (±20%). Only improve the quality, do not change the fundamental meaning or add new concepts.',
+    'Return ONLY the improved section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Keep similar length as input (±20%). Do not include labels, explanations, comments, or the section name (like "Verse1:") in your output. Keep all lines together as one continuous block of text.',
     'Improves a specific lyric section while maintaining context and style',
-    '1.4',
+    '1.5',
     'gpt-oss:20b',
     0.7,
-    256,
+    1024,
     true
 );
 
@@ -540,7 +541,7 @@ SELECT upsert_prompt_template(
     true
 );
 
--- lyrics/rewrite-section (v1.7)
+-- lyrics/rewrite-section (v1.8)
 SELECT upsert_prompt_template(
     'lyrics',
     'rewrite-section',
@@ -553,16 +554,16 @@ SELECT upsert_prompt_template(
 - Fluent language
 
 The rewritten section should feel like a new take on the same emotional core.',
-    'Return ONLY the rewritten section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.',
+    'Return ONLY the rewritten section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Match the original section length (similar number of lines). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.',
     'Completely rewrites a lyric section with fresh creative perspectives',
-    '1.7',
+    '1.8',
     'gpt-oss:20b',
     0.8,
-    256,
+    1024,
     true
 );
 
--- lyrics/translate (v3.0)
+-- lyrics/translate (v3.1)
 SELECT upsert_prompt_template(
     'lyrics',
     'translate',
@@ -606,7 +607,7 @@ In darkest night
 You made me smile
 You made things right',
     'Translates lyrics to natural English with optimized phrasing for singability (4-8 words/line, breathing points)',
-    '3.0',
+    '3.1',
     'gpt-oss:20b',
     0.5,
     2048,
@@ -792,14 +793,14 @@ SELECT upsert_prompt_template(
     true
 );
 
--- titel/generate-fast (v1.0)
+-- titel/generate-fast (v1.1)
 SELECT upsert_prompt_template(
     'titel',
     'generate-fast',
     'Generate a short title (2-4 words) in the same language as the input. Keep it simple and descriptive. No punctuation marks.',
     'Output only the title (max 35 characters). No punctuation, no explanations.',
     'Fast title generation optimized for speed with llama3.2:3b (auto-generation fallback)',
-    '1.0',
+    '1.1',
     'llama3.2:3b',
     0.5,
     10,

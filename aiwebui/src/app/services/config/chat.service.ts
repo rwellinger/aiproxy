@@ -101,6 +101,14 @@ export class ChatService {
 
     // Validate response is not empty (can happen with large models hitting token limits)
     if (!data.response || data.response.trim() === '') {
+      // Check if token limit was definitively hit (eval_count == max_tokens && done_reason == "length")
+      if (data.eval_count >= (template.max_tokens || 0) && data.done_reason === 'length') {
+        throw new Error(
+          `AI Model hit token limit (${data.eval_count}/${template.max_tokens} tokens used). Try switching to "Fast" mode under "AI Enhancement Quality".`
+        );
+      }
+
+      // Generic empty response error (unknown cause)
       throw new Error(
         `AI Model returned empty response. Try switching to "Fast" mode under "AI Enhancement Quality".`
       );

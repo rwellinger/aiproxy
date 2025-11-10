@@ -178,6 +178,14 @@
       font-family: $font-family-base;
     }
   }
+
+  .field-hint {
+    font-size: $font-xs;
+    color: $text-muted;
+    margin-top: $spacing-xs;
+    line-height: 1.4;
+    font-style: italic;
+  }
 }
 
 // Temperature option styling (multi-line)

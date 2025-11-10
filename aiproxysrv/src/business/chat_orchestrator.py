@@ -75,13 +75,27 @@ class ChatOrchestrator:
 
             # Log warning if response is empty (token limit exceeded by thinking, etc.)
             if not cleaned_response.get("response", "").strip():
-                logger.warning(
-                    "Empty response from Ollama (possible token limit exceeded)",
-                    model=model,
-                    eval_count=cleaned_response.get("eval_count"),
-                    done_reason=cleaned_response.get("done_reason"),
-                    max_tokens=max_tokens,
-                )
+                eval_count = cleaned_response.get("eval_count", 0)
+                done_reason = cleaned_response.get("done_reason", "")
+
+                # Definitively token limit reached
+                if eval_count >= max_tokens and done_reason == "length":
+                    logger.warning(
+                        "Empty response: Token limit reached exactly (likely consumed by thinking/reasoning)",
+                        model=model,
+                        eval_count=eval_count,
+                        max_tokens=max_tokens,
+                        done_reason=done_reason,
+                    )
+                else:
+                    # Unknown cause
+                    logger.warning(
+                        "Empty response: Unknown cause",
+                        model=model,
+                        eval_count=eval_count,
+                        max_tokens=max_tokens,
+                        done_reason=done_reason,
+                    )
 
             if CHAT_DEBUG_LOGGING:
                 logger.debug("Ollama Chat Response", model=model, response_data=cleaned_response)

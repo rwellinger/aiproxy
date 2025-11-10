@@ -115,9 +115,7 @@ def serve_s3_image(image_id):
             return jsonify({"error": "Not an S3 image"}), 400
 
         # Stream from S3 using generic proxy service
-        return s3_proxy_service.serve_resource(
-            bucket=S3_IMAGES_BUCKET, s3_key=image.s3_key, filename=image.filename
-        )
+        return s3_proxy_service.serve_resource(bucket=S3_IMAGES_BUCKET, s3_key=image.s3_key, filename=image.filename)
 
     except Exception as e:
         logger.error(

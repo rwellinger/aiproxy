@@ -735,6 +735,9 @@
     "errors": {
       "noTemplate": "No template provided for editing",
       "modelsFailed": "Failed to load available models"
+    },
+    "hints": {
+      "maxTokens": "Total output limit (includes internal reasoning). Control response length via character limits in post-condition (e.g., 'Maximum 400 characters')."
     }
   },
   "sideMenu": {
