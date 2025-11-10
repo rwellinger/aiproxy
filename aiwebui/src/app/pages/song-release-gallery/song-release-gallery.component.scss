@@ -560,25 +560,66 @@
   }
 }
 
-.projects-chips {
+// Assigned Projects List
+.assigned-projects-list {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.project-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm;
+  margin-bottom: $spacing-xs;
+  background-color: $background-light;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-sm;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: $background-selected;
+    border-color: $primary-color;
+  }
+}
+
+.project-info {
+  display: flex;
+  align-items: center;
   gap: $spacing-sm;
+  flex: 1;
 
-  .project-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: $spacing-xs;
-    padding: $spacing-xs $spacing-sm;
-    background-color: rgba($primary-color, 0.1);
+  i {
     color: $primary-color;
-    border-radius: $border-radius-sm;
     font-size: $font-sm;
-    font-weight: $font-weight-medium;
+  }
 
-    i {
-      font-size: 0.9rem;
-    }
+  .project-name {
+    color: $text-primary;
+    font-weight: $font-weight-medium;
+    font-size: $font-sm;
+  }
+}
+
+.asset-action-button {
+  @include button-secondary('base');
+  padding: $spacing-xs !important;
+  min-width: auto !important;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: $font-xs;
+    margin: 0;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 }
 

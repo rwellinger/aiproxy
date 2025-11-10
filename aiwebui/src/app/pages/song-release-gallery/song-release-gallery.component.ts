@@ -297,4 +297,13 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
 
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   }
+
+  /**
+   * Navigate to Song Project with project ID in state.
+   */
+  openProject(projectId: string): void {
+    this.router.navigate(['/song-projects'], {
+      state: { selectedProjectId: projectId }
+    });
+  }
 }

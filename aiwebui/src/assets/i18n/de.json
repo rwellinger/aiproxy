@@ -1667,7 +1667,8 @@
         "delete": "Löschen",
         "copy": "In Zwischenablage kopieren",
         "uploadCover": "Cover hochladen",
-        "replaceCover": "Cover ersetzen"
+        "replaceCover": "Cover ersetzen",
+        "openProject": "Projekt öffnen"
       },
       "sections": {
         "general": "Allgemeine Informationen",

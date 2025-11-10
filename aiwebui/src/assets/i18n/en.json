@@ -1667,7 +1667,8 @@
         "delete": "Delete",
         "copy": "Copy to clipboard",
         "uploadCover": "Upload Cover",
-        "replaceCover": "Replace Cover"
+        "replaceCover": "Replace Cover",
+        "openProject": "Open Project"
       },
       "sections": {
         "general": "General Information",

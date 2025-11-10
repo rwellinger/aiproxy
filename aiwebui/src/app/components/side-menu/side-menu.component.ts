@@ -6,7 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../services/business/auth.service';
 import { User, AuthState } from '../../models/user.model';
-import * as packageInfo from '../../../../package.json';
+import appVersion from '../../../assets/app-version.json';
 
 @Component({
   selector: 'app-side-menu',
@@ -16,7 +16,7 @@ import * as packageInfo from '../../../../package.json';
   styleUrl: './side-menu.component.scss'
 })
 export class SideMenuComponent implements OnInit, OnDestroy {
-  version = (packageInfo as any).version;
+  version = appVersion.version;
   authState: AuthState | null = null;
   currentUser: User | null = null;
   firstName = 'Guest'; // Computed property to avoid method calls in template

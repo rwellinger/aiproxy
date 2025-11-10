@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import or_
+from sqlalchemy import case, desc, nullslast, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
 
@@ -181,8 +181,30 @@ class SongReleaseService:
             # Get total count
             total = query.count()
 
-            # Apply pagination and sorting
-            releases = query.order_by(SongRelease.created_at.desc()).limit(limit).offset(offset).all()
+            # Apply status-based smart sorting
+            # - released: sort by release_date (not created_at!)
+            # - uploaded: sort by upload_date
+            # - downtaken: sort by downtaken_date
+            # - archived/rejected: sort by updated_at
+            # - draft/arranging/mixing/mastering: sort by created_at (newest first)
+            sort_field = case(
+                (SongRelease.status == "released", SongRelease.release_date),
+                (SongRelease.status == "uploaded", SongRelease.upload_date),
+                (SongRelease.status == "downtaken", SongRelease.downtaken_date),
+                (SongRelease.status.in_(["archived", "rejected"]), SongRelease.updated_at),
+                else_=SongRelease.created_at,  # draft, arranging, mixing, mastering
+            )
+
+            # Apply pagination and sorting (NULL dates go to end)
+            releases = (
+                query.order_by(
+                    nullslast(desc(sort_field)),  # Primary: status-based date field
+                    desc(SongRelease.created_at),  # Secondary: created_at as tiebreaker
+                )
+                .limit(limit)
+                .offset(offset)
+                .all()
+            )
 
             logger.debug(
                 "Releases retrieved",

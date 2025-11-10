@@ -215,11 +215,20 @@
             <i class="fas fa-folder-open"></i>
             {{ 'songRelease.gallery.sections.projects' | translate }}
           </h3>
-          <div class="projects-chips">
-            <span *ngFor="let project of selectedRelease.assigned_projects" class="project-chip">
-              <i class="fas fa-folder"></i>
-              {{ project.project_name }}
-            </span>
+          <div class="assigned-projects-list">
+            <div *ngFor="let project of selectedRelease.assigned_projects" class="project-item">
+              <div class="project-info">
+                <i class="fas fa-folder"></i>
+                <span class="project-name">{{ project.project_name }}</span>
+              </div>
+              <button
+                type="button"
+                class="asset-action-button"
+                (click)="openProject(project.id)"
+                [title]="'songRelease.gallery.actions.openProject' | translate">
+                <i class="fas fa-external-link-alt"></i>
+              </button>
+            </div>
           </div>
         </div>
 
