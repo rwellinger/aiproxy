@@ -177,6 +177,17 @@ if ! make lint-all > /dev/null 2>&1; then
 fi
 print_success "Frontend Linting bestanden"
 
+# Unit Tests
+print_info "Führe Frontend Unit Tests aus..."
+if ! make test > /dev/null 2>&1; then
+    print_error "Frontend Unit Tests fehlgeschlagen!"
+    echo ""
+    echo "Tests ausführen:"
+    echo "  ${YELLOW}cd aiwebui && make test${NC}"
+    exit 1
+fi
+print_success "Frontend Unit Tests bestanden"
+
 # Production Build Test
 print_info "Führe Production Build Test aus..."
 if ! make build-dev > /dev/null 2>&1; then

@@ -9,6 +9,7 @@
     "prebuild:prod": "node scripts/update-version.js",
     "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
+    "pretest": "node scripts/update-version.js",
     "test": "ng test",
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",
