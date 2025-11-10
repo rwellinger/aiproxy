@@ -101,8 +101,8 @@
           <div class="release-item-header">
             <div class="release-cover">
               <img *ngIf="release.cover_url" [src]="release.cover_url" alt="Cover">
-              <div *ngIf="!release.cover_url" class="cover-placeholder">
-                <i class="fas fa-compact-disc"></i>
+              <div *ngIf="!release.cover_url" class="cover-placeholder" [style.background-color]="getColorFromString(release.name)">
+                <span class="initials">{{ getInitials(release.name) }}</span>
               </div>
             </div>
             <div class="release-info">
@@ -164,8 +164,8 @@
         <div class="detail-header">
           <div class="detail-cover">
             <img *ngIf="selectedRelease.cover_url" [src]="selectedRelease.cover_url" alt="Cover">
-            <div *ngIf="!selectedRelease.cover_url" class="cover-placeholder-large">
-              <i class="fas fa-compact-disc"></i>
+            <div *ngIf="!selectedRelease.cover_url" class="cover-placeholder-large" [style.background-color]="getColorFromString(selectedRelease.name)">
+              <span class="initials">{{ getInitials(selectedRelease.name) }}</span>
             </div>
           </div>
           <div class="detail-title-group">
@@ -276,6 +276,22 @@
               <span class="field-label">{{ 'songRelease.gallery.metadata.updated' | translate }}</span>
               <div class="readonly-field">{{ formatDate(selectedRelease.updated_at) }}</div>
             </div>
+          </div>
+        </div>
+
+        <!-- Rejection/Downtaken Reasons -->
+        <div class="detail-section-block" *ngIf="selectedRelease.rejected_reason || selectedRelease.downtaken_reason">
+          <h3 class="section-title">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ 'songRelease.gallery.sections.reasons' | translate }}
+          </h3>
+          <div class="detail-field" *ngIf="selectedRelease.rejected_reason">
+            <span class="field-label">{{ 'songRelease.editor.rejectedReason' | translate }}</span>
+            <div class="readonly-field reason-field">{{ selectedRelease.rejected_reason }}</div>
+          </div>
+          <div class="detail-field" *ngIf="selectedRelease.downtaken_reason">
+            <span class="field-label">{{ 'songRelease.editor.downtakenReason' | translate }}</span>
+            <div class="readonly-field reason-field">{{ selectedRelease.downtaken_reason }}</div>
           </div>
         </div>
 

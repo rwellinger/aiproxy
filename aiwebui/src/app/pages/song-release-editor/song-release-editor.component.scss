@@ -238,6 +238,19 @@
     }
   }
 
+  .cover-placeholder-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+
+    .initials {
+      font-size: 3rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+  }
+
   .cover-upload-controls {
     flex: 1;
 

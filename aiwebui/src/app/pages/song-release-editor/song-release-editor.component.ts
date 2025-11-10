@@ -191,28 +191,50 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
 
     // Apply status-specific required fields
     switch (status) {
-      case ReleaseStatus.UPLOADED:
+      case ReleaseStatus.UPLOADED: {
         this.addRequiredValidator('upload_date');
+        // release_date is OPTIONAL for uploaded (might not be planned yet)
         this.addRequiredValidator('upc');
         this.addRequiredValidator('copyright_info');
-        break;
 
-      case ReleaseStatus.RELEASED:
-        this.addRequiredValidator('upload_date');
-        this.addRequiredValidator('release_date');
-        this.addRequiredValidator('upc');
-        this.addRequiredValidator('isrc');
-        this.addRequiredValidator('copyright_info');
+        // Auto-fill upload_date with today if empty
+        const uploadDateControl = this.releaseForm.get('upload_date');
+        if (uploadDateControl && !uploadDateControl.value) {
+          uploadDateControl.setValue(new Date());
+        }
         break;
+      }
+
+      case ReleaseStatus.RELEASED: {
+        this.addRequiredValidator('upload_date');
+        this.addRequiredValidator('release_date'); // REQUIRED after release
+        this.addRequiredValidator('upc');
+        this.addRequiredValidator('isrc'); // ISRC only available after actual release
+        this.addRequiredValidator('copyright_info');
+
+        // Auto-fill release_date with today if empty
+        const releaseDateControl = this.releaseForm.get('release_date');
+        if (releaseDateControl && !releaseDateControl.value) {
+          releaseDateControl.setValue(new Date());
+        }
+        break;
+      }
 
       case ReleaseStatus.REJECTED:
         this.addRequiredValidator('rejected_reason');
         break;
 
-      case ReleaseStatus.DOWNTAKEN:
+      case ReleaseStatus.DOWNTAKEN: {
         this.addRequiredValidator('downtaken_date');
         this.addRequiredValidator('downtaken_reason');
+
+        // Auto-fill downtaken_date with today if empty
+        const downtakenDateControl = this.releaseForm.get('downtaken_date');
+        if (downtakenDateControl && !downtakenDateControl.value) {
+          downtakenDateControl.setValue(new Date());
+        }
         break;
+      }
     }
   }
 
@@ -355,6 +377,44 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Validate status-specific required fields (frontend validation)
+   */
+  private validateStatusRequirements(): { valid: boolean; missingFields: string[] } {
+    const status = this.releaseForm.get('status')?.value;
+    const missingFields: string[] = [];
+
+    // Check status-specific requirements
+    switch (status) {
+      case ReleaseStatus.UPLOADED:
+        if (!this.releaseForm.get('upload_date')?.value) missingFields.push('Upload Date');
+        if (!this.releaseForm.get('upc')?.value) missingFields.push('UPC');
+        if (!this.releaseForm.get('copyright_info')?.value) missingFields.push('Copyright Info');
+        if (!this.coverPreviewUrl && !this.selectedCoverFile) missingFields.push('Cover Image');
+        break;
+
+      case ReleaseStatus.RELEASED:
+        if (!this.releaseForm.get('upload_date')?.value) missingFields.push('Upload Date');
+        if (!this.releaseForm.get('release_date')?.value) missingFields.push('Release Date');
+        if (!this.releaseForm.get('upc')?.value) missingFields.push('UPC');
+        if (!this.releaseForm.get('isrc')?.value) missingFields.push('ISRC');
+        if (!this.releaseForm.get('copyright_info')?.value) missingFields.push('Copyright Info');
+        if (!this.coverPreviewUrl && !this.selectedCoverFile) missingFields.push('Cover Image');
+        break;
+
+      case ReleaseStatus.REJECTED:
+        if (!this.releaseForm.get('rejected_reason')?.value) missingFields.push('Rejected Reason');
+        break;
+
+      case ReleaseStatus.DOWNTAKEN:
+        if (!this.releaseForm.get('downtaken_date')?.value) missingFields.push('Downtaken Date');
+        if (!this.releaseForm.get('downtaken_reason')?.value) missingFields.push('Downtaken Reason');
+        break;
+    }
+
+    return { valid: missingFields.length === 0, missingFields };
+  }
+
+  /**
    * Save release (create or update)
    */
   async save(): Promise<void> {
@@ -382,15 +442,31 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Frontend validation for status-specific requirements
+    const validation = this.validateStatusRequirements();
+    if (!validation.valid) {
+      const status = this.releaseForm.get('status')?.value;
+      this.notificationService.error(
+        `Missing required fields for status '${status}': ${validation.missingFields.join(', ')}`
+      );
+      return;
+    }
+
     this.isSaving = true;
 
     try {
       const formValue = this.releaseForm.value;
 
-      // Format dates to YYYY-MM-DD
+      // Format dates to YYYY-MM-DD (using local timezone, not UTC!)
       const formatDate = (date: Date | null): string | undefined => {
         if (!date) return undefined;
-        return date instanceof Date ? date.toISOString().split('T')[0] : undefined;
+        if (!(date instanceof Date)) return undefined;
+
+        // Use local timezone instead of UTC to avoid day-shifting
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
       };
 
       const releaseData = {
@@ -433,11 +509,21 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
 
       this.goBack();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save release:', error);
-      this.notificationService.error(
-        this.translate.instant('songRelease.messages.saveError')
-      );
+
+      // Show specific error message from backend if available
+      let errorMessage = this.translate.instant('songRelease.messages.saveError');
+
+      if (error?.error?.error) {
+        // Backend returned specific error message
+        errorMessage = error.error.error;
+      } else if (error?.message) {
+        // Generic HTTP error message
+        errorMessage = error.message;
+      }
+
+      this.notificationService.error(errorMessage);
     } finally {
       this.isSaving = false;
     }
@@ -487,7 +573,11 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
         return [ReleaseStatus.UPLOADED, ReleaseStatus.RELEASED, ReleaseStatus.DOWNTAKEN].includes(status);
 
       case 'release_date':
+        // Release date = planned release date (optional for uploaded, required after release)
+        return [ReleaseStatus.UPLOADED, ReleaseStatus.RELEASED, ReleaseStatus.DOWNTAKEN].includes(status);
+
       case 'isrc':
+        // ISRC only available after actual release
         return [ReleaseStatus.RELEASED, ReleaseStatus.DOWNTAKEN].includes(status);
 
       case 'rejected_reason':
@@ -518,5 +608,42 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
     }
 
     return '';
+  }
+
+  /**
+   * Get initials from release name (e.g., "My Album" -> "MA")
+   */
+  getInitials(name: string): string {
+    if (!name) return '?';
+
+    const words = name.trim().split(/\s+/);
+
+    if (words.length === 1) {
+      // Single word: take first 2 characters
+      return words[0].substring(0, 2).toUpperCase();
+    }
+
+    // Multiple words: take first letter of first 2 words
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+
+  /**
+   * Generate consistent color from string (for cover placeholder)
+   */
+  getColorFromString(text: string): string {
+    if (!text) return '#5a6268'; // Default gray
+
+    // Simple hash function
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      hash = text.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    // Generate color (pastel-like colors for better readability)
+    const hue = Math.abs(hash % 360);
+    const saturation = 60; // Medium saturation for pleasant colors
+    const lightness = 55; // Medium lightness for good contrast
+
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   }
 }

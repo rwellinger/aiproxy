@@ -49,7 +49,7 @@ class SongReleaseOrchestrator:
         tags: str | None = None,
         cover_file: tuple[bytes, str, int, int] | None = None,  # (data, filename, width, height)
         **optional_fields,
-    ) -> dict[str, Any] | None:
+    ) -> tuple[dict[str, Any] | None, str | None]:
         """
         Create release with project assignments and optional cover upload
 
@@ -67,7 +67,9 @@ class SongReleaseOrchestrator:
             **optional_fields: Additional optional fields
 
         Returns:
-            Release data dictionary or None if failed
+            Tuple of (release_data_dict, error_message)
+            - (dict, None) if successful
+            - (None, "error message") if failed
         """
         try:
             # 1. Validate cover dimensions if provided (business logic in transformer)
@@ -77,7 +79,7 @@ class SongReleaseOrchestrator:
                 is_valid, error_msg = validate_cover_dimensions(width, height)
                 if not is_valid:
                     logger.warning("Cover validation failed", error=error_msg)
-                    return None
+                    return None, error_msg
 
                 # Generate S3 key (business logic in transformer)
                 # Note: We create a temporary release_id for S3 key generation
@@ -101,14 +103,14 @@ class SongReleaseOrchestrator:
             is_valid, error_msg = validate_required_fields_for_status(status, release_data)
             if not is_valid:
                 logger.warning("Validation failed", error=error_msg, status=status)
-                return None
+                return None, error_msg
 
             # 4. Create release in DB (CRUD in db_service)
             release = self.db_service.create_release(db=db, user_id=user_id, **release_data)
 
             if not release:
                 logger.error("Failed to create release in DB")
-                return None
+                return None, "Database creation failed"
 
             # 5. Update S3 key with real release ID and upload cover if provided
             if cover_file:
@@ -116,22 +118,27 @@ class SongReleaseOrchestrator:
                 # Regenerate S3 key with real release ID
                 cover_s3_key = generate_s3_cover_key(str(user_id), str(release.id), filename)
 
+                # Determine content type from filename
+                extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else "jpg"
+                content_type = "image/jpeg" if extension in ["jpg", "jpeg"] else f"image/{extension}"
+
                 # Upload to S3 (infrastructure)
-                upload_success = self.storage.upload_bytes(cover_s3_key, file_data)
-                if not upload_success:
-                    logger.error("Failed to upload cover to S3", release_id=str(release.id))
+                try:
+                    self.storage.upload(file_data, cover_s3_key, content_type=content_type)
+                except Exception as e:
+                    logger.error("Failed to upload cover to S3", release_id=str(release.id), error=str(e))
                     # Rollback DB creation
                     self.db_service.delete_release(db, release.id, user_id)
-                    return None
+                    return None, f"Failed to upload cover: {str(e)}"
 
                 # Update release with final S3 key
                 update_success = self.db_service.update_release(db, release.id, user_id, {"cover_s3_key": cover_s3_key})
                 if not update_success:
                     logger.error("Failed to update release with cover S3 key")
                     # Cleanup S3
-                    self.storage.delete_file(cover_s3_key)
+                    self.storage.delete(cover_s3_key)
                     self.db_service.delete_release(db, release.id, user_id)
-                    return None
+                    return None, "Failed to update cover reference in database"
 
                 release.cover_s3_key = cover_s3_key
 
@@ -142,9 +149,9 @@ class SongReleaseOrchestrator:
                     logger.error("Failed to assign projects to release")
                     # Cleanup
                     if cover_s3_key:
-                        self.storage.delete_file(cover_s3_key)
+                        self.storage.delete(cover_s3_key)
                     self.db_service.delete_release(db, release.id, user_id)
-                    return None
+                    return None, "Failed to assign projects"
 
             # 7. Get assigned projects for response
             projects = self.db_service.get_assigned_projects(db, release.id)
@@ -154,14 +161,14 @@ class SongReleaseOrchestrator:
 
             # 9. Replace S3 placeholder with presigned URL
             if release.cover_s3_key:
-                response["cover_url"] = self.storage.generate_presigned_url(release.cover_s3_key)
+                response["cover_url"] = self.storage.get_url(release.cover_s3_key)
 
             logger.info("Release created with projects", release_id=str(release.id), project_count=len(project_ids))
-            return response
+            return response, None
 
         except Exception as e:
             logger.error("Create release orchestration failed", error=str(e), error_type=e.__class__.__name__)
-            return None
+            return None, f"Creation failed: {str(e)}"
 
     def get_release_with_details(self, db: Session, release_id: UUID, user_id: UUID) -> dict[str, Any] | None:
         """
@@ -190,7 +197,7 @@ class SongReleaseOrchestrator:
 
             # 4. Replace S3 placeholder with presigned URL
             if release.cover_s3_key:
-                response["cover_url"] = self.storage.generate_presigned_url(release.cover_s3_key)
+                response["cover_url"] = self.storage.get_url(release.cover_s3_key)
 
             return response
 
@@ -233,7 +240,7 @@ class SongReleaseOrchestrator:
             # 3. Add presigned URLs for covers
             for i, release in enumerate(releases):
                 if release.cover_s3_key:
-                    items[i]["cover_url"] = self.storage.generate_presigned_url(release.cover_s3_key)
+                    items[i]["cover_url"] = self.storage.get_url(release.cover_s3_key)
 
             return {"items": items, "total": total, "limit": limit, "offset": offset}
 
@@ -249,7 +256,7 @@ class SongReleaseOrchestrator:
         update_data: dict[str, Any],
         project_ids: list[UUID] | None = None,
         cover_file: tuple[bytes, str, int, int] | None = None,
-    ) -> dict[str, Any] | None:
+    ) -> tuple[dict[str, Any] | None, str | None]:
         """
         Update release with optional cover upload and project reassignment
 
@@ -262,14 +269,16 @@ class SongReleaseOrchestrator:
             cover_file: Optional tuple of (file_data, filename, width, height)
 
         Returns:
-            Updated release data dictionary or None if failed
+            Tuple of (release_data_dict, error_message)
+            - (dict, None) if successful
+            - (None, "error message") if failed
         """
         try:
             # 1. Get existing release
             release = self.db_service.get_release_by_id(db, release_id, user_id)
             if not release:
                 logger.warning("Release not found for update", release_id=str(release_id))
-                return None
+                return None, "Release not found"
 
             old_cover_s3_key = release.cover_s3_key
 
@@ -281,29 +290,61 @@ class SongReleaseOrchestrator:
                 is_valid, error_msg = validate_cover_dimensions(width, height)
                 if not is_valid:
                     logger.warning("Cover validation failed", error=error_msg)
-                    return None
+                    return None, error_msg
 
                 # Generate S3 key (business logic in transformer)
                 new_cover_s3_key = generate_s3_cover_key(str(user_id), str(release_id), filename)
 
+                # Determine content type from filename
+                extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else "jpg"
+                content_type = "image/jpeg" if extension in ["jpg", "jpeg"] else f"image/{extension}"
+
                 # Upload to S3 (infrastructure)
-                upload_success = self.storage.upload_bytes(new_cover_s3_key, file_data)
-                if not upload_success:
-                    logger.error("Failed to upload new cover to S3")
-                    return None
+                try:
+                    self.storage.upload(file_data, new_cover_s3_key, content_type=content_type)
+                except Exception as e:
+                    logger.error("Failed to upload new cover to S3", error=str(e))
+                    return None, f"Failed to upload cover: {str(e)}"
 
                 update_data["cover_s3_key"] = new_cover_s3_key
 
             # 3. Validate required fields if status changed (business logic in transformer)
             new_status = update_data.get("status", release.status)
-            merged_data = {**transform_release_to_response(release), **update_data}
+
+            # Build merged data from actual release attributes (NOT transformed response)
+            # This ensures cover_s3_key (not cover_url) is available for validation
+            merged_data = {
+                "type": release.type,
+                "name": release.name,
+                "status": release.status,
+                "genre": release.genre,
+                "description": release.description,
+                "tags": release.tags,
+                "upload_date": release.upload_date,
+                "release_date": release.release_date,
+                "downtaken_date": release.downtaken_date,
+                "downtaken_reason": release.downtaken_reason,
+                "rejected_reason": release.rejected_reason,
+                "upc": release.upc,
+                "isrc": release.isrc,
+                "copyright_info": release.copyright_info,
+                "cover_s3_key": release.cover_s3_key,
+                **update_data,  # Override with update data
+            }
+
             is_valid, error_msg = validate_required_fields_for_status(new_status, merged_data)
             if not is_valid:
-                logger.warning("Update validation failed", error=error_msg, status=new_status)
+                logger.warning(
+                    "Update validation failed",
+                    error=error_msg,
+                    status=new_status,
+                    release_id=str(release_id),
+                    merged_keys=list(merged_data.keys()),
+                )
                 # Cleanup uploaded cover if any
                 if cover_file and "cover_s3_key" in update_data:
-                    self.storage.delete_file(update_data["cover_s3_key"])
-                return None
+                    self.storage.delete(update_data["cover_s3_key"])
+                return None, error_msg
 
             # 4. Update release in DB (CRUD in db_service)
             updated_release = self.db_service.update_release(db, release_id, user_id, update_data)
@@ -311,12 +352,12 @@ class SongReleaseOrchestrator:
                 logger.error("Failed to update release in DB")
                 # Cleanup uploaded cover if any
                 if cover_file and "cover_s3_key" in update_data:
-                    self.storage.delete_file(update_data["cover_s3_key"])
-                return None
+                    self.storage.delete(update_data["cover_s3_key"])
+                return None, "Database update failed"
 
             # 5. Delete old cover from S3 if replaced
             if cover_file and old_cover_s3_key and old_cover_s3_key != update_data.get("cover_s3_key"):
-                self.storage.delete_file(old_cover_s3_key)
+                self.storage.delete(old_cover_s3_key)
 
             # 6. Update project assignments if provided (CRUD in db_service)
             if project_ids is not None:
@@ -325,11 +366,12 @@ class SongReleaseOrchestrator:
                     logger.error("Failed to update project assignments")
 
             # 7. Get updated details
-            return self.get_release_with_details(db, release_id, user_id)
+            result = self.get_release_with_details(db, release_id, user_id)
+            return result, None
 
         except Exception as e:
             logger.error("Update release orchestration failed", error=str(e), release_id=str(release_id))
-            return None
+            return None, f"Update failed: {str(e)}"
 
     def delete_release_with_cleanup(self, db: Session, release_id: UUID, user_id: UUID) -> bool:
         """
@@ -358,7 +400,7 @@ class SongReleaseOrchestrator:
 
             # 3. Delete cover from S3 if exists (infrastructure)
             if release.cover_s3_key:
-                self.storage.delete_file(release.cover_s3_key)
+                self.storage.delete(release.cover_s3_key)
                 logger.debug("Cover deleted from S3", s3_key=release.cover_s3_key)
 
             logger.info("Release deleted with cleanup", release_id=str(release_id))

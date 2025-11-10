@@ -65,12 +65,24 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe(searchTerm => {
       this.searchTerm = searchTerm;
-      this.loadReleases(0);
+      this.loadReleases(0).then(() => {
+        // Auto-select first release after search
+        if (this.releaseList.length > 0) {
+          this.selectRelease(this.releaseList[0]);
+        } else {
+          this.selectedRelease = null;
+        }
+      });
     });
   }
 
   ngOnInit(): void {
-    this.loadReleases(0);
+    this.loadReleases(0).then(() => {
+      // Auto-select first release if list is not empty
+      if (this.releaseList.length > 0 && !this.selectedRelease) {
+        this.selectRelease(this.releaseList[0]);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -90,7 +102,7 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
       const response = await this.releaseService.getReleases(
         this.pagination.limit,
         this.pagination.offset,
-        this.selectedStatusFilter !== 'all' ? this.selectedStatusFilter : undefined,
+        this.selectedStatusFilter || undefined,  // Send 'all' as string, not undefined
         this.searchTerm || undefined
       ).toPromise();
 
@@ -142,7 +154,14 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
    */
   selectStatusFilter(filter: string): void {
     this.selectedStatusFilter = filter;
-    this.loadReleases(0);
+    this.loadReleases(0).then(() => {
+      // Auto-select first release after filter change
+      if (this.releaseList.length > 0) {
+        this.selectRelease(this.releaseList[0]);
+      } else {
+        this.selectedRelease = null;
+      }
+    });
   }
 
   /**
@@ -150,7 +169,14 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
    */
   changePage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
-      this.loadReleases(page);
+      this.loadReleases(page).then(() => {
+        // Auto-select first release on new page
+        if (this.releaseList.length > 0) {
+          this.selectRelease(this.releaseList[0]);
+        } else {
+          this.selectedRelease = null;
+        }
+      });
     }
   }
 
@@ -233,5 +259,42 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
       console.error('Failed to delete release:', error);
       this.notificationService.error(this.translate.instant('songRelease.messages.deleteError'));
     }
+  }
+
+  /**
+   * Get initials from release name (e.g., "My Album" -> "MA")
+   */
+  getInitials(name: string): string {
+    if (!name) return '?';
+
+    const words = name.trim().split(/\s+/);
+
+    if (words.length === 1) {
+      // Single word: take first 2 characters
+      return words[0].substring(0, 2).toUpperCase();
+    }
+
+    // Multiple words: take first letter of first 2 words
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+
+  /**
+   * Generate consistent color from string (for cover placeholder)
+   */
+  getColorFromString(text: string): string {
+    if (!text) return '#5a6268'; // Default gray
+
+    // Simple hash function
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      hash = text.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    // Generate color (pastel-like colors for better readability)
+    const hue = Math.abs(hash % 360);
+    const saturation = 60; // Medium saturation for pleasant colors
+    const lightness = 55; // Medium lightness for good contrast
+
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   }
 }

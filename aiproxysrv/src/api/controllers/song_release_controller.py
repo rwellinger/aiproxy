@@ -54,7 +54,7 @@ class SongReleaseController:
                 "copyright_info": release_data.copyright_info,
             }
 
-            result = song_release_orchestrator.create_release_with_projects(
+            result, error_msg = song_release_orchestrator.create_release_with_projects(
                 db=db,
                 user_id=user_id,
                 type=release_data.type,
@@ -69,7 +69,13 @@ class SongReleaseController:
             )
 
             if not result:
-                return {"error": "Failed to create release"}, 500
+                # Return validation errors as 400, other errors as 500
+                if error_msg and any(
+                    keyword in error_msg.lower() for keyword in ["missing", "required", "invalid", "must be"]
+                ):
+                    return {"error": error_msg}, 400
+                else:
+                    return {"error": error_msg or "Failed to create release"}, 500
 
             response = ReleaseResponse(**result)
             return {"data": response.model_dump(), "message": "Release created successfully"}, 201
@@ -167,7 +173,7 @@ class SongReleaseController:
             if "project_ids" in update_dict:
                 project_uuids = [UUID(pid) for pid in update_dict.pop("project_ids")]
 
-            result = song_release_orchestrator.update_release_with_projects(
+            result, error_msg = song_release_orchestrator.update_release_with_projects(
                 db=db,
                 release_id=release_id,
                 user_id=user_id,
@@ -177,7 +183,12 @@ class SongReleaseController:
             )
 
             if not result:
-                return {"error": "Release not found or update failed"}, 404
+                # Distinguish between validation errors (400) and not found (404)
+                if error_msg and "not found" in error_msg.lower():
+                    return {"error": error_msg}, 404
+                else:
+                    # Validation or other business logic error
+                    return {"error": error_msg or "Update failed"}, 400
 
             response = ReleaseResponse(**result)
             return {"data": response.model_dump(), "message": "Release updated successfully"}, 200
@@ -186,7 +197,9 @@ class SongReleaseController:
             logger.warning("Invalid UUID in project_ids", error=str(e))
             return {"error": f"Invalid project ID format: {str(e)}"}, 400
         except Exception as e:
-            logger.error("Update release error", error=str(e), release_id=str(release_id), error_type=e.__class__.__name__)
+            logger.error(
+                "Update release error", error=str(e), release_id=str(release_id), error_type=e.__class__.__name__
+            )
             return {"error": f"Failed to update release: {str(e)}"}, 500
 
     @staticmethod
@@ -213,7 +226,9 @@ class SongReleaseController:
             return {"message": "Release deleted successfully"}, 200
 
         except Exception as e:
-            logger.error("Delete release error", error=str(e), release_id=str(release_id), error_type=e.__class__.__name__)
+            logger.error(
+                "Delete release error", error=str(e), release_id=str(release_id), error_type=e.__class__.__name__
+            )
             return {"error": f"Failed to delete release: {str(e)}"}, 500
 
 

@@ -235,6 +235,10 @@
             </button>
           </div>
 
+          <div class="cover-preview cover-placeholder-preview" *ngIf="!coverPreviewUrl && releaseForm.get('name')?.value" [style.background-color]="getColorFromString(releaseForm.get('name')?.value)">
+            <span class="initials">{{ getInitials(releaseForm.get('name')?.value) }}</span>
+          </div>
+
           <div class="cover-upload-controls">
             <label for="coverFileInput" class="upload-label">
               <i class="fas fa-upload"></i>

@@ -23,27 +23,48 @@ def validate_required_fields_for_status(status: str, data: dict[str, Any]) -> tu
         >>> validate_required_fields_for_status("draft", {"type": "single", "name": "Test", "genre": "Rock"})
         (True, None)
         >>> validate_required_fields_for_status("uploaded", {"type": "single", "name": "Test", "genre": "Rock"})
-        (False, "Missing required fields for status 'uploaded': upload_date, upc, copyright_info, cover_s3_key")
+        (False, "Missing required fields for status 'uploaded': Upload Date, UPC, Copyright Info, Cover Image")
         >>> validate_required_fields_for_status("released", {"type": "single", "name": "Test", "genre": "Rock", "upload_date": "2024-01-01", "release_date": "2024-01-15", "upc": "123", "isrc": "US123", "copyright_info": "(C) 2024", "cover_s3_key": "cover.jpg"})
+        (True, None)
+        >>> validate_required_fields_for_status("rejected", {"type": "single", "name": "Test", "genre": "Rock", "rejected_reason": "Quality issues"})
         (True, None)
     """
     # Base fields (required for ALL statuses)
     base_fields = ["type", "name", "genre"]
 
+    # User-friendly field names for error messages
+    field_labels = {
+        "type": "Type",
+        "name": "Name",
+        "genre": "Genre",
+        "upload_date": "Upload Date",
+        "release_date": "Release Date",
+        "downtaken_date": "Downtaken Date",
+        "downtaken_reason": "Downtaken Reason",
+        "rejected_reason": "Rejected Reason",
+        "upc": "UPC",
+        "isrc": "ISRC",
+        "copyright_info": "Copyright Info",
+        "cover_s3_key": "Cover Image",  # User-friendly: "Cover Image" instead of "cover_s3_key"
+    }
+
     # Status-specific required fields
+    # Business Logic:
+    # - uploaded: Has been uploaded to distributor (Ditto/DistroKid), release_date is OPTIONAL (might not be planned yet), ISRC not yet known
+    # - released: Actually released, release_date is REQUIRED, ISRC is now available from distributor
+    # - downtaken: Was released and then removed, both dates are REQUIRED
     status_requirements = {
         "draft": base_fields,
         "arranging": base_fields,
         "mixing": base_fields,
         "mastering": base_fields,
-        "rejected": base_fields + ["description", "rejected_reason"],
-        "archived": base_fields + ["description"],
-        "uploaded": base_fields + ["description", "upload_date", "upc", "copyright_info", "cover_s3_key"],
+        "rejected": base_fields + ["rejected_reason"],
+        "archived": base_fields,
+        "uploaded": base_fields + ["upload_date", "upc", "copyright_info", "cover_s3_key"],  # release_date is OPTIONAL
         "released": base_fields
-        + ["description", "upload_date", "release_date", "upc", "isrc", "copyright_info", "cover_s3_key"],
+        + ["upload_date", "release_date", "upc", "isrc", "copyright_info", "cover_s3_key"],  # release_date now REQUIRED
         "downtaken": base_fields
         + [
-            "description",
             "upload_date",
             "release_date",
             "downtaken_date",
@@ -59,7 +80,9 @@ def validate_required_fields_for_status(status: str, data: dict[str, Any]) -> tu
     missing = [field for field in required if not data.get(field)]
 
     if missing:
-        return False, f"Missing required fields for status '{status}': {', '.join(missing)}"
+        # Convert technical field names to user-friendly labels
+        missing_labels = [field_labels.get(field, field) for field in missing]
+        return False, f"Missing required fields for status '{status}': {', '.join(missing_labels)}"
 
     return True, None
 

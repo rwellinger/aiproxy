@@ -1675,6 +1675,7 @@
         "projects": "Assigned Projects",
         "industry": "Industry Identifiers",
         "dates": "Important Dates",
+        "reasons": "Rejection/Removal Reasons",
         "cover": "Cover Image"
       },
       "metadata": {
