@@ -66,6 +66,16 @@ export interface AssignedImage {
   created_at: string | null;
 }
 
+export interface AssignedRelease {
+  id: string;
+  name: string | null;
+  type: 'single' | 'album' | null;
+  status: string | null;
+  genre: string | null;
+  release_date: string | null;
+  created_at: string | null;
+}
+
 export interface ProjectFolderWithFiles extends ProjectFolder {
   files: ProjectFile[];
 }
@@ -80,6 +90,7 @@ export interface SongProjectDetail extends SongProject {
   total_files: number;  // Live calculated
   total_size_bytes: number;  // Live calculated
   folders: ProjectFolderWithAssets[];
+  assigned_releases?: AssignedRelease[];
 }
 
 export interface SongProjectListItem {

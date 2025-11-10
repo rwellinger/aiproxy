@@ -101,5 +101,20 @@ export const routes: Routes = [
         path: 'song-projects',
         canActivate: [AuthGuard],
         loadComponent: () => import('./pages/song-projects/song-projects.component').then(m => m.SongProjectsComponent)
+    },
+    {
+        path: 'song-releases/new',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/song-release-editor/song-release-editor.component').then(m => m.SongReleaseEditorComponent)
+    },
+    {
+        path: 'song-releases/edit/:id',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/song-release-editor/song-release-editor.component').then(m => m.SongReleaseEditorComponent)
+    },
+    {
+        path: 'song-releases',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./pages/song-release-gallery/song-release-gallery.component').then(m => m.SongReleaseGalleryComponent)
     }
 ];

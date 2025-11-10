@@ -463,3 +463,41 @@ def transform_image_to_assigned_response(image: Any) -> dict[str, Any]:  # pragm
         "height": height,
         "created_at": image.created_at.isoformat() if image.created_at else None,
     }
+
+
+def transform_release_to_assigned_response(release: Any) -> dict[str, Any]:  # pragma: no cover
+    """
+    Transform SongRelease DB model to assigned release API response format (pure function)
+
+    NOTE: No unit tests - Simple attribute mapper without business logic.
+    Testing would only verify mock setup, not real behavior (CLAUDE.md rule).
+
+    Args:
+        release: SongRelease DB model instance
+
+    Returns:
+        Dictionary with release data for API response
+
+    Examples:
+        >>> class MockRelease:
+        ...     id = "jkl-012"
+        ...     name = "Summer EP"
+        ...     type = "single"
+        ...     status = "released"
+        ...     genre = "Electronic"
+        ...     release_date = None
+        ...     created_at = None
+        >>> transform_release_to_assigned_response(MockRelease())
+        {'id': 'jkl-012', 'name': 'Summer EP', 'type': 'single', 'status': 'released', 'genre': 'Electronic', 'release_date': None, 'created_at': None}
+    """
+    return {
+        "id": str(release.id),
+        "name": release.name if hasattr(release, "name") else None,
+        "type": release.type if hasattr(release, "type") else None,
+        "status": release.status if hasattr(release, "status") else None,
+        "genre": release.genre if hasattr(release, "genre") else None,
+        "release_date": release.release_date.isoformat()
+        if hasattr(release, "release_date") and release.release_date
+        else None,
+        "created_at": release.created_at.isoformat() if release.created_at else None,
+    }

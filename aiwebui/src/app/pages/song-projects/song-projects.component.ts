@@ -797,4 +797,32 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   canUploadFiles(): boolean {
     return this.selectedProject?.project_status !== 'archived';
   }
+
+  /**
+   * Get CSS class for release status badge
+   */
+  getStatusBadgeClass(status: string | null): string {
+    if (!status) return 'release-status-draft';
+
+    const statusMap: Record<string, string> = {
+      'draft': 'release-status-draft',
+      'arranging': 'release-status-progress',
+      'mixing': 'release-status-progress',
+      'mastering': 'release-status-progress',
+      'uploaded': 'release-status-uploaded',
+      'released': 'release-status-released',
+      'rejected': 'release-status-rejected',
+      'downtaken': 'release-status-rejected',
+      'archived': 'release-status-archived'
+    };
+
+    return statusMap[status] || 'release-status-draft';
+  }
+
+  /**
+   * Open release details
+   */
+  openRelease(releaseId: string): void {
+    this.router.navigate(['/song-releases', releaseId]);
+  }
 }

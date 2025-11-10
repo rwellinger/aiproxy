@@ -160,7 +160,7 @@ class SongReleaseOrchestrator:
             return response
 
         except Exception as e:
-            logger.error("Create release orchestration failed", error=str(e), error_type=type(e).__name__)
+            logger.error("Create release orchestration failed", error=str(e), error_type=e.__class__.__name__)
             return None
 
     def get_release_with_details(self, db: Session, release_id: UUID, user_id: UUID) -> dict[str, Any] | None:

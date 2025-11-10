@@ -78,7 +78,7 @@ class SongReleaseController:
             logger.warning("Invalid UUID in project_ids", error=str(e))
             return {"error": f"Invalid project ID format: {str(e)}"}, 400
         except Exception as e:
-            logger.error("Release creation error", error=str(e), error_type=type(e).__name__)
+            logger.error("Release creation error", error=str(e), error_type=e.__class__.__name__)
             return {"error": f"Failed to create release: {str(e)}"}, 500
 
     @staticmethod
@@ -105,10 +105,10 @@ class SongReleaseController:
             )
 
             response = ReleaseListResponse(**result)
-            return {"data": response.model_dump()}, 200
+            return response.model_dump(), 200
 
         except Exception as e:
-            logger.error("Get releases error", error=str(e), error_type=type(e).__name__)
+            logger.error("Get releases error", error=str(e), error_type=e.__class__.__name__)
             return {"error": f"Failed to retrieve releases: {str(e)}"}, 500
 
     @staticmethod
@@ -134,7 +134,7 @@ class SongReleaseController:
             return {"data": response.model_dump()}, 200
 
         except Exception as e:
-            logger.error("Get release error", error=str(e), release_id=str(release_id), error_type=type(e).__name__)
+            logger.error("Get release error", error=str(e), release_id=str(release_id), error_type=e.__class__.__name__)
             return {"error": f"Failed to retrieve release: {str(e)}"}, 500
 
     @staticmethod
@@ -186,7 +186,7 @@ class SongReleaseController:
             logger.warning("Invalid UUID in project_ids", error=str(e))
             return {"error": f"Invalid project ID format: {str(e)}"}, 400
         except Exception as e:
-            logger.error("Update release error", error=str(e), release_id=str(release_id), error_type=type(e).__name__)
+            logger.error("Update release error", error=str(e), release_id=str(release_id), error_type=e.__class__.__name__)
             return {"error": f"Failed to update release: {str(e)}"}, 500
 
     @staticmethod
@@ -213,7 +213,7 @@ class SongReleaseController:
             return {"message": "Release deleted successfully"}, 200
 
         except Exception as e:
-            logger.error("Delete release error", error=str(e), release_id=str(release_id), error_type=type(e).__name__)
+            logger.error("Delete release error", error=str(e), release_id=str(release_id), error_type=e.__class__.__name__)
             return {"error": f"Failed to delete release: {str(e)}"}, 500
 
 

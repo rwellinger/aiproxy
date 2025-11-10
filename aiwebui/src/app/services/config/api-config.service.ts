@@ -166,6 +166,21 @@ export class ApiConfigService {
             delete: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}`,
             uploadFile: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}/files`,
             clearFolder: (projectId: string, folderId: string) => `${this.baseUrl}/api/v1/song-projects/${projectId}/folders/${folderId}/clear`
+        },
+        songRelease: {
+            create: `${this.baseUrl}/api/v1/song-releases`,
+            list: (limit?: number, offset?: number, statusFilter?: string, search?: string) => {
+                const params = new URLSearchParams();
+                if (limit !== undefined) params.append('limit', limit.toString());
+                if (offset !== undefined) params.append('offset', offset.toString());
+                if (statusFilter) params.append('status_filter', statusFilter);
+                if (search) params.append('search', search);
+                const query = params.toString();
+                return `${this.baseUrl}/api/v1/song-releases${query ? '?' + query : ''}`;
+            },
+            detail: (id: string) => `${this.baseUrl}/api/v1/song-releases/${id}`,
+            update: (id: string) => `${this.baseUrl}/api/v1/song-releases/${id}`,
+            delete: (id: string) => `${this.baseUrl}/api/v1/song-releases/${id}`
         }
     };
 

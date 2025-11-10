@@ -145,9 +145,12 @@
     "title": {
       "image": "Assign Image to Project",
       "song": "Assign Song to Project",
-      "sketch": "Assign Sketch to Project"
+      "sketch": "Assign Sketch to Project",
+      "release": "Assign Release to Project"
     },
     "selectProject": "Select Project",
+    "selectProjects": "Select Projects",
+    "albumMultiSelectHint": "Albums can be assigned to multiple projects",
     "selectFolder": "Select Folder (Optional)",
     "noFolder": "No Folder",
     "noFoldersAvailable": "No folders available in this project",
@@ -155,7 +158,9 @@
     "errors": {
       "loadProjectsFailed": "Failed to load projects",
       "loadFoldersFailed": "Failed to load folders",
-      "assignFailed": "Failed to assign to project"
+      "assignFailed": "Failed to assign to project",
+      "noProjectSelected": "Please select at least one project",
+      "singleOneProject": "Single releases can only be assigned to one project"
     }
   },
   "detailPanel": {
@@ -757,6 +762,7 @@
     "settings": "Settings",
     "sketchLibrary": "Sketch Library",
     "songProjects": "Song Projects",
+    "songReleases": "Song Releases",
     "textOverlayEditor": "Text Overlay"
   },
   "songDetailPanel": {
@@ -1635,6 +1641,126 @@
       "formInvalid": "Please fill in all required fields"
     }
   },
+  "songRelease": {
+    "title": "Song Releases",
+    "gallery": {
+      "title": "Release Manager",
+      "subtitle": "Manage your singles and albums",
+      "search": "Search releases...",
+      "items": "items",
+      "loading": "Loading releases...",
+      "empty": "No releases found",
+      "selectPrompt": "Select a release from the list to view details",
+      "pagination": {
+        "info": "Page {{current}} of {{total}}"
+      },
+      "filters": {
+        "all": "All",
+        "progress": "In Progress",
+        "uploaded": "Uploaded",
+        "released": "Released",
+        "archive": "Archive"
+      },
+      "actions": {
+        "new": "New Release",
+        "edit": "Edit",
+        "delete": "Delete",
+        "copy": "Copy to clipboard",
+        "uploadCover": "Upload Cover",
+        "replaceCover": "Replace Cover"
+      },
+      "sections": {
+        "general": "General Information",
+        "metadata": "Metadata",
+        "projects": "Assigned Projects",
+        "industry": "Industry Identifiers",
+        "dates": "Important Dates",
+        "cover": "Cover Image"
+      },
+      "metadata": {
+        "created": "Created",
+        "updated": "Updated"
+      }
+    },
+    "editor": {
+      "titleCreate": "Create New Release",
+      "titleEdit": "Edit Release",
+      "loading": "Loading release data...",
+      "sections": {
+        "basic": "Basic Information",
+        "projects": "Project Assignment",
+        "industry": "Industry Metadata",
+        "dates": "Publication Dates",
+        "reasons": "Status Reasons",
+        "cover": "Cover Image"
+      },
+      "type": "Type",
+      "status": "Status",
+      "name": "Name",
+      "genre": "Genre",
+      "description": "Description",
+      "tags": "Tags",
+      "tagsPlaceholder": "Enter tags separated by commas",
+      "tagsHint": "Comma-separated, e.g., rock, indie, summer",
+      "noProjectsAssigned": "No projects assigned yet",
+      "assignProjects": "Assign to Projects",
+      "upc": "UPC (Universal Product Code)",
+      "isrc": "ISRC (International Standard Recording Code)",
+      "copyrightInfo": "Copyright Information",
+      "uploadDate": "Upload Date",
+      "releaseDate": "Release Date",
+      "downtakenDate": "Downtaken Date",
+      "rejectedReason": "Reason for Rejection",
+      "downtakenReason": "Reason for Removal",
+      "uploadCover": "Select Cover Image",
+      "coverHint": "Recommended size: 200x200 pixels (JPG/PNG)",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saving": "Saving..."
+    },
+    "types": {
+      "single": "Single",
+      "album": "Album"
+    },
+    "statuses": {
+      "draft": "Draft",
+      "arranging": "Arranging",
+      "mixing": "Mixing",
+      "mastering": "Mastering",
+      "rejected": "Rejected",
+      "uploaded": "Uploaded",
+      "released": "Released",
+      "downtaken": "Downtaken",
+      "archived": "Archived"
+    },
+    "messages": {
+      "createSuccess": "Release created successfully",
+      "updateSuccess": "Release updated successfully",
+      "deleteSuccess": "Release deleted successfully",
+      "deleteConfirm": "Are you sure you want to delete this release?",
+      "loadError": "Failed to load release",
+      "saveError": "Failed to save release",
+      "deleteError": "Failed to delete release",
+      "coverValidationError": "Cover image must be 200x200 pixels",
+      "coverRequired": "Cover image is required for this status",
+      "releaseSaved": "Release saved successfully",
+      "projectsAssigned": "Projects assigned successfully",
+      "useProjectName": "Use project name '{{projectName}}' for this Single?",
+      "unsavedChanges": "You have unsaved changes. Discard changes?"
+    },
+    "validation": {
+      "required": "This field is required",
+      "maxLength": "Maximum {{max}} characters allowed",
+      "formInvalid": "Please fill in all required fields",
+      "invalidForm": "Please correct the errors in the form",
+      "selectTypeFirst": "Please select release type first",
+      "noProjectAssigned": "Please assign at least one project",
+      "singleOneProject": "Single releases can only be assigned to one project",
+      "uploadDateRequired": "Upload date is required for status 'uploaded'",
+      "releaseDateRequired": "Release date is required for status 'released'",
+      "coverRequired": "Cover image is required for this status"
+    }
+  },
   "songProjects": {
     "title": "Song Projects",
     "list": {
@@ -1671,6 +1797,7 @@
       "assignedSongs": "Assigned Songs",
       "assignedSketches": "Assigned Sketches",
       "assignedImages": "Assigned Images",
+      "assignedReleases": "Assigned Releases",
       "noAssignedAssets": "No assigned assets in this folder",
       "folderContent": {
         "images": "{{count}} images",
@@ -1702,7 +1829,8 @@
         "backToList": "Back to Projects",
         "openSong": "Open Song",
         "openSketch": "Open Sketch",
-        "openImage": "Open Image"
+        "openImage": "Open Image",
+        "viewRelease": "View Release"
       },
       "copyCompleteClone": "Copy Clone Command",
       "sections": {

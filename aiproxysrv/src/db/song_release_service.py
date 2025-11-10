@@ -96,10 +96,10 @@ class SongReleaseService:
 
         except SQLAlchemyError as e:
             db.rollback()
-            logger.error("Release creation DB error", error=str(e), error_type=type(e).__name__)
+            logger.error("Release creation DB error", error=str(e), error_type=e.__class__.__name__)
             return None
         except Exception as e:
-            logger.error("Release creation failed", error=str(e), error_type=type(e).__name__)
+            logger.error("Release creation failed", error=str(e), error_type=e.__class__.__name__)
             return None
 
     def get_release_by_id(self, db: Session, release_id: UUID, user_id: UUID) -> SongRelease | None:
