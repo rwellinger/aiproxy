@@ -22,9 +22,9 @@ export class ApiConfigService {
                 const query = params.toString();
                 return `${this.baseUrl}/api/v1/song/list${query ? '?' + query : ''}`;
             },
-            detail: (songId: string) => `${this.baseUrl}/api/v1/song/id/${songId}`,
-            delete: (songId: string) => `${this.baseUrl}/api/v1/song/id/${songId}`,
-            update: (songId: string) => `${this.baseUrl}/api/v1/song/id/${songId}`,
+            detail: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}`,
+            delete: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}`,
+            update: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}`,
             updateChoiceRating: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/rating`,
             bulkDelete: `${this.baseUrl}/api/v1/song/bulk-delete`,
             assignToProject: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}/assign-to-project`
@@ -35,9 +35,9 @@ export class ApiConfigService {
             tasks: `${this.baseUrl}/api/v1/image/tasks`,
             list: (limit?: number, offset?: number) => `${this.baseUrl}/api/v1/image/list${limit !== undefined || offset !== undefined ? '?' : ''}${limit !== undefined ? `limit=${limit}` : ''}${limit !== undefined && offset !== undefined ? '&' : ''}${offset !== undefined ? `offset=${offset}` : ''}`,
             listForTextOverlay: `${this.baseUrl}/api/v1/image/list-for-text-overlay`,
-            detail: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}`,
-            delete: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}`,
-            update: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}`,
+            detail: (id: string) => `${this.baseUrl}/api/v1/image/${id}`,
+            delete: (id: string) => `${this.baseUrl}/api/v1/image/${id}`,
+            update: (id: string) => `${this.baseUrl}/api/v1/image/${id}`,
             bulkDelete: `${this.baseUrl}/api/v1/image/bulk-delete`,
             addTextOverlay: `${this.baseUrl}/api/v1/image/add-text-overlay`,
             assignToProject: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}/assign-to-project`,

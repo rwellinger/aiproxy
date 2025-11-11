@@ -6,6 +6,8 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.types import UUID4
 
+from config.allowed_models import MUREKA_ALLOWED_MODELS
+
 from .common_schemas import BaseResponse, PaginationResponse
 
 
@@ -23,9 +25,8 @@ class SongGenerateRequest(BaseModel):
     @field_validator("model")
     @classmethod
     def validate_model(cls, v):
-        allowed_models = ["auto", "mureka-7.5", "mureka-7", "mureka-6", "mureka-o1"]
-        if v not in allowed_models:
-            raise ValueError(f"model must be one of: {', '.join(allowed_models)}")
+        if v not in MUREKA_ALLOWED_MODELS:
+            raise ValueError(f"model must be one of: {', '.join(MUREKA_ALLOWED_MODELS)}")
         return v
 
     model_config = ConfigDict(
@@ -290,9 +291,8 @@ class InstrumentalGenerateRequest(BaseModel):
     @field_validator("model")
     @classmethod
     def validate_model(cls, v):
-        allowed_models = ["auto", "mureka-7.5", "mureka-7", "mureka-6", "mureka-o1"]
-        if v not in allowed_models:
-            raise ValueError(f"model must be one of: {', '.join(allowed_models)}")
+        if v not in MUREKA_ALLOWED_MODELS:
+            raise ValueError(f"model must be one of: {', '.join(MUREKA_ALLOWED_MODELS)}")
         return v
 
     model_config = ConfigDict(

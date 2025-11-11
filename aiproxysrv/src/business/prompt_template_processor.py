@@ -4,7 +4,7 @@ This module contains core business logic for processing prompt templates.
 All functions are pure (no DB, no file system) and 100% unit-testable.
 
 Architecture:
-- Uses PromptTemplateFallbackHandler for parameter resolution
+- Direct parameter access from templates (NO fallbacks!)
 - Pure functions only (transformations, string manipulation)
 - No database queries (Repository layer handles that)
 - No HTTP calls (Controller layer handles that)
@@ -12,7 +12,6 @@ Architecture:
 
 from typing import TYPE_CHECKING, Any
 
-from business.prompt_template_fallback_handler import PromptTemplateFallbackHandler
 from utils.logger import logger
 
 
@@ -20,12 +19,18 @@ if TYPE_CHECKING:
     from db.models import PromptTemplate
 
 
+class PromptTemplateProcessorError(Exception):
+    """Raised when template processing fails due to incomplete template"""
+
+    pass
+
+
 class PromptTemplateProcessor:
     """
     Pure business logic for prompt template processing.
 
     All methods are static and pure functions (100% testable without mocks).
-    Uses FallbackHandler for parameter resolution with WARNING logging.
+    NO fallbacks - templates MUST be complete or will raise error.
     """
 
     @staticmethod
@@ -84,10 +89,10 @@ class PromptTemplateProcessor:
     @staticmethod
     def process_template(template: "PromptTemplate", user_input: str) -> dict[str, Any]:
         """
-        Complete template processing: resolve AI parameters and build prompt.
+        Complete template processing: validate parameters and build prompt.
 
         This is the main entry point for template processing.
-        Combines parameter resolution (with fallback handling) and prompt building.
+        NO FALLBACKS - template MUST be complete or raises error.
 
         Pure function - only logs, no other side effects
 
@@ -99,28 +104,36 @@ class PromptTemplateProcessor:
             Dict with complete processing result:
             {
                 "prompt": str,              # Complete prompt text
-                "model": str,               # Resolved model name
-                "temperature": float,       # Resolved temperature
-                "max_tokens": int,          # Resolved max_tokens
-                "fallback_count": int,      # Number of fallbacks used (0-3)
-                "fallbacks_used": {         # Which parameters used fallback
-                    "model": bool,
-                    "temperature": bool,
-                    "max_tokens": bool
-                }
+                "model": str,               # Model name from template
+                "temperature": float,       # Temperature from template
+                "max_tokens": int | None    # Max tokens from template (None = no limit)
             }
 
+        Raises:
+            PromptTemplateProcessorError: If template is missing required fields (model, temperature)
+
         Side Effects:
-            Logs DEBUG for success, WARNING if fallbacks used (via FallbackHandler)
+            Logs INFO for success, ERROR if template incomplete
 
         Example:
             result = PromptTemplateProcessor.process_template(template, "Write a song")
-            if result["fallback_count"] > 0:
-                # Alert: Template is incomplete!
             # Use result["prompt"], result["model"], etc. for API call
         """
-        # Step 1: Resolve AI parameters (with fallback tracking)
-        ai_params = PromptTemplateFallbackHandler.resolve_all_parameters(template, template.category, template.action)
+        # Step 1: Validate required fields (NO FALLBACKS!)
+        if not template.model or not template.model.strip():
+            raise PromptTemplateProcessorError(
+                f"Template {template.category}/{template.action} missing required field: model"
+            )
+
+        if template.temperature is None:
+            raise PromptTemplateProcessorError(
+                f"Template {template.category}/{template.action} missing required field: temperature"
+            )
+
+        # max_tokens can be None (means no limit) - this is valid!
+        model = template.model
+        temperature = template.temperature
+        max_tokens = template.max_tokens  # None or int (0 also means no limit)
 
         # Step 2: Build prompt
         prompt = PromptTemplateProcessor.build_prompt(template, user_input)
@@ -128,11 +141,9 @@ class PromptTemplateProcessor:
         # Step 3: Combine everything
         result = {
             "prompt": prompt,
-            "model": ai_params["model"],
-            "temperature": ai_params["temperature"],
-            "max_tokens": ai_params["max_tokens"],
-            "fallback_count": ai_params["fallback_count"],
-            "fallbacks_used": ai_params["fallbacks_used"],
+            "model": model,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
         }
 
         logger.info(
@@ -140,10 +151,9 @@ class PromptTemplateProcessor:
             category=template.category,
             action=template.action,
             template_id=template.id,
-            model=result["model"],
-            temperature=result["temperature"],
-            max_tokens=result["max_tokens"],
-            fallback_count=result["fallback_count"],
+            model=model,
+            temperature=temperature,
+            max_tokens=max_tokens if max_tokens is not None else "no_limit",
             prompt_length=len(prompt),
         )
 

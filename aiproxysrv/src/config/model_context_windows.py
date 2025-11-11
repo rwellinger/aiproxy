@@ -5,8 +5,6 @@ Maps AI model names to their context window sizes (in tokens).
 Includes:
 - OpenAI Models (gpt-4o, gpt-5, etc.)
 - Ollama Models (llama3, gpt-oss, etc.)
-
-Default: 2048 tokens
 """
 
 MODEL_CONTEXT_WINDOWS = {

@@ -4,6 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from config.allowed_models import OLLAMA_ALLOWED_MODELS
+
 
 class PromptTemplateBase(BaseModel):
     """Base schema for prompt templates"""
@@ -14,20 +16,18 @@ class PromptTemplateBase(BaseModel):
     post_condition: str = Field(..., description="Text after user input")
     description: str | None = Field(None, description="Human-readable description of the template")
     version: str | None = Field(None, max_length=10, description="Template version")
-    model: str | None = Field(
-        None,
-        max_length=50,
-        description="AI model for this template (llama3.2:3b, gpt-oss:20b, deepseek-r1:8b, gemma3:4b)",
+    model: str | None = Field(None, max_length=50, description="AI model for this template")
+    temperature: float | None = Field(None, description="Temperature for text generation (validated by frontend)")
+    max_tokens: int | None = Field(
+        None, description="Maximum tokens to generate (None or <=0 means no limit, let model decide)"
     )
-    temperature: float | None = Field(None, ge=0.0, le=2.0, description="Ollama Chat API temperature (0.0-2.0)")
-    max_tokens: int | None = Field(None, gt=0, description="Maximum tokens to generate")
     active: bool = Field(True, description="Whether the template is active")
 
     @field_validator("model")
     @classmethod
     def validate_model(cls, v):
-        if v is not None and v not in ["llama3.2:3b", "gpt-oss:20b", "deepseek-r1:8b", "gemma3:4b"]:
-            raise ValueError("model must be one of: llama3.2:3b, gpt-oss:20b, deepseek-r1:8b, gemma3:4b")
+        if v is not None and v not in OLLAMA_ALLOWED_MODELS:
+            raise ValueError(f"model must be one of: {', '.join(OLLAMA_ALLOWED_MODELS)}")
         return v
 
 
@@ -44,20 +44,18 @@ class PromptTemplateUpdate(BaseModel):
     post_condition: str | None = Field(None, description="Text after user input")
     description: str | None = Field(None, description="Human-readable description of the template")
     version: str | None = Field(None, max_length=10, description="Template version")
-    model: str | None = Field(
-        None,
-        max_length=50,
-        description="AI model for this template (llama3.2:3b, gpt-oss:20b, deepseek-r1:8b, gemma3:4b)",
+    model: str | None = Field(None, max_length=50, description="AI model for this template")
+    temperature: float | None = Field(None, description="Temperature for text generation (validated by frontend)")
+    max_tokens: int | None = Field(
+        None, description="Maximum tokens to generate (None or <=0 means no limit, let model decide)"
     )
-    temperature: float | None = Field(None, ge=0.0, le=2.0, description="Ollama Chat API temperature (0.0-2.0)")
-    max_tokens: int | None = Field(None, gt=0, description="Maximum tokens to generate")
     active: bool | None = Field(None, description="Whether the template is active")
 
     @field_validator("model")
     @classmethod
     def validate_model(cls, v):
-        if v is not None and v not in ["llama3.2:3b", "gpt-oss:20b", "deepseek-r1:8b", "gemma3:4b"]:
-            raise ValueError("model must be one of: llama3.2:3b, gpt-oss:20b, deepseek-r1:8b, gemma3:4b")
+        if v is not None and v not in OLLAMA_ALLOWED_MODELS:
+            raise ValueError(f"model must be one of: {', '.join(OLLAMA_ALLOWED_MODELS)}")
         return v
 
 

@@ -137,14 +137,7 @@ class PromptTemplateOrchestrator:
                 template_data.get("category", ""), template_data.get("action", "")
             )
 
-            # Step 2: Validate optional AI parameters
-            if "temperature" in template_data and template_data["temperature"] is not None:
-                PromptTemplateValidator.validate_temperature_range(template_data["temperature"])
-
-            if "max_tokens" in template_data and template_data["max_tokens"] is not None:
-                PromptTemplateValidator.validate_max_tokens_positive(template_data["max_tokens"])
-
-            # Step 3: Check if template already exists
+            # Step 2: Check if template already exists
             if self.service.template_exists(db, template_data["category"], template_data["action"]):
                 raise PromptTemplateOrchestratorError(
                     f"Template already exists for category '{template_data['category']}' and action '{template_data['action']}'"
@@ -202,14 +195,7 @@ class PromptTemplateOrchestrator:
                     f"Template not found for category '{category}' and action '{action}'"
                 )
 
-            # Step 2: Validate updated AI parameters
-            if "temperature" in update_data and update_data["temperature"] is not None:
-                PromptTemplateValidator.validate_temperature_range(update_data["temperature"])
-
-            if "max_tokens" in update_data and update_data["max_tokens"] is not None:
-                PromptTemplateValidator.validate_max_tokens_positive(update_data["max_tokens"])
-
-            # Step 3: Auto-increment version using validator
+            # Step 2: Auto-increment version using validator
             current_version = template.version
             new_version = PromptTemplateValidator.validate_version_increment(current_version)
             update_data["version"] = new_version

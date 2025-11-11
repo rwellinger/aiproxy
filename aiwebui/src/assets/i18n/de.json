@@ -650,7 +650,7 @@
     "detail": {
       "aiParameters": "KI-Parameter",
       "defaults": {
-        "maxTokens": "Standard (2048)",
+        "maxTokens": "Kein Limit (Model entscheidet)",
         "model": "Standard (llama3.2:3b)",
         "noDescription": "Keine Beschreibung",
         "temperature": "Standard (0.7)"
@@ -705,7 +705,7 @@
       "description": "Optionale Beschreibung...",
       "model": "z.B. llama3.2:3b",
       "temperature": "0.0 - 2.0",
-      "maxTokens": "z.B. 2048",
+      "maxTokens": "Max 3000 (leer = kein Limit)",
       "preCondition": "Vorbedingung eingeben...",
       "postCondition": "Nachbedingung eingeben..."
     },
@@ -737,7 +737,7 @@
       "modelsFailed": "Fehler beim Laden der verfügbaren Modelle"
     },
     "hints": {
-      "maxTokens": "Gesamt-Output-Grenze (inkl. internes Reasoning). Response-Länge via Zeichen-Limits in Nachbedingung steuern (z.B. 'Maximum 400 Zeichen')."
+      "maxTokens": "Maximale Antwortlänge in Tokens (leer/0 = kein Limit, Model entscheidet). CoT-Models (gpt-oss:20b) brauchen mehr Budget für internes Reasoning."
     }
   },
   "sideMenu": {

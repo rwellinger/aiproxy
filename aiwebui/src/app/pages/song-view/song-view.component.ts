@@ -806,12 +806,9 @@ export class SongViewComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
     try {
-      // Convert selectedTags set to comma-separated string
-      const tagsString = Array.from(this.selectedTags).join(', ');
-
       const updatedSong = await firstValueFrom(
         this.http.put<any>(this.apiConfig.endpoints.song.update(this.selectedSong.id), {
-          tags: tagsString
+          tags: Array.from(this.selectedTags)
         })
       );
 

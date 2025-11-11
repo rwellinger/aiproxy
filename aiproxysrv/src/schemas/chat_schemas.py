@@ -5,14 +5,18 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from config.allowed_models import OLLAMA_ALLOWED_MODELS
+
 from .common_schemas import BaseResponse
 
 
 class ChatOptions(BaseModel):
     """Schema for chat generation options"""
 
-    temperature: float | None = Field(0.3, ge=0.0, le=2.0, description="Temperature for text generation")
-    max_tokens: int | None = Field(30, gt=0, le=4000, description="Maximum tokens to generate")
+    temperature: float | None = Field(0.3, description="Temperature for text generation (validated by frontend)")
+    max_tokens: int | None = Field(
+        30, description="Maximum tokens to generate (None or <=0 means no limit, let model decide)"
+    )
     top_p: float | None = Field(0.9, ge=0.0, le=1.0, description="Top-p sampling parameter")
     repeat_penalty: float | None = Field(1.1, ge=0.0, le=2.0, description="Repeat penalty")
 
@@ -33,9 +37,8 @@ class ChatRequest(BaseModel):
     @field_validator("model")
     @classmethod
     def validate_model(cls, v):
-        valid_models = ["llama3.2:3b", "gpt-oss:20b", "deepseek-r1:8b", "gemma3:4b"]
-        if v not in valid_models:
-            raise ValueError(f"model must be one of: {', '.join(valid_models)}")
+        if v not in OLLAMA_ALLOWED_MODELS:
+            raise ValueError(f"model must be one of: {', '.join(OLLAMA_ALLOWED_MODELS)}")
         return v
 
     model_config = ConfigDict(
@@ -87,9 +90,12 @@ class UnifiedChatRequest(BaseModel):
         "", description="Optional user-specific instructions (placed between input and post_condition)"
     )
     temperature: float | None = Field(
-        None, ge=0.0, le=2.0, description="Temperature for text generation (overrides template)"
+        None, description="Temperature for text generation (overrides template, validated by frontend)"
     )
-    max_tokens: int | None = Field(None, gt=0, le=4000, description="Maximum tokens to generate (overrides template)")
+    max_tokens: int | None = Field(
+        None,
+        description="Maximum tokens to generate (None or <=0 means no limit, let model decide, overrides template)",
+    )
     model: str | None = Field(None, description="AI model to use (overrides template)")
     category: str | None = Field(None, description="Template category (for logging/tracking)")
     action: str | None = Field(None, description="Template action (for logging/tracking)")
@@ -97,10 +103,8 @@ class UnifiedChatRequest(BaseModel):
     @field_validator("model")
     @classmethod
     def validate_model(cls, v):
-        if v is not None:
-            valid_models = ["llama3.2:3b", "gpt-oss:20b", "deepseek-r1:8b", "gemma3:4b"]
-            if v not in valid_models:
-                raise ValueError(f"model must be one of: {', '.join(valid_models)}")
+        if v is not None and v not in OLLAMA_ALLOWED_MODELS:
+            raise ValueError(f"model must be one of: {', '.join(OLLAMA_ALLOWED_MODELS)}")
         return v
 
     model_config = ConfigDict(

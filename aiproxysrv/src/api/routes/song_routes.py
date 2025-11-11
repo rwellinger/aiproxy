@@ -133,7 +133,7 @@ def list_songs():
     return jsonify(response_data), status_code
 
 
-@api_song_v1.route("/id/<song_id>", methods=["GET"])
+@api_song_v1.route("/<song_id>", methods=["GET"])
 @jwt_required
 def get_song(song_id):
     """Get single song by ID with all choices"""
@@ -142,7 +142,7 @@ def get_song(song_id):
     return jsonify(response_data), status_code
 
 
-@api_song_v1.route("/id/<song_id>", methods=["DELETE"])
+@api_song_v1.route("/<song_id>", methods=["DELETE"])
 @jwt_required
 def delete_song(song_id):
     """Delete song by ID including all choices"""
@@ -223,7 +223,7 @@ def queue_status():
     return jsonify(response_data), status_code
 
 
-@api_song_v1.route("/<string:song_id>", methods=["PUT"])
+@api_song_v1.route("/<song_id>", methods=["PUT"])
 @jwt_required
 @validate()
 def update_song(song_id: str, body: SongUpdateRequest):

@@ -94,49 +94,6 @@ class SongOrchestrator:
             logger.error(f"Error retrieving song {song_id}: {e}")
             raise SongOrchestratorError(f"Failed to retrieve song: {e}") from e
 
-    def update_song_metadata(self, song_id: str, update_data: dict[str, Any]) -> dict[str, Any] | None:
-        """
-        Update song metadata with validation
-
-        Args:
-            song_id: ID of the song to update
-            update_data: Data to update
-
-        Returns:
-            Updated song data or None if not found
-        """
-        try:
-            # Check if song exists
-            song = song_service.get_song_by_id(song_id)
-            if not song:
-                return None
-
-            # Business logic: Validate and filter allowed fields (delegated to validator)
-            from business.song_validator import SongValidationError
-
-            try:
-                filtered_data = SongValidator.validate_update_fields(update_data)
-            except SongValidationError as e:
-                raise SongOrchestratorError(str(e)) from e
-
-            # Update the song
-            updated_song = song_service.update_song(song_id, filtered_data)
-            if not updated_song:
-                raise SongOrchestratorError("Failed to update song")
-
-            logger.info(f"Song {song_id} updated successfully")
-            return {
-                "id": str(updated_song.id),
-                "title": updated_song.title,
-                "tags": updated_song.tags,
-                "workflow": updated_song.workflow,
-                "updated_at": updated_song.updated_at.isoformat() if updated_song.updated_at else None,
-            }
-
-        except Exception as e:
-            logger.error(f"Error updating song {song_id}: {e}")
-            raise SongOrchestratorError(f"Failed to update song: {e}") from e
-
     def delete_single_song(self, song_id: str) -> bool:
         """
         Delete a single song including all choices
@@ -332,6 +289,10 @@ class SongOrchestrator:
                 folder = get_folder_by_id(db, UUID(update_data["project_folder_id"]))
                 if not folder:
                     raise ValueError(f"Folder not found: {update_data['project_folder_id']}")
+
+            # Business logic: Convert tags from array to comma-separated string for DB storage
+            if "tags" in update_data and isinstance(update_data["tags"], list):
+                update_data["tags"] = ", ".join(update_data["tags"])
 
             # Update song (using service instance, NOT wrapper function)
             updated_song = song_service.update_song(song_id, update_data)

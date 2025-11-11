@@ -26,13 +26,12 @@ chat_controller = ChatController()
 def generate_unified(body: UnifiedChatRequest):
     """Generate chat response with unified request structure and template support"""
     try:
-        # Validate that all required template parameters are provided
+        # Validate that required template parameters are provided
+        # Note: max_tokens is optional (None/0 means no limit, let model decide)
         if body.model is None:
             raise ValueError("Model parameter is required but not provided by template")
         if body.temperature is None:
             raise ValueError("Temperature parameter is required but not provided by template")
-        if body.max_tokens is None:
-            raise ValueError("Max_tokens parameter is required but not provided by template")
 
         # Conditional logging based on .env setting
         if CHAT_DEBUG_LOGGING:

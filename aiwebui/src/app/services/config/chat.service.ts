@@ -99,15 +99,13 @@ export class ChatService {
       throw new Error(`Template ${category}/${action} not found in database`);
     }
 
-    // Validate template has all required parameters
+    // Validate template has required parameters (model and temperature)
+    // Note: max_tokens is optional (null/0 means no limit, let model decide)
     if (!template.model) {
       throw new Error(`Template ${category}/${action} is missing model parameter`);
     }
     if (template.temperature === undefined || template.temperature === null) {
       throw new Error(`Template ${category}/${action} is missing temperature parameter`);
-    }
-    if (!template.max_tokens) {
-      throw new Error(`Template ${category}/${action} is missing max_tokens parameter`);
     }
 
     // Apply pre_condition enhancement if provided, otherwise use template default

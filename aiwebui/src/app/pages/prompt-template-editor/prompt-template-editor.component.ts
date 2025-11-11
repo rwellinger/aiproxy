@@ -155,13 +155,19 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
         this.isSaving = true;
 
         try {
+            // Get max_tokens value - preserve 0 and null (they mean "no limit")
+            const maxTokensValue = this.editorForm.get('max_tokens')?.value;
+            const maxTokens = (maxTokensValue === null || maxTokensValue === undefined || maxTokensValue === '')
+                ? null
+                : maxTokensValue;
+
             const update: PromptTemplateUpdate = {
                 pre_condition: this.editorForm.get('pre_condition')?.value.trim(),
                 post_condition: this.editorForm.get('post_condition')?.value.trim(),
                 description: this.editorForm.get('description')?.value?.trim() || undefined,
                 model: this.editorForm.get('model')?.value || undefined,
                 temperature: this.editorForm.get('temperature')?.value || undefined,
-                max_tokens: this.editorForm.get('max_tokens')?.value || undefined
+                max_tokens: maxTokens
             };
 
             const updatedTemplate = await this.promptService.updateTemplateAsync(

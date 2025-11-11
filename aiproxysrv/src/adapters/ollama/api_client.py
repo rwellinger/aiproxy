@@ -16,7 +16,7 @@ class OllamaAPIClient:
         self.base_url = OLLAMA_URL
         self.timeout = OLLAMA_TIMEOUT
 
-    def generate(self, model: str, prompt: str, temperature: float, max_tokens: int) -> dict[str, Any]:
+    def generate(self, model: str, prompt: str, temperature: float, max_tokens: int | None) -> dict[str, Any]:
         """
         Send generation request to Ollama API.
 
@@ -24,7 +24,7 @@ class OllamaAPIClient:
             model: Ollama model name (e.g., "llama3.2:3b")
             prompt: Prompt text to generate from
             temperature: Sampling temperature (0.0-2.0)
-            max_tokens: Maximum tokens to generate
+            max_tokens: Maximum tokens to generate (None or <=0 means no limit)
 
         Returns:
             Ollama API response JSON
@@ -35,11 +35,16 @@ class OllamaAPIClient:
         api_url = f"{self.base_url}/api/generate"
         headers = {"Content-Type": "application/json"}
 
+        # Build options - only include num_predict if max_tokens is set and > 0
+        options = {"temperature": temperature}
+        if max_tokens is not None and max_tokens > 0:
+            options["num_predict"] = max_tokens
+
         payload = {
             "model": model,
             "prompt": prompt,
             "stream": False,
-            "options": {"temperature": temperature, "num_predict": max_tokens},
+            "options": options,
         }
 
         # Conditional logging based on CHAT_DEBUG_LOGGING

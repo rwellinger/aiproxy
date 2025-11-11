@@ -120,11 +120,9 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
         if (!this.song || !this.songId) return;
 
         try {
-            const tagsString = this.selectedTags.join(', ');
-
             await firstValueFrom(
                 this.http.put<any>(this.apiConfigService.endpoints.song.update(this.songId), {
-                    tags: tagsString
+                    tags: this.selectedTags
                 })
             );
 

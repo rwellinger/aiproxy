@@ -128,7 +128,7 @@ def serve_s3_image(image_id):
         return jsonify({"error": "Failed to load image from S3"}), 500
 
 
-@api_image_v1.route("/id/<string:image_id>", methods=["GET"])
+@api_image_v1.route("/<string:image_id>", methods=["GET"])
 @jwt_required
 def get_image(image_id):
     """Get single image by ID"""
@@ -137,7 +137,7 @@ def get_image(image_id):
     return jsonify(response_data), status_code
 
 
-@api_image_v1.route("/id/<string:image_id>", methods=["DELETE"])
+@api_image_v1.route("/<string:image_id>", methods=["DELETE"])
 @jwt_required
 def delete_image(image_id):
     """Delete image by ID"""
@@ -165,7 +165,7 @@ def bulk_delete_images():
     return jsonify(response_data), status_code
 
 
-@api_image_v1.route("/id/<string:image_id>", methods=["PUT"])
+@api_image_v1.route("/<string:image_id>", methods=["PUT"])
 @jwt_required
 @validate()
 def update_image_metadata(image_id: str, body: ImageUpdateRequest):

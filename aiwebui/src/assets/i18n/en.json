@@ -650,7 +650,7 @@
     "detail": {
       "aiParameters": "AI Parameters",
       "defaults": {
-        "maxTokens": "Default (2048)",
+        "maxTokens": "No limit (model decides)",
         "model": "Default (llama3.2:3b)",
         "noDescription": "No description",
         "temperature": "Default (0.7)"
@@ -705,7 +705,7 @@
       "description": "Optional description...",
       "model": "e.g., llama3.2:3b",
       "temperature": "0.0 - 2.0",
-      "maxTokens": "e.g., 2048",
+      "maxTokens": "Max 3000 (empty = no limit)",
       "preCondition": "Enter the pre-condition prompt...",
       "postCondition": "Enter the post-condition prompt..."
     },
@@ -737,7 +737,7 @@
       "modelsFailed": "Failed to load available models"
     },
     "hints": {
-      "maxTokens": "Total output limit (includes internal reasoning). Control response length via character limits in post-condition (e.g., 'Maximum 400 characters')."
+      "maxTokens": "Maximum response length in tokens (empty/0 = no limit, model decides). CoT models (gpt-oss:20b) need more budget for internal reasoning."
     }
   },
   "sideMenu": {
