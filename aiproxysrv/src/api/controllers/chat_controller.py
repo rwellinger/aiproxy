@@ -20,6 +20,8 @@ class ChatController:
         temperature: float = 0.3,
         max_tokens: int = 30,
         user_instructions: str = "",
+        category: str | None = None,
+        action: str | None = None,
     ) -> tuple[dict[str, Any], int]:
         """
         Generate chat response with Ollama.
@@ -32,10 +34,12 @@ class ChatController:
             temperature: Sampling temperature (default 0.3)
             max_tokens: Maximum tokens to generate (default 30)
             user_instructions: Optional user-specific instructions (placed between prompt and post_condition)
+            category: Template category for logging (optional)
+            action: Template action for logging (optional)
 
         Returns:
             Tuple of (response_data, status_code)
         """
         return self.orchestrator.generate_chat(
-            model, pre_condition, prompt, post_condition, temperature, max_tokens, user_instructions
+            model, pre_condition, prompt, post_condition, temperature, max_tokens, user_instructions, category, action
         )

@@ -2,6 +2,15 @@
  * Song Project Models - TypeScript interfaces and enums for song project management.
  */
 
+/**
+ * Cover info for Song Project - determines which cover to display
+ */
+export interface CoverInfo {
+  source: 'release' | 'placeholder';
+  release_id?: string;  // UUID if source='release'
+  release_name?: string;  // Name if source='release'
+}
+
 export interface SongProject {
   id: string;
   user_id: string;
@@ -10,6 +19,7 @@ export interface SongProject {
   tags: string[];
   description?: string;
   project_status: 'new' | 'progress' | 'archived';
+  cover_info?: CoverInfo;  // Cover display logic
   created_at: string; // ISO format
   updated_at: string; // ISO format
 }
@@ -100,6 +110,7 @@ export interface SongProjectListItem {
   project_status: 'new' | 'progress' | 'archived';
   total_files: number;
   total_size_bytes: number;
+  cover_info?: CoverInfo;  // Cover display logic
   created_at: string;
   updated_at: string;
 }

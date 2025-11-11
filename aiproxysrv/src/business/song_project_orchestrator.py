@@ -24,6 +24,7 @@ from business.song_project_transformer import (
     detect_file_type,
     generate_s3_prefix,
     get_default_folder_structure,
+    get_display_cover_info,
     get_mime_type,
     normalize_project_name,
     transform_image_to_assigned_response,
@@ -286,6 +287,11 @@ class SongProjectOrchestrator:
             # Load assigned releases for project (coordination)
             self._load_assigned_releases(db, project_id, response)
 
+            # Add cover_info based on assigned releases (business logic in transformer)
+            releases = self.db_service.get_assigned_releases_for_project(db, project_id)
+            cover_info = get_display_cover_info(releases)
+            response["cover_info"] = cover_info
+
             return response
 
         except Exception as e:
@@ -333,6 +339,15 @@ class SongProjectOrchestrator:
 
             # Transform projects to response
             projects_data = [transform_project_to_response(p) for p in result["items"]]
+
+            # Add cover_info for each project (based on assigned releases)
+            for project_data in projects_data:
+                project_id = UUID(project_data["id"])
+                # Load assigned releases
+                releases = self.db_service.get_assigned_releases_for_project(db, project_id)
+                # Determine cover display logic (business logic in transformer)
+                cover_info = get_display_cover_info(releases)
+                project_data["cover_info"] = cover_info
 
             # Calculate pagination metadata (business logic in transformer)
             pagination = calculate_pagination_meta(result["total"], limit, offset)

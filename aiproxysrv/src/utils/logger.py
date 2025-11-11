@@ -20,8 +20,8 @@ def format_record(record):
     """
     Custom formatter that displays extra fields based on log level:
     - DEBUG: Shows extra fields inline (compact, single-line)
-    - INFO/WARNING: Message only (clean for production)
-    - ERROR/CRITICAL: Shows extra fields multi-line (detailed error analysis)
+    - INFO: Message only (clean for production)
+    - WARNING/ERROR/CRITICAL: Shows extra fields multi-line (detailed for debugging)
     """
     # Base format
     format_str = (
@@ -31,12 +31,12 @@ def format_record(record):
         "<level>{message}</level>"
     )
 
-    # Show extra fields for DEBUG and ERROR/CRITICAL levels
-    if record["level"].name in ("DEBUG", "ERROR", "CRITICAL"):
+    # Show extra fields for DEBUG, WARNING, ERROR, and CRITICAL levels
+    if record["level"].name in ("DEBUG", "WARNING", "ERROR", "CRITICAL"):
         extra = record["extra"]
 
-        if record["level"].name in ("ERROR", "CRITICAL"):
-            # ERROR/CRITICAL: Multi-line format with special handling for error fields
+        if record["level"].name in ("WARNING", "ERROR", "CRITICAL"):
+            # WARNING/ERROR/CRITICAL: Multi-line format with special handling for error fields
             if "error_type" in extra:
                 format_str += "\n  <yellow>└─ Type:</yellow> <red>{extra[error_type]}</red>"
 
@@ -64,7 +64,7 @@ def format_record(record):
                     value_str = value_str.replace("{", "{{").replace("}", "}}")
                     format_str += f"\n  <yellow>└─ {key}:</yellow> {value_str}"
         else:
-            # DEBUG: Compact inline format (key=value key=value)
+            # DEBUG/WARNING: Compact inline format (key=value key=value)
             relevant_extras = {k: v for k, v in extra.items() if not k.startswith("_")}
             if relevant_extras:
                 for key, value in relevant_extras.items():

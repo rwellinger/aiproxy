@@ -502,3 +502,93 @@ def transform_release_to_assigned_response(release: Any) -> dict[str, Any]:  # p
         else None,
         "created_at": release.created_at.isoformat() if release.created_at else None,
     }
+
+
+def get_display_cover_info(releases: list[Any]) -> dict[str, Any]:
+    """
+    Determine which cover to display for a Song Project based on assigned releases (pure function)
+
+    Business logic:
+    - If no releases assigned → placeholder (letter-based initials)
+    - If releases exist:
+      - Filter out: status IN ('rejected', 'downtaken', 'archived')
+      - Sort by: release_date DESC (highest = newest)
+      - Select: First valid release
+    - If no valid releases remain → placeholder
+
+    Args:
+        releases: List of SongRelease DB model instances (from get_assigned_releases_for_project)
+
+    Returns:
+        Dictionary with cover info:
+        {
+            'source': 'release' | 'placeholder',
+            'release_id': str | None,  # UUID if source='release'
+            'release_name': str | None  # Name if source='release'
+        }
+
+    Examples:
+        >>> # No releases
+        >>> get_display_cover_info([])
+        {'source': 'placeholder', 'release_id': None, 'release_name': None}
+
+        >>> # Single valid release
+        >>> class MockRelease:
+        ...     id = "abc-123"
+        ...     name = "Summer EP"
+        ...     status = "released"
+        ...     release_date = "2024-06-01"
+        >>> get_display_cover_info([MockRelease()])
+        {'source': 'release', 'release_id': 'abc-123', 'release_name': 'Summer EP'}
+
+        >>> # Multiple releases, newest valid one selected
+        >>> class Release1:
+        ...     id = "old-123"
+        ...     name = "Old Release"
+        ...     status = "released"
+        ...     release_date = "2023-01-01"
+        >>> class Release2:
+        ...     id = "new-456"
+        ...     name = "New Release"
+        ...     status = "uploaded"
+        ...     release_date = "2024-12-01"
+        >>> get_display_cover_info([Release1(), Release2()])
+        {'source': 'release', 'release_id': 'new-456', 'release_name': 'New Release'}
+
+        >>> # Only invalid status → placeholder
+        >>> class RejectedRelease:
+        ...     id = "rejected-123"
+        ...     name = "Rejected EP"
+        ...     status = "rejected"
+        ...     release_date = "2024-01-01"
+        >>> get_display_cover_info([RejectedRelease()])
+        {'source': 'placeholder', 'release_id': None, 'release_name': None}
+    """
+    # No releases → placeholder
+    if not releases:
+        return {"source": "placeholder", "release_id": None, "release_name": None}
+
+    # Filter out invalid statuses
+    excluded_statuses = {"rejected", "downtaken", "archived"}
+    valid_releases = [r for r in releases if r.status not in excluded_statuses]
+
+    # No valid releases → placeholder
+    if not valid_releases:
+        return {"source": "placeholder", "release_id": None, "release_name": None}
+
+    # Sort by release_date DESC (newest first)
+    # Handle None release_date (treat as very old)
+    sorted_releases = sorted(
+        valid_releases,
+        key=lambda r: r.release_date if r.release_date else "1900-01-01",  # type: ignore
+        reverse=True,
+    )
+
+    # Select newest release
+    newest_release = sorted_releases[0]
+
+    return {
+        "source": "release",
+        "release_id": str(newest_release.id),
+        "release_name": newest_release.name,
+    }

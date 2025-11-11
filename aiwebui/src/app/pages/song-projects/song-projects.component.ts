@@ -17,11 +17,14 @@ import { MatMenuModule } from '@angular/material/menu';
 import { SongProjectService } from '../../services/business/song-project.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import { UserSettingsService } from '../../services/user-settings.service';
+import { ApiConfigService } from '../../services/config/api-config.service';
+import { ImageBlobService } from '../../services/ui/image-blob.service';
 import { CreateProjectDialogComponent } from '../../dialogs/create-project-dialog/create-project-dialog.component';
 import {
   SongProjectDetail,
   SongProjectListItem
 } from '../../models/song-project.model';
+import { getInitials, getColorFromString } from '../../shared/utils/cover-utils';
 
 @Component({
   selector: 'app-song-projects',
@@ -47,6 +50,8 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   // Project list and pagination
   projectList: SongProjectListItem[] = [];
   selectedProject: SongProjectDetail | null = null;
+  selectedProjectCoverBlobUrl: string = '';
+  listItemCoverBlobUrls = new Map<string, string>(); // Map: project.id -> blob URL
   totalProjects = 0;
   pagination = {
     total: 0,
@@ -86,6 +91,8 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private settingsService = inject(UserSettingsService);
+  private apiConfig = inject(ApiConfigService);
+  private imageBlobService = inject(ImageBlobService);
 
   // Navigation state (must be captured in constructor)
   private navigationState: any = null;
@@ -155,6 +162,25 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
       this.pagination = response.pagination;
       this.pagination.offset = offset;
       this.totalProjects = response.pagination.total;
+
+      // Load cover images as blobs (with JWT authentication)
+      this.projectList.forEach(project => {
+        if (project.cover_info?.source === 'release' && project.cover_info.release_id) {
+          const coverUrl = `${this.apiConfig.endpoints.songRelease.detail(project.cover_info.release_id)}/cover`;
+          this.imageBlobService.getImageBlobUrl(coverUrl)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (blobUrl) => {
+                if (blobUrl) {
+                  this.listItemCoverBlobUrls.set(project.id, blobUrl);
+                }
+              },
+              error: () => {
+                // Silently fail - placeholder will be shown
+              }
+            });
+        }
+      });
     } catch (error) {
       console.error('Failed to load projects:', error);
       this.notificationService.error(
@@ -178,11 +204,31 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
 
       this.selectedProject = response.data;
 
-      // Sort folders numerically by folder_name (e.g., "01 Arrangement", "02 AI", ...)
+      // Sort folders numerically by folder_name (e.g., "01 Arrangement", "02 AI", ...")
       if (this.selectedProject?.folders) {
         this.selectedProject.folders.sort((a, b) =>
           a.folder_name.localeCompare(b.folder_name, undefined, { numeric: true })
         );
+      }
+
+      // Load cover image as blob (with JWT authentication)
+      if (this.selectedProject?.cover_info?.source === 'release' && this.selectedProject.cover_info.release_id) {
+        const coverUrl = `${this.apiConfig.endpoints.songRelease.detail(this.selectedProject.cover_info.release_id)}/cover`;
+        this.imageBlobService.getImageBlobUrl(coverUrl)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (blobUrl) => {
+              if (blobUrl) {
+                this.selectedProjectCoverBlobUrl = blobUrl;
+              }
+            },
+            error: () => {
+              // Silently fail - placeholder will be shown
+              this.selectedProjectCoverBlobUrl = '';
+            }
+          });
+      } else {
+        this.selectedProjectCoverBlobUrl = '';
       }
     } catch (error) {
       console.error('Failed to load project details:', error);
@@ -691,6 +737,14 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
       );
 
       this.selectedProject.project_status = newStatus;
+
+      // Update item in list and reload to respect filters
+      const projectInList = this.projectList.find(p => p.id === this.selectedProject!.id);
+      if (projectInList) {
+        projectInList.project_status = newStatus;
+      }
+      await this.loadProjects();
+
       this.notificationService.success(
         this.translate.instant('songProjects.messages.statusUpdated')
       );
@@ -832,5 +886,50 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
    */
   openRelease(releaseId: string): void {
     this.router.navigate(['/song-releases', releaseId]);
+  }
+
+  /**
+   * Get cover URL for project list item (returns blob URL if loaded)
+   */
+  getProjectCoverUrl(project: SongProjectListItem): string | null {
+    return this.listItemCoverBlobUrls.get(project.id) || null;
+  }
+
+  /**
+   * Get cover URL for selected project detail (returns blob URL if loaded)
+   */
+  getSelectedProjectCoverUrl(): string | null {
+    return this.selectedProjectCoverBlobUrl || null;
+  }
+
+  /**
+   * Get initials from project name (for placeholder cover)
+   */
+  getInitials(name: string): string {
+    return getInitials(name);
+  }
+
+  /**
+   * Get color from project name (for placeholder cover background)
+   */
+  getColorFromString(name: string): string {
+    return getColorFromString(name);
+  }
+
+  /**
+   * Copy text to clipboard
+   */
+  async copyToClipboard(text: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(text);
+      this.notificationService.success(
+        this.translate.instant('common.copiedToClipboard')
+      );
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      this.notificationService.error(
+        this.translate.instant('songProjects.messages.clipboardError')
+      );
+    }
   }
 }

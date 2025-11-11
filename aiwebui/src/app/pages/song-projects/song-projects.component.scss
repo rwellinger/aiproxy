@@ -225,9 +225,33 @@
   gap: $spacing-sm;
   margin-bottom: $spacing-sm;
 
-  .icon {
-    font-size: 1.5rem;
-    color: $primary-color;
+  .project-cover {
+    width: 48px;
+    height: 48px;
+    border-radius: $border-radius-md;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    .cover-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cover-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+
+      .initials {
+        text-transform: uppercase;
+      }
+    }
   }
 
   .title-group {
@@ -323,119 +347,158 @@
   .header-title {
     display: flex;
     align-items: center;
-    gap: $spacing-sm;
+    gap: $spacing-md;
     flex: 1;
 
-    i {
-      font-size: 1.5rem;
-      color: $primary-color;
+    .project-cover-detail {
+      width: 80px;
+      height: 80px;
+      border-radius: $border-radius-lg;
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      .cover-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .cover-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.75rem;
+
+        .initials {
+          text-transform: uppercase;
+        }
+      }
     }
 
-    h2 {
-      margin: 0;
-      color: $text-primary;
-    }
-
-    .edit-project-name-button {
-      background-color: transparent;
-      border: 1px solid $border-light;
-      color: $primary-color;
-      padding: $spacing-xs !important;
-      min-width: auto !important;
-      width: 32px;
-      height: 32px;
+    .title-content {
       display: flex;
       align-items: center;
-      justify-content: center;
-      border-radius: $border-radius-sm;
-      cursor: pointer;
-      transition: all 0.2s ease;
+      gap: $spacing-sm;
+      flex: 1;
 
       i {
-        font-size: $font-sm;
-        margin: 0;
+        font-size: 1.5rem;
         color: $primary-color;
       }
 
-      &:hover:not(:disabled) {
-        background-color: $primary-color;
-        border-color: $primary-color;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      h2 {
+        margin: 0;
+        color: $text-primary;
+      }
+    }
+
+    .title-content {
+      .edit-project-name-button {
+        background-color: transparent;
+        border: 1px solid $border-light;
+        color: $primary-color;
+        padding: $spacing-xs !important;
+        min-width: auto !important;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: $border-radius-sm;
+        cursor: pointer;
+        transition: all 0.2s ease;
 
         i {
-          color: white;
+          font-size: $font-sm;
+          margin: 0;
+          color: $primary-color;
+        }
+
+        &:hover:not(:disabled) {
+          background-color: $primary-color;
+          border-color: $primary-color;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+
+          i {
+            color: white;
+          }
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
       }
 
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
+      .project-name-input {
+        flex: 1;
+        padding: $spacing-xs $spacing-sm;
+        border: 2px solid $primary-color;
+        border-radius: $border-radius-sm;
+        font-size: $font-lg;
+        font-weight: $font-weight-semibold;
+        color: $text-primary;
+        background-color: $background-white;
+        outline: none;
+        transition: border-color 0.2s ease;
 
-    .project-name-input {
-      flex: 1;
-      padding: $spacing-xs $spacing-sm;
-      border: 2px solid $primary-color;
-      border-radius: $border-radius-sm;
-      font-size: $font-lg;
-      font-weight: $font-weight-semibold;
-      color: $text-primary;
-      background-color: $background-white;
-      outline: none;
-      transition: border-color 0.2s ease;
+        &:focus {
+          border-color: darken($primary-color, 10%);
+        }
 
-      &:focus {
-        border-color: darken($primary-color, 10%);
-      }
-
-      &::placeholder {
-        color: $text-muted;
-      }
-    }
-
-    .save-project-name-button {
-      @include button-primary('base');
-      padding: $spacing-xs !important;
-      min-width: auto !important;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      i {
-        font-size: $font-sm;
-        margin: 0;
-        color: white;
+        &::placeholder {
+          color: $text-muted;
+        }
       }
 
-      &:hover:not(:disabled) {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      .save-project-name-button {
+        @include button-primary('base');
+        padding: $spacing-xs !important;
+        min-width: auto !important;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        i {
+          font-size: $font-sm;
+          margin: 0;
+          color: white;
+        }
+
+        &:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
       }
-    }
 
-    .cancel-project-name-button {
-      @include button-secondary('base');
-      padding: $spacing-xs !important;
-      min-width: auto !important;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      .cancel-project-name-button {
+        @include button-secondary('base');
+        padding: $spacing-xs !important;
+        min-width: auto !important;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-      i {
-        font-size: $font-sm;
-        margin: 0;
-        color: $text-secondary;
-      }
+        i {
+          font-size: $font-sm;
+          margin: 0;
+          color: $text-secondary;
+        }
 
-      &:hover:not(:disabled) {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        &:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
       }
     }
   }
@@ -452,6 +515,66 @@
 
   &:last-child {
     border-bottom: none;
+  }
+
+  // Metadata ID Row (analog Sketch Library)
+  .metadata-id-row {
+    margin-bottom: $spacing-md;
+
+    .metadata-id-item {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding: $spacing-xs 0;
+
+      .meta-icon {
+        color: $primary-color;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+      }
+
+      .meta-id {
+        font-family: 'Courier New', monospace;
+        font-size: $font-sm;
+        color: $text-secondary;
+        background: $background-light;
+        padding: 6px 12px;
+        border-radius: $border-radius-sm;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+      }
+
+      .copy-id-btn {
+        background: transparent;
+        border: none;
+        color: $text-secondary;
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: $border-radius-sm;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        i {
+          font-size: $font-sm;
+        }
+
+        &:hover {
+          background: $background-light;
+          color: $primary-color;
+        }
+      }
+    }
+  }
+
+  .metadata-row {
+    display: flex;
+    gap: $spacing-md;
+    margin-bottom: $spacing-sm;
   }
 }
 

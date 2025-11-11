@@ -5,6 +5,17 @@ from pydantic import BaseModel, Field
 from schemas.common_schemas import PaginationMeta
 
 
+class CoverInfo(BaseModel):
+    """Cover display info for Song Project"""
+
+    source: str = Field(..., description="Cover source: 'release' or 'placeholder'")
+    release_id: str | None = Field(default=None, description="Release UUID if source='release'")
+    release_name: str | None = Field(default=None, description="Release name if source='release'")
+
+    class Config:
+        from_attributes = True
+
+
 class ProjectCreateRequest(BaseModel):
     """Request schema for creating a new project"""
 
@@ -33,6 +44,7 @@ class ProjectResponse(BaseModel):
     tags: list[str]
     description: str | None
     project_status: str
+    cover_info: CoverInfo | None = Field(default=None, description="Cover display information")
     created_at: str | None
     updated_at: str | None
 
@@ -130,6 +142,7 @@ class ProjectDetailResponse(BaseModel):
     project_status: str
     total_files: int
     total_size_bytes: int
+    cover_info: CoverInfo | None = Field(default=None, description="Cover display information")
     created_at: str | None
     updated_at: str | None
     folders: list[FolderResponse]

@@ -8,6 +8,7 @@ from business.song_project_transformer import (
     detect_file_type,
     generate_s3_prefix,
     get_default_folder_structure,
+    get_display_cover_info,
     get_mime_type,
     normalize_project_name,
     transform_file_to_response,
@@ -556,3 +557,179 @@ class TestValidateProjectStatus:
         assert validate_project_status("NEW") is False
         assert validate_project_status("Progress") is False
         assert validate_project_status("ARCHIVED") is False
+
+
+class TestGetDisplayCoverInfo:
+    """Test get_display_cover_info() - Cover display logic for Song Projects"""
+
+    def test_no_releases_returns_placeholder(self):
+        """Returns placeholder when no releases are assigned"""
+        releases = []
+
+        result = get_display_cover_info(releases)
+
+        assert result == {"source": "placeholder", "release_id": None, "release_name": None}
+
+    def test_single_valid_release(self):
+        """Returns release info for single valid release"""
+        release = Mock()
+        release.id = "abc-123"
+        release.name = "Summer EP"
+        release.status = "released"
+        release.release_date = "2024-06-01"
+
+        result = get_display_cover_info([release])
+
+        assert result == {"source": "release", "release_id": "abc-123", "release_name": "Summer EP"}
+
+    def test_multiple_releases_selects_newest(self):
+        """Selects release with highest release_date when multiple exist"""
+        old_release = Mock()
+        old_release.id = "old-123"
+        old_release.name = "Old Release"
+        old_release.status = "released"
+        old_release.release_date = "2023-01-01"
+
+        new_release = Mock()
+        new_release.id = "new-456"
+        new_release.name = "New Release"
+        new_release.status = "uploaded"
+        new_release.release_date = "2024-12-01"
+
+        result = get_display_cover_info([old_release, new_release])
+
+        assert result == {"source": "release", "release_id": "new-456", "release_name": "New Release"}
+
+    def test_filters_rejected_status(self):
+        """Filters out releases with 'rejected' status"""
+        rejected = Mock()
+        rejected.id = "rejected-123"
+        rejected.name = "Rejected EP"
+        rejected.status = "rejected"
+        rejected.release_date = "2024-01-01"
+
+        result = get_display_cover_info([rejected])
+
+        assert result == {"source": "placeholder", "release_id": None, "release_name": None}
+
+    def test_filters_downtaken_status(self):
+        """Filters out releases with 'downtaken' status"""
+        downtaken = Mock()
+        downtaken.id = "downtaken-123"
+        downtaken.name = "Downtaken Album"
+        downtaken.status = "downtaken"
+        downtaken.release_date = "2024-03-01"
+
+        result = get_display_cover_info([downtaken])
+
+        assert result == {"source": "placeholder", "release_id": None, "release_name": None}
+
+    def test_filters_archived_status(self):
+        """Filters out releases with 'archived' status"""
+        archived = Mock()
+        archived.id = "archived-123"
+        archived.name = "Archived Release"
+        archived.status = "archived"
+        archived.release_date = "2024-02-01"
+
+        result = get_display_cover_info([archived])
+
+        assert result == {"source": "placeholder", "release_id": None, "release_name": None}
+
+    def test_mixed_valid_and_invalid_selects_valid(self):
+        """Selects valid release when mixed with invalid statuses"""
+        rejected = Mock()
+        rejected.id = "rejected-123"
+        rejected.name = "Rejected EP"
+        rejected.status = "rejected"
+        rejected.release_date = "2024-05-01"
+
+        valid = Mock()
+        valid.id = "valid-456"
+        valid.name = "Valid Album"
+        valid.status = "released"
+        valid.release_date = "2024-03-01"
+
+        result = get_display_cover_info([rejected, valid])
+
+        assert result == {"source": "release", "release_id": "valid-456", "release_name": "Valid Album"}
+
+    def test_handles_none_release_date(self):
+        """Handles releases with None release_date (treats as very old)"""
+        no_date = Mock()
+        no_date.id = "no-date-123"
+        no_date.name = "Draft Release"
+        no_date.status = "draft"
+        no_date.release_date = None
+
+        with_date = Mock()
+        with_date.id = "with-date-456"
+        with_date.name = "Scheduled Release"
+        with_date.status = "uploaded"
+        with_date.release_date = "2024-12-01"
+
+        result = get_display_cover_info([no_date, with_date])
+
+        # Should select the one with actual date (newer)
+        assert result == {"source": "release", "release_id": "with-date-456", "release_name": "Scheduled Release"}
+
+    def test_all_releases_have_none_date_selects_first(self):
+        """Selects first release when all have None release_date"""
+        release1 = Mock()
+        release1.id = "release1"
+        release1.name = "Release 1"
+        release1.status = "draft"
+        release1.release_date = None
+
+        release2 = Mock()
+        release2.id = "release2"
+        release2.name = "Release 2"
+        release2.status = "draft"
+        release2.release_date = None
+
+        result = get_display_cover_info([release1, release2])
+
+        # Should return one of them (order doesn't matter if all None)
+        assert result["source"] == "release"
+        assert result["release_id"] in ["release1", "release2"]
+
+    def test_sorts_chronologically_newest_first(self):
+        """Verifies newest release_date is selected (DESC order)"""
+        release1 = Mock()
+        release1.id = "2023-release"
+        release1.name = "2023 Album"
+        release1.status = "released"
+        release1.release_date = "2023-06-15"
+
+        release2 = Mock()
+        release2.id = "2024-release"
+        release2.name = "2024 Single"
+        release2.status = "uploaded"
+        release2.release_date = "2024-01-10"
+
+        release3 = Mock()
+        release3.id = "2024-latest"
+        release3.name = "2024 Latest"
+        release3.status = "mastering"
+        release3.release_date = "2024-11-20"
+
+        result = get_display_cover_info([release1, release2, release3])
+
+        # Should select the chronologically latest (2024-11-20)
+        assert result == {"source": "release", "release_id": "2024-latest", "release_name": "2024 Latest"}
+
+    def test_accepts_various_valid_statuses(self):
+        """Accepts all valid statuses except rejected/downtaken/archived"""
+        valid_statuses = ["draft", "arranging", "mixing", "mastering", "uploaded", "released"]
+
+        for status in valid_statuses:
+            release = Mock()
+            release.id = f"{status}-id"
+            release.name = f"{status} Release"
+            release.status = status
+            release.release_date = "2024-01-01"
+
+            result = get_display_cover_info([release])
+
+            assert result["source"] == "release", f"Status '{status}' should be valid"
+            assert result["release_id"] == f"{status}-id"

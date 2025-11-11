@@ -112,7 +112,7 @@ Output: A reflective journey through solitude and self-discovery. This song pain
     '1.1',
     'gpt-oss:20b',
     0.7,
-    512,
+    1024,
     true
 );
 
@@ -307,7 +307,7 @@ Output: "Bold abstract geometric shapes, vibrant color palette, clean minimalist
     '2.1',
     'gpt-oss:20b',
     0.7,
-    1024,
+    1536,
     true
 );
 
@@ -348,7 +348,7 @@ Output: "A clown character, vibrant costume, expressive face paint, centered por
     '1.0',
     'llama3.2:3b',
     0.5,
-    150,
+    400,
     true
 );
 
@@ -397,7 +397,7 @@ Output: "An enchanted forest clearing where ethereal translucent figures appear 
     '1.1',
     'gpt-oss:20b',
     0.8,
-    1024,
+    1536,
     true
 );
 
@@ -652,7 +652,7 @@ Examples:
     '4.0',
     'gpt-oss:20b',
     0.9,
-    512,
+    1024,
     true
 );
 
@@ -731,7 +731,7 @@ Output (German): "Melancholische Pop-Ballade mit Klavier, sanften Streichern, su
     '1.0',
     'gpt-oss:20b',
     0.9,
-    512,
+    2048,
     true
 );
 
@@ -789,7 +789,7 @@ SELECT upsert_prompt_template(
     '4.0',
     'llama3.2:3b',
     0.7,
-    15,
+    300,
     true
 );
 
@@ -803,7 +803,7 @@ SELECT upsert_prompt_template(
     '1.1',
     'llama3.2:3b',
     0.5,
-    10,
+    100,
     true
 );
 

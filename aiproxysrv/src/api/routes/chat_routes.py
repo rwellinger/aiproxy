@@ -71,6 +71,8 @@ def generate_unified(body: UnifiedChatRequest):
             temperature=body.temperature,
             max_tokens=body.max_tokens,
             user_instructions=body.user_instructions,
+            category=body.category,
+            action=body.action,
         )
         return jsonify(response_data), status_code
     except Exception as e:
