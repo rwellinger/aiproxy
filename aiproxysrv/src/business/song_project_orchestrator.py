@@ -538,36 +538,73 @@ class SongProjectOrchestrator:
                 hash_preview=file_hash[:16] if file_hash else "None",
             )
 
-            # Upload to S3
-            try:
-                self.storage.upload(file_data, s3_key, content_type=mime_type)
-            except Exception as e:
-                logger.error("S3 upload failed", s3_key=s3_key, error=str(e))
-                return None
+            # Check if file already exists (Mirror update scenario)
+            existing_file = self.db_service.get_file_by_path(db, project_id, relative_path)
 
-            # Create file record in DB
-            # filename = just the filename (no subdirs)
-            # relative_path = full path including subdirs (e.g., "Audio Files/Drums/Kick.wav")
-            file_record = self.db_service.create_file(
-                db=db,
-                project_id=project_id,
-                folder_id=folder.id,
-                filename=actual_filename,  # Just the filename
-                relative_path=relative_path,  # Full path with subdirs
-                s3_key=s3_key,
-                file_type=file_type,
-                mime_type=mime_type,
-                file_size_bytes=len(file_data),
-                file_hash=file_hash,  # SHA256 for Mirror comparison
-                storage_backend="s3",
-            )
+            if existing_file:
+                logger.info(
+                    "File exists, updating (Mirror scenario)",
+                    file_id=str(existing_file.id),
+                    relative_path=relative_path,
+                    old_hash=existing_file.file_hash,
+                    new_hash=file_hash,
+                )
 
-            if not file_record:
-                logger.error("Failed to create file record in DB", s3_key=s3_key)
-                # Try to cleanup S3
-                with contextlib.suppress(Exception):
-                    self.storage.delete(s3_key)
-                return None
+                # Upload to S3 (overwrite existing)
+                try:
+                    self.storage.upload(file_data, s3_key, content_type=mime_type)
+                except Exception as e:
+                    logger.error("S3 upload failed", s3_key=s3_key, error=str(e))
+                    return None
+
+                # Update existing file record
+                file_record = self.db_service.update_file(
+                    db=db,
+                    file_id=existing_file.id,
+                    s3_key=s3_key,
+                    file_size_bytes=len(file_data),
+                    file_hash=file_hash,
+                    mime_type=mime_type,
+                )
+
+                if not file_record:
+                    logger.error("Failed to update file record in DB", file_id=str(existing_file.id))
+                    return None
+
+            else:
+                # New file - upload to S3 and create DB record
+                logger.debug("New file, creating", relative_path=relative_path)
+
+                # Upload to S3
+                try:
+                    self.storage.upload(file_data, s3_key, content_type=mime_type)
+                except Exception as e:
+                    logger.error("S3 upload failed", s3_key=s3_key, error=str(e))
+                    return None
+
+                # Create file record in DB
+                # filename = just the filename (no subdirs)
+                # relative_path = full path including subdirs (e.g., "Audio Files/Drums/Kick.wav")
+                file_record = self.db_service.create_file(
+                    db=db,
+                    project_id=project_id,
+                    folder_id=folder.id,
+                    filename=actual_filename,  # Just the filename
+                    relative_path=relative_path,  # Full path with subdirs
+                    s3_key=s3_key,
+                    file_type=file_type,
+                    mime_type=mime_type,
+                    file_size_bytes=len(file_data),
+                    file_hash=file_hash,  # SHA256 for Mirror comparison
+                    storage_backend="s3",
+                )
+
+                if not file_record:
+                    logger.error("Failed to create file record in DB", s3_key=s3_key)
+                    # Try to cleanup S3
+                    with contextlib.suppress(Exception):
+                        self.storage.delete(s3_key)
+                    return None
 
             logger.info(
                 "File uploaded to project",

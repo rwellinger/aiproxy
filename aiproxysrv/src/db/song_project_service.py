@@ -1,7 +1,7 @@
 """Song Project Service - Database operations for song project management"""
 
 import traceback
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -517,6 +517,102 @@ class SongProjectService:
             return None
         except Exception as e:
             logger.error("Get file by ID failed", file_id=str(file_id), error=str(e), error_type=type(e).__name__)
+            return None
+
+    def get_file_by_path(self, db: Session, project_id: UUID, relative_path: str) -> ProjectFile | None:
+        """
+        Get a file by its relative path (for Mirror update detection)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            relative_path: Relative path within project (e.g., "03 Pictures/cover.afphoto")
+
+        Returns:
+            ProjectFile instance if found, None otherwise
+        """
+        try:
+            file = (
+                db.query(ProjectFile)
+                .filter(ProjectFile.project_id == project_id, ProjectFile.relative_path == relative_path)
+                .first()
+            )
+            return file
+
+        except SQLAlchemyError as e:
+            logger.error(
+                "Get file by path DB error",
+                project_id=str(project_id),
+                relative_path=relative_path,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return None
+        except Exception as e:
+            logger.error(
+                "Get file by path failed",
+                project_id=str(project_id),
+                relative_path=relative_path,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return None
+
+    def update_file(
+        self,
+        db: Session,
+        file_id: UUID,
+        s3_key: str | None = None,
+        file_size_bytes: int | None = None,
+        file_hash: str | None = None,
+        mime_type: str | None = None,
+    ) -> ProjectFile | None:
+        """
+        Update file record (for Mirror sync updates)
+
+        Args:
+            db: Database session
+            file_id: File UUID
+            s3_key: New S3 key (optional)
+            file_size_bytes: New file size (optional)
+            file_hash: New file hash (optional)
+            mime_type: New MIME type (optional)
+
+        Returns:
+            Updated ProjectFile instance if successful, None otherwise
+        """
+        try:
+            file = db.query(ProjectFile).filter(ProjectFile.id == file_id).first()
+
+            if not file:
+                logger.debug("File not found for update", file_id=str(file_id))
+                return None
+
+            # Update fields if provided
+            if s3_key is not None:
+                file.s3_key = s3_key
+            if file_size_bytes is not None:
+                file.file_size_bytes = file_size_bytes
+            if file_hash is not None:
+                file.file_hash = file_hash
+            if mime_type is not None:
+                file.mime_type = mime_type
+
+            # Update timestamp
+            file.updated_at = datetime.now(UTC)
+
+            db.commit()
+            db.refresh(file)
+
+            logger.info("File updated", file_id=str(file_id), filename=file.filename)
+            return file
+
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error("File update DB error", file_id=str(file_id), error=str(e), error_type=type(e).__name__)
+            return None
+        except Exception as e:
+            logger.error("File update failed", file_id=str(file_id), error=str(e), error_type=type(e).__name__)
             return None
 
     def delete_file(self, db: Session, file_id: UUID) -> bool:
