@@ -614,6 +614,10 @@ def download(project_id, folder_id, local_path):
                 relative_path = file["relative_path"]
                 download_url = file["download_url"]
 
+                # Build full URL (download_url is now a backend proxy path)
+                if download_url and not download_url.startswith("http"):
+                    download_url = config["api_url"] + download_url
+
                 # Remove folder name prefix (e.g., "01 Arrangement/Media/drums.wav" → "Media/drums.wav")
                 # Folder name is everything before the first "/"
                 if "/" in relative_path:
@@ -628,9 +632,10 @@ def download(project_id, folder_id, local_path):
                 # Create subdirectories if needed
                 target_file.parent.mkdir(parents=True, exist_ok=True)
 
-                # Download file
+                # Download file via backend proxy (with JWT auth)
                 file_response = requests.get(
                     download_url,
+                    headers=headers,  # JWT authentication required
                     verify=config.get("ssl_verify", False),
                     timeout=600,  # 10min timeout for large files
                     stream=True,
@@ -809,6 +814,10 @@ def clone(project_id, local_path, create_dir):
                     ]  # e.g., "01 Arrangement/Media/drums.flac"
                     download_url = file["download_url"]
 
+                    # Build full URL (download_url is now a backend proxy path)
+                    if download_url and not download_url.startswith("http"):
+                        download_url = config["api_url"] + download_url
+
                     # CRITICAL: Keep complete path structure (do NOT remove folder prefix!)
                     # relative_path already contains full structure: "01 Arrangement/Media/drums.flac"
                     target_file = local_path / relative_path
@@ -816,9 +825,10 @@ def clone(project_id, local_path, create_dir):
                     # Create subdirectories if needed
                     target_file.parent.mkdir(parents=True, exist_ok=True)
 
-                    # Download file
+                    # Download file via backend proxy (with JWT auth)
                     file_response = requests.get(
                         download_url,
+                        headers=headers,  # JWT authentication required
                         verify=config.get("ssl_verify", False),
                         timeout=600,  # 10min timeout for large files
                         stream=True,

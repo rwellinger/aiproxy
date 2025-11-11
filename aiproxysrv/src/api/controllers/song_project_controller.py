@@ -437,28 +437,20 @@ class SongProjectController:
             # Get files from folder
             files = folder.get("files", [])
 
-            # Generate fresh download URLs (existing URLs might be expired)
+            # Generate backend proxy URLs (instead of presigned S3 URLs)
             file_list = []
             for f in files:
+                file_id = f.get("id")
                 s3_key = f.get("s3_key")
-                download_url = None
 
-                # Generate fresh presigned URL (valid for 1 hour)
-                if s3_key:
-                    try:
-                        download_url = song_project_orchestrator.storage.get_url(s3_key, expires_in=3600)
-                    except Exception as e:
-                        logger.error(
-                            "Failed to generate download URL",
-                            s3_key=s3_key,
-                            filename=f.get("filename"),
-                            error=str(e),
-                            error_type=type(e).__name__,
-                        )
+                # Generate backend proxy URL (CLI will combine with api_url)
+                download_url = None
+                if s3_key and file_id:
+                    download_url = f"/api/v1/song-projects/{project_id}/files/{file_id}/download"
 
                 file_list.append(
                     {
-                        "id": f.get("id"),
+                        "id": file_id,
                         "filename": f.get("filename"),
                         "relative_path": f.get("relative_path"),
                         "download_url": download_url,

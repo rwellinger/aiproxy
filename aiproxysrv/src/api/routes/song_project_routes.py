@@ -26,6 +26,7 @@ from api.auth_middleware import get_current_user_id, jwt_required
 from api.controllers.song_project_controller import song_project_controller
 from db.database import get_db
 from schemas.song_project_schemas import BatchDeleteRequest, MirrorRequest, ProjectCreateRequest, ProjectUpdateRequest
+from utils.logger import logger
 
 
 # Blueprint definition
@@ -550,3 +551,75 @@ def clear_folder_files(project_id: str, folder_id: str):
         return jsonify(result), status_code
     finally:
         db.close()
+
+
+@api_song_projects_v1.route("/<project_id>/files/<file_id>/download", methods=["GET"])
+@jwt_required
+def download_file(project_id: str, file_id: str):
+    """
+    Download project file via backend proxy (streams from S3).
+
+    CRITICAL: This is a backend proxy route - NEVER return presigned URLs to CLI/frontend!
+
+    Path Parameters:
+        - project_id (UUID): Project ID (for security validation)
+        - file_id (UUID): File ID
+
+    Response:
+        200: Binary file data (application/octet-stream or specific MIME type)
+        401: {'error': 'Unauthorized'}
+        404: {'error': 'File not found' | 'Project not found'}
+        500: {'error': 'Failed to load file from S3'}
+
+    Example:
+        GET /api/v1/song-projects/550e8400-e29b-41d4-a716-446655440000/files/abc123.../download
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        from adapters.s3.s3_proxy_service import s3_proxy_service
+        from config.settings import S3_SONG_PROJECTS_BUCKET
+        from db.song_project_service import song_project_service
+
+        project_uuid = UUID(project_id)
+        file_uuid = UUID(file_id)
+
+        logger.debug("Serving project file", project_id=project_id, file_id=file_id, user_id=user_id)
+
+        # Get file from DB
+        db: Session = next(get_db())
+        try:
+            file = song_project_service.get_file_by_id(db, file_uuid)
+            if not file:
+                return jsonify({"error": "File not found"}), 404
+
+            # Security: Verify file belongs to user's project
+            if str(file.project_id) != str(project_uuid) or str(file.project.user_id) != str(user_id):
+                return jsonify({"error": "File not found"}), 404
+
+            # Verify file has S3 key
+            if not file.s3_key:
+                return jsonify({"error": "File not available"}), 404
+
+            # Stream from S3 using generic proxy service
+            return s3_proxy_service.serve_resource(
+                bucket=S3_SONG_PROJECTS_BUCKET, s3_key=file.s3_key, filename=file.filename
+            )
+
+        finally:
+            db.close()
+
+    except ValueError:
+        return jsonify({"error": "Invalid project or file ID format"}), 400
+    except Exception as e:
+        logger.error(
+            "Error serving project file",
+            project_id=project_id,
+            file_id=file_id,
+            error=str(e),
+            error_type=type(e).__name__,
+        )
+        return jsonify({"error": "Failed to load file from S3"}), 500

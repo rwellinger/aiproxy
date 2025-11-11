@@ -947,8 +947,9 @@ class SongProjectOrchestrator:
 
                 # Get files for this folder
                 for file in folder.files:
-                    # Generate pre-signed download URL (1 hour expiry)
-                    download_url = self.storage.get_url(file.s3_key, expires_in=3600)
+                    # Generate backend proxy URL (instead of presigned S3 URL)
+                    # CLI will combine with api_url: {api_url}/api/v1/song-projects/{project_id}/files/{file_id}/download
+                    download_url = f"/api/v1/song-projects/{project_id}/files/{file.id}/download"
 
                     files_data.append(
                         {
