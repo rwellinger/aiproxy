@@ -23,6 +23,7 @@ class SketchService:
         lyrics: str | None,
         prompt: str,
         tags: str | None = None,
+        sketch_type: str = "song",
         workflow: str = "draft",
         description_long: str | None = None,
         description_short: str | None = None,
@@ -38,6 +39,7 @@ class SketchService:
             lyrics: Song lyrics (optional)
             prompt: Music style prompt (required)
             tags: Comma-separated tags (optional)
+            sketch_type: Sketch type (default: song)
             workflow: Workflow status (default: draft)
             description_long: Long description for release (optional)
             description_short: Short description for release (optional)
@@ -53,6 +55,7 @@ class SketchService:
                 lyrics=lyrics,
                 prompt=prompt,
                 tags=tags,
+                sketch_type=sketch_type,
                 workflow=workflow,
                 description_long=description_long,
                 description_short=description_short,
@@ -207,6 +210,7 @@ class SketchService:
         lyrics: str | None = None,
         prompt: str | None = None,
         tags: str | None = None,
+        sketch_type: str | None = None,
         workflow: str | None = None,
         description_long: str | None = None,
         description_short: str | None = None,
@@ -225,6 +229,7 @@ class SketchService:
             lyrics: New lyrics (optional)
             prompt: New music style prompt (optional)
             tags: New tags (optional)
+            sketch_type: New sketch type (optional)
             workflow: New workflow status (optional)
             description_long: Long description for release (optional)
             description_short: Short description for release (optional)
@@ -257,6 +262,9 @@ class SketchService:
             if tags is not None:
                 sketch.tags = tags
                 updated_fields.append("tags")
+            if sketch_type is not None:
+                sketch.sketch_type = sketch_type
+                updated_fields.append("sketch_type")
             if workflow is not None:
                 sketch.workflow = workflow
                 updated_fields.append("workflow")
@@ -337,6 +345,74 @@ class SketchService:
                 stacktrace=traceback.format_exc(),
             )
             return False
+
+    def duplicate_sketch(
+        self,
+        db: Session,
+        original_sketch_id: str | UUID,
+        new_title: str | None = None,
+        new_lyrics: str | None = None,
+        new_sketch_type: str | None = None,
+    ) -> SongSketch | None:
+        """
+        Duplicate a sketch with optional new values (CRUD only - no business logic)
+
+        Args:
+            db: Database session
+            original_sketch_id: UUID of sketch to duplicate
+            new_title: Override title (optional)
+            new_lyrics: Override lyrics (optional)
+            new_sketch_type: Override sketch_type (optional)
+
+        Returns:
+            New SongSketch instance if successful, None otherwise
+        """
+        try:
+            # Get original sketch
+            original = self.get_sketch_by_id(db, original_sketch_id)
+            if not original:
+                logger.warning("Original sketch not found for duplication", sketch_id=str(original_sketch_id))
+                return None
+
+            # Create duplicate with overrides
+            duplicate = SongSketch(
+                title=new_title if new_title is not None else original.title,
+                lyrics=new_lyrics if new_lyrics is not None else original.lyrics,
+                prompt=original.prompt,
+                tags=original.tags,
+                sketch_type=new_sketch_type if new_sketch_type is not None else original.sketch_type,
+                workflow="draft",  # Always start as draft
+                description_long=original.description_long,
+                description_short=original.description_short,
+                description_tags=original.description_tags,
+                info=original.info,
+                # Note: Do NOT copy project_id/project_folder_id - user assigns later
+            )
+
+            db.add(duplicate)
+            db.commit()
+            db.refresh(duplicate)
+
+            logger.info(
+                "Sketch duplicated",
+                original_id=str(original_sketch_id),
+                duplicate_id=str(duplicate.id),
+            )
+            return duplicate
+
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error("sketch_duplication_db_error", original_id=str(original_sketch_id), error=str(e))
+            return None
+        except Exception as e:
+            logger.error(
+                "sketch_duplication_failed",
+                original_id=str(original_sketch_id),
+                error=str(e),
+                error_type=type(e).__name__,
+                stacktrace=traceback.format_exc(),
+            )
+            return None
 
     def mark_sketch_as_used(self, db: Session, sketch_id: str | UUID) -> SongSketch | None:
         """

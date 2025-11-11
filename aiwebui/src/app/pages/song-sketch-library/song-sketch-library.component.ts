@@ -313,6 +313,37 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
     }
   }
 
+  async duplicateSketch(sketch: Sketch): Promise<void> {
+    const confirmMessage = this.translate.instant('songSketch.library.messages.duplicateConfirm', {
+      title: sketch.title || 'Untitled'
+    });
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.sketchService.duplicateSketch(sketch.id)
+      );
+
+      this.notificationService.success(
+        this.translate.instant('songSketch.library.messages.duplicated')
+      );
+
+      // Reload list and select new sketch
+      await this.loadSketches(this.currentPage);
+      if (response.data?.id) {
+        this.selectedSketch = this.sketches.find(s => s.id === response.data.id) || null;
+      }
+
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('songSketch.library.messages.duplicateError') + ': ' + error.message
+      );
+    }
+  }
+
   navigateToSketchCreator(): void {
     this.router.navigate(['/song-sketch-creator']);
   }

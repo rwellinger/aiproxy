@@ -10,6 +10,7 @@ from db.sketch_service import sketch_service
 from schemas.common_schemas import PaginationMeta
 from schemas.sketch_schemas import (
     SketchCreateRequest,
+    SketchDuplicateRequest,
     SketchListResponse,
     SketchResponse,
     SketchUpdateRequest,
@@ -40,6 +41,7 @@ class SketchController:
                 lyrics=sketch_data.lyrics,
                 prompt=sketch_data.prompt,
                 tags=sketch_data.tags,
+                sketch_type=sketch_data.sketch_type,
             )
 
             response = SketchResponse.model_validate(sketch)
@@ -226,6 +228,49 @@ class SketchController:
         except Exception as e:
             logger.error("sketch_delete_error", sketch_id=sketch_id, error=str(e), error_type=type(e).__name__)
             return {"error": f"Failed to delete sketch: {str(e)}"}, 500
+
+    @staticmethod
+    def duplicate_sketch(
+        db: Session,
+        sketch_id: str,
+        duplicate_data: SketchDuplicateRequest,
+    ) -> tuple[dict[str, Any], int]:
+        """
+        Duplicate a sketch (simple copy without translation)
+
+        Args:
+            db: Database session
+            sketch_id: UUID of sketch to duplicate
+            duplicate_data: Duplication options (title_suffix)
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            # Validate UUID format
+            try:
+                UUID(sketch_id)
+            except ValueError:
+                return {"error": "Invalid sketch ID format"}, 400
+
+            orchestrator = SketchOrchestrator()
+            duplicate = orchestrator.duplicate_sketch(
+                db=db,
+                original_sketch_id=sketch_id,
+                new_title_suffix=duplicate_data.new_title_suffix,
+            )
+
+            response = SketchResponse.model_validate(duplicate)
+            return {"data": response.model_dump(), "message": "Sketch duplicated successfully"}, 201
+
+        except SketchOrchestratorError as e:
+            if "not found" in str(e).lower():
+                return {"error": f"Sketch not found with ID: {sketch_id}"}, 404
+            logger.error("sketch_duplication_error", sketch_id=sketch_id, error=str(e))
+            return {"error": f"Failed to duplicate sketch: {str(e)}"}, 500
+        except Exception as e:
+            logger.error("sketch_duplication_error", sketch_id=sketch_id, error=str(e), error_type=type(e).__name__)
+            return {"error": f"Failed to duplicate sketch: {str(e)}"}, 500
 
     @staticmethod
     def assign_to_project(

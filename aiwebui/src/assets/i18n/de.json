@@ -1301,7 +1301,11 @@
         "promptCharCounter": "{{count}}/{{max}} Zeichen",
         "workflow": "Workflow-Status",
         "workflowHint": "Organisiere deine Skizzen nach Workflow-Status",
-        "workflowReadonlyHint": "Workflow kann nur in der Bibliotheksansicht geändert werden"
+        "workflowReadonlyHint": "Workflow kann nur in der Bibliotheksansicht geändert werden",
+        "sketchType": "Sketch-Typ",
+        "sketchTypeInspiration": "Inspiration",
+        "sketchTypeSong": "Song",
+        "sketchTypeHint": "Inspiration = Ursprüngliche Idee (z.B. Deutsch), Song = Finaler Lyric (z.B. Englisch)"
       },
       "description": {
         "descriptionLong": "Lange Beschreibung",
@@ -1390,6 +1394,10 @@
         "used": "Verwendet",
         "archived": "Archiviert"
       },
+      "type": {
+        "inspiration": "Inspiration",
+        "song": "Song"
+      },
       "actions": {
         "assignToProject": "Zu Projekt zuweisen",
         "newSketch": "Neue Skizze",
@@ -1408,7 +1416,10 @@
         "copyDescriptionTags": "Beschreibungs-Tags in Zwischenablage kopiert",
         "copyInfo": "Arbeitsinformationen in Zwischenablage kopiert",
         "markAsUsed": "Als verwendet markieren",
-        "backToDraft": "Zurück zu Entwurf"
+        "backToDraft": "Zurück zu Entwurf",
+        "duplicate": "Duplizieren",
+        "duplicateDisabled": "Duplizieren deaktiviert (nur für Inspirationen verfügbar)",
+        "deleteDisabled": "Löschen deaktiviert (verwendete Sketches können nicht gelöscht werden)"
       },
       "detail": {
         "tabs": {
@@ -1454,7 +1465,10 @@
         "markAsUsedError": "Fehler beim Markieren als verwendet",
         "markedAsDraft": "Skizze als Entwurf markiert",
         "markAsDraftError": "Fehler beim Markieren als Entwurf",
-        "sketchSaved": "Skizze erfolgreich gespeichert"
+        "sketchSaved": "Skizze erfolgreich gespeichert",
+        "duplicateConfirm": "Möchtest du '{{title}}' wirklich duplizieren?",
+        "duplicated": "Skizze erfolgreich dupliziert",
+        "duplicateError": "Fehler beim Duplizieren"
       }
     },
     "workflow": {

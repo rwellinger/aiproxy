@@ -1301,7 +1301,11 @@
         "promptCharCounter": "{{count}}/{{max}} characters",
         "workflow": "Workflow Status",
         "workflowHint": "Organize your sketches by workflow status",
-        "workflowReadonlyHint": "Workflow can only be changed in the library view"
+        "workflowReadonlyHint": "Workflow can only be changed in the library view",
+        "sketchType": "Sketch Type",
+        "sketchTypeInspiration": "Inspiration",
+        "sketchTypeSong": "Song",
+        "sketchTypeHint": "Inspiration = Original idea (e.g., German), Song = Final lyrics (e.g., English)"
       },
       "description": {
         "descriptionLong": "Long Description",
@@ -1390,6 +1394,10 @@
         "used": "Used",
         "archived": "Archived"
       },
+      "type": {
+        "inspiration": "Inspiration",
+        "song": "Song"
+      },
       "actions": {
         "assignToProject": "Assign to Project",
         "newSketch": "New Sketch",
@@ -1408,7 +1416,10 @@
         "copyDescriptionTags": "Description tags copied to clipboard",
         "copyInfo": "Work information copied to clipboard",
         "markAsUsed": "Mark as Used",
-        "backToDraft": "Back to Draft"
+        "backToDraft": "Back to Draft",
+        "duplicate": "Duplicate",
+        "duplicateDisabled": "Duplicate disabled (only available for inspirations)",
+        "deleteDisabled": "Delete disabled (used sketches cannot be deleted)"
       },
       "detail": {
         "tabs": {
@@ -1454,7 +1465,10 @@
         "markAsUsedError": "Error marking sketch as used",
         "markedAsDraft": "Sketch marked as draft",
         "markAsDraftError": "Error marking sketch as draft",
-        "sketchSaved": "Sketch saved successfully"
+        "sketchSaved": "Sketch saved successfully",
+        "duplicateConfirm": "Do you really want to duplicate '{{title}}'?",
+        "duplicated": "Sketch duplicated successfully",
+        "duplicateError": "Error duplicating sketch"
       }
     },
     "workflow": {
