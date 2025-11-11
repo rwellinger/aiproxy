@@ -34,6 +34,7 @@ def mock_sketch_db_model():
             "info",
             "project_id",
             "project_name",
+            "sketch_type",
             "created_at",
             "updated_at",
         ]
@@ -50,6 +51,7 @@ def mock_sketch_db_model():
     mock.info = None
     mock.project_id = None
     mock.project_name = None
+    mock.sketch_type = "manual"
     mock.created_at = datetime.now()
     mock.updated_at = None
     return mock

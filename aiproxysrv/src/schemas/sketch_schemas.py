@@ -26,6 +26,9 @@ class SketchCreateRequest(BaseModel):
     lyrics: str | None = Field(None, max_length=10000, description="Song lyrics (optional)")
     prompt: str = Field(..., min_length=1, max_length=1024, description="Music style prompt")
     tags: str | None = Field(None, max_length=1000, description="Comma-separated tags")
+    sketch_type: str = Field(
+        default="song", pattern="^(inspiration|song)$", description="Sketch type: inspiration or song"
+    )
     description_long: str | None = Field(None, description="Long description for release platforms")
     description_short: str | None = Field(None, max_length=150, description="Short description (max 150 chars)")
     description_tags: str | None = Field(None, max_length=1000, description="Release tags (comma-separated)")
@@ -42,6 +45,7 @@ class SketchResponse(BaseModel):
     lyrics: str | None = Field(None, description="Song lyrics")
     prompt: str = Field(..., description="Music style prompt")
     tags: str | None = Field(None, description="Comma-separated tags")
+    sketch_type: str = Field(..., description="Sketch type: inspiration or song")
     description_long: str | None = Field(None, description="Long description for release platforms")
     description_short: str | None = Field(None, description="Short description (max 150 chars)")
     description_tags: str | None = Field(None, description="Release tags (comma-separated)")
@@ -73,6 +77,7 @@ class SketchUpdateRequest(BaseModel):
     lyrics: str | None = Field(None, max_length=10000, description="New lyrics")
     prompt: str | None = Field(None, min_length=1, max_length=1024, description="New music style")
     tags: str | None = Field(None, max_length=1000, description="New tags")
+    sketch_type: str | None = Field(None, pattern="^(inspiration|song)$", description="New sketch type")
     description_long: str | None = Field(None, description="New long description")
     description_short: str | None = Field(None, max_length=150, description="New short description")
     description_tags: str | None = Field(None, max_length=1000, description="New release tags")
@@ -133,3 +138,11 @@ class SketchDeleteResponse(BaseResponse):
     """Schema for sketch deletion response"""
 
     data: dict = Field(default={"deleted": True}, description="Deletion confirmation")
+
+
+class SketchDuplicateRequest(BaseModel):
+    """Schema for sketch duplication requests"""
+
+    new_title_suffix: str | None = Field(
+        default=None, max_length=100, description="Suffix for new title (default: ' (Copy)')"
+    )

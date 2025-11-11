@@ -122,6 +122,7 @@ export class ApiConfigService {
             detail: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
             update: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
             delete: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
+            duplicate: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}/duplicate`,
             assignToProject: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}/assign-to-project`
         },
         equipment: {

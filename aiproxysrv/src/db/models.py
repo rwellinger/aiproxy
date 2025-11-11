@@ -44,6 +44,7 @@ class SongSketch(Base):
 
     # Metadata
     tags = Column(String(1000), nullable=True)
+    sketch_type = Column(String(20), nullable=False, default="song", server_default="song")
 
     # Release descriptions (for publishing to platforms)
     description_long = Column(Text, nullable=True)

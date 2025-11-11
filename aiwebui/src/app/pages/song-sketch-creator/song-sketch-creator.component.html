@@ -162,6 +162,41 @@
             </div>
           </div>
 
+          <!-- Sketch Type Field -->
+          <div class="form-group">
+            <label for="sketch_type">{{ 'songSketch.creator.fields.sketchType' | translate }}</label>
+
+            <div class="sketch-type-selector">
+              <label class="type-option" [class.selected]="sketchForm.get('sketch_type')?.value === 'inspiration'">
+                <input
+                  type="radio"
+                  formControlName="sketch_type"
+                  value="inspiration"
+                  [disabled]="isSaving">
+                <div class="type-badge inspiration">
+                  <i class="fas fa-lightbulb"></i>
+                  <span>{{ 'songSketch.creator.fields.sketchTypeInspiration' | translate }}</span>
+                </div>
+              </label>
+
+              <label class="type-option" [class.selected]="sketchForm.get('sketch_type')?.value === 'song'">
+                <input
+                  type="radio"
+                  formControlName="sketch_type"
+                  value="song"
+                  [disabled]="isSaving">
+                <div class="type-badge song">
+                  <i class="fas fa-music"></i>
+                  <span>{{ 'songSketch.creator.fields.sketchTypeSong' | translate }}</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="field-hint">
+              {{ 'songSketch.creator.fields.sketchTypeHint' | translate }}
+            </div>
+          </div>
+
           <!-- Tags Selection -->
           <div class="form-group">
             <h4 class="tags-section-title">{{ 'songSketch.creator.tags.title' | translate }}</h4>

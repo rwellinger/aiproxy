@@ -632,3 +632,58 @@
     }
   }
 }
+
+// Sketch Type Selector
+.sketch-type-selector {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+
+  .type-option {
+    flex: 1;
+    cursor: pointer;
+
+    input[type="radio"] {
+      display: none;
+    }
+
+    .type-badge {
+      padding: 1rem;
+      border: 2px solid $border-standard;
+      border-radius: 8px;
+      text-align: center;
+      transition: all 0.2s ease;
+      background: $background-light;
+
+      i {
+        font-size: 1.5rem;
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      span {
+        font-weight: 500;
+        display: block;
+      }
+
+      &:hover {
+        border-color: $primary-color;
+        transform: translateY(-2px);
+      }
+
+      &.inspiration {
+        i { color: #3b82f6; }  // Blue
+      }
+
+      &.song {
+        i { color: #10b981; }  // Green
+      }
+    }
+
+    &.selected .type-badge {
+      border-color: $primary-color;
+      background: $background-selected;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+}

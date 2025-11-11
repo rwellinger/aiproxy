@@ -225,6 +225,21 @@
     @include project-badge;
   }
 
+  .type-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    font-size: 1rem;
+
+    &.inspiration i {
+      color: #3b82f6;  // Blue for inspiration
+    }
+
+    &.song i {
+      color: #10b981;  // Green for song
+    }
+  }
+
   .sketch-item-meta {
     display: flex;
     gap: $spacing-sm;
@@ -776,6 +791,10 @@
 }
 
 .draft-button {
+  @include button-secondary('base');
+}
+
+.duplicate-button {
   @include button-secondary('base');
 }
 

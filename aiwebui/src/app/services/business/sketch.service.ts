@@ -12,6 +12,7 @@ export interface Sketch {
   lyrics?: string;
   prompt: string;
   tags?: string;
+  sketch_type: 'inspiration' | 'song';
   description_long?: string;
   description_short?: string;
   description_tags?: string;
@@ -117,6 +118,19 @@ export class SketchService {
     };
     return firstValueFrom(
       this.http.post(this.apiConfig.endpoints.sketch.assignToProject(sketchId), body)
+    );
+  }
+
+  /**
+   * Duplicate a sketch (simple copy without translation)
+   */
+  duplicateSketch(
+    sketchId: string,
+    options: { new_title_suffix?: string } = {}
+  ): Observable<SketchDetailResponse> {
+    return this.http.post<SketchDetailResponse>(
+      this.apiConfig.endpoints.sketch.duplicate(sketchId),
+      options
     );
   }
 }

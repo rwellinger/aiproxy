@@ -83,6 +83,9 @@
           (click)="selectSketch(sketch)">
           <div class="sketch-item-header">
             <h4 class="sketch-title">
+              <span class="type-icon" [class.inspiration]="sketch.sketch_type === 'inspiration'" [class.song]="sketch.sketch_type === 'song'">
+                <i class="fas" [class.fa-lightbulb]="sketch.sketch_type === 'inspiration'" [class.fa-music]="sketch.sketch_type === 'song'"></i>
+              </span>
               {{ sketch.title || ('songSketch.library.untitled' | translate) }}
             </h4>
             <div class="sketch-badges">
@@ -350,7 +353,7 @@
       <!-- Action Buttons at Bottom -->
       <mat-card-actions align="end">
         <div class="detail-actions">
-          <!-- Assign to Project Button -->
+          <!-- 1. Assign to Project Button -->
           <button
             type="button"
             class="action-button assign-button"
@@ -360,18 +363,7 @@
             <span>{{ 'songSketch.library.actions.assignToProject' | translate }}</span>
           </button>
 
-          <!-- Edit Button - only enabled for draft sketches -->
-          <button
-            type="button"
-            class="action-button edit-button"
-            (click)="editSketch()"
-            [disabled]="selectedSketch.workflow !== 'draft'"
-            [title]="selectedSketch.workflow !== 'draft' ? ('songSketch.library.actions.editDisabled' | translate) : ('songSketch.library.actions.edit' | translate)">
-            <i class="fas fa-edit"></i>
-            <span>{{ 'songSketch.library.actions.edit' | translate }}</span>
-          </button>
-
-          <!-- Mark as Used Button - only for draft sketches -->
+          <!-- 2. Mark as Used Button - only for draft sketches -->
           <button
             type="button"
             class="action-button used-button"
@@ -382,7 +374,7 @@
             <span>{{ 'songSketch.library.actions.markAsUsed' | translate }}</span>
           </button>
 
-          <!-- Back to Draft Button - only for used sketches -->
+          <!-- 2b. Back to Draft Button - only for used sketches -->
           <button
             type="button"
             class="action-button draft-button"
@@ -393,7 +385,7 @@
             <span>{{ 'songSketch.library.actions.backToDraft' | translate }}</span>
           </button>
 
-          <!-- Archive Button - visible for draft and used sketches -->
+          <!-- 3. Archive Button - visible for draft and used sketches -->
           <button
             type="button"
             class="action-button archive-button"
@@ -404,12 +396,35 @@
             <span>{{ 'songSketch.library.actions.archive' | translate }}</span>
           </button>
 
-          <!-- Delete Button - always visible -->
+          <!-- 4. Edit Button - only enabled for draft sketches -->
+          <button
+            type="button"
+            class="action-button edit-button"
+            (click)="editSketch()"
+            [disabled]="selectedSketch.workflow !== 'draft'"
+            [title]="selectedSketch.workflow !== 'draft' ? ('songSketch.library.actions.editDisabled' | translate) : ('songSketch.library.actions.edit' | translate)">
+            <i class="fas fa-edit"></i>
+            <span>{{ 'songSketch.library.actions.edit' | translate }}</span>
+          </button>
+
+          <!-- 5. Duplicate Button - disabled for type 'song' -->
+          <button
+            type="button"
+            class="action-button duplicate-button"
+            (click)="duplicateSketch(selectedSketch)"
+            [disabled]="selectedSketch.sketch_type === 'song'"
+            [title]="selectedSketch.sketch_type === 'song' ? ('songSketch.library.actions.duplicateDisabled' | translate) : ('songSketch.library.actions.duplicate' | translate)">
+            <i class="fas fa-copy"></i>
+            <span>{{ 'songSketch.library.actions.duplicate' | translate }}</span>
+          </button>
+
+          <!-- 6. Delete Button - disabled for workflow 'used' -->
           <button
             type="button"
             class="action-button delete-button"
             (click)="confirmDeleteSketch(selectedSketch.id)"
-            [title]="'songSketch.library.actions.delete' | translate">
+            [disabled]="selectedSketch.workflow === 'used'"
+            [title]="selectedSketch.workflow === 'used' ? ('songSketch.library.actions.deleteDisabled' | translate) : ('songSketch.library.actions.delete' | translate)">
             <i class="fas fa-trash"></i>
             <span>{{ 'songSketch.library.actions.delete' | translate }}</span>
           </button>

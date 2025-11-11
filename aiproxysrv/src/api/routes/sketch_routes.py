@@ -8,7 +8,7 @@ from api.auth_middleware import jwt_required
 from api.controllers.sketch_controller import SketchController
 from db.database import get_db
 from schemas.project_asset_schemas import AssignToProjectRequest
-from schemas.sketch_schemas import SketchCreateRequest, SketchUpdateRequest
+from schemas.sketch_schemas import SketchCreateRequest, SketchDuplicateRequest, SketchUpdateRequest
 
 
 api_sketch_v1 = Blueprint("api_sketch_v1", __name__, url_prefix="/api/v1/sketches")
@@ -119,6 +119,31 @@ def delete_sketch(sketch_id: str):
     db: Session = next(get_db())
     try:
         result, status_code = SketchController.delete_sketch(db, sketch_id)
+        return jsonify(result), status_code
+    finally:
+        db.close()
+
+
+@api_sketch_v1.route("/<sketch_id>/duplicate", methods=["POST"])
+@jwt_required
+def duplicate_sketch(sketch_id: str):
+    """
+    Duplicate a sketch (simple copy without translation)
+
+    Body (optional):
+    {
+        "new_title_suffix": " (Copy 2)"  // Optional custom suffix
+    }
+    """
+    try:
+        # Parse request body (optional, defaults provided by schema)
+        duplicate_data = SketchDuplicateRequest.model_validate(request.json or {})
+    except ValidationError as e:
+        return jsonify({"error": f"Validation error: {e}"}), 400
+
+    db: Session = next(get_db())
+    try:
+        result, status_code = SketchController.duplicate_sketch(db, sketch_id, duplicate_data)
         return jsonify(result), status_code
     finally:
         db.close()

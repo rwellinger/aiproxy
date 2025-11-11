@@ -26,6 +26,7 @@ class SketchOrchestrator:
         lyrics: str | None,
         prompt: str,
         tags: str | None = None,
+        sketch_type: str = "song",
         workflow: str = "draft",
         description_long: str | None = None,
         description_short: str | None = None,
@@ -41,6 +42,7 @@ class SketchOrchestrator:
             lyrics: Song lyrics (optional)
             prompt: Music style prompt (required)
             tags: Comma-separated tags (optional)
+            sketch_type: Sketch type (default: song)
             workflow: Workflow status (default: draft)
             description_long: Long description for release (optional)
             description_short: Short description for release (optional)
@@ -69,7 +71,7 @@ class SketchOrchestrator:
             )
 
             # Repository: Create sketch with normalized data
-            sketch = sketch_service.create_sketch(db=db, workflow=workflow, **normalized_data)
+            sketch = sketch_service.create_sketch(db=db, sketch_type=sketch_type, workflow=workflow, **normalized_data)
 
             if not sketch:
                 raise SketchOrchestratorError("Failed to create sketch")
@@ -251,3 +253,54 @@ class SketchOrchestrator:
                 error_type=type(e).__name__,
             )
             raise
+
+    def duplicate_sketch(
+        self,
+        db: Session,
+        original_sketch_id: str | UUID,
+        new_title_suffix: str | None = None,
+    ) -> Any:
+        """
+        Duplicate sketch (simple copy without translation)
+
+        Args:
+            db: Database session
+            original_sketch_id: UUID of sketch to duplicate
+            new_title_suffix: Suffix for new title (default: ' (Copy)')
+
+        Returns:
+            New SongSketch instance
+
+        Raises:
+            SketchOrchestratorError: If duplication fails
+        """
+        try:
+            # Get original sketch
+            original = sketch_service.get_sketch_by_id(db, original_sketch_id)
+            if not original:
+                raise SketchOrchestratorError(f"Original sketch not found: {original_sketch_id}")
+
+            # Determine new title
+            suffix = new_title_suffix if new_title_suffix else " (Copy)"
+            new_title = f"{original.title}{suffix}" if original.title else None
+
+            # Auto-convert inspiration → song on duplicate (workflow optimization)
+            new_sketch_type = "song" if original.sketch_type == "inspiration" else original.sketch_type
+
+            # Create duplicate via repository
+            duplicate = sketch_service.duplicate_sketch(
+                db=db,
+                original_sketch_id=original_sketch_id,
+                new_title=new_title,
+                new_lyrics=original.lyrics,
+                new_sketch_type=new_sketch_type,
+            )
+
+            if not duplicate:
+                raise SketchOrchestratorError("Failed to create duplicate sketch")
+
+            return duplicate
+
+        except Exception as e:
+            logger.error("Sketch duplication failed", sketch_id=str(original_sketch_id), error=str(e))
+            raise SketchOrchestratorError(f"Failed to duplicate sketch: {e}") from e
