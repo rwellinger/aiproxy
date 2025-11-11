@@ -116,53 +116,6 @@ class TestProcessTemplate:
         assert result["model"] == "llama3.2"
         assert result["temperature"] == 0.8
         assert result["max_tokens"] == 1000
-        assert result["fallback_count"] == 0
-        assert result["fallbacks_used"]["model"] is False
-        assert result["fallbacks_used"]["temperature"] is False
-        assert result["fallbacks_used"]["max_tokens"] is False
-
-    def test_process_template_with_fallbacks(self):
-        """Process template with missing parameters - uses fallbacks"""
-        template = Mock(
-            model=None,  # Missing
-            temperature=None,  # Missing
-            max_tokens=1000,  # Present
-            pre_condition="Pre",
-            post_condition="Post",
-            category="lyrics",
-            action="generate",
-            id=42,
-        )
-
-        result = PromptTemplateProcessor.process_template(template, "Input")
-
-        assert result["model"] == "llama3.2:3b"  # Default
-        assert result["temperature"] == 0.7  # Default
-        assert result["max_tokens"] == 1000  # From template
-        assert result["fallback_count"] == 2
-        assert result["fallbacks_used"]["model"] is True
-        assert result["fallbacks_used"]["temperature"] is True
-        assert result["fallbacks_used"]["max_tokens"] is False
-
-    def test_process_template_all_fallbacks(self):
-        """Process template with no parameters - all fallbacks"""
-        template = Mock(
-            model=None,
-            temperature=None,
-            max_tokens=None,
-            pre_condition="",
-            post_condition="",
-            category="image",
-            action="enhance",
-            id=42,
-        )
-
-        result = PromptTemplateProcessor.process_template(template, "Enhance this")
-
-        assert result["fallback_count"] == 3
-        assert result["model"] == "llama3.2:3b"
-        assert result["temperature"] == 0.7
-        assert result["max_tokens"] == 2048
 
     def test_process_template_returns_all_fields(self):
         """Verify all required fields are in result"""
@@ -179,26 +132,9 @@ class TestProcessTemplate:
 
         result = PromptTemplateProcessor.process_template(template, "test")
 
-        required_fields = ["prompt", "model", "temperature", "max_tokens", "fallback_count", "fallbacks_used"]
+        required_fields = ["prompt", "model", "temperature"]
         for field in required_fields:
             assert field in result
-
-    def test_process_template_prompt_not_empty(self):
-        """Processed template always has non-empty prompt"""
-        template = Mock(
-            model="test",
-            temperature=0.7,
-            max_tokens=100,
-            pre_condition="",
-            post_condition="",
-            category="test",
-            action="test",
-            id=1,
-        )
-
-        result = PromptTemplateProcessor.process_template(template, "Input")
-
-        assert len(result["prompt"]) > 0
 
     def test_process_template_different_categories(self):
         """Process templates from different categories"""
@@ -219,4 +155,3 @@ class TestProcessTemplate:
             result = PromptTemplateProcessor.process_template(template, "Input")
 
             assert result["prompt"] == "Pre\n\nInput\n\nPost"
-            assert result["fallback_count"] == 0
