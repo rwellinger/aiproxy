@@ -1,9 +1,14 @@
 name: Build & Release
 
+# Workflow disabled - Docker builds are now performed locally
+# To re-enable, uncomment the 'on' section below
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  workflow_dispatch:  # Manual trigger only
+
+# on:
+#   push:
+#     tags:
+#       - 'v*.*.*'
 
 env:
   REGISTRY: ghcr.io
