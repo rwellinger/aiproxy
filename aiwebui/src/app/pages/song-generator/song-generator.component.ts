@@ -543,7 +543,7 @@ export class SongGeneratorComponent implements OnInit {
     async loadSketches(): Promise<void> {
         try {
             const response = await firstValueFrom(
-                this.sketchService.getSketches(100, 0, undefined)
+                this.sketchService.getSketches(100, 0, 'draft', undefined, 'song')
             );
             this.sketches = response.data || [];
         } catch (error: any) {

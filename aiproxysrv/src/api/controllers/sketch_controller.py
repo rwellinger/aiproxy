@@ -61,6 +61,7 @@ class SketchController:
         offset: int = 0,
         search: str = "",
         workflow: str | None = None,
+        sketch_type: str | None = None,
         sort_by: str = "created_at",
         sort_direction: str = "desc",
     ) -> tuple[dict[str, Any], int]:
@@ -73,6 +74,7 @@ class SketchController:
             offset: Number of sketches to skip
             search: Search term to filter by title, lyrics, prompt, or tags
             workflow: Optional workflow filter (draft, used, archived)
+            sketch_type: Optional sketch type filter (song, inspiration)
             sort_by: Field to sort by (created_at, updated_at, title)
             sort_direction: Sort direction (asc, desc)
 
@@ -86,6 +88,7 @@ class SketchController:
                 offset=offset,
                 search=search,
                 workflow=workflow,
+                sketch_type=sketch_type,
                 sort_by=sort_by,
                 sort_direction=sort_direction,
             )

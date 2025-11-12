@@ -52,6 +52,7 @@ def list_sketches():
     # Parse search and sort parameters
     search = request.args.get("search", "").strip()
     workflow = request.args.get("workflow", None)  # Optional workflow filter
+    sketch_type = request.args.get("sketch_type", None)  # Optional sketch type filter
     sort_by = request.args.get("sort_by", "created_at")
     sort_direction = request.args.get("sort_direction", "desc")
 
@@ -67,6 +68,10 @@ def list_sketches():
     if workflow and workflow not in ["draft", "used", "archived"]:
         return jsonify({"error": "Invalid workflow. Must be one of: draft, used, archived"}), 400
 
+    # Validate sketch_type filter
+    if sketch_type and sketch_type not in ["song", "inspiration"]:
+        return jsonify({"error": "Invalid sketch_type. Must be one of: song, inspiration"}), 400
+
     db: Session = next(get_db())
     try:
         result, status_code = SketchController.get_sketches(
@@ -75,6 +80,7 @@ def list_sketches():
             offset=offset,
             search=search,
             workflow=workflow,
+            sketch_type=sketch_type,
             sort_by=sort_by,
             sort_direction=sort_direction,
         )

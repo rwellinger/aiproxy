@@ -110,12 +110,13 @@ export class ApiConfigService {
         },
         sketch: {
             create: () => `${this.baseUrl}/api/v1/sketches`,
-            list: (limit?: number, offset?: number, workflow?: string, search?: string) => {
+            list: (limit?: number, offset?: number, workflow?: string, search?: string, sketchType?: string) => {
                 const params = new URLSearchParams();
                 if (limit !== undefined) params.append('limit', limit.toString());
                 if (offset !== undefined) params.append('offset', offset.toString());
                 if (workflow) params.append('workflow', workflow);
                 if (search) params.append('search', search);
+                if (sketchType) params.append('sketch_type', sketchType);
                 const query = params.toString();
                 return `${this.baseUrl}/api/v1/sketches${query ? '?' + query : ''}`;
             },

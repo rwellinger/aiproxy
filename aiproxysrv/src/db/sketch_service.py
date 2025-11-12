@@ -115,6 +115,7 @@ class SketchService:
         offset: int = 0,
         search: str = "",
         workflow: str | None = None,
+        sketch_type: str | None = None,
         sort_by: str = "created_at",
         sort_direction: str = "desc",
     ) -> dict[str, Any]:
@@ -127,6 +128,7 @@ class SketchService:
             offset: Number of sketches to skip (default 0)
             search: Search term to filter by title, lyrics, prompt, or tags
             workflow: Optional workflow filter (draft, used, archived)
+            sketch_type: Optional sketch type filter (song, inspiration)
             sort_by: Field to sort by (created_at, updated_at, title)
             sort_direction: Sort direction (asc, desc)
 
@@ -143,6 +145,10 @@ class SketchService:
             else:
                 # When no workflow is specified, exclude archived sketches
                 query = query.filter(SongSketch.workflow != "archived")
+
+            # Apply sketch_type filter
+            if sketch_type:
+                query = query.filter(SongSketch.sketch_type == sketch_type)
 
             # Apply search filter if provided
             if search:
@@ -187,6 +193,7 @@ class SketchService:
                 limit=limit,
                 offset=offset,
                 workflow=workflow,
+                sketch_type=sketch_type,
                 search=search,
                 sort_by=sort_by,
                 sort_direction=sort_direction,

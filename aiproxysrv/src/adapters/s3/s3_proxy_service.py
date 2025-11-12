@@ -17,11 +17,13 @@ Usage:
     )
 """
 
+import mimetypes
 import traceback
 from io import BytesIO
 
 from flask import Response, send_file
 
+from adapters.s3.mime_types_config import MIME_TYPE_MAPPING
 from infrastructure.storage import get_storage
 from utils.logger import logger
 
@@ -78,7 +80,10 @@ class S3ProxyService:
     @staticmethod
     def _get_content_type(filename: str) -> str:
         """
-        Determine Content-Type from filename extension
+        Determine Content-Type from filename extension using hybrid approach:
+        1. Custom mapping (explicit control for critical formats)
+        2. Python mimetypes library (automatic fallback)
+        3. Default to 'application/octet-stream'
 
         Args:
             filename: Original filename
@@ -91,46 +96,26 @@ class S3ProxyService:
             'image/png'
             >>> S3ProxyService._get_content_type("photo.jpg")
             'image/jpeg'
-            >>> S3ProxyService._get_content_type("cover.webp")
-            'image/webp'
+            >>> S3ProxyService._get_content_type("project.cpr")
+            'application/x-cubase-project'
+            >>> S3ProxyService._get_content_type("archive.zip")
+            'application/zip'
             >>> S3ProxyService._get_content_type("unknown.xyz")
             'application/octet-stream'
         """
         extension = filename.lower().rsplit(".", 1)[-1] if "." in filename else ""
 
-        # Image types
-        if extension in ["jpg", "jpeg"]:
-            return "image/jpeg"
-        elif extension == "png":
-            return "image/png"
-        elif extension == "webp":
-            return "image/webp"
-        elif extension == "gif":
-            return "image/gif"
-        elif extension == "svg":
-            return "image/svg+xml"
+        # 1. Custom mapping first (guaranteed behavior for critical formats)
+        if extension in MIME_TYPE_MAPPING:
+            return MIME_TYPE_MAPPING[extension]
 
-        # Audio types (for future song releases)
-        elif extension == "mp3":
-            return "audio/mpeg"
-        elif extension == "wav":
-            return "audio/wav"
-        elif extension == "flac":
-            return "audio/flac"
-        elif extension == "ogg":
-            return "audio/ogg"
+        # 2. Fallback to Python's mimetypes library (automatic support)
+        guessed_type, _ = mimetypes.guess_type(filename)
+        if guessed_type:
+            return guessed_type
 
-        # Document types (for future features)
-        elif extension == "pdf":
-            return "application/pdf"
-        elif extension == "json":
-            return "application/json"
-        elif extension == "txt":
-            return "text/plain"
-
-        # Default
-        else:
-            return "application/octet-stream"
+        # 3. Ultimate fallback (binary data)
+        return "application/octet-stream"
 
 
 # Singleton instance

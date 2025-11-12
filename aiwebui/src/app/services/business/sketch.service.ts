@@ -73,10 +73,11 @@ export class SketchService {
     limit = 20,
     offset = 0,
     workflow?: string,
-    search?: string
+    search?: string,
+    sketchType?: string
   ): Observable<SketchListResponse> {
     return this.http.get<SketchListResponse>(
-      this.apiConfig.endpoints.sketch.list(limit, offset, workflow, search)
+      this.apiConfig.endpoints.sketch.list(limit, offset, workflow, search, sketchType)
     );
   }
 
