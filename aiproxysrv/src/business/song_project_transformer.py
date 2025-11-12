@@ -398,15 +398,17 @@ def transform_sketch_to_assigned_response(sketch: Any) -> dict[str, Any]:  # pra
         ...     id = "def-456"
         ...     title = "Chorus Ideas"
         ...     prompt = "upbeat pop"
+        ...     sketch_type = "song"
         ...     workflow = "draft"
         ...     created_at = None
         >>> transform_sketch_to_assigned_response(MockSketch())
-        {'id': 'def-456', 'title': 'Chorus Ideas', 'prompt': 'upbeat pop', 'workflow': 'draft', 'created_at': None}
+        {'id': 'def-456', 'title': 'Chorus Ideas', 'prompt': 'upbeat pop', 'sketch_type': 'song', 'workflow': 'draft', 'created_at': None}
     """
     return {
         "id": str(sketch.id),
         "title": sketch.title,
         "prompt": sketch.prompt,
+        "sketch_type": sketch.sketch_type if hasattr(sketch, "sketch_type") else "song",
         "workflow": sketch.workflow if hasattr(sketch, "workflow") else "draft",
         "created_at": sketch.created_at.isoformat() if sketch.created_at else None,
     }

@@ -108,6 +108,7 @@ class AssignedSketchResponse(BaseModel):
     id: str
     title: str | None
     prompt: str
+    sketch_type: str
     workflow: str
     created_at: str | None
 

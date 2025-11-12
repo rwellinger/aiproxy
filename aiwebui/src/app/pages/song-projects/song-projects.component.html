@@ -333,7 +333,7 @@
                   </h4>
                   <div *ngFor="let sketch of folder.assigned_sketches" class="asset-item">
                     <div class="asset-info">
-                      <i class="fas fa-pencil-alt"></i>
+                      <i class="fas" [ngClass]="sketch.sketch_type === 'inspiration' ? 'fa-lightbulb' : 'fa-music'"></i>
                       <span class="asset-title">{{ sketch.title || sketch.prompt }}</span>
                       <span class="asset-badge">{{ sketch.workflow }}</span>
                     </div>

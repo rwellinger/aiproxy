@@ -62,6 +62,7 @@ export interface AssignedSketch {
   id: string;
   title: string | null;
   prompt: string;
+  sketch_type: 'inspiration' | 'song';
   workflow: string;
   created_at: string | null;
 }
