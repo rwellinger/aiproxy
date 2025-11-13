@@ -464,6 +464,59 @@ def batch_delete_files(project_id: str):
         db.close()
 
 
+@api_song_projects_v1.route("/<project_id>/files/fix-mime", methods=["POST"])
+@jwt_required
+def fix_mime_types(project_id: str):
+    """
+    Fix missing/wrong MIME types for all files in project.
+
+    Scans all files with NULL or 'application/octet-stream' MIME types
+    and updates them based on filename extension.
+
+    Query Parameters:
+        - folder_id (optional): Only fix files in specific folder
+        - dry_run (optional): Preview changes without updating (true/false)
+
+    Response:
+        200: {
+            'data': {
+                'scanned': 150,
+                'updated': 42,
+                'unchanged': 108,
+                'files': [
+                    {
+                        'file_id': 'uuid',
+                        'filename': 'track.flac',
+                        'old_mime': null,
+                        'new_mime': 'audio/flac'
+                    }
+                ]
+            }
+        }
+        401: {'error': 'Unauthorized'}
+        500: {'error': 'Failed to fix MIME types: ...'}
+
+    Example:
+        POST /api/v1/song-projects/{id}/files/fix-mime
+        POST /api/v1/song-projects/{id}/files/fix-mime?folder_id={folder_id}
+        POST /api/v1/song-projects/{id}/files/fix-mime?dry_run=true
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    folder_id = request.args.get("folder_id")
+    dry_run = request.args.get("dry_run", "").lower() == "true"
+
+    db: Session = next(get_db())
+    try:
+        result, status_code = song_project_controller.fix_mime_types(db, UUID(user_id), project_id, folder_id, dry_run)
+        return jsonify(result), status_code
+    finally:
+        db.close()
+
+
 @api_song_projects_v1.route("/<project_id>/files/all", methods=["GET"])
 @jwt_required
 def get_all_project_files(project_id: str):

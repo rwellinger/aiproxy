@@ -1274,5 +1274,119 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
             console.print(f"  [dim]... and {len(errors) - 10} more errors[/dim]")
 
 
+@cli.command()
+@click.argument("project_id")
+@click.option("--folder", "folder_id", default=None, help="Only fix files in specific folder")
+@click.option("--dry-run", is_flag=True, help="Preview changes without updating")
+def fix_mime(project_id, folder_id, dry_run):
+    """Fix missing/wrong MIME types for project files
+
+    Scans all files in database with NULL or 'application/octet-stream'
+    MIME types and updates them based on filename extension.
+
+    No local files needed - works purely on S3 metadata in database.
+
+    Uses the comprehensive MIME type mapping including:
+    - Audio formats (FLAC, WAV, MP3, etc.)
+    - DAW projects (Cubase, Nuendo, Studio One, etc.)
+    - Audio tools (Melodyne, SpectraLayers, etc.)
+    - Archives (ZIP, GZIP, 7Z, RAR, etc.)
+    - Images and documents
+
+    Examples:
+        aiproxy-cli fix-mime <project-id>
+        aiproxy-cli fix-mime <project-id> --folder <folder-id>
+        aiproxy-cli fix-mime <project-id> --dry-run
+    """
+
+    # Load config
+    config = load_config()
+    if not config:
+        console.print("[red]✗ Not logged in. Run: aiproxy-cli login[/red]")
+        sys.exit(1)
+
+    # Check token expiry
+    if not check_token_expiry(config):
+        console.print("[yellow]Run: aiproxy-cli login[/yellow]")
+        sys.exit(1)
+
+    # Build URL with query parameters
+    url = f"{config['api_url']}/api/v1/song-projects/{project_id}/files/fix-mime"
+    params = {}
+    if folder_id:
+        params["folder_id"] = folder_id
+    if dry_run:
+        params["dry_run"] = "true"
+
+    # Show header
+    console.print(f"[bold]🔍 Scanning project files for MIME type issues...[/bold]")
+    if folder_id:
+        console.print(f"[dim]Folder: {folder_id}[/dim]")
+    if dry_run:
+        console.print("[yellow]DRY-RUN MODE: No changes will be made[/yellow]")
+    console.print()
+
+    try:
+        with console.status("[bold green]Analyzing MIME types..."):
+            response = requests.post(
+                url,
+                params=params,
+                headers={"Authorization": f"Bearer {config['jwt_token']}"},
+                verify=config.get("ssl_verify", False),
+                timeout=60,
+            )
+
+        if response.status_code != 200:
+            error = response.json().get("error", f"HTTP {response.status_code}")
+            console.print(f"[red]✗ Failed: {error}[/red]")
+            sys.exit(1)
+
+        data = response.json()["data"]
+        scanned = data["scanned"]
+        updated = data["updated"]
+        unchanged = data["unchanged"]
+        files = data["files"]
+
+        # Summary
+        console.print("[bold cyan]📊 MIME Type Fix Summary:[/bold cyan]")
+        console.print(f"  [blue]📁 Scanned:[/blue]   {scanned} files")
+        console.print(f"  [green]✓ Updated:[/green]   {updated} files")
+        console.print(f"  [dim]✓ Unchanged:[/dim] {unchanged} files")
+        console.print()
+
+        if files:
+            console.print("[bold]📝 Changes:[/bold]")
+            for f in files[:20]:  # Show max 20
+                old = f["old_mime"] if f["old_mime"] else "[red]NULL[/red]"
+                new = f["new_mime"]
+                filename = f["filename"]
+
+                # Truncate long filenames
+                if len(filename) > 60:
+                    filename = filename[:57] + "..."
+
+                console.print(f"  [cyan]{filename}[/cyan]")
+                console.print(f"    {old} → [green]{new}[/green]")
+
+            if len(files) > 20:
+                console.print(f"  [dim]... and {len(files) - 20} more files[/dim]")
+
+        console.print()
+
+        if dry_run:
+            console.print("[yellow]🔍 DRY-RUN: Run without --dry-run to apply changes[/yellow]")
+        elif updated > 0:
+            console.print("[green]✓ MIME types updated successfully![/green]")
+        else:
+            console.print("[green]✓ All files already have correct MIME types![/green]")
+
+    except requests.exceptions.Timeout:
+        console.print("[red]✗ Connection timeout[/red]")
+        sys.exit(1)
+    except Exception as e:
+        console.print(f"[red]✗ Error: {str(e)}[/red]")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     cli()

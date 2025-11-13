@@ -565,6 +565,107 @@ class SongProjectController:
             return {"error": f"Batch delete failed: {str(e)}"}, 500
 
     @staticmethod
+    def fix_mime_types(
+        db: Session, user_id: UUID, project_id: str, folder_id: str | None, dry_run: bool
+    ) -> tuple[dict[str, Any], int]:
+        """
+        Fix missing/wrong MIME types for files in project
+
+        Args:
+            db: Database session
+            user_id: User ID (from JWT)
+            project_id: Project UUID string
+            folder_id: Optional folder UUID string (None = all folders)
+            dry_run: If True, preview changes without updating
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            # Import here to avoid circular dependency
+            from adapters.s3.s3_proxy_service import S3ProxyService
+            from db.models import SongProjectFile
+
+            # Convert string UUID to UUID object
+            project_uuid = UUID(project_id)
+            folder_uuid = UUID(folder_id) if folder_id else None
+
+            # Verify user owns project
+            project = song_project_service.get_project_by_id(db, project_uuid)
+            if not project or project.user_id != user_id:
+                return {"error": "Project not found or unauthorized"}, 404
+
+            # Query files with missing/wrong MIME types
+            query = (
+                db.query(SongProjectFile)
+                .filter(
+                    SongProjectFile.project_id == project_uuid,
+                    (SongProjectFile.mime_type.is_(None) | (SongProjectFile.mime_type == "application/octet-stream")),
+                )
+            )
+
+            # Filter by folder if specified
+            if folder_uuid:
+                query = query.filter(SongProjectFile.folder_id == folder_uuid)
+
+            files = query.all()
+
+            # Calculate new MIME types
+            updates = []
+            for file in files:
+                old_mime = file.mime_type
+                new_mime = S3ProxyService._get_content_type(file.filename)
+
+                # Only update if different
+                if new_mime != old_mime:
+                    updates.append(
+                        {
+                            "file_id": str(file.id),
+                            "filename": file.filename,
+                            "old_mime": old_mime,
+                            "new_mime": new_mime,
+                        }
+                    )
+
+                    # Update DB (unless dry-run)
+                    if not dry_run:
+                        file.mime_type = new_mime
+
+            # Commit changes (unless dry-run)
+            if not dry_run and updates:
+                db.commit()
+
+            logger.info(
+                "MIME types fix completed",
+                project_id=str(project_uuid),
+                folder_id=str(folder_uuid) if folder_uuid else None,
+                scanned=len(files),
+                updated=len(updates),
+                dry_run=dry_run,
+            )
+
+            return {
+                "data": {
+                    "scanned": len(files),
+                    "updated": len(updates),
+                    "unchanged": len(files) - len(updates),
+                    "files": updates,
+                }
+            }, 200
+
+        except ValueError as e:
+            logger.error("Fix MIME types validation error", error=str(e))
+            return {"error": f"Invalid UUID: {str(e)}"}, 400
+        except Exception as e:
+            logger.error(
+                "Fix MIME types error",
+                project_id=project_id,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Failed to fix MIME types: {str(e)}"}, 500
+
+    @staticmethod
     def get_all_project_files_with_urls(db: Session, user_id: UUID, project_id: str) -> tuple[dict[str, Any], int]:
         """
         Get all files from all folders for complete project download
