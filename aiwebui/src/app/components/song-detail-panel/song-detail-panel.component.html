@@ -211,26 +211,26 @@
                         <td>{{ choice.formattedDuration }}</td>
                         <td>
                             <button type="button"
-                                    *ngIf="choice.flac_url"
-                                    (click)="onDownloadFlac(choice.flac_url)"
+                                    *ngIf="choice.flac_url || choice.flac_s3_key"
+                                    (click)="onDownloadFlac(choice.id)"
                                     class="download-flac-btn">
                                 <i class="fas fa-download"></i> {{ 'songDetailPanel.choices.downloadFlac' | translate }}
                             </button>
-                            <span *ngIf="!choice.flac_url" class="not-available">{{ 'songDetailPanel.choices.notAvailable' | translate }}</span>
+                            <span *ngIf="!choice.flac_url && !choice.flac_s3_key" class="not-available">{{ 'songDetailPanel.choices.notAvailable' | translate }}</span>
                         </td>
                         <td>
                             <button type="button"
-                                    *ngIf="choice.mp3_url"
-                                    (click)="onPlayAudio(choice.mp3_url, choice.id, i + 1)"
+                                    *ngIf="choice.mp3_url || choice.mp3_s3_key"
+                                    (click)="onPlayAudio(choice.id, choice.id, i + 1)"
                                     [class.active]="currentlyPlayingId === choice.id">
                                 <i class="fas fa-music"></i>
                                 {{ currentlyPlayingId === choice.id ? ('songDetailPanel.choices.playing' | translate) : ('songDetailPanel.choices.play' | translate) }}
                             </button>
-                            <span *ngIf="!choice.mp3_url" class="not-available">{{ 'songDetailPanel.choices.notAvailable' | translate }}</span>
+                            <span *ngIf="!choice.mp3_url && !choice.mp3_s3_key" class="not-available">{{ 'songDetailPanel.choices.notAvailable' | translate }}</span>
                         </td>
                         <td>
                             <button type="button"
-                                    *ngIf="choice.mp3_url && !choice.stem_url"
+                                    *ngIf="(choice.mp3_url || choice.mp3_s3_key) && !choice.stem_url && !choice.stem_s3_key"
                                     (click)="onGenerateStem(choice.id)"
                                     [disabled]="stemGenerationInProgress.has(choice.id)">
                                 <i class="fas fa-spinner fa-spin" *ngIf="stemGenerationInProgress.has(choice.id)"></i>
@@ -238,12 +238,12 @@
                                 {{ stemGenerationInProgress.has(choice.id) ? ('songDetailPanel.choices.generating' | translate) : ('songDetailPanel.choices.generateStems' | translate) }}
                             </button>
                             <button type="button"
-                                    *ngIf="choice.stem_url"
-                                    (click)="onDownloadStems(choice.stem_url)"
+                                    *ngIf="choice.stem_url || choice.stem_s3_key"
+                                    (click)="onDownloadStems(choice.id)"
                                     class="download-stems-btn">
                                 <i class="fas fa-download"></i> {{ 'songDetailPanel.choices.downloadStems' | translate }}
                             </button>
-                            <span *ngIf="!choice.mp3_url" class="not-available">{{ 'songDetailPanel.choices.notAvailable' | translate }}</span>
+                            <span *ngIf="!choice.mp3_url && !choice.mp3_s3_key" class="not-available">{{ 'songDetailPanel.choices.notAvailable' | translate }}</span>
                         </td>
                         <td *ngIf="showRating">
                             <div class="rating-buttons">

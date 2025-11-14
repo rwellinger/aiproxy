@@ -149,12 +149,17 @@ class SongChoice(Base):
     mureka_choice_id = Column(String(255), nullable=True)  # MUREKA's choice ID
     choice_index = Column(Integer, nullable=True)  # Index in choices array
 
-    # URLs and files
+    # URLs and files (legacy Mureka URLs - kept for backward compatibility)
     mp3_url = Column(String(1000), nullable=True)
     flac_url = Column(String(1000), nullable=True)
     video_url = Column(String(1000), nullable=True)  # Falls verfügbar
     image_url = Column(String(1000), nullable=True)  # Cover image
     stem_url = Column(String(1000), nullable=True)  # Stems ZIP file URL
+
+    # S3 storage keys (new - for lazy migration pattern)
+    mp3_s3_key = Column(String(500), nullable=True)  # S3 key for MP3 audio file
+    flac_s3_key = Column(String(500), nullable=True)  # S3 key for FLAC audio file
+    stem_s3_key = Column(String(500), nullable=True)  # S3 key for stems ZIP file
 
     # Metadata
     duration = Column(Float, nullable=True)  # Duration in milliseconds (as returned by MUREKA)

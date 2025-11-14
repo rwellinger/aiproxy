@@ -54,6 +54,54 @@ class TestValidateCategoryActionFormat:
             PromptTemplateValidator.validate_category_action_format(category, action)
 
 
+class TestValidateVersionIncrement:
+    """Test version increment validation"""
+
+    def test_increment_from_1_0(self):
+        """Test incrementing from version 1.0"""
+        result = PromptTemplateValidator.validate_version_increment("1.0")
+        assert result == "1.1"
+
+    def test_increment_from_2_5(self):
+        """Test incrementing from version 2.5"""
+        result = PromptTemplateValidator.validate_version_increment("2.5")
+        assert result == "2.6"
+
+    def test_increment_from_9_9(self):
+        """Test incrementing from version 9.9"""
+        result = PromptTemplateValidator.validate_version_increment("9.9")
+        assert result == "10.0"
+
+    def test_increment_from_none(self):
+        """Test incrementing from None returns 1.0"""
+        result = PromptTemplateValidator.validate_version_increment(None)
+        assert result == "1.0"
+
+    def test_increment_from_empty_string(self):
+        """Test incrementing from empty string returns 1.0"""
+        result = PromptTemplateValidator.validate_version_increment("")
+        assert result == "1.0"
+
+    def test_increment_from_invalid_string(self):
+        """Test incrementing from invalid string returns 1.0"""
+        result = PromptTemplateValidator.validate_version_increment("invalid")
+        assert result == "1.0"
+        result = PromptTemplateValidator.validate_version_increment("abc.def")
+        assert result == "1.0"
+
+    def test_increment_preserves_one_decimal(self):
+        """Test incrementing preserves one decimal place"""
+        result = PromptTemplateValidator.validate_version_increment("1.0")
+        assert result == "1.1"
+        result = PromptTemplateValidator.validate_version_increment("1.9")
+        assert result == "2.0"
+
+    def test_increment_from_integer_string(self):
+        """Test incrementing from integer string"""
+        result = PromptTemplateValidator.validate_version_increment("3")
+        assert result == "3.1"
+
+
 class TestValidationErrorException:
     """Test PromptTemplateValidationError exception"""
 

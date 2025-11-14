@@ -1319,7 +1319,7 @@ def fix_mime(project_id, folder_id, dry_run):
         params["dry_run"] = "true"
 
     # Show header
-    console.print(f"[bold]🔍 Scanning project files for MIME type issues...[/bold]")
+    console.print("[bold]🔍 Scanning project files for MIME type issues...[/bold]")
     if folder_id:
         console.print(f"[dim]Folder: {folder_id}[/dim]")
     if dry_run:

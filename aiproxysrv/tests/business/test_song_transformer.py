@@ -309,3 +309,116 @@ class TestFormatDurationFromMs:
         """Test formatting duration with milliseconds (should be truncated)"""
         assert SongTransformer.format_duration_from_ms(30567.89) == "00:30"  # 30.567 seconds -> 30
         assert SongTransformer.format_duration_from_ms(125999.99) == "02:05"  # 125.999 seconds -> 125
+
+
+class TestSanitizeFilename:
+    """Tests for sanitize_filename()"""
+
+    def test_sanitize_simple_title(self):
+        """Test sanitizing simple title"""
+        from business.song_transformer import sanitize_filename
+
+        assert sanitize_filename("My Rock Song") == "my-rock-song"
+
+    def test_sanitize_with_special_characters(self):
+        """Test sanitizing title with special characters"""
+        from business.song_transformer import sanitize_filename
+
+        assert sanitize_filename("Epic Song (Remix) [2024]") == "epic-song-remix-2024"
+        assert sanitize_filename("Song!!! @#$ %%%") == "song"
+
+    def test_sanitize_none_title(self):
+        """Test sanitizing None title"""
+        from business.song_transformer import sanitize_filename
+
+        assert sanitize_filename(None) == "untitled"
+
+    def test_sanitize_empty_string(self):
+        """Test sanitizing empty string"""
+        from business.song_transformer import sanitize_filename
+
+        assert sanitize_filename("") == "untitled"
+        assert sanitize_filename("   ") == "untitled"
+
+    def test_sanitize_max_length(self):
+        """Test sanitizing with max length truncation"""
+        from business.song_transformer import sanitize_filename
+
+        long_title = "a" * 100
+        result = sanitize_filename(long_title, max_length=20)
+        assert len(result) == 20
+        assert result == "a" * 20
+
+    def test_sanitize_truncate_removes_trailing_hyphen(self):
+        """Test sanitizing removes trailing hyphen after truncation"""
+        from business.song_transformer import sanitize_filename
+
+        result = sanitize_filename("my-very-long-song-title", max_length=15)
+        assert len(result) <= 15
+        assert not result.endswith("-")  # Should not end with hyphen
+
+    def test_sanitize_only_special_chars(self):
+        """Test sanitizing title with only special characters"""
+        from business.song_transformer import sanitize_filename
+
+        assert sanitize_filename("!!!@@@###") == "untitled"
+        assert sanitize_filename("---___+++") == "untitled"
+
+
+class TestGenerateS3SongKey:
+    """Tests for generate_s3_song_key()"""
+
+    def test_generate_key_with_title(self):
+        """Test generating S3 key with song title"""
+        from business.song_transformer import generate_s3_song_key
+
+        result = generate_s3_song_key("abc-123-def-456", "My Rock Song", 0, "mp3")
+        assert result == "songs/my-rock-song_abc-123/choice-0/audio.mp3"
+
+    def test_generate_key_without_title(self):
+        """Test generating S3 key without song title"""
+        from business.song_transformer import generate_s3_song_key
+
+        result = generate_s3_song_key("abc-123-def-456", None, 0, "mp3")
+        assert result == "songs/untitled_abc-123/choice-0/audio.mp3"
+
+    def test_generate_key_flac(self):
+        """Test generating S3 key for FLAC file"""
+        from business.song_transformer import generate_s3_song_key
+
+        result = generate_s3_song_key("abc-123-def-456", "My Rock Song", 1, "flac")
+        assert result == "songs/my-rock-song_abc-123/choice-1/audio.flac"
+
+    def test_generate_key_stems(self):
+        """Test generating S3 key for stems ZIP"""
+        from business.song_transformer import generate_s3_song_key
+
+        result = generate_s3_song_key("abc-123-def-456", "My Rock Song", 0, "stems")
+        assert result == "songs/my-rock-song_abc-123/choice-0/stems.zip"
+
+    def test_generate_key_short_song_id(self):
+        """Test generating S3 key shortens song_id to 7 chars"""
+        from business.song_transformer import generate_s3_song_key
+
+        long_id = "abc-123-def-456-ghi-789"
+        result = generate_s3_song_key(long_id, "Epic Song", 0, "mp3")
+        assert result == "songs/epic-song_abc-123/choice-0/audio.mp3"
+
+    def test_generate_key_special_chars_in_title(self):
+        """Test generating S3 key sanitizes special characters"""
+        from business.song_transformer import generate_s3_song_key
+
+        result = generate_s3_song_key("abc-123", "Epic Song!!! (2024)", 0, "mp3")
+        assert result == "songs/epic-song-2024_abc-123/choice-0/audio.mp3"
+
+    def test_generate_key_multiple_choices(self):
+        """Test generating S3 keys for multiple choices"""
+        from business.song_transformer import generate_s3_song_key
+
+        result0 = generate_s3_song_key("abc-123", "Test Song", 0, "mp3")
+        result1 = generate_s3_song_key("abc-123", "Test Song", 1, "mp3")
+        result2 = generate_s3_song_key("abc-123", "Test Song", 2, "mp3")
+
+        assert result0 == "songs/test-song_abc-123/choice-0/audio.mp3"
+        assert result1 == "songs/test-song_abc-123/choice-1/audio.mp3"
+        assert result2 == "songs/test-song_abc-123/choice-2/audio.mp3"
