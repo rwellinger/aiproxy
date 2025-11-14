@@ -1801,8 +1801,17 @@ Mac Studio M1 Max (32GB RAM) - IP: 10.0.1.120
 │   └── Ollama (Port 11434) - LLM backend for chat conversations
 └── Storage
     ├── postgres-data (Volume)
-    ├── redis-data (Volume)
-    └── images-data (Volume)
+    └── redis-data (Volume)
+
+Synology NAS (10.0.1.200)
+├── MinIO S3 Storage
+│   ├── S3 API (Port 9000) - S3-compatible object storage
+│   ├── Web Console (Port 9001) - MinIO admin UI
+│   └── Data: /volume1/minio-data (RAID protected)
+└── Network Access
+    ├── Backend: MINIO_ENDPOINT=10.0.1.200:9000
+    ├── Console: https://macstudio/ (proxied via Nginx)
+    └── Docker container with user: 1000:1000
 
 All images built via GitHub Actions (Multi-platform: AMD64 + ARM64)
 Images pulled from GitHub Container Registry (GHCR)

@@ -29,6 +29,10 @@ graph TB
         end
     end
 
+    subgraph "Synology NAS (10.0.1.200)"
+        MINIO_NAS[MinIO<br/>:9000 S3 API<br/>:9001 Console<br/>/volume1/minio-data]
+    end
+
     subgraph "External Services"
         OPENAI_EXT[OpenAI API<br/>DALL-E 3]
         MUREKA_EXT[Mureka API<br/>Song Generation]
@@ -36,19 +40,21 @@ graph TB
 
     NGINX --> API_CONTAINER
     NGINX --> STATIC
+    NGINX --> MINIO_NAS
 
     API_CONTAINER --> PROD_PG
     API_CONTAINER --> PROD_REDIS
     API_CONTAINER --> OPENAI_EXT
     API_CONTAINER --> OLLAMA_HOST
+    API_CONTAINER -->|S3 :9000| MINIO_NAS
 
     WORKER_CONTAINER --> PROD_REDIS
     WORKER_CONTAINER --> PROD_PG
     WORKER_CONTAINER --> MUREKA_EXT
+    WORKER_CONTAINER -->|S3 :9000| MINIO_NAS
 
     PROD_PG --> PG_VOL
     PROD_REDIS --> REDIS_VOL
-    API_CONTAINER --> IMG_VOL
 
     style NGINX fill:#e3f2fd
     style API_CONTAINER fill:#e8f5e8

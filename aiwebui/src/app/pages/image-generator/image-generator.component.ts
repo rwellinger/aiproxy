@@ -4,7 +4,7 @@ import {CommonModule} from '@angular/common';
 import {HttpClient} from '@angular/common/http';
 import {firstValueFrom} from 'rxjs';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
-import {ImageBlobService} from '../../services/ui/image-blob.service';
+import {ResourceBlobService} from '../../services/ui/resource-blob.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {ImageService} from '../../services/business/image.service';
@@ -125,7 +125,7 @@ export class ImageGeneratorComponent implements OnInit {
     private imageService = inject(ImageService);
     private chatService = inject(ChatService);
     private progressService = inject(ProgressService);
-    private imageBlobService = inject(ImageBlobService);
+    private resourceBlobService = inject(ResourceBlobService);
     private translate = inject(TranslateService);
     private userService = inject(UserService);
 
@@ -314,7 +314,7 @@ export class ImageGeneratorComponent implements OnInit {
 
                     // Load blob URL for modal display
                     if (data.url) {
-                        this.imageBlobService.getImageBlobUrl(data.url).subscribe({
+                        this.resourceBlobService.getResourceBlobUrl(data.url).subscribe({
                             next: (blobUrl) => {
                                 this.generatedImageBlobUrl = blobUrl;
                             },
@@ -363,9 +363,9 @@ export class ImageGeneratorComponent implements OnInit {
 
     onDownloadImage() {
         if (this.generatedImageData?.url) {
-            // Use authenticated download via ImageBlobService
+            // Use authenticated download via ResourceBlobService
             const filename = this.getImageFilename();
-            this.imageBlobService.downloadImage(this.generatedImageData.url, filename);
+            this.resourceBlobService.downloadResource(this.generatedImageData.url, filename);
         }
     }
 

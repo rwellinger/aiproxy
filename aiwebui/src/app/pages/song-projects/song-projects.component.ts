@@ -18,7 +18,7 @@ import { SongProjectService } from '../../services/business/song-project.service
 import { NotificationService } from '../../services/ui/notification.service';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { ApiConfigService } from '../../services/config/api-config.service';
-import { ImageBlobService } from '../../services/ui/image-blob.service';
+import { ResourceBlobService } from '../../services/ui/resource-blob.service';
 import { CreateProjectDialogComponent } from '../../dialogs/create-project-dialog/create-project-dialog.component';
 import {
   SongProjectDetail,
@@ -92,7 +92,7 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private settingsService = inject(UserSettingsService);
   private apiConfig = inject(ApiConfigService);
-  private imageBlobService = inject(ImageBlobService);
+  private resourceBlobService = inject(ResourceBlobService);
 
   // Navigation state (must be captured in constructor)
   private navigationState: any = null;
@@ -167,7 +167,7 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
       this.projectList.forEach(project => {
         if (project.cover_info?.source === 'release' && project.cover_info.release_id) {
           const coverUrl = `${this.apiConfig.endpoints.songRelease.detail(project.cover_info.release_id)}/cover`;
-          this.imageBlobService.getImageBlobUrl(coverUrl)
+          this.resourceBlobService.getResourceBlobUrl(coverUrl)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
               next: (blobUrl) => {
@@ -214,7 +214,7 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
       // Load cover image as blob (with JWT authentication)
       if (this.selectedProject?.cover_info?.source === 'release' && this.selectedProject.cover_info.release_id) {
         const coverUrl = `${this.apiConfig.endpoints.songRelease.detail(this.selectedProject.cover_info.release_id)}/cover`;
-        this.imageBlobService.getImageBlobUrl(coverUrl)
+        this.resourceBlobService.getResourceBlobUrl(coverUrl)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (blobUrl) => {

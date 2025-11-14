@@ -8,7 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 
 import { SongReleaseService } from '../../services/business/song-release.service';
 import { NotificationService } from '../../services/ui/notification.service';
-import { ImageBlobService } from '../../services/ui/image-blob.service';
+import { ResourceBlobService } from '../../services/ui/resource-blob.service';
 import { SongRelease, SongReleaseListItem, ReleaseType, ReleaseStatus } from '../../models/song-release.model';
 
 @Component({
@@ -57,7 +57,7 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
 
   private releaseService = inject(SongReleaseService);
   private notificationService = inject(NotificationService);
-  private imageBlobService = inject(ImageBlobService);
+  private resourceBlobService = inject(ResourceBlobService);
   private translate = inject(TranslateService);
   private router = inject(Router);
 
@@ -120,7 +120,7 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
         // Load cover blob URLs for all list items
         this.releaseList.forEach(release => {
           if (release.cover_url) {
-            this.imageBlobService.getImageBlobUrl(release.cover_url)
+            this.resourceBlobService.getResourceBlobUrl(release.cover_url)
               .pipe(takeUntil(this.destroy$))
               .subscribe({
                 next: (blobUrl) => {
@@ -162,7 +162,7 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
 
         // Load cover blob URL for authenticated image access
         if (this.selectedRelease.cover_url) {
-          this.imageBlobService.getImageBlobUrl(this.selectedRelease.cover_url)
+          this.resourceBlobService.getResourceBlobUrl(this.selectedRelease.cover_url)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
               next: (blobUrl) => {

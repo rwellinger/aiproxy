@@ -17,8 +17,13 @@ graph TB
         end
     end
 
+    subgraph "Synology NAS (10.0.1.200)"
+        MINIO[MinIO S3 Storage<br/>:9000 S3 API<br/>:9001 Console<br/>/volume1/minio-data]
+    end
+
     CLIENT -->|HTTPS| NGINX
     NGINX -->|/aiwebui/<br/>incl. /ai-chat| NGINX
+    NGINX -->|/ MinIO Console| MINIO
     NGINX -->|/api/v1/image/| API
     NGINX -->|/api/v1/song/| API
     NGINX -->|/api/v1/ollama/chat/| API
@@ -28,5 +33,7 @@ graph TB
     API --> PG
     API --> REDIS
     API -->|Chat Generation| OLLAMA
+    API -->|S3 API :9000| MINIO
     WORKER --> REDIS
     WORKER --> PG
+    WORKER -->|S3 API :9000| MINIO

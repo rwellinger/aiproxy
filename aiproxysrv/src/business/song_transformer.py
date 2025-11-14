@@ -177,6 +177,8 @@ def generate_s3_song_key(song_id: str, song_title: str | None, choice_index: int
     """
     Generate S3 key for song file upload (lazy migration pattern)
 
+    NOTE: Key does NOT include bucket name (bucket is 'songs' in settings.py)
+
     Pure function - no dependencies, fully unit-testable
 
     Args:
@@ -186,17 +188,17 @@ def generate_s3_song_key(song_id: str, song_title: str | None, choice_index: int
         file_type: File type ('mp3', 'flac', 'stems')
 
     Returns:
-        S3 key (e.g., "songs/{sanitized_title}_{song_id_short}/choice-{index}/audio.{ext}")
+        S3 key (e.g., "{sanitized_title}_{song_id_short}/choice-{index}/audio.{ext}")
 
     Examples:
         >>> generate_s3_song_key("abc-123-def-456", "My Rock Song", 0, "mp3")
-        'songs/my-rock-song_abc-123/choice-0/audio.mp3'
+        'my-rock-song_abc-123/choice-0/audio.mp3'
         >>> generate_s3_song_key("abc-123-def-456", "My Rock Song", 1, "flac")
-        'songs/my-rock-song_abc-123/choice-1/audio.flac'
+        'my-rock-song_abc-123/choice-1/audio.flac'
         >>> generate_s3_song_key("abc-123-def-456", None, 0, "stems")
-        'songs/untitled_abc-123/choice-0/stems.zip'
+        'untitled_abc-123/choice-0/stems.zip'
         >>> generate_s3_song_key("abc-123-def-456-ghi-789", "Epic Song", 0, "mp3")
-        'songs/epic-song_abc-123/choice-0/audio.mp3'
+        'epic-song_abc-123/choice-0/audio.mp3'
     """
     # Sanitize title for filename
     sanitized_title = sanitize_filename(song_title)
@@ -207,5 +209,6 @@ def generate_s3_song_key(song_id: str, song_title: str | None, choice_index: int
     # Determine file extension and name based on type
     filename = "stems.zip" if file_type == "stems" else f"audio.{file_type}"
 
-    # Build S3 key: songs/{title_id-short}/choice-{index}/{filename}
-    return f"songs/{sanitized_title}_{song_id_short}/choice-{choice_index}/{filename}"
+    # Build S3 key: {title_id-short}/choice-{index}/{filename}
+    # NOTE: Bucket name ('songs') is NOT part of the key!
+    return f"{sanitized_title}_{song_id_short}/choice-{choice_index}/{filename}"

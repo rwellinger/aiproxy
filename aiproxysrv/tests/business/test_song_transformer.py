@@ -366,35 +366,35 @@ class TestSanitizeFilename:
 
 
 class TestGenerateS3SongKey:
-    """Tests for generate_s3_song_key()"""
+    """Tests for generate_s3_song_key() - NOTE: Keys do NOT include bucket name"""
 
     def test_generate_key_with_title(self):
         """Test generating S3 key with song title"""
         from business.song_transformer import generate_s3_song_key
 
         result = generate_s3_song_key("abc-123-def-456", "My Rock Song", 0, "mp3")
-        assert result == "songs/my-rock-song_abc-123/choice-0/audio.mp3"
+        assert result == "my-rock-song_abc-123/choice-0/audio.mp3"
 
     def test_generate_key_without_title(self):
         """Test generating S3 key without song title"""
         from business.song_transformer import generate_s3_song_key
 
         result = generate_s3_song_key("abc-123-def-456", None, 0, "mp3")
-        assert result == "songs/untitled_abc-123/choice-0/audio.mp3"
+        assert result == "untitled_abc-123/choice-0/audio.mp3"
 
     def test_generate_key_flac(self):
         """Test generating S3 key for FLAC file"""
         from business.song_transformer import generate_s3_song_key
 
         result = generate_s3_song_key("abc-123-def-456", "My Rock Song", 1, "flac")
-        assert result == "songs/my-rock-song_abc-123/choice-1/audio.flac"
+        assert result == "my-rock-song_abc-123/choice-1/audio.flac"
 
     def test_generate_key_stems(self):
         """Test generating S3 key for stems ZIP"""
         from business.song_transformer import generate_s3_song_key
 
         result = generate_s3_song_key("abc-123-def-456", "My Rock Song", 0, "stems")
-        assert result == "songs/my-rock-song_abc-123/choice-0/stems.zip"
+        assert result == "my-rock-song_abc-123/choice-0/stems.zip"
 
     def test_generate_key_short_song_id(self):
         """Test generating S3 key shortens song_id to 7 chars"""
@@ -402,14 +402,14 @@ class TestGenerateS3SongKey:
 
         long_id = "abc-123-def-456-ghi-789"
         result = generate_s3_song_key(long_id, "Epic Song", 0, "mp3")
-        assert result == "songs/epic-song_abc-123/choice-0/audio.mp3"
+        assert result == "epic-song_abc-123/choice-0/audio.mp3"
 
     def test_generate_key_special_chars_in_title(self):
         """Test generating S3 key sanitizes special characters"""
         from business.song_transformer import generate_s3_song_key
 
         result = generate_s3_song_key("abc-123", "Epic Song!!! (2024)", 0, "mp3")
-        assert result == "songs/epic-song-2024_abc-123/choice-0/audio.mp3"
+        assert result == "epic-song-2024_abc-123/choice-0/audio.mp3"
 
     def test_generate_key_multiple_choices(self):
         """Test generating S3 keys for multiple choices"""
@@ -419,6 +419,6 @@ class TestGenerateS3SongKey:
         result1 = generate_s3_song_key("abc-123", "Test Song", 1, "mp3")
         result2 = generate_s3_song_key("abc-123", "Test Song", 2, "mp3")
 
-        assert result0 == "songs/test-song_abc-123/choice-0/audio.mp3"
-        assert result1 == "songs/test-song_abc-123/choice-1/audio.mp3"
-        assert result2 == "songs/test-song_abc-123/choice-2/audio.mp3"
+        assert result0 == "test-song_abc-123/choice-0/audio.mp3"
+        assert result1 == "test-song_abc-123/choice-1/audio.mp3"
+        assert result2 == "test-song_abc-123/choice-2/audio.mp3"
