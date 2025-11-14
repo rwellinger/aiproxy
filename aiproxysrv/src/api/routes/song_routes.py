@@ -2,11 +2,16 @@
 Song Generation Routes mit MUREKA + Pydantic validation
 """
 
+from uuid import UUID
+
 from flask import Blueprint, jsonify, request
 from flask_pydantic import validate
+from sqlalchemy.orm import Session
 
-from api.auth_middleware import jwt_required
+from api.auth_middleware import get_current_user_id, jwt_required
 from api.controllers.song_controller import SongController
+from business.song_orchestrator import SongS3MigrationError
+from db.database import get_db
 from schemas.common_schemas import ErrorResponse
 from schemas.project_asset_schemas import AssignToProjectRequest
 from schemas.song_schemas import (
@@ -14,6 +19,7 @@ from schemas.song_schemas import (
     SongUpdateRequest,
     StemGenerateRequest,
 )
+from utils.logger import logger
 
 
 api_song_v1 = Blueprint("api_song_v1", __name__, url_prefix="/api/v1/song")
@@ -249,3 +255,185 @@ def assign_song_to_project(song_id: str, body: AssignToProjectRequest):
     except Exception as e:
         error_response = ErrorResponse(error=str(e))
         return jsonify(error_response.dict()), 500
+
+
+# ============================================================
+# S3 Proxy Endpoints (Lazy Migration from Mureka CDN)
+# ============================================================
+
+
+@api_song_v1.route("/choice/<choice_id>/mp3", methods=["GET"])
+@jwt_required
+def serve_choice_mp3(choice_id: str):
+    """
+    Serve song choice MP3 via backend proxy (lazy migration from Mureka to S3)
+
+    CRITICAL: This endpoint implements lazy migration pattern:
+    1. Check if file exists in S3 (mp3_s3_key)
+    2. If not, download from Mureka URL and upload to S3
+    3. Stream file from S3 to browser
+
+    Path Parameters:
+        - choice_id (UUID): Choice ID
+
+    Response:
+        200: Binary audio data (audio/mpeg)
+        401: {'error': 'Unauthorized'}
+        404: {'error': 'Choice not found' | 'MP3 not available'}
+        500: {'error': 'Failed to load MP3'}
+
+    Example:
+        GET /api/v1/song/choice/550e8400-e29b-41d4-a716-446655440000/mp3
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        from adapters.s3.s3_proxy_service import s3_proxy_service
+        from business.song_orchestrator import song_orchestrator
+        from config.settings import S3_SONGS_BUCKET
+
+        choice_uuid = UUID(choice_id)
+
+        logger.debug("Serving choice MP3", choice_id=choice_id, user_id=user_id)
+
+        # Get DB session
+        db: Session = next(get_db())
+        try:
+            # Lazy migration: Download from Mureka to S3 if needed
+            s3_key = song_orchestrator.migrate_choice_to_s3(db, str(choice_uuid), "mp3")
+
+            # Stream from S3 using generic proxy service
+            return s3_proxy_service.serve_resource(bucket=S3_SONGS_BUCKET, s3_key=s3_key, filename="song.mp3")
+
+        finally:
+            db.close()
+
+    except ValueError:
+        return jsonify({"error": "Invalid choice ID format"}), 400
+    except SongS3MigrationError as e:
+        logger.warning("MP3 migration failed", choice_id=choice_id, error=str(e))
+        return jsonify({"error": "MP3 not available"}), 404
+    except Exception as e:
+        logger.error("Error serving choice MP3", choice_id=choice_id, error=str(e), error_type=type(e).__name__)
+        return jsonify({"error": "Failed to load MP3"}), 500
+
+
+@api_song_v1.route("/choice/<choice_id>/flac", methods=["GET"])
+@jwt_required
+def serve_choice_flac(choice_id: str):
+    """
+    Serve song choice FLAC via backend proxy (lazy migration from Mureka to S3)
+
+    CRITICAL: This endpoint implements lazy migration pattern:
+    1. Check if file exists in S3 (flac_s3_key)
+    2. If not, download from Mureka URL and upload to S3
+    3. Stream file from S3 to browser
+
+    Path Parameters:
+        - choice_id (UUID): Choice ID
+
+    Response:
+        200: Binary audio data (audio/flac)
+        401: {'error': 'Unauthorized'}
+        404: {'error': 'Choice not found' | 'FLAC not available'}
+        500: {'error': 'Failed to load FLAC'}
+
+    Example:
+        GET /api/v1/song/choice/550e8400-e29b-41d4-a716-446655440000/flac
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        from adapters.s3.s3_proxy_service import s3_proxy_service
+        from business.song_orchestrator import song_orchestrator
+        from config.settings import S3_SONGS_BUCKET
+
+        choice_uuid = UUID(choice_id)
+
+        logger.debug("Serving choice FLAC", choice_id=choice_id, user_id=user_id)
+
+        # Get DB session
+        db: Session = next(get_db())
+        try:
+            # Lazy migration: Download from Mureka to S3 if needed
+            s3_key = song_orchestrator.migrate_choice_to_s3(db, str(choice_uuid), "flac")
+
+            # Stream from S3 using generic proxy service
+            return s3_proxy_service.serve_resource(bucket=S3_SONGS_BUCKET, s3_key=s3_key, filename="song.flac")
+
+        finally:
+            db.close()
+
+    except ValueError:
+        return jsonify({"error": "Invalid choice ID format"}), 400
+    except SongS3MigrationError as e:
+        logger.warning("FLAC migration failed", choice_id=choice_id, error=str(e))
+        return jsonify({"error": "FLAC not available"}), 404
+    except Exception as e:
+        logger.error("Error serving choice FLAC", choice_id=choice_id, error=str(e), error_type=type(e).__name__)
+        return jsonify({"error": "Failed to load FLAC"}), 500
+
+
+@api_song_v1.route("/choice/<choice_id>/stems", methods=["GET"])
+@jwt_required
+def serve_choice_stems(choice_id: str):
+    """
+    Serve song choice stems ZIP via backend proxy (lazy migration from Mureka to S3)
+
+    CRITICAL: This endpoint implements lazy migration pattern:
+    1. Check if file exists in S3 (stem_s3_key)
+    2. If not, download from Mureka URL and upload to S3
+    3. Stream file from S3 to browser
+
+    Path Parameters:
+        - choice_id (UUID): Choice ID
+
+    Response:
+        200: Binary ZIP data (application/zip)
+        401: {'error': 'Unauthorized'}
+        404: {'error': 'Choice not found' | 'Stems not available'}
+        500: {'error': 'Failed to load stems'}
+
+    Example:
+        GET /api/v1/song/choice/550e8400-e29b-41d4-a716-446655440000/stems
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        from adapters.s3.s3_proxy_service import s3_proxy_service
+        from business.song_orchestrator import song_orchestrator
+        from config.settings import S3_SONGS_BUCKET
+
+        choice_uuid = UUID(choice_id)
+
+        logger.debug("Serving choice stems", choice_id=choice_id, user_id=user_id)
+
+        # Get DB session
+        db: Session = next(get_db())
+        try:
+            # Lazy migration: Download from Mureka to S3 if needed
+            s3_key = song_orchestrator.migrate_choice_to_s3(db, str(choice_uuid), "stems")
+
+            # Stream from S3 using generic proxy service
+            return s3_proxy_service.serve_resource(bucket=S3_SONGS_BUCKET, s3_key=s3_key, filename="stems.zip")
+
+        finally:
+            db.close()
+
+    except ValueError:
+        return jsonify({"error": "Invalid choice ID format"}), 400
+    except SongS3MigrationError as e:
+        logger.warning("Stems migration failed", choice_id=choice_id, error=str(e))
+        return jsonify({"error": "Stems not available"}), 404
+    except Exception as e:
+        logger.error("Error serving choice stems", choice_id=choice_id, error=str(e), error_type=type(e).__name__)
+        return jsonify({"error": "Failed to load stems"}), 500

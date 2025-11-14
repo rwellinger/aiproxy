@@ -6,6 +6,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from business.song_project_orchestrator import song_project_orchestrator
+from db.song_project_service import song_project_service
 from schemas.common_schemas import PaginationMeta
 from schemas.song_project_schemas import (
     BatchDeleteRequest,
@@ -596,12 +597,9 @@ class SongProjectController:
                 return {"error": "Project not found or unauthorized"}, 404
 
             # Query files with missing/wrong MIME types
-            query = (
-                db.query(SongProjectFile)
-                .filter(
-                    SongProjectFile.project_id == project_uuid,
-                    (SongProjectFile.mime_type.is_(None) | (SongProjectFile.mime_type == "application/octet-stream")),
-                )
+            query = db.query(SongProjectFile).filter(
+                SongProjectFile.project_id == project_uuid,
+                (SongProjectFile.mime_type.is_(None) | (SongProjectFile.mime_type == "application/octet-stream")),
             )
 
             # Filter by folder if specified

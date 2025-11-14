@@ -27,7 +27,11 @@ export class ApiConfigService {
             update: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}`,
             updateChoiceRating: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/rating`,
             bulkDelete: `${this.baseUrl}/api/v1/song/bulk-delete`,
-            assignToProject: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}/assign-to-project`
+            assignToProject: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}/assign-to-project`,
+            // S3 Proxy endpoints (lazy migration from Mureka CDN)
+            choiceMp3: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/mp3`,
+            choiceFlac: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/flac`,
+            choiceStems: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/stems`
         },
         image: {
             generate: `${this.baseUrl}/api/v1/image/generate`,

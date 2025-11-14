@@ -2,11 +2,15 @@
 
 from typing import Any
 
+import requests
+
 from business.bulk_delete_transformer import BulkDeleteTransformer, DeleteResult
 from business.song_mureka_transformer import SongMurekaTransformer
-from business.song_transformer import SongTransformer
+from business.song_transformer import SongTransformer, generate_s3_song_key
 from business.song_validator import SongValidator
-from db.song_service import song_service
+from config.settings import S3_SONGS_BUCKET
+from db.song_service import get_choice_by_id_with_song, song_service, update_choice_s3_key
+from infrastructure.storage import get_storage
 from utils.logger import logger
 
 
@@ -16,8 +20,18 @@ class SongOrchestratorError(Exception):
     pass
 
 
+class SongS3MigrationError(SongOrchestratorError):
+    """Exception raised when S3 migration fails"""
+
+    pass
+
+
 class SongOrchestrator:
     """Orchestrates song operations (calls transformers + repository)"""
+
+    def __init__(self):
+        """Initialize orchestrator with S3 storage"""
+        self.s3_storage = get_storage(bucket=S3_SONGS_BUCKET)
 
     def get_songs_with_pagination(
         self,
@@ -350,3 +364,123 @@ class SongOrchestrator:
         )
 
         return result
+
+    def migrate_choice_to_s3(self, db, choice_id: str, file_type: str) -> str:
+        """
+        Lazy migration: Download file from Mureka URL to S3 if not already migrated
+
+        This is the core lazy migration logic - checks if s3_key exists,
+        if not downloads from mureka_url and uploads to S3.
+
+        Args:
+            db: Database session
+            choice_id: UUID of the song choice
+            file_type: File type to migrate ('mp3', 'flac', 'stems')
+
+        Returns:
+            S3 key of the migrated file
+
+        Raises:
+            SongS3MigrationError: If migration fails (choice not found, no URL, download fails, etc.)
+        """
+        # 1. Load choice with song relationship from DB
+        choice = get_choice_by_id_with_song(db, choice_id)
+        if not choice:
+            raise SongS3MigrationError(f"Choice not found: {choice_id}")
+
+        # 2. Check if already migrated to S3
+        existing_s3_key = self._get_existing_s3_key(choice, file_type)
+        if existing_s3_key:
+            logger.debug(
+                "Choice already migrated to S3",
+                choice_id=choice_id,
+                file_type=file_type,
+                s3_key=existing_s3_key[:50] + "...",
+            )
+            return existing_s3_key
+
+        # 3. Get Mureka URL for download
+        mureka_url = self._get_mureka_url(choice, file_type)
+        if not mureka_url:
+            raise SongS3MigrationError(f"No Mureka URL found for choice {choice_id}, file_type={file_type}")
+
+        # 4. Download file from Mureka CDN
+        logger.info("Downloading from Mureka", choice_id=choice_id, file_type=file_type, url_preview=mureka_url[:80])
+        try:
+            file_data = self._download_from_url(mureka_url)
+        except Exception as e:
+            raise SongS3MigrationError(f"Failed to download from Mureka: {str(e)}") from e
+
+        # 5. Generate S3 key (readable format with title + song_id)
+        song_title = choice.song.title if choice.song else None
+        song_id = str(choice.song.id) if choice.song else str(choice.song_id)
+        choice_index = choice.choice_index if choice.choice_index is not None else 0
+
+        s3_key = generate_s3_song_key(song_id, song_title, choice_index, file_type)
+
+        # 6. Upload to S3
+        logger.info("Uploading to S3", choice_id=choice_id, file_type=file_type, s3_key=s3_key)
+        try:
+            content_type = self._get_content_type(file_type)
+            self.s3_storage.upload(file_data, s3_key, content_type=content_type)
+        except Exception as e:
+            raise SongS3MigrationError(f"Failed to upload to S3: {str(e)}") from e
+
+        # 7. Update DB with new s3_key
+        success = update_choice_s3_key(db, choice_id, file_type, s3_key)
+        if not success:
+            logger.warning("Failed to update DB with s3_key, but file uploaded", choice_id=choice_id, s3_key=s3_key)
+
+        logger.info(
+            "Choice migrated to S3 successfully",
+            choice_id=choice_id,
+            file_type=file_type,
+            s3_key=s3_key,
+            file_size=len(file_data),
+        )
+        return s3_key
+
+    def _get_existing_s3_key(self, choice, file_type: str) -> str | None:
+        """Get existing S3 key if already migrated"""
+        s3_key_map = {
+            "mp3": choice.mp3_s3_key,
+            "flac": choice.flac_s3_key,
+            "stems": choice.stem_s3_key,
+        }
+        return s3_key_map.get(file_type)
+
+    def _get_mureka_url(self, choice, file_type: str) -> str | None:
+        """Get Mureka URL for download"""
+        url_map = {
+            "mp3": choice.mp3_url,
+            "flac": choice.flac_url,
+            "stems": choice.stem_url,
+        }
+        return url_map.get(file_type)
+
+    def _download_from_url(self, url: str, timeout: int = 300) -> bytes:
+        """
+        Download file from URL (Mureka CDN)
+
+        Args:
+            url: URL to download from
+            timeout: Request timeout in seconds (default 300s = 5min for large files)
+
+        Returns:
+            File content as bytes
+
+        Raises:
+            requests.RequestException: If download fails
+        """
+        response = requests.get(url, timeout=timeout, stream=True)
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx, 5xx)
+        return response.content
+
+    def _get_content_type(self, file_type: str) -> str:
+        """Get MIME type for file type"""
+        content_types = {
+            "mp3": "audio/mpeg",
+            "flac": "audio/flac",
+            "stems": "application/zip",
+        }
+        return content_types.get(file_type, "application/octet-stream")

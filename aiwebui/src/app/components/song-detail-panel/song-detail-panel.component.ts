@@ -199,13 +199,17 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
         return option?.label || this.song.workflow;
     }
 
-    // Audio methods - now emits events to parent
-    onPlayAudio(url: string, id: string, choiceNumber: number) {
+    // Audio methods - now emits events to parent (using backend proxy URLs)
+    onPlayAudio(choiceId: string, id: string, choiceNumber: number) {
+        // Use backend proxy endpoint for lazy S3 migration
+        const url = this.apiConfigService.endpoints.song.choiceMp3(choiceId);
         this.playAudio.emit({ url, id, choiceNumber });
     }
 
-    onDownloadFlac(url: string) {
-        this.downloadFlac.emit(url);
+    onDownloadFlac(choiceId: string) {
+        // Use backend proxy endpoint for lazy S3 migration
+        const url = this.apiConfigService.endpoints.song.choiceFlac(choiceId);
+        window.open(url, '_blank');
     }
 
     async onGenerateStem(choiceId: string) {
@@ -242,8 +246,10 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     }
 
 
-    onDownloadStems(url: string) {
-        this.downloadStems.emit(url);
+    onDownloadStems(choiceId: string) {
+        // Use backend proxy endpoint for lazy S3 migration
+        const url = this.apiConfigService.endpoints.song.choiceStems(choiceId);
+        window.open(url, '_blank');
     }
 
     async onUpdateRating(choiceId: string, rating: number | null) {

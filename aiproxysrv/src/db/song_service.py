@@ -790,6 +790,87 @@ class SongService:
             )
             return None
 
+    def get_choice_by_id_with_song(self, db, choice_id: str) -> SongChoice | None:
+        """
+        Get a specific choice by ID with song relationship (for orchestrator use)
+
+        CRUD ONLY - No business logic!
+
+        Args:
+            db: Database session
+            choice_id: UUID of the choice
+
+        Returns:
+            SongChoice instance with song relationship loaded, or None if not found
+        """
+        try:
+            from sqlalchemy.orm import joinedload
+
+            choice = (
+                db.query(SongChoice).options(joinedload(SongChoice.song)).filter(SongChoice.id == choice_id).first()
+            )
+            if choice:
+                logger.debug("Choice with song retrieved", choice_id=str(choice_id))
+            else:
+                logger.debug("Choice not found", choice_id=str(choice_id))
+            return choice
+        except Exception as e:
+            logger.error(
+                "error_getting_choice_by_id_with_song",
+                choice_id=str(choice_id),
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return None
+
+    def update_choice_s3_key(self, db, choice_id: str, file_type: str, s3_key: str) -> bool:
+        """
+        Update S3 key for a specific file type in song choice
+
+        CRUD ONLY - No business logic!
+
+        Args:
+            db: Database session
+            choice_id: UUID of the choice
+            file_type: File type ('mp3', 'flac', 'stems')
+            s3_key: S3 storage key
+
+        Returns:
+            True if updated successfully, False otherwise
+        """
+        try:
+            choice = db.query(SongChoice).filter(SongChoice.id == choice_id).first()
+            if not choice:
+                logger.debug("Choice not found for update", choice_id=str(choice_id))
+                return False
+
+            # Update corresponding s3_key field
+            if file_type == "mp3":
+                choice.mp3_s3_key = s3_key
+            elif file_type == "flac":
+                choice.flac_s3_key = s3_key
+            elif file_type == "stems":
+                choice.stem_s3_key = s3_key
+            else:
+                logger.warning("Invalid file type for s3_key update", file_type=file_type)
+                return False
+
+            db.commit()
+            logger.info(
+                "choice_s3_key_updated", choice_id=str(choice_id), file_type=file_type, s3_key=s3_key[:50] + "..."
+            )
+            return True
+        except Exception as e:
+            logger.error(
+                "error_updating_choice_s3_key",
+                choice_id=str(choice_id),
+                file_type=file_type,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            db.rollback()
+            return False
+
 
 # Global service instance
 song_service = SongService()
@@ -804,3 +885,13 @@ def get_song_by_id(db, song_id):
 def update_song(db, song_id, update_data):
     """Wrapper function for service method"""
     return song_service.update_song(db, song_id, update_data)
+
+
+def get_choice_by_id_with_song(db, choice_id):
+    """Wrapper function for service method"""
+    return song_service.get_choice_by_id_with_song(db, choice_id)
+
+
+def update_choice_s3_key(db, choice_id, file_type, s3_key):
+    """Wrapper function for service method"""
+    return song_service.update_choice_s3_key(db, choice_id, file_type, s3_key)
