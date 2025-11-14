@@ -14,7 +14,7 @@ import { MatDialog } from '@angular/material/dialog';
 
 import { SongReleaseService } from '../../services/business/song-release.service';
 import { NotificationService } from '../../services/ui/notification.service';
-import { ImageBlobService } from '../../services/ui/image-blob.service';
+import { ResourceBlobService } from '../../services/ui/resource-blob.service';
 import { AssignToProjectDialogComponent } from '../../dialogs/assign-to-project-dialog/assign-to-project-dialog.component';
 import { ReleaseType, ReleaseStatus, SongRelease } from '../../models/song-release.model';
 
@@ -69,7 +69,7 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private releaseService = inject(SongReleaseService);
   private notificationService = inject(NotificationService);
-  private imageBlobService = inject(ImageBlobService);
+  private resourceBlobService = inject(ResourceBlobService);
   private translate = inject(TranslateService);
   private dialog = inject(MatDialog);
 
@@ -165,7 +165,7 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
       // Load cover preview if exists
       // CRITICAL: Use blob URL for authenticated image access
       if (this.selectedRelease.cover_url) {
-        this.imageBlobService.getImageBlobUrl(this.selectedRelease.cover_url)
+        this.resourceBlobService.getResourceBlobUrl(this.selectedRelease.cover_url)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (blobUrl) => {

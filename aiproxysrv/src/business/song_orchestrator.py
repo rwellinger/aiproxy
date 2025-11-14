@@ -484,3 +484,7 @@ class SongOrchestrator:
             "stems": "application/zip",
         }
         return content_types.get(file_type, "application/octet-stream")
+
+
+# Global instance for use in routes
+song_orchestrator = SongOrchestrator()

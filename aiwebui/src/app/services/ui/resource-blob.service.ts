@@ -3,64 +3,73 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, map, catchError, shareReplay } from 'rxjs';
 import { ApiConfigService } from '../config/api-config.service';
 
+/**
+ * Generic service for loading resources (images, audio, etc.) with JWT authentication.
+ *
+ * Browser elements like <img>, <audio>, and window.open() cannot send JWT headers.
+ * This service downloads resources via HttpClient (with auth headers) and creates
+ * blob URLs that the browser can use.
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class ImageBlobService {
+export class ResourceBlobService {
   private http = inject(HttpClient);
   private apiConfig = inject(ApiConfigService);
   private blobCache = new Map<string, Observable<string>>();
 
   /**
-   * Get blob URL for image with authentication headers
+   * Get blob URL for any resource with authentication headers.
+   * Use this for <img> src, <audio> src, etc.
    */
-  getImageBlobUrl(imageUrl: string): Observable<string> {
-    if (!imageUrl) {
+  getResourceBlobUrl(resourceUrl: string): Observable<string> {
+    if (!resourceUrl) {
       return of('');
     }
 
     // Check cache first
-    if (this.blobCache.has(imageUrl)) {
-      return this.blobCache.get(imageUrl)!;
+    if (this.blobCache.has(resourceUrl)) {
+      return this.blobCache.get(resourceUrl)!;
     }
 
-    // Build absolute URL if imageUrl is relative
-    const absoluteUrl = imageUrl.startsWith('http')
-      ? imageUrl
-      : `${this.apiConfig.getBaseUrl()}${imageUrl}`;
+    // Build absolute URL if resourceUrl is relative
+    const absoluteUrl = resourceUrl.startsWith('http')
+      ? resourceUrl
+      : `${this.apiConfig.getBaseUrl()}${resourceUrl}`;
 
-    // Create observable for authenticated image fetch
+    // Create observable for authenticated resource fetch
     const blobUrl$ = this.http.get(absoluteUrl, {
       responseType: 'blob',
       // HttpClient will automatically add auth headers via interceptor
     }).pipe(
       map((blob: Blob) => {
-        // Create blob URL for display
+        // Create blob URL for display/playback
         return URL.createObjectURL(blob);
       }),
       catchError(error => {
-        console.error('Failed to load image:', imageUrl, error);
-        // Return empty string on error - image will show broken
+        console.error('Failed to load resource:', resourceUrl, error);
+        // Return empty string on error
         return of('');
       }),
       shareReplay(1) // Cache the result
     );
 
     // Cache the observable
-    this.blobCache.set(imageUrl, blobUrl$);
+    this.blobCache.set(resourceUrl, blobUrl$);
     return blobUrl$;
   }
 
   /**
-   * Download image with authentication
+   * Download resource with authentication.
+   * Triggers browser download dialog.
    */
-  downloadImage(imageUrl: string, filename?: string): void {
-    if (!imageUrl) return;
+  downloadResource(resourceUrl: string, filename?: string): void {
+    if (!resourceUrl) return;
 
-    // Build absolute URL if imageUrl is relative
-    const absoluteUrl = imageUrl.startsWith('http')
-      ? imageUrl
-      : `${this.apiConfig.getBaseUrl()}${imageUrl}`;
+    // Build absolute URL if resourceUrl is relative
+    const absoluteUrl = resourceUrl.startsWith('http')
+      ? resourceUrl
+      : `${this.apiConfig.getBaseUrl()}${resourceUrl}`;
 
     this.http.get(absoluteUrl, {
       responseType: 'blob'
@@ -70,7 +79,7 @@ export class ImageBlobService {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = filename || this.extractFilename(imageUrl);
+        link.download = filename || this.extractFilename(resourceUrl);
 
         // Trigger download
         document.body.appendChild(link);
@@ -81,7 +90,7 @@ export class ImageBlobService {
         URL.revokeObjectURL(url);
       },
       error: (error) => {
-        console.error('Failed to download image:', error);
+        console.error('Failed to download resource:', error);
       }
     });
   }
@@ -102,26 +111,26 @@ export class ImageBlobService {
   }
 
   /**
-   * Remove specific image from cache
+   * Remove specific resource from cache
    */
-  clearImageFromCache(imageUrl: string): void {
-    const obs = this.blobCache.get(imageUrl);
+  clearResourceFromCache(resourceUrl: string): void {
+    const obs = this.blobCache.get(resourceUrl);
     if (obs) {
       obs.subscribe(url => {
         if (url) {
           URL.revokeObjectURL(url);
         }
       });
-      this.blobCache.delete(imageUrl);
+      this.blobCache.delete(resourceUrl);
     }
   }
 
   private extractFilename(url: string): string {
     try {
       const pathname = new URL(url).pathname;
-      return pathname.split('/').pop() || 'image.png';
+      return pathname.split('/').pop() || 'download';
     } catch {
-      return 'image.png';
+      return 'download';
     }
   }
 }

@@ -13,7 +13,7 @@ import {FormsModule} from '@angular/forms';
 import {HttpClient} from '@angular/common/http';
 import {Router} from '@angular/router';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
-import {ImageBlobService} from '../../services/ui/image-blob.service';
+import {ResourceBlobService} from '../../services/ui/resource-blob.service';
 import {ImageService} from '../../services/business/image.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
 import {NotificationService} from '../../services/ui/notification.service';
@@ -109,7 +109,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('searchInput') searchInput!: ElementRef;
 
     private http = inject(HttpClient);
-    private imageBlobService = inject(ImageBlobService);
+    private resourceBlobService = inject(ResourceBlobService);
     private imageService = inject(ImageService);
     private apiConfig = inject(ApiConfigService);
     private notificationService = inject(NotificationService);
@@ -244,7 +244,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Load blob URL for modal display
         if (image?.url) {
-            this.imageBlobService.getImageBlobUrl(image.url).subscribe({
+            this.resourceBlobService.getResourceBlobUrl(image.url).subscribe({
                 next: (blobUrl) => {
                     this.selectedImageBlobUrl = blobUrl;
                 },
@@ -304,9 +304,9 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     downloadImage(imageUrl: string) {
-        // Use authenticated download via ImageBlobService
+        // Use authenticated download via ResourceBlobService
         const filename = this.getImageFilename();
-        this.imageBlobService.downloadImage(imageUrl, filename);
+        this.resourceBlobService.downloadResource(imageUrl, filename);
     }
 
     private getImageFilename(): string {

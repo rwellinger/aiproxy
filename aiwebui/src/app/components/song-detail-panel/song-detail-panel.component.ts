@@ -7,6 +7,7 @@ import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {SongService} from '../../services/business/song.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
+import {ResourceBlobService} from '../../services/ui/resource-blob.service';
 import {MUSIC_STYLE_CATEGORIES} from '../../models/music-style-chooser.model';
 
 @Component({
@@ -55,6 +56,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     private songService = inject(SongService);
     private notificationService = inject(NotificationService);
     private apiConfigService = inject(ApiConfigService);
+    private resourceBlobService = inject(ResourceBlobService);
     private http = inject(HttpClient);
     private translate = inject(TranslateService);
 
@@ -199,17 +201,29 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
         return option?.label || this.song.workflow;
     }
 
-    // Audio methods - now emits events to parent (using backend proxy URLs)
+    // Audio methods - emits events to parent (using authenticated blob URLs)
     onPlayAudio(choiceId: string, id: string, choiceNumber: number) {
-        // Use backend proxy endpoint for lazy S3 migration
-        const url = this.apiConfigService.endpoints.song.choiceMp3(choiceId);
-        this.playAudio.emit({ url, id, choiceNumber });
+        // Use backend proxy endpoint with JWT auth → Convert to blob URL
+        const backendUrl = this.apiConfigService.endpoints.song.choiceMp3(choiceId);
+
+        // Load blob URL with authentication and emit to parent
+        this.resourceBlobService.getResourceBlobUrl(backendUrl).subscribe({
+            next: (blobUrl) => {
+                if (blobUrl) {
+                    this.playAudio.emit({ url: blobUrl, id, choiceNumber });
+                }
+            },
+            error: (error) => {
+                console.error('Failed to load audio:', error);
+                this.notificationService.error(this.translate.instant('songDetailPanel.errors.loadAudio'));
+            }
+        });
     }
 
     onDownloadFlac(choiceId: string) {
-        // Use backend proxy endpoint for lazy S3 migration
-        const url = this.apiConfigService.endpoints.song.choiceFlac(choiceId);
-        window.open(url, '_blank');
+        // Use authenticated download via ResourceBlobService
+        const backendUrl = this.apiConfigService.endpoints.song.choiceFlac(choiceId);
+        this.resourceBlobService.downloadResource(backendUrl, `song-choice-${choiceId}.flac`);
     }
 
     async onGenerateStem(choiceId: string) {
@@ -247,9 +261,9 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
 
 
     onDownloadStems(choiceId: string) {
-        // Use backend proxy endpoint for lazy S3 migration
-        const url = this.apiConfigService.endpoints.song.choiceStems(choiceId);
-        window.open(url, '_blank');
+        // Use authenticated download via ResourceBlobService
+        const backendUrl = this.apiConfigService.endpoints.song.choiceStems(choiceId);
+        this.resourceBlobService.downloadResource(backendUrl, `song-choice-${choiceId}-stems.zip`);
     }
 
     async onUpdateRating(choiceId: string, rating: number | null) {

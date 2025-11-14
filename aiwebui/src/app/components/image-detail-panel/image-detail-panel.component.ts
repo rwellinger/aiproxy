@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { ImageBlobService } from '../../services/ui/image-blob.service';
+import { ResourceBlobService } from '../../services/ui/resource-blob.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import { ApiConfigService } from '../../services/config/api-config.service';
 import { ChatService } from '../../services/config/chat.service';
@@ -18,7 +18,7 @@ import { ProgressService } from '../../services/ui/progress.service';
   styleUrl: './image-detail-panel.component.scss'
 })
 export class ImageDetailPanelComponent implements OnInit, OnChanges {
-  private imageBlobService = inject(ImageBlobService);
+  private resourceBlobService = inject(ResourceBlobService);
   private notificationService = inject(NotificationService);
   private apiConfigService = inject(ApiConfigService);
   private http = inject(HttpClient);
@@ -183,7 +183,7 @@ export class ImageDetailPanelComponent implements OnInit, OnChanges {
     const imageUrl = this.image?.display_url || this.image?.url;
 
     if (imageUrl) {
-      this.imageBlobService.getImageBlobUrl(imageUrl).subscribe({
+      this.resourceBlobService.getResourceBlobUrl(imageUrl).subscribe({
         next: (blobUrl) => {
           this.imageBlobUrl = blobUrl;
         },
