@@ -208,6 +208,52 @@ def check_token_expiry(config):
         return True
 
 
+def check_storage_health(config):
+    """
+    Check if S3 storage backend (MinIO) is reachable
+
+    CRITICAL Pre-Flight Check:
+    - Prevents 600s timeout per batch when MinIO is down (e.g., NAS auto-shutdown at 23:30)
+    - Prevents user confusion (seeing "success" but nothing uploaded)
+    - Prevents inconsistent state (DB records without S3 files)
+
+    Returns:
+        True if storage is healthy, False otherwise
+    """
+    try:
+        url = f"{config['api_url']}/api/v1/health/storage"
+        response = requests.get(
+            url,
+            headers={"Authorization": f"Bearer {config['jwt_token']}"},
+            verify=config.get("ssl_verify", False),
+            timeout=5,  # 5s total timeout (backend has 2s, plus network overhead)
+        )
+
+        if response.status_code == 200:
+            return True
+        elif response.status_code == 503:
+            # Storage backend is down
+            data = response.json()
+            message = data.get("message", "Storage backend unavailable")
+            console.print(f"[red]✗ Storage backend check failed:[/red] {message}")
+            console.print("[yellow]→ Is the NAS running? (auto-shutdown at 23:30)[/yellow]")
+            return False
+        else:
+            console.print(f"[red]✗ Unexpected health check response: HTTP {response.status_code}[/red]")
+            return False
+
+    except requests.exceptions.Timeout:
+        console.print("[red]✗ Storage health check timeout[/red]")
+        console.print("[yellow]→ Backend or MinIO may be down[/yellow]")
+        return False
+    except requests.exceptions.ConnectionError:
+        console.print(f"[red]✗ Cannot reach backend: {config['api_url']}[/red]")
+        return False
+    except Exception as e:
+        console.print(f"[red]✗ Storage health check error: {str(e)}[/red]")
+        return False
+
+
 # ============================================================
 # CLI Commands
 # ============================================================
@@ -317,6 +363,14 @@ def upload(project_id, folder_id, local_path, debug):
     if not check_token_expiry(config):
         console.print("[yellow]Run: aiproxy-cli login[/yellow]")
         sys.exit(1)
+
+    # CRITICAL: Check storage backend health BEFORE scanning files
+    # Prevents 600s timeout per batch when MinIO is down (e.g., NAS auto-shutdown at 23:30)
+    console.print("[bold]Checking storage backend...[/bold]")
+    if not check_storage_health(config):
+        console.print("[red]✗ Upload aborted: Storage backend not reachable[/red]")
+        sys.exit(1)
+    console.print("[green]✓ Storage backend OK[/green]\n")
 
     # Check if project is archived
     try:
@@ -551,6 +605,14 @@ def download(project_id, folder_id, local_path):
         console.print("[yellow]Run: aiproxy-cli login[/yellow]")
         sys.exit(1)
 
+    # CRITICAL: Check storage backend health BEFORE fetching file list
+    # Prevents 600s timeout per file when MinIO is down
+    console.print("[bold]Checking storage backend...[/bold]")
+    if not check_storage_health(config):
+        console.print("[red]✗ Download aborted: Storage backend not reachable[/red]")
+        sys.exit(1)
+    console.print("[green]✓ Storage backend OK[/green]\n")
+
     # Fetch file list from API
     url = f"{config['api_url']}/api/v1/song-projects/{project_id}/folders/{folder_id}/files"
     headers = {"Authorization": f"Bearer {config['jwt_token']}"}
@@ -715,6 +777,14 @@ def clone(project_id, local_path, create_dir):
     if not check_token_expiry(config):
         console.print("[yellow]Run: aiproxy-cli login[/yellow]")
         sys.exit(1)
+
+    # CRITICAL: Check storage backend health BEFORE fetching project structure
+    # Clone downloads entire project - prevents timeout-hell when MinIO is down
+    console.print("[bold]Checking storage backend...[/bold]")
+    if not check_storage_health(config):
+        console.print("[red]✗ Clone aborted: Storage backend not reachable[/red]")
+        sys.exit(1)
+    console.print("[green]✓ Storage backend OK[/green]\n")
 
     # Fetch complete project structure from API
     url = f"{config['api_url']}/api/v1/song-projects/{project_id}/files/all"
@@ -916,6 +986,17 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
     if not check_token_expiry(config):
         console.print("[yellow]Run: aiproxy-cli login[/yellow]")
         sys.exit(1)
+
+    # CRITICAL: Check storage backend health BEFORE scanning files
+    # Mirror is ESPECIALLY dangerous when MinIO is down:
+    # - Could delete files from DB but not from S3 → Inconsistent state!
+    # - Prevents 600s timeout per batch (NAS auto-shutdown at 23:30)
+    console.print("[bold]Checking storage backend...[/bold]")
+    if not check_storage_health(config):
+        console.print("[red]✗ Mirror aborted: Storage backend not reachable[/red]")
+        console.print("[yellow]→ Mirror requires storage for upload AND delete operations[/yellow]")
+        sys.exit(1)
+    console.print("[green]✓ Storage backend OK[/green]\n")
 
     # Check if project is archived
     try:

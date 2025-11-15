@@ -44,7 +44,14 @@ class SongProjectOrchestrator:
     def __init__(self):
         """Initialize orchestrator with services"""
         self.db_service = song_project_service
-        self.storage = get_storage(bucket=S3_SONG_PROJECTS_BUCKET)
+        self._storage = None  # Lazy init to allow server startup when MinIO is down
+
+    @property
+    def storage(self):
+        """Lazy-load S3 storage (only when first accessed)"""
+        if self._storage is None:
+            self._storage = get_storage(bucket=S3_SONG_PROJECTS_BUCKET)
+        return self._storage
 
     def create_project_with_structure(
         self,

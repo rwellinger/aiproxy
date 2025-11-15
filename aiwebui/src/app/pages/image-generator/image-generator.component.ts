@@ -6,6 +6,7 @@ import {firstValueFrom} from 'rxjs';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import {ResourceBlobService} from '../../services/ui/resource-blob.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
+import {HealthService} from '../../services/config/health.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {ImageService} from '../../services/business/image.service';
 import {ChatService} from '../../services/config/chat.service';
@@ -48,6 +49,10 @@ export class ImageGeneratorComponent implements OnInit {
     generatedImageUrl = '';
     generatedImageBlobUrl = '';
     showImageModal = false;
+
+    // Storage health state (preventive UX)
+    isStorageHealthy = true;
+    isCheckingStorage = true;
     generatedImageId: string | null = null;
     generatedImageData: any = null;
 
@@ -121,6 +126,7 @@ export class ImageGeneratorComponent implements OnInit {
     private fb = inject(FormBuilder);
     private http = inject(HttpClient);
     private apiConfig = inject(ApiConfigService);
+    private healthService = inject(HealthService);
     private notificationService = inject(NotificationService);
     private imageService = inject(ImageService);
     private chatService = inject(ChatService);
@@ -187,6 +193,10 @@ export class ImageGeneratorComponent implements OnInit {
         this.detailLevel.valueChanges.subscribe(() => this.saveStylePreferences());
         this.enhanceQuality.valueChanges.subscribe(() => this.saveStylePreferences());
 
+        // CRITICAL: Check storage health on page load (preventive UX)
+        // Disables generate button if MinIO is down (prevents wasted API credits)
+        this.checkStorageHealth();
+
         // Watch title changes → Reset composition if album-cover but no title
         this.promptForm.get('title')?.valueChanges.subscribe(title => {
             if (!title?.trim() && this.composition.value === 'album-cover') {
@@ -194,6 +204,22 @@ export class ImageGeneratorComponent implements OnInit {
                 this.notificationService.info(this.translate.instant('imageGenerator.albumCoverRequiresTitle'));
             }
         });
+    }
+
+    /**
+     * Check storage health on component init
+     * Prevents users from wasting API credits when storage is unavailable
+     */
+    private async checkStorageHealth() {
+        this.isCheckingStorage = true;
+        try {
+            this.isStorageHealthy = await firstValueFrom(this.healthService.checkStorage());
+        } catch (error) {
+            console.warn('[ImageGenerator] Storage health check failed:', error);
+            this.isStorageHealthy = false;
+        } finally {
+            this.isCheckingStorage = false;
+        }
     }
 
     async onSubmit() {

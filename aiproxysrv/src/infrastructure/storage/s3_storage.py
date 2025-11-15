@@ -13,12 +13,13 @@ from utils.logger import logger
 class S3Storage(StorageInterface):
     """S3-compatible storage implementation (works with MinIO, AWS S3, Backblaze B2, Wasabi)"""
 
-    def __init__(self, bucket: str | None = None):
+    def __init__(self, bucket: str | None = None, skip_bucket_check: bool = False):
         """
         Initialize S3 client
 
         Args:
             bucket: Bucket name (optional). If None, uses S3_BUCKET from config.
+            skip_bucket_check: If True, skip bucket existence check (for health checks or when MinIO might be down)
         """
         self.s3_client = boto3.client(
             "s3",
@@ -29,8 +30,9 @@ class S3Storage(StorageInterface):
         )
         self.bucket = bucket or S3_BUCKET
 
-        # Ensure bucket exists
-        self._ensure_bucket_exists()
+        # Ensure bucket exists (skip if explicitly disabled for graceful degradation)
+        if not skip_bucket_check:
+            self._ensure_bucket_exists()
 
     def _ensure_bucket_exists(self):
         """Create bucket if it doesn't exist"""
@@ -147,3 +149,60 @@ class S3Storage(StorageInterface):
         except ClientError as e:
             logger.error("S3 move failed", source=source_key, dest=dest_key, error=str(e))
             return False
+
+    def health_check(self, timeout: int = 2) -> tuple[bool, str]:
+        """
+        Quick health check for S3 storage backend (MinIO/AWS S3)
+
+        Args:
+            timeout: Connection timeout in seconds (default: 2s for fail-fast)
+
+        Returns:
+            Tuple of (is_healthy: bool, message: str)
+            - (True, "OK") if storage is reachable
+            - (False, error_message) if storage is down/unreachable
+
+        Example:
+            >>> storage = S3Storage()
+            >>> healthy, msg = storage.health_check()
+            >>> if not healthy:
+            ...     print(f"Storage down: {msg}")
+        """
+        try:
+            # Create temporary client with short timeout for health check
+            # (don't use self.s3_client to avoid affecting normal operations)
+            from botocore.config import Config
+
+            config = Config(connect_timeout=timeout, read_timeout=timeout)
+            health_client = boto3.client(
+                "s3",
+                endpoint_url=S3_ENDPOINT,
+                aws_access_key_id=S3_ACCESS_KEY,
+                aws_secret_access_key=S3_SECRET_KEY,
+                region_name=S3_REGION,
+                config=config,
+            )
+
+            # Quick check: head_bucket (doesn't transfer data, just metadata)
+            health_client.head_bucket(Bucket=self.bucket)
+            logger.debug("Storage health check OK", bucket=self.bucket, endpoint=S3_ENDPOINT)
+            return True, "OK"
+
+        except ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_msg = str(e)
+            logger.warning("Storage health check failed (ClientError)", error_code=error_code, error=error_msg)
+            return False, f"S3 error: {error_code}"
+
+        except Exception as e:
+            # Connection errors, timeouts, DNS failures, etc.
+            error_msg = str(e)
+            logger.warning("Storage health check failed (Connection)", error=error_msg, endpoint=S3_ENDPOINT)
+
+            # Provide user-friendly error messages
+            if "Could not connect" in error_msg or "Connection" in error_msg:
+                return False, f"Cannot reach storage backend at {S3_ENDPOINT}"
+            elif "timed out" in error_msg.lower():
+                return False, f"Storage backend timeout ({S3_ENDPOINT})"
+            else:
+                return False, f"Storage backend error: {error_msg}"

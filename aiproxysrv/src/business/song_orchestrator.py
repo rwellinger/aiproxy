@@ -31,7 +31,14 @@ class SongOrchestrator:
 
     def __init__(self):
         """Initialize orchestrator with S3 storage"""
-        self.s3_storage = get_storage(bucket=S3_SONGS_BUCKET)
+        self._s3_storage = None  # Lazy init to allow server startup when MinIO is down
+
+    @property
+    def s3_storage(self):
+        """Lazy-load S3 storage (only when first accessed)"""
+        if self._s3_storage is None:
+            self._s3_storage = get_storage(bucket=S3_SONGS_BUCKET)
+        return self._s3_storage
 
     def get_songs_with_pagination(
         self,

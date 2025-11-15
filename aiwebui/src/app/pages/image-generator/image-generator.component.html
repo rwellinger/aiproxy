@@ -219,13 +219,19 @@
                                 </div>
                             </div>
 
+                            <!-- Storage Health Warning (Preventive UX) -->
+                            <div *ngIf="!isStorageHealthy && !isCheckingStorage" class="storage-warning" style="margin-bottom: 1rem; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; color: #856404;">
+                                <i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>
+                                <strong>Storage Unavailable:</strong> Image generation is temporarily disabled. The storage backend (MinIO) is not reachable. Please try again later or contact support.
+                            </div>
+
                             <div class="button-group">
                                 <button type="submit"
-                                        [disabled]="promptForm.invalid || isLoading || isImprovingPrompt || isTranslatingPrompt || isGeneratingTitle"
+                                        [disabled]="promptForm.invalid || isLoading || isImprovingPrompt || isTranslatingPrompt || isGeneratingTitle || !isStorageHealthy || isCheckingStorage"
                                         class="create-button">
-                                    <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
-                                    <i class="fas fa-brain" *ngIf="!isLoading"></i>
-                                    {{ isLoading ? ('imageGenerator.creating' | translate) : ('imageGenerator.createButton' | translate) }}
+                                    <i class="fas fa-spinner fa-spin" *ngIf="isLoading || isCheckingStorage"></i>
+                                    <i class="fas fa-brain" *ngIf="!isLoading && !isCheckingStorage"></i>
+                                    {{ isCheckingStorage ? 'Checking storage...' : (isLoading ? ('imageGenerator.creating' | translate) : ('imageGenerator.createButton' | translate)) }}
                                 </button>
                                 <button type="button" (click)="resetForm()"
                                         [disabled]="isLoading || isImprovingPrompt || isTranslatingPrompt || isGeneratingTitle"

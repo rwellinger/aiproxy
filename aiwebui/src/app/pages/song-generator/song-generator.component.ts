@@ -7,6 +7,7 @@ import {firstValueFrom} from 'rxjs';
 import {SongService} from '../../services/business/song.service';
 import {SketchService, Sketch} from '../../services/business/sketch.service';
 import {ApiConfigService} from '../../services/config/api-config.service';
+import {HealthService} from '../../services/config/health.service';
 import {NotificationService} from '../../services/ui/notification.service';
 import {ChatService} from '../../services/config/chat.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
@@ -38,6 +39,10 @@ export class SongGeneratorComponent implements OnInit {
     selectedSketch: Sketch | null = null;
     selectedSketchId: string | null = null;
 
+    // Storage health state (preventive UX)
+    isStorageHealthy = true;
+    isCheckingStorage = true;
+
     // Audio player state
     audioUrl: string | null = null;
     currentSongTitle: string = '';
@@ -55,6 +60,7 @@ export class SongGeneratorComponent implements OnInit {
     private songService = inject(SongService);
     private sketchService = inject(SketchService);
     private apiConfig = inject(ApiConfigService);
+    private healthService = inject(HealthService);
     private notificationService = inject(NotificationService);
     private chatService = inject(ChatService);
     private progressService = inject(ProgressService);
@@ -92,6 +98,26 @@ export class SongGeneratorComponent implements OnInit {
                 this.loadSketchById(params['sketch_id']);
             }
         });
+
+        // CRITICAL: Check storage health on page load (preventive UX)
+        // Disables generate button if MinIO is down (prevents wasted API credits)
+        this.checkStorageHealth();
+    }
+
+    /**
+     * Check storage health on component init
+     * Prevents users from wasting API credits when storage is unavailable
+     */
+    private async checkStorageHealth() {
+        this.isCheckingStorage = true;
+        try {
+            this.isStorageHealthy = await firstValueFrom(this.healthService.checkStorage());
+        } catch (error) {
+            console.warn('[SongGenerator] Storage health check failed:', error);
+            this.isStorageHealthy = false;
+        } finally {
+            this.isCheckingStorage = false;
+        }
     }
 
     async onSubmit() {

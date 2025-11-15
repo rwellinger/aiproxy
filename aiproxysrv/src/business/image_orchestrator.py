@@ -25,7 +25,14 @@ class ImageOrchestrator:
     """Orchestrates image operations (calls services + repository)"""
 
     def __init__(self):
-        self.s3_storage = get_storage(bucket=S3_IMAGES_BUCKET)
+        self._s3_storage = None  # Lazy init to allow server startup when MinIO is down
+
+    @property
+    def s3_storage(self):
+        """Lazy-load S3 storage (only when first accessed)"""
+        if self._s3_storage is None:
+            self._s3_storage = get_storage(bucket=S3_IMAGES_BUCKET)
+        return self._s3_storage
 
     def generate_image(
         self,
