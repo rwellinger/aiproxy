@@ -236,10 +236,14 @@ def check_storage_health(config):
             data = response.json()
             message = data.get("message", "Storage backend unavailable")
             console.print(f"[red]✗ Storage backend check failed:[/red] {message}")
-            console.print("[yellow]→ Is the NAS running? (auto-shutdown at 23:30)[/yellow]")
+            console.print(
+                "[yellow]→ Is the NAS running? (auto-shutdown at 23:30)[/yellow]"
+            )
             return False
         else:
-            console.print(f"[red]✗ Unexpected health check response: HTTP {response.status_code}[/red]")
+            console.print(
+                f"[red]✗ Unexpected health check response: HTTP {response.status_code}[/red]"
+            )
             return False
 
     except requests.exceptions.Timeout:
@@ -994,7 +998,9 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
     console.print("[bold]Checking storage backend...[/bold]")
     if not check_storage_health(config):
         console.print("[red]✗ Mirror aborted: Storage backend not reachable[/red]")
-        console.print("[yellow]→ Mirror requires storage for upload AND delete operations[/yellow]")
+        console.print(
+            "[yellow]→ Mirror requires storage for upload AND delete operations[/yellow]"
+        )
         sys.exit(1)
     console.print("[green]✓ Storage backend OK[/green]\n")
 
@@ -1357,7 +1363,9 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
 
 @cli.command()
 @click.argument("project_id")
-@click.option("--folder", "folder_id", default=None, help="Only fix files in specific folder")
+@click.option(
+    "--folder", "folder_id", default=None, help="Only fix files in specific folder"
+)
 @click.option("--dry-run", is_flag=True, help="Preview changes without updating")
 def fix_mime(project_id, folder_id, dry_run):
     """Fix missing/wrong MIME types for project files
@@ -1455,7 +1463,9 @@ def fix_mime(project_id, folder_id, dry_run):
         console.print()
 
         if dry_run:
-            console.print("[yellow]🔍 DRY-RUN: Run without --dry-run to apply changes[/yellow]")
+            console.print(
+                "[yellow]🔍 DRY-RUN: Run without --dry-run to apply changes[/yellow]"
+            )
         elif updated > 0:
             console.print("[green]✓ MIME types updated successfully![/green]")
         else:
