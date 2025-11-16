@@ -1,11 +1,17 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
+
+export interface ProjectDialogData {
+  project_name?: string;
+  description?: string;
+  tags?: string[];
+}
 
 @Component({
   selector: 'app-create-project-dialog',
@@ -24,14 +30,20 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class CreateProjectDialogComponent implements OnInit {
   projectForm!: FormGroup;
+  isEditMode: boolean = false;
 
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<CreateProjectDialogComponent>);
 
+  constructor(@Inject(MAT_DIALOG_DATA) public data: ProjectDialogData | null) {
+    this.isEditMode = !!data;
+  }
+
   ngOnInit(): void {
     this.projectForm = this.fb.group({
-      project_name: ['', [Validators.required, Validators.maxLength(100)]],
-      tags: ['']
+      project_name: [this.data?.project_name || '', [Validators.required, Validators.maxLength(100)]],
+      description: [this.data?.description || '', [Validators.maxLength(2000)]],
+      tags: [this.data?.tags?.join(', ') || '']
     });
   }
 
@@ -71,6 +83,7 @@ export class CreateProjectDialogComponent implements OnInit {
 
     this.dialogRef.close({
       project_name: formValue.project_name.trim(),
+      description: formValue.description?.trim() || undefined,
       tags: tags
     });
   }

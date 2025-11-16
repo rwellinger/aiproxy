@@ -1764,7 +1764,7 @@
       "coverRequired": "Cover-Bild ist für diesen Status erforderlich",
       "releaseSaved": "Release erfolgreich gespeichert",
       "projectsAssigned": "Projekte erfolgreich zugewiesen",
-      "useProjectName": "Projektname '{{projectName}}' für diese Single verwenden?",
+      "useProjectName": "Projektdaten (Name, Beschreibung, Tags) von '{{projectName}}' für diese Single übernehmen?",
       "unsavedChanges": "Du hast ungespeicherte Änderungen. Änderungen verwerfen?"
     },
     "validation": {
@@ -1856,6 +1856,10 @@
         "general": "Allgemeine Informationen",
         "metadata": "Metadaten",
         "files": "Dateien & Ordner"
+      },
+      "tabs": {
+        "metadata": "Metadaten",
+        "filesAndFolders": "Dateien & Ordner"
       }
     },
     "editor": {
@@ -1869,8 +1873,15 @@
       "cancel": "Abbrechen",
       "projectName": "Projektname",
       "projectNameHint": "z.B., Sommervibes 2024",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Beschreibung eingeben (optional)...",
       "tags": "Tags",
-      "tagsHint": "Komma-getrennt, z.B., pop, rock, veröffentlicht"
+      "tagsPlaceholder": "Tags eingeben (Enter zum Hinzufügen)...",
+      "tagsHint": "Komma-getrennt, z.B., pop, rock, veröffentlicht",
+      "addTag": "Tag hinzufügen",
+      "tagExists": "Dieses Tag existiert bereits",
+      "status": "Status",
+      "editProject": "Projekt bearbeiten"
     },
     "folders": {
       "arrangement": "Arrangement",
@@ -1902,7 +1913,8 @@
     },
     "warnings": {
       "uploadBlocked": "Projekt ist archiviert. Aktiviere es zuerst, um Dateien hochzuladen.",
-      "deleteBlocked": "Archivierte Projekte können nicht gelöscht werden. Aktiviere es zuerst."
+      "deleteBlocked": "Archivierte Projekte können nicht gelöscht werden. Aktiviere es zuerst.",
+      "editBlocked": "Archivierte Projekte können nicht bearbeitet werden. Aktiviere es zuerst."
     },
     "dialogs": {
       "editProject": {

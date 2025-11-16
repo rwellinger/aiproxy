@@ -13,6 +13,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 
 import { SongReleaseService } from '../../services/business/song-release.service';
+import { SongProjectService } from '../../services/business/song-project.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import { ResourceBlobService } from '../../services/ui/resource-blob.service';
 import { AssignToProjectDialogComponent } from '../../dialogs/assign-to-project-dialog/assign-to-project-dialog.component';
@@ -68,6 +69,7 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private releaseService = inject(SongReleaseService);
+  private projectService = inject(SongProjectService);
   private notificationService = inject(NotificationService);
   private resourceBlobService = inject(ResourceBlobService);
   private translate = inject(TranslateService);
@@ -206,7 +208,7 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
       case ReleaseStatus.UPLOADED: {
         this.addRequiredValidator('upload_date');
         // release_date is OPTIONAL for uploaded (might not be planned yet)
-        this.addRequiredValidator('upc');
+        // UPC/ISRC are OPTIONAL (not all platforms require them, e.g., SoundCloud)
         this.addRequiredValidator('copyright_info');
 
         // Auto-fill upload_date with today if empty
@@ -220,8 +222,7 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
       case ReleaseStatus.RELEASED: {
         this.addRequiredValidator('upload_date');
         this.addRequiredValidator('release_date'); // REQUIRED after release
-        this.addRequiredValidator('upc');
-        this.addRequiredValidator('isrc'); // ISRC only available after actual release
+        // UPC/ISRC are OPTIONAL (not all platforms require them)
         this.addRequiredValidator('copyright_info');
 
         // Auto-fill release_date with today if empty
@@ -335,13 +336,13 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Offer to use project name for Single release
+   * Offer to use project data (name, description, tags) for Single release
    */
-  private offerProjectNameForSingle(): void {
+  private async offerProjectNameForSingle(): Promise<void> {
     const currentName = this.releaseForm.get('name')?.value;
 
     // Always offer if exactly 1 project is assigned (even if name already exists)
-    if (this.assignedProjectNames.length === 1) {
+    if (this.assignedProjectNames.length === 1 && this.assignedProjectIds.length === 1) {
       const projectName = this.assignedProjectNames[0];
 
       // Skip if project name is already the release name
@@ -354,7 +355,27 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
       });
 
       if (confirm(message)) {
-        this.releaseForm.patchValue({ name: projectName });
+        // Fetch full project details to get description and tags
+        try {
+          const projectResponse = await firstValueFrom(
+            this.projectService.getProjectById(this.assignedProjectIds[0])
+          );
+
+          if (projectResponse?.data) {
+            const project = projectResponse.data;
+
+            // Patch name, description, and tags
+            this.releaseForm.patchValue({
+              name: projectName,
+              description: project.description || '',
+              tags: Array.isArray(project.tags) ? project.tags.join(', ') : ''
+            });
+          }
+        } catch (error) {
+          console.error('Failed to load project details:', error);
+          // Fallback: just set the name
+          this.releaseForm.patchValue({ name: projectName });
+        }
       }
     }
   }
@@ -406,7 +427,6 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
     switch (status) {
       case ReleaseStatus.UPLOADED:
         if (!this.releaseForm.get('upload_date')?.value) missingFields.push('Upload Date');
-        if (!this.releaseForm.get('upc')?.value) missingFields.push('UPC');
         if (!this.releaseForm.get('copyright_info')?.value) missingFields.push('Copyright Info');
         if (!this.coverPreviewUrl && !this.selectedCoverFile) missingFields.push('Cover Image');
         break;
@@ -414,8 +434,6 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
       case ReleaseStatus.RELEASED:
         if (!this.releaseForm.get('upload_date')?.value) missingFields.push('Upload Date');
         if (!this.releaseForm.get('release_date')?.value) missingFields.push('Release Date');
-        if (!this.releaseForm.get('upc')?.value) missingFields.push('UPC');
-        if (!this.releaseForm.get('isrc')?.value) missingFields.push('ISRC');
         if (!this.releaseForm.get('copyright_info')?.value) missingFields.push('Copyright Info');
         if (!this.coverPreviewUrl && !this.selectedCoverFile) missingFields.push('Cover Image');
         break;

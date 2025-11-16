@@ -1,10 +1,11 @@
 <h2 mat-dialog-title>
-  <i class="fas fa-folder-plus"></i>
-  {{ 'songProjects.editor.createTitle' | translate }}
+  <i class="fas" [ngClass]="isEditMode ? 'fa-edit' : 'fa-folder-plus'"></i>
+  {{ (isEditMode ? 'songProjects.editor.editTitle' : 'songProjects.editor.createTitle') | translate }}
 </h2>
 
 <mat-dialog-content>
-  <p class="dialog-subtitle">{{ 'songProjects.editor.createSubtitle' | translate }}</p>
+  <p class="dialog-subtitle" *ngIf="!isEditMode">{{ 'songProjects.editor.createSubtitle' | translate }}</p>
+  <p class="dialog-subtitle" *ngIf="isEditMode">{{ 'songProjects.editor.editSubtitle' | translate }}</p>
 
   <form [formGroup]="projectForm">
     <!-- Project Name -->
@@ -19,6 +20,18 @@
       <mat-error *ngIf="getFieldError('project_name')">
         {{ getFieldError('project_name') | translate }}
       </mat-error>
+    </mat-form-field>
+
+    <!-- Description (Optional) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'songProjects.editor.description' | translate }}</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        [placeholder]="'songProjects.editor.descriptionPlaceholder' | translate"
+        rows="3"
+        maxlength="2000"
+      ></textarea>
     </mat-form-field>
 
     <!-- Tags (Optional) -->

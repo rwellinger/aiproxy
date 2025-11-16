@@ -190,109 +190,76 @@
 
             <div class="title-content">
               <i class="fas fa-folder-open"></i>
-              <!-- Non-Edit Mode -->
-              <h2 *ngIf="!isEditingProjectName">{{ selectedProject.project_name }}</h2>
-              <button
-                *ngIf="!isEditingProjectName"
-                type="button"
-                class="edit-project-name-button"
-                (click)="startEditProjectName()"
-                [matTooltip]="'songProjects.editor.editTitle' | translate">
-                <i class="fas fa-edit"></i>
-              </button>
-              <!-- Edit Mode -->
-              <input
-                *ngIf="isEditingProjectName"
-                type="text"
-                class="project-name-input"
-                [(ngModel)]="editProjectNameValue"
-                (keyup.enter)="saveProjectName()"
-                (keyup.escape)="cancelEditProjectName()"
-                [placeholder]="'songProjects.editor.projectName' | translate">
-              <button
-                *ngIf="isEditingProjectName"
-                type="button"
-                class="save-project-name-button"
-                (click)="saveProjectName()"
-                [matTooltip]="'common.save' | translate">
-                <i class="fas fa-check"></i>
-              </button>
-              <button
-                *ngIf="isEditingProjectName"
-                type="button"
-                class="cancel-project-name-button"
-                (click)="cancelEditProjectName()"
-                [matTooltip]="'common.cancel' | translate">
-                <i class="fas fa-times"></i>
-              </button>
+              <h2>{{ selectedProject.project_name }}</h2>
             </div>
           </div>
         </div>
 
-        <!-- Project Stats -->
-        <div class="detail-section-block">
-          <h3 class="section-title">
-            <i class="fas fa-chart-bar"></i>
-            {{ 'songProjects.detail.sections.metadata' | translate }}
-          </h3>
+        <!-- Tabs -->
+        <mat-tab-group class="project-tabs" [(selectedIndex)]="selectedTabIndex">
+          <!-- Metadata Tab -->
+          <mat-tab [label]="'songProjects.detail.tabs.metadata' | translate">
+            <div class="tab-content">
+              <!-- ID Row -->
+              <div class="metadata-id-row">
+                <div class="metadata-id-item">
+                  <i class="fas fa-fingerprint meta-icon"></i>
+                  <span class="meta-id" [title]="selectedProject.id">{{ selectedProject.id }}</span>
+                  <button type="button"
+                          class="copy-id-btn"
+                          (click)="copyToClipboard(selectedProject.id)"
+                          title="Copy ID">
+                    <i class="fas fa-copy"></i>
+                  </button>
+                </div>
+              </div>
 
-          <!-- ID Row -->
-          <div class="metadata-id-row">
-            <div class="metadata-id-item">
-              <i class="fas fa-fingerprint meta-icon"></i>
-              <span class="meta-id" [title]="selectedProject.id">{{ selectedProject.id }}</span>
-              <button type="button"
-                      class="copy-id-btn"
-                      (click)="copyToClipboard(selectedProject.id)"
-                      title="Copy ID">
-                <i class="fas fa-copy"></i>
-              </button>
+              <div class="detail-field-row">
+                <div class="detail-field">
+                  <span class="field-label">{{ 'songProjects.detail.stats.totalFiles' | translate }}</span>
+                  <div class="readonly-field">{{ selectedProject.total_files }}</div>
+                </div>
+
+                <div class="detail-field">
+                  <span class="field-label">{{ 'songProjects.detail.stats.totalSize' | translate }}</span>
+                  <div class="readonly-field">{{ formatFileSize(selectedProject.total_size_bytes) }}</div>
+                </div>
+              </div>
+
+              <!-- Tags -->
+              <div class="detail-field" *ngIf="selectedProject.tags && selectedProject.tags.length > 0">
+                <span class="field-label">{{ 'songProjects.editor.tags' | translate }}</span>
+                <div class="readonly-field">
+                  <mat-chip-set>
+                    <mat-chip *ngFor="let tag of selectedProject.tags">{{ tag }}</mat-chip>
+                  </mat-chip-set>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div class="detail-field" *ngIf="selectedProject.description">
+                <span class="field-label">{{ 'songProjects.editor.description' | translate }}</span>
+                <div class="readonly-field">{{ selectedProject.description }}</div>
+              </div>
+
+              <div class="detail-field-row">
+                <div class="detail-field">
+                  <span class="field-label">{{ 'songProjects.detail.stats.created' | translate }}</span>
+                  <div class="readonly-field">{{ selectedProject.created_at | date:'medium' }}</div>
+                </div>
+
+                <div class="detail-field">
+                  <span class="field-label">{{ 'songProjects.detail.stats.updated' | translate }}</span>
+                  <div class="readonly-field">{{ selectedProject.updated_at | date:'medium' }}</div>
+                </div>
+              </div>
             </div>
-          </div>
+          </mat-tab>
 
-          <div class="detail-field-row-2col">
-            <div class="detail-field">
-              <span class="field-label">{{ 'songProjects.detail.stats.totalFiles' | translate }}</span>
-              <div class="readonly-field">{{ selectedProject.total_files }}</div>
-            </div>
-
-            <div class="detail-field">
-              <span class="field-label">{{ 'songProjects.detail.stats.totalSize' | translate }}</span>
-              <div class="readonly-field">{{ formatFileSize(selectedProject.total_size_bytes) }}</div>
-            </div>
-          </div>
-
-          <div class="detail-field-row">
-            <div class="detail-field">
-              <span class="field-label">{{ 'songProjects.detail.stats.created' | translate }}</span>
-              <div class="readonly-field">{{ selectedProject.created_at | date:'medium' }}</div>
-            </div>
-
-            <div class="detail-field">
-              <span class="field-label">{{ 'songProjects.detail.stats.updated' | translate }}</span>
-              <div class="readonly-field">{{ selectedProject.updated_at | date:'medium' }}</div>
-            </div>
-          </div>
-
-          <!-- Tags -->
-          <div class="detail-field" *ngIf="selectedProject.tags && selectedProject.tags.length > 0">
-            <span class="field-label">{{ 'songProjects.editor.tags' | translate }}</span>
-            <div class="readonly-field">
-              <mat-chip-set>
-                <mat-chip *ngFor="let tag of selectedProject.tags">{{ tag }}</mat-chip>
-              </mat-chip-set>
-            </div>
-          </div>
-        </div>
-
-        <!-- Folders & Files -->
-        <div class="detail-section-block">
-          <h3 class="section-title">
-            <i class="fas fa-folder"></i>
-            {{ 'songProjects.detail.sections.files' | translate }}
-          </h3>
-
-          <!-- Folders Accordion -->
+          <!-- Files & Folders Tab -->
+          <mat-tab [label]="'songProjects.detail.tabs.filesAndFolders' | translate">
+            <div class="tab-content">
+              <!-- Folders Accordion -->
           <mat-accordion *ngIf="selectedProject.folders && selectedProject.folders.length > 0">
             <mat-expansion-panel *ngFor="let folder of selectedProject.folders">
               <mat-expansion-panel-header>
@@ -439,33 +406,35 @@
           <div *ngIf="!selectedProject.folders || selectedProject.folders.length === 0" class="empty-folder">
             <p>{{ 'songProjects.detail.noFiles' | translate }}</p>
           </div>
-        </div>
 
-        <!-- Assigned Releases -->
-        <div class="detail-section-block" *ngIf="selectedProject.assigned_releases && selectedProject.assigned_releases.length > 0">
-          <h3 class="section-title">
-            <i class="fas fa-compact-disc"></i>
-            {{ 'songProjects.detail.assignedReleases' | translate }}
-          </h3>
-          <div class="assigned-releases-list">
-            <div *ngFor="let release of selectedProject.assigned_releases" class="release-item">
-              <div class="release-info">
-                <i class="fas fa-compact-disc"></i>
-                <span class="release-name">{{ release.name }}</span>
-                <span class="release-badge">{{ release.type }}</span>
-                <span class="release-meta">{{ release.genre }}</span>
-                <span class="release-status" [class]="getStatusBadgeClass(release.status)">{{ release.status }}</span>
+              <!-- Assigned Releases -->
+              <div *ngIf="selectedProject.assigned_releases && selectedProject.assigned_releases.length > 0" class="assigned-releases-section">
+                <h3 class="section-title">
+                  <i class="fas fa-compact-disc"></i>
+                  {{ 'songProjects.detail.assignedReleases' | translate }}
+                </h3>
+                <div class="assigned-releases-list">
+                  <div *ngFor="let release of selectedProject.assigned_releases" class="release-item">
+                    <div class="release-info">
+                      <i class="fas fa-compact-disc"></i>
+                      <span class="release-name">{{ release.name }}</span>
+                      <span class="release-badge">{{ release.type }}</span>
+                      <span class="release-meta">{{ release.genre }}</span>
+                      <span class="release-status" [class]="getStatusBadgeClass(release.status)">{{ release.status }}</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="asset-action-button"
+                      (click)="openRelease(release.id)"
+                      [matTooltip]="'songProjects.detail.actions.viewRelease' | translate">
+                      <i class="fas fa-external-link-alt"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <button
-                type="button"
-                class="asset-action-button"
-                (click)="openRelease(release.id)"
-                [matTooltip]="'songProjects.detail.actions.viewRelease' | translate">
-                <i class="fas fa-external-link-alt"></i>
-              </button>
             </div>
-          </div>
-        </div>
+          </mat-tab>
+        </mat-tab-group>
 
         <!-- Detail Actions -->
         <div class="detail-actions">
@@ -476,6 +445,16 @@
           <button type="button" class="action-button complete-clone-button" (click)="copyCLICompleteCloneCommand()">
             <i class="fas fa-code"></i>
             <span>{{ 'songProjects.detail.copyCompleteClone' | translate }}</span>
+          </button>
+          <button
+            type="button"
+            class="action-button edit-button"
+            (click)="openEditDialog()"
+            [disabled]="selectedProject.project_status === 'archived'"
+            [matTooltip]="selectedProject.project_status === 'archived' ? ('songProjects.warnings.editBlocked' | translate) : ''"
+          >
+            <i class="fas fa-edit"></i>
+            <span>{{ 'songProjects.list.actions.edit' | translate }}</span>
           </button>
           <button
             type="button"

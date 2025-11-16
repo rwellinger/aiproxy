@@ -1764,7 +1764,7 @@
       "coverRequired": "Cover image is required for this status",
       "releaseSaved": "Release saved successfully",
       "projectsAssigned": "Projects assigned successfully",
-      "useProjectName": "Use project name '{{projectName}}' for this Single?",
+      "useProjectName": "Use project data (name, description, tags) from '{{projectName}}' for this Single?",
       "unsavedChanges": "You have unsaved changes. Discard changes?"
     },
     "validation": {
@@ -1856,6 +1856,10 @@
         "general": "General Information",
         "metadata": "Metadata",
         "files": "Files & Folders"
+      },
+      "tabs": {
+        "metadata": "Metadata",
+        "filesAndFolders": "Files & Folders"
       }
     },
     "editor": {
@@ -1869,8 +1873,15 @@
       "cancel": "Cancel",
       "projectName": "Project Name",
       "projectNameHint": "e.g., Summer Vibes 2024",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter description (optional)...",
       "tags": "Tags",
-      "tagsHint": "Comma-separated, e.g., pop, rock, released"
+      "tagsPlaceholder": "Enter tags (press Enter to add)...",
+      "tagsHint": "Comma-separated, e.g., pop, rock, released",
+      "addTag": "Add Tag",
+      "tagExists": "This tag already exists",
+      "status": "Status",
+      "editProject": "Edit Project"
     },
     "folders": {
       "arrangement": "Arrangement",
@@ -1902,7 +1913,8 @@
     },
     "warnings": {
       "uploadBlocked": "Project is archived. Unarchive it first to upload files.",
-      "deleteBlocked": "Cannot delete archived project. Unarchive it first."
+      "deleteBlocked": "Cannot delete archived project. Unarchive it first.",
+      "editBlocked": "Cannot edit archived project. Unarchive it first."
     },
     "dialogs": {
       "editProject": {

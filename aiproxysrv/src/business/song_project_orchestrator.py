@@ -636,6 +636,24 @@ class SongProjectOrchestrator:
                 folder=folder_name,
             )
 
+            # Auto-update project status: 'new' → 'progress' after first file upload
+            if project.project_status == "new":
+                updated_project = self.db_service.update_project(
+                    db=db,
+                    project_id=project_id,
+                    project_name=project.project_name,  # Keep existing name
+                    project_status="progress",
+                )
+                if updated_project:
+                    logger.info(
+                        "Project status auto-updated after file upload",
+                        project_id=str(project_id),
+                        old_status="new",
+                        new_status="progress",
+                    )
+                else:
+                    logger.warning("Failed to auto-update project status", project_id=str(project_id))
+
             # Note: Project stats (total_files, total_size_bytes) are calculated LIVE
             # in transform_project_detail_to_response() from actual files (Single Source of Truth)
 

@@ -23,8 +23,8 @@ def validate_required_fields_for_status(status: str, data: dict[str, Any]) -> tu
         >>> validate_required_fields_for_status("draft", {"type": "single", "name": "Test", "genre": "Rock"})
         (True, None)
         >>> validate_required_fields_for_status("uploaded", {"type": "single", "name": "Test", "genre": "Rock"})
-        (False, "Missing required fields for status 'uploaded': Upload Date, UPC, Copyright Info, Cover Image")
-        >>> validate_required_fields_for_status("released", {"type": "single", "name": "Test", "genre": "Rock", "upload_date": "2024-01-01", "release_date": "2024-01-15", "upc": "123", "isrc": "US123", "copyright_info": "(C) 2024", "cover_s3_key": "cover.jpg"})
+        (False, "Missing required fields for status 'uploaded': Upload Date, Copyright Info, Cover Image")
+        >>> validate_required_fields_for_status("released", {"type": "single", "name": "Test", "genre": "Rock", "upload_date": "2024-01-01", "release_date": "2024-01-15", "copyright_info": "(C) 2024", "cover_s3_key": "cover.jpg"})
         (True, None)
         >>> validate_required_fields_for_status("rejected", {"type": "single", "name": "Test", "genre": "Rock", "rejected_reason": "Quality issues"})
         (True, None)
@@ -50,9 +50,9 @@ def validate_required_fields_for_status(status: str, data: dict[str, Any]) -> tu
 
     # Status-specific required fields
     # Business Logic:
-    # - uploaded: Has been uploaded to distributor (Ditto/DistroKid), release_date is OPTIONAL (might not be planned yet), ISRC not yet known
-    # - released: Actually released, release_date is REQUIRED, ISRC is now available from distributor
-    # - downtaken: Was released and then removed, both dates are REQUIRED
+    # - uploaded: Has been uploaded to distributor (Ditto/DistroKid), release_date is OPTIONAL (might not be planned yet), UPC/ISRC are OPTIONAL (not all platforms require them, e.g., SoundCloud)
+    # - released: Actually released, release_date is REQUIRED, UPC/ISRC are OPTIONAL (not all platforms require them)
+    # - downtaken: Was released and then removed, both dates are REQUIRED, UPC/ISRC are OPTIONAL
     status_requirements = {
         "draft": base_fields,
         "arranging": base_fields,
@@ -60,20 +60,18 @@ def validate_required_fields_for_status(status: str, data: dict[str, Any]) -> tu
         "mastering": base_fields,
         "rejected": base_fields + ["rejected_reason"],
         "archived": base_fields,
-        "uploaded": base_fields + ["upload_date", "upc", "copyright_info", "cover_s3_key"],  # release_date is OPTIONAL
+        "uploaded": base_fields + ["upload_date", "copyright_info", "cover_s3_key"],  # UPC/ISRC optional, release_date optional
         "released": base_fields
-        + ["upload_date", "release_date", "upc", "isrc", "copyright_info", "cover_s3_key"],  # release_date now REQUIRED
+        + ["upload_date", "release_date", "copyright_info", "cover_s3_key"],  # UPC/ISRC optional
         "downtaken": base_fields
         + [
             "upload_date",
             "release_date",
             "downtaken_date",
             "downtaken_reason",
-            "upc",
-            "isrc",
             "copyright_info",
             "cover_s3_key",
-        ],
+        ],  # UPC/ISRC optional
     }
 
     required = status_requirements.get(status, base_fields)

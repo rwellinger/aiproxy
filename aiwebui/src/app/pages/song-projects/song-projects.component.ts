@@ -13,6 +13,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTabsModule } from '@angular/material/tabs';
 
 import { SongProjectService } from '../../services/business/song-project.service';
 import { NotificationService } from '../../services/ui/notification.service';
@@ -41,7 +42,8 @@ import { getInitials, getColorFromString } from '../../shared/utils/cover-utils'
     MatExpansionModule,
     MatDialogModule,
     MatTooltipModule,
-    MatMenuModule
+    MatMenuModule,
+    MatTabsModule
   ],
   templateUrl: './song-projects.component.html',
   styleUrl: './song-projects.component.scss'
@@ -67,16 +69,7 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   // UI state
   isLoading = false;
   isLoadingDetail = false;
-
-  // Edit state
-  isEditingProjectName = false;
-  editProjectNameValue = '';
-  isEditingProject = false;
-  editProjectForm: {
-    name: string;
-    tags: string[];
-    description: string;
-  } | null = null;
+  selectedTabIndex = 0;
 
   // Math for template
   Math = Math;
@@ -661,64 +654,54 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Start editing project name.
+   * Open edit project dialog (using create dialog in edit mode)
    */
-  startEditProjectName(): void {
+  openEditDialog(): void {
     if (!this.selectedProject) return;
-    this.editProjectNameValue = this.selectedProject.project_name;
-    this.isEditingProjectName = true;
-  }
 
-  /**
-   * Cancel editing project name.
-   */
-  cancelEditProjectName(): void {
-    this.isEditingProjectName = false;
-    this.editProjectNameValue = '';
-  }
-
-  /**
-   * Save edited project name.
-   */
-  async saveProjectName(): Promise<void> {
-    if (!this.selectedProject || !this.editProjectNameValue.trim()) {
-      this.cancelEditProjectName();
-      return;
-    }
-
-    const newName = this.editProjectNameValue.trim();
-    if (newName === this.selectedProject.project_name) {
-      this.cancelEditProjectName();
-      return;
-    }
-
-    try {
-      await firstValueFrom(
-        this.projectService.updateProject(this.selectedProject.id, {
-          project_name: newName
-        })
-      );
-
-      this.notificationService.success(
-        this.translate.instant('songProjects.messages.updateSuccess')
-      );
-
-      // Update local state
-      this.selectedProject.project_name = newName;
-
-      // Update in list
-      const projectInList = this.projectList.find(p => p.id === this.selectedProject!.id);
-      if (projectInList) {
-        projectInList.project_name = newName;
+    const dialogRef = this.dialog.open(CreateProjectDialogComponent, {
+      width: '500px',
+      data: {
+        project_name: this.selectedProject.project_name,
+        description: this.selectedProject.description,
+        tags: this.selectedProject.tags
       }
+    });
 
-      this.cancelEditProjectName();
-    } catch (error) {
-      console.error('Failed to update project name:', error);
-      this.notificationService.error(
-        this.translate.instant('songProjects.messages.saveError')
-      );
-    }
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (!result || !this.selectedProject) return;
+
+      try {
+        await firstValueFrom(
+          this.projectService.updateProject(this.selectedProject.id, {
+            project_name: result.project_name,
+            description: result.description,
+            tags: result.tags
+          })
+        );
+
+        // Update local state
+        this.selectedProject.project_name = result.project_name;
+        this.selectedProject.description = result.description;
+        this.selectedProject.tags = result.tags;
+
+        // Update in list
+        const projectInList = this.projectList.find(p => p.id === this.selectedProject!.id);
+        if (projectInList) {
+          projectInList.project_name = result.project_name;
+          projectInList.tags = result.tags;
+        }
+
+        this.notificationService.success(
+          this.translate.instant('songProjects.messages.projectUpdated')
+        );
+      } catch (error) {
+        console.error('Failed to update project:', error);
+        this.notificationService.error(
+          this.translate.instant('common.error')
+        );
+      }
+    });
   }
 
   /**
@@ -754,69 +737,6 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
         this.translate.instant('common.error')
       );
     }
-  }
-
-  /**
-   * Open edit project dialog
-   */
-  openEditProjectDialog(): void {
-    if (!this.selectedProject) return;
-
-    this.editProjectForm = {
-      name: this.selectedProject.project_name,
-      tags: [...this.selectedProject.tags],
-      description: this.selectedProject.description || ''
-    };
-    this.isEditingProject = true;
-  }
-
-  /**
-   * Save project changes from edit dialog
-   */
-  async saveProjectChanges(): Promise<void> {
-    if (!this.editProjectForm || !this.selectedProject) return;
-
-    try {
-      await firstValueFrom(
-        this.projectService.updateProject(this.selectedProject.id, {
-          project_name: this.editProjectForm.name,
-          tags: this.editProjectForm.tags,
-          description: this.editProjectForm.description
-        })
-      );
-
-      // Update local state
-      this.selectedProject.project_name = this.editProjectForm.name;
-      this.selectedProject.tags = this.editProjectForm.tags;
-      this.selectedProject.description = this.editProjectForm.description;
-
-      // Update in list
-      const projectInList = this.projectList.find(p => p.id === this.selectedProject!.id);
-      if (projectInList) {
-        projectInList.project_name = this.editProjectForm.name;
-        projectInList.tags = this.editProjectForm.tags;
-      }
-
-      this.isEditingProject = false;
-      this.editProjectForm = null;
-
-      this.notificationService.success(
-        this.translate.instant('songProjects.messages.projectUpdated')
-      );
-    } catch (error) {
-      console.error('Failed to update project:', error);
-      this.notificationService.error(
-        this.translate.instant('common.error')
-      );
-    }
-  }
-
-  /**
-   * Cancel edit project dialog
-   */
-  cancelEditProject(): void {
-    this.isEditingProject = false;
-    this.editProjectForm = null;
   }
 
   /**

@@ -502,11 +502,31 @@
       }
     }
   }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
 }
 
 .detail-content {
   flex: 1;
   overflow-y: auto;
+}
+
+// Tab Content Wrapper (consistent padding for all tabs)
+.tab-content {
+  padding: $spacing-md;
+}
+
+// Section block within tabs (no padding, handled by tab-content)
+.detail-section-block-in-tab {
+  padding: 0;
+
+  &:not(:last-child) {
+    margin-bottom: $spacing-lg;
+  }
 }
 
 .detail-section-block {
@@ -516,66 +536,66 @@
   &:last-child {
     border-bottom: none;
   }
+}
 
-  // Metadata ID Row (analog Sketch Library)
-  .metadata-id-row {
-    margin-bottom: $spacing-md;
+// Metadata ID Row (analog Sketch Library)
+.metadata-id-row {
+  margin-bottom: $spacing-md;
 
-    .metadata-id-item {
+  .metadata-id-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-xs 0;
+
+    .meta-icon {
+      color: $primary-color;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .meta-id {
+      font-family: 'Courier New', monospace;
+      font-size: $font-sm;
+      color: $text-secondary;
+      background: $background-light;
+      padding: 6px 12px;
+      border-radius: $border-radius-sm;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .copy-id-btn {
+      background: transparent;
+      border: none;
+      color: $text-secondary;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: $border-radius-sm;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: $spacing-xs;
-      padding: $spacing-xs 0;
+      justify-content: center;
+      flex-shrink: 0;
 
-      .meta-icon {
-        color: $primary-color;
-        font-size: 0.9rem;
-        flex-shrink: 0;
-      }
-
-      .meta-id {
-        font-family: 'Courier New', monospace;
+      i {
         font-size: $font-sm;
-        color: $text-secondary;
-        background: $background-light;
-        padding: 6px 12px;
-        border-radius: $border-radius-sm;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        flex: 1;
       }
 
-      .copy-id-btn {
-        background: transparent;
-        border: none;
-        color: $text-secondary;
-        cursor: pointer;
-        padding: 6px 12px;
-        border-radius: $border-radius-sm;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-
-        i {
-          font-size: $font-sm;
-        }
-
-        &:hover {
-          background: $background-light;
-          color: $primary-color;
-        }
+      &:hover {
+        background: $background-light;
+        color: $primary-color;
       }
     }
   }
+}
 
-  .metadata-row {
-    display: flex;
-    gap: $spacing-md;
-    margin-bottom: $spacing-sm;
-  }
+.metadata-row {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-sm;
 }
 
 .section-title {
@@ -605,6 +625,14 @@
   grid-template-columns: 1fr 1fr;
   gap: $spacing-md;
   margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .detail-field {
+    margin-bottom: 0;
+  }
 }
 
 .detail-field-row-3col {
@@ -937,6 +965,10 @@ mat-accordion {
   @include button-storage('base');
 }
 
+.edit-button {
+  @include button-secondary('base');
+}
+
 .archive-button {
   @include button-secondary('base');
 }
@@ -1026,6 +1058,15 @@ mat-accordion {
   .pagination-info {
     font-size: $font-sm;
     color: $text-muted;
+  }
+}
+
+// Assigned Releases Section (within tab)
+.assigned-releases-section {
+  margin-top: $spacing-lg;
+
+  .section-title {
+    margin-bottom: $spacing-md;
   }
 }
 
