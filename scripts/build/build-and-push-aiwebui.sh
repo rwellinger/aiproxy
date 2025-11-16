@@ -115,10 +115,16 @@ build_image() {
 
     cd "$BUILD_DIR"
 
+    # Build timestamp in ISO 8601 format
+    BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+
     print_info "Building $APP_IMAGE..."
     print_warning "This may take a while (Angular build + npm install)..."
 
     docker build -f Dockerfile --target production \
+        --label "org.opencontainers.image.created=$BUILD_DATE" \
+        --label "org.opencontainers.image.version=$VERSION" \
+        --label "org.opencontainers.image.source=https://github.com/rwellinger/mac_ki_service" \
         -t "$APP_IMAGE:local" \
         -t "$APP_IMAGE:$VERSION" \
         -t "$REGISTRY/$APP_IMAGE:$VERSION" \

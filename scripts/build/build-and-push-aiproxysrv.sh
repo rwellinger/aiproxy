@@ -116,12 +116,23 @@ build_images() {
 
     cd "$BUILD_DIR"
 
+    # Build timestamp in ISO 8601 format
+    BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+
     print_info "Building $APP_IMAGE..."
-    docker build -f Dockerfile --target app -t "$APP_IMAGE:local" -t "$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:latest" .
+    docker build -f Dockerfile --target app \
+        --label "org.opencontainers.image.created=$BUILD_DATE" \
+        --label "org.opencontainers.image.version=$VERSION" \
+        --label "org.opencontainers.image.source=https://github.com/rwellinger/mac_ki_service" \
+        -t "$APP_IMAGE:local" -t "$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:latest" .
     print_success "$APP_IMAGE built successfully"
 
     print_info "Building $WORKER_IMAGE..."
-    docker build -f Dockerfile --target worker -t "$WORKER_IMAGE:local" -t "$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:latest" .
+    docker build -f Dockerfile --target worker \
+        --label "org.opencontainers.image.created=$BUILD_DATE" \
+        --label "org.opencontainers.image.version=$VERSION" \
+        --label "org.opencontainers.image.source=https://github.com/rwellinger/mac_ki_service" \
+        -t "$WORKER_IMAGE:local" -t "$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:latest" .
     print_success "$WORKER_IMAGE built successfully"
 }
 
