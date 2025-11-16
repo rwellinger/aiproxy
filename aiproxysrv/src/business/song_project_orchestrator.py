@@ -641,8 +641,8 @@ class SongProjectOrchestrator:
                 updated_project = self.db_service.update_project(
                     db=db,
                     project_id=project_id,
-                    project_name=project.project_name,  # Keep existing name
-                    project_status="progress",
+                    user_id=user_id,
+                    update_data={"project_status": "progress"},
                 )
                 if updated_project:
                     logger.info(
