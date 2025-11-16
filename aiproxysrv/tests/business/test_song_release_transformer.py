@@ -90,7 +90,7 @@ class TestValidateRequiredFieldsForStatus:
         assert error is None
 
     def test_uploaded_status_missing_upc(self):
-        """Test uploaded status missing UPC"""
+        """Test uploaded status with missing UPC (now optional)"""
         # Arrange
         data = {
             "type": "single",
@@ -104,9 +104,9 @@ class TestValidateRequiredFieldsForStatus:
         # Act
         is_valid, error = validate_required_fields_for_status("uploaded", data)
 
-        # Assert
-        assert is_valid is False
-        assert "UPC" in error
+        # Assert - UPC is optional, so this should be valid
+        assert is_valid is True
+        assert error is None
 
     def test_uploaded_status_missing_cover_image(self):
         """Test uploaded status missing cover image"""
@@ -150,7 +150,7 @@ class TestValidateRequiredFieldsForStatus:
         assert error is None
 
     def test_released_status_missing_isrc(self):
-        """Test released status missing ISRC (required after distribution)"""
+        """Test released status with missing ISRC (now optional)"""
         # Arrange
         data = {
             "type": "single",
@@ -166,9 +166,9 @@ class TestValidateRequiredFieldsForStatus:
         # Act
         is_valid, error = validate_required_fields_for_status("released", data)
 
-        # Assert
-        assert is_valid is False
-        assert "ISRC" in error
+        # Assert - ISRC is optional, so this should be valid
+        assert is_valid is True
+        assert error is None
 
     def test_released_status_missing_release_date(self):
         """Test released status missing release_date"""

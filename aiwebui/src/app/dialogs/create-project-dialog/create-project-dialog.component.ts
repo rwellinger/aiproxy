@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, Inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -34,9 +34,10 @@ export class CreateProjectDialogComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<CreateProjectDialogComponent>);
+  public data = inject<ProjectDialogData | null>(MAT_DIALOG_DATA);
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: ProjectDialogData | null) {
-    this.isEditMode = !!data;
+  constructor() {
+    this.isEditMode = !!this.data;
   }
 
   ngOnInit(): void {
