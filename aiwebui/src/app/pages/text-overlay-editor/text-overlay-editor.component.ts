@@ -78,9 +78,20 @@ export class TextOverlayEditorComponent implements OnInit {
   currentClickTarget: 'title' | 'artist' | null = null;
 
   fontStyles = [
+    // Original fonts
     { value: 'bold', label: 'Bold (Anton)', icon: 'fas fa-bold' },
     { value: 'elegant', label: 'Elegant (Playfair)', icon: 'fas fa-signature' },
-    { value: 'light', label: 'Light (Roboto)', icon: 'fas fa-feather' }
+    { value: 'light', label: 'Light (Roboto)', icon: 'fas fa-feather' },
+    // Comic styles
+    { value: 'bangers', label: 'Bangers (Comic Bold)', icon: 'fas fa-explosion' },
+    { value: 'comic', label: 'Comic Neue (Modern)', icon: 'fas fa-comment' },
+    { value: 'bubblegum', label: 'Bubblegum (Playful)', icon: 'fas fa-circle' },
+    { value: 'righteous', label: 'Righteous (Retro)', icon: 'fas fa-glasses' },
+    // Display fonts
+    { value: 'bebas', label: 'Bebas Neue (Condensed)', icon: 'fas fa-compress' },
+    { value: 'bungee', label: 'Bungee (Urban)', icon: 'fas fa-cube' },
+    { value: 'montserrat', label: 'Montserrat (Geometric)', icon: 'fas fa-shapes' },
+    { value: 'oswald', label: 'Oswald (Gothic)', icon: 'fas fa-skull' }
   ];
 
   private fb = inject(FormBuilder);
@@ -255,12 +266,31 @@ export class TextOverlayEditorComponent implements OnInit {
     // Map fontStyle to CSS font family (matching backend TTF fonts)
     const getFontFamily = (style: string): string => {
       switch (style) {
+        // Original fonts
         case 'bold':
           return 'Anton, Arial Black, sans-serif';
         case 'elegant':
           return '"Playfair Display", Georgia, serif';
         case 'light':
           return '"Roboto Light", Arial, sans-serif';
+        // Comic styles
+        case 'bangers':
+          return 'Bangers, Impact, sans-serif';
+        case 'comic':
+          return '"Comic Neue", "Comic Sans MS", sans-serif';
+        case 'bubblegum':
+          return '"Bubblegum Sans", cursive, sans-serif';
+        case 'righteous':
+          return 'Righteous, Impact, sans-serif';
+        // Display fonts
+        case 'bebas':
+          return '"Bebas Neue", Impact, sans-serif';
+        case 'bungee':
+          return 'Bungee, Impact, sans-serif';
+        case 'montserrat':
+          return 'Montserrat, Helvetica, sans-serif';
+        case 'oswald':
+          return 'Oswald, Arial Narrow, sans-serif';
         default:
           return 'sans-serif';
       }

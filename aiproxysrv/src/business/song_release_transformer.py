@@ -60,7 +60,8 @@ def validate_required_fields_for_status(status: str, data: dict[str, Any]) -> tu
         "mastering": base_fields,
         "rejected": base_fields + ["rejected_reason"],
         "archived": base_fields,
-        "uploaded": base_fields + ["upload_date", "copyright_info", "cover_s3_key"],  # UPC/ISRC optional, release_date optional
+        "uploaded": base_fields
+        + ["upload_date", "copyright_info", "cover_s3_key"],  # UPC/ISRC optional, release_date optional
         "released": base_fields
         + ["upload_date", "release_date", "copyright_info", "cover_s3_key"],  # UPC/ISRC optional
         "downtaken": base_fields

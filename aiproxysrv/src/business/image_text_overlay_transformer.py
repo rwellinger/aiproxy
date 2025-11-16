@@ -11,6 +11,16 @@ class ImageTextOverlayTransformer:
         "bold": "Anton-Regular.ttf",  # Heavy display font
         "elegant": "PlayfairDisplay-Regular.ttf",  # Serif
         "light": "Roboto-Light.ttf",  # Thin sans-serif
+        # Comic styles
+        "bangers": "Bangers-Regular.ttf",  # Bold comic
+        "comic": "ComicNeue-Regular.ttf",  # Modern comic
+        "bubblegum": "BubblegumSans-Regular.ttf",  # Playful comic
+        "righteous": "Righteous-Regular.ttf",  # Retro comic
+        # Display fonts for music titles
+        "bebas": "BebasNeue-Regular.ttf",  # Ultra condensed
+        "bungee": "Bungee-Regular.ttf",  # Urban 3D
+        "montserrat": "Montserrat-Regular.ttf",  # Geometric clean
+        "oswald": "Oswald-Regular.ttf",  # Condensed gothic
     }
 
     # Grid position mappings (3x3 grid)
