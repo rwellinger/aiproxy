@@ -9,6 +9,8 @@ Includes:
 
 MODEL_CONTEXT_WINDOWS = {
     # OpenAI Models (External) - GPT-5 Series
+    "gpt-5.1": 200000,  # GPT-5.1 (more efficient than gpt-5)
+    "gpt-5.1-codex-mini": 200000,  # GPT-5.1 Codex Mini
     "gpt-5": 200000,  # GPT-5 base (estimated 200k)
     "gpt-5-pro": 200000,  # GPT-5 Pro
     "gpt-5-mini": 200000,  # GPT-5 Mini
