@@ -123,7 +123,8 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
       rejected_reason: ['', Validators.maxLength(500)],
       upc: ['', Validators.maxLength(50)],
       isrc: ['', Validators.maxLength(50)],
-      copyright_info: ['', Validators.maxLength(500)]
+      copyright_info: ['', Validators.maxLength(500)],
+      smart_link: ['', Validators.maxLength(1000)]
     });
   }
 
@@ -155,7 +156,8 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
         rejected_reason: this.selectedRelease.rejected_reason || '',
         upc: this.selectedRelease.upc || '',
         isrc: this.selectedRelease.isrc || '',
-        copyright_info: this.selectedRelease.copyright_info || ''
+        copyright_info: this.selectedRelease.copyright_info || '',
+        smart_link: this.selectedRelease.smart_link || ''
       });
 
       // Load assigned projects
@@ -521,6 +523,7 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
         upc: formValue.upc || undefined,
         isrc: formValue.isrc || undefined,
         copyright_info: formValue.copyright_info || undefined,
+        smart_link: formValue.smart_link || undefined,
         project_ids: this.assignedProjectIds
       };
 
@@ -607,6 +610,7 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
       case 'upload_date':
       case 'upc':
       case 'copyright_info':
+      case 'smart_link':
         return [ReleaseStatus.UPLOADED, ReleaseStatus.RELEASED, ReleaseStatus.DOWNTAKEN].includes(status);
 
       case 'release_date':

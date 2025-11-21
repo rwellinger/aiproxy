@@ -149,6 +149,17 @@
             {{ getFieldError('copyright_info') }}
           </mat-error>
         </mat-form-field>
+
+        <!-- Smart Link (conditional - ab "uploaded") -->
+        <mat-form-field appearance="outline" class="form-field-full" *ngIf="shouldShowField('smart_link')">
+          <mat-label>{{ 'songRelease.editor.smartLink' | translate }}</mat-label>
+          <input matInput formControlName="smart_link" maxlength="1000"
+                 [placeholder]="'songRelease.editor.smartLinkPlaceholder' | translate">
+          <mat-hint>{{ 'songRelease.editor.smartLinkHint' | translate }}</mat-hint>
+          <mat-error *ngIf="releaseForm.get('smart_link')?.invalid">
+            {{ getFieldError('smart_link') }}
+          </mat-error>
+        </mat-form-field>
       </div>
 
       <!-- Dates (conditional based on status) -->

@@ -184,6 +184,7 @@ def transform_release_to_response(release: Any, projects: list[Any] | None = Non
         ...     upc = None
         ...     isrc = None
         ...     copyright_info = None
+        ...     smart_link = None
         ...     cover_s3_key = None
         ...     created_at = None
         ...     updated_at = None
@@ -213,6 +214,7 @@ def transform_release_to_response(release: Any, projects: list[Any] | None = Non
         "upc": release.upc,
         "isrc": release.isrc,
         "copyright_info": release.copyright_info,
+        "smart_link": release.smart_link,
         "cover_url": get_presigned_cover_url_placeholder(release.cover_s3_key),
         "created_at": release.created_at.isoformat() if release.created_at else None,
         "updated_at": release.updated_at.isoformat() if release.updated_at else None,

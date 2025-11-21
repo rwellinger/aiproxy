@@ -27,6 +27,9 @@ class ReleaseCreateRequest(BaseModel):
     upc: str | None = Field(default=None, max_length=50, description="Universal Product Code")
     isrc: str | None = Field(default=None, max_length=50, description="International Standard Recording Code")
     copyright_info: str | None = Field(default=None, description="Copyright information")
+    smart_link: str | None = Field(
+        default=None, max_length=1000, description="Smart link URL (DistroKid, ToneDen, etc.)"
+    )
 
 
 class ReleaseUpdateRequest(BaseModel):
@@ -53,6 +56,9 @@ class ReleaseUpdateRequest(BaseModel):
     upc: str | None = Field(default=None, max_length=50, description="Universal Product Code")
     isrc: str | None = Field(default=None, max_length=50, description="International Standard Recording Code")
     copyright_info: str | None = Field(default=None, description="Copyright information")
+    smart_link: str | None = Field(
+        default=None, max_length=1000, description="Smart link URL (DistroKid, ToneDen, etc.)"
+    )
 
 
 class ReleaseFilterRequest(BaseModel):
@@ -101,6 +107,7 @@ class ReleaseResponse(BaseModel):
     upc: str | None
     isrc: str | None
     copyright_info: str | None
+    smart_link: str | None
 
     cover_url: str | None
 

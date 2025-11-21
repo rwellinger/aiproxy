@@ -471,6 +471,34 @@
     font-size: 1.1rem;
     color: $text-muted;
   }
+
+  .smart-link-header {
+    margin-top: $spacing-xs;
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding: $spacing-xs $spacing-sm;
+      background-color: $background-light;
+      border-radius: 6px;
+      color: $primary-color;
+      text-decoration: none;
+      font-size: $font-sm;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: $primary-color;
+        color: $background-white;
+        transform: translateY(-1px);
+      }
+
+      i {
+        font-size: $font-xs;
+      }
+    }
+  }
 }
 
 .detail-section-block {

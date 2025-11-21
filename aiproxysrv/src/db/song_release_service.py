@@ -33,6 +33,7 @@ class SongReleaseService:
         upc: str | None = None,
         isrc: str | None = None,
         copyright_info: str | None = None,
+        smart_link: str | None = None,
         cover_s3_key: str | None = None,
     ) -> SongRelease | None:
         """
@@ -55,6 +56,7 @@ class SongReleaseService:
             upc: Universal Product Code
             isrc: International Standard Recording Code
             copyright_info: Copyright information
+            smart_link: Smart link URL (DistroKid, ToneDen, etc.)
             cover_s3_key: S3 key for cover image
 
         Returns:
@@ -77,6 +79,7 @@ class SongReleaseService:
                 upc=upc,
                 isrc=isrc,
                 copyright_info=copyright_info,
+                smart_link=smart_link,
                 cover_s3_key=cover_s3_key,
             )
 
@@ -259,6 +262,7 @@ class SongReleaseService:
                 "upc",
                 "isrc",
                 "copyright_info",
+                "smart_link",
                 "cover_s3_key",
             }
 

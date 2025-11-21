@@ -338,6 +338,7 @@ class SongReleaseOrchestrator:
                 "upc": release.upc,
                 "isrc": release.isrc,
                 "copyright_info": release.copyright_info,
+                "smart_link": release.smart_link,
                 "cover_s3_key": release.cover_s3_key,
                 **update_data,  # Override with update data
             }

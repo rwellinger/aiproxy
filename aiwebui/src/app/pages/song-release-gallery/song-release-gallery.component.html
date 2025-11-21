@@ -176,6 +176,13 @@
             <span class="status-badge" [ngClass]="getStatusClass(selectedRelease.status)">
               {{ 'songRelease.statuses.' + selectedRelease.status | translate }}
             </span>
+            <!-- Smart Link in Header -->
+            <div *ngIf="selectedRelease.smart_link" class="smart-link-header">
+              <a [href]="selectedRelease.smart_link" target="_blank" class="external-link">
+                <i class="fas fa-external-link-alt"></i>
+                {{ 'songRelease.editor.smartLink' | translate }}
+              </a>
+            </div>
           </div>
         </div>
 

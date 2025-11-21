@@ -678,6 +678,7 @@ class SongRelease(Base):
     upc = Column(String(50), nullable=True)  # Universal Product Code
     isrc = Column(String(50), nullable=True)  # International Standard Recording Code
     copyright_info = Column(Text, nullable=True)
+    smart_link = Column(String(1000), nullable=True)  # Smart link (DistroKid HyperFollow, ToneDen, etc.)
 
     # Cover image (S3 upload, not generated_images)
     cover_s3_key = Column(String(500), nullable=True)

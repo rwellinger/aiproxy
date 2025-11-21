@@ -43,6 +43,7 @@ export interface SongRelease {
   upc?: string;
   isrc?: string;
   copyright_info?: string;
+  smart_link?: string;
   cover_url?: string; // Presigned S3 URL
   created_at?: string; // ISO format
   updated_at?: string; // ISO format
@@ -87,6 +88,7 @@ export interface SongReleaseCreateRequest {
   upc?: string;
   isrc?: string;
   copyright_info?: string;
+  smart_link?: string;
 }
 
 export interface SongReleaseUpdateRequest {
@@ -105,4 +107,5 @@ export interface SongReleaseUpdateRequest {
   upc?: string;
   isrc?: string;
   copyright_info?: string;
+  smart_link?: string;
 }

@@ -52,6 +52,7 @@ class SongReleaseController:
                 "upc": release_data.upc,
                 "isrc": release_data.isrc,
                 "copyright_info": release_data.copyright_info,
+                "smart_link": release_data.smart_link,
             }
 
             result, error_msg = song_release_orchestrator.create_release_with_projects(
