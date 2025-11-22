@@ -3,7 +3,7 @@
 import uuid
 from enum import Enum
 
-from sqlalchemy import ARRAY, Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import ARRAY, BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import JSON, JSONB, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -600,7 +600,7 @@ class ProjectFile(Base):
     # Storage
     s3_key = Column(String(255), nullable=True, index=True)
     local_path = Column(String(500), nullable=True)
-    file_size_bytes = Column(Integer, nullable=True)
+    file_size_bytes = Column(BigInteger, nullable=True)  # BigInteger supports files >2GB
     file_hash = Column(String(64), nullable=True)
 
     # Sync
