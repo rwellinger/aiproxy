@@ -149,8 +149,8 @@ export class AssignToProjectDialogComponent implements OnInit {
       return !this.selectedProjectId;
     }
 
-    // For non-release assets (song, image, sketch): need project AND folder
-    return !this.selectedProjectId || !this.selectedFolderId;
+    // For non-release assets (song, image, sketch): only project is required, folder is optional
+    return !this.selectedProjectId;
   }
 
   /**

@@ -242,6 +242,63 @@
                 <div class="readonly-field">{{ selectedProject.description }}</div>
               </div>
 
+              <!-- All Assigned Songs -->
+              <div *ngIf="selectedProject.all_assigned_songs?.length" class="assigned-assets-section">
+                <h3 class="section-title">
+                  <i class="fas fa-music"></i>
+                  {{ 'songProjects.detail.allAssignedSongs' | translate }}
+                </h3>
+                <div *ngFor="let song of selectedProject.all_assigned_songs" class="asset-item">
+                  <div class="asset-info">
+                    <i class="fas fa-music"></i>
+                    <span class="asset-title">{{ song.title || 'Untitled' }}</span>
+                    <span class="asset-badge">{{ song.workflow }}</span>
+                    <span *ngIf="song.file_type" class="asset-meta">{{ song.file_type.toUpperCase() }}</span>
+                    <span *ngIf="song.file_size_bytes" class="asset-meta">{{ formatFileSize(song.file_size_bytes) }}</span>
+                  </div>
+                  <button type="button" class="asset-action-button" (click)="openSong(song.id)" [matTooltip]="'songProjects.detail.actions.openSong' | translate">
+                    <i class="fas fa-external-link-alt"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- All Assigned Sketches -->
+              <div *ngIf="selectedProject.all_assigned_sketches?.length" class="assigned-assets-section">
+                <h3 class="section-title">
+                  <i class="fas fa-pencil-alt"></i>
+                  {{ 'songProjects.detail.allAssignedSketches' | translate }}
+                </h3>
+                <div *ngFor="let sketch of selectedProject.all_assigned_sketches" class="asset-item">
+                  <div class="asset-info">
+                    <i class="fas" [ngClass]="sketch.sketch_type === 'inspiration' ? 'fa-lightbulb' : 'fa-music'"></i>
+                    <span class="asset-title">{{ sketch.title || sketch.prompt }}</span>
+                    <span class="asset-badge">{{ sketch.workflow }}</span>
+                  </div>
+                  <button type="button" class="asset-action-button" (click)="openSketch(sketch.id)" [matTooltip]="'songProjects.detail.actions.openSketch' | translate">
+                    <i class="fas fa-external-link-alt"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- All Assigned Images -->
+              <div *ngIf="selectedProject.all_assigned_images?.length" class="assigned-assets-section">
+                <h3 class="section-title">
+                  <i class="fas fa-image"></i>
+                  {{ 'songProjects.detail.allAssignedImages' | translate }}
+                </h3>
+                <div *ngFor="let image of selectedProject.all_assigned_images" class="asset-item">
+                  <div class="asset-info">
+                    <i class="fas fa-image"></i>
+                    <span class="asset-title">{{ image.title || image.prompt || 'Untitled' }}</span>
+                    <span *ngIf="image.composition" class="asset-meta">{{ image.composition }}</span>
+                    <span *ngIf="image.width && image.height" class="asset-meta">{{ image.width }}x{{ image.height }}</span>
+                  </div>
+                  <button type="button" class="asset-action-button" (click)="openImage(image.id)" [matTooltip]="'songProjects.detail.actions.openImage' | translate">
+                    <i class="fas fa-external-link-alt"></i>
+                  </button>
+                </div>
+              </div>
+
               <div class="detail-field-row">
                 <div class="detail-field">
                   <span class="field-label">{{ 'songProjects.detail.stats.created' | translate }}</span>

@@ -260,6 +260,54 @@ class SongProjectOrchestrator:
             # Don't fail the entire request, just log the error
             response_data["assigned_releases"] = []
 
+    def _load_all_assigned_assets(self, db: Session, project_id: UUID, response_data: dict[str, Any]) -> None:
+        """
+        Load ALL assigned assets for project (for Metadata tab, regardless of folder assignment)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            response_data: Response dictionary (will be modified in-place)
+
+        Note:
+            This method modifies response_data in-place by adding all_assigned_songs,
+            all_assigned_sketches, and all_assigned_images lists.
+        """
+        try:
+            # Load ALL assigned songs from DB
+            songs = self.db_service.get_all_assigned_songs_for_project(db, project_id)
+            response_data["all_assigned_songs"] = [transform_song_to_assigned_response(song) for song in songs]
+
+            # Load ALL assigned sketches from DB
+            sketches = self.db_service.get_all_assigned_sketches_for_project(db, project_id)
+            response_data["all_assigned_sketches"] = [
+                transform_sketch_to_assigned_response(sketch) for sketch in sketches
+            ]
+
+            # Load ALL assigned images from DB
+            images = self.db_service.get_all_assigned_images_for_project(db, project_id)
+            response_data["all_assigned_images"] = [transform_image_to_assigned_response(image) for image in images]
+
+            logger.debug(
+                "All assigned assets loaded for project",
+                project_id=str(project_id),
+                songs_count=len(songs),
+                sketches_count=len(sketches),
+                images_count=len(images),
+            )
+
+        except Exception as e:
+            logger.error(
+                "Failed to load all assigned assets",
+                project_id=str(project_id),
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            # Don't fail the entire request, just log the error
+            response_data["all_assigned_songs"] = []
+            response_data["all_assigned_sketches"] = []
+            response_data["all_assigned_images"] = []
+
     def get_project_with_details(self, db: Session, project_id: UUID, user_id: UUID) -> dict[str, Any] | None:
         """
         Get project with all folders, files, and assigned assets
@@ -293,6 +341,9 @@ class SongProjectOrchestrator:
 
             # Load assigned releases for project (coordination)
             self._load_assigned_releases(db, project_id, response)
+
+            # Load ALL assigned assets for project (for Metadata tab)
+            self._load_all_assigned_assets(db, project_id, response)
 
             # Add cover_info based on assigned releases (business logic in transformer)
             releases = self.db_service.get_assigned_releases_for_project(db, project_id)

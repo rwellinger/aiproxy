@@ -775,6 +775,95 @@ class SongProjectService:
             )
             return []
 
+    def get_all_assigned_songs_for_project(self, db: Session, project_id: UUID) -> list[Any]:
+        """
+        Get ALL assigned songs for a project (regardless of folder assignment)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+
+        Returns:
+            List of Song instances
+        """
+        try:
+            from db.models import Song
+
+            songs = db.query(Song).filter(Song.project_id == project_id).order_by(Song.created_at.desc()).all()
+            logger.debug("All assigned songs retrieved", project_id=str(project_id), count=len(songs))
+            return songs
+        except SQLAlchemyError as e:
+            logger.error(
+                "Failed to get all assigned songs",
+                error=str(e),
+                error_type=type(e).__name__,
+                project_id=str(project_id),
+            )
+            return []
+
+    def get_all_assigned_sketches_for_project(self, db: Session, project_id: UUID) -> list[Any]:
+        """
+        Get ALL assigned sketches for a project (regardless of folder assignment)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+
+        Returns:
+            List of SongSketch instances
+        """
+        try:
+            from db.models import SongSketch
+
+            sketches = (
+                db.query(SongSketch)
+                .filter(SongSketch.project_id == project_id)
+                .order_by(SongSketch.created_at.desc())
+                .all()
+            )
+            logger.debug("All assigned sketches retrieved", project_id=str(project_id), count=len(sketches))
+            return sketches
+        except SQLAlchemyError as e:
+            logger.error(
+                "Failed to get all assigned sketches",
+                error=str(e),
+                error_type=type(e).__name__,
+                project_id=str(project_id),
+            )
+            return []
+
+    def get_all_assigned_images_for_project(self, db: Session, project_id: UUID) -> list[Any]:
+        """
+        Get ALL assigned images for a project (regardless of folder assignment)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+
+        Returns:
+            List of GeneratedImage instances
+        """
+        try:
+            from db.models import GeneratedImage, ProjectImageReference
+
+            images = (
+                db.query(GeneratedImage)
+                .join(ProjectImageReference, ProjectImageReference.image_id == GeneratedImage.id)
+                .filter(ProjectImageReference.project_id == project_id)
+                .order_by(GeneratedImage.created_at.desc())
+                .all()
+            )
+            logger.debug("All assigned images retrieved", project_id=str(project_id), count=len(images))
+            return images
+        except SQLAlchemyError as e:
+            logger.error(
+                "Failed to get all assigned images",
+                error=str(e),
+                error_type=type(e).__name__,
+                project_id=str(project_id),
+            )
+            return []
+
     def get_assigned_releases_for_project(self, db: Session, project_id: UUID) -> list[Any]:
         """
         Get all releases assigned to a project

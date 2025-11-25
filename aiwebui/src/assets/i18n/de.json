@@ -1820,6 +1820,9 @@
       "assignedSketches": "Zugewiesene Sketches",
       "assignedImages": "Zugewiesene Bilder",
       "assignedReleases": "Zugewiesene Releases",
+      "allAssignedSongs": "Zugewiesene Songs",
+      "allAssignedSketches": "Zugewiesene Sketches",
+      "allAssignedImages": "Zugewiesene Bilder",
       "noAssignedAssets": "Keine zugewiesenen Assets in diesem Ordner",
       "folderContent": {
         "images": "{{count}} Bilder",

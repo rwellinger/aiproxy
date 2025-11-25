@@ -1820,6 +1820,9 @@
       "assignedSketches": "Assigned Sketches",
       "assignedImages": "Assigned Images",
       "assignedReleases": "Assigned Releases",
+      "allAssignedSongs": "Assigned Songs",
+      "allAssignedSketches": "Assigned Sketches",
+      "allAssignedImages": "Assigned Images",
       "noAssignedAssets": "No assigned assets in this folder",
       "folderContent": {
         "images": "{{count}} images",

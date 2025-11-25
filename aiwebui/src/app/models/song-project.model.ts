@@ -102,6 +102,10 @@ export interface SongProjectDetail extends SongProject {
   total_size_bytes: number;  // Live calculated
   folders: ProjectFolderWithAssets[];
   assigned_releases?: AssignedRelease[];
+  // All assigned assets (regardless of folder) - for Metadata tab
+  all_assigned_songs?: AssignedSong[];
+  all_assigned_sketches?: AssignedSketch[];
+  all_assigned_images?: AssignedImage[];
 }
 
 export interface SongProjectListItem {
