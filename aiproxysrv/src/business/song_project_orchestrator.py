@@ -504,6 +504,16 @@ class SongProjectOrchestrator:
                 )
                 return False
 
+            # Prevent deletion of projects assigned to releases
+            assigned_releases = self.db_service.get_assigned_releases_for_project(db, project_id)
+            if assigned_releases:
+                logger.warning(
+                    "Cannot delete project assigned to releases",
+                    project_id=str(project_id),
+                    release_count=len(assigned_releases),
+                )
+                return False
+
             # Delete S3 files if s3_prefix exists
             if project.s3_prefix:
                 try:

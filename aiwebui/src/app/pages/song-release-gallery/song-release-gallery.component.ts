@@ -9,7 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { SongReleaseService } from '../../services/business/song-release.service';
 import { NotificationService } from '../../services/ui/notification.service';
 import { ResourceBlobService } from '../../services/ui/resource-blob.service';
-import { SongRelease, SongReleaseListItem, ReleaseType, ReleaseStatus } from '../../models/song-release.model';
+import { SongRelease, SongReleaseListItem, ReleaseType, ReleaseStatus, AssignedProject } from '../../models/song-release.model';
 
 @Component({
   selector: 'app-song-release-gallery',
@@ -340,10 +340,14 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
 
   /**
    * Navigate to Song Project with project ID in state.
+   * Passes targetStatus to switch to archived tab if project is archived.
    */
-  openProject(projectId: string): void {
+  openProject(project: AssignedProject): void {
     this.router.navigate(['/song-projects'], {
-      state: { selectedProjectId: projectId }
+      state: {
+        selectedProjectId: project.id,
+        targetStatus: project.project_status === 'archived' ? 'archived' : 'all'
+      }
     });
   }
 

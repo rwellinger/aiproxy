@@ -131,6 +131,21 @@ class AssignedImageResponse(BaseModel):
         from_attributes = True
 
 
+class AssignedReleaseResponse(BaseModel):
+    """Response schema for an assigned release"""
+
+    id: str
+    name: str | None
+    type: str | None
+    status: str | None
+    genre: str | None
+    release_date: str | None
+    created_at: str | None
+
+    class Config:
+        from_attributes = True
+
+
 class ProjectDetailResponse(BaseModel):
     """Response schema for project with folders and files"""
 
@@ -147,6 +162,8 @@ class ProjectDetailResponse(BaseModel):
     created_at: str | None
     updated_at: str | None
     folders: list[FolderResponse]
+    # Assigned releases for this project
+    assigned_releases: list[AssignedReleaseResponse] | None = None
     # All assigned assets (regardless of folder) - for Metadata tab
     all_assigned_songs: list[AssignedSongResponse] | None = None
     all_assigned_sketches: list[AssignedSketchResponse] | None = None

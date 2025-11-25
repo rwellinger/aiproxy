@@ -116,6 +116,12 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
         this.loadProjects();
       });
 
+    // Check navigation state for status filter (e.g., for archived projects from Song Release links)
+    const targetStatus = this.navigationState?.['targetStatus'];
+    if (targetStatus && ['all', 'new', 'progress', 'archived'].includes(targetStatus)) {
+      this.currentStatus = targetStatus as 'all' | 'new' | 'progress' | 'archived';
+    }
+
     // Load initial data and auto-select project if provided via state
     this.loadProjects().then(() => {
       const selectedProjectId = this.navigationState?.['selectedProjectId'];
