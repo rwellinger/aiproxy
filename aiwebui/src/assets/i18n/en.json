@@ -141,6 +141,23 @@
     "title": "Select Project",
     "subtitle": "This picture is assigned to multiple projects. Please select one:"
   },
+  "createProjectDialog": {
+    "advanced": {
+      "title": "Assignments",
+      "hint": "Here you can manage the assignments of elements to this project. Removing only removes the assignment - the elements themselves are preserved.",
+      "assignedSongs": "Assigned Songs",
+      "assignedSketches": "Assigned Sketches",
+      "assignedImages": "Assigned Images",
+      "noAssignments": "No assignments",
+      "unassign": "Remove assignment",
+      "confirmUnassign": "Remove the assignment of {{type}} \"{{name}}\"? The element itself will be preserved.",
+      "typeSong": "Song",
+      "typeSketch": "Sketch",
+      "typeImage": "Image",
+      "unassignSuccess": "Assignment successfully removed",
+      "unassignError": "Error removing assignment"
+    }
+  },
   "assignToProject": {
     "title": {
       "image": "Assign Pictures to Project",
@@ -369,6 +386,7 @@
   "imageView": {
     "actions": {
       "assignToProject": "Assign to Project",
+      "unassignFromProject": "Remove from Project",
       "delete": "Delete",
       "deleteCount": "Delete ({{count}})",
       "deselectAll": "Deselect All",
@@ -391,13 +409,18 @@
       "count": "{{count}} pictures"
     },
     "confirmations": {
-      "bulkDelete": "Are you sure you want to delete {{count}} selected pictures(s)?"
+      "bulkDelete": "Are you sure you want to delete {{count}} selected pictures(s)?",
+      "unassignFromProject": "Remove picture \"{{image}}\" from project \"{{project}}\"? The picture itself will be preserved."
+    },
+    "dialogs": {
+      "selectProjectToUnassign": "Which project should the picture be removed from?"
     },
     "errors": {
       "deletingImages": "Error deleting pictures: {{error}}",
       "loadingImages": "Error loading pictures: {{error}}",
       "noImagesSelected": "No pictures selected for deletion",
-      "updatingTitle": "Error updating title: {{error}}"
+      "updatingTitle": "Error updating title: {{error}}",
+      "unassigningFromProject": "Error removing from project: {{error}}"
     },
     "gallery": {
       "clearSearch": "Clear search",
@@ -413,7 +436,8 @@
       "noSearchResults": "No pictures match your search criteria.",
       "selectImagePlaceholder": "Select an picture from the list to view details",
       "noProjects": "This picture is not assigned to any project",
-      "projectLoadError": "Failed to load projects for this picture"
+      "projectLoadError": "Failed to load projects for this picture",
+      "unassignedFromProject": "Picture successfully removed from project"
     },
     "noImages": "No pictures found",
     "orientation": {
@@ -1029,6 +1053,7 @@
   "songView": {
     "actions": {
       "assignToProject": "Assign to Project",
+      "unassignFromProject": "Remove from Project",
       "close": "Close",
       "copyAll": "Copy All",
       "copyLyrics": "Copy Lyrics",
@@ -1053,7 +1078,8 @@
       "notFound": "{{count}} not found"
     },
     "confirmations": {
-      "bulkDelete": "Are you sure you want to delete {{count}} selected song(s)?"
+      "bulkDelete": "Are you sure you want to delete {{count}} selected song(s)?",
+      "unassignFromProject": "Remove song \"{{song}}\" from project \"{{project}}\"? The song itself will be preserved."
     },
     "header": {
       "count": "{{count}} songs"
@@ -1075,7 +1101,8 @@
       "updatingRating": "Error updating rating: {{error}}",
       "updatingTags": "Error updating tags: {{error}}",
       "updatingTitle": "Error updating title: {{error}}",
-      "updatingWorkflow": "Error updating workflow: {{error}}"
+      "updatingWorkflow": "Error updating workflow: {{error}}",
+      "unassigningFromProject": "Error removing from project: {{error}}"
     },
     "filters": {
       "all": "All",
@@ -1104,7 +1131,8 @@
       "selectSongPlaceholder": "Select a song from the list to view details",
       "unknownSong": "Unknown Song",
       "untitled": "Untitled",
-      "untitledSong": "Untitled Song"
+      "untitledSong": "Untitled Song",
+      "unassignedFromProject": "Song successfully removed from project"
     },
     "noSongs": "No songs found",
     "pagination": {
@@ -1403,6 +1431,7 @@
       },
       "actions": {
         "assignToProject": "Assign to Project",
+        "unassignFromProject": "Remove from Project",
         "newSketch": "New Sketch",
         "createFirst": "Create Your First Sketch",
         "edit": "Edit",
@@ -1454,7 +1483,8 @@
         "deleteTitle": "Delete Sketch",
         "deleteMessage": "Are you sure you want to delete this sketch? This action cannot be undone.",
         "cancel": "Cancel",
-        "confirm": "Delete"
+        "confirm": "Delete",
+        "unassignFromProject": "Remove sketch \"{{sketch}}\" from project \"{{project}}\"? The sketch itself will be preserved."
       },
       "messages": {
         "noSketches": "No sketches found",
@@ -1473,7 +1503,9 @@
         "duplicateConfirm": "Do you really want to duplicate '{{title}}'?",
         "duplicated": "Sketch duplicated successfully",
         "duplicateError": "Error duplicating sketch",
-        "cannotDeleteAssigned": "Cannot delete sketch assigned to project '{{project}}'"
+        "cannotDeleteAssigned": "Cannot delete sketch assigned to project '{{project}}'",
+        "unassignedFromProject": "Sketch successfully removed from project",
+        "unassignFromProjectError": "Error removing sketch from project"
       }
     },
     "workflow": {
@@ -1882,6 +1914,7 @@
       "saving": "Saving...",
       "save": "Save",
       "cancel": "Cancel",
+      "close": "Close",
       "projectName": "Project Name",
       "projectNameHint": "e.g., Summer Vibes 2024",
       "description": "Description",

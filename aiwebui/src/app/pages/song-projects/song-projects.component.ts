@@ -676,15 +676,31 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
     if (!this.selectedProject) return;
 
     const dialogRef = this.dialog.open(CreateProjectDialogComponent, {
-      width: '500px',
+      width: '600px',
+      maxHeight: '90vh',
       data: {
+        project_id: this.selectedProject.id,
         project_name: this.selectedProject.project_name,
         description: this.selectedProject.description,
-        tags: this.selectedProject.tags
+        tags: this.selectedProject.tags,
+        // Pass assigned elements for Advanced section
+        all_assigned_songs: this.selectedProject.all_assigned_songs,
+        all_assigned_sketches: this.selectedProject.all_assigned_sketches,
+        all_assigned_images: this.selectedProject.all_assigned_images
       }
     });
 
     dialogRef.afterClosed().subscribe(async (result) => {
+      // If dialog was closed without result but unassignments were made, reload project
+      if (!result && this.selectedProject) {
+        // Reload to reflect any unassignments made in Advanced section
+        const projectInList = this.projectList.find(p => p.id === this.selectedProject!.id);
+        if (projectInList) {
+          await this.selectProject(projectInList);
+        }
+        return;
+      }
+
       if (!result || !this.selectedProject) return;
 
       try {
@@ -706,6 +722,8 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
         if (projectInList) {
           projectInList.project_name = result.project_name;
           projectInList.tags = result.tags;
+          // Reload project to reflect any unassignments made in Advanced section
+          await this.selectProject(projectInList);
         }
 
         this.notificationService.success(

@@ -687,4 +687,79 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             this.notificationService.error(this.translate.instant('imageView.messages.projectLoadError'));
         }
     }
+
+    /**
+     * Unassign image from a specific project (link only, image remains)
+     * Shows project selection dialog if assigned to multiple projects
+     */
+    async unassignFromProject(): Promise<void> {
+        if (!this.selectedImage || !this.selectedImage.projects_count) {
+            return;
+        }
+
+        try {
+            // Fetch projects for this image
+            const projects = await this.imageService.getProjectsForImage(this.selectedImage.id);
+
+            if (projects.length === 0) {
+                return;
+            }
+
+            let targetProjectId: string;
+            let targetProjectName: string;
+
+            if (projects.length === 1) {
+                // Single project: use directly
+                targetProjectId = projects[0].project_id;
+                targetProjectName = projects[0].project_name;
+            } else {
+                // Multiple projects: show selection dialog
+                const { SelectProjectDialogComponent } = await import('../../dialogs/select-project-dialog/select-project-dialog.component');
+                const dialogRef = this.dialog.open(SelectProjectDialogComponent, {
+                    width: '400px',
+                    data: {
+                        imageId: this.selectedImage.id,
+                        projects: projects,
+                        title: this.translate.instant('imageView.dialogs.selectProjectToUnassign')
+                    }
+                });
+
+                const result = await firstValueFrom(dialogRef.afterClosed());
+                if (!result?.selectedProjectId) {
+                    return;
+                }
+                targetProjectId = result.selectedProjectId;
+                targetProjectName = projects.find(p => p.project_id === targetProjectId)?.project_name || '';
+            }
+
+            // Confirm unassignment
+            const confirmation = confirm(
+                this.translate.instant('imageView.confirmations.unassignFromProject', {
+                    image: this.getDisplayTitle(this.selectedImage),
+                    project: targetProjectName
+                })
+            );
+
+            if (!confirmation) {
+                return;
+            }
+
+            this.isLoading = true;
+            await this.imageService.unassignFromProject(this.selectedImage.id, targetProjectId);
+
+            this.notificationService.success(
+                this.translate.instant('imageView.messages.unassignedFromProject')
+            );
+
+            // Reload images to reflect updated project assignment
+            await this.loadImages(this.currentPage);
+
+        } catch (error: any) {
+            this.notificationService.error(
+                this.translate.instant('imageView.errors.unassigningFromProject', { error: error.message })
+            );
+        } finally {
+            this.isLoading = false;
+        }
+    }
 }

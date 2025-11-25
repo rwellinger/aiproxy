@@ -392,3 +392,34 @@ class ImageController:
                 "Failed to get projects for image", image_id=image_id, error_type=type(e).__name__, error=str(e)
             )
             return {"error": f"Internal server error: {str(e)}"}, 500
+
+    def unassign_from_project(self, image_id: str, project_id: str) -> tuple[dict[str, Any], int]:
+        """
+        Remove image from project (link only, image remains)
+
+        Args:
+            image_id: Image UUID
+            project_id: Project UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            result = self.orchestrator.unassign_image_from_project(image_id, project_id)
+
+            logger.info("Image unassigned from project", image_id=image_id, project_id=project_id)
+
+            return {"success": True, "data": result}, 200
+
+        except ValueError as e:
+            logger.warning("Image unassign validation failed", image_id=image_id, project_id=project_id, error=str(e))
+            return {"error": str(e)}, 404
+        except Exception as e:
+            logger.error(
+                "Failed to unassign image from project",
+                image_id=image_id,
+                project_id=project_id,
+                error_type=type(e).__name__,
+                error=str(e),
+            )
+            return {"error": f"Internal server error: {str(e)}"}, 500

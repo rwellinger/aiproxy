@@ -5,12 +5,22 @@ import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { AssignedSong, AssignedSketch, AssignedImage } from '../../models/song-project.model';
+import { SongService } from '../../services/business/song.service';
+import { SketchService } from '../../services/business/sketch.service';
+import { ImageService } from '../../services/business/image.service';
+import { NotificationService } from '../../services/ui/notification.service';
 
 export interface ProjectDialogData {
+  project_id?: string;
   project_name?: string;
   description?: string;
   tags?: string[];
+  // Assigned elements (only for edit mode)
+  all_assigned_songs?: AssignedSong[];
+  all_assigned_sketches?: AssignedSketch[];
+  all_assigned_images?: AssignedImage[];
 }
 
 @Component({
@@ -31,13 +41,43 @@ export interface ProjectDialogData {
 export class CreateProjectDialogComponent implements OnInit {
   projectForm!: FormGroup;
   isEditMode: boolean = false;
+  showAdvanced: boolean = false;
+
+  // Assigned elements (copy to allow local modifications)
+  assignedSongs: AssignedSong[] = [];
+  assignedSketches: AssignedSketch[] = [];
+  assignedImages: AssignedImage[] = [];
+
+  // Track unassigned items (for reporting back to parent)
+  unassignedItems: { type: 'song' | 'sketch' | 'image'; id: string }[] = [];
 
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<CreateProjectDialogComponent>);
   public data = inject<ProjectDialogData | null>(MAT_DIALOG_DATA);
+  private songService = inject(SongService);
+  private sketchService = inject(SketchService);
+  private imageService = inject(ImageService);
+  private translate = inject(TranslateService);
+  private notificationService = inject(NotificationService);
 
   constructor() {
     this.isEditMode = !!this.data;
+  }
+
+  get hasAssignments(): boolean {
+    return this.assignedSongs.length > 0 ||
+           this.assignedSketches.length > 0 ||
+           this.assignedImages.length > 0;
+  }
+
+  get hasUnassignedItems(): boolean {
+    return this.unassignedItems.length > 0;
+  }
+
+  get totalAssignments(): number {
+    return this.assignedSongs.length +
+           this.assignedSketches.length +
+           this.assignedImages.length;
   }
 
   ngOnInit(): void {
@@ -46,6 +86,13 @@ export class CreateProjectDialogComponent implements OnInit {
       description: [this.data?.description || '', [Validators.maxLength(2000)]],
       tags: [this.data?.tags?.join(', ') || '']
     });
+
+    // Initialize assigned elements (copy to allow local modifications)
+    if (this.isEditMode && this.data) {
+      this.assignedSongs = [...(this.data.all_assigned_songs || [])];
+      this.assignedSketches = [...(this.data.all_assigned_sketches || [])];
+      this.assignedImages = [...(this.data.all_assigned_images || [])];
+    }
   }
 
   /**
@@ -94,5 +141,111 @@ export class CreateProjectDialogComponent implements OnInit {
    */
   onCancel(): void {
     this.dialogRef.close();
+  }
+
+  /**
+   * Toggle Advanced panel visibility and resize dialog
+   */
+  toggleAdvanced(): void {
+    this.showAdvanced = !this.showAdvanced;
+    // Resize dialog when toggling
+    this.dialogRef.updateSize(this.showAdvanced ? '850px' : '450px');
+  }
+
+  /**
+   * Unassign a song from this project
+   */
+  async unassignSong(song: AssignedSong): Promise<void> {
+    const confirmation = confirm(
+      this.translate.instant('createProjectDialog.advanced.confirmUnassign', {
+        type: this.translate.instant('createProjectDialog.advanced.typeSong'),
+        name: song.title || 'Untitled'
+      })
+    );
+
+    if (!confirmation) return;
+
+    try {
+      await this.songService.unassignFromProject(song.id);
+      this.assignedSongs = this.assignedSongs.filter(s => s.id !== song.id);
+      this.unassignedItems.push({ type: 'song', id: song.id });
+      this.notificationService.success(
+        this.translate.instant('createProjectDialog.advanced.unassignSuccess')
+      );
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('createProjectDialog.advanced.unassignError') + ': ' + error.message
+      );
+    }
+  }
+
+  /**
+   * Unassign a sketch from this project
+   */
+  async unassignSketch(sketch: AssignedSketch): Promise<void> {
+    const confirmation = confirm(
+      this.translate.instant('createProjectDialog.advanced.confirmUnassign', {
+        type: this.translate.instant('createProjectDialog.advanced.typeSketch'),
+        name: sketch.title || sketch.prompt?.substring(0, 30) || 'Untitled'
+      })
+    );
+
+    if (!confirmation) return;
+
+    try {
+      await this.sketchService.unassignFromProject(sketch.id);
+      this.assignedSketches = this.assignedSketches.filter(s => s.id !== sketch.id);
+      this.unassignedItems.push({ type: 'sketch', id: sketch.id });
+      this.notificationService.success(
+        this.translate.instant('createProjectDialog.advanced.unassignSuccess')
+      );
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('createProjectDialog.advanced.unassignError') + ': ' + error.message
+      );
+    }
+  }
+
+  /**
+   * Unassign an image from this project
+   */
+  async unassignImage(image: AssignedImage): Promise<void> {
+    if (!this.data?.project_id) return;
+
+    const confirmation = confirm(
+      this.translate.instant('createProjectDialog.advanced.confirmUnassign', {
+        type: this.translate.instant('createProjectDialog.advanced.typeImage'),
+        name: image.title || image.prompt?.substring(0, 30) || 'Untitled'
+      })
+    );
+
+    if (!confirmation) return;
+
+    try {
+      await this.imageService.unassignFromProject(image.id, this.data.project_id);
+      this.assignedImages = this.assignedImages.filter(i => i.id !== image.id);
+      this.unassignedItems.push({ type: 'image', id: image.id });
+      this.notificationService.success(
+        this.translate.instant('createProjectDialog.advanced.unassignSuccess')
+      );
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('createProjectDialog.advanced.unassignError') + ': ' + error.message
+      );
+    }
+  }
+
+  /**
+   * Get display title for an element
+   */
+  getDisplayTitle(item: AssignedSong | AssignedSketch | AssignedImage, fallbackField?: string): string {
+    if (item.title && item.title.trim()) {
+      return item.title.trim();
+    }
+    if (fallbackField && (item as any)[fallbackField]) {
+      const fallback = (item as any)[fallbackField];
+      return fallback.length > 40 ? fallback.substring(0, 37) + '...' : fallback;
+    }
+    return 'Untitled';
   }
 }

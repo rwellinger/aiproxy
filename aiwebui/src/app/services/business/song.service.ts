@@ -187,4 +187,10 @@ export class SongService {
     };
     return this.httpWithTimeout<any>('POST', this.apiConfig.endpoints.song.assignToProject(songId), body, 30000);
   }
+
+  async unassignFromProject(songId: string): Promise<any> {
+    return firstValueFrom(
+      this.http.delete(this.apiConfig.endpoints.song.unassignFromProject(songId))
+    );
+  }
 }

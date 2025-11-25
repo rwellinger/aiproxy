@@ -28,6 +28,7 @@ export class ApiConfigService {
             updateChoiceRating: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/rating`,
             bulkDelete: `${this.baseUrl}/api/v1/song/bulk-delete`,
             assignToProject: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}/assign-to-project`,
+            unassignFromProject: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}/unassign-from-project`,
             // S3 Proxy endpoints (lazy migration from Mureka CDN)
             choiceMp3: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/mp3`,
             choiceFlac: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/flac`,
@@ -45,6 +46,7 @@ export class ApiConfigService {
             bulkDelete: `${this.baseUrl}/api/v1/image/bulk-delete`,
             addTextOverlay: `${this.baseUrl}/api/v1/image/add-text-overlay`,
             assignToProject: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}/assign-to-project`,
+            unassignFromProject: (imageId: string, projectId: string) => `${this.baseUrl}/api/v1/image/id/${imageId}/unassign-from-project/${projectId}`,
             getProjects: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}/projects`
         },
         redis: {
@@ -128,7 +130,8 @@ export class ApiConfigService {
             update: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
             delete: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
             duplicate: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}/duplicate`,
-            assignToProject: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}/assign-to-project`
+            assignToProject: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}/assign-to-project`,
+            unassignFromProject: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}/unassign-from-project`
         },
         equipment: {
             create: () => `${this.baseUrl}/api/v1/equipment`,

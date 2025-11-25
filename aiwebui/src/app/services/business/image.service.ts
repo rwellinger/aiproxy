@@ -88,4 +88,13 @@ export class ImageService {
     );
     return response.projects;
   }
+
+  /**
+   * Unassign an image from a project (link only, image remains)
+   */
+  async unassignFromProject(imageId: string, projectId: string): Promise<any> {
+    return firstValueFrom(
+      this.http.delete(this.apiConfig.endpoints.image.unassignFromProject(imageId, projectId))
+    );
+  }
 }

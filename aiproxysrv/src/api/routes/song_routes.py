@@ -257,6 +257,18 @@ def assign_song_to_project(song_id: str, body: AssignToProjectRequest):
         return jsonify(error_response.dict()), 500
 
 
+@api_song_v1.route("/<string:song_id>/unassign-from-project", methods=["DELETE"])
+@jwt_required
+def unassign_song_from_project(song_id: str):
+    """Remove song from its assigned project (link only, song remains)"""
+    try:
+        response_data, status_code = song_controller.unassign_from_project(song_id)
+        return jsonify(response_data), status_code
+    except Exception as e:
+        error_response = ErrorResponse(error=str(e))
+        return jsonify(error_response.dict()), 500
+
+
 # ============================================================
 # S3 Proxy Endpoints (Lazy Migration from Mureka CDN)
 # ============================================================

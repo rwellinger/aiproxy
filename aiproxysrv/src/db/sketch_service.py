@@ -225,6 +225,7 @@ class SketchService:
         info: str | None = None,
         project_id: str | None = None,
         project_folder_id: str | None = None,
+        clear_project: bool = False,
     ) -> SongSketch | None:
         """
         Update an existing sketch
@@ -287,12 +288,21 @@ class SketchService:
             if info is not None:
                 sketch.info = info
                 updated_fields.append("info")
-            if project_id is not None:
-                sketch.project_id = project_id
+            # Handle project assignment/unassignment
+            if clear_project:
+                # Explicitly clear project assignment (unassign from project)
+                sketch.project_id = None
+                sketch.project_folder_id = None
                 updated_fields.append("project_id")
-            if project_folder_id is not None:
-                sketch.project_folder_id = project_folder_id
                 updated_fields.append("project_folder_id")
+            else:
+                # Normal update: only set if value provided
+                if project_id is not None:
+                    sketch.project_id = project_id
+                    updated_fields.append("project_id")
+                if project_folder_id is not None:
+                    sketch.project_folder_id = project_folder_id
+                    updated_fields.append("project_folder_id")
 
             # Update timestamp
             sketch.updated_at = datetime.utcnow()
