@@ -1042,4 +1042,44 @@ export class SongViewComponent implements OnInit, OnDestroy {
       state: { selectedProjectId: projectId }
     });
   }
+
+  /**
+   * Unassign song from its project (link only, song remains)
+   */
+  async unassignFromProject(): Promise<void> {
+    if (!this.selectedSong || !this.selectedSong.project_id) {
+      return;
+    }
+
+    const confirmation = confirm(
+      this.translate.instant('songView.confirmations.unassignFromProject', {
+        song: this.getDisplayTitle(this.selectedSong),
+        project: this.selectedSong.project_name || ''
+      })
+    );
+
+    if (!confirmation) {
+      return;
+    }
+
+    this.isLoading = true;
+    try {
+      await this.songService.unassignFromProject(this.selectedSong.id);
+
+      this.notificationService.success(
+        this.translate.instant('songView.messages.unassignedFromProject')
+      );
+
+      // Reload songs to reflect updated project assignment
+      const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+      await this.loadSongs(currentPage);
+
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('songView.errors.unassigningFromProject', { error: error.message })
+      );
+    } finally {
+      this.isLoading = false;
+    }
+  }
 }

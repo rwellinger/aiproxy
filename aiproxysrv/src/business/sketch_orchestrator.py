@@ -254,6 +254,46 @@ class SketchOrchestrator:
             )
             raise
 
+    def unassign_from_project(self, db: Session, sketch_id: str) -> dict | None:
+        """
+        Remove sketch from its assigned project (link only, sketch remains)
+
+        Args:
+            db: Database session
+            sketch_id: Sketch UUID
+
+        Returns:
+            dict: Updated sketch data or None if not found
+        """
+        try:
+            # Update sketch to remove project assignment
+            updated_sketch = sketch_service.update_sketch(
+                db=db,
+                sketch_id=sketch_id,
+                clear_project=True,
+            )
+
+            if not updated_sketch:
+                return None
+
+            logger.info("Sketch unassigned from project", sketch_id=sketch_id)
+
+            return {
+                "id": str(updated_sketch.id),
+                "title": updated_sketch.title,
+                "project_id": None,
+                "project_folder_id": None,
+            }
+
+        except Exception as e:
+            logger.error(
+                "Failed to unassign sketch from project",
+                sketch_id=sketch_id,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            raise
+
     def duplicate_sketch(
         self,
         db: Session,

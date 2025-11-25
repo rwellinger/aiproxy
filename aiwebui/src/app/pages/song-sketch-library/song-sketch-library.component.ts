@@ -439,4 +439,43 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
       state: { selectedProjectId: projectId }
     });
   }
+
+  /**
+   * Unassign sketch from its project (link only, sketch remains)
+   */
+  async unassignFromProject(): Promise<void> {
+    if (!this.selectedSketch || !this.selectedSketch.project_id) {
+      return;
+    }
+
+    const confirmation = confirm(
+      this.translate.instant('songSketch.library.confirmations.unassignFromProject', {
+        sketch: this.selectedSketch.title || this.translate.instant('songSketch.library.untitled'),
+        project: this.selectedSketch.project_name || ''
+      })
+    );
+
+    if (!confirmation) {
+      return;
+    }
+
+    this.isLoading = true;
+    try {
+      await this.sketchService.unassignFromProject(this.selectedSketch.id);
+
+      this.notificationService.success(
+        this.translate.instant('songSketch.library.messages.unassignedFromProject')
+      );
+
+      // Reload sketches to reflect updated project assignment
+      await this.loadSketches(this.currentPage);
+
+    } catch (error: any) {
+      this.notificationService.error(
+        this.translate.instant('songSketch.library.messages.unassignFromProjectError') + ': ' + error.message
+      );
+    } finally {
+      this.isLoading = false;
+    }
+  }
 }

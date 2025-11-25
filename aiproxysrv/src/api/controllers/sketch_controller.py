@@ -336,3 +336,44 @@ class SketchController:
                 error_type=type(e).__name__,
             )
             return {"error": f"Failed to assign sketch to project: {str(e)}"}, 500
+
+    @staticmethod
+    def unassign_from_project(db: Session, sketch_id: str) -> tuple[dict[str, Any], int]:
+        """
+        Remove sketch from its assigned project (link only, sketch remains)
+
+        Args:
+            db: Database session
+            sketch_id: Sketch UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            # Validate UUID format
+            try:
+                UUID(sketch_id)
+            except ValueError:
+                return {"error": "Invalid sketch ID format"}, 400
+
+            orchestrator = SketchOrchestrator()
+            result = orchestrator.unassign_from_project(db=db, sketch_id=sketch_id)
+
+            if not result:
+                return {"error": "Sketch not found"}, 404
+
+            logger.info("Sketch unassigned from project", sketch_id=sketch_id)
+
+            return {"success": True, "data": result}, 200
+
+        except ValueError as e:
+            logger.warning("Sketch unassign validation failed", sketch_id=sketch_id, error=str(e))
+            return {"error": str(e)}, 404
+        except Exception as e:
+            logger.error(
+                "Failed to unassign sketch from project",
+                sketch_id=sketch_id,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Failed to unassign sketch from project: {str(e)}"}, 500

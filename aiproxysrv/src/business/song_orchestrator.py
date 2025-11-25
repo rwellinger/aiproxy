@@ -372,6 +372,33 @@ class SongOrchestrator:
 
         return result
 
+    def unassign_song_from_project(self, song_id: str) -> dict:
+        """
+        Remove song from its assigned project (link only, song remains)
+
+        Args:
+            song_id: Song UUID
+
+        Returns:
+            dict: Unassignment result
+
+        Raises:
+            ValueError: If song not found
+        """
+        update_data = {
+            "project_id": None,
+            "project_folder_id": None,
+        }
+
+        result = self.update_song(song_id, update_data)
+
+        if not result:
+            raise ValueError(f"Song not found: {song_id}")
+
+        logger.info("Song unassigned from project", song_id=song_id)
+
+        return result
+
     def migrate_choice_to_s3(self, db, choice_id: str, file_type: str) -> str:
         """
         Lazy migration: Download file from Mureka URL to S3 if not already migrated

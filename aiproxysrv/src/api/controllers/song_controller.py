@@ -283,3 +283,27 @@ class SongController:
         except Exception as e:
             logger.error(f"Failed to assign song to project {song_id}: {type(e).__name__}: {e}")
             return {"error": "Internal server error"}, 500
+
+    def unassign_from_project(self, song_id: str) -> tuple[dict, int]:
+        """
+        Remove song from its assigned project (link only, song remains)
+
+        Args:
+            song_id: Song UUID
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            result = self.orchestrator.unassign_song_from_project(song_id)
+
+            logger.info(f"Song unassigned from project: {song_id}")
+
+            return {"success": True, "data": result}, 200
+
+        except ValueError as e:
+            logger.warning(f"Song unassign validation failed {song_id}: {e}")
+            return {"error": str(e)}, 404
+        except Exception as e:
+            logger.error(f"Failed to unassign song from project {song_id}: {type(e).__name__}: {e}")
+            return {"error": "Internal server error"}, 500

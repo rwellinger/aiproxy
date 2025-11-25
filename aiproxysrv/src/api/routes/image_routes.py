@@ -193,6 +193,18 @@ def assign_to_project(image_id: str, body: AssignToProjectRequest):
         return jsonify(error_response.dict()), 500
 
 
+@api_image_v1.route("/id/<string:image_id>/unassign-from-project/<string:project_id>", methods=["DELETE"])
+@jwt_required
+def unassign_from_project(image_id: str, project_id: str):
+    """Remove image from project (link only, image remains)"""
+    try:
+        response_data, status_code = image_controller.unassign_from_project(image_id, project_id)
+        return jsonify(response_data), status_code
+    except Exception as e:
+        error_response = ErrorResponse(error=str(e))
+        return jsonify(error_response.dict()), 500
+
+
 @api_image_v1.route("/id/<string:image_id>/projects", methods=["GET"])
 @jwt_required
 def get_projects_for_image(image_id: str):

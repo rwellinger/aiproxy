@@ -783,3 +783,45 @@ class ImageOrchestrator:
 
         finally:
             db.close()
+
+    def unassign_image_from_project(self, image_id: str, project_id: str) -> dict[str, Any]:
+        """
+        Remove image from project (link only, image remains)
+
+        Args:
+            image_id: Image UUID
+            project_id: Project UUID
+
+        Returns:
+            dict: Unassignment result
+
+        Raises:
+            ValueError: If image-project reference not found
+        """
+        from uuid import UUID
+
+        from db.database import get_db
+        from db.project_asset_service import delete_image_reference_by_ids
+
+        db = next(get_db())
+
+        try:
+            # Delete the reference
+            success = delete_image_reference_by_ids(db, UUID(project_id), UUID(image_id))
+
+            if not success:
+                raise ValueError(f"Image {image_id} is not assigned to project {project_id}")
+
+            logger.info(
+                "Image unassigned from project",
+                image_id=image_id,
+                project_id=project_id,
+            )
+
+            return {
+                "image_id": image_id,
+                "project_id": project_id,
+            }
+
+        finally:
+            db.close()

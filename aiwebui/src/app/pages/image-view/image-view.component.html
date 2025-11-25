@@ -190,6 +190,9 @@
             <button mat-button type="button" (click)="openAssignToProjectDialog()">
               <i class="fas fa-folder-plus"></i> {{ 'imageView.actions.assignToProject' | translate }}
             </button>
+            <button mat-button type="button" *ngIf="selectedImage.projects_count && selectedImage.projects_count > 0" (click)="unassignFromProject()">
+              <i class="fas fa-folder-minus"></i> {{ 'imageView.actions.unassignFromProject' | translate }}
+            </button>
             <button mat-button type="button" (click)="onDownloadImage()">
               <i class="fas fa-download"></i> {{ 'imageView.actions.downloadOriginal' | translate }}
             </button>

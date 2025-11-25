@@ -172,3 +172,15 @@ def assign_to_project(sketch_id: str):
         return jsonify(result), status_code
     finally:
         db.close()
+
+
+@api_sketch_v1.route("/<sketch_id>/unassign-from-project", methods=["DELETE"])
+@jwt_required
+def unassign_from_project(sketch_id: str):
+    """Remove sketch from its assigned project (link only, sketch remains)"""
+    db: Session = next(get_db())
+    try:
+        result, status_code = SketchController.unassign_from_project(db, sketch_id)
+        return jsonify(result), status_code
+    finally:
+        db.close()

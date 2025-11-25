@@ -134,4 +134,13 @@ export class SketchService {
       options
     );
   }
+
+  /**
+   * Unassign a sketch from its project (link only, sketch remains)
+   */
+  async unassignFromProject(sketchId: string): Promise<any> {
+    return firstValueFrom(
+      this.http.delete(this.apiConfig.endpoints.sketch.unassignFromProject(sketchId))
+    );
+  }
 }
