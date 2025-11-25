@@ -147,6 +147,10 @@ class ProjectDetailResponse(BaseModel):
     created_at: str | None
     updated_at: str | None
     folders: list[FolderResponse]
+    # All assigned assets (regardless of folder) - for Metadata tab
+    all_assigned_songs: list[AssignedSongResponse] | None = None
+    all_assigned_sketches: list[AssignedSketchResponse] | None = None
+    all_assigned_images: list[AssignedImageResponse] | None = None
 
     class Config:
         from_attributes = True

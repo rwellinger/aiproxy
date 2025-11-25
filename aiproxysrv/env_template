@@ -5,6 +5,10 @@
 # Generate with: openssl rand -base64 32
 JWT_SECRET_KEY=
 
+# JWT Token Expiration in hours (default: 240 = 10 days)
+# Examples: 24 (1 day), 168 (1 week), 240 (10 days), 720 (30 days)
+JWT_EXPIRATION_HOURS=240
+
 # ==================================================
 # ENCRYPTION (Fernet symmetric encryption for Equipment)
 # ==================================================

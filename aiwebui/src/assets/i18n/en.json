@@ -139,11 +139,11 @@
   },
   "selectProject": {
     "title": "Select Project",
-    "subtitle": "This image is assigned to multiple projects. Please select one:"
+    "subtitle": "This picture is assigned to multiple projects. Please select one:"
   },
   "assignToProject": {
     "title": {
-      "image": "Assign Image to Project",
+      "image": "Assign Pictures to Project",
       "song": "Assign Song to Project",
       "sketch": "Assign Sketch to Project",
       "release": "Assign Release to Project"
@@ -412,8 +412,8 @@
       "noImagesInDb": "No pictures found in the database.",
       "noSearchResults": "No pictures match your search criteria.",
       "selectImagePlaceholder": "Select an picture from the list to view details",
-      "noProjects": "This image is not assigned to any project",
-      "projectLoadError": "Failed to load projects for this image"
+      "noProjects": "This picture is not assigned to any project",
+      "projectLoadError": "Failed to load projects for this picture"
     },
     "noImages": "No pictures found",
     "orientation": {
@@ -436,7 +436,8 @@
     },
     "tooltips": {
       "original": "Original Picture",
-      "withOverlay": "Picture with Text Overlay"
+      "withOverlay": "Picture with Text Overlay",
+      "cannotDeleteProject": "Cannot delete - assigned to {{count}} project(s)"
     },
     "compositionBadge": {
       "albumCover": "Album Cover"
@@ -1064,6 +1065,7 @@
     "errors": {
       "cannotDeleteProtected": "Cannot delete songs with {{workflow}} workflow: {{songs}}",
       "cannotSelectProtected": "Cannot select songs with {{workflow}} workflow for deletion",
+      "cannotDeleteAssigned": "Cannot delete song assigned to project '{{project}}'",
       "copyFailed": "Failed to copy to clipboard",
       "copyLyricsFailed": "Failed to copy lyrics to clipboard",
       "deletingSongs": "Error deleting songs: {{error}}",
@@ -1125,6 +1127,7 @@
       "cannotDelete": "Cannot delete this song",
       "cannotDeleteInUse": "Cannot delete songs with In Use workflow",
       "cannotDeleteOnWork": "Cannot delete songs with On Work workflow",
+      "cannotDeleteProject": "Cannot delete - assigned to project '{{project}}'",
       "inUseNoDelete": "This song is In Use and cannot be deleted",
       "instrumental": "Instrumental",
       "onWorkNoDelete": "This song is On Work and cannot be deleted",
@@ -1142,7 +1145,7 @@
       "organizationId": "Organization ID",
       "currentMonth": "Current Month",
       "allTimeSummary": "All Time Summary",
-      "image": "Images",
+      "image": "Pictures",
       "chat": "Chat",
       "total": "Total",
       "remaining": "Balance Remaining"
@@ -1419,7 +1422,8 @@
         "backToDraft": "Back to Draft",
         "duplicate": "Duplicate",
         "duplicateDisabled": "Duplicate disabled (only available for inspirations)",
-        "deleteDisabled": "Delete disabled (used sketches cannot be deleted)"
+        "deleteDisabled": "Delete disabled (used sketches cannot be deleted)",
+        "deleteDisabledProject": "Delete disabled (assigned to project '{{project}}')"
       },
       "detail": {
         "tabs": {
@@ -1468,7 +1472,8 @@
         "sketchSaved": "Sketch saved successfully",
         "duplicateConfirm": "Do you really want to duplicate '{{title}}'?",
         "duplicated": "Sketch duplicated successfully",
-        "duplicateError": "Error duplicating sketch"
+        "duplicateError": "Error duplicating sketch",
+        "cannotDeleteAssigned": "Cannot delete sketch assigned to project '{{project}}'"
       }
     },
     "workflow": {
@@ -1485,8 +1490,8 @@
     "titleSection": "Title Settings",
     "artistSection": "Artist Settings (Optional)",
     "form": {
-      "selectImage": "Select Image",
-      "imageRequired": "Image is required",
+      "selectImage": "Select Picture",
+      "imageRequired": "Picture is required",
       "title": "Title",
       "titleRequired": "Title is required",
       "titlePosition": "Title Position",
@@ -1508,7 +1513,7 @@
       "belowTitleRight": "Right",
       "gridPosition": "Grid Position",
       "customPosition": "Custom Position",
-      "clickOnImage": "Click on Image",
+      "clickOnImage": "Click on Picture",
       "coordinateX": "X Position (%)",
       "coordinateY": "Y Position (%)",
       "useTitleColor": "Use Title Color"
@@ -1519,13 +1524,13 @@
     },
     "preview": {
       "title": "Live Preview",
-      "selectImagePlaceholder": "Select an image to start"
+      "selectImagePlaceholder": "Select an picture to start"
     },
     "success": {
       "applied": "Text overlay applied successfully"
     },
     "errors": {
-      "loadImagesFailed": "Failed to load images",
+      "loadImagesFailed": "Failed to load pictures",
       "formInvalid": "Please fill in all required fields",
       "applyFailed": "Failed to apply text overlay"
     }
@@ -1694,7 +1699,7 @@
         "industry": "Industry Identifiers",
         "dates": "Important Dates",
         "reasons": "Rejection/Removal Reasons",
-        "cover": "Cover Image"
+        "cover": "Cover Pircture"
       },
       "metadata": {
         "created": "Created",
@@ -1711,7 +1716,7 @@
         "industry": "Industry Metadata",
         "dates": "Publication Dates",
         "reasons": "Status Reasons",
-        "cover": "Cover Image"
+        "cover": "Cover Picture"
       },
       "type": "Type",
       "status": "Status",
@@ -1734,7 +1739,7 @@
       "downtakenDate": "Downtaken Date",
       "rejectedReason": "Reason for Rejection",
       "downtakenReason": "Reason for Removal",
-      "uploadCover": "Select Cover Image",
+      "uploadCover": "Select Cover Picture",
       "coverHint": "Recommended size: 200x200 pixels (JPG/PNG)",
       "save": "Save",
       "cancel": "Cancel",
@@ -1763,8 +1768,8 @@
       "loadError": "Failed to load release",
       "saveError": "Failed to save release",
       "deleteError": "Failed to delete release",
-      "coverValidationError": "Cover image must be 200x200 pixels",
-      "coverRequired": "Cover image is required for this status",
+      "coverValidationError": "Cover picture must be 200x200 pixels",
+      "coverRequired": "Cover picture is required for this status",
       "releaseSaved": "Release saved successfully",
       "projectsAssigned": "Projects assigned successfully",
       "useProjectName": "Use project data (name, description, tags) from '{{projectName}}' for this Single?",
@@ -1780,7 +1785,7 @@
       "singleOneProject": "Single releases can only be assigned to one project",
       "uploadDateRequired": "Upload date is required for status 'uploaded'",
       "releaseDateRequired": "Release date is required for status 'released'",
-      "coverRequired": "Cover image is required for this status"
+      "coverRequired": "Cover picture is required for this status"
     }
   },
   "songProjects": {
@@ -1818,11 +1823,14 @@
       "noFiles": "No files in this folder",
       "assignedSongs": "Assigned Songs",
       "assignedSketches": "Assigned Sketches",
-      "assignedImages": "Assigned Images",
+      "assignedImages": "Assigned Pictures",
       "assignedReleases": "Assigned Releases",
+      "allAssignedSongs": "Assigned Songs",
+      "allAssignedSketches": "Assigned Sketches",
+      "allAssignedImages": "Assigned Pictures",
       "noAssignedAssets": "No assigned assets in this folder",
       "folderContent": {
-        "images": "{{count}} images",
+        "images": "{{count}} pictures",
         "songs": "{{count}} songs",
         "sketches": "{{count}} sketches",
         "assets": "{{count}} assets",
@@ -1851,7 +1859,7 @@
         "backToList": "Back to Projects",
         "openSong": "Open Song",
         "openSketch": "Open Sketch",
-        "openImage": "Open Image",
+        "openImage": "Open Picture",
         "viewRelease": "View Release"
       },
       "copyCompleteClone": "Copy Clone Command",
@@ -1917,6 +1925,7 @@
     "warnings": {
       "uploadBlocked": "Project is archived. Unarchive it first to upload files.",
       "deleteBlocked": "Cannot delete archived project. Unarchive it first.",
+      "deleteBlockedRelease": "Cannot delete - assigned to {{count}} release(s)",
       "editBlocked": "Cannot edit archived project. Unarchive it first."
     },
     "dialogs": {

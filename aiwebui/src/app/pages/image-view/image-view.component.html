@@ -61,6 +61,8 @@
               type="checkbox"
               class="image-checkbox"
               [checked]="selectedImageIds.has(image.id)"
+              [disabled]="!canDeleteImage(image)"
+              [title]="!canDeleteImage(image) ? ('imageView.tooltips.cannotDeleteProject' | translate:{count: image.projects_count}) : ''"
               (click)="$event.stopPropagation()"
               (change)="toggleImageSelection(image.id)">
 

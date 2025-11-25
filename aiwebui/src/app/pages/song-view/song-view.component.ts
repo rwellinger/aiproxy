@@ -82,6 +82,9 @@ export class SongViewComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
+  // Navigation state (must be captured in constructor)
+  private navigationState: any = null;
+
   // Selection mode state
   isSelectionMode = false;
   selectedSongIds = new Set<string>();
@@ -114,6 +117,10 @@ export class SongViewComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
 
   constructor() {
+    // IMPORTANT: getCurrentNavigation() must be called in constructor!
+    const navigation = this.router.getCurrentNavigation();
+    this.navigationState = navigation?.extras?.state;
+
     // Setup search debouncing
     this.searchSubject.pipe(
       debounceTime(300),
@@ -146,11 +153,27 @@ export class SongViewComponent implements OnInit, OnDestroy {
   }
 
   private loadUserSettings() {
+    // Check navigation state for workflow filter (e.g., for archived songs from Song Project links)
+    const targetWorkflow = this.navigationState?.['targetWorkflow'];
+    const selectedSongIdFromState = this.navigationState?.['selectedSongId'];
+
+    if (targetWorkflow && ['all', 'inUse', 'onWork', 'notUsed', 'fail', 'archived'].includes(targetWorkflow)) {
+      this.currentWorkflow = targetWorkflow;
+    }
+
     this.settingsService.getSettings()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(settings => {
+      .subscribe(async settings => {
         this.pagination.limit = settings.songListLimit;
-        this.loadSongs();
+        await this.loadSongs();
+
+        // Select song from navigation state if provided
+        if (selectedSongIdFromState) {
+          const song = this.songs.find(s => s.id === selectedSongIdFromState);
+          if (song) {
+            await this.selectSong(song);
+          }
+        }
       });
   }
 
@@ -398,17 +421,6 @@ export class SongViewComponent implements OnInit, OnDestroy {
   }
 
   toggleSongSelection(songId: string) {
-    const song = this.songs.find(s => s.id === songId);
-    if (song && !this.canDeleteSong(song)) {
-      const workflowText = song.workflow === 'inUse'
-        ? this.translate.instant('songView.filters.inUse')
-        : song.workflow === 'onWork'
-          ? this.translate.instant('songView.filters.onWork')
-          : song.workflow;
-      this.notificationService.error(this.translate.instant('songView.errors.cannotSelectProtected', { workflow: workflowText }));
-      return;
-    }
-
     if (this.selectedSongIds.has(songId)) {
       this.selectedSongIds.delete(songId);
     } else {
@@ -918,9 +930,9 @@ export class SongViewComponent implements OnInit, OnDestroy {
   }
 
 
-  // Check if a song can be deleted (not "In Use" or "On Work")
+  // Check if a song can be deleted (not "In Use", "On Work", or assigned to a project)
   canDeleteSong(song: any): boolean {
-    return song.workflow !== 'inUse' && song.workflow !== 'onWork';
+    return song.workflow !== 'inUse' && song.workflow !== 'onWork' && !song.project_id;
   }
 
   // Check if the current selection contains any undeletable songs
