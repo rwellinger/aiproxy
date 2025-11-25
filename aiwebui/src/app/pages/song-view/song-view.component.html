@@ -101,7 +101,7 @@
               [disabled]="!canDeleteSong(song)"
               (click)="$event.stopPropagation()"
               (change)="toggleSongSelection(song.id)"
-              [title]="!canDeleteSong(song) ? (song.workflow === 'inUse' ? ('songView.tooltips.cannotDeleteInUse' | translate) : song.workflow === 'onWork' ? ('songView.tooltips.cannotDeleteOnWork' | translate) : ('songView.tooltips.cannotDelete' | translate)) : ''">
+              [title]="!canDeleteSong(song) ? (song.project_id ? ('songView.tooltips.cannotDeleteProject' | translate:{project: song.project_name}) : song.workflow === 'inUse' ? ('songView.tooltips.cannotDeleteInUse' | translate) : song.workflow === 'onWork' ? ('songView.tooltips.cannotDeleteOnWork' | translate) : ('songView.tooltips.cannotDelete' | translate)) : ''">
 
             <div class="song-item-header">
               <h4 class="song-title">

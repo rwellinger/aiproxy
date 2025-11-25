@@ -436,7 +436,8 @@
     },
     "tooltips": {
       "original": "Original-Bild",
-      "withOverlay": "Bild mit Text-Overlay"
+      "withOverlay": "Bild mit Text-Overlay",
+      "cannotDeleteProject": "Kann nicht geloescht werden - zugewiesen an {{count}} Projekt(e)"
     },
     "compositionBadge": {
       "albumCover": "Album-Cover"
@@ -1064,6 +1065,7 @@
     "errors": {
       "cannotDeleteProtected": "Songs mit {{workflow}}-Workflow können nicht gelöscht werden: {{songs}}",
       "cannotSelectProtected": "Songs mit {{workflow}}-Workflow können nicht zum Löschen ausgewählt werden",
+      "cannotDeleteAssigned": "Song kann nicht geloescht werden - zugewiesen an Projekt '{{project}}'",
       "copyFailed": "Fehler beim Kopieren in die Zwischenablage",
       "copyLyricsFailed": "Fehler beim Kopieren des Songtextes in die Zwischenablage",
       "deletingSongs": "Fehler beim Löschen der Songs: {{error}}",
@@ -1125,6 +1127,7 @@
       "cannotDelete": "Dieser Song kann nicht gelöscht werden",
       "cannotDeleteInUse": "Songs mit In Verwendung-Workflow können nicht gelöscht werden",
       "cannotDeleteOnWork": "Songs mit In Arbeit-Workflow können nicht gelöscht werden",
+      "cannotDeleteProject": "Kann nicht geloescht werden - zugewiesen an Projekt '{{project}}'",
       "inUseNoDelete": "Dieser Song ist in Verwendung und kann nicht gelöscht werden",
       "instrumental": "Instrumental",
       "onWorkNoDelete": "Dieser Song ist in Arbeit und kann nicht gelöscht werden",
@@ -1419,7 +1422,8 @@
         "backToDraft": "Zurück zu Entwurf",
         "duplicate": "Duplizieren",
         "duplicateDisabled": "Duplizieren deaktiviert (nur für Inspirationen verfügbar)",
-        "deleteDisabled": "Löschen deaktiviert (verwendete Sketches können nicht gelöscht werden)"
+        "deleteDisabled": "Löschen deaktiviert (verwendete Sketches können nicht gelöscht werden)",
+        "deleteDisabledProject": "Löschen deaktiviert (zugewiesen an Projekt '{{project}}')"
       },
       "detail": {
         "tabs": {
@@ -1468,7 +1472,8 @@
         "sketchSaved": "Skizze erfolgreich gespeichert",
         "duplicateConfirm": "Möchtest du '{{title}}' wirklich duplizieren?",
         "duplicated": "Skizze erfolgreich dupliziert",
-        "duplicateError": "Fehler beim Duplizieren"
+        "duplicateError": "Fehler beim Duplizieren",
+        "cannotDeleteAssigned": "Skizze kann nicht geloescht werden - zugewiesen an Projekt '{{project}}'"
       }
     },
     "workflow": {
@@ -1920,6 +1925,7 @@
     "warnings": {
       "uploadBlocked": "Projekt ist archiviert. Aktiviere es zuerst, um Dateien hochzuladen.",
       "deleteBlocked": "Archivierte Projekte können nicht gelöscht werden. Aktiviere es zuerst.",
+      "deleteBlockedRelease": "Kann nicht geloescht werden - zugewiesen an {{count}} Release(s)",
       "editBlocked": "Archivierte Projekte können nicht bearbeitet werden. Aktiviere es zuerst."
     },
     "dialogs": {

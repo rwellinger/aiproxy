@@ -23,7 +23,9 @@ import { ResourceBlobService } from '../../services/ui/resource-blob.service';
 import { CreateProjectDialogComponent } from '../../dialogs/create-project-dialog/create-project-dialog.component';
 import {
   SongProjectDetail,
-  SongProjectListItem
+  SongProjectListItem,
+  AssignedSong,
+  AssignedSketch
 } from '../../models/song-project.model';
 import { getInitials, getColorFromString } from '../../shared/utils/cover-utils';
 
@@ -581,19 +583,27 @@ export class SongProjectsComponent implements OnInit, OnDestroy {
 
   /**
    * Navigate to Song View with song ID in state.
+   * Passes targetWorkflow to switch to archived tab if song is archived.
    */
-  openSong(songId: string): void {
+  openSong(song: AssignedSong): void {
     this.router.navigate(['/songview'], {
-      state: { selectedSongId: songId }
+      state: {
+        selectedSongId: song.id,
+        targetWorkflow: song.workflow === 'archived' ? 'archived' : 'all'
+      }
     });
   }
 
   /**
    * Navigate to Sketch Library with sketch ID in state.
+   * Passes targetWorkflow to switch to archived tab if sketch is archived.
    */
-  openSketch(sketchId: string): void {
+  openSketch(sketch: AssignedSketch): void {
     this.router.navigate(['/song-sketch-library'], {
-      state: { selectedSketchId: sketchId }
+      state: {
+        selectedSketchId: sketch.id,
+        targetWorkflow: sketch.workflow === 'archived' ? 'archived' : 'all'
+      }
     });
   }
 

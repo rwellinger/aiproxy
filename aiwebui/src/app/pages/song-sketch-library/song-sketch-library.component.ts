@@ -88,7 +88,13 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Check if returning from save/edit with a selected sketch ID
     const selectedSketchId = this.navigationState?.['selectedSketchId'];
+    const targetWorkflow = this.navigationState?.['targetWorkflow'];
     const returnPage = this.navigationState?.['returnPage'] || 0;
+
+    // Set workflow filter BEFORE loading sketches (e.g., for archived sketches from Song Project links)
+    if (targetWorkflow && ['all', 'draft', 'used', 'archived'].includes(targetWorkflow)) {
+      this.currentWorkflow = targetWorkflow as 'all' | 'draft' | 'used' | 'archived';
+    }
 
     this.loadSketches(returnPage).then(() => {
       // Re-select the sketch after save if ID was provided

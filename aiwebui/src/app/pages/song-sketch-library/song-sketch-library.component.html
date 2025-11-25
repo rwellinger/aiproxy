@@ -418,13 +418,13 @@
             <span>{{ 'songSketch.library.actions.duplicate' | translate }}</span>
           </button>
 
-          <!-- 6. Delete Button - disabled for workflow 'used' -->
+          <!-- 6. Delete Button - disabled for workflow 'used' or assigned to project -->
           <button
             type="button"
             class="action-button delete-button"
             (click)="confirmDeleteSketch(selectedSketch.id)"
-            [disabled]="selectedSketch.workflow === 'used'"
-            [title]="selectedSketch.workflow === 'used' ? ('songSketch.library.actions.deleteDisabled' | translate) : ('songSketch.library.actions.delete' | translate)">
+            [disabled]="selectedSketch.workflow === 'used' || selectedSketch.project_id"
+            [title]="selectedSketch.project_id ? ('songSketch.library.actions.deleteDisabledProject' | translate:{project: selectedSketch.project_name}) : (selectedSketch.workflow === 'used' ? ('songSketch.library.actions.deleteDisabled' | translate) : ('songSketch.library.actions.delete' | translate))">
             <i class="fas fa-trash"></i>
             <span>{{ 'songSketch.library.actions.delete' | translate }}</span>
           </button>

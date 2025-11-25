@@ -414,6 +414,11 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
+    // Check if an image can be deleted (not assigned to any project)
+    canDeleteImage(image: ImageData): boolean {
+        return !image.projects_count || image.projects_count === 0;
+    }
+
     toggleImageSelection(imageId: string) {
         if (this.selectedImageIds.has(imageId)) {
             this.selectedImageIds.delete(imageId);
@@ -424,7 +429,9 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     selectAllImages() {
         this.images.forEach(image => {
-            this.selectedImageIds.add(image.id);
+            if (this.canDeleteImage(image)) {
+                this.selectedImageIds.add(image.id);
+            }
         });
     }
 
@@ -444,6 +451,22 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     async bulkDeleteImages() {
         if (this.selectedImageIds.size === 0) {
             this.notificationService.error(this.translate.instant('imageView.errors.noImagesSelected'));
+            return;
+        }
+
+        // Check for protected images that cannot be deleted (assigned to projects)
+        const protectedImages = this.images.filter(image =>
+            this.selectedImageIds.has(image.id) && !this.canDeleteImage(image)
+        );
+
+        if (protectedImages.length > 0) {
+            const totalProjects = protectedImages.reduce((sum, img) => sum + (img.projects_count || 0), 0);
+            this.notificationService.error(
+                this.translate.instant('imageView.errors.cannotDeleteAssignedBulk', {
+                    imageCount: protectedImages.length,
+                    projectCount: totalProjects
+                })
+            );
             return;
         }
 
