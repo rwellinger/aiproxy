@@ -43,6 +43,10 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     private searchSubject = new Subject<string>();
     private destroy$ = new Subject<void>();
 
+    // Category filter
+    currentCategory: 'all' | 'lyrics' | 'image' | 'music' | 'titel' | 'description' | 'other' = 'all';
+    private knownCategories = ['lyrics', 'image', 'music', 'titel', 'description'];
+
     // Navigation state (must be captured in constructor)
     private navigationState: any = null;
 
@@ -102,11 +106,18 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
 
         try {
             this.templates = await this.promptService.getAllTemplates().toPromise() || [];
-            this.applyFilter();
 
             // Check if returning from editor with navigation state
             const returnPage = this.navigationState?.['returnPage'];
             const selectTemplate = this.navigationState?.['selectTemplate'];
+            const targetCategory = this.navigationState?.['targetCategory'];
+
+            // Set category filter BEFORE applying filter (for returning from editor)
+            if (targetCategory && ['all', 'lyrics', 'image', 'music', 'titel', 'description', 'other'].includes(targetCategory)) {
+                this.currentCategory = targetCategory;
+            }
+
+            this.applyFilter();
 
             // Navigate to return page if specified
             if (returnPage !== undefined && returnPage !== null) {
@@ -122,10 +133,23 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
                 if (template) {
                     this.selectTemplate(template);
                 } else {
-                    // Template not on current page, notify user
-                    this.notificationService.info(
-                        this.translate.instant('promptTemplates.notifications.templateSaved')
+                    // Template not on current page, search in filtered list
+                    const templateInFiltered = this.filteredTemplates.find(t =>
+                        t.category === selectTemplate.category &&
+                        t.action === selectTemplate.action
                     );
+                    if (templateInFiltered) {
+                        // Find page index and navigate there
+                        const templateIndex = this.filteredTemplates.indexOf(templateInFiltered);
+                        const targetPage = Math.floor(templateIndex / this.pagination.limit);
+                        this.goToPage(targetPage);
+                        this.selectTemplate(templateInFiltered);
+                    } else {
+                        // Template not in current filter, notify user
+                        this.notificationService.info(
+                            this.translate.instant('promptTemplates.notifications.templateSaved')
+                        );
+                    }
                 }
             } else if (this.filteredTemplates.length > 0 && !this.selectedTemplate) {
                 // Auto-select first template if available and none selected
@@ -141,11 +165,28 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     }
 
     applyFilter(): void {
+        // Step 1: Filter by category
+        let categoryFiltered: PromptTemplate[];
+        if (this.currentCategory === 'all') {
+            categoryFiltered = [...this.templates];
+        } else if (this.currentCategory === 'other') {
+            // "Other" = categories NOT in knownCategories
+            categoryFiltered = this.templates.filter(template =>
+                !this.knownCategories.includes(template.category.toLowerCase())
+            );
+        } else {
+            // Specific category filter
+            categoryFiltered = this.templates.filter(template =>
+                template.category.toLowerCase() === this.currentCategory
+            );
+        }
+
+        // Step 2: Filter by search term
         if (!this.searchTerm.trim()) {
-            this.filteredTemplates = [...this.templates];
+            this.filteredTemplates = categoryFiltered;
         } else {
             const term = this.searchTerm.toLowerCase();
-            this.filteredTemplates = this.templates.filter(template =>
+            this.filteredTemplates = categoryFiltered.filter(template =>
                 template.category.toLowerCase().includes(term) ||
                 template.action.toLowerCase().includes(term)
             );
@@ -155,6 +196,12 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
         this.pagination.total = this.filteredTemplates.length;
         this.pagination.offset = 0; // Reset to first page
         this.updatePaginatedTemplates();
+    }
+
+    onCategoryChange(category: 'all' | 'lyrics' | 'image' | 'music' | 'titel' | 'description' | 'other'): void {
+        this.currentCategory = category;
+        this.selectedTemplate = null; // Clear selection when changing category
+        this.applyFilter();
     }
 
     private updatePaginatedTemplates(): void {
@@ -294,7 +341,8 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
                 template: this.selectedTemplate,
                 category: this.selectedTemplate.category,
                 action: this.selectedTemplate.action,
-                returnPage: currentPage
+                returnPage: currentPage,
+                targetCategory: this.currentCategory
             }
         });
     }

@@ -199,7 +199,8 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
                 selectTemplate: {
                     category: this.category,
                     action: this.action
-                }
+                },
+                targetCategory: this.navigationState?.['targetCategory'] || 'all'
             }
         });
     }
@@ -212,7 +213,8 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
                     category: updatedTemplate.category,
                     action: updatedTemplate.action
                 },
-                returnPage: this.navigationState?.['returnPage'] || 0
+                returnPage: this.navigationState?.['returnPage'] || 0,
+                targetCategory: this.navigationState?.['targetCategory'] || 'all'
             }
         });
     }

@@ -49,7 +49,7 @@ export class LyricCreationComponent implements OnInit {
     lastSectionState: string | null = null;
     isImprovingSection = false;
     isRewritingSection = false;
-    isExtendingSection = false;
+    isCondensingSection = false;
     isOptimizingSection = false;
 
     // Section Detection Rules (loaded from API)
@@ -88,7 +88,7 @@ export class LyricCreationComponent implements OnInit {
     }
 
     get isAnySectionOperationInProgress(): boolean {
-        return this.isImprovingSection || this.isRewritingSection || this.isExtendingSection || this.isOptimizingSection;
+        return this.isImprovingSection || this.isRewritingSection || this.isCondensingSection || this.isOptimizingSection;
     }
 
     get isFromSketchCreator(): boolean {
@@ -711,6 +711,7 @@ export class LyricCreationComponent implements OnInit {
         try {
             const rewrittenContent = await this.progressService.executeWithProgress(
                 () => this.chatService.rewriteLyricSection(
+                    this.activeSection!.label,
                     this.activeSection!.content,
                     this.activeSection!.aiInstructions
                 ),
@@ -725,27 +726,27 @@ export class LyricCreationComponent implements OnInit {
         }
     }
 
-    async extendSectionAI(): Promise<void> {
+    async condenseSectionAI(): Promise<void> {
         if (!this.activeSection) {
             return;
         }
 
-        this.isExtendingSection = true;
+        this.isCondensingSection = true;
         try {
-            const extendedContent = await this.progressService.executeWithProgress(
-                () => this.chatService.extendLyricSection(
+            const condensedContent = await this.progressService.executeWithProgress(
+                () => this.chatService.condenseLyricSection(
+                    this.activeSection!.label,
                     this.activeSection!.content,
-                    4,
                     this.activeSection!.aiInstructions
                 ),
-                this.translate.instant('lyricCreation.sectionEditor.extending'),
-                this.translate.instant('lyricCreation.sectionEditor.extendingHint')
+                this.translate.instant('lyricCreation.sectionEditor.condensing'),
+                this.translate.instant('lyricCreation.sectionEditor.condensingHint')
             );
-            this.activeSection.content = this.removeQuotes(extendedContent);
+            this.activeSection.content = this.removeQuotes(condensedContent);
         } catch (error: any) {
-            this.notificationService.error(`Error extending section: ${error.message}`);
+            this.notificationService.error(`Error condensing section: ${error.message}`);
         } finally {
-            this.isExtendingSection = false;
+            this.isCondensingSection = false;
         }
     }
 

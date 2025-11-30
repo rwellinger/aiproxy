@@ -564,7 +564,7 @@
       "placeholder": "Diesen Abschnitt bearbeiten...",
       "improve": "Abschnitt verbessern",
       "rewrite": "Abschnitt umschreiben",
-      "extend": "Abschnitt erweitern",
+      "condense": "Abschnitt kürzen",
       "optimize": "Phrasierung optimieren",
       "activated": "Abschnitts-Editor aktiviert",
       "applied": "Abschnitte erfolgreich angewendet",
@@ -575,8 +575,8 @@
       "improvingHint": "KI verbessert diesen Abschnitt",
       "rewriting": "Schreibe Abschnitt um...",
       "rewritingHint": "KI schreibt diesen Abschnitt um",
-      "extending": "Erweitere Abschnitt...",
-      "extendingHint": "KI fügt diesem Abschnitt mehr Zeilen hinzu",
+      "condensing": "Kürze Abschnitt...",
+      "condensingHint": "KI fasst den Text zu singbaren Lyrics zusammen",
       "optimizing": "Optimiere Phrasierung...",
       "optimizingHint": "KI formatiert Text in kurze musikalische Phrasen",
       "aiInstructions": "KI-Anweisungen (optional)",
@@ -696,10 +696,20 @@
       },
       "tokensHint": "(ca. {{words}} Wörter)"
     },
+    "filters": {
+      "all": "Alle",
+      "lyrics": "Lyrics",
+      "image": "Bild",
+      "music": "Musik",
+      "titel": "Titel",
+      "description": "Beschreibung",
+      "other": "Andere"
+    },
     "list": {
       "clearSearch": "Suche löschen",
       "count": "{{count}} Vorlagen",
       "noTemplates": "Keine Vorlagen verfügbar",
+      "noTemplatesInCategory": "Keine Vorlagen in dieser Kategorie",
       "refresh": "Aktualisieren",
       "searchPlaceholder": "Suche in Category und Action...",
       "status": {

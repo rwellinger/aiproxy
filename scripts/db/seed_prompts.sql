@@ -112,7 +112,7 @@ Output: A reflective journey through solitude and self-discovery. This song pain
     '1.1',
     'gpt-oss:20b',
     0.7,
-    1024,
+    null,
     true
 );
 
@@ -151,7 +151,7 @@ Output: Dawn-lit reflections on solitude, hope, and urban renewal.',
     '1.1',
     'gpt-oss:20b',
     0.6,
-    1024,
+    null,
     true
 );
 
@@ -196,7 +196,7 @@ Output: Reflective, Solitude, Urban, Dawn, Self-Discovery, Melancholic, Hopeful,
     '1.1',
     'gpt-oss:20b',
     0.6,
-    1024,
+    null,
     true
 );
 
@@ -250,7 +250,7 @@ Output: "Futuristic metropolis with glass skyscrapers, neon lights, flying vehic
     '7.6',
     'gpt-oss:20b',
     0.7,
-    1024,
+    null,
     true
 );
 
@@ -307,7 +307,7 @@ Output: "Bold abstract geometric shapes, vibrant color palette, clean minimalist
     '2.1',
     'gpt-oss:20b',
     0.7,
-    1536,
+    null,
     true
 );
 
@@ -397,7 +397,7 @@ Output: "An enchanted forest clearing where ethereal translucent figures appear 
     '1.1',
     'gpt-oss:20b',
     0.8,
-    1536,
+    null,
     true
 );
 
@@ -428,7 +428,7 @@ Output: "Futuristic city at night with bright lights"',
     '3.1',
     'gpt-oss:20b',
     0.5,
-    1024,
+    null,
     true
 );
 
@@ -436,24 +436,38 @@ Output: "Futuristic city at night with bright lights"',
 -- LYRICS TEMPLATES
 -- ============================================================
 
--- lyrics/extend-section (v1.4)
+-- lyrics/condense-section (v1.1)
 SELECT upsert_prompt_template(
     'lyrics',
-    'extend-section',
-    'You are a professional song lyricist. Your task is to extend the given song section by adding more lines. The extension should:
-- Match the existing rhyme scheme and rhythm
-- Continue the thematic development
-- Maintain consistent imagery and tone
-- Flow naturally from the existing content
-- Add depth without being repetitive
+    'condense-section',
+    'You are a professional music lyricist. Transform verbose, prose-like text into concise, singable lyrics.
 
-Build upon what is already there to create a longer, more developed section.',
-    'Return the COMPLETE extended section (original + new lines) as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.',
-    'Extends a lyric section by adding more lines that match style and theme',
-    '1.4',
+SECTION LENGTH GUIDELINES (strictly follow based on section type):
+- INTRO/OUTRO: 2-4 lines - very brief, sets/closes mood
+- VERSE: 4-6 lines - tells the story
+- PRE-CHORUS: 2-4 lines - builds tension
+- CHORUS: 4-6 lines - memorable, repeatable hook
+- BRIDGE: 4-6 lines - contrast/new perspective
+
+RULES:
+- Maximum 4-8 words per line
+- Keep core imagery and emotion
+- Cut filler words and purple prose
+- Make it singable, not literary',
+    'Return ONLY the condensed lyrics. Same language as input. No explanations.
+
+STRICT RULES:
+- Follow SECTION LENGTH GUIDELINES for the given section type
+- 4-8 words per line maximum
+- Cut unnecessary adjectives and flowery language
+- Keep the core meaning and emotion
+- Make every word count for singing
+- No labels or meta-commentary',
+    'Condenses verbose text into concise, singable lyrics with section-appropriate length',
+    '1.1',
     'gpt-oss:20b',
-    0.7,
-    1024,
+    0.6,
+    null,
     true
 );
 
@@ -496,29 +510,41 @@ Do not include any other explanations, comments, or metadata in your output.',
     '2.8',
     'gpt-oss:20b',
     0.7,
-    2048,
+    null,
     true
 );
 
--- lyrics/improve-section (v1.5)
+-- lyrics/improve-section (v1.6)
 SELECT upsert_prompt_template(
     'lyrics',
     'improve-section',
-    'You are a professional song lyricist and songwriter. Your task is to improve the given song section while maintaining its core message and style. Consider:
+    'You are a professional song lyricist and songwriter. Your task is to improve the given song section while maintaining its core message and style.
+
+SECTION LENGTH GUIDELINES (strictly follow based on section type):
+- INTRO/OUTRO: 2-4 lines, 10-25 words - very brief, sets/closes mood
+- VERSE: 4-8 lines, 30-60 words - tells the story
+- PRE-CHORUS: 2-4 lines, 15-30 words - builds tension
+- CHORUS: 4-6 lines, 25-45 words - memorable, repeatable hook
+- BRIDGE: 4-6 lines, 25-45 words - contrast/new perspective
+
+Consider:
 - Rhyme scheme and rhythm
 - Imagery and metaphors
 - Emotional impact
 - Word choice and clarity
 - Flow and pacing
-- Fluent language
 
-Keep the same general length and structure (±20%). Only improve the quality, do not change the fundamental meaning or add new concepts.',
-    'Return ONLY the improved section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Keep similar length as input (±20%). Do not include labels, explanations, comments, or the section name (like "Verse1:") in your output. Keep all lines together as one continuous block of text.',
-    'Improves a specific lyric section while maintaining context and style',
-    '1.5',
+CRITICAL: Match the input length exactly. NEVER add excessive metaphors or poetic flourishes that inflate the text.',
+    'Return ONLY the improved section text. IMPORTANT: Keep the same language as the input.
+
+STRICT LENGTH RULE: Your output MUST have the same number of lines (±1) as the input. Count the input lines and match them exactly. Do NOT add extra lines or words.
+
+Do not include labels, explanations, comments, or the section name in your output.',
+    'Improves a specific lyric section while maintaining context, style, and LENGTH',
+    '1.6',
     'gpt-oss:20b',
     0.7,
-    1024,
+    null,
     true
 );
 
@@ -537,29 +563,40 @@ SELECT upsert_prompt_template(
     '1.0',
     'gpt-oss:20b',
     0.5,
-    2048,
+    null,
     true
 );
 
--- lyrics/rewrite-section (v1.8)
+-- lyrics/rewrite-section (v1.9)
 SELECT upsert_prompt_template(
     'lyrics',
     'rewrite-section',
-    'You are a professional song lyricist and songwriter. Your task is to completely rewrite the given song section with fresh perspectives while keeping similar themes. Feel free to:
+    'You are a professional song lyricist and songwriter. Your task is to completely rewrite the given song section with fresh perspectives while keeping similar themes.
+
+SECTION LENGTH GUIDELINES (strictly follow based on section type):
+- INTRO/OUTRO: 2-4 lines, 10-25 words - very brief, sets/closes mood
+- VERSE: 4-8 lines, 30-60 words - tells the story
+- PRE-CHORUS: 2-4 lines, 15-30 words - builds tension
+- CHORUS: 4-6 lines, 25-45 words - memorable, repeatable hook
+- BRIDGE: 4-6 lines, 25-45 words - contrast/new perspective
+
+Feel free to:
 - Use different metaphors and imagery
 - Change the rhyme scheme
 - Explore new angles on the same topic
-- Vary the rhythm and structure
 - Add creative wordplay
-- Fluent language
 
-The rewritten section should feel like a new take on the same emotional core.',
-    'Return ONLY the rewritten section text as a SINGLE paragraph without blank lines. IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English). Match the original section length (similar number of lines). Do not include labels, explanations, comments, or the section name in your output. Keep all lines together as one continuous block of text.',
-    'Completely rewrites a lyric section with fresh creative perspectives',
-    '1.8',
+CRITICAL: Match the input length exactly. NEVER add excessive metaphors or poetic flourishes that inflate the text. The rewritten section should feel like a new take on the same emotional core.',
+    'Return ONLY the rewritten section text. IMPORTANT: Keep the same language as the input.
+
+STRICT LENGTH RULE: Your output MUST have the same number of lines (±1) as the input. Count the input lines and match them exactly. Do NOT add extra lines or words.
+
+Do not include labels, explanations, comments, or the section name in your output.',
+    'Completely rewrites a lyric section with fresh perspectives while maintaining LENGTH',
+    '1.9',
     'gpt-oss:20b',
     0.8,
-    1024,
+    null,
     true
 );
 
@@ -610,7 +647,7 @@ You made things right',
     '3.1',
     'gpt-oss:20b',
     0.5,
-    2048,
+    null,
     true
 );
 
@@ -652,7 +689,7 @@ Examples:
     '4.0',
     'gpt-oss:20b',
     0.9,
-    1024,
+    null,
     true
 );
 
@@ -731,7 +768,7 @@ Output (German): "Melancholische Pop-Ballade mit Klavier, sanften Streichern, su
     '1.0',
     'gpt-oss:20b',
     0.9,
-    2048,
+    null,
     true
 );
 
@@ -763,7 +800,7 @@ Output: "Electronic dance music with driving synths, modern production"',
     '2.0',
     'gpt-oss:20b',
     0.5,
-    512,
+    null,
     true
 );
 

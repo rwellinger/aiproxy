@@ -240,20 +240,34 @@ export class ChatService {
     );
   }
 
-  async rewriteLyricSection(sectionContent: string, userInstructions?: string): Promise<string> {
-    return this.callUnifiedWithValidation('lyrics', 'rewrite-section', sectionContent, undefined, userInstructions);
+  async rewriteLyricSection(
+    sectionLabel: string,
+    sectionContent: string,
+    userInstructions?: string
+  ): Promise<string> {
+    return this.callUnifiedWithValidation(
+      'lyrics',
+      'rewrite-section',
+      sectionContent,
+      (template) => `You are rewriting the "${sectionLabel}" section.\n\n${template.pre_condition || ''}`,
+      userInstructions
+    );
   }
 
   async optimizeLyricPhrasing(lyricContent: string, userInstructions?: string): Promise<string> {
     return this.callUnifiedWithValidation('lyrics', 'optimize-phrasing', lyricContent, undefined, userInstructions);
   }
 
-  async extendLyricSection(sectionContent: string, lines: number, userInstructions?: string): Promise<string> {
+  async condenseLyricSection(
+    sectionLabel: string,
+    sectionContent: string,
+    userInstructions?: string
+  ): Promise<string> {
     return this.callUnifiedWithValidation(
       'lyrics',
-      'extend-section',
+      'condense-section',
       sectionContent,
-      (template) => `Add ${lines} more lines to this section.\n\n${template.pre_condition || ''}`,
+      (template) => `You are condensing the "${sectionLabel}" section into concise, singable lyrics.\n\n${template.pre_condition || ''}`,
       userInstructions
     );
   }

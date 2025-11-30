@@ -27,7 +27,7 @@ import {
   AssignedSong,
   AssignedSketch
 } from '../../models/song-project.model';
-import { getInitials, getColorFromString } from '../../shared/utils/cover-utils';
+import { getInitials, getColorFromString } from '../../services/utils/cover-utils';
 
 @Component({
   selector: 'app-song-projects',

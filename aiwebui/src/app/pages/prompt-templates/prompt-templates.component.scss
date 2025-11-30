@@ -140,6 +140,32 @@
   }
 }
 
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+
+  .filter-btn {
+    padding: $spacing-xs $spacing-sm;
+    border: 1px solid $border-standard;
+    background-color: $background-white;
+    border-radius: 8px;
+    font-size: $font-sm;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: $background-light;
+    }
+
+    &.active {
+      background-color: $primary-color;
+      color: $background-white;
+      border-color: $primary-color;
+    }
+  }
+}
+
 .template-list {
   flex: 1;
   overflow-y: auto;

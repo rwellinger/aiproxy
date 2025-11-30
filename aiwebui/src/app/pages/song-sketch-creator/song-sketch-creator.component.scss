@@ -12,7 +12,7 @@
 }
 
 .sketch-creator-card {
-  max-width: 1000px;
+  max-width: 1400px;
   width: 100%;
   height: 100%;
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
@@ -154,9 +154,9 @@
   }
 
   .prompt-textarea {
-    min-height: 50px;
+    min-height: 40px;
     flex: 1 1 auto;
-    max-height: 150px;
+    max-height: 80px;
   }
 
   .prompt-input-group {
@@ -648,22 +648,23 @@
     }
 
     .type-badge {
-      padding: 1rem;
+      padding: 0.5rem 1rem;
       border: 2px solid $border-standard;
       border-radius: 8px;
       text-align: center;
       transition: all 0.2s ease;
       background: $background-light;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
 
       i {
-        font-size: 1.5rem;
-        display: block;
-        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
       }
 
       span {
         font-weight: 500;
-        display: block;
       }
 
       &:hover {

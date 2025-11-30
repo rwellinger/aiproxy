@@ -124,6 +124,7 @@
                                 <!-- AI Instructions Textarea -->
                                 <div class="ai-instructions-group" *ngIf="activeSection">
                                     <label for="aiInstructions" class="ai-instructions-label">
+                                        <i class="fas fa-wand-magic-sparkles"></i>
                                         {{ 'lyricCreation.sectionEditor.aiInstructions' | translate }}
                                     </label>
                                     <textarea
@@ -160,12 +161,12 @@
 
                                 <button
                                         type="button"
-                                        (click)="extendSectionAI()"
+                                        (click)="condenseSectionAI()"
                                         [disabled]="isAnySectionOperationInProgress"
                                         class="ai-action-button">
-                                    <i class="fas fa-plus-circle" *ngIf="!isExtendingSection"></i>
-                                    <i class="fas fa-spinner fa-spin" *ngIf="isExtendingSection"></i>
-                                    {{ 'lyricCreation.sectionEditor.extend' | translate }}
+                                    <i class="fas fa-compress-alt" *ngIf="!isCondensingSection"></i>
+                                    <i class="fas fa-spinner fa-spin" *ngIf="isCondensingSection"></i>
+                                    {{ 'lyricCreation.sectionEditor.condense' | translate }}
                                 </button>
 
                                 <button

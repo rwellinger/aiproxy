@@ -9,8 +9,8 @@
                             <i class="fas fa-file-alt"></i>
                             {{ 'promptTemplates.title' | translate }}
                         </h2>
-                        <div class="templates-count-badge" *ngIf="templates.length > 0">
-                            {{ 'promptTemplates.list.count' | translate:{count: templates.length} }}
+                        <div class="templates-count-badge" *ngIf="filteredTemplates.length > 0">
+                            {{ 'promptTemplates.list.count' | translate:{count: filteredTemplates.length} }}
                         </div>
                     </div>
                 </div>
@@ -33,6 +33,51 @@
                             [disabled]="isLoading"
                             [title]="'promptTemplates.list.clearSearch' | translate">
                         <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="category-filter">
+                    <button type="button"
+                            class="filter-btn"
+                            [class.active]="currentCategory === 'all'"
+                            (click)="onCategoryChange('all')">
+                        {{ 'promptTemplates.filters.all' | translate }}
+                    </button>
+                    <button type="button"
+                            class="filter-btn"
+                            [class.active]="currentCategory === 'lyrics'"
+                            (click)="onCategoryChange('lyrics')">
+                        {{ 'promptTemplates.filters.lyrics' | translate }}
+                    </button>
+                    <button type="button"
+                            class="filter-btn"
+                            [class.active]="currentCategory === 'image'"
+                            (click)="onCategoryChange('image')">
+                        {{ 'promptTemplates.filters.image' | translate }}
+                    </button>
+                    <button type="button"
+                            class="filter-btn"
+                            [class.active]="currentCategory === 'music'"
+                            (click)="onCategoryChange('music')">
+                        {{ 'promptTemplates.filters.music' | translate }}
+                    </button>
+                    <button type="button"
+                            class="filter-btn"
+                            [class.active]="currentCategory === 'titel'"
+                            (click)="onCategoryChange('titel')">
+                        {{ 'promptTemplates.filters.titel' | translate }}
+                    </button>
+                    <button type="button"
+                            class="filter-btn"
+                            [class.active]="currentCategory === 'description'"
+                            (click)="onCategoryChange('description')">
+                        {{ 'promptTemplates.filters.description' | translate }}
+                    </button>
+                    <button type="button"
+                            class="filter-btn"
+                            [class.active]="currentCategory === 'other'"
+                            (click)="onCategoryChange('other')">
+                        {{ 'promptTemplates.filters.other' | translate }}
                     </button>
                 </div>
             </div>
@@ -72,9 +117,9 @@
                     </div>
                 </div>
 
-                <div class="empty-state" *ngIf="templates.length === 0 && !isLoading">
+                <div class="empty-state" *ngIf="filteredTemplates.length === 0 && !isLoading">
                     <i class="fas fa-file-alt"></i>
-                    <p>{{ 'promptTemplates.list.noTemplates' | translate }}</p>
+                    <p>{{ (currentCategory === 'all' ? 'promptTemplates.list.noTemplates' : 'promptTemplates.list.noTemplatesInCategory') | translate }}</p>
                 </div>
             </div>
 

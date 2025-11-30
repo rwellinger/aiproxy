@@ -513,6 +513,54 @@
 
   .ai-instructions-group {
     margin-top: $spacing-md;
+    padding: $spacing-sm $spacing-md;
+    background: linear-gradient(135deg, rgba($ai-color, 0.08) 0%, rgba($ai-color, 0.04) 100%);
+    border: 1px solid rgba($ai-color, 0.25);
+    border-radius: 8px;
+    border-left: 3px solid $ai-color;
+
+    .ai-instructions-label {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      font-size: $font-sm;
+      font-weight: $font-weight-medium;
+      color: $ai-color;
+      margin-bottom: $spacing-xs;
+
+      i {
+        font-size: $font-base;
+      }
+    }
+
+    .ai-instructions-textarea {
+      width: 100%;
+      min-height: 60px;
+      padding: $spacing-sm;
+      border: 1px solid rgba($ai-color, 0.3);
+      border-radius: 6px;
+      font-size: $font-sm;
+      font-family: $font-family-base;
+      resize: vertical;
+      background: $background-white;
+      transition: border-color 0.2s, box-shadow 0.2s;
+
+      &:focus {
+        outline: none;
+        border-color: $ai-color;
+        box-shadow: 0 0 0 3px rgba($ai-color, 0.15);
+      }
+
+      &::placeholder {
+        color: $text-muted;
+        font-style: italic;
+      }
+
+      &:disabled {
+        background: $background-light;
+        cursor: not-allowed;
+      }
+    }
   }
 
   .section-ai-actions {

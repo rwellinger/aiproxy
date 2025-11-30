@@ -564,7 +564,7 @@
       "placeholder": "Edit this section...",
       "improve": "Improve Section",
       "rewrite": "Rewrite Section",
-      "extend": "Extend Section",
+      "condense": "Condense Section",
       "optimize": "Optimize Phrasing",
       "activated": "Section Editor activated",
       "applied": "Sections applied successfully",
@@ -575,8 +575,8 @@
       "improvingHint": "AI is improving this section",
       "rewriting": "Rewriting Section...",
       "rewritingHint": "AI is rewriting this section",
-      "extending": "Extending Section...",
-      "extendingHint": "AI is adding more lines to this section",
+      "condensing": "Condensing Section...",
+      "condensingHint": "AI is condensing verbose text into singable lyrics",
       "optimizing": "Optimizing Phrasing...",
       "optimizingHint": "AI is reformatting lyrics into short musical phrases",
       "aiInstructions": "AI Instructions (optional)",
@@ -696,10 +696,20 @@
       },
       "tokensHint": "(approx. {{words}} words)"
     },
+    "filters": {
+      "all": "All",
+      "lyrics": "Lyrics",
+      "image": "Image",
+      "music": "Music",
+      "titel": "Title",
+      "description": "Description",
+      "other": "Other"
+    },
     "list": {
       "clearSearch": "Clear search",
       "count": "{{count}} templates",
       "noTemplates": "No templates available",
+      "noTemplatesInCategory": "No templates in this category",
       "refresh": "Refresh",
       "searchPlaceholder": "Search in category and action...",
       "status": {
