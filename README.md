@@ -2,7 +2,7 @@
 
 <img src="thwellysAIToolbar.jpg" alt="thWelly's AI Toolbox" width="1024" height="578">
 
-A full-stack platform for AI-powered image and music generation with Python backend (FastAPI) and Angular 18 frontend.
+A full-stack platform for AI-powered image and music generation with Python backend (FastAPI) and Angular 20 frontend.
 
 ---
 
@@ -93,7 +93,7 @@ A full-stack platform for AI-powered image and music generation with Python back
   - Project metadata: Tags, descriptions, cover images, sync status
   - CLI integration for local workflow (clone, mirror, batch operations)
 - **PostgreSQL** database for persistent storage
-- **Angular 18** frontend with Material Design
+- **Angular 20** frontend with Material Design
 - **Redis & Celery** for asynchronous task processing
 
 ---
@@ -102,7 +102,7 @@ A full-stack platform for AI-powered image and music generation with Python back
 
 - **macOS** (Apple Silicon - M1/M4)
 - **Python 3.12+** (with Miniconda3, current: 3.12.12)
-- **Node.js & npm** (for Angular 18)
+- **Node.js & npm** (for Angular 20)
 - **Docker** (via Colima for macOS)
 - **Git**
 
@@ -311,7 +311,7 @@ mac_ki_service/
 │   ├── VERSION          # Version file for releases
 │   └── pyproject.toml
 │
-├── aiwebui/             # Angular 18 Frontend
+├── aiwebui/             # Angular 20 Frontend
 │   ├── src/app/
 │   │   ├── pages/       # Feature pages (17)
 │   │   │   ├── ai-chat/               # AI Chat conversations
@@ -567,7 +567,7 @@ python src/worker.py
 - **Migrations**: Alembic
 
 ### Frontend (aiwebui)
-- **Framework**: Angular 18
+- **Framework**: Angular 20
 - **UI**: Angular Material
 - **Styling**: SCSS
 - **State**: RxJS

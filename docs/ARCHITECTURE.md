@@ -25,14 +25,14 @@ This project uses the **arc42 architecture template** for comprehensive document
 ## Quick Reference
 
 ### Tech Stack
-- **Frontend**: Angular 18, Material Design, TypeScript, RxJS, ngx-translate
+- **Frontend**: Angular 20, Material Design, TypeScript, RxJS, ngx-translate
 - **Backend**: FastAPI, Python 3.12.12, Celery, SQLAlchemy, Alembic
 - **Database**: PostgreSQL, Redis
 - **Deployment**: Docker (Colima), Nginx
 - **Hardware**: Apple Silicon (M1/M4)
 
 ### Key Components
-- **aiwebui**: Angular 18 frontend with Material Design
+- **aiwebui**: Angular 20 frontend with Material Design
 - **aiproxysrv**: FastAPI backend + proxy for external APIs (OpenAI, Mureka, Ollama)
 - **forwardproxy**: Nginx reverse proxy (production)
 - **aitestmock**: Mock API for cost-free testing

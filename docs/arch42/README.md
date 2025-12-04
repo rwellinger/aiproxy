@@ -263,7 +263,7 @@ ApiCostService (src/db/api_cost_service.py)
 - **Code Review**: Violations easily detectable during PR review
 
 ### 4.2 Technology Stack
-- **Frontend**: Angular 18.2.13 + TypeScript + Angular Material + SCSS + RxJS
+- **Frontend**: Angular 20.0.0 + TypeScript + Angular Material + SCSS + RxJS
 - **Backend**: Python 3.12.12 + FastAPI + SQLAlchemy 2.0 + Pydantic 2.0 + Alembic 1.13
 - **Image Processing**: Pillow (PIL) 11.0.0 - Text overlay rendering, font handling, image manipulation
 - **Object Storage**: Boto3 + S3-compatible storage (MinIO, AWS S3, Backblaze B2, Wasabi)
@@ -294,7 +294,7 @@ ApiCostService (src/db/api_cost_service.py)
 
 *Figure 5.2.1: Angular Project Structure - Components, services and modules of the frontend*
 
-- **Technology**: Angular 18.2.13 + TypeScript + SCSS + Angular Material
+- **Technology**: Angular 20.0.0 + TypeScript + SCSS + Angular Material
 - **Structure**:
   ```
   src/app/
@@ -2098,7 +2098,7 @@ All buttons MUST use mixins from `src/scss/_mixins.scss`:
 - **BOTH** `en.json` AND `de.json` must be updated
 - **Example:** `{{ 'featureName.subsection.key' | translate }}`
 
-**Angular 18 Modern Patterns:**
+**Angular 20 Modern Patterns:**
 - **ALWAYS** use `inject()` function instead of constructor injection
 - Pattern: `private service = inject(ServiceName)`
 - Use Angular's `HttpClient` (NOT fetch API)
