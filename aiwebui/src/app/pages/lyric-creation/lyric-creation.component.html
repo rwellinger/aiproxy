@@ -10,20 +10,20 @@
                 </div>
                 <div *ngIf="isFromSketchCreator && !sectionEditorMode" class="sketch-navigation-buttons">
                     <button
-                        type="button"
-                        (click)="cancelChanges()"
-                        class="cancel-button"
-                        [disabled]="isAnyLyricOperationInProgress"
-                        [title]="'common.cancel' | translate">
+                            type="button"
+                            (click)="cancelChanges()"
+                            class="cancel-button"
+                            [disabled]="isAnyLyricOperationInProgress"
+                            [title]="'common.cancel' | translate">
                         <i class="fas fa-times"></i>
                         <span>{{ 'common.cancel' | translate }}</span>
                     </button>
                     <button
-                        type="button"
-                        (click)="applyChanges()"
-                        class="apply-button"
-                        [disabled]="isAnyLyricOperationInProgress"
-                        [title]="'common.apply' | translate">
+                            type="button"
+                            (click)="applyChanges()"
+                            class="apply-button"
+                            [disabled]="isAnyLyricOperationInProgress"
+                            [title]="'common.apply' | translate">
                         <i class="fas fa-check"></i>
                         <span>{{ 'common.apply' | translate }}</span>
                     </button>

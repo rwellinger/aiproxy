@@ -1,40 +1,40 @@
-import {Component, OnInit, inject, HostListener} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {CommonModule} from '@angular/common';
-import {HttpClient} from '@angular/common/http';
-import {firstValueFrom} from 'rxjs';
-import {TranslateModule, TranslateService} from '@ngx-translate/core';
-import {ResourceBlobService} from '../../services/ui/resource-blob.service';
-import {ApiConfigService} from '../../services/config/api-config.service';
-import {HealthService} from '../../services/config/health.service';
-import {NotificationService} from '../../services/ui/notification.service';
-import {ImageService} from '../../services/business/image.service';
-import {ChatService} from '../../services/config/chat.service';
-import {UserService} from '../../services/business/user.service';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatCardModule} from '@angular/material/card';
-import {MatButtonModule} from '@angular/material/button';
-import {MatSelectModule} from '@angular/material/select';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {ImageDetailPanelComponent} from '../../components/image-detail-panel/image-detail-panel.component';
-import {InfoTooltipComponent} from '../../components/info-tooltip/info-tooltip.component';
-import {ProgressService} from '../../services/ui/progress.service';
+import {Component, HostListener, inject, OnInit} from "@angular/core";
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {CommonModule} from "@angular/common";
+import {HttpClient} from "@angular/common/http";
+import {firstValueFrom} from "rxjs";
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
+import {ResourceBlobService} from "../../services/ui/resource-blob.service";
+import {ApiConfigService} from "../../services/config/api-config.service";
+import {HealthService} from "../../services/config/health.service";
+import {NotificationService} from "../../services/ui/notification.service";
+import {ImageService} from "../../services/business/image.service";
+import {ChatService} from "../../services/config/chat.service";
+import {UserService} from "../../services/business/user.service";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatCardModule} from "@angular/material/card";
+import {MatButtonModule} from "@angular/material/button";
+import {MatSelectModule} from "@angular/material/select";
+import {MatFormFieldModule} from "@angular/material/form-field";
+import {ImageDetailPanelComponent} from "../../components/image-detail-panel/image-detail-panel.component";
+import {InfoTooltipComponent} from "../../components/info-tooltip/info-tooltip.component";
+import {ProgressService} from "../../services/ui/progress.service";
 import {
     ArtisticStyle,
-    CompositionStyle,
-    LightingStyle,
     ColorPaletteStyle,
+    CompositionStyle,
     DetailLevel,
     EnhanceQuality,
+    LightingStyle,
     SelectOption
-} from '../../models/image-generation.model';
+} from "../../models/image-generation.model";
 
 @Component({
-    selector: 'app-image-generator',
+    selector: "app-image-generator",
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, MatButtonModule, MatSelectModule, MatFormFieldModule, ImageDetailPanelComponent, InfoTooltipComponent, TranslateModule],
-    templateUrl: './image-generator.component.html',
-    styleUrl: './image-generator.component.scss'
+    templateUrl: "./image-generator.component.html",
+    styleUrl: "./image-generator.component.scss"
 })
 export class ImageGeneratorComponent implements OnInit {
     promptForm!: FormGroup;
@@ -45,9 +45,9 @@ export class ImageGeneratorComponent implements OnInit {
     showPromptDropdown = false;
     isGeneratingTitle = false;
     showTitleDropdown = false;
-    result = '';
-    generatedImageUrl = '';
-    generatedImageBlobUrl = '';
+    result = "";
+    generatedImageUrl = "";
+    generatedImageBlobUrl = "";
     showImageModal = false;
 
     // Storage health state (preventive UX)
@@ -58,69 +58,69 @@ export class ImageGeneratorComponent implements OnInit {
 
     // Style-related FormControls (managed separately for cleaner code)
     // Note: Initial values will be overridden in ngOnInit() from LocalStorage
-    artisticStyle = new FormControl<ArtisticStyle>('auto');
-    composition = new FormControl<CompositionStyle>('auto');
-    lighting = new FormControl<LightingStyle>('auto');
-    colorPalette = new FormControl<ColorPaletteStyle>('auto');
-    detailLevel = new FormControl<DetailLevel>('auto');
-    enhanceQuality = new FormControl<EnhanceQuality>('auto', { nonNullable: true });
+    artisticStyle = new FormControl<ArtisticStyle>("auto");
+    composition = new FormControl<CompositionStyle>("auto");
+    lighting = new FormControl<LightingStyle>("auto");
+    colorPalette = new FormControl<ColorPaletteStyle>("auto");
+    detailLevel = new FormControl<DetailLevel>("auto");
+    enhanceQuality = new FormControl<EnhanceQuality>("auto", {nonNullable: true});
 
     // Dropdown options (i18n keys)
     artisticStyleOptions: SelectOption<ArtisticStyle>[] = [
-        { value: 'auto', labelKey: 'imageGenerator.styles.artisticStyle.options.auto' },
-        { value: 'photorealistic', labelKey: 'imageGenerator.styles.artisticStyle.options.photorealistic' },
-        { value: 'digital-art', labelKey: 'imageGenerator.styles.artisticStyle.options.digital-art' },
-        { value: 'oil-painting', labelKey: 'imageGenerator.styles.artisticStyle.options.oil-painting' },
-        { value: 'watercolor', labelKey: 'imageGenerator.styles.artisticStyle.options.watercolor' },
-        { value: 'cartoon', labelKey: 'imageGenerator.styles.artisticStyle.options.cartoon' },
-        { value: 'anime', labelKey: 'imageGenerator.styles.artisticStyle.options.anime' },
-        { value: 'sketch', labelKey: 'imageGenerator.styles.artisticStyle.options.sketch' },
-        { value: '3d-render', labelKey: 'imageGenerator.styles.artisticStyle.options.3d-render' }
+        {value: "auto", labelKey: "imageGenerator.styles.artisticStyle.options.auto"},
+        {value: "photorealistic", labelKey: "imageGenerator.styles.artisticStyle.options.photorealistic"},
+        {value: "digital-art", labelKey: "imageGenerator.styles.artisticStyle.options.digital-art"},
+        {value: "oil-painting", labelKey: "imageGenerator.styles.artisticStyle.options.oil-painting"},
+        {value: "watercolor", labelKey: "imageGenerator.styles.artisticStyle.options.watercolor"},
+        {value: "cartoon", labelKey: "imageGenerator.styles.artisticStyle.options.cartoon"},
+        {value: "anime", labelKey: "imageGenerator.styles.artisticStyle.options.anime"},
+        {value: "sketch", labelKey: "imageGenerator.styles.artisticStyle.options.sketch"},
+        {value: "3d-render", labelKey: "imageGenerator.styles.artisticStyle.options.3d-render"}
     ];
 
     compositionOptions: SelectOption<CompositionStyle>[] = [
-        { value: 'auto', labelKey: 'imageGenerator.styles.composition.options.auto' },
-        { value: 'portrait', labelKey: 'imageGenerator.styles.composition.options.portrait' },
-        { value: 'landscape', labelKey: 'imageGenerator.styles.composition.options.landscape' },
-        { value: 'wide-angle', labelKey: 'imageGenerator.styles.composition.options.wide-angle' },
-        { value: 'close-up', labelKey: 'imageGenerator.styles.composition.options.close-up' },
-        { value: 'rule-of-thirds', labelKey: 'imageGenerator.styles.composition.options.rule-of-thirds' },
-        { value: 'centered', labelKey: 'imageGenerator.styles.composition.options.centered' },
-        { value: 'album-cover', labelKey: 'imageGenerator.styles.composition.options.album-cover' }
+        {value: "auto", labelKey: "imageGenerator.styles.composition.options.auto"},
+        {value: "portrait", labelKey: "imageGenerator.styles.composition.options.portrait"},
+        {value: "landscape", labelKey: "imageGenerator.styles.composition.options.landscape"},
+        {value: "wide-angle", labelKey: "imageGenerator.styles.composition.options.wide-angle"},
+        {value: "close-up", labelKey: "imageGenerator.styles.composition.options.close-up"},
+        {value: "rule-of-thirds", labelKey: "imageGenerator.styles.composition.options.rule-of-thirds"},
+        {value: "centered", labelKey: "imageGenerator.styles.composition.options.centered"},
+        {value: "album-cover", labelKey: "imageGenerator.styles.composition.options.album-cover"}
     ];
 
     lightingOptions: SelectOption<LightingStyle>[] = [
-        { value: 'auto', labelKey: 'imageGenerator.styles.lighting.options.auto' },
-        { value: 'natural', labelKey: 'imageGenerator.styles.lighting.options.natural' },
-        { value: 'studio', labelKey: 'imageGenerator.styles.lighting.options.studio' },
-        { value: 'dramatic', labelKey: 'imageGenerator.styles.lighting.options.dramatic' },
-        { value: 'golden-hour', labelKey: 'imageGenerator.styles.lighting.options.golden-hour' },
-        { value: 'night', labelKey: 'imageGenerator.styles.lighting.options.night' }
+        {value: "auto", labelKey: "imageGenerator.styles.lighting.options.auto"},
+        {value: "natural", labelKey: "imageGenerator.styles.lighting.options.natural"},
+        {value: "studio", labelKey: "imageGenerator.styles.lighting.options.studio"},
+        {value: "dramatic", labelKey: "imageGenerator.styles.lighting.options.dramatic"},
+        {value: "golden-hour", labelKey: "imageGenerator.styles.lighting.options.golden-hour"},
+        {value: "night", labelKey: "imageGenerator.styles.lighting.options.night"}
     ];
 
     colorPaletteOptions: SelectOption<ColorPaletteStyle>[] = [
-        { value: 'auto', labelKey: 'imageGenerator.styles.colorPalette.options.auto' },
-        { value: 'vibrant', labelKey: 'imageGenerator.styles.colorPalette.options.vibrant' },
-        { value: 'muted', labelKey: 'imageGenerator.styles.colorPalette.options.muted' },
-        { value: 'monochrome', labelKey: 'imageGenerator.styles.colorPalette.options.monochrome' },
-        { value: 'high-contrast', labelKey: 'imageGenerator.styles.colorPalette.options.high-contrast' },
-        { value: 'warm', labelKey: 'imageGenerator.styles.colorPalette.options.warm' },
-        { value: 'cool', labelKey: 'imageGenerator.styles.colorPalette.options.cool' },
-        { value: 'pastel', labelKey: 'imageGenerator.styles.colorPalette.options.pastel' }
+        {value: "auto", labelKey: "imageGenerator.styles.colorPalette.options.auto"},
+        {value: "vibrant", labelKey: "imageGenerator.styles.colorPalette.options.vibrant"},
+        {value: "muted", labelKey: "imageGenerator.styles.colorPalette.options.muted"},
+        {value: "monochrome", labelKey: "imageGenerator.styles.colorPalette.options.monochrome"},
+        {value: "high-contrast", labelKey: "imageGenerator.styles.colorPalette.options.high-contrast"},
+        {value: "warm", labelKey: "imageGenerator.styles.colorPalette.options.warm"},
+        {value: "cool", labelKey: "imageGenerator.styles.colorPalette.options.cool"},
+        {value: "pastel", labelKey: "imageGenerator.styles.colorPalette.options.pastel"}
     ];
 
     detailLevelOptions: SelectOption<DetailLevel>[] = [
-        { value: 'auto', labelKey: 'imageGenerator.styles.detailLevel.options.auto' },
-        { value: 'minimal', labelKey: 'imageGenerator.styles.detailLevel.options.minimal' },
-        { value: 'moderate', labelKey: 'imageGenerator.styles.detailLevel.options.moderate' },
-        { value: 'highly-detailed', labelKey: 'imageGenerator.styles.detailLevel.options.highly-detailed' }
+        {value: "auto", labelKey: "imageGenerator.styles.detailLevel.options.auto"},
+        {value: "minimal", labelKey: "imageGenerator.styles.detailLevel.options.minimal"},
+        {value: "moderate", labelKey: "imageGenerator.styles.detailLevel.options.moderate"},
+        {value: "highly-detailed", labelKey: "imageGenerator.styles.detailLevel.options.highly-detailed"}
     ];
 
     enhanceQualityOptions: SelectOption<EnhanceQuality>[] = [
-        { value: 'auto', labelKey: 'imageGenerator.enhanceQuality.options.auto' },
-        { value: 'quality', labelKey: 'imageGenerator.enhanceQuality.options.quality' },
-        { value: 'fast', labelKey: 'imageGenerator.enhanceQuality.options.fast' },
-        { value: 'off', labelKey: 'imageGenerator.enhanceQuality.options.off' }
+        {value: "auto", labelKey: "imageGenerator.enhanceQuality.options.auto"},
+        {value: "quality", labelKey: "imageGenerator.enhanceQuality.options.quality"},
+        {value: "fast", labelKey: "imageGenerator.enhanceQuality.options.fast"},
+        {value: "off", labelKey: "imageGenerator.enhanceQuality.options.off"}
     ];
 
     private fb = inject(FormBuilder);
@@ -137,14 +137,14 @@ export class ImageGeneratorComponent implements OnInit {
 
     ngOnInit() {
         this.promptForm = this.fb.group({
-            title: [''],
-            prompt: ['', Validators.required],
-            size: ['1024x1024', Validators.required]
+            title: [""],
+            prompt: ["", Validators.required],
+            size: ["1024x1024", Validators.required]
         });
 
         // Load saved form data
         const savedData = this.imageService.loadFormData();
-        if (savedData.prompt || savedData['title']) this.promptForm.patchValue(savedData);
+        if (savedData.prompt || savedData["title"]) this.promptForm.patchValue(savedData);
 
         // Save form data on changes
         this.promptForm.valueChanges.subscribe(value => {
@@ -161,11 +161,11 @@ export class ImageGeneratorComponent implements OnInit {
         this.enhanceQuality.setValue(savedStyles.enhanceQuality);
 
         // If Album Cover is already selected, force enhanceQuality to 'auto' and size to square
-        if (savedStyles.composition === 'album-cover') {
-            this.enhanceQuality.setValue('auto');
+        if (savedStyles.composition === "album-cover") {
+            this.enhanceQuality.setValue("auto");
             this.enhanceQuality.disable();
-            this.promptForm.patchValue({ size: '1024x1024' }, { emitEvent: false });
-            this.promptForm.get('size')?.disable({ emitEvent: false });
+            this.promptForm.patchValue({size: "1024x1024"}, {emitEvent: false});
+            this.promptForm.get("size")?.disable({emitEvent: false});
             this.saveStylePreferences();
         }
 
@@ -173,18 +173,18 @@ export class ImageGeneratorComponent implements OnInit {
         this.artisticStyle.valueChanges.subscribe(() => this.saveStylePreferences());
         this.composition.valueChanges.subscribe(value => {
             // Auto-set enhancement quality, size, and disable when Album Cover is selected
-            if (value === 'album-cover') {
-                this.enhanceQuality.setValue('auto', { emitEvent: false });
+            if (value === "album-cover") {
+                this.enhanceQuality.setValue("auto", {emitEvent: false});
                 this.enhanceQuality.disable();
-                this.promptForm.patchValue({ size: '1024x1024' }, { emitEvent: false });
+                this.promptForm.patchValue({size: "1024x1024"}, {emitEvent: false});
                 // Disable size dropdown to prevent format changes
-                this.promptForm.get('size')?.disable({ emitEvent: false });
+                this.promptForm.get("size")?.disable({emitEvent: false});
                 // Reset incompatible styles to 'auto' when switching to Album Cover
                 this.resetIncompatibleStylesForAlbumCover();
             } else {
                 // Re-enable when switching away from Album Cover
                 this.enhanceQuality.enable();
-                this.promptForm.get('size')?.enable({ emitEvent: false });
+                this.promptForm.get("size")?.enable({emitEvent: false});
             }
             this.saveStylePreferences();
         });
@@ -198,10 +198,10 @@ export class ImageGeneratorComponent implements OnInit {
         this.checkStorageHealth();
 
         // Watch title changes → Reset composition if album-cover but no title
-        this.promptForm.get('title')?.valueChanges.subscribe(title => {
-            if (!title?.trim() && this.composition.value === 'album-cover') {
-                this.composition.setValue('auto');
-                this.notificationService.info(this.translate.instant('imageGenerator.albumCoverRequiresTitle'));
+        this.promptForm.get("title")?.valueChanges.subscribe(title => {
+            if (!title?.trim() && this.composition.value === "album-cover") {
+                this.composition.setValue("auto");
+                this.notificationService.info(this.translate.instant("imageGenerator.albumCoverRequiresTitle"));
             }
         });
     }
@@ -215,7 +215,7 @@ export class ImageGeneratorComponent implements OnInit {
         try {
             this.isStorageHealthy = await firstValueFrom(this.healthService.checkStorage());
         } catch (error) {
-            console.warn('[ImageGenerator] Storage health check failed:', error);
+            console.warn("[ImageGenerator] Storage health check failed:", error);
             this.isStorageHealthy = false;
         } finally {
             this.isCheckingStorage = false;
@@ -225,13 +225,13 @@ export class ImageGeneratorComponent implements OnInit {
     async onSubmit() {
         if (this.promptForm.valid) {
             // Validate title is required for Album Cover composition
-            if (this.composition.value === 'album-cover' && !this.promptForm.get('title')?.value?.trim()) {
-                this.notificationService.error(this.translate.instant('imageGenerator.errors.titleRequiredForCover'));
+            if (this.composition.value === "album-cover" && !this.promptForm.get("title")?.value?.trim()) {
+                this.notificationService.error(this.translate.instant("imageGenerator.errors.titleRequiredForCover"));
                 return;
             }
 
             this.isLoading = true;
-            this.result = '';
+            this.result = "";
 
             try {
                 const formValue = this.promptForm.value;
@@ -241,41 +241,41 @@ export class ImageGeneratorComponent implements OnInit {
                 if (!titleValue) {
                     titleValue = await this.progressService.executeWithProgress(
                         () => this.chatService.generateTitleFast(formValue.prompt.trim()),
-                        this.translate.instant('imageGenerator.progress.generatingTitle'),
-                        this.translate.instant('imageGenerator.progress.generatingTitleHint')
+                        this.translate.instant("imageGenerator.progress.generatingTitle"),
+                        this.translate.instant("imageGenerator.progress.generatingTitleHint")
                     );
                     titleValue = this.removeQuotes(titleValue);
                     // Update form with generated title
-                    this.promptForm.patchValue({ title: titleValue }, { emitEvent: false });
+                    this.promptForm.patchValue({title: titleValue}, {emitEvent: false});
                 }
 
                 const effectiveMode = this.getEffectiveEnhanceMode();
                 let finalPrompt = formValue.prompt.trim();
 
                 // Step 1: AI Enhancement (if not 'off')
-                if (effectiveMode !== 'off') {
+                if (effectiveMode !== "off") {
                     // Album Cover uses special cover enhancement
-                    if (this.composition.value === 'album-cover') {
+                    if (this.composition.value === "album-cover") {
                         finalPrompt = await this.progressService.executeWithProgress(
                             () => this.chatService.enhanceCoverPrompt(finalPrompt),
-                            this.translate.instant('imageGenerator.progress.enhancingCover'),
-                            this.translate.instant('imageGenerator.progress.enhancingCoverHint')
+                            this.translate.instant("imageGenerator.progress.enhancingCover"),
+                            this.translate.instant("imageGenerator.progress.enhancingCoverHint")
                         );
                     } else {
                         // Regular enhancement (quality or fast)
                         const progressMessage =
-                            effectiveMode === 'quality'
-                                ? this.translate.instant('imageGenerator.progress.enhancingQuality')
-                                : this.translate.instant('imageGenerator.progress.enhancingFast');
+                            effectiveMode === "quality"
+                                ? this.translate.instant("imageGenerator.progress.enhancingQuality")
+                                : this.translate.instant("imageGenerator.progress.enhancingFast");
 
                         const progressHint =
-                            effectiveMode === 'quality'
-                                ? this.translate.instant('imageGenerator.progress.enhancingQualityHint')
-                                : this.translate.instant('imageGenerator.progress.enhancingFastHint');
+                            effectiveMode === "quality"
+                                ? this.translate.instant("imageGenerator.progress.enhancingQualityHint")
+                                : this.translate.instant("imageGenerator.progress.enhancingFastHint");
 
                         finalPrompt = await this.progressService.executeWithProgress(
                             () =>
-                                effectiveMode === 'quality'
+                                effectiveMode === "quality"
                                     ? this.chatService.improveImagePrompt(finalPrompt)
                                     : this.chatService.improveImagePromptFast(finalPrompt),
                             progressMessage,
@@ -295,19 +295,19 @@ export class ImageGeneratorComponent implements OnInit {
                 };
 
                 // Add style parameters if not 'auto'
-                if (this.artisticStyle.value !== 'auto') {
+                if (this.artisticStyle.value !== "auto") {
                     requestBody.artistic_style = this.artisticStyle.value;
                 }
-                if (this.composition.value !== 'auto') {
+                if (this.composition.value !== "auto") {
                     requestBody.composition = this.composition.value;
                 }
-                if (this.lighting.value !== 'auto') {
+                if (this.lighting.value !== "auto") {
                     requestBody.lighting = this.lighting.value;
                 }
-                if (this.colorPalette.value !== 'auto') {
+                if (this.colorPalette.value !== "auto") {
                     requestBody.color_palette = this.colorPalette.value;
                 }
-                if (this.detailLevel.value !== 'auto') {
+                if (this.detailLevel.value !== "auto") {
                     requestBody.detail_level = this.detailLevel.value;
                 }
 
@@ -317,7 +317,7 @@ export class ImageGeneratorComponent implements OnInit {
 
                 if (data.url) {
                     // Store the generated image URL and ID
-                    this.generatedImageUrl = data.url || '';
+                    this.generatedImageUrl = data.url || "";
                     this.generatedImageId = data.id || null;
 
                     // Create image object for direct display (use data from backend)
@@ -329,7 +329,7 @@ export class ImageGeneratorComponent implements OnInit {
                         enhanced_prompt: data.enhanced_prompt || null,
                         title: titleValue || null,
                         size: formValue.size,
-                        model_used: 'DALL-E 3',
+                        model_used: "DALL-E 3",
                         created_at: new Date().toISOString(),
                         artistic_style: data.artistic_style || null,
                         composition: data.composition || null,
@@ -345,13 +345,13 @@ export class ImageGeneratorComponent implements OnInit {
                                 this.generatedImageBlobUrl = blobUrl;
                             },
                             error: (error) => {
-                                console.error('Failed to load image blob:', error);
-                                this.generatedImageBlobUrl = '';
+                                console.error("Failed to load image blob:", error);
+                                this.generatedImageBlobUrl = "";
                             }
                         });
                     }
                 } else {
-                    this.notificationService.error('Error generating image.');
+                    this.notificationService.error("Error generating image.");
                 }
             } catch (error: any) {
                 this.notificationService.error(`Error: ${error.message}`);
@@ -363,9 +363,9 @@ export class ImageGeneratorComponent implements OnInit {
 
     downloadImage() {
         if (this.generatedImageUrl) {
-            const link = document.createElement('a');
+            const link = document.createElement("a");
             link.href = this.generatedImageUrl;
-            link.target = '_blank';
+            link.target = "_blank";
             link.download = `generated-image-${Date.now()}.png`;
             document.body.appendChild(link);
             link.click();
@@ -396,8 +396,8 @@ export class ImageGeneratorComponent implements OnInit {
     }
 
     private getImageFilename(): string {
-        const title = this.generatedImageData?.title || this.generatedImageData?.prompt || 'image';
-        const sanitized = title.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
+        const title = this.generatedImageData?.title || this.generatedImageData?.prompt || "image";
+        const sanitized = title.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 50);
         return `${sanitized}.png`;
     }
 
@@ -407,9 +407,9 @@ export class ImageGeneratorComponent implements OnInit {
 
 
     async translatePrompt() {
-        const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
+        const currentPrompt = this.promptForm.get("prompt")?.value?.trim();
         if (!currentPrompt) {
-            this.notificationService.error(this.translate.instant('imageGenerator.errors.promptRequired'));
+            this.notificationService.error(this.translate.instant("imageGenerator.errors.promptRequired"));
             return;
         }
 
@@ -417,8 +417,8 @@ export class ImageGeneratorComponent implements OnInit {
         try {
             const translatedPrompt = await this.progressService.executeWithProgress(
                 () => this.chatService.translateImagePrompt(currentPrompt),
-                this.translate.instant('imageGenerator.progress.translating'),
-                this.translate.instant('imageGenerator.progress.translatingHint')
+                this.translate.instant("imageGenerator.progress.translating"),
+                this.translate.instant("imageGenerator.progress.translatingHint")
             );
             this.promptForm.patchValue({prompt: this.removeQuotes(translatedPrompt)});
         } catch (error: any) {
@@ -429,9 +429,9 @@ export class ImageGeneratorComponent implements OnInit {
     }
 
     async interpretLyric() {
-        const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
+        const currentPrompt = this.promptForm.get("prompt")?.value?.trim();
         if (!currentPrompt) {
-            this.notificationService.error(this.translate.instant('imageGenerator.errors.promptRequired'));
+            this.notificationService.error(this.translate.instant("imageGenerator.errors.promptRequired"));
             return;
         }
 
@@ -439,8 +439,8 @@ export class ImageGeneratorComponent implements OnInit {
         try {
             const interpretedPrompt = await this.progressService.executeWithProgress(
                 () => this.chatService.interpretLyricPrompt(currentPrompt),
-                this.translate.instant('imageGenerator.progress.interpretingLyric'),
-                this.translate.instant('imageGenerator.progress.interpretingLyricHint')
+                this.translate.instant("imageGenerator.progress.interpretingLyric"),
+                this.translate.instant("imageGenerator.progress.interpretingLyricHint")
             );
             this.promptForm.patchValue({prompt: this.removeQuotes(interpretedPrompt)});
         } catch (error: any) {
@@ -458,12 +458,12 @@ export class ImageGeneratorComponent implements OnInit {
         this.showPromptDropdown = false;
     }
 
-    selectPromptAction(action: 'translate' | 'interpret-lyric') {
+    selectPromptAction(action: "translate" | "interpret-lyric") {
         this.closePromptDropdown();
 
-        if (action === 'translate') {
+        if (action === "translate") {
             this.translatePrompt();
-        } else if (action === 'interpret-lyric') {
+        } else if (action === "interpret-lyric") {
             this.interpretLyric();
         }
     }
@@ -471,20 +471,20 @@ export class ImageGeneratorComponent implements OnInit {
     // Title generation methods
     async generateTitle() {
         // Determine input text based on priority: title > prompt > default
-        let inputText = this.promptForm.get('title')?.value?.trim();
+        let inputText = this.promptForm.get("title")?.value?.trim();
         if (!inputText) {
-            inputText = this.promptForm.get('prompt')?.value?.trim();
+            inputText = this.promptForm.get("prompt")?.value?.trim();
         }
         if (!inputText) {
-            inputText = this.translate.instant('imageGenerator.generateTitleFallback');
+            inputText = this.translate.instant("imageGenerator.generateTitleFallback");
         }
 
         this.isGeneratingTitle = true;
         try {
             const generatedTitle = await this.progressService.executeWithProgress(
                 () => this.chatService.generateTitle(inputText),
-                this.translate.instant('imageGenerator.progress.generatingTitle'),
-                this.translate.instant('imageGenerator.progress.generatingTitleHint')
+                this.translate.instant("imageGenerator.progress.generatingTitle"),
+                this.translate.instant("imageGenerator.progress.generatingTitleHint")
             );
             this.promptForm.patchValue({title: this.removeQuotes(generatedTitle)});
         } catch (error: any) {
@@ -502,19 +502,19 @@ export class ImageGeneratorComponent implements OnInit {
         this.showTitleDropdown = false;
     }
 
-    selectTitleAction(action: 'generate') {
+    selectTitleAction(action: "generate") {
         this.closeTitleDropdown();
 
-        if (action === 'generate') {
+        if (action === "generate") {
             this.generateTitle();
         }
     }
 
-    @HostListener('document:click', ['$event'])
+    @HostListener("document:click", ["$event"])
     onDocumentClick(event: Event) {
         const target = event.target as HTMLElement;
-        const promptDropdown = target.closest('.prompt-dropdown-container');
-        const titleDropdown = target.closest('.title-dropdown-container');
+        const promptDropdown = target.closest(".prompt-dropdown-container");
+        const titleDropdown = target.closest(".title-dropdown-container");
 
         if (!promptDropdown && this.showPromptDropdown) {
             this.closePromptDropdown();
@@ -529,11 +529,11 @@ export class ImageGeneratorComponent implements OnInit {
      */
     get isManualMode(): boolean {
         return (
-            this.artisticStyle.value !== 'auto' ||
-            this.composition.value !== 'auto' ||
-            this.lighting.value !== 'auto' ||
-            this.colorPalette.value !== 'auto' ||
-            this.detailLevel.value !== 'auto'
+            this.artisticStyle.value !== "auto" ||
+            this.composition.value !== "auto" ||
+            this.lighting.value !== "auto" ||
+            this.colorPalette.value !== "auto" ||
+            this.detailLevel.value !== "auto"
         );
     }
 
@@ -541,14 +541,14 @@ export class ImageGeneratorComponent implements OnInit {
      * Check if Album Cover composition can be used (requires title)
      */
     get canUseAlbumCover(): boolean {
-        return !!this.promptForm.get('title')?.value?.trim();
+        return !!this.promptForm.get("title")?.value?.trim();
     }
 
     /**
      * Check if Album Cover composition is currently selected
      */
     get isAlbumCoverMode(): boolean {
-        return this.composition.value === 'album-cover';
+        return this.composition.value === "album-cover";
     }
 
     /**
@@ -556,12 +556,12 @@ export class ImageGeneratorComponent implements OnInit {
      */
     private saveStylePreferences(): void {
         this.imageService.saveStylePreferences({
-            artisticStyle: this.artisticStyle.value || 'auto',
-            composition: this.composition.value || 'auto',
-            lighting: this.lighting.value || 'auto',
-            colorPalette: this.colorPalette.value || 'auto',
-            detailLevel: this.detailLevel.value || 'auto',
-            enhanceQuality: this.enhanceQuality.value || 'auto'
+            artisticStyle: this.artisticStyle.value || "auto",
+            composition: this.composition.value || "auto",
+            lighting: this.lighting.value || "auto",
+            colorPalette: this.colorPalette.value || "auto",
+            detailLevel: this.detailLevel.value || "auto",
+            enhanceQuality: this.enhanceQuality.value || "auto"
         });
     }
 
@@ -571,33 +571,33 @@ export class ImageGeneratorComponent implements OnInit {
      * Manual Mode → Off (user already set precise styles, avoid conflicts)
      * Album Cover → Always Quality (needs title + artist context)
      */
-    private getEffectiveEnhanceMode(): 'quality' | 'fast' | 'off' {
+    private getEffectiveEnhanceMode(): "quality" | "fast" | "off" {
         // Album Cover always requires enhancement (for title + artist integration)
-        if (this.composition.value === 'album-cover') {
-            return 'quality';
+        if (this.composition.value === "album-cover") {
+            return "quality";
         }
 
         const selected = this.enhanceQuality.value;
 
-        if (selected === 'auto') {
-            return this.isManualMode ? 'off' : 'quality';
+        if (selected === "auto") {
+            return this.isManualMode ? "off" : "quality";
         }
 
-        return selected as 'quality' | 'fast' | 'off';
+        return selected as "quality" | "fast" | "off";
     }
 
     resetForm() {
-        this.promptForm.reset({size: '1024x1024', title: ''});
+        this.promptForm.reset({size: "1024x1024", title: ""});
         this.imageService.clearFormData();
-        this.generatedImageUrl = '';
-        this.generatedImageBlobUrl = '';
+        this.generatedImageUrl = "";
+        this.generatedImageBlobUrl = "";
         this.generatedImageId = null;
         this.generatedImageData = null;
     }
 
     private removeQuotes(text: string): string {
         if (!text) return text;
-        return text.replace(/^["']|["']$/g, '').trim();
+        return text.replace(/^["']|["']$/g, "").trim();
     }
 
     /**
@@ -607,10 +607,10 @@ export class ImageGeneratorComponent implements OnInit {
      * since text is added separately via Text Overlay Editor.
      */
     private resetIncompatibleStylesForAlbumCover(): void {
-        const incompatibleArtisticStyles: ArtisticStyle[] = ['sketch'];
+        const incompatibleArtisticStyles: ArtisticStyle[] = ["sketch"];
 
         if (incompatibleArtisticStyles.includes(this.artisticStyle.value as ArtisticStyle)) {
-            this.artisticStyle.setValue('auto', { emitEvent: false });
+            this.artisticStyle.setValue("auto", {emitEvent: false});
         }
     }
 
@@ -618,8 +618,8 @@ export class ImageGeneratorComponent implements OnInit {
      * Check if an artistic style option is incompatible with Album Cover composition
      */
     isArtisticStyleIncompatibleWithAlbumCover(style: ArtisticStyle): boolean {
-        if (!this.isAlbumCoverMode || style === 'auto') return false;
-        const incompatibleStyles: ArtisticStyle[] = ['sketch'];
+        if (!this.isAlbumCoverMode || style === "auto") return false;
+        const incompatibleStyles: ArtisticStyle[] = ["sketch"];
         return incompatibleStyles.includes(style);
     }
 

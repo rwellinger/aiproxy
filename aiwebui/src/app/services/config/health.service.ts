@@ -1,11 +1,11 @@
-import {inject, Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
-import {catchError, map, timeout} from 'rxjs/operators';
-import {ApiConfigService} from './api-config.service';
+import {inject, Injectable} from "@angular/core";
+import {HttpClient} from "@angular/common/http";
+import {Observable, of} from "rxjs";
+import {catchError, map, timeout} from "rxjs/operators";
+import {ApiConfigService} from "./api-config.service";
 
 export interface HealthCheckResponse {
-    status: 'healthy' | 'unhealthy';
+    status: "healthy" | "unhealthy";
     message: string;
 }
 
@@ -19,7 +19,7 @@ export interface HealthCheckResponse {
  * - Data loss when MinIO is down (e.g., NAS auto-shutdown at 23:30)
  */
 @Injectable({
-    providedIn: 'root'
+    providedIn: "root"
 })
 export class HealthService {
     private http = inject(HttpClient);
@@ -51,14 +51,14 @@ export class HealthService {
      * ```
      */
     checkStorage(timeoutMs: number = 5000): Observable<boolean> {
-        const url = `${this.apiConfig['baseUrl']}/api/v1/health/storage`;
+        const url = `${this.apiConfig["baseUrl"]}/api/v1/health/storage`;
 
         return this.http.get<HealthCheckResponse>(url).pipe(
             timeout(timeoutMs),
-            map(response => response.status === 'healthy'),
+            map(response => response.status === "healthy"),
             catchError(error => {
                 // Backend returned 503 or network error
-                console.warn('[HealthService] Storage health check failed:', error);
+                console.warn("[HealthService] Storage health check failed:", error);
                 return of(false);
             })
         );
@@ -71,18 +71,18 @@ export class HealthService {
      * @returns Observable with detailed health status
      */
     checkStorageDetailed(timeoutMs: number = 5000): Observable<HealthCheckResponse | null> {
-        const url = `${this.apiConfig['baseUrl']}/api/v1/health/storage`;
+        const url = `${this.apiConfig["baseUrl"]}/api/v1/health/storage`;
 
         return this.http.get<HealthCheckResponse>(url).pipe(
             timeout(timeoutMs),
             catchError(error => {
-                console.warn('[HealthService] Storage health check failed:', error);
+                console.warn("[HealthService] Storage health check failed:", error);
                 // Return unhealthy status on error
                 return of({
-                    status: 'unhealthy' as const,
+                    status: "unhealthy" as const,
                     message: error.status === 503
-                        ? error.error?.message || 'Storage backend unavailable'
-                        : 'Health check failed: Network error'
+                        ? error.error?.message || "Storage backend unavailable"
+                        : "Health check failed: Network error"
                 });
             })
         );

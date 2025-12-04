@@ -1,24 +1,24 @@
-import {Component, OnInit, OnDestroy, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Router} from '@angular/router';
-import {Subject, takeUntil} from 'rxjs';
-import {TranslateModule, TranslateService} from '@ngx-translate/core';
-import {MatCardModule} from '@angular/material/card';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatSelectModule} from '@angular/material/select';
-import {MatFormFieldModule} from '@angular/material/form-field';
+import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {CommonModule} from "@angular/common";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {Router} from "@angular/router";
+import {Subject, takeUntil} from "rxjs";
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
+import {MatCardModule} from "@angular/material/card";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatSelectModule} from "@angular/material/select";
+import {MatFormFieldModule} from "@angular/material/form-field";
 
-import {PromptTemplate, PromptTemplateUpdate} from '../../models/prompt-template.model';
-import {PromptTemplateService} from '../../services/config/prompt-template.service';
-import {NotificationService} from '../../services/ui/notification.service';
-import {ChatService} from '../../services/config/chat.service';
-import {ConversationService} from '../../services/business/conversation.service';
-import {OllamaChatModel} from '../../models/conversation.model';
-import {TemperatureOption, TemperatureOptionsService} from '../../services/config/temperature-options.service';
+import {PromptTemplate, PromptTemplateUpdate} from "../../models/prompt-template.model";
+import {PromptTemplateService} from "../../services/config/prompt-template.service";
+import {NotificationService} from "../../services/ui/notification.service";
+import {ChatService} from "../../services/config/chat.service";
+import {ConversationService} from "../../services/business/conversation.service";
+import {OllamaChatModel} from "../../models/conversation.model";
+import {TemperatureOption, TemperatureOptionsService} from "../../services/config/temperature-options.service";
 
 @Component({
-    selector: 'app-prompt-template-editor',
+    selector: "app-prompt-template-editor",
     standalone: true,
     imports: [
         CommonModule,
@@ -30,8 +30,8 @@ import {TemperatureOption, TemperatureOptionsService} from '../../services/confi
         MatSelectModule,
         MatFormFieldModule
     ],
-    templateUrl: './prompt-template-editor.component.html',
-    styleUrl: './prompt-template-editor.component.scss'
+    templateUrl: "./prompt-template-editor.component.html",
+    styleUrl: "./prompt-template-editor.component.scss"
 })
 export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
     // Form
@@ -39,8 +39,8 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
 
     // Template data
     originalTemplate: PromptTemplate | null = null;
-    category: string = '';
-    action: string = '';
+    category: string = "";
+    action: string = "";
 
     // Model data
     models: OllamaChatModel[] = [];
@@ -77,10 +77,10 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
 
         // Initialize form
         this.editorForm = this.fb.group({
-            pre_condition: ['', Validators.required],
-            post_condition: ['', Validators.required],
-            description: [''],
-            model: [''],
+            pre_condition: ["", Validators.required],
+            post_condition: ["", Validators.required],
+            description: [""],
+            model: [""],
             temperature: [null],
             max_tokens: [null]
         });
@@ -94,12 +94,12 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
         this.loadModels();
 
         // Load template from navigation state
-        if (this.navigationState?.['template']) {
-            this.loadTemplate(this.navigationState['template']);
+        if (this.navigationState?.["template"]) {
+            this.loadTemplate(this.navigationState["template"]);
         } else {
             // No template provided - redirect back
             this.notificationService.error(
-                this.translate.instant('promptTemplateEditor.errors.noTemplate')
+                this.translate.instant("promptTemplateEditor.errors.noTemplate")
             );
             this.cancel();
         }
@@ -120,9 +120,9 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
                     this.models = models || [];
                 },
                 error: (error) => {
-                    console.error('Error loading models:', error);
+                    console.error("Error loading models:", error);
                     this.notificationService.error(
-                        this.translate.instant('promptTemplateEditor.errors.modelsFailed')
+                        this.translate.instant("promptTemplateEditor.errors.modelsFailed")
                     );
                 },
                 complete: () => {
@@ -138,10 +138,10 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
 
         // Populate form
         this.editorForm.patchValue({
-            pre_condition: template.pre_condition || '',
-            post_condition: template.post_condition || '',
-            description: template.description || '',
-            model: template.model || '',
+            pre_condition: template.pre_condition || "",
+            post_condition: template.post_condition || "",
+            description: template.description || "",
+            model: template.model || "",
             temperature: template.temperature,
             max_tokens: template.max_tokens
         });
@@ -156,17 +156,17 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
 
         try {
             // Get max_tokens value - preserve 0 and null (they mean "no limit")
-            const maxTokensValue = this.editorForm.get('max_tokens')?.value;
-            const maxTokens = (maxTokensValue === null || maxTokensValue === undefined || maxTokensValue === '')
+            const maxTokensValue = this.editorForm.get("max_tokens")?.value;
+            const maxTokens = (maxTokensValue === null || maxTokensValue === undefined || maxTokensValue === "")
                 ? null
                 : maxTokensValue;
 
             const update: PromptTemplateUpdate = {
-                pre_condition: this.editorForm.get('pre_condition')?.value.trim(),
-                post_condition: this.editorForm.get('post_condition')?.value.trim(),
-                description: this.editorForm.get('description')?.value?.trim() || undefined,
-                model: this.editorForm.get('model')?.value || undefined,
-                temperature: this.editorForm.get('temperature')?.value || undefined,
+                pre_condition: this.editorForm.get("pre_condition")?.value.trim(),
+                post_condition: this.editorForm.get("post_condition")?.value.trim(),
+                description: this.editorForm.get("description")?.value?.trim() || undefined,
+                model: this.editorForm.get("model")?.value || undefined,
+                temperature: this.editorForm.get("temperature")?.value || undefined,
                 max_tokens: maxTokens
             };
 
@@ -177,14 +177,14 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
             );
 
             this.notificationService.success(
-                this.translate.instant('promptTemplateEditor.notifications.saved')
+                this.translate.instant("promptTemplateEditor.notifications.saved")
             );
 
             // Navigate back with updated template
             this.navigateBackToPromptTemplates(updatedTemplate);
         } catch (error: any) {
             this.notificationService.error(
-                this.translate.instant('promptTemplateEditor.notifications.saveError', {message: error.message})
+                this.translate.instant("promptTemplateEditor.notifications.saveError", {message: error.message})
             );
         } finally {
             this.isSaving = false;
@@ -193,42 +193,42 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
 
     cancel(): void {
         // Navigate back without changes, re-select original template
-        this.router.navigate(['/prompt-templates'], {
+        this.router.navigate(["/prompt-templates"], {
             state: {
-                returnPage: this.navigationState?.['returnPage'] || 0,
+                returnPage: this.navigationState?.["returnPage"] || 0,
                 selectTemplate: {
                     category: this.category,
                     action: this.action
                 },
-                targetCategory: this.navigationState?.['targetCategory'] || 'all'
+                targetCategory: this.navigationState?.["targetCategory"] || "all"
             }
         });
     }
 
     private navigateBackToPromptTemplates(updatedTemplate: PromptTemplate): void {
-        this.router.navigate(['/prompt-templates'], {
+        this.router.navigate(["/prompt-templates"], {
             state: {
                 updatedTemplate: updatedTemplate,
                 selectTemplate: {
                     category: updatedTemplate.category,
                     action: updatedTemplate.action
                 },
-                returnPage: this.navigationState?.['returnPage'] || 0,
-                targetCategory: this.navigationState?.['targetCategory'] || 'all'
+                returnPage: this.navigationState?.["returnPage"] || 0,
+                targetCategory: this.navigationState?.["targetCategory"] || "all"
             }
         });
     }
 
     get characterCountPre(): number {
-        return this.editorForm.get('pre_condition')?.value?.length || 0;
+        return this.editorForm.get("pre_condition")?.value?.length || 0;
     }
 
     get characterCountPost(): number {
-        return this.editorForm.get('post_condition')?.value?.length || 0;
+        return this.editorForm.get("post_condition")?.value?.length || 0;
     }
 
     async improvePreCondition(): Promise<void> {
-        const currentValue = this.editorForm.get('pre_condition')?.value;
+        const currentValue = this.editorForm.get("pre_condition")?.value;
         if (!currentValue || !currentValue.trim()) {
             return;
         }
@@ -238,8 +238,8 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
         try {
             // Use ChatService with prompt_engineering/improve_condition template
             const improved = await this.chatService.validateAndCallUnified(
-                'prompt_engineering',
-                'improve_condition',
+                "prompt_engineering",
+                "improve_condition",
                 currentValue
             );
 
@@ -249,11 +249,11 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
             });
 
             this.notificationService.success(
-                this.translate.instant('promptTemplateEditor.notifications.improved')
+                this.translate.instant("promptTemplateEditor.notifications.improved")
             );
         } catch (error: any) {
             this.notificationService.error(
-                this.translate.instant('promptTemplateEditor.notifications.improveError', {message: error.message})
+                this.translate.instant("promptTemplateEditor.notifications.improveError", {message: error.message})
             );
         } finally {
             this.isImprovingPre = false;
@@ -261,7 +261,7 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
     }
 
     async improvePostCondition(): Promise<void> {
-        const currentValue = this.editorForm.get('post_condition')?.value;
+        const currentValue = this.editorForm.get("post_condition")?.value;
         if (!currentValue || !currentValue.trim()) {
             return;
         }
@@ -271,8 +271,8 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
         try {
             // Use ChatService with prompt_engineering/improve_condition template
             const improved = await this.chatService.validateAndCallUnified(
-                'prompt_engineering',
-                'improve_condition',
+                "prompt_engineering",
+                "improve_condition",
                 currentValue
             );
 
@@ -282,11 +282,11 @@ export class PromptTemplateEditorComponent implements OnInit, OnDestroy {
             });
 
             this.notificationService.success(
-                this.translate.instant('promptTemplateEditor.notifications.improved')
+                this.translate.instant("promptTemplateEditor.notifications.improved")
             );
         } catch (error: any) {
             this.notificationService.error(
-                this.translate.instant('promptTemplateEditor.notifications.improveError', {message: error.message})
+                this.translate.instant("promptTemplateEditor.notifications.improveError", {message: error.message})
             );
         } finally {
             this.isImprovingPost = false;

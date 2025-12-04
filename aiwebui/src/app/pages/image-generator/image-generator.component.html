@@ -105,12 +105,19 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="char-counter">{{ 'imageGenerator.promptCharCounter' | translate: {count: promptForm.get('prompt')?.value?.length || 0, max: 2500} }}</div>
+                                <div class="char-counter">{{
+                                        'imageGenerator.promptCharCounter' | translate: {
+                                            count: promptForm.get('prompt')?.value?.length || 0,
+                                            max: 2500
+                                        }
+                                    }}
+                                </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="size">{{ 'imageGenerator.sizeLabel' | translate }}</label>
-                                <select id="size" formControlName="size" required [disabled]="isLoading || isAlbumCoverMode"
+                                <select id="size" formControlName="size" required
+                                        [disabled]="isLoading || isAlbumCoverMode"
                                         class="size-select">
                                     <option value="1024x1024">{{ 'imageGenerator.size.square' | translate }}</option>
                                     <option value="1792x1024">{{ 'imageGenerator.size.landscape' | translate }}</option>
@@ -134,10 +141,12 @@
                                     <mat-form-field appearance="outline" class="style-field">
                                         <mat-label>{{ 'imageGenerator.styles.artisticStyle.label' | translate }}</mat-label>
                                         <mat-select [formControl]="artisticStyle" [disabled]="isLoading">
-                                            <mat-option *ngFor="let option of artisticStyleOptions" [value]="option.value"
+                                            <mat-option *ngFor="let option of artisticStyleOptions"
+                                                        [value]="option.value"
                                                         [disabled]="isArtisticStyleIncompatibleWithAlbumCover(option.value)">
                                                 {{ option.labelKey | translate }}
-                                                <span *ngIf="isArtisticStyleIncompatibleWithAlbumCover(option.value)" class="option-hint">
+                                                <span *ngIf="isArtisticStyleIncompatibleWithAlbumCover(option.value)"
+                                                      class="option-hint">
                                                     ({{ 'imageGenerator.incompatibleWithAlbumCover' | translate }})
                                                 </span>
                                             </mat-option>
@@ -151,7 +160,8 @@
                                             <mat-option *ngFor="let option of compositionOptions" [value]="option.value"
                                                         [disabled]="option.value === 'album-cover' && !canUseAlbumCover">
                                                 {{ option.labelKey | translate }}
-                                                <span *ngIf="option.value === 'album-cover' && !canUseAlbumCover" class="option-hint">
+                                                <span *ngIf="option.value === 'album-cover' && !canUseAlbumCover"
+                                                      class="option-hint">
                                                     ({{ 'imageGenerator.titleRequired' | translate }})
                                                 </span>
                                             </mat-option>
@@ -165,7 +175,8 @@
                                             <mat-option *ngFor="let option of lightingOptions" [value]="option.value"
                                                         [disabled]="isLightingIncompatibleWithAlbumCover(option.value)">
                                                 {{ option.labelKey | translate }}
-                                                <span *ngIf="isLightingIncompatibleWithAlbumCover(option.value)" class="option-hint">
+                                                <span *ngIf="isLightingIncompatibleWithAlbumCover(option.value)"
+                                                      class="option-hint">
                                                     ({{ 'imageGenerator.incompatibleWithAlbumCover' | translate }})
                                                 </span>
                                             </mat-option>
@@ -176,10 +187,12 @@
                                     <mat-form-field appearance="outline" class="style-field">
                                         <mat-label>{{ 'imageGenerator.styles.colorPalette.label' | translate }}</mat-label>
                                         <mat-select [formControl]="colorPalette" [disabled]="isLoading">
-                                            <mat-option *ngFor="let option of colorPaletteOptions" [value]="option.value"
+                                            <mat-option *ngFor="let option of colorPaletteOptions"
+                                                        [value]="option.value"
                                                         [disabled]="isColorPaletteIncompatibleWithAlbumCover(option.value)">
                                                 {{ option.labelKey | translate }}
-                                                <span *ngIf="isColorPaletteIncompatibleWithAlbumCover(option.value)" class="option-hint">
+                                                <span *ngIf="isColorPaletteIncompatibleWithAlbumCover(option.value)"
+                                                      class="option-hint">
                                                     ({{ 'imageGenerator.incompatibleWithAlbumCover' | translate }})
                                                 </span>
                                             </mat-option>
@@ -192,7 +205,8 @@
                                     <mat-form-field appearance="outline" class="style-field">
                                         <mat-label>{{ 'imageGenerator.styles.detailLevel.label' | translate }}</mat-label>
                                         <mat-select [formControl]="detailLevel" [disabled]="isLoading">
-                                            <mat-option *ngFor="let option of detailLevelOptions" [value]="option.value">
+                                            <mat-option *ngFor="let option of detailLevelOptions"
+                                                        [value]="option.value">
                                                 {{ option.labelKey | translate }}
                                             </mat-option>
                                         </mat-select>
@@ -200,18 +214,20 @@
 
                                     <mat-form-field appearance="outline" class="style-field">
                                         <mat-label>{{ 'imageGenerator.enhanceQuality.label' | translate }}</mat-label>
-                                        <mat-select [formControl]="enhanceQuality" [disabled]="isLoading || isAlbumCoverMode">
-                                            <mat-option *ngFor="let option of enhanceQualityOptions" [value]="option.value">
+                                        <mat-select [formControl]="enhanceQuality"
+                                                    [disabled]="isLoading || isAlbumCoverMode">
+                                            <mat-option *ngFor="let option of enhanceQualityOptions"
+                                                        [value]="option.value">
                                                 {{ option.labelKey | translate }}
                                             </mat-option>
                                         </mat-select>
                                         <app-info-tooltip matSuffix
-                                            *ngIf="isAlbumCoverMode"
-                                            [text]="'imageGenerator.albumCoverEnhancementHint'">
+                                                          *ngIf="isAlbumCoverMode"
+                                                          [text]="'imageGenerator.albumCoverEnhancementHint'">
                                         </app-info-tooltip>
                                         <app-info-tooltip matSuffix
-                                            *ngIf="!isAlbumCoverMode && enhanceQuality.value === 'auto'"
-                                            [text]="isManualMode
+                                                          *ngIf="!isAlbumCoverMode && enhanceQuality.value === 'auto'"
+                                                          [text]="isManualMode
                                                 ? 'imageGenerator.enhanceQuality.hints.autoManual'
                                                 : 'imageGenerator.enhanceQuality.hints.autoQuality'">
                                         </app-info-tooltip>
@@ -220,9 +236,11 @@
                             </div>
 
                             <!-- Storage Health Warning (Preventive UX) -->
-                            <div *ngIf="!isStorageHealthy && !isCheckingStorage" class="storage-warning" style="margin-bottom: 1rem; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; color: #856404;">
+                            <div *ngIf="!isStorageHealthy && !isCheckingStorage" class="storage-warning"
+                                 style="margin-bottom: 1rem; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; color: #856404;">
                                 <i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>
-                                <strong>Storage Unavailable:</strong> Image generation is temporarily disabled. The storage backend (MinIO) is not reachable. Please try again later or contact support.
+                                <strong>Storage Unavailable:</strong> Image generation is temporarily disabled. The
+                                storage backend (MinIO) is not reachable. Please try again later or contact support.
                             </div>
 
                             <div class="button-group">

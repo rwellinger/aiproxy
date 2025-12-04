@@ -33,14 +33,14 @@
                             <div class="info-row">
                 <span class="label">
                   <i class="fas fa-calendar-plus"></i>
-                  {{ 'userProfile.memberSince' | translate }}
+                    {{ 'userProfile.memberSince' | translate }}
                 </span>
                                 <span class="value">{{ formatDate(currentUser.created_at) }}</span>
                             </div>
                             <div class="info-row" *ngIf="currentUser.last_login">
                 <span class="label">
                   <i class="fas fa-clock"></i>
-                  {{ 'userProfile.lastLogin' | translate }}
+                    {{ 'userProfile.lastLogin' | translate }}
                 </span>
                                 <span class="value">{{ formatDate(currentUser.last_login) }}</span>
                             </div>
@@ -238,11 +238,11 @@
                                 [disabled]="userForm.invalid || isLoading">
               <span *ngIf="isLoading">
                 <i class="fas fa-spinner fa-spin"></i>
-                {{ 'userProfile.saving' | translate }}
+                  {{ 'userProfile.saving' | translate }}
               </span>
                             <span *ngIf="!isLoading">
                 <i class="fas fa-save"></i>
-                {{ 'userProfile.saveButton' | translate }}
+                                {{ 'userProfile.saveButton' | translate }}
               </span>
                         </button>
                     </div>
@@ -315,7 +315,8 @@
                             </div>
 
                             <!-- All Time Summary Section -->
-                            <h4 class="api-costs-subtitle" *ngIf="openaiAllTimeCosts">{{ 'userProfile.costs.allTimeSummary' | translate }}</h4>
+                            <h4 class="api-costs-subtitle"
+                                *ngIf="openaiAllTimeCosts">{{ 'userProfile.costs.allTimeSummary' | translate }}</h4>
                             <div class="api-costs-list" *ngIf="openaiAllTimeCosts">
                                 <div class="api-costs-item">
                                     <span class="api-costs-label">{{ 'userProfile.costs.image' | translate }}:</span>

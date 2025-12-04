@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable} from "@angular/core";
 
 export interface TemperatureOption {
     value: number;
@@ -7,34 +7,34 @@ export interface TemperatureOption {
 }
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: "root"
 })
 export class TemperatureOptionsService {
     private readonly temperatureOptions: TemperatureOption[] = [
         {
             value: 0.1,
-            labelKey: 'promptTemplateEditor.temperature.veryPrecise',
-            descriptionKey: 'promptTemplateEditor.temperature.veryPreciseDesc'
+            labelKey: "promptTemplateEditor.temperature.veryPrecise",
+            descriptionKey: "promptTemplateEditor.temperature.veryPreciseDesc"
         },
         {
             value: 0.3,
-            labelKey: 'promptTemplateEditor.temperature.slightlyVariable',
-            descriptionKey: 'promptTemplateEditor.temperature.slightlyVariableDesc'
+            labelKey: "promptTemplateEditor.temperature.slightlyVariable",
+            descriptionKey: "promptTemplateEditor.temperature.slightlyVariableDesc"
         },
         {
             value: 0.5,
-            labelKey: 'promptTemplateEditor.temperature.balanced',
-            descriptionKey: 'promptTemplateEditor.temperature.balancedDesc'
+            labelKey: "promptTemplateEditor.temperature.balanced",
+            descriptionKey: "promptTemplateEditor.temperature.balancedDesc"
         },
         {
             value: 0.7,
-            labelKey: 'promptTemplateEditor.temperature.creative',
-            descriptionKey: 'promptTemplateEditor.temperature.creativeDesc'
+            labelKey: "promptTemplateEditor.temperature.creative",
+            descriptionKey: "promptTemplateEditor.temperature.creativeDesc"
         },
         {
             value: 0.9,
-            labelKey: 'promptTemplateEditor.temperature.veryCreative',
-            descriptionKey: 'promptTemplateEditor.temperature.veryCreativeDesc'
+            labelKey: "promptTemplateEditor.temperature.veryCreative",
+            descriptionKey: "promptTemplateEditor.temperature.veryCreativeDesc"
         }
     ];
 

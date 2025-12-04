@@ -3,106 +3,106 @@
  */
 
 export enum EquipmentType {
-  SOFTWARE = 'Software',
-  PLUGIN = 'Plugin'
+    SOFTWARE = "Software",
+    PLUGIN = "Plugin"
 }
 
 export enum LicenseManagement {
-  ONLINE = 'online',
-  ILOK = 'ilok',
-  LICENSE_KEY = 'license_key',
-  OTHER = 'other'
+    ONLINE = "online",
+    ILOK = "ilok",
+    LICENSE_KEY = "license_key",
+    OTHER = "other"
 }
 
 export enum EquipmentStatus {
-  ACTIVE = 'active',
-  TRIAL = 'trial',
-  EXPIRED = 'expired',
-  ARCHIVED = 'archived'
+    ACTIVE = "active",
+    TRIAL = "trial",
+    EXPIRED = "expired",
+    ARCHIVED = "archived"
 }
 
 export interface Equipment {
-  id: string;
-  type: EquipmentType;
-  name: string;
-  version?: string;
-  description?: string;
-  software_tags?: string;
-  plugin_tags?: string;
-  manufacturer?: string;
-  url?: string;
-  username?: string;
-  password?: string;
-  license_management?: LicenseManagement;
-  license_key?: string;
-  license_description?: string;
-  purchase_date?: string; // ISO format
-  price?: string; // Format: "299.99 EUR"
-  system_requirements?: string;
-  status: EquipmentStatus;
-  created_at: string; // ISO format
-  updated_at?: string; // ISO format
+    id: string;
+    type: EquipmentType;
+    name: string;
+    version?: string;
+    description?: string;
+    software_tags?: string;
+    plugin_tags?: string;
+    manufacturer?: string;
+    url?: string;
+    username?: string;
+    password?: string;
+    license_management?: LicenseManagement;
+    license_key?: string;
+    license_description?: string;
+    purchase_date?: string; // ISO format
+    price?: string; // Format: "299.99 EUR"
+    system_requirements?: string;
+    status: EquipmentStatus;
+    created_at: string; // ISO format
+    updated_at?: string; // ISO format
 }
 
 export interface EquipmentListItem {
-  id: string;
-  type: EquipmentType;
-  name: string;
-  manufacturer?: string;
-  status: EquipmentStatus;
-  created_at: string;
+    id: string;
+    type: EquipmentType;
+    name: string;
+    manufacturer?: string;
+    status: EquipmentStatus;
+    created_at: string;
 }
 
 export interface EquipmentListResponse {
-  data: EquipmentListItem[];
-  pagination: {
-    total: number;
-    limit: number;
-    offset: number;
-    has_more: boolean;
-  };
+    data: EquipmentListItem[];
+    pagination: {
+        total: number;
+        limit: number;
+        offset: number;
+        has_more: boolean;
+    };
 }
 
 export interface EquipmentDetailResponse {
-  data: Equipment;
-  message?: string;
+    data: Equipment;
+    message?: string;
 }
 
 export interface EquipmentCreateRequest {
-  type: EquipmentType;
-  name: string;
-  version?: string;
-  description?: string;
-  software_tags?: string;
-  plugin_tags?: string;
-  manufacturer?: string;
-  url?: string;
-  username?: string;
-  password?: string;
-  license_management?: LicenseManagement;
-  license_key?: string;
-  license_description?: string;
-  purchase_date?: string; // ISO format
-  price?: string;
-  system_requirements?: string;
-  status?: EquipmentStatus;
+    type: EquipmentType;
+    name: string;
+    version?: string;
+    description?: string;
+    software_tags?: string;
+    plugin_tags?: string;
+    manufacturer?: string;
+    url?: string;
+    username?: string;
+    password?: string;
+    license_management?: LicenseManagement;
+    license_key?: string;
+    license_description?: string;
+    purchase_date?: string; // ISO format
+    price?: string;
+    system_requirements?: string;
+    status?: EquipmentStatus;
 }
 
 export interface EquipmentUpdateRequest {
-  name?: string;
-  version?: string;
-  description?: string;
-  software_tags?: string;
-  plugin_tags?: string;
-  manufacturer?: string;
-  url?: string;
-  username?: string;
-  password?: string;
-  license_management?: LicenseManagement;
-  license_key?: string;
-  license_description?: string;
-  purchase_date?: string;
-  price?: string;
-  system_requirements?: string;
-  status?: EquipmentStatus;
+    name?: string;
+    version?: string;
+    description?: string;
+    software_tags?: string;
+    plugin_tags?: string;
+    manufacturer?: string;
+    url?: string;
+    username?: string;
+    password?: string;
+    license_management?: LicenseManagement;
+    license_key?: string;
+    license_description?: string;
+    purchase_date?: string;
+    price?: string;
+    system_requirements?: string;
+    status?: EquipmentStatus;
 }

@@ -22,14 +22,14 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-
+  
   mat-card-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: visible;
     padding: $spacing-md;
-
+    
     form {
       display: flex;
       flex-direction: column;
@@ -47,11 +47,11 @@
   align-items: center;
   margin-bottom: $spacing-md;
   flex-shrink: 0;
-
+  
   .prompt-editor-title {
     margin: 0;
     padding: 0;
-
+    
     h2 {
       display: flex;
       align-items: center;
@@ -61,13 +61,13 @@
       font-size: 1.75rem;
       margin: 0 0 $spacing-xs 0;
       color: $text-primary;
-
+      
       i {
         color: $primary-color;
         font-size: 1.5rem;
       }
     }
-
+    
     .template-subtitle {
       font-size: $font-sm;
       color: $text-muted;
@@ -76,40 +76,40 @@
       font-weight: 400;
     }
   }
-
+  
   .navigation-buttons {
     display: flex;
     gap: $spacing-sm;
     align-items: center;
-
+    
     .cancel-button {
       @include button-secondary('base');
       display: inline-flex;
       align-items: center;
       gap: $spacing-xs;
       font-weight: $font-weight-medium !important;
-
+      
       i {
         font-size: $font-base;
       }
-
+      
       &:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
       }
     }
-
+    
     .apply-button {
       @include button-primary('base');
       display: inline-flex;
       align-items: center;
       gap: $spacing-xs;
       font-weight: $font-weight-medium !important;
-
+      
       i {
         font-size: $font-base;
       }
-
+      
       &:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -132,7 +132,7 @@
   grid-template-columns: 1fr 1fr;
   gap: $spacing-md;
   margin-bottom: $spacing-md;
-
+  
   &:last-child {
     margin-bottom: 0;
   }
@@ -141,14 +141,14 @@
 .metadata-field {
   display: flex;
   flex-direction: column;
-
+  
   label {
     font-weight: 600;
     color: $text-primary;
     margin-bottom: $spacing-xs;
     font-size: $font-sm;
   }
-
+  
   .form-input {
     padding: $spacing-sm $spacing-md;
     border: 1px solid $border-light;
@@ -156,11 +156,11 @@
     font-size: $font-base;
     font-family: $font-family-base;
     transition: $transition-fast;
-
+    
     &:focus {
       @include input-focus-state($primary-color);
     }
-
+    
     &:disabled {
       background: $background-light;
       color: $text-muted;
@@ -168,17 +168,17 @@
       opacity: 0.6;
     }
   }
-
+  
   .model-select,
   .temperature-select {
     width: 100%;
-
+    
     mat-select {
       font-size: $font-base;
       font-family: $font-family-base;
     }
   }
-
+  
   .field-hint {
     font-size: $font-xs;
     color: $text-muted;
@@ -234,12 +234,12 @@
   margin-bottom: $spacing-sm;
   font-size: $font-base;
   flex-shrink: 0;
-
+  
   i {
     color: $primary-color;
     font-size: $font-sm;
   }
-
+  
   .required-indicator {
     color: $danger-color;
     margin-left: 2px;
@@ -260,11 +260,11 @@
   box-sizing: border-box;
   line-height: $line-height-relaxed;
   overflow-y: auto;
-
+  
   &:focus {
     @include input-focus-state($primary-color);
   }
-
+  
   &:disabled {
     background: $background-light;
     color: $text-muted;
@@ -297,17 +297,17 @@
   gap: $spacing-xs;
   font-weight: $font-weight-medium !important;
   flex-shrink: 0;
-
+  
   i {
     font-size: $font-base;
   }
-
+  
   &:hover:not(:disabled) {
     background-color: $ai-hover !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
-
+  
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -319,11 +319,11 @@
   .prompt-editor-card {
     height: calc(100vh - 1.5rem);
   }
-
+  
   .prompt-editor-textarea {
     max-height: 400px;
   }
-
+  
   .action-section {
     padding: $spacing-sm;
   }

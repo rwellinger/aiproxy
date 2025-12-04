@@ -1,24 +1,24 @@
-import {Component, OnInit, OnDestroy, ViewChild, ElementRef, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {Router} from '@angular/router';
-import {Subject, debounceTime, distinctUntilChanged, takeUntil} from 'rxjs';
-import {PromptTemplate} from '../../models/prompt-template.model';
-import {PromptTemplateService} from '../../services/config/prompt-template.service';
-import {NotificationService} from '../../services/ui/notification.service';
-import {UserSettingsService} from '../../services/user-settings.service';
-import {TemperatureOptionsService} from '../../services/config/temperature-options.service';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatCardModule} from '@angular/material/card';
-import {MatButtonModule} from '@angular/material/button';
-import {TranslateModule, TranslateService} from '@ngx-translate/core';
+import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {CommonModule} from "@angular/common";
+import {FormsModule} from "@angular/forms";
+import {Router} from "@angular/router";
+import {debounceTime, distinctUntilChanged, Subject, takeUntil} from "rxjs";
+import {PromptTemplate} from "../../models/prompt-template.model";
+import {PromptTemplateService} from "../../services/config/prompt-template.service";
+import {NotificationService} from "../../services/ui/notification.service";
+import {UserSettingsService} from "../../services/user-settings.service";
+import {TemperatureOptionsService} from "../../services/config/temperature-options.service";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatCardModule} from "@angular/material/card";
+import {MatButtonModule} from "@angular/material/button";
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
 
 @Component({
-    selector: 'app-prompt-templates',
+    selector: "app-prompt-templates",
     standalone: true,
     imports: [CommonModule, FormsModule, MatSnackBarModule, MatCardModule, MatButtonModule, TranslateModule],
-    templateUrl: './prompt-templates.component.html',
-    styleUrl: './prompt-templates.component.scss'
+    templateUrl: "./prompt-templates.component.html",
+    styleUrl: "./prompt-templates.component.scss"
 })
 export class PromptTemplatesComponent implements OnInit, OnDestroy {
     // Template data
@@ -36,16 +36,16 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
 
     // UI state
     isLoading = false;
-    loadingMessage = '';
+    loadingMessage = "";
 
     // Search functionality
-    searchTerm: string = '';
+    searchTerm: string = "";
     private searchSubject = new Subject<string>();
     private destroy$ = new Subject<void>();
 
     // Category filter
-    currentCategory: 'all' | 'lyrics' | 'image' | 'music' | 'titel' | 'description' | 'other' = 'all';
-    private knownCategories = ['lyrics', 'image', 'music', 'titel', 'description'];
+    currentCategory: "all" | "lyrics" | "image" | "music" | "titel" | "description" | "other" = "all";
+    private knownCategories = ["lyrics", "image", "music", "titel", "description"];
 
     // Navigation state (must be captured in constructor)
     private navigationState: any = null;
@@ -53,7 +53,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     // Make Math available in template
     Math = Math;
 
-    @ViewChild('searchInput') searchInput!: ElementRef;
+    @ViewChild("searchInput") searchInput!: ElementRef;
 
     private promptService = inject(PromptTemplateService);
     private notificationService = inject(NotificationService);
@@ -102,18 +102,18 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
 
     async loadTemplates(): Promise<void> {
         this.isLoading = true;
-        this.loadingMessage = this.translate.instant('promptTemplates.notifications.loading');
+        this.loadingMessage = this.translate.instant("promptTemplates.notifications.loading");
 
         try {
             this.templates = await this.promptService.getAllTemplates().toPromise() || [];
 
             // Check if returning from editor with navigation state
-            const returnPage = this.navigationState?.['returnPage'];
-            const selectTemplate = this.navigationState?.['selectTemplate'];
-            const targetCategory = this.navigationState?.['targetCategory'];
+            const returnPage = this.navigationState?.["returnPage"];
+            const selectTemplate = this.navigationState?.["selectTemplate"];
+            const targetCategory = this.navigationState?.["targetCategory"];
 
             // Set category filter BEFORE applying filter (for returning from editor)
-            if (targetCategory && ['all', 'lyrics', 'image', 'music', 'titel', 'description', 'other'].includes(targetCategory)) {
+            if (targetCategory && ["all", "lyrics", "image", "music", "titel", "description", "other"].includes(targetCategory)) {
                 this.currentCategory = targetCategory;
             }
 
@@ -147,7 +147,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
                     } else {
                         // Template not in current filter, notify user
                         this.notificationService.info(
-                            this.translate.instant('promptTemplates.notifications.templateSaved')
+                            this.translate.instant("promptTemplates.notifications.templateSaved")
                         );
                     }
                 }
@@ -156,7 +156,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
                 this.selectTemplate(this.filteredTemplates[0]);
             }
         } catch (error: any) {
-            this.notificationService.error(this.translate.instant('promptTemplates.notifications.loadError', { message: error.message }));
+            this.notificationService.error(this.translate.instant("promptTemplates.notifications.loadError", {message: error.message}));
             this.templates = [];
             this.filteredTemplates = [];
         } finally {
@@ -167,9 +167,9 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     applyFilter(): void {
         // Step 1: Filter by category
         let categoryFiltered: PromptTemplate[];
-        if (this.currentCategory === 'all') {
+        if (this.currentCategory === "all") {
             categoryFiltered = [...this.templates];
-        } else if (this.currentCategory === 'other') {
+        } else if (this.currentCategory === "other") {
             // "Other" = categories NOT in knownCategories
             categoryFiltered = this.templates.filter(template =>
                 !this.knownCategories.includes(template.category.toLowerCase())
@@ -198,7 +198,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
         this.updatePaginatedTemplates();
     }
 
-    onCategoryChange(category: 'all' | 'lyrics' | 'image' | 'music' | 'titel' | 'description' | 'other'): void {
+    onCategoryChange(category: "all" | "lyrics" | "image" | "music" | "titel" | "description" | "other"): void {
         this.currentCategory = category;
         this.selectedTemplate = null; // Clear selection when changing category
         this.applyFilter();
@@ -223,8 +223,8 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     }
 
     clearSearch(): void {
-        this.searchTerm = '';
-        this.searchSubject.next('');
+        this.searchTerm = "";
+        this.searchSubject.next("");
     }
 
     selectTemplate(template: PromptTemplate): void {
@@ -237,12 +237,12 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
 
     formatDate(dateString: string): string {
         try {
-            return new Date(dateString).toLocaleDateString('de-CH', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+            return new Date(dateString).toLocaleDateString("de-CH", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
             });
         } catch {
             return dateString;
@@ -254,10 +254,10 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
     }
 
     getTokensToWordsHint(tokens: number | null | undefined): string {
-        if (!tokens || tokens === null || tokens === undefined) return '';
+        if (!tokens || tokens === null || tokens === undefined) return "";
         // Rough estimation: 1 token ≈ 0.75 words
         const words = Math.round(tokens * 0.75);
-        return this.translate.instant('promptTemplates.detail.tokensHint', { words });
+        return this.translate.instant("promptTemplates.detail.tokensHint", {words});
     }
 
     getTemperatureLabel(temperature: number | null | undefined): string {
@@ -265,7 +265,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
             temperature,
             (key: string) => this.translate.instant(key)
         );
-        return label || (temperature !== null && temperature !== undefined ? temperature.toString() : '');
+        return label || (temperature !== null && temperature !== undefined ? temperature.toString() : "");
     }
 
     // Pagination methods
@@ -284,19 +284,19 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
             if (current <= 4) {
                 // Show: 1 2 3 4 5 ... last
                 for (let i = 1; i <= 5; i++) pages.push(i);
-                pages.push('...');
+                pages.push("...");
                 pages.push(totalPages);
             } else if (current >= totalPages - 3) {
                 // Show: 1 ... n-4 n-3 n-2 n-1 n
                 pages.push(1);
-                pages.push('...');
+                pages.push("...");
                 for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
             } else {
                 // Show: 1 ... current-1 current current+1 ... last
                 pages.push(1);
-                pages.push('...');
+                pages.push("...");
                 for (let i = current - 1; i <= current + 1; i++) pages.push(i);
-                pages.push('...');
+                pages.push("...");
                 pages.push(totalPages);
             }
         }
@@ -336,7 +336,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
 
         const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
 
-        this.router.navigate(['/prompt-template-editor'], {
+        this.router.navigate(["/prompt-template-editor"], {
             state: {
                 template: this.selectedTemplate,
                 category: this.selectedTemplate.category,

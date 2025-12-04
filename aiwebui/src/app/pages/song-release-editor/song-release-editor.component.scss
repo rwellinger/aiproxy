@@ -16,17 +16,17 @@
 .editor-header {
   padding: $spacing-lg;
   border-bottom: 1px solid $border-light;
-
+  
   .header-title {
     display: flex;
     align-items: center;
     gap: $spacing-sm;
-
+    
     i {
       font-size: 1.5rem;
       color: $primary-color;
     }
-
+    
     h2 {
       margin: 0;
       font-size: 1.5rem;
@@ -45,13 +45,13 @@
   padding: $spacing-xl;
   text-align: center;
   color: $text-muted;
-
+  
   i {
     font-size: 3rem;
     margin-bottom: $spacing-md;
     color: $primary-color;
   }
-
+  
   p {
     margin: 0;
   }
@@ -66,7 +66,7 @@
   margin-bottom: $spacing-xl;
   padding-bottom: $spacing-xl;
   border-bottom: 1px solid $border-light;
-
+  
   &:last-of-type {
     border-bottom: none;
   }
@@ -80,7 +80,7 @@
   color: $text-primary;
   font-size: $font-lg;
   font-weight: $font-weight-semibold;
-
+  
   i {
     color: $primary-color;
   }
@@ -92,7 +92,7 @@
   grid-template-columns: 1fr 1fr;
   gap: $spacing-md;
   margin-bottom: $spacing-md;
-
+  
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -112,7 +112,7 @@
   .mat-mdc-form-field {
     width: 100%;
   }
-
+  
   .mat-mdc-text-field-wrapper {
     background-color: $background-white;
   }
@@ -123,12 +123,12 @@
   .assigned-projects {
     margin-bottom: $spacing-md;
   }
-
+  
   .project-chips {
     display: flex;
     flex-wrap: wrap;
     gap: $spacing-sm;
-
+    
     .project-chip {
       display: inline-flex;
       align-items: center;
@@ -139,13 +139,13 @@
       border-radius: $border-radius-sm;
       font-size: $font-sm;
       font-weight: $font-weight-medium;
-
+      
       i {
         font-size: 0.9rem;
       }
     }
   }
-
+  
   .no-projects {
     display: flex;
     align-items: center;
@@ -155,29 +155,29 @@
     border: 1px solid #ffc107;
     border-radius: $border-radius-sm;
     margin-bottom: $spacing-md;
-
+    
     i {
       color: #ff9800;
       font-size: $font-lg;
     }
-
+    
     p {
       margin: 0;
       color: #856404;
       font-weight: $font-weight-medium;
     }
   }
-
+  
   .assign-button {
     @include button-primary('base');
     display: inline-flex;
     align-items: center;
     gap: $spacing-xs;
-
+    
     i {
       font-size: $font-base;
     }
-
+    
     &:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -190,11 +190,11 @@
   display: flex;
   gap: $spacing-lg;
   align-items: flex-start;
-
+  
   @media (max-width: 768px) {
     flex-direction: column;
   }
-
+  
   .cover-preview {
     position: relative;
     width: 200px;
@@ -203,13 +203,13 @@
     border-radius: $border-radius-sm;
     overflow: hidden;
     flex-shrink: 0;
-
+    
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-
+    
     .remove-cover-button {
       position: absolute;
       top: $spacing-xs;
@@ -226,34 +226,34 @@
       align-items: center;
       justify-content: center;
       transition: all 0.2s ease;
-
+      
       &:hover {
         background-color: rgba(255, 0, 0, 0.8);
         transform: scale(1.1);
       }
-
+      
       i {
         font-size: $font-sm;
       }
     }
   }
-
+  
   .cover-placeholder-preview {
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-weight: 600;
-
+    
     .initials {
       font-size: 3rem;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
   }
-
+  
   .cover-upload-controls {
     flex: 1;
-
+    
     .upload-label {
       @include button-secondary('base');
       display: inline-flex;
@@ -261,21 +261,21 @@
       gap: $spacing-xs;
       cursor: pointer;
       margin-bottom: $spacing-sm;
-
+      
       i {
         font-size: $font-base;
       }
-
+      
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
       }
     }
-
+    
     .file-input {
       display: none;
     }
-
+    
     .upload-hint {
       margin: $spacing-sm 0 0 0;
       color: $text-muted;
@@ -291,36 +291,36 @@
   justify-content: flex-end;
   padding-top: $spacing-lg;
   border-top: 1px solid $border-light;
-
+  
   .action-button {
     display: inline-flex;
     align-items: center;
     gap: $spacing-xs;
     font-weight: $font-weight-medium !important;
-
+    
     i {
       font-size: $font-base;
     }
-
+    
     span {
       display: inline-block;
     }
-
+    
     &:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
-
+    
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
   }
-
+  
   .cancel-button {
     @include button-secondary('base');
   }
-
+  
   .save-button {
     @include button-primary('base');
   }
@@ -331,20 +331,20 @@
   .release-editor-container {
     padding: $spacing-md;
   }
-
+  
   .editor-header,
   .editor-form {
     padding: $spacing-md;
   }
-
+  
   .form-section {
     margin-bottom: $spacing-lg;
     padding-bottom: $spacing-lg;
   }
-
+  
   .editor-actions {
     flex-direction: column;
-
+    
     .action-button {
       width: 100%;
       justify-content: center;

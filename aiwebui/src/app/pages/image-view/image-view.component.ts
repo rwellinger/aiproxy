@@ -1,31 +1,33 @@
 import {
-    Component,
-    OnInit,
-    ViewEncapsulation,
-    ViewChild,
-    ElementRef,
     AfterViewInit,
+    Component,
+    ElementRef,
+    inject,
     OnDestroy,
-    inject
-} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {HttpClient} from '@angular/common/http';
-import {Router} from '@angular/router';
-import {TranslateModule, TranslateService} from '@ngx-translate/core';
-import {ResourceBlobService} from '../../services/ui/resource-blob.service';
-import {ImageService} from '../../services/business/image.service';
-import {ApiConfigService} from '../../services/config/api-config.service';
-import {NotificationService} from '../../services/ui/notification.service';
-import {UserSettingsService} from '../../services/user-settings.service';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatDialog} from '@angular/material/dialog';
-import {AssignToProjectDialogComponent} from '../../dialogs/assign-to-project-dialog/assign-to-project-dialog.component';
-import {MatCardModule} from '@angular/material/card';
-import {MatButtonModule} from '@angular/material/button';
-import {DisplayNamePipe} from '../../pipes/display-name.pipe';
-import {ImageDetailPanelComponent} from '../../components/image-detail-panel/image-detail-panel.component';
-import {Subject, debounceTime, distinctUntilChanged, takeUntil, firstValueFrom} from 'rxjs';
+    OnInit,
+    ViewChild,
+    ViewEncapsulation
+} from "@angular/core";
+import {CommonModule} from "@angular/common";
+import {FormsModule} from "@angular/forms";
+import {HttpClient} from "@angular/common/http";
+import {Router} from "@angular/router";
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
+import {ResourceBlobService} from "../../services/ui/resource-blob.service";
+import {ImageService} from "../../services/business/image.service";
+import {ApiConfigService} from "../../services/config/api-config.service";
+import {NotificationService} from "../../services/ui/notification.service";
+import {UserSettingsService} from "../../services/user-settings.service";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatDialog} from "@angular/material/dialog";
+import {
+    AssignToProjectDialogComponent
+} from "../../dialogs/assign-to-project-dialog/assign-to-project-dialog.component";
+import {MatCardModule} from "@angular/material/card";
+import {MatButtonModule} from "@angular/material/button";
+import {DisplayNamePipe} from "../../pipes/display-name.pipe";
+import {ImageDetailPanelComponent} from "../../components/image-detail-panel/image-detail-panel.component";
+import {debounceTime, distinctUntilChanged, firstValueFrom, Subject, takeUntil} from "rxjs";
 
 interface ImageData {
     id: string;
@@ -54,19 +56,19 @@ interface PaginationInfo {
 }
 
 @Component({
-    selector: 'app-image-view',
+    selector: "app-image-view",
     standalone: true,
     imports: [CommonModule, FormsModule, TranslateModule, MatSnackBarModule, MatCardModule, MatButtonModule, DisplayNamePipe, ImageDetailPanelComponent],
-    templateUrl: './image-view.component.html',
-    styleUrl: './image-view.component.scss',
+    templateUrl: "./image-view.component.html",
+    styleUrl: "./image-view.component.scss",
     encapsulation: ViewEncapsulation.None
 })
 export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     images: ImageData[] = [];
     selectedImage: ImageData | null = null;
-    selectedImageBlobUrl: string = '';
+    selectedImageBlobUrl: string = "";
     isLoading = false;
-    loadingMessage = '';
+    loadingMessage = "";
     currentPage = 0;
     pagination: PaginationInfo = {
         has_more: false,
@@ -76,9 +78,9 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     // Search and sort (server-based)
-    searchTerm: string = '';
-    sortBy: string = 'created_at';
-    sortDirection: 'asc' | 'desc' = 'desc';
+    searchTerm: string = "";
+    sortBy: string = "created_at";
+    sortDirection: "asc" | "desc" = "desc";
 
     // RxJS subjects for debouncing
     private searchSubject = new Subject<string>();
@@ -93,20 +95,20 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Inline editing state
     editingTitle = false;
-    editTitleValue = '';
+    editTitleValue = "";
 
     // Image placeholder and dimensions analysis
-    @ViewChild('imagePlaceholder') imagePlaceholder!: ElementRef;
+    @ViewChild("imagePlaceholder") imagePlaceholder!: ElementRef;
     placeholderDimensions = {
         width: 0,
         height: 0,
-        aspectRatio: '0:0',
+        aspectRatio: "0:0",
         viewportWidth: 0,
         viewportHeight: 0
     };
 
-    @ViewChild('titleInput') titleInput!: ElementRef;
-    @ViewChild('searchInput') searchInput!: ElementRef;
+    @ViewChild("titleInput") titleInput!: ElementRef;
+    @ViewChild("searchInput") searchInput!: ElementRef;
 
     private http = inject(HttpClient);
     private resourceBlobService = inject(ResourceBlobService);
@@ -162,7 +164,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
         this.measureDimensions();
 
         // Update dimensions on window resize
-        window.addEventListener('resize', () => {
+        window.addEventListener("resize", () => {
             setTimeout(() => this.measureDimensions(), 100);
         });
     }
@@ -183,7 +185,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private calculateAspectRatio(width: number, height: number): string {
-        if (height === 0) return '0:0';
+        if (height === 0) return "0:0";
         const gcd = this.gcd(Math.round(width), Math.round(height));
         return `${Math.round(width / gcd)}:${Math.round(height / gcd)}`;
     }
@@ -194,7 +196,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     async loadImages(page: number = 0) {
         this.isLoading = true;
-        this.loadingMessage = this.translate.instant('imageView.messages.loadingImages');
+        this.loadingMessage = this.translate.instant("imageView.messages.loadingImages");
 
         try {
             const offset = page * this.pagination.limit;
@@ -208,10 +210,10 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             });
 
             if (this.searchTerm.trim()) {
-                params.append('search', this.searchTerm.trim());
+                params.append("search", this.searchTerm.trim());
             }
 
-            const url = `${this.apiConfig.endpoints.image.list(this.pagination.limit, offset).split('?')[0]}?${params.toString()}`;
+            const url = `${this.apiConfig.endpoints.image.list(this.pagination.limit, offset).split("?")[0]}?${params.toString()}`;
 
             const data = await firstValueFrom(
                 this.http.get<any>(url)
@@ -230,13 +232,12 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.images = [];
             }
         } catch (error: any) {
-            this.notificationService.error(this.translate.instant('imageView.errors.loadingImages', { error: error.message }));
+            this.notificationService.error(this.translate.instant("imageView.errors.loadingImages", {error: error.message}));
             this.images = [];
         } finally {
             this.isLoading = false;
         }
     }
-
 
 
     selectImage(image: ImageData) {
@@ -249,12 +250,12 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.selectedImageBlobUrl = blobUrl;
                 },
                 error: (error) => {
-                    console.error('Failed to load image blob for modal:', error);
-                    this.selectedImageBlobUrl = '';
+                    console.error("Failed to load image blob for modal:", error);
+                    this.selectedImageBlobUrl = "";
                 }
             });
         } else {
-            this.selectedImageBlobUrl = '';
+            this.selectedImageBlobUrl = "";
         }
 
         // Measure dimensions when image changes
@@ -276,12 +277,12 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     formatDate(dateString: string): string {
         try {
-            return new Date(dateString).toLocaleDateString('de-DE', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+            return new Date(dateString).toLocaleDateString("de-DE", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
             });
         } catch {
             return dateString;
@@ -291,15 +292,15 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     getImageOrientation(size: string): string {
         // Map image size to orientation type
         switch (size) {
-            case '1024x1024':
-                return 'square';
-            case '1792x1024':
-                return 'landscape';
-            case '1024x1792':
-                return 'portrait';
+            case "1024x1024":
+                return "square";
+            case "1792x1024":
+                return "landscape";
+            case "1024x1792":
+                return "portrait";
             default:
                 // Fallback for unknown sizes
-                return 'square';
+                return "square";
         }
     }
 
@@ -310,24 +311,24 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private getImageFilename(): string {
-        const title = this.selectedImage?.title || (this.selectedImage ? this.getDisplayTitle(this.selectedImage) : '') || 'image';
-        const sanitized = title.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
+        const title = this.selectedImage?.title || (this.selectedImage ? this.getDisplayTitle(this.selectedImage) : "") || "image";
+        const sanitized = title.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 50);
         return `${sanitized}.png`;
     }
 
     onImageError(event: Event): void {
         const target = event.target as HTMLImageElement;
         if (target) {
-            target.style.display = 'none';
+            target.style.display = "none";
         }
     }
 
     formatDateShort(dateString: string): string {
         try {
-            return new Date(dateString).toLocaleDateString('de-CH', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
+            return new Date(dateString).toLocaleDateString("de-CH", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
             });
         } catch {
             return dateString;
@@ -350,19 +351,19 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             if (current <= 4) {
                 // Show: 1 2 3 4 5 ... last
                 for (let i = 1; i <= 5; i++) pages.push(i);
-                pages.push('...');
+                pages.push("...");
                 pages.push(totalPages);
             } else if (current >= totalPages - 3) {
                 // Show: 1 ... n-4 n-3 n-2 n-1 n
                 pages.push(1);
-                pages.push('...');
+                pages.push("...");
                 for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
             } else {
                 // Show: 1 ... current-1 current current+1 ... last
                 pages.push(1);
-                pages.push('...');
+                pages.push("...");
                 for (let i = current - 1; i <= current + 1; i++) pages.push(i);
-                pages.push('...');
+                pages.push("...");
                 pages.push(totalPages);
             }
         }
@@ -389,12 +390,12 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     clearSearch() {
-        this.searchTerm = '';
-        this.searchSubject.next('');
+        this.searchTerm = "";
+        this.searchSubject.next("");
     }
 
     toggleSort() {
-        this.sortDirection = this.sortDirection === 'desc' ? 'asc' : 'desc';
+        this.sortDirection = this.sortDirection === "desc" ? "asc" : "desc";
         this.loadImages(0); // Reset to first page and reload with new sort
     }
 
@@ -450,7 +451,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     async bulkDeleteImages() {
         if (this.selectedImageIds.size === 0) {
-            this.notificationService.error(this.translate.instant('imageView.errors.noImagesSelected'));
+            this.notificationService.error(this.translate.instant("imageView.errors.noImagesSelected"));
             return;
         }
 
@@ -462,7 +463,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
         if (protectedImages.length > 0) {
             const totalProjects = protectedImages.reduce((sum, img) => sum + (img.projects_count || 0), 0);
             this.notificationService.error(
-                this.translate.instant('imageView.errors.cannotDeleteAssignedBulk', {
+                this.translate.instant("imageView.errors.cannotDeleteAssignedBulk", {
                     imageCount: protectedImages.length,
                     projectCount: totalProjects
                 })
@@ -470,7 +471,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
 
-        const confirmation = confirm(this.translate.instant('imageView.confirmations.bulkDelete', { count: this.selectedImageIds.size }));
+        const confirmation = confirm(this.translate.instant("imageView.confirmations.bulkDelete", {count: this.selectedImageIds.size}));
         if (!confirmation) {
             return;
         }
@@ -488,9 +489,9 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             // Show detailed result notification
             if (result.summary) {
                 const {deleted, not_found, errors} = result.summary;
-                let message = this.translate.instant('imageView.bulkDelete.completed', { deleted });
-                if (not_found > 0) message += `, ${this.translate.instant('imageView.bulkDelete.notFound', { count: not_found })}`;
-                if (errors > 0) message += `, ${this.translate.instant('imageView.bulkDelete.errors', { count: errors })}`;
+                let message = this.translate.instant("imageView.bulkDelete.completed", {deleted});
+                if (not_found > 0) message += `, ${this.translate.instant("imageView.bulkDelete.notFound", {count: not_found})}`;
+                if (errors > 0) message += `, ${this.translate.instant("imageView.bulkDelete.errors", {count: errors})}`;
 
                 if (deleted <= 0) {
                     this.notificationService.error(message);
@@ -510,7 +511,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             await this.loadImages(this.currentPage);
 
         } catch (error: any) {
-            this.notificationService.error(this.translate.instant('imageView.errors.deletingImages', { error: error.message }));
+            this.notificationService.error(this.translate.instant("imageView.errors.deletingImages", {error: error.message}));
         } finally {
             this.isLoading = false;
         }
@@ -526,8 +527,8 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             return image.title.trim();
         }
         // Generate title from user_prompt (original user input)
-        const displayPrompt = image.user_prompt || image.prompt || 'Untitled';
-        return displayPrompt.length > 50 ? displayPrompt.substring(0, 47) + '...' : displayPrompt;
+        const displayPrompt = image.user_prompt || image.prompt || "Untitled";
+        return displayPrompt.length > 50 ? displayPrompt.substring(0, 47) + "..." : displayPrompt;
     }
 
     startEditTitle() {
@@ -548,7 +549,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     cancelEditTitle() {
         this.editingTitle = false;
-        this.editTitleValue = '';
+        this.editTitleValue = "";
     }
 
     async saveTitle() {
@@ -583,10 +584,10 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             }
 
             this.editingTitle = false;
-            this.editTitleValue = '';
+            this.editTitleValue = "";
 
         } catch (error: any) {
-            this.notificationService.error(this.translate.instant('imageView.errors.updatingTitle', { error: error.message }));
+            this.notificationService.error(this.translate.instant("imageView.errors.updatingTitle", {error: error.message}));
         } finally {
             this.isLoading = false;
         }
@@ -609,7 +610,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     navigateToImageGenerator() {
-        this.router.navigate(['/imagegen']);
+        this.router.navigate(["/imagegen"]);
     }
 
     /**
@@ -621,10 +622,10 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         const dialogRef = this.dialog.open(AssignToProjectDialogComponent, {
-            width: '600px',
-            maxHeight: '90vh',
+            width: "600px",
+            maxHeight: "90vh",
             data: {
-                assetType: 'image',
+                assetType: "image",
                 assetId: this.selectedImage.id
             }
         });
@@ -632,7 +633,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
         dialogRef.afterClosed().subscribe(async (result) => {
             if (result?.success) {
                 this.notificationService.success(
-                    this.translate.instant('assignToProject.success')
+                    this.translate.instant("assignToProject.success")
                 );
                 // Reload images to reflect updated project assignment
                 const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
@@ -654,20 +655,20 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             const projects = await this.imageService.getProjectsForImage(image.id);
 
             if (projects.length === 0) {
-                this.notificationService.info(this.translate.instant('imageView.messages.noProjects'));
+                this.notificationService.info(this.translate.instant("imageView.messages.noProjects"));
                 return;
             }
 
             if (projects.length === 1) {
                 // Single project: navigate directly
-                this.router.navigate(['/song-projects'], {
-                    state: { selectedProjectId: projects[0].project_id }
+                this.router.navigate(["/song-projects"], {
+                    state: {selectedProjectId: projects[0].project_id}
                 });
             } else {
                 // Multiple projects: show selection dialog
-                const { SelectProjectDialogComponent } = await import('../../dialogs/select-project-dialog/select-project-dialog.component');
+                const {SelectProjectDialogComponent} = await import("../../dialogs/select-project-dialog/select-project-dialog.component");
                 const dialogRef = this.dialog.open(SelectProjectDialogComponent, {
-                    width: '400px',
+                    width: "400px",
                     data: {
                         imageId: image.id,
                         projects: projects
@@ -676,15 +677,15 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
                 dialogRef.afterClosed().subscribe(result => {
                     if (result?.selectedProjectId) {
-                        this.router.navigate(['/song-projects'], {
-                            state: { selectedProjectId: result.selectedProjectId }
+                        this.router.navigate(["/song-projects"], {
+                            state: {selectedProjectId: result.selectedProjectId}
                         });
                     }
                 });
             }
         } catch (error) {
-            console.error('Failed to fetch projects for image:', error);
-            this.notificationService.error(this.translate.instant('imageView.messages.projectLoadError'));
+            console.error("Failed to fetch projects for image:", error);
+            this.notificationService.error(this.translate.instant("imageView.messages.projectLoadError"));
         }
     }
 
@@ -714,13 +715,13 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
                 targetProjectName = projects[0].project_name;
             } else {
                 // Multiple projects: show selection dialog
-                const { SelectProjectDialogComponent } = await import('../../dialogs/select-project-dialog/select-project-dialog.component');
+                const {SelectProjectDialogComponent} = await import("../../dialogs/select-project-dialog/select-project-dialog.component");
                 const dialogRef = this.dialog.open(SelectProjectDialogComponent, {
-                    width: '400px',
+                    width: "400px",
                     data: {
                         imageId: this.selectedImage.id,
                         projects: projects,
-                        title: this.translate.instant('imageView.dialogs.selectProjectToUnassign')
+                        title: this.translate.instant("imageView.dialogs.selectProjectToUnassign")
                     }
                 });
 
@@ -729,12 +730,12 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
                     return;
                 }
                 targetProjectId = result.selectedProjectId;
-                targetProjectName = projects.find(p => p.project_id === targetProjectId)?.project_name || '';
+                targetProjectName = projects.find(p => p.project_id === targetProjectId)?.project_name || "";
             }
 
             // Confirm unassignment
             const confirmation = confirm(
-                this.translate.instant('imageView.confirmations.unassignFromProject', {
+                this.translate.instant("imageView.confirmations.unassignFromProject", {
                     image: this.getDisplayTitle(this.selectedImage),
                     project: targetProjectName
                 })
@@ -748,7 +749,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             await this.imageService.unassignFromProject(this.selectedImage.id, targetProjectId);
 
             this.notificationService.success(
-                this.translate.instant('imageView.messages.unassignedFromProject')
+                this.translate.instant("imageView.messages.unassignedFromProject")
             );
 
             // Reload images to reflect updated project assignment
@@ -756,7 +757,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
         } catch (error: any) {
             this.notificationService.error(
-                this.translate.instant('imageView.errors.unassigningFromProject', { error: error.message })
+                this.translate.instant("imageView.errors.unassigningFromProject", {error: error.message})
             );
         } finally {
             this.isLoading = false;

@@ -46,26 +46,26 @@
                                 <label for="sketch-select">{{ 'songGenerator.selectSketch.label' | translate }}</label>
                                 <div class="sketch-select-group">
                                     <select
-                                        id="sketch-select"
-                                        class="sketch-select"
-                                        [disabled]="isLoading"
-                                        [(ngModel)]="selectedSketchId"
-                                        [ngModelOptions]="{standalone: true}"
-                                        (ngModelChange)="onSketchIdChanged($event)">
+                                            id="sketch-select"
+                                            class="sketch-select"
+                                            [disabled]="isLoading"
+                                            [(ngModel)]="selectedSketchId"
+                                            [ngModelOptions]="{standalone: true}"
+                                            (ngModelChange)="onSketchIdChanged($event)">
                                         <option [ngValue]="null">{{ 'songGenerator.selectSketch.placeholder' | translate }}</option>
                                         <option
-                                            *ngFor="let sketch of sketches"
-                                            [ngValue]="sketch.id">
+                                                *ngFor="let sketch of sketches"
+                                                [ngValue]="sketch.id">
                                             {{ sketch.title || ('songSketch.library.untitled' | translate) }}
                                         </option>
                                     </select>
                                     <button
-                                        *ngIf="selectedSketch"
-                                        type="button"
-                                        class="clear-sketch-btn"
-                                        (click)="clearSketch()"
-                                        [disabled]="isLoading"
-                                        [title]="'songGenerator.selectSketch.clear' | translate">
+                                            *ngIf="selectedSketch"
+                                            type="button"
+                                            class="clear-sketch-btn"
+                                            (click)="clearSketch()"
+                                            [disabled]="isLoading"
+                                            [title]="'songGenerator.selectSketch.clear' | translate">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </div>
@@ -84,29 +84,29 @@
                             <!-- Title Field (readonly) -->
                             <div class="form-group">
                                 <label for="title">{{ 'songGenerator.titleLabel' | translate }}<span class="required"
-                                                               *ngIf="isInstrumentalMode"> {{ 'songGenerator.titleRequired' | translate }}</span></label>
+                                                                                                     *ngIf="isInstrumentalMode"> {{ 'songGenerator.titleRequired' | translate }}</span></label>
                                 <input
-                                    id="title"
-                                    type="text"
-                                    formControlName="title"
-                                    [placeholder]="'songGenerator.titlePlaceholder' | translate"
-                                    [required]="isInstrumentalMode"
-                                    maxlength="50"
-                                    readonly
-                                    class="title-input readonly-input">
+                                        id="title"
+                                        type="text"
+                                        formControlName="title"
+                                        [placeholder]="'songGenerator.titlePlaceholder' | translate"
+                                        [required]="isInstrumentalMode"
+                                        maxlength="50"
+                                        readonly
+                                        class="title-input readonly-input">
                                 <div class="char-counter">{{ 'songGenerator.charCounter' | translate: {count: songForm.get('title')?.value?.length || 0} }}</div>
                             </div>
 
                             <div class="form-group">
                                 <label for="lyrics">{{ 'songGenerator.lyricsLabel' | translate }}</label>
                                 <textarea
-                                    id="lyrics"
-                                    formControlName="lyrics"
-                                    [placeholder]="'songGenerator.lyricsPlaceholder' | translate"
-                                    [required]="!isInstrumentalMode"
-                                    readonly
-                                    class="lyrics-input readonly-input"
-                                    [class.disabled-section]="isInstrumentalMode">
+                                        id="lyrics"
+                                        formControlName="lyrics"
+                                        [placeholder]="'songGenerator.lyricsPlaceholder' | translate"
+                                        [required]="!isInstrumentalMode"
+                                        readonly
+                                        class="lyrics-input readonly-input"
+                                        [class.disabled-section]="isInstrumentalMode">
                                 </textarea>
                                 <div class="lyrics-char-count" *ngIf="songForm.get('lyrics')?.value">
                                     {{ songForm.get('lyrics')?.value?.length || 0 }} {{ 'songGenerator.charactersCount' | translate }}
@@ -120,16 +120,17 @@
                             <div class="form-group">
                                 <label for="prompt">{{ 'songGenerator.musicStyleLabel' | translate }}</label>
                                 <textarea
-                                    id="prompt"
-                                    formControlName="prompt"
-                                    [placeholder]="'songGenerator.musicStylePlaceholder' | translate"
-                                    required
-                                    maxlength="1024"
-                                    readonly
-                                    class="prompt-input readonly-input">
+                                        id="prompt"
+                                        formControlName="prompt"
+                                        [placeholder]="'songGenerator.musicStylePlaceholder' | translate"
+                                        required
+                                        maxlength="1024"
+                                        readonly
+                                        class="prompt-input readonly-input">
                                 </textarea>
                                 <div class="lyrics-char-count" *ngIf="songForm.get('prompt')?.value">
-                                    {{ songForm.get('prompt')?.value?.length || 0 }} / 1024 {{ 'songGenerator.charactersCount' | translate }}
+                                    {{ songForm.get('prompt')?.value?.length || 0 }} /
+                                    1024 {{ 'songGenerator.charactersCount' | translate }}
                                 </div>
                             </div>
 
@@ -146,9 +147,11 @@
                             </div>
 
                             <!-- Storage Health Warning (Preventive UX) -->
-                            <div *ngIf="!isStorageHealthy && !isCheckingStorage" class="storage-warning" style="margin-bottom: 1rem; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; color: #856404;">
+                            <div *ngIf="!isStorageHealthy && !isCheckingStorage" class="storage-warning"
+                                 style="margin-bottom: 1rem; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; color: #856404;">
                                 <i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>
-                                <strong>Storage Unavailable:</strong> Song generation is temporarily disabled. The storage backend (MinIO) is not reachable. Please try again later or contact support.
+                                <strong>Storage Unavailable:</strong> Song generation is temporarily disabled. The
+                                storage backend (MinIO) is not reachable. Please try again later or contact support.
                             </div>
 
                             <div class="button-group">
@@ -231,7 +234,8 @@
 
                                 <!-- Player Controls -->
                                 <div class="player-controls">
-                                    <button type="button" class="control-btn" (click)="stopAudio()" [title]="'songGenerator.player.stop' | translate">
+                                    <button type="button" class="control-btn" (click)="stopAudio()"
+                                            [title]="'songGenerator.player.stop' | translate">
                                         <i class="fas fa-stop"></i>
                                     </button>
                                     <button type="button" class="control-btn play-btn" (click)="playPauseAudio()"

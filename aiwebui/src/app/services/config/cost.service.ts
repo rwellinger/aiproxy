@@ -1,7 +1,7 @@
-import {inject, Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
-import {ApiConfigService} from './api-config.service';
+import {inject, Injectable} from "@angular/core";
+import {HttpClient} from "@angular/common/http";
+import {Observable} from "rxjs";
+import {ApiConfigService} from "./api-config.service";
 
 export interface MonthlyCosts {
     year: number;
@@ -22,7 +22,7 @@ export interface CostResponse {
 }
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: "root"
 })
 export class CostService {
     private http = inject(HttpClient);

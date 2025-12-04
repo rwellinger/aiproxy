@@ -1,8 +1,8 @@
-import {Injectable} from '@angular/core';
-import {environment} from '../../../environments/environment';
+import {Injectable} from "@angular/core";
+import {environment} from "../../../environments/environment";
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: "root"
 })
 export class ApiConfigService {
     private readonly baseUrl = environment.apiUrl;
@@ -16,11 +16,11 @@ export class ApiConfigService {
             stems: `${this.baseUrl}/api/v1/song/stem/generate`,
             list: (limit?: number, offset?: number, status?: string) => {
                 const params = new URLSearchParams();
-                if (limit !== undefined) params.append('limit', limit.toString());
-                if (offset !== undefined) params.append('offset', offset.toString());
-                if (status) params.append('status', status);
+                if (limit !== undefined) params.append("limit", limit.toString());
+                if (offset !== undefined) params.append("offset", offset.toString());
+                if (status) params.append("status", status);
                 const query = params.toString();
-                return `${this.baseUrl}/api/v1/song/list${query ? '?' + query : ''}`;
+                return `${this.baseUrl}/api/v1/song/list${query ? "?" + query : ""}`;
             },
             detail: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}`,
             delete: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}`,
@@ -38,7 +38,7 @@ export class ApiConfigService {
             generate: `${this.baseUrl}/api/v1/image/generate`,
             status: (taskId: string) => `${this.baseUrl}/api/v1/image/status/${taskId}`,
             tasks: `${this.baseUrl}/api/v1/image/tasks`,
-            list: (limit?: number, offset?: number) => `${this.baseUrl}/api/v1/image/list${limit !== undefined || offset !== undefined ? '?' : ''}${limit !== undefined ? `limit=${limit}` : ''}${limit !== undefined && offset !== undefined ? '&' : ''}${offset !== undefined ? `offset=${offset}` : ''}`,
+            list: (limit?: number, offset?: number) => `${this.baseUrl}/api/v1/image/list${limit !== undefined || offset !== undefined ? "?" : ""}${limit !== undefined ? `limit=${limit}` : ""}${limit !== undefined && offset !== undefined ? "&" : ""}${offset !== undefined ? `offset=${offset}` : ""}`,
             listForTextOverlay: `${this.baseUrl}/api/v1/image/list-for-text-overlay`,
             detail: (id: string) => `${this.baseUrl}/api/v1/image/${id}`,
             delete: (id: string) => `${this.baseUrl}/api/v1/image/${id}`,
@@ -71,14 +71,14 @@ export class ApiConfigService {
         conversation: {
             list: (skip?: number, limit?: number, provider?: string, archived?: boolean) => {
                 const params = new URLSearchParams();
-                if (skip !== undefined) params.append('skip', skip.toString());
-                if (limit !== undefined) params.append('limit', limit.toString());
-                if (provider) params.append('provider', provider);
-                if (archived === true) params.append('archived', 'true');
-                if (archived === false) params.append('archived', 'false');
+                if (skip !== undefined) params.append("skip", skip.toString());
+                if (limit !== undefined) params.append("limit", limit.toString());
+                if (provider) params.append("provider", provider);
+                if (archived === true) params.append("archived", "true");
+                if (archived === false) params.append("archived", "false");
                 // archived === undefined means default (only non-archived)
                 const query = params.toString();
-                return `${this.baseUrl}/api/v1/conversations${query ? '?' + query : ''}`;
+                return `${this.baseUrl}/api/v1/conversations${query ? "?" + query : ""}`;
             },
             detail: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}`,
             create: `${this.baseUrl}/api/v1/conversations`,
@@ -86,7 +86,7 @@ export class ApiConfigService {
             delete: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}`,
             sendMessage: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}/messages`,
             compress: (id: string, keepRecent?: number) => {
-                const query = keepRecent !== undefined ? `?keep_recent=${keepRecent}` : '';
+                const query = keepRecent !== undefined ? `?keep_recent=${keepRecent}` : "";
                 return `${this.baseUrl}/api/v1/conversations/${id}/compress${query}`;
             },
             restoreArchive: (id: string) => `${this.baseUrl}/api/v1/conversations/${id}/restore-archive`,
@@ -103,10 +103,10 @@ export class ApiConfigService {
         lyricParsingRule: {
             list: (ruleType?: string, activeOnly?: boolean) => {
                 const params = new URLSearchParams();
-                if (ruleType) params.append('rule_type', ruleType);
-                if (activeOnly !== undefined) params.append('active_only', activeOnly.toString());
+                if (ruleType) params.append("rule_type", ruleType);
+                if (activeOnly !== undefined) params.append("active_only", activeOnly.toString());
                 const query = params.toString();
-                return `${this.baseUrl}/api/v1/lyric-parsing-rules${query ? '?' + query : ''}`;
+                return `${this.baseUrl}/api/v1/lyric-parsing-rules${query ? "?" + query : ""}`;
             },
             detail: (id: number) => `${this.baseUrl}/api/v1/lyric-parsing-rules/${id}`,
             create: `${this.baseUrl}/api/v1/lyric-parsing-rules`,
@@ -118,13 +118,13 @@ export class ApiConfigService {
             create: () => `${this.baseUrl}/api/v1/sketches`,
             list: (limit?: number, offset?: number, workflow?: string, search?: string, sketchType?: string) => {
                 const params = new URLSearchParams();
-                if (limit !== undefined) params.append('limit', limit.toString());
-                if (offset !== undefined) params.append('offset', offset.toString());
-                if (workflow) params.append('workflow', workflow);
-                if (search) params.append('search', search);
-                if (sketchType) params.append('sketch_type', sketchType);
+                if (limit !== undefined) params.append("limit", limit.toString());
+                if (offset !== undefined) params.append("offset", offset.toString());
+                if (workflow) params.append("workflow", workflow);
+                if (search) params.append("search", search);
+                if (sketchType) params.append("sketch_type", sketchType);
                 const query = params.toString();
-                return `${this.baseUrl}/api/v1/sketches${query ? '?' + query : ''}`;
+                return `${this.baseUrl}/api/v1/sketches${query ? "?" + query : ""}`;
             },
             detail: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
             update: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}`,
@@ -137,13 +137,13 @@ export class ApiConfigService {
             create: () => `${this.baseUrl}/api/v1/equipment`,
             list: (limit?: number, offset?: number, type?: string, status?: string, search?: string) => {
                 const params = new URLSearchParams();
-                if (limit !== undefined) params.append('limit', limit.toString());
-                if (offset !== undefined) params.append('offset', offset.toString());
-                if (type) params.append('type', type);
-                if (status) params.append('status', status);
-                if (search) params.append('search', search);
+                if (limit !== undefined) params.append("limit", limit.toString());
+                if (offset !== undefined) params.append("offset", offset.toString());
+                if (type) params.append("type", type);
+                if (status) params.append("status", status);
+                if (search) params.append("search", search);
                 const query = params.toString();
-                return `${this.baseUrl}/api/v1/equipment${query ? '?' + query : ''}`;
+                return `${this.baseUrl}/api/v1/equipment${query ? "?" + query : ""}`;
             },
             detail: (id: string) => `${this.baseUrl}/api/v1/equipment/${id}`,
             update: (id: string) => `${this.baseUrl}/api/v1/equipment/${id}`,
@@ -162,13 +162,13 @@ export class ApiConfigService {
             create: `${this.baseUrl}/api/v1/song-projects`,
             list: (limit?: number, offset?: number, search?: string, tags?: string, projectStatus?: string) => {
                 const params = new URLSearchParams();
-                if (limit !== undefined) params.append('limit', limit.toString());
-                if (offset !== undefined) params.append('offset', offset.toString());
-                if (search) params.append('search', search);
-                if (tags) params.append('tags', tags);
-                if (projectStatus) params.append('project_status', projectStatus);
+                if (limit !== undefined) params.append("limit", limit.toString());
+                if (offset !== undefined) params.append("offset", offset.toString());
+                if (search) params.append("search", search);
+                if (tags) params.append("tags", tags);
+                if (projectStatus) params.append("project_status", projectStatus);
                 const query = params.toString();
-                return `${this.baseUrl}/api/v1/song-projects${query ? '?' + query : ''}`;
+                return `${this.baseUrl}/api/v1/song-projects${query ? "?" + query : ""}`;
             },
             detail: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}`,
             update: (id: string) => `${this.baseUrl}/api/v1/song-projects/${id}`,
@@ -180,12 +180,12 @@ export class ApiConfigService {
             create: `${this.baseUrl}/api/v1/song-releases`,
             list: (limit?: number, offset?: number, statusFilter?: string, search?: string) => {
                 const params = new URLSearchParams();
-                if (limit !== undefined) params.append('limit', limit.toString());
-                if (offset !== undefined) params.append('offset', offset.toString());
-                if (statusFilter) params.append('status_filter', statusFilter);
-                if (search) params.append('search', search);
+                if (limit !== undefined) params.append("limit", limit.toString());
+                if (offset !== undefined) params.append("offset", offset.toString());
+                if (statusFilter) params.append("status_filter", statusFilter);
+                if (search) params.append("search", search);
                 const query = params.toString();
-                return `${this.baseUrl}/api/v1/song-releases${query ? '?' + query : ''}`;
+                return `${this.baseUrl}/api/v1/song-releases${query ? "?" + query : ""}`;
             },
             detail: (id: string) => `${this.baseUrl}/api/v1/song-releases/${id}`,
             update: (id: string) => `${this.baseUrl}/api/v1/song-releases/${id}`,
@@ -200,6 +200,6 @@ export class ApiConfigService {
     getEndpoint(category: keyof typeof this.endpoints, action: string, ...params: unknown[]): string {
         const categoryEndpoints = this.endpoints[category] as Record<string, unknown>;
         const endpoint = categoryEndpoints[action];
-        return typeof endpoint === 'function' ? endpoint(...params) : endpoint as string;
+        return typeof endpoint === "function" ? endpoint(...params) : endpoint as string;
     }
 }

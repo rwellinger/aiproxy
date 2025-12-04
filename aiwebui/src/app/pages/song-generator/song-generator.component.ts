@@ -1,26 +1,26 @@
-import {Component, OnInit, ViewEncapsulation, inject, HostListener, ViewChild, ElementRef} from '@angular/core';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {CommonModule} from '@angular/common';
-import {Router, ActivatedRoute} from '@angular/router';
-import {TranslateModule, TranslateService} from '@ngx-translate/core';
-import {firstValueFrom} from 'rxjs';
-import {SongService} from '../../services/business/song.service';
-import {SketchService, Sketch} from '../../services/business/sketch.service';
-import {ApiConfigService} from '../../services/config/api-config.service';
-import {HealthService} from '../../services/config/health.service';
-import {NotificationService} from '../../services/ui/notification.service';
-import {ChatService} from '../../services/config/chat.service';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatCardModule} from '@angular/material/card';
-import {SongDetailPanelComponent} from '../../components/song-detail-panel/song-detail-panel.component';
-import {ProgressService} from '../../services/ui/progress.service';
+import {Component, ElementRef, HostListener, inject, OnInit, ViewChild, ViewEncapsulation} from "@angular/core";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {CommonModule} from "@angular/common";
+import {ActivatedRoute, Router} from "@angular/router";
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
+import {firstValueFrom} from "rxjs";
+import {SongService} from "../../services/business/song.service";
+import {Sketch, SketchService} from "../../services/business/sketch.service";
+import {ApiConfigService} from "../../services/config/api-config.service";
+import {HealthService} from "../../services/config/health.service";
+import {NotificationService} from "../../services/ui/notification.service";
+import {ChatService} from "../../services/config/chat.service";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatCardModule} from "@angular/material/card";
+import {SongDetailPanelComponent} from "../../components/song-detail-panel/song-detail-panel.component";
+import {ProgressService} from "../../services/ui/progress.service";
 
 @Component({
-    selector: 'app-song-generator',
+    selector: "app-song-generator",
     standalone: true,
     imports: [CommonModule, FormsModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, SongDetailPanelComponent, TranslateModule],
-    templateUrl: './song-generator.component.html',
-    styleUrl: './song-generator.component.scss',
+    templateUrl: "./song-generator.component.html",
+    styleUrl: "./song-generator.component.scss",
     encapsulation: ViewEncapsulation.None
 })
 export class SongGeneratorComponent implements OnInit {
@@ -28,8 +28,8 @@ export class SongGeneratorComponent implements OnInit {
     isLoading = false;
     isGeneratingTitle = false;
     showTitleDropdown = false;
-    loadingMessage = '';
-    result = '';
+    loadingMessage = "";
+    result = "";
     currentlyPlaying: string | null = null;
     currentSongId: string | null = null;
     isInstrumentalMode = false; // Computed property to avoid method calls in template
@@ -45,7 +45,7 @@ export class SongGeneratorComponent implements OnInit {
 
     // Audio player state
     audioUrl: string | null = null;
-    currentSongTitle: string = '';
+    currentSongTitle: string = "";
     isPlaying = false;
     currentTime = 0;
     duration = 0;
@@ -54,7 +54,7 @@ export class SongGeneratorComponent implements OnInit {
     isLoaded = false;
 
     @ViewChild(SongDetailPanelComponent) songDetailPanel!: SongDetailPanelComponent;
-    @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
+    @ViewChild("audioPlayer") audioPlayer!: ElementRef<HTMLAudioElement>;
 
     private fb = inject(FormBuilder);
     private songService = inject(SongService);
@@ -70,32 +70,32 @@ export class SongGeneratorComponent implements OnInit {
 
     ngOnInit() {
         this.songForm = this.fb.group({
-            lyrics: ['', Validators.required],
-            prompt: ['', [Validators.required, Validators.maxLength(1024)]],
-            model: ['auto', Validators.required],
-            title: ['', [Validators.maxLength(50)]],
+            lyrics: ["", Validators.required],
+            prompt: ["", [Validators.required, Validators.maxLength(1024)]],
+            model: ["auto", Validators.required],
+            title: ["", [Validators.maxLength(50)]],
             isInstrumental: [false]
         });
 
         // Initialize isInstrumentalMode property
-        this.isInstrumentalMode = this.songForm.get('isInstrumental')?.value || false;
+        this.isInstrumentalMode = this.songForm.get("isInstrumental")?.value || false;
 
         // Update validators when isInstrumental changes
-        this.songForm.get('isInstrumental')?.valueChanges.subscribe(isInstrumental => {
+        this.songForm.get("isInstrumental")?.valueChanges.subscribe(isInstrumental => {
             this.isInstrumentalMode = isInstrumental; // Update computed property
             this.updateValidators(isInstrumental);
         });
 
         // Initialize validators based on current state
-        this.updateValidators(this.songForm.get('isInstrumental')?.value || false);
+        this.updateValidators(this.songForm.get("isInstrumental")?.value || false);
 
         // Load sketches
         this.loadSketches();
 
         // Check for sketch_id in URL
         this.route.queryParams.subscribe(params => {
-            if (params['sketch_id']) {
-                this.loadSketchById(params['sketch_id']);
+            if (params["sketch_id"]) {
+                this.loadSketchById(params["sketch_id"]);
             }
         });
 
@@ -113,7 +113,7 @@ export class SongGeneratorComponent implements OnInit {
         try {
             this.isStorageHealthy = await firstValueFrom(this.healthService.checkStorage());
         } catch (error) {
-            console.warn('[SongGenerator] Storage health check failed:', error);
+            console.warn("[SongGenerator] Storage health check failed:", error);
             this.isStorageHealthy = false;
         } finally {
             this.isCheckingStorage = false;
@@ -122,7 +122,7 @@ export class SongGeneratorComponent implements OnInit {
 
     async onSubmit() {
         if (this.songForm.valid) {
-            const isInstrumental = this.songForm.get('isInstrumental')?.value;
+            const isInstrumental = this.songForm.get("isInstrumental")?.value;
             if (isInstrumental) {
                 await this.generateInstrumental();
             } else {
@@ -132,16 +132,16 @@ export class SongGeneratorComponent implements OnInit {
     }
 
     resetForm() {
-        this.songForm.reset({model: 'auto', isInstrumental: false});
+        this.songForm.reset({model: "auto", isInstrumental: false});
         this.isInstrumentalMode = false; // Reset computed property
-        this.result = '';
+        this.result = "";
     }
 
 
     async generateSong() {
         const formValue = this.songForm.value;
         this.isLoading = true;
-        this.result = '';
+        this.result = "";
 
         try {
             const data = await this.songService.generateSong(
@@ -159,7 +159,7 @@ export class SongGeneratorComponent implements OnInit {
                 }
                 await this.checkSongStatus(data.task_id, false);
             } else {
-                const errorMsg = this.translate.instant('songGenerator.errors.errorInitSong');
+                const errorMsg = this.translate.instant("songGenerator.errors.errorInitSong");
                 this.notificationService.error(errorMsg);
                 this.result = errorMsg;
             }
@@ -172,7 +172,7 @@ export class SongGeneratorComponent implements OnInit {
     async generateInstrumental() {
         const formValue = this.songForm.value;
         this.isLoading = true;
-        this.result = '';
+        this.result = "";
 
         try {
             const data = await this.songService.generateInstrumental(
@@ -189,7 +189,7 @@ export class SongGeneratorComponent implements OnInit {
                 }
                 await this.checkSongStatus(data.task_id, true);
             } else {
-                const errorMsg = this.translate.instant('songGenerator.errors.errorInitInstrumental');
+                const errorMsg = this.translate.instant("songGenerator.errors.errorInitInstrumental");
                 this.notificationService.error(errorMsg);
                 this.result = errorMsg;
             }
@@ -209,11 +209,11 @@ export class SongGeneratorComponent implements OnInit {
                     ? await this.songService.checkInstrumentalStatus(taskId)
                     : await this.songService.checkSongStatus(taskId);
 
-                if (data.status === 'SUCCESS') {
+                if (data.status === "SUCCESS") {
                     await this.renderResultTask(data.result);
                     completed = true;
-                } else if (data.status === 'FAILURE') {
-                    const errorKey = isInstrumental ? 'songGenerator.errors.instrumentalFailed' : 'songGenerator.errors.generationFailed';
+                } else if (data.status === "FAILURE") {
+                    const errorKey = isInstrumental ? "songGenerator.errors.instrumentalFailed" : "songGenerator.errors.generationFailed";
                     const errorMessage = data.result?.error || data.result || this.translate.instant(errorKey);
                     this.notificationService.error(`${this.translate.instant(errorKey)}: ${errorMessage}`);
                     this.result = `<div class="error-box">Error: ${errorMessage}</div>`;
@@ -232,7 +232,7 @@ export class SongGeneratorComponent implements OnInit {
                     await new Promise(resolve => setTimeout(resolve, interval));
                 }
             } catch (error: any) {
-                const errorMsg = this.translate.instant('songGenerator.errors.errorFetchingStatus');
+                const errorMsg = this.translate.instant("songGenerator.errors.errorFetchingStatus");
                 this.notificationService.error(`${errorMsg}: ${error.message}`);
                 this.result = `${errorMsg}: ${error.message}`;
                 completed = true;
@@ -244,8 +244,8 @@ export class SongGeneratorComponent implements OnInit {
 
     async renderResultTask(data: any): Promise<void> {
         // Only use DB loading - no more MUREKA result fallback
-        if (this.currentSongId && (data.status === 'SUCCESS' || data.status === 'succeeded')) {
-            this.result = '';
+        if (this.currentSongId && (data.status === "SUCCESS" || data.status === "succeeded")) {
+            this.result = "";
             // Einfach das Detail Panel refreshen - Daten sind bereits in DB
             if (this.songDetailPanel) {
                 // Sicherstellen dass die songId gesetzt ist bevor wir reloadSong aufrufen
@@ -253,17 +253,16 @@ export class SongGeneratorComponent implements OnInit {
                 await this.songDetailPanel.reloadSong();
             }
             return;
-        } else if (data.status === 'FAILURE') {
+        } else if (data.status === "FAILURE") {
             // Nur bei FAILURE Fehler zeigen
-            this.result = 'Error: Song generation failed.';
-            this.notificationService.error('Song generation failed');
+            this.result = "Error: Song generation failed.";
+            this.notificationService.error("Song generation failed");
         }
     }
 
 
-
     // Event handlers for song detail panel
-    onPlayAudio(event: {url: string, id: string, choiceNumber: number}) {
+    onPlayAudio(event: { url: string, id: string, choiceNumber: number }) {
         this.onPlayAudioInternal(event.url, event.id);
     }
 
@@ -281,8 +280,8 @@ export class SongGeneratorComponent implements OnInit {
         this.currentlyPlaying = choiceId;
         // Get song title from current song via song detail panel
         const currentSong = this.songDetailPanel?.song;
-        const songTitle = currentSong?.title || 'Generated Song';
-        this.currentSongTitle = songTitle.length > 40 ? songTitle.substring(0, 37) + '...' : songTitle;
+        const songTitle = currentSong?.title || "Generated Song";
+        this.currentSongTitle = songTitle.length > 40 ? songTitle.substring(0, 37) + "..." : songTitle;
 
         // Wait for audio element to be ready
         setTimeout(() => {
@@ -361,10 +360,10 @@ export class SongGeneratorComponent implements OnInit {
     }
 
     formatTime(seconds: number): string {
-        if (isNaN(seconds)) return '0:00';
+        if (isNaN(seconds)) return "0:00";
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = Math.floor(seconds % 60);
-        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
     }
 
     onDownloadStems(url: string) {
@@ -383,12 +382,12 @@ export class SongGeneratorComponent implements OnInit {
         // Check for specific internal progress statuses first
         if (data.progress?.status) {
             switch (data.progress.status) {
-                case 'SLOT_ACQUIRED':
-                    return this.translate.instant('songGenerator.status.acquiring');
-                case 'GENERATION_STARTED':
-                    return this.translate.instant('songGenerator.status.starting');
-                case 'POLLING':
-                    return this.translate.instant('songGenerator.status.polling');
+                case "SLOT_ACQUIRED":
+                    return this.translate.instant("songGenerator.status.acquiring");
+                case "GENERATION_STARTED":
+                    return this.translate.instant("songGenerator.status.starting");
+                case "POLLING":
+                    return this.translate.instant("songGenerator.status.polling");
                 default:
                     break;
             }
@@ -397,35 +396,35 @@ export class SongGeneratorComponent implements OnInit {
         // Check for mureka-specific status
         if (data.progress?.mureka_status) {
             switch (data.progress.mureka_status) {
-                case 'preparing':
-                    return this.translate.instant('songGenerator.status.preparing');
-                case 'queued':
-                    return this.translate.instant('songGenerator.status.queued');
-                case 'running':
-                    return this.translate.instant('songGenerator.status.generatingAi');
-                case 'timeouted':
-                    return this.translate.instant('songGenerator.status.timeout');
+                case "preparing":
+                    return this.translate.instant("songGenerator.status.preparing");
+                case "queued":
+                    return this.translate.instant("songGenerator.status.queued");
+                case "running":
+                    return this.translate.instant("songGenerator.status.generatingAi");
+                case "timeouted":
+                    return this.translate.instant("songGenerator.status.timeout");
                 default:
-                    return `${this.translate.instant('songGenerator.status.polling')} (${data.progress.mureka_status})`;
+                    return `${this.translate.instant("songGenerator.status.polling")} (${data.progress.mureka_status})`;
             }
         }
 
         // Fallback to general celery status
         switch (data.status) {
-            case 'PENDING':
-                return this.translate.instant('songGenerator.status.initializing');
-            case 'PROGRESS':
-                return this.translate.instant('songGenerator.status.processingRequest');
+            case "PENDING":
+                return this.translate.instant("songGenerator.status.initializing");
+            case "PROGRESS":
+                return this.translate.instant("songGenerator.status.processingRequest");
             default:
-                return this.translate.instant('songGenerator.status.processing');
+                return this.translate.instant("songGenerator.status.processing");
         }
     }
 
     downloadFlac(flacUrl: string) {
         // Create a temporary anchor element to trigger the download
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = flacUrl;
-        link.download = ''; // This will use the filename from the URL
+        link.download = ""; // This will use the filename from the URL
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -433,9 +432,9 @@ export class SongGeneratorComponent implements OnInit {
 
     downloadStems(stemsUrl: string) {
         // Create a temporary anchor element to trigger the download
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = stemsUrl;
-        link.download = ''; // This will use the filename from the URL
+        link.download = ""; // This will use the filename from the URL
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -468,10 +467,10 @@ export class SongGeneratorComponent implements OnInit {
         // No-op: Shared component handles this
     }
 
-    @HostListener('document:click', ['$event'])
+    @HostListener("document:click", ["$event"])
     onDocumentClick(event: Event) {
         const target = event.target as HTMLElement;
-        const titleDropdown = target.closest('.title-dropdown-container');
+        const titleDropdown = target.closest(".title-dropdown-container");
 
         if (!titleDropdown && this.showTitleDropdown) {
             this.closeTitleDropdown();
@@ -481,12 +480,12 @@ export class SongGeneratorComponent implements OnInit {
 
     private removeQuotes(text: string): string {
         if (!text) return text;
-        return text.replace(/^["']|["']$/g, '').trim();
+        return text.replace(/^["']|["']$/g, "").trim();
     }
 
     private updateValidators(isInstrumental: boolean) {
-        const lyricsControl = this.songForm.get('lyrics');
-        const titleControl = this.songForm.get('title');
+        const lyricsControl = this.songForm.get("lyrics");
+        const titleControl = this.songForm.get("title");
 
         if (isInstrumental) {
             // For instrumental: lyrics not required, title is required
@@ -503,23 +502,23 @@ export class SongGeneratorComponent implements OnInit {
     }
 
     isInstrumental(): boolean {
-        return this.songForm.get('isInstrumental')?.value || false;
+        return this.songForm.get("isInstrumental")?.value || false;
     }
 
-    setMode(mode: 'song' | 'instrumental') {
-        const isInstrumental = mode === 'instrumental';
+    setMode(mode: "song" | "instrumental") {
+        const isInstrumental = mode === "instrumental";
         this.isInstrumentalMode = isInstrumental; // Update computed property
         this.songForm.patchValue({isInstrumental: isInstrumental});
     }
 
     async generateTitle() {
         const isInstrumental = this.isInstrumentalMode; // Use property instead of method call
-        let inputText = '';
+        let inputText = "";
 
         // Priority logic: Title > Lyrics (non-instrumental) / Style (instrumental) > Fallback
-        const currentTitle = this.songForm.get('title')?.value?.trim();
-        const currentLyrics = this.songForm.get('lyrics')?.value?.trim();
-        const currentStyle = this.songForm.get('prompt')?.value?.trim();
+        const currentTitle = this.songForm.get("title")?.value?.trim();
+        const currentLyrics = this.songForm.get("lyrics")?.value?.trim();
+        const currentStyle = this.songForm.get("prompt")?.value?.trim();
 
         if (currentTitle) {
             inputText = currentTitle;
@@ -531,15 +530,15 @@ export class SongGeneratorComponent implements OnInit {
             inputText = currentLyrics;
         } else {
             // Fallback constant
-            inputText = this.translate.instant('songGenerator.generateTitleFallback');
+            inputText = this.translate.instant("songGenerator.generateTitleFallback");
         }
 
         this.isGeneratingTitle = true;
         try {
             const generatedTitle = await this.progressService.executeWithProgress(
                 () => this.chatService.generateTitle(inputText),
-                this.translate.instant('songGenerator.progress.generatingTitle'),
-                this.translate.instant('songGenerator.progress.generatingTitleHint')
+                this.translate.instant("songGenerator.progress.generatingTitle"),
+                this.translate.instant("songGenerator.progress.generatingTitleHint")
             );
             this.songForm.patchValue({title: this.removeQuotes(generatedTitle)});
         } catch (error: any) {
@@ -557,10 +556,10 @@ export class SongGeneratorComponent implements OnInit {
         this.showTitleDropdown = false;
     }
 
-    selectTitleAction(action: 'generate') {
+    selectTitleAction(action: "generate") {
         this.closeTitleDropdown();
 
-        if (action === 'generate') {
+        if (action === "generate") {
             this.generateTitle();
         }
     }
@@ -569,11 +568,11 @@ export class SongGeneratorComponent implements OnInit {
     async loadSketches(): Promise<void> {
         try {
             const response = await firstValueFrom(
-                this.sketchService.getSketches(100, 0, 'draft', undefined, 'song')
+                this.sketchService.getSketches(100, 0, "draft", undefined, "song")
             );
             this.sketches = response.data || [];
         } catch (error: any) {
-            console.error('Error loading sketches:', error);
+            console.error("Error loading sketches:", error);
         }
     }
 
@@ -587,7 +586,7 @@ export class SongGeneratorComponent implements OnInit {
             }
         } catch (error: any) {
             this.notificationService.error(
-                this.translate.instant('songGenerator.errors.sketchNotFound')
+                this.translate.instant("songGenerator.errors.sketchNotFound")
             );
         }
     }
@@ -608,12 +607,12 @@ export class SongGeneratorComponent implements OnInit {
         this.selectedSketch = sketch;
         this.selectedSketchId = sketch.id;
         this.songForm.patchValue({
-            title: sketch.title || '',
-            lyrics: sketch.lyrics || '',
-            prompt: sketch.prompt || ''
+            title: sketch.title || "",
+            lyrics: sketch.lyrics || "",
+            prompt: sketch.prompt || ""
         });
         this.notificationService.success(
-            this.translate.instant('songGenerator.success.sketchLoaded')
+            this.translate.instant("songGenerator.success.sketchLoaded")
         );
     }
 
@@ -623,18 +622,18 @@ export class SongGeneratorComponent implements OnInit {
 
         // Clear form fields
         this.songForm.patchValue({
-            title: '',
-            lyrics: '',
-            prompt: ''
+            title: "",
+            lyrics: "",
+            prompt: ""
         });
 
         this.notificationService.success(
-            this.translate.instant('songGenerator.success.sketchCleared')
+            this.translate.instant("songGenerator.success.sketchCleared")
         );
     }
 
     getSketchWorkflowLabel(workflow: string | undefined): string {
-        if (!workflow) return '';
+        if (!workflow) return "";
         return this.translate.instant(`songSketch.workflow.${workflow}`);
     }
 }

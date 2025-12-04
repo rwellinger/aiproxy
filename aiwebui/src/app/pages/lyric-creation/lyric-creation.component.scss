@@ -19,14 +19,14 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-
+  
   mat-card-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: visible;
     padding: $spacing-md;
-
+    
     form {
       display: flex;
       flex-direction: column;
@@ -44,11 +44,11 @@
   align-items: center;
   margin-bottom: $spacing-md;
   flex-shrink: 0;
-
+  
   .lyric-title {
     margin: 0;
     padding: 0;
-
+    
     h2 {
       display: flex;
       align-items: center;
@@ -58,46 +58,46 @@
       font-size: 1.5rem;
       margin: 0;
       color: $text-primary;
-
+      
       i {
         color: $primary-color;
       }
     }
   }
-
+  
   .sketch-navigation-buttons {
     display: flex;
     gap: $spacing-sm;
     align-items: center;
-
+    
     .cancel-button {
       @include button-secondary('base');
       display: inline-flex;
       align-items: center;
       gap: $spacing-xs;
       font-weight: $font-weight-medium !important;
-
+      
       i {
         font-size: $font-base;
       }
-
+      
       &:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
       }
     }
-
+    
     .apply-button {
       @include button-primary('base');
       display: inline-flex;
       align-items: center;
       gap: $spacing-xs;
       font-weight: $font-weight-medium !important;
-
+      
       i {
         font-size: $font-base;
       }
-
+      
       &:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -127,11 +127,11 @@
   box-sizing: border-box;
   line-height: $line-height-relaxed;
   overflow-y: auto;
-
+  
   &:focus {
     @include input-focus-state($primary-color);
   }
-
+  
   &:disabled {
     background: $background-light;
     color: $text-muted;
@@ -162,7 +162,7 @@
   font-size: $font-sm;
   color: $text-muted;
   flex-shrink: 0;
-
+  
   i {
     color: $primary-color;
     font-size: $font-base;
@@ -194,11 +194,11 @@
   align-items: center;
   gap: $spacing-xs;
   font-weight: $font-weight-medium !important;
-
+  
   i {
     font-size: $font-base;
   }
-
+  
   &:hover:not(:disabled) {
     background-color: $ai-hover !important;
     transform: translateY(-2px);
@@ -212,11 +212,11 @@
   align-items: center;
   gap: $spacing-xs;
   font-weight: $font-weight-medium !important;
-
+  
   i {
     font-size: $font-base;
   }
-
+  
   &:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -231,7 +231,7 @@
 .clear-button {
   @include button-secondary('base');
   font-weight: $font-weight-medium !important;
-
+  
   i {
     margin-right: $spacing-xs;
   }
@@ -277,22 +277,22 @@
   cursor: pointer;
   transition: $transition-fast;
   text-align: left;
-
+  
   &:hover:not(:disabled) {
     background-color: $background-light;
   }
-
+  
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-
+  
   i {
     width: 16px;
     flex-shrink: 0;
     color: $ai-color;
   }
-
+  
   span {
     flex: 1;
     font-weight: $font-weight-medium;
@@ -331,7 +331,7 @@
   border-right: 1px solid $border-light;
   padding-right: $spacing-md;
   overflow: hidden;
-
+  
   .navigator-header {
     display: flex;
     justify-content: space-between;
@@ -339,13 +339,13 @@
     padding-bottom: $spacing-sm;
     border-bottom: 2px solid $primary-color;
     margin-bottom: $spacing-md;
-
+    
     h3 {
       margin: 0;
       font-size: $font-lg;
       color: $text-primary;
     }
-
+    
     .section-count {
       background: $primary-color;
       color: white;
@@ -355,7 +355,7 @@
       font-weight: $font-weight-bold;
     }
   }
-
+  
   .section-list {
     flex: 1;
     overflow-y: auto;
@@ -372,24 +372,24 @@
   cursor: pointer;
   transition: $transition-fast;
   background: $background-white;
-
+  
   &:hover {
     border-color: $primary-color;
     background: $background-light;
     transform: translateX(4px);
   }
-
+  
   &.active {
     border-color: $primary-color;
     background: lighten($primary-color, 45%);
     box-shadow: 0 2px 8px rgba($primary-color, 0.2);
-
+    
     .section-label {
       color: $primary-color;
       font-weight: $font-weight-bold;
     }
   }
-
+  
   .section-label {
     display: flex;
     align-items: center;
@@ -397,13 +397,13 @@
     font-weight: $font-weight-medium;
     color: $text-primary;
     margin-bottom: $spacing-xs;
-
+    
     i {
       color: $ai-color;
       font-size: $font-sm;
     }
   }
-
+  
   .section-preview {
     font-size: $font-sm;
     color: $text-muted;
@@ -419,7 +419,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-
+  
   .workspace-header {
     display: flex;
     justify-content: space-between;
@@ -427,7 +427,7 @@
     padding-bottom: $spacing-sm;
     border-bottom: 2px solid $primary-color;
     margin-bottom: $spacing-md;
-
+    
     h3 {
       margin: 0;
       font-size: $font-lg;
@@ -435,18 +435,18 @@
       display: flex;
       align-items: center;
       gap: $spacing-xs;
-
+      
       i {
         color: $primary-color;
       }
     }
-
+    
     .workspace-actions {
       display: flex;
       gap: $spacing-xs;
     }
   }
-
+  
   .workspace-content {
     flex: 1;
     display: flex;
@@ -454,7 +454,7 @@
     overflow: hidden;
     margin-bottom: $spacing-md;
   }
-
+  
   .section-textarea {
     flex: 1;
     width: 100%;
@@ -466,11 +466,11 @@
     resize: none;
     overflow-y: auto;
     line-height: $line-height-relaxed;
-
+    
     &:focus {
       @include input-focus-state($primary-color);
     }
-
+    
     &:disabled {
       background: $background-light;
       color: $text-muted;
@@ -478,13 +478,13 @@
       opacity: 0.6;
     }
   }
-
+  
   .section-footer-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: $spacing-xs;
-
+    
     .cleanup-button {
       @include button-secondary('base');
       font-weight: $font-weight-medium !important;
@@ -493,24 +493,24 @@
       gap: $spacing-xs;
       padding: $spacing-xs $spacing-sm;
       font-size: $font-sm;
-
+      
       i {
         font-size: $font-sm;
       }
-
+      
       &:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
       }
     }
-
+    
     .section-char-count {
       font-size: $font-sm;
       color: $text-muted;
       font-style: italic;
     }
   }
-
+  
   .ai-instructions-group {
     margin-top: $spacing-md;
     padding: $spacing-sm $spacing-md;
@@ -518,7 +518,7 @@
     border: 1px solid rgba($ai-color, 0.25);
     border-radius: 8px;
     border-left: 3px solid $ai-color;
-
+    
     .ai-instructions-label {
       display: flex;
       align-items: center;
@@ -527,12 +527,12 @@
       font-weight: $font-weight-medium;
       color: $ai-color;
       margin-bottom: $spacing-xs;
-
+      
       i {
         font-size: $font-base;
       }
     }
-
+    
     .ai-instructions-textarea {
       width: 100%;
       min-height: 60px;
@@ -544,25 +544,25 @@
       resize: vertical;
       background: $background-white;
       transition: border-color 0.2s, box-shadow 0.2s;
-
+      
       &:focus {
         outline: none;
         border-color: $ai-color;
         box-shadow: 0 0 0 3px rgba($ai-color, 0.15);
       }
-
+      
       &::placeholder {
         color: $text-muted;
         font-style: italic;
       }
-
+      
       &:disabled {
         background: $background-light;
         cursor: not-allowed;
       }
     }
   }
-
+  
   .section-ai-actions {
     display: flex;
     gap: $spacing-sm;
@@ -580,7 +580,7 @@
   @include button-success('base');
   background-color: $success-color !important;
   font-weight: $font-weight-medium !important;
-
+  
   &:hover:not(:disabled) {
     background-color: $success-hover !important;
   }
@@ -591,11 +591,11 @@
   .lyric-creation-card {
     height: calc(100vh - 1.5rem);
   }
-
+  
   .lyric-textarea {
     max-height: 400px;
   }
-
+  
   .action-section {
     padding: $spacing-sm;
   }
@@ -606,38 +606,38 @@
   .lyric-creation-container {
     padding: $spacing-sm;
   }
-
+  
   .lyric-creation-card {
     max-width: 100%;
     height: calc(100vh - 1rem);
   }
-
+  
   // Larger form inputs for touch
   .lyric-textarea {
     min-height: 300px;
     font-size: 16px; // Prevent iOS zoom
   }
-
+  
   .form-input,
   .form-textarea {
     min-height: 44px;
     font-size: 16px;
   }
-
+  
   // Vertical stacking of action buttons
   .action-section {
     flex-direction: column;
     align-items: stretch;
     gap: 0.5rem;
   }
-
+  
   .utility-actions,
   .submit-actions {
     flex-direction: column;
     width: 100%;
     gap: 0.5rem;
   }
-
+  
   // Full-width buttons with larger touch targets
   .utility-button,
   .architecture-button,
@@ -648,16 +648,16 @@
     height: 60px;
     font-size: 1rem;
   }
-
+  
   // Header adjustments
   .lyric-header {
     padding: 0.75rem;
-
+    
     .lyric-title h2 {
       font-size: 1.25rem;
     }
   }
-
+  
   // Controls panel - not sticky on touch
   .controls-panel {
     position: static;
@@ -669,52 +669,52 @@
   .lyric-creation-container {
     padding: $spacing-xs;
   }
-
+  
   .lyric-creation-card {
     height: calc(100vh - 1rem);
   }
-
+  
   .lyric-header {
     padding: $spacing-10;
     margin-bottom: $spacing-sm;
-
+    
     .lyric-title h2 {
       font-size: 1.25rem;
     }
   }
-
+  
   .action-section {
     flex-direction: column;
     align-items: stretch;
     gap: $spacing-10;
   }
-
+  
   .ai-actions {
     flex-direction: column;
     gap: $spacing-xs;
-
+    
     .ai-action-button {
       width: 100%;
       justify-content: center;
     }
   }
-
+  
   .utility-actions {
     .clear-button {
       width: 100%;
     }
   }
-
+  
   // Section Editor Mobile
   .section-editor-container {
     flex-direction: column;
   }
-
+  
   .section-navigator,
   .section-workspace {
     width: 100%;
   }
-
+  
   .section-navigator {
     border-right: none;
     border-bottom: 1px solid $border-light;

@@ -34,16 +34,16 @@
   align-items: center;
   padding: $spacing-md;
   border-bottom: 1px solid $border-light;
-
+  
   .header-title {
     flex: 1;
-
+    
     .header-title-group {
       display: flex;
       align-items: center;
       gap: $spacing-sm;
     }
-
+    
     h2 {
       display: flex;
       align-items: center;
@@ -52,12 +52,12 @@
       font-size: 1.25rem;
       font-weight: 600;
       color: $text-primary;
-
+      
       i {
         color: $primary-color;
       }
     }
-
+    
     .projects-count-badge {
       display: inline-block;
       padding: 4px 8px;
@@ -68,14 +68,14 @@
       border-radius: 12px;
       white-space: nowrap;
     }
-
+    
     .subtitle {
       margin: 0;
       color: $text-secondary;
       font-size: $font-sm;
     }
   }
-
+  
   .new-project-button {
     @include button-primary('base');
     min-width: auto !important;
@@ -86,12 +86,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
+    
     i {
       font-size: $font-lg;
       margin: 0;
     }
-
+    
     &:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -108,7 +108,7 @@
 .search-box {
   position: relative;
   margin-bottom: $spacing-sm;
-
+  
   i.fa-search {
     position: absolute;
     left: $spacing-sm;
@@ -116,14 +116,14 @@
     transform: translateY(-50%);
     color: $text-muted;
   }
-
+  
   .search-input {
     width: 100%;
     padding: $spacing-sm $spacing-sm $spacing-sm 2.5rem;
     border: 1px solid $border-standard;
     border-radius: 8px;
     font-size: $font-sm;
-
+    
     &:focus {
       outline: none;
       border-color: $primary-color;
@@ -149,17 +149,17 @@
   justify-content: center;
   transition: all 0.2s ease;
   z-index: 2;
-
+  
   &:hover:not(:disabled) {
-    background-color: rgba(0,0,0,0.1);
+    background-color: rgba(0, 0, 0, 0.1);
     color: $text-primary;
   }
-
+  
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-
+  
   i {
     font-size: 12px;
   }
@@ -168,7 +168,7 @@
 .status-filter {
   display: flex;
   gap: $spacing-xs;
-
+  
   .filter-btn {
     flex: 1;
     padding: $spacing-xs $spacing-sm;
@@ -178,11 +178,11 @@
     font-size: $font-sm;
     cursor: pointer;
     transition: all 0.2s ease;
-
+    
     &:hover {
       background-color: $background-light;
     }
-
+    
     &.active {
       background-color: $primary-color;
       color: $background-white;
@@ -206,12 +206,12 @@
   background-color: $background-white;
   cursor: pointer;
   transition: all 0.2s ease;
-
+  
   &:hover {
     background-color: $background-selected;
     border-color: $primary-color;
   }
-
+  
   &.selected {
     background-color: $background-selected;
     border-color: $primary-color;
@@ -224,20 +224,20 @@
   align-items: flex-start;
   gap: $spacing-sm;
   margin-bottom: $spacing-sm;
-
+  
   .project-cover {
     width: 48px;
     height: 48px;
     border-radius: $border-radius-md;
     overflow: hidden;
     flex-shrink: 0;
-
+    
     .cover-image {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-
+    
     .cover-placeholder {
       width: 100%;
       height: 100%;
@@ -247,22 +247,22 @@
       color: white;
       font-weight: 600;
       font-size: 1rem;
-
+      
       .initials {
         text-transform: uppercase;
       }
     }
   }
-
+  
   .title-group {
     flex: 1;
-
+    
     h4 {
       margin: 0 0 $spacing-xs 0;
       color: $text-primary;
       font-weight: $font-weight-semibold;
     }
-
+    
     .status-badge {
       display: inline-block;
       padding: 2px 8px;
@@ -270,17 +270,17 @@
       font-size: $font-xs;
       font-weight: $font-weight-medium;
       margin-left: $spacing-sm;
-
+      
       &.status-badge--new {
         background-color: #e0e7ff;
         color: #3730a3;
       }
-
+      
       &.status-badge--progress {
         background-color: #dbeafe;
         color: #1e40af;
       }
-
+      
       &.status-badge--archived {
         background-color: #f3f4f6;
         color: #6b7280;
@@ -308,22 +308,22 @@
   border-radius: $border-radius-sm;
   font-size: $font-xs;
   font-weight: $font-weight-medium;
-
+  
   &.status-local {
     background-color: $storage-bg;
     color: $storage-text;
   }
-
+  
   &.status-cloud {
     background-color: #dbeafe;
     color: #1e40af;
   }
-
+  
   &.status-synced {
     background-color: #d1fae5;
     color: #065f46;
   }
-
+  
   &.status-syncing {
     background-color: #e0e7ff;
     color: #3730a3;
@@ -343,13 +343,13 @@
   align-items: center;
   padding: $spacing-md;
   border-bottom: 1px solid $border-light;
-
+  
   .header-title {
     display: flex;
     align-items: center;
     gap: $spacing-md;
     flex: 1;
-
+    
     .project-cover-detail {
       width: 80px;
       height: 80px;
@@ -357,13 +357,13 @@
       overflow: hidden;
       flex-shrink: 0;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
+      
       .cover-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
-
+      
       .cover-placeholder {
         width: 100%;
         height: 100%;
@@ -373,30 +373,30 @@
         color: white;
         font-weight: 600;
         font-size: 1.75rem;
-
+        
         .initials {
           text-transform: uppercase;
         }
       }
     }
-
+    
     .title-content {
       display: flex;
       align-items: center;
       gap: $spacing-sm;
       flex: 1;
-
+      
       i {
         font-size: 1.5rem;
         color: $primary-color;
       }
-
+      
       h2 {
         margin: 0;
         color: $text-primary;
       }
     }
-
+    
     .title-content {
       .edit-project-name-button {
         background-color: transparent;
@@ -412,30 +412,30 @@
         border-radius: $border-radius-sm;
         cursor: pointer;
         transition: all 0.2s ease;
-
+        
         i {
           font-size: $font-sm;
           margin: 0;
           color: $primary-color;
         }
-
+        
         &:hover:not(:disabled) {
           background-color: $primary-color;
           border-color: $primary-color;
           transform: translateY(-1px);
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-
+          
           i {
             color: white;
           }
         }
-
+        
         &:disabled {
           opacity: 0.5;
           cursor: not-allowed;
         }
       }
-
+      
       .project-name-input {
         flex: 1;
         padding: $spacing-xs $spacing-sm;
@@ -447,16 +447,16 @@
         background-color: $background-white;
         outline: none;
         transition: border-color 0.2s ease;
-
+        
         &:focus {
           border-color: darken($primary-color, 10%);
         }
-
+        
         &::placeholder {
           color: $text-muted;
         }
       }
-
+      
       .save-project-name-button {
         @include button-primary('base');
         padding: $spacing-xs !important;
@@ -466,19 +466,19 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
+        
         i {
           font-size: $font-sm;
           margin: 0;
           color: white;
         }
-
+        
         &:hover:not(:disabled) {
           transform: translateY(-1px);
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
         }
       }
-
+      
       .cancel-project-name-button {
         @include button-secondary('base');
         padding: $spacing-xs !important;
@@ -488,13 +488,13 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
+        
         i {
           font-size: $font-sm;
           margin: 0;
           color: $text-secondary;
         }
-
+        
         &:hover:not(:disabled) {
           transform: translateY(-1px);
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
@@ -502,7 +502,7 @@
       }
     }
   }
-
+  
   .header-actions {
     display: flex;
     align-items: center;
@@ -523,7 +523,7 @@
 // Section block within tabs (no padding, handled by tab-content)
 .detail-section-block-in-tab {
   padding: 0;
-
+  
   &:not(:last-child) {
     margin-bottom: $spacing-lg;
   }
@@ -532,7 +532,7 @@
 .detail-section-block {
   padding: $spacing-md;
   border-bottom: 1px solid $border-light;
-
+  
   &:last-child {
     border-bottom: none;
   }
@@ -541,19 +541,19 @@
 // Metadata ID Row (analog Sketch Library)
 .metadata-id-row {
   margin-bottom: $spacing-md;
-
+  
   .metadata-id-item {
     display: flex;
     align-items: center;
     gap: $spacing-xs;
     padding: $spacing-xs 0;
-
+    
     .meta-icon {
       color: $primary-color;
       font-size: 0.9rem;
       flex-shrink: 0;
     }
-
+    
     .meta-id {
       font-family: 'Courier New', monospace;
       font-size: $font-sm;
@@ -566,7 +566,7 @@
       white-space: nowrap;
       flex: 1;
     }
-
+    
     .copy-id-btn {
       background: transparent;
       border: none;
@@ -579,11 +579,11 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-
+      
       i {
         font-size: $font-sm;
       }
-
+      
       &:hover {
         background: $background-light;
         color: $primary-color;
@@ -606,7 +606,7 @@
   color: $text-primary;
   font-size: $font-lg;
   font-weight: $font-weight-semibold;
-
+  
   i {
     color: $primary-color;
   }
@@ -614,7 +614,7 @@
 
 .detail-field {
   margin-bottom: $spacing-md;
-
+  
   &:last-child {
     margin-bottom: 0;
   }
@@ -625,11 +625,11 @@
   grid-template-columns: 1fr 1fr;
   gap: $spacing-md;
   margin-bottom: $spacing-md;
-
+  
   &:last-child {
     margin-bottom: 0;
   }
-
+  
   .detail-field {
     margin-bottom: 0;
   }
@@ -666,17 +666,17 @@
 mat-accordion {
   mat-expansion-panel {
     margin-bottom: $spacing-sm;
-
+    
     mat-expansion-panel-header {
       mat-panel-title {
         display: flex;
         align-items: center;
         gap: $spacing-sm;
-
+        
         i {
           color: $primary-color;
         }
-
+        
         .file-count {
           margin-left: auto;
           color: $text-secondary;
@@ -705,16 +705,16 @@ mat-accordion {
   align-items: center;
   gap: $spacing-xs;
   font-weight: $font-weight-medium !important;
-
+  
   i {
     font-size: $font-sm;
   }
-
+  
   &:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
-
+  
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -727,21 +727,21 @@ mat-accordion {
   align-items: center;
   gap: $spacing-xs;
   font-weight: $font-weight-medium !important;
-
+  
   i {
     font-size: $font-sm;
   }
-
+  
   .dropdown-icon {
     margin-left: 4px;
     font-size: 0.75rem;
   }
-
+  
   &:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
-
+  
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -764,16 +764,16 @@ mat-accordion {
   align-items: center;
   gap: $spacing-xs;
   font-weight: $font-weight-medium !important;
-
+  
   i {
     font-size: $font-sm;
   }
-
+  
   &:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
-
+  
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -789,7 +789,7 @@ mat-accordion {
   background-color: $background-light;
   border: 1px solid $border-light;
   border-radius: $border-radius-sm;
-
+  
   &:hover {
     background-color: $background-selected;
   }
@@ -800,16 +800,16 @@ mat-accordion {
   align-items: center;
   gap: $spacing-sm;
   flex: 1;
-
+  
   i {
     color: $text-secondary;
   }
-
+  
   .filename {
     color: $text-primary;
     font-weight: $font-weight-medium;
   }
-
+  
   .filesize {
     color: $text-muted;
     font-size: $font-sm;
@@ -821,7 +821,7 @@ mat-accordion {
   @include button-secondary('base');
   padding: $spacing-xs $spacing-sm !important;
   min-width: auto !important;
-
+  
   i {
     font-size: $font-sm;
   }
@@ -836,7 +836,7 @@ mat-accordion {
 
 .assigned-assets-section {
   margin-bottom: $spacing-md;
-
+  
   &:last-child {
     margin-bottom: 0;
   }
@@ -850,7 +850,7 @@ mat-accordion {
   color: $text-primary;
   font-size: $font-base;
   font-weight: $font-weight-semibold;
-
+  
   i {
     color: $primary-color;
     font-size: $font-sm;
@@ -867,7 +867,7 @@ mat-accordion {
   border: 1px solid $border-light;
   border-radius: $border-radius-sm;
   transition: all 0.2s ease;
-
+  
   &:hover {
     background-color: $background-selected;
     border-color: $primary-color;
@@ -879,18 +879,18 @@ mat-accordion {
   align-items: center;
   gap: $spacing-sm;
   flex: 1;
-
+  
   i {
     color: $primary-color;
     font-size: $font-sm;
   }
-
+  
   .asset-title {
     color: $text-primary;
     font-weight: $font-weight-medium;
     font-size: $font-sm;
   }
-
+  
   .asset-badge {
     padding: 2px 6px;
     background-color: #e0e7ff;
@@ -899,7 +899,7 @@ mat-accordion {
     font-size: $font-xs;
     font-weight: $font-weight-medium;
   }
-
+  
   .asset-meta {
     color: $text-muted;
     font-size: $font-xs;
@@ -915,12 +915,12 @@ mat-accordion {
   display: flex;
   align-items: center;
   justify-content: center;
-
+  
   i {
     font-size: $font-xs;
     margin: 0;
   }
-
+  
   &:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -942,15 +942,15 @@ mat-accordion {
   align-items: center;
   gap: $spacing-xs;
   font-weight: $font-weight-medium !important;
-
+  
   i {
     font-size: $font-base;
   }
-
+  
   span {
     display: inline-block;
   }
-
+  
   &:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -989,7 +989,7 @@ mat-accordion {
   justify-content: center;
   padding: $spacing-xl;
   gap: $spacing-md;
-
+  
   p {
     margin: 0;
     color: $text-secondary;
@@ -1004,12 +1004,12 @@ mat-accordion {
   padding: $spacing-xl;
   gap: $spacing-md;
   color: $text-secondary;
-
+  
   i {
     font-size: 3rem;
     color: $text-muted;
   }
-
+  
   p {
     margin: 0;
   }
@@ -1020,7 +1020,7 @@ mat-accordion {
   text-align: center;
   color: $text-secondary;
   font-size: $font-sm;
-
+  
   p {
     margin: 0;
   }
@@ -1034,7 +1034,7 @@ mat-accordion {
   gap: $spacing-md;
   padding: $spacing-md;
   border-top: 1px solid $border-light;
-
+  
   .pagination-btn {
     padding: $spacing-xs $spacing-sm;
     border: 1px solid $border-standard;
@@ -1042,19 +1042,19 @@ mat-accordion {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-
+    
     &:hover:not(:disabled) {
       background-color: $primary-color;
       color: $background-white;
       border-color: $primary-color;
     }
-
+    
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
   }
-
+  
   .pagination-info {
     font-size: $font-sm;
     color: $text-muted;
@@ -1064,7 +1064,7 @@ mat-accordion {
 // Assigned Releases Section (within tab)
 .assigned-releases-section {
   margin-top: $spacing-lg;
-
+  
   .section-title {
     margin-bottom: $spacing-md;
   }
@@ -1087,7 +1087,7 @@ mat-accordion {
   border: 1px solid $border-light;
   border-radius: $border-radius-sm;
   transition: all 0.2s ease;
-
+  
   &:hover {
     background-color: $background-selected;
     border-color: $primary-color;
@@ -1099,18 +1099,18 @@ mat-accordion {
   align-items: center;
   gap: $spacing-sm;
   flex: 1;
-
+  
   i {
     color: $primary-color;
     font-size: $font-sm;
   }
-
+  
   .release-name {
     color: $text-primary;
     font-weight: $font-weight-medium;
     font-size: $font-sm;
   }
-
+  
   .release-badge {
     padding: 2px 6px;
     background-color: #e0e7ff;
@@ -1120,44 +1120,44 @@ mat-accordion {
     font-weight: $font-weight-medium;
     text-transform: uppercase;
   }
-
+  
   .release-meta {
     color: $text-muted;
     font-size: $font-xs;
   }
-
+  
   .release-status {
     padding: 2px 6px;
     border-radius: $border-radius-sm;
     font-size: $font-xs;
     font-weight: $font-weight-medium;
     text-transform: uppercase;
-
+    
     &.release-status-draft {
       background-color: #e3f2fd;
       color: #1976d2;
     }
-
+    
     &.release-status-progress {
       background-color: #e0e7ff;
       color: #3730a3;
     }
-
+    
     &.release-status-uploaded {
       background-color: #fef3c7;
       color: #92400e;
     }
-
+    
     &.release-status-released {
       background-color: #d1fae5;
       color: #065f46;
     }
-
+    
     &.release-status-rejected {
       background-color: #fee2e2;
       color: #991b1b;
     }
-
+    
     &.release-status-archived {
       background-color: #f5f5f5;
       color: #757575;

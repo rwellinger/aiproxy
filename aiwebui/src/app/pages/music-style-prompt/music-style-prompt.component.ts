@@ -1,24 +1,26 @@
-import {Component, OnInit, ViewEncapsulation, inject, HostListener, ViewChild} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {CommonModule} from '@angular/common';
-import {MatDialog} from '@angular/material/dialog';
-import {TranslateModule, TranslateService} from '@ngx-translate/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {SongService, FormDataContext} from '../../services/business/song.service';
-import {NotificationService} from '../../services/ui/notification.service';
-import {ChatService} from '../../services/config/chat.service';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatCardModule} from '@angular/material/card';
-import {ProgressService} from '../../services/ui/progress.service';
-import {MusicStyleChooserInlineComponent} from '../../components/music-style-chooser-inline/music-style-chooser-inline.component';
-import {MusicStyleChooserService} from '../../services/music-style-chooser.service';
+import {Component, HostListener, inject, OnInit, ViewChild, ViewEncapsulation} from "@angular/core";
+import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {CommonModule} from "@angular/common";
+import {MatDialog} from "@angular/material/dialog";
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
+import {ActivatedRoute, Router} from "@angular/router";
+import {FormDataContext, SongService} from "../../services/business/song.service";
+import {NotificationService} from "../../services/ui/notification.service";
+import {ChatService} from "../../services/config/chat.service";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatCardModule} from "@angular/material/card";
+import {ProgressService} from "../../services/ui/progress.service";
+import {
+    MusicStyleChooserInlineComponent
+} from "../../components/music-style-chooser-inline/music-style-chooser-inline.component";
+import {MusicStyleChooserService} from "../../services/music-style-chooser.service";
 
 @Component({
-    selector: 'app-music-style-prompt',
+    selector: "app-music-style-prompt",
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, MatCardModule, TranslateModule, MusicStyleChooserInlineComponent],
-    templateUrl: './music-style-prompt.component.html',
-    styleUrl: './music-style-prompt.component.scss',
+    templateUrl: "./music-style-prompt.component.html",
+    styleUrl: "./music-style-prompt.component.scss",
     encapsulation: ViewEncapsulation.None
 })
 export class MusicStylePromptComponent implements OnInit {
@@ -28,11 +30,11 @@ export class MusicStylePromptComponent implements OnInit {
     showEditDropdown = false;
     showEnhancerDropdown = false;
     lastSearchReplaceState: string | null = null;
-    currentMode: 'auto' | 'manual' = 'auto';
+    currentMode: "auto" | "manual" = "auto";
     isStyleChooserCollapsed = false;
 
     // Context for form data storage (song-generator or sketch-creator)
-    private context: FormDataContext = 'song-generator';
+    private context: FormDataContext = "song-generator";
 
     // State from navigation (when called from sketch editor)
     private isFromSketch = false;
@@ -65,7 +67,7 @@ export class MusicStylePromptComponent implements OnInit {
     }
 
     get characterCount(): number {
-        return this.promptForm.get('prompt')?.value?.length || 0;
+        return this.promptForm.get("prompt")?.value?.length || 0;
     }
 
     get canUndo(): boolean {
@@ -80,13 +82,13 @@ export class MusicStylePromptComponent implements OnInit {
         // Update prompt in form data and navigate back
         const updatedFormData = {
             ...this.sketchFormData,
-            prompt: this.promptForm.get('prompt')?.value || ''
+            prompt: this.promptForm.get("prompt")?.value || ""
         };
 
         this.navigateBackToSketchCreator(updatedFormData);
 
         this.notificationService.success(
-            this.translate.instant('musicStylePrompt.changesApplied')
+            this.translate.instant("musicStylePrompt.changesApplied")
         );
     }
 
@@ -95,14 +97,14 @@ export class MusicStylePromptComponent implements OnInit {
         this.navigateBackToSketchCreator(this.sketchFormData);
 
         this.notificationService.info(
-            this.translate.instant('musicStylePrompt.changesCancelled')
+            this.translate.instant("musicStylePrompt.changesCancelled")
         );
     }
 
     private navigateBackToSketchCreator(formData: any): void {
         // Navigate back with form data
         if (this.isEditMode && this.currentSketchId) {
-            this.router.navigate(['/song-sketch-creator'], {
+            this.router.navigate(["/song-sketch-creator"], {
                 state: {
                     editMode: true,
                     sketchId: this.currentSketchId,
@@ -110,7 +112,7 @@ export class MusicStylePromptComponent implements OnInit {
                 }
             });
         } else {
-            this.router.navigate(['/song-sketch-creator'], {
+            this.router.navigate(["/song-sketch-creator"], {
                 state: {
                     formData: formData
                 }
@@ -120,19 +122,19 @@ export class MusicStylePromptComponent implements OnInit {
 
     ngOnInit() {
         // Check if coming from sketch creator via router state
-        if (this.navigationState?.['context'] === 'sketch') {
+        if (this.navigationState?.["context"] === "sketch") {
             this.isFromSketch = true;
-            this.isEditMode = this.navigationState['editMode'] || false;
-            this.currentSketchId = this.navigationState['sketchId'] || null;
-            this.sketchFormData = this.navigationState['formData'] || {};
-            this.context = 'sketch-creator';
+            this.isEditMode = this.navigationState["editMode"] || false;
+            this.currentSketchId = this.navigationState["sketchId"] || null;
+            this.sketchFormData = this.navigationState["formData"] || {};
+            this.context = "sketch-creator";
         } else {
             // Song generator mode
-            this.context = 'song-generator';
+            this.context = "song-generator";
         }
 
         this.promptForm = this.fb.group({
-            prompt: ['']
+            prompt: [""]
         });
 
         // Load prompt based on context
@@ -145,7 +147,7 @@ export class MusicStylePromptComponent implements OnInit {
 
             if (parsed?.isAutoMode) {
                 // Pattern recognized - switch to auto mode and restore selections
-                this.currentMode = 'auto';
+                this.currentMode = "auto";
                 this.musicStyleService.saveConfig(parsed.config);
             } else {
                 // No pattern match - default to manual mode and clear selections
@@ -172,11 +174,11 @@ export class MusicStylePromptComponent implements OnInit {
         }
     }
 
-    @HostListener('document:click', ['$event'])
+    @HostListener("document:click", ["$event"])
     onDocumentClick(event: MouseEvent): void {
         const target = event.target as HTMLElement;
-        const clickedInEditDropdown = target.closest('.edit-dropdown-container');
-        const clickedInEnhancerDropdown = target.closest('.enhancer-dropdown-container');
+        const clickedInEditDropdown = target.closest(".edit-dropdown-container");
+        const clickedInEnhancerDropdown = target.closest(".enhancer-dropdown-container");
 
         if (!clickedInEditDropdown && this.showEditDropdown) {
             this.showEditDropdown = false;
@@ -197,105 +199,105 @@ export class MusicStylePromptComponent implements OnInit {
     }
 
     clearPrompt(): void {
-        this.promptForm.patchValue({prompt: ''});
+        this.promptForm.patchValue({prompt: ""});
         // Reset Style Chooser as well
         if (this.styleChooser) {
             this.styleChooser.reset();
         }
         // Switch back to auto-mode
         this.switchToAutoMode();
-        this.notificationService.success(this.translate.instant('musicStylePrompt.cleared'));
+        this.notificationService.success(this.translate.instant("musicStylePrompt.cleared"));
     }
 
     async enhancePrompt() {
-        const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
+        const currentPrompt = this.promptForm.get("prompt")?.value?.trim();
         if (!currentPrompt) {
-            this.notificationService.error(this.translate.instant('musicStylePrompt.errors.promptRequired'));
+            this.notificationService.error(this.translate.instant("musicStylePrompt.errors.promptRequired"));
             return;
         }
 
         this.switchToManualMode();
         this.isEnhancingPrompt = true;
-        this.promptForm.get('prompt')?.disable();
+        this.promptForm.get("prompt")?.disable();
         try {
             const enhancedPrompt = await this.progressService.executeWithProgress(
                 () => this.chatService.improveMusicStylePrompt(currentPrompt),
-                this.translate.instant('musicStylePrompt.progress.enhancing'),
-                this.translate.instant('musicStylePrompt.progress.enhancingHint')
+                this.translate.instant("musicStylePrompt.progress.enhancing"),
+                this.translate.instant("musicStylePrompt.progress.enhancingHint")
             );
             this.promptForm.patchValue({prompt: this.removeQuotes(enhancedPrompt)});
-            this.notificationService.success(this.translate.instant('musicStylePrompt.success.promptEnhanced'));
+            this.notificationService.success(this.translate.instant("musicStylePrompt.success.promptEnhanced"));
         } catch (error: any) {
             this.notificationService.error(`Error enhancing prompt: ${error.message}`);
         } finally {
             this.isEnhancingPrompt = false;
-            this.promptForm.get('prompt')?.enable();
+            this.promptForm.get("prompt")?.enable();
         }
     }
 
     async enhanceSunoPrompt() {
-        const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
+        const currentPrompt = this.promptForm.get("prompt")?.value?.trim();
         if (!currentPrompt) {
-            this.notificationService.error(this.translate.instant('musicStylePrompt.errors.promptRequired'));
+            this.notificationService.error(this.translate.instant("musicStylePrompt.errors.promptRequired"));
             return;
         }
 
         // Detect gender from prompt text (from style chooser selections)
-        let gender: 'male' | 'female' | undefined;
-        if (currentPrompt.toLowerCase().includes('male-voice') || currentPrompt.toLowerCase().includes('male voice')) {
-            gender = 'male';
-        } else if (currentPrompt.toLowerCase().includes('female-voice') || currentPrompt.toLowerCase().includes('female voice')) {
-            gender = 'female';
+        let gender: "male" | "female" | undefined;
+        if (currentPrompt.toLowerCase().includes("male-voice") || currentPrompt.toLowerCase().includes("male voice")) {
+            gender = "male";
+        } else if (currentPrompt.toLowerCase().includes("female-voice") || currentPrompt.toLowerCase().includes("female voice")) {
+            gender = "female";
         }
 
         this.switchToManualMode();
         this.isEnhancingPrompt = true;
-        this.promptForm.get('prompt')?.disable();
+        this.promptForm.get("prompt")?.disable();
         try {
             const enhancedPrompt = await this.progressService.executeWithProgress(
                 () => this.chatService.improveMusicStylePromptForSuno(currentPrompt, gender),
-                this.translate.instant('musicStylePrompt.progress.enhancingSuno'),
-                this.translate.instant('musicStylePrompt.progress.enhancingSunoHint')
+                this.translate.instant("musicStylePrompt.progress.enhancingSuno"),
+                this.translate.instant("musicStylePrompt.progress.enhancingSunoHint")
             );
             this.promptForm.patchValue({prompt: this.removeQuotes(enhancedPrompt)});
-            this.notificationService.success(this.translate.instant('musicStylePrompt.success.promptEnhancedSuno'));
+            this.notificationService.success(this.translate.instant("musicStylePrompt.success.promptEnhancedSuno"));
         } catch (error: any) {
             this.notificationService.error(`Error enhancing prompt for Suno: ${error.message}`);
         } finally {
             this.isEnhancingPrompt = false;
-            this.promptForm.get('prompt')?.enable();
+            this.promptForm.get("prompt")?.enable();
         }
     }
 
     async translatePrompt() {
-        const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
+        const currentPrompt = this.promptForm.get("prompt")?.value?.trim();
         if (!currentPrompt) {
-            this.notificationService.error(this.translate.instant('musicStylePrompt.errors.promptRequired'));
+            this.notificationService.error(this.translate.instant("musicStylePrompt.errors.promptRequired"));
             return;
         }
 
         this.switchToManualMode();
         this.isTranslatingPrompt = true;
-        this.promptForm.get('prompt')?.disable();
+        this.promptForm.get("prompt")?.disable();
         try {
             const translatedPrompt = await this.progressService.executeWithProgress(
                 () => this.chatService.translateMusicStylePrompt(currentPrompt),
-                this.translate.instant('musicStylePrompt.progress.translating'),
-                this.translate.instant('musicStylePrompt.progress.translatingHint')
+                this.translate.instant("musicStylePrompt.progress.translating"),
+                this.translate.instant("musicStylePrompt.progress.translatingHint")
             );
             this.promptForm.patchValue({prompt: this.removeQuotes(translatedPrompt)});
-            this.notificationService.success(this.translate.instant('musicStylePrompt.success.promptTranslated'));
+            this.notificationService.success(this.translate.instant("musicStylePrompt.success.promptTranslated"));
         } catch (error: any) {
             this.notificationService.error(`Error translating prompt: ${error.message}`);
         } finally {
             this.isTranslatingPrompt = false;
-            this.promptForm.get('prompt')?.enable();
+            this.promptForm.get("prompt")?.enable();
         }
     }
 
     private removeQuotes(text: string): string {
         if (!text) return text;
-        return text.replace(/^["']|["']$/g, '').trim();
+        return text.replace(/^["']|["']$/g, "").trim();
     }
 
     toggleEditDropdown(): void {
@@ -310,19 +312,19 @@ export class MusicStylePromptComponent implements OnInit {
         this.showEditDropdown = false;
 
         switch (action) {
-            case 'searchReplace':
+            case "searchReplace":
                 this.openSearchReplaceDialog();
                 break;
-            case 'undo':
+            case "undo":
                 this.undoLastChange();
                 break;
         }
     }
 
-    selectEnhancerAction(action: 'standard' | 'suno'): void {
+    selectEnhancerAction(action: "standard" | "suno"): void {
         this.showEnhancerDropdown = false;
 
-        if (action === 'standard') {
+        if (action === "standard") {
             this.enhancePrompt();
         } else {
             this.enhanceSunoPrompt();
@@ -330,13 +332,13 @@ export class MusicStylePromptComponent implements OnInit {
     }
 
     openSearchReplaceDialog(): void {
-        const SearchReplaceDialogComponent = import('../../components/search-replace-dialog/search-replace-dialog.component')
+        const SearchReplaceDialogComponent = import("../../components/search-replace-dialog/search-replace-dialog.component")
             .then(m => m.SearchReplaceDialogComponent);
 
         SearchReplaceDialogComponent.then(component => {
             const dialogRef = this.dialog.open(component, {
-                width: '500px',
-                maxWidth: '90vw',
+                width: "500px",
+                maxWidth: "90vw",
                 disableClose: false,
                 autoFocus: true
             });
@@ -350,7 +352,7 @@ export class MusicStylePromptComponent implements OnInit {
     }
 
     private performSearchReplace(searchText: string, replaceText: string): void {
-        const currentPrompt = this.promptForm.get('prompt')?.value || '';
+        const currentPrompt = this.promptForm.get("prompt")?.value || "";
         if (!currentPrompt.trim()) {
             return;
         }
@@ -364,57 +366,57 @@ export class MusicStylePromptComponent implements OnInit {
         const updatedPrompt = currentPrompt.replaceAll(searchText, replaceText);
 
         // Calculate number of replacements
-        const occurrences = (currentPrompt.match(new RegExp(this.escapeRegExp(searchText), 'g')) || []).length;
+        const occurrences = (currentPrompt.match(new RegExp(this.escapeRegExp(searchText), "g")) || []).length;
 
         // Update form
         this.promptForm.patchValue({prompt: updatedPrompt});
 
         // Show success notification
         this.notificationService.success(
-            this.translate.instant('musicStylePrompt.searchReplaceDialog.applied', {count: occurrences})
+            this.translate.instant("musicStylePrompt.searchReplaceDialog.applied", {count: occurrences})
         );
     }
 
     private escapeRegExp(text: string): string {
-        return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
 
     undoLastChange(): void {
         if (this.lastSearchReplaceState !== null) {
             this.promptForm.patchValue({prompt: this.lastSearchReplaceState});
             this.lastSearchReplaceState = null;
-            this.notificationService.success(this.translate.instant('musicStylePrompt.undoApplied'));
+            this.notificationService.success(this.translate.instant("musicStylePrompt.undoApplied"));
         }
     }
 
     async copyPromptToClipboard(): Promise<void> {
-        const prompt = this.promptForm.get('prompt')?.value || '';
+        const prompt = this.promptForm.get("prompt")?.value || "";
         if (!prompt.trim()) {
             return;
         }
 
         try {
             await navigator.clipboard.writeText(prompt);
-            this.notificationService.success(this.translate.instant('musicStylePrompt.copiedToClipboard'));
+            this.notificationService.success(this.translate.instant("musicStylePrompt.copiedToClipboard"));
         } catch (error) {
-            console.error('Failed to copy to clipboard:', error);
-            this.notificationService.error(this.translate.instant('musicStylePrompt.errors.copyFailed'));
+            console.error("Failed to copy to clipboard:", error);
+            this.notificationService.error(this.translate.instant("musicStylePrompt.errors.copyFailed"));
         }
     }
 
     onStyleChanged(stylePrompt: string): void {
         // Auto-mode: Update prompt immediately
-        if (this.currentMode === 'auto') {
+        if (this.currentMode === "auto") {
             this.promptForm.patchValue({prompt: stylePrompt});
         }
     }
 
     onApplyStyles(stylePrompt: string): void {
         // Manual-mode: Apply styles and switch to auto-mode
-        const currentPrompt = this.promptForm.get('prompt')?.value?.trim();
+        const currentPrompt = this.promptForm.get("prompt")?.value?.trim();
 
         if (currentPrompt && currentPrompt !== stylePrompt) {
-            const confirmOverwrite = confirm(this.translate.instant('musicStylePrompt.mode.applyConfirm'));
+            const confirmOverwrite = confirm(this.translate.instant("musicStylePrompt.mode.applyConfirm"));
             if (!confirmOverwrite) {
                 return;
             }
@@ -422,18 +424,18 @@ export class MusicStylePromptComponent implements OnInit {
 
         this.promptForm.patchValue({prompt: stylePrompt});
         this.switchToAutoMode();
-        this.notificationService.success(this.translate.instant('musicStylePrompt.mode.stylesApplied'));
+        this.notificationService.success(this.translate.instant("musicStylePrompt.mode.stylesApplied"));
     }
 
     switchToManualMode(): void {
-        if (this.currentMode === 'manual') {
+        if (this.currentMode === "manual") {
             return;
         }
-        this.currentMode = 'manual';
+        this.currentMode = "manual";
     }
 
     switchToAutoMode(): void {
-        this.currentMode = 'auto';
+        this.currentMode = "auto";
     }
 
     onCollapseToggled(isCollapsed: boolean): void {

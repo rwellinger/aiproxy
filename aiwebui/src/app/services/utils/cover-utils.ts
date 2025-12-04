@@ -17,17 +17,17 @@
  * getInitials('') // '?'
  */
 export function getInitials(name: string): string {
-  if (!name) return '?';
+    if (!name) return "?";
 
-  const words = name.trim().split(/\s+/);
+    const words = name.trim().split(/\s+/);
 
-  if (words.length === 1) {
-    // Single word: take first 2 characters
-    return words[0].substring(0, 2).toUpperCase();
-  }
+    if (words.length === 1) {
+        // Single word: take first 2 characters
+        return words[0].substring(0, 2).toUpperCase();
+    }
 
-  // Multiple words: take first letter of first 2 words
-  return (words[0][0] + words[1][0]).toUpperCase();
+    // Multiple words: take first letter of first 2 words
+    return (words[0][0] + words[1][0]).toUpperCase();
 }
 
 /**
@@ -44,18 +44,18 @@ export function getInitials(name: string): string {
  * getColorFromString('My Album') // Always returns same color
  */
 export function getColorFromString(text: string): string {
-  if (!text) return '#5a6268'; // Default gray
+    if (!text) return "#5a6268"; // Default gray
 
-  // Simple hash function
-  let hash = 0;
-  for (let i = 0; i < text.length; i++) {
-    hash = text.charCodeAt(i) + ((hash << 5) - hash);
-  }
+    // Simple hash function
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+        hash = text.charCodeAt(i) + ((hash << 5) - hash);
+    }
 
-  // Generate HSL color (pastel-like colors for better readability)
-  const hue = Math.abs(hash % 360);
-  const saturation = 60; // Medium saturation for pleasant colors
-  const lightness = 55; // Medium lightness for good contrast
+    // Generate HSL color (pastel-like colors for better readability)
+    const hue = Math.abs(hash % 360);
+    const saturation = 60; // Medium saturation for pleasant colors
+    const lightness = 55; // Medium lightness for good contrast
 
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }

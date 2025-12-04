@@ -1,33 +1,28 @@
-import {Component, OnInit, OnDestroy, ViewChild, ElementRef, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {Subject, takeUntil} from 'rxjs';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatCardModule} from '@angular/material/card';
-import {MatButtonModule} from '@angular/material/button';
-import {MatSelectModule} from '@angular/material/select';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatIconModule} from '@angular/material/icon';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {MatExpansionModule} from '@angular/material/expansion';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
-import {MatMenuModule} from '@angular/material/menu';
-import {TranslateModule, TranslateService} from '@ngx-translate/core';
+import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {CommonModule} from "@angular/common";
+import {FormsModule} from "@angular/forms";
+import {Subject, takeUntil} from "rxjs";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatCardModule} from "@angular/material/card";
+import {MatButtonModule} from "@angular/material/button";
+import {MatSelectModule} from "@angular/material/select";
+import {MatFormFieldModule} from "@angular/material/form-field";
+import {MatInputModule} from "@angular/material/input";
+import {MatIconModule} from "@angular/material/icon";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {MatExpansionModule} from "@angular/material/expansion";
+import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {MatMenuModule} from "@angular/material/menu";
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
 
-import {ConversationService} from '../../services/business/conversation.service';
-import {NotificationService} from '../../services/ui/notification.service';
-import {ChatExportService} from '../../services/business/chat-export.service';
-import {
-    Conversation,
-    Message,
-    OllamaChatModel,
-    ConversationDetailResponse
-} from '../../models/conversation.model';
-import {MessageContentPipe} from '../../pipes/message-content.pipe';
+import {ConversationService} from "../../services/business/conversation.service";
+import {NotificationService} from "../../services/ui/notification.service";
+import {ChatExportService} from "../../services/business/chat-export.service";
+import {Conversation, ConversationDetailResponse, Message, OllamaChatModel} from "../../models/conversation.model";
+import {MessageContentPipe} from "../../pipes/message-content.pipe";
 
 @Component({
-    selector: 'app-ai-chat',
+    selector: "app-ai-chat",
     standalone: true,
     imports: [
         CommonModule,
@@ -46,8 +41,8 @@ import {MessageContentPipe} from '../../pipes/message-content.pipe';
         TranslateModule,
         MessageContentPipe
     ],
-    templateUrl: './ai-chat.component.html',
-    styleUrl: './ai-chat.component.scss'
+    templateUrl: "./ai-chat.component.html",
+    styleUrl: "./ai-chat.component.scss"
 })
 export class AiChatComponent implements OnInit, OnDestroy {
     // Services
@@ -71,23 +66,23 @@ export class AiChatComponent implements OnInit, OnDestroy {
     isCompressing = false;
 
     // Form State
-    newChatTitle = '';
-    selectedModel = '';
-    systemContext = '';
-    messageInput = '';
+    newChatTitle = "";
+    selectedModel = "";
+    systemContext = "";
+    messageInput = "";
 
     // View State
     showNewChatForm = false;
     isEditingTitle = false;
-    editTitleValue = '';
+    editTitleValue = "";
     showArchived = false;
 
     // Computed properties to avoid method calls in template
-    formattedTokenCount = '';
+    formattedTokenCount = "";
     tokenPercentage = 0;
 
-    @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
-    @ViewChild('messageInputField') private messageInputField!: ElementRef;
+    @ViewChild("messagesContainer") private messagesContainer!: ElementRef;
+    @ViewChild("messageInputField") private messageInputField!: ElementRef;
 
     ngOnInit(): void {
         this.loadConversations();
@@ -125,8 +120,8 @@ export class AiChatComponent implements OnInit, OnDestroy {
                     }
                 },
                 error: (error) => {
-                    console.error('Error loading models:', error);
-                    this.notificationService.error(this.translate.instant('aiChat.notifications.modelsFailed'));
+                    console.error("Error loading models:", error);
+                    this.notificationService.error(this.translate.instant("aiChat.notifications.modelsFailed"));
                 },
                 complete: () => {
                     this.isLoadingModels = false;
@@ -142,7 +137,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
         // archived: undefined = only non-archived, true = only archived
         const archived = this.showArchived ? true : undefined;
         this.conversationService
-            .getConversations(0, 50, 'internal', archived)
+            .getConversations(0, 50, "internal", archived)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (response) => {
@@ -154,8 +149,8 @@ export class AiChatComponent implements OnInit, OnDestroy {
                     }
                 },
                 error: (error) => {
-                    console.error('Error loading conversations:', error);
-                    this.notificationService.error(this.translate.instant('aiChat.notifications.conversationsFailed'));
+                    console.error("Error loading conversations:", error);
+                    this.notificationService.error(this.translate.instant("aiChat.notifications.conversationsFailed"));
                 },
                 complete: () => {
                     this.isLoading = false;
@@ -182,13 +177,13 @@ export class AiChatComponent implements OnInit, OnDestroy {
                 next: (response: ConversationDetailResponse) => {
                     this.messages = response.messages;
                     this.currentConversation = response.conversation;
-                    this.systemContext = response.conversation.system_context || '';
+                    this.systemContext = response.conversation.system_context || "";
                     this.updateTokenDisplay(); // Update computed properties
                     setTimeout(() => this.scrollToBottom(), 100);
                 },
                 error: (error) => {
-                    console.error('Error loading conversation:', error);
-                    this.notificationService.error(this.translate.instant('aiChat.notifications.conversationFailed'));
+                    console.error("Error loading conversation:", error);
+                    this.notificationService.error(this.translate.instant("aiChat.notifications.conversationFailed"));
                 },
                 complete: () => {
                     this.isLoading = false;
@@ -201,7 +196,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
      */
     public showNewChat(): void {
         this.showNewChatForm = true;
-        this.newChatTitle = '';
+        this.newChatTitle = "";
         // Load persisted system context
         this.systemContext = this.conversationService.loadSystemContext();
         // Lazy load models when needed
@@ -213,7 +208,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
      */
     public cancelNewChat(): void {
         this.showNewChatForm = false;
-        this.newChatTitle = '';
+        this.newChatTitle = "";
         // Keep system context - it persists across sessions
     }
 
@@ -222,7 +217,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
      */
     public createConversation(): void {
         if (!this.newChatTitle.trim() || !this.selectedModel) {
-            this.notificationService.error(this.translate.instant('aiChat.notifications.titleModelRequired'));
+            this.notificationService.error(this.translate.instant("aiChat.notifications.titleModelRequired"));
             return;
         }
 
@@ -232,7 +227,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
                 title: this.newChatTitle.trim(),
                 model: this.selectedModel,
                 system_context: this.systemContext.trim() || undefined,
-                provider: 'internal'
+                provider: "internal"
             })
             .pipe(takeUntil(this.destroy$))
             .subscribe({
@@ -240,11 +235,11 @@ export class AiChatComponent implements OnInit, OnDestroy {
                     this.conversations.unshift(conversation);
                     this.selectConversation(conversation);
                     this.showNewChatForm = false;
-                    this.newChatTitle = '';
+                    this.newChatTitle = "";
                 },
                 error: (error) => {
-                    console.error('Error creating conversation:', error);
-                    this.notificationService.error(this.translate.instant('aiChat.notifications.createFailed'));
+                    console.error("Error creating conversation:", error);
+                    this.notificationService.error(this.translate.instant("aiChat.notifications.createFailed"));
                 },
                 complete: () => {
                     this.isLoading = false;
@@ -258,7 +253,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
     public deleteConversation(): void {
         if (!this.currentConversation) return;
 
-        if (!confirm(this.translate.instant('aiChat.notifications.deleteConfirm', {title: this.currentConversation.title}))) {
+        if (!confirm(this.translate.instant("aiChat.notifications.deleteConfirm", {title: this.currentConversation.title}))) {
             return;
         }
 
@@ -280,8 +275,8 @@ export class AiChatComponent implements OnInit, OnDestroy {
                     }
                 },
                 error: (error) => {
-                    console.error('Error deleting conversation:', error);
-                    this.notificationService.error(this.translate.instant('aiChat.notifications.deleteFailed'));
+                    console.error("Error deleting conversation:", error);
+                    this.notificationService.error(this.translate.instant("aiChat.notifications.deleteFailed"));
                 },
                 complete: () => {
                     this.isLoading = false;
@@ -298,13 +293,13 @@ export class AiChatComponent implements OnInit, OnDestroy {
         }
 
         const content = this.messageInput.trim();
-        this.messageInput = '';
+        this.messageInput = "";
 
         // Create temporary user message for optimistic UI
         const tempUserMessage: Message = {
-            id: 'temp-' + Date.now(),
+            id: "temp-" + Date.now(),
             conversation_id: this.currentConversation.id,
-            role: 'user',
+            role: "user",
             content: content,
             token_count: undefined,
             created_at: new Date().toISOString()
@@ -337,8 +332,8 @@ export class AiChatComponent implements OnInit, OnDestroy {
                     setTimeout(() => this.focusInput(), 200);
                 },
                 error: (error) => {
-                    console.error('Error sending message:', error);
-                    this.notificationService.error(this.translate.instant('aiChat.notifications.sendFailed'));
+                    console.error("Error sending message:", error);
+                    this.notificationService.error(this.translate.instant("aiChat.notifications.sendFailed"));
 
                     // Remove temporary message on error
                     this.messages = this.messages.filter(m => m.id !== tempUserMessage.id);
@@ -356,7 +351,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
      * Handle Enter key in message input
      */
     public onMessageInputKeydown(event: KeyboardEvent): void {
-        if (event.key === 'Enter' && !event.shiftKey) {
+        if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
             this.sendMessage();
         }
@@ -393,20 +388,20 @@ export class AiChatComponent implements OnInit, OnDestroy {
 
         // < 1 Minute
         if (diffMinutes < 1) {
-            return this.translate.instant('aiChat.time.justNow');
+            return this.translate.instant("aiChat.time.justNow");
         }
 
         // < 60 Minutes
         if (diffMinutes < 60) {
-            return this.translate.instant('aiChat.time.minAgo', {min: diffMinutes});
+            return this.translate.instant("aiChat.time.minAgo", {min: diffMinutes});
         }
 
         // Today
         const today = new Date();
         if (date.toDateString() === today.toDateString()) {
-            return date.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit'
+            return date.toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit"
             });
         }
 
@@ -414,29 +409,29 @@ export class AiChatComponent implements OnInit, OnDestroy {
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
         if (date.toDateString() === yesterday.toDateString()) {
-            return `${this.translate.instant('aiChat.time.yesterday')} ${date.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit'
+            return `${this.translate.instant("aiChat.time.yesterday")} ${date.toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit"
             })}`;
         }
 
         // < 7 Days - Show weekday
         if (diffDays < 7) {
-            const weekday = date.toLocaleDateString('en-GB', {weekday: 'long'});
-            const time = date.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit'
+            const weekday = date.toLocaleDateString("en-GB", {weekday: "long"});
+            const time = date.toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit"
             });
             return `${weekday} ${time}`;
         }
 
         // Older - Show full date
-        return date.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+        return date.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
         });
     }
 
@@ -458,7 +453,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
      * Clear saved system context
      */
     public clearSystemContext(): void {
-        this.systemContext = '';
+        this.systemContext = "";
         this.conversationService.clearSystemContext();
     }
 
@@ -468,7 +463,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
      */
     private updateTokenDisplay(): void {
         if (!this.currentConversation?.context_window_size) {
-            this.formattedTokenCount = '';
+            this.formattedTokenCount = "";
             this.tokenPercentage = 0;
             return;
         }
@@ -507,9 +502,9 @@ export class AiChatComponent implements OnInit, OnDestroy {
      */
     public getTokenProgressColor(): string {
         const percentage = this.getTokenPercentage();
-        if (percentage >= 90) return 'warn';
-        if (percentage >= 70) return 'accent';
-        return 'primary';
+        if (percentage >= 90) return "warn";
+        if (percentage >= 70) return "accent";
+        return "primary";
     }
 
     /**
@@ -533,7 +528,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
     public compressConversation(): void {
         if (!this.currentConversation || this.isCompressing) return;
 
-        const confirmed = confirm(this.translate.instant('aiChat.compression.confirmMessage'));
+        const confirmed = confirm(this.translate.instant("aiChat.compression.confirmMessage"));
 
         if (!confirmed) return;
 
@@ -544,7 +539,7 @@ export class AiChatComponent implements OnInit, OnDestroy {
             .subscribe({
                 next: (response) => {
                     this.notificationService.success(
-                        this.translate.instant('aiChat.notifications.compressed', {count: response.archived_messages})
+                        this.translate.instant("aiChat.notifications.compressed", {count: response.archived_messages})
                     );
                     // Reload conversation to see updated token count
                     if (this.currentConversation) {
@@ -552,8 +547,8 @@ export class AiChatComponent implements OnInit, OnDestroy {
                     }
                 },
                 error: (error) => {
-                    console.error('Error compressing conversation:', error);
-                    this.notificationService.error(this.translate.instant('aiChat.notifications.compressionFailed'));
+                    console.error("Error compressing conversation:", error);
+                    this.notificationService.error(this.translate.instant("aiChat.notifications.compressionFailed"));
                     this.isCompressing = false;
                 },
                 complete: () => {
@@ -603,11 +598,11 @@ export class AiChatComponent implements OnInit, OnDestroy {
                     }
 
                     this.isEditingTitle = false;
-                    this.editTitleValue = '';
+                    this.editTitleValue = "";
                 },
                 error: (error) => {
-                    console.error('Error updating title:', error);
-                    this.notificationService.error(this.translate.instant('aiChat.notifications.titleUpdateFailed'));
+                    console.error("Error updating title:", error);
+                    this.notificationService.error(this.translate.instant("aiChat.notifications.titleUpdateFailed"));
                     this.cancelEditTitle();
                 }
             });
@@ -618,17 +613,17 @@ export class AiChatComponent implements OnInit, OnDestroy {
      */
     public cancelEditTitle(): void {
         this.isEditingTitle = false;
-        this.editTitleValue = '';
+        this.editTitleValue = "";
     }
 
     /**
      * Handle Enter key in title edit
      */
     public onTitleInputKeydown(event: KeyboardEvent): void {
-        if (event.key === 'Enter') {
+        if (event.key === "Enter") {
             event.preventDefault();
             this.saveTitle();
-        } else if (event.key === 'Escape') {
+        } else if (event.key === "Escape") {
             event.preventDefault();
             this.cancelEditTitle();
         }
@@ -645,11 +640,11 @@ export class AiChatComponent implements OnInit, OnDestroy {
 
         navigator.clipboard.writeText(plainText)
             .then(() => {
-                this.notificationService.success(this.translate.instant('aiChat.notifications.copiedPlainText'));
+                this.notificationService.success(this.translate.instant("aiChat.notifications.copiedPlainText"));
             })
             .catch((error) => {
-                console.error('Error copying to clipboard:', error);
-                this.notificationService.error(this.translate.instant('aiChat.notifications.copyFailed'));
+                console.error("Error copying to clipboard:", error);
+                this.notificationService.error(this.translate.instant("aiChat.notifications.copyFailed"));
             });
     }
 
@@ -661,11 +656,11 @@ export class AiChatComponent implements OnInit, OnDestroy {
 
         navigator.clipboard.writeText(content)
             .then(() => {
-                this.notificationService.success(this.translate.instant('aiChat.notifications.copiedMarkdown'));
+                this.notificationService.success(this.translate.instant("aiChat.notifications.copiedMarkdown"));
             })
             .catch((error) => {
-                console.error('Error copying to clipboard:', error);
-                this.notificationService.error(this.translate.instant('aiChat.notifications.copyFailed'));
+                console.error("Error copying to clipboard:", error);
+                this.notificationService.error(this.translate.instant("aiChat.notifications.copyFailed"));
             });
     }
 
@@ -677,10 +672,10 @@ export class AiChatComponent implements OnInit, OnDestroy {
 
         try {
             this.chatExportService.exportToMarkdown(this.currentConversation, this.messages);
-            this.notificationService.success(this.translate.instant('aiChat.notifications.exported'));
+            this.notificationService.success(this.translate.instant("aiChat.notifications.exported"));
         } catch (error) {
-            console.error('Error exporting to Markdown:', error);
-            this.notificationService.error(this.translate.instant('aiChat.notifications.exportFailed'));
+            console.error("Error exporting to Markdown:", error);
+            this.notificationService.error(this.translate.instant("aiChat.notifications.exportFailed"));
         }
     }
 
@@ -696,10 +691,10 @@ export class AiChatComponent implements OnInit, OnDestroy {
                 this.currentConversation.id,
                 this.currentConversation.title
             );
-            this.notificationService.success(this.translate.instant('aiChat.notifications.exportedFull'));
+            this.notificationService.success(this.translate.instant("aiChat.notifications.exportedFull"));
         } catch (error) {
-            console.error('Error exporting full chat history:', error);
-            this.notificationService.error(this.translate.instant('aiChat.notifications.exportFullFailed'));
+            console.error("Error exporting full chat history:", error);
+            this.notificationService.error(this.translate.instant("aiChat.notifications.exportFullFailed"));
         } finally {
             this.isLoading = false;
         }
@@ -738,12 +733,12 @@ export class AiChatComponent implements OnInit, OnDestroy {
                         this.selectConversation(this.conversations[0]);
                     }
 
-                    const successKey = newArchivedState ? 'aiChat.notifications.archived' : 'aiChat.notifications.unarchived';
+                    const successKey = newArchivedState ? "aiChat.notifications.archived" : "aiChat.notifications.unarchived";
                     this.notificationService.success(this.translate.instant(successKey));
                 },
                 error: (error) => {
-                    console.error(`Error ${newArchivedState ? 'archive' : 'unarchive'}:`, error);
-                    const errorKey = newArchivedState ? 'aiChat.notifications.archiveFailed' : 'aiChat.notifications.unarchiveFailed';
+                    console.error(`Error ${newArchivedState ? "archive" : "unarchive"}:`, error);
+                    const errorKey = newArchivedState ? "aiChat.notifications.archiveFailed" : "aiChat.notifications.unarchiveFailed";
                     this.notificationService.error(this.translate.instant(errorKey));
                 }
             });

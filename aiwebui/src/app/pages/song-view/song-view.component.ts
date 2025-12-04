@@ -1,1085 +1,1090 @@
-import {Component, OnInit, ViewEncapsulation, ViewChild, ElementRef, OnDestroy, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {Subject, debounceTime, distinctUntilChanged, takeUntil, firstValueFrom} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
-import {TranslateModule, TranslateService} from '@ngx-translate/core';
-import {Router} from '@angular/router';
-import {SongService} from '../../services/business/song.service';
-import {ApiConfigService} from '../../services/config/api-config.service';
-import {NotificationService} from '../../services/ui/notification.service';
-import {UserSettingsService} from '../../services/user-settings.service';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatCardModule} from '@angular/material/card';
-import {MatButtonModule} from '@angular/material/button';
-import {MatDialog} from '@angular/material/dialog';
-import {SongDetailPanelComponent} from '../../components/song-detail-panel/song-detail-panel.component';
-import {AssignToProjectDialogComponent} from '../../dialogs/assign-to-project-dialog/assign-to-project-dialog.component';
+import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild, ViewEncapsulation} from "@angular/core";
+import {CommonModule} from "@angular/common";
+import {FormsModule} from "@angular/forms";
+import {debounceTime, distinctUntilChanged, firstValueFrom, Subject, takeUntil} from "rxjs";
+import {HttpClient} from "@angular/common/http";
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
+import {Router} from "@angular/router";
+import {SongService} from "../../services/business/song.service";
+import {ApiConfigService} from "../../services/config/api-config.service";
+import {NotificationService} from "../../services/ui/notification.service";
+import {UserSettingsService} from "../../services/user-settings.service";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatCardModule} from "@angular/material/card";
+import {MatButtonModule} from "@angular/material/button";
+import {MatDialog} from "@angular/material/dialog";
+import {SongDetailPanelComponent} from "../../components/song-detail-panel/song-detail-panel.component";
+import {
+    AssignToProjectDialogComponent
+} from "../../dialogs/assign-to-project-dialog/assign-to-project-dialog.component";
 
 @Component({
-  selector: 'app-song-view',
-  standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, MatSnackBarModule, MatCardModule, MatButtonModule, SongDetailPanelComponent],
-  templateUrl: './song-view.component.html',
-  styleUrl: './song-view.component.scss',
-  encapsulation: ViewEncapsulation.None
+    selector: "app-song-view",
+    standalone: true,
+    imports: [CommonModule, FormsModule, TranslateModule, MatSnackBarModule, MatCardModule, MatButtonModule, SongDetailPanelComponent],
+    templateUrl: "./song-view.component.html",
+    styleUrl: "./song-view.component.scss",
+    encapsulation: ViewEncapsulation.None
 })
 export class SongViewComponent implements OnInit, OnDestroy {
-  // Songs list and pagination
-  songs: any[] = [];
-  filteredSongs: any[] = [];
-  selectedSong: any = null;
-  selectedSongId: string | null = null;
-  pagination: any = {
-    total: 0,
-    limit: 10, // Will be overridden by user settings
-    offset: 0,
-    has_more: false
-  };
+    // Songs list and pagination
+    songs: any[] = [];
+    filteredSongs: any[] = [];
+    selectedSong: any = null;
+    selectedSongId: string | null = null;
+    pagination: any = {
+        total: 0,
+        limit: 10, // Will be overridden by user settings
+        offset: 0,
+        has_more: false
+    };
 
-  // Search and sort (server-based)
-  searchTerm: string = '';
-  sortBy: string = 'created_at';
-  sortDirection: 'asc' | 'desc' = 'desc';
+    // Search and sort (server-based)
+    searchTerm: string = "";
+    sortBy: string = "created_at";
+    sortDirection: "asc" | "desc" = "desc";
 
-  // Workflow filter
-  currentWorkflow: string = 'all';
+    // Workflow filter
+    currentWorkflow: string = "all";
 
-  // UI state
-  isLoading = false;
-  isLoadingSongs = false;
-  loadingMessage = '';
+    // UI state
+    isLoading = false;
+    isLoadingSongs = false;
+    loadingMessage = "";
 
-  // Keep consistent pagination - show more items
-  itemsPerPage = 20;
+    // Keep consistent pagination - show more items
+    itemsPerPage = 20;
 
-  // Audio and features
-  currentlyPlaying: string | null = null;
+    // Audio and features
+    currentlyPlaying: string | null = null;
 
-  // Audio player state
-  audioUrl: string | null = null;
-  currentSongTitle: string = '';
-  isPlaying = false;
-  currentTime = 0;
-  duration = 0;
-  volume = 1;
+    // Audio player state
+    audioUrl: string | null = null;
+    currentSongTitle: string = "";
+    isPlaying = false;
+    currentTime = 0;
+    duration = 0;
+    volume = 1;
 
-  @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
+    @ViewChild("audioPlayer") audioPlayer!: ElementRef<HTMLAudioElement>;
 
-  // Modal state
-  showModal = false;
-  modalTitle = '';
-  modalContent = '';
-  modalType: 'lyrics' | 'prompt' | '' = '';
+    // Modal state
+    showModal = false;
+    modalTitle = "";
+    modalContent = "";
+    modalType: "lyrics" | "prompt" | "" = "";
 
-  // Lyrics dialog state
-  showLyricsDialog = false;
+    // Lyrics dialog state
+    showLyricsDialog = false;
 
-  // Make Math available in template
-  Math = Math;
+    // Make Math available in template
+    Math = Math;
 
-  // RxJS subjects for debouncing
-  private searchSubject = new Subject<string>();
-  private destroy$ = new Subject<void>();
+    // RxJS subjects for debouncing
+    private searchSubject = new Subject<string>();
+    private destroy$ = new Subject<void>();
 
-  // Navigation state (must be captured in constructor)
-  private navigationState: any = null;
+    // Navigation state (must be captured in constructor)
+    private navigationState: any = null;
 
-  // Selection mode state
-  isSelectionMode = false;
-  selectedSongIds = new Set<string>();
+    // Selection mode state
+    isSelectionMode = false;
+    selectedSongIds = new Set<string>();
 
-  // Inline editing state
-  editingTitle = false;
-  editTitleValue = '';
+    // Inline editing state
+    editingTitle = false;
+    editTitleValue = "";
 
-  // Tags editing state
-  editingTags = false;
-  selectedTags = new Set<string>();
+    // Tags editing state
+    editingTags = false;
+    selectedTags = new Set<string>();
 
-  // Predefined tags categories
-  readonly tagCategories = {
-    style: ['Alternative', 'Rock', 'Pop', 'Ballad', 'Modern', 'Classic', 'Folk'],
-    theme: ['Nature', 'Love', 'Technology', 'People', 'Drama', 'Politics'],
-    useCase: ['Unused', 'Cover', 'Song', 'Inspiration', 'Video', 'Demo']
-  };
+    // Predefined tags categories
+    readonly tagCategories = {
+        style: ["Alternative", "Rock", "Pop", "Ballad", "Modern", "Classic", "Folk"],
+        theme: ["Nature", "Love", "Technology", "People", "Drama", "Politics"],
+        useCase: ["Unused", "Cover", "Song", "Inspiration", "Video", "Demo"]
+    };
 
-  @ViewChild('titleInput') titleInput!: ElementRef;
-  @ViewChild('searchInput') searchInput!: ElementRef;
+    @ViewChild("titleInput") titleInput!: ElementRef;
+    @ViewChild("searchInput") searchInput!: ElementRef;
 
-  private songService = inject(SongService);
-  private apiConfig = inject(ApiConfigService);
-  private notificationService = inject(NotificationService);
-  private settingsService = inject(UserSettingsService);
-  private http = inject(HttpClient);
-  private translate = inject(TranslateService);
-  private router = inject(Router);
-  private dialog = inject(MatDialog);
+    private songService = inject(SongService);
+    private apiConfig = inject(ApiConfigService);
+    private notificationService = inject(NotificationService);
+    private settingsService = inject(UserSettingsService);
+    private http = inject(HttpClient);
+    private translate = inject(TranslateService);
+    private router = inject(Router);
+    private dialog = inject(MatDialog);
 
-  constructor() {
-    // IMPORTANT: getCurrentNavigation() must be called in constructor!
-    const navigation = this.router.getCurrentNavigation();
-    this.navigationState = navigation?.extras?.state;
+    constructor() {
+        // IMPORTANT: getCurrentNavigation() must be called in constructor!
+        const navigation = this.router.getCurrentNavigation();
+        this.navigationState = navigation?.extras?.state;
 
-    // Setup search debouncing
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      takeUntil(this.destroy$)
-    ).subscribe(searchTerm => {
-      const hadFocus = document.activeElement === this.searchInput?.nativeElement;
-      this.searchTerm = searchTerm;
-      this.loadSongs().then(() => {
-        // Restore focus if it was in search field
-        if (hadFocus && this.searchInput) {
-          setTimeout(() => this.searchInput.nativeElement.focus(), 0);
-        }
-      });
-    });
-  }
-
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  ngOnInit() {
-    (window as any).angularComponentRef = this;
-    this.loadUserSettings();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private loadUserSettings() {
-    // Check navigation state for workflow filter (e.g., for archived songs from Song Project links)
-    const targetWorkflow = this.navigationState?.['targetWorkflow'];
-    const selectedSongIdFromState = this.navigationState?.['selectedSongId'];
-
-    if (targetWorkflow && ['all', 'inUse', 'onWork', 'notUsed', 'fail', 'archived'].includes(targetWorkflow)) {
-      this.currentWorkflow = targetWorkflow;
+        // Setup search debouncing
+        this.searchSubject.pipe(
+            debounceTime(300),
+            distinctUntilChanged(),
+            takeUntil(this.destroy$)
+        ).subscribe(searchTerm => {
+            const hadFocus = document.activeElement === this.searchInput?.nativeElement;
+            this.searchTerm = searchTerm;
+            this.loadSongs().then(() => {
+                // Restore focus if it was in search field
+                if (hadFocus && this.searchInput) {
+                    setTimeout(() => this.searchInput.nativeElement.focus(), 0);
+                }
+            });
+        });
     }
 
-    this.settingsService.getSettings()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(async settings => {
-        this.pagination.limit = settings.songListLimit;
-        await this.loadSongs();
+    private delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
-        // Select song from navigation state if provided
-        if (selectedSongIdFromState) {
-          const song = this.songs.find(s => s.id === selectedSongIdFromState);
-          if (song) {
-            await this.selectSong(song);
-          }
+    ngOnInit() {
+        (window as any).angularComponentRef = this;
+        this.loadUserSettings();
+    }
+
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    private loadUserSettings() {
+        // Check navigation state for workflow filter (e.g., for archived songs from Song Project links)
+        const targetWorkflow = this.navigationState?.["targetWorkflow"];
+        const selectedSongIdFromState = this.navigationState?.["selectedSongId"];
+
+        if (targetWorkflow && ["all", "inUse", "onWork", "notUsed", "fail", "archived"].includes(targetWorkflow)) {
+            this.currentWorkflow = targetWorkflow;
         }
-      });
-  }
 
-  async loadSongs(page: number = 0) {
-    this.isLoadingSongs = true;
-    try {
-      const offset = page * this.pagination.limit;
-      // Send workflow filter to backend (including "all")
-      const workflowParam = this.currentWorkflow === 'all' ? 'all' : this.currentWorkflow;
-      const data = await this.songService.getSongs(
-        this.pagination.limit,
-        offset,
-        'SUCCESS',
-        this.searchTerm.trim(),
-        this.sortBy,
-        this.sortDirection,
-        workflowParam
-      );
-      this.songs = data.songs || [];
-      this.pagination = data.pagination || this.pagination;
-      this.pagination.offset = offset;
+        this.settingsService.getSettings()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(async settings => {
+                this.pagination.limit = settings.songListLimit;
+                await this.loadSongs();
 
-      // Backend handles filtering, no client-side filter needed
-      this.filteredSongs = this.songs;
+                // Select song from navigation state if provided
+                if (selectedSongIdFromState) {
+                    const song = this.songs.find(s => s.id === selectedSongIdFromState);
+                    if (song) {
+                        await this.selectSong(song);
+                    }
+                }
+            });
+    }
 
-      // Selection logic based on results
-      if (this.filteredSongs.length > 0) {
-        // Check if currently selected song is in the new filtered list
-        const isSelectedSongInList = this.selectedSong &&
-          this.filteredSongs.some(song => song.id === this.selectedSong.id);
+    async loadSongs(page: number = 0) {
+        this.isLoadingSongs = true;
+        try {
+            const offset = page * this.pagination.limit;
+            // Send workflow filter to backend (including "all")
+            const workflowParam = this.currentWorkflow === "all" ? "all" : this.currentWorkflow;
+            const data = await this.songService.getSongs(
+                this.pagination.limit,
+                offset,
+                "SUCCESS",
+                this.searchTerm.trim(),
+                this.sortBy,
+                this.sortDirection,
+                workflowParam
+            );
+            this.songs = data.songs || [];
+            this.pagination = data.pagination || this.pagination;
+            this.pagination.offset = offset;
 
-        if (!isSelectedSongInList) {
-          // If selected song is not in new list, select first song
-          await this.selectSong(this.filteredSongs[0]);
+            // Backend handles filtering, no client-side filter needed
+            this.filteredSongs = this.songs;
+
+            // Selection logic based on results
+            if (this.filteredSongs.length > 0) {
+                // Check if currently selected song is in the new filtered list
+                const isSelectedSongInList = this.selectedSong &&
+                    this.filteredSongs.some(song => song.id === this.selectedSong.id);
+
+                if (!isSelectedSongInList) {
+                    // If selected song is not in new list, select first song
+                    await this.selectSong(this.filteredSongs[0]);
+                }
+            } else {
+                // Clear selection if no songs found
+                this.selectedSong = null;
+                this.selectedSongId = null;
+                // Player is now self-contained in detail panel
+            }
+        } catch (error: any) {
+            this.notificationService.error(this.translate.instant("songView.errors.loadingSongs", {error: error.message}));
+        } finally {
+            this.isLoadingSongs = false;
         }
-      } else {
-        // Clear selection if no songs found
+    }
+
+    async selectSong(song: any) {
+        // Clear previous selection and stop audio
         this.selectedSong = null;
-        this.selectedSongId = null;
+        this.selectedSongId = song.id;
         // Player is now self-contained in detail panel
-      }
-    } catch (error: any) {
-      this.notificationService.error(this.translate.instant('songView.errors.loadingSongs', { error: error.message }));
-    } finally {
-      this.isLoadingSongs = false;
+
+        // Store basic song info for backwards compatibility with existing template code
+        this.selectedSong = song;
     }
-  }
 
-  async selectSong(song: any) {
-    // Clear previous selection and stop audio
-    this.selectedSong = null;
-    this.selectedSongId = song.id;
-    // Player is now self-contained in detail panel
+    // Pagination methods
+    async nextPage() {
+        if (!this.pagination.has_more) return;
 
-    // Store basic song info for backwards compatibility with existing template code
-    this.selectedSong = song;
-  }
-
-  // Pagination methods
-  async nextPage() {
-    if (!this.pagination.has_more) return;
-
-    const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
-    await this.loadSongs(currentPage + 1);
-  }
-
-  async previousPage() {
-    if (this.pagination.offset === 0) return;
-
-    const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
-    await this.loadSongs(Math.max(0, currentPage - 1));
-  }
-
-  async loadMore() {
-    if (!this.pagination.has_more) return;
-
-    this.isLoadingSongs = true;
-    try {
-      const newOffset = this.pagination.offset + this.pagination.limit;
-      // Send workflow filter to backend (including "all")
-      const workflowParam = this.currentWorkflow === 'all' ? 'all' : this.currentWorkflow;
-      const data = await this.songService.getSongs(
-        this.pagination.limit,
-        newOffset,
-        'SUCCESS',
-        this.searchTerm.trim(),
-        this.sortBy,
-        this.sortDirection,
-        workflowParam
-      );
-
-      // Append new songs to existing list
-      this.songs = [...this.songs, ...(data.songs || [])];
-      this.pagination = data.pagination || this.pagination;
-      this.pagination.offset = newOffset;
-
-      // Backend handles filtering, no client-side filter needed
-      this.filteredSongs = this.songs;
-    } catch (error: any) {
-      this.notificationService.error(this.translate.instant('songView.errors.loadingMore', { error: error.message }));
-    } finally {
-      this.isLoadingSongs = false;
-    }
-  }
-
-  // Utility methods
-  getSongPreview(song: any): string {
-    if (!song.lyrics) return this.translate.instant('songView.messages.noLyrics');
-    // Use similar logic to DisplayNamePipe but for 20 chars
-    const lyrics = song.lyrics.trim();
-    return lyrics.length > 20 ? lyrics.substring(0, 17) + '...' : lyrics;
-  }
-
-  getSongTitle(song: any): string {
-    return song.prompt || this.translate.instant('songView.messages.untitledSong');
-  }
-
-  // Title editing methods
-  getDisplayTitle(song: any): string {
-    if (song.title && song.title.trim()) {
-      return song.title.trim();
-    }
-    // Fallback to lyrics preview like before (using DisplayNamePipe logic)
-    if (song.lyrics && song.lyrics.trim()) {
-      const lyrics = song.lyrics.trim();
-      return lyrics.length > 30 ? lyrics.substring(0, 27) + '...' : lyrics;
-    }
-    // Final fallback
-    return this.translate.instant('songView.messages.untitledSong');
-  }
-
-  startEditTitle() {
-    if (!this.selectedSong) return;
-
-    this.editingTitle = true;
-    // Use current title if exists, otherwise use generated title as template
-    this.editTitleValue = this.selectedSong.title || this.getDisplayTitle(this.selectedSong);
-
-    // Focus input after view updates
-    setTimeout(() => {
-      if (this.titleInput) {
-        this.titleInput.nativeElement.focus();
-        this.titleInput.nativeElement.select();
-      }
-    }, 100);
-  }
-
-  cancelEditTitle() {
-    this.editingTitle = false;
-    this.editTitleValue = '';
-  }
-
-  async saveTitle() {
-    if (!this.selectedSong) return;
-
-    this.isLoading = true;
-    try {
-      const updatedSong = await firstValueFrom(
-        this.http.put<any>(this.apiConfig.endpoints.song.update(this.selectedSong.id), {
-          title: this.editTitleValue.trim()
-        })
-      );
-
-      // Update selected song with new data (ensure all fields are preserved)
-      this.selectedSong = {
-        ...this.selectedSong,
-        title: updatedSong.title,
-        updated_at: updatedSong.updated_at
-      };
-
-      // Update in songs list too
-      const songIndex = this.songs.findIndex(song => song.id === this.selectedSong!.id);
-      if (songIndex !== -1) {
-        this.songs[songIndex] = {
-          ...this.songs[songIndex],
-          title: updatedSong.title
-        };
-        // Stay on current page after update
         const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
-        this.loadSongs(currentPage);
-      }
-
-      this.editingTitle = false;
-      this.editTitleValue = '';
-
-
-    } catch (error: any) {
-      this.notificationService.error(this.translate.instant('songView.errors.updatingTitle', { error: error.message }));
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString();
-  }
-
-  formatDateShort(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('de-CH', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  }
-
-  formatDateDetailed(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('de-CH', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-
-  // Server-side search and sort - no client-side filtering needed
-  // applyFilterAndSort() method removed as filtering is done server-side
-
-  onSearchChange(searchTerm: string) {
-    this.searchSubject.next(searchTerm);
-  }
-
-  clearSearch() {
-    this.searchTerm = '';
-    this.searchSubject.next('');
-  }
-
-  toggleSort() {
-    this.sortDirection = this.sortDirection === 'desc' ? 'asc' : 'desc';
-    this.loadSongs(0); // Reset to first page and reload with new sort
-  }
-
-  setWorkflowFilter(workflow: string) {
-    this.currentWorkflow = workflow;
-    this.loadSongs(0); // Reset to first page and reload with new filter
-  }
-
-
-  // Selection mode methods
-  toggleSelectionMode() {
-    this.isSelectionMode = !this.isSelectionMode;
-    if (!this.isSelectionMode) {
-      this.selectedSongIds.clear();
-    }
-  }
-
-  toggleSongSelection(songId: string) {
-    if (this.selectedSongIds.has(songId)) {
-      this.selectedSongIds.delete(songId);
-    } else {
-      this.selectedSongIds.add(songId);
-    }
-  }
-
-  selectAllSongs() {
-    this.filteredSongs.forEach(song => {
-      if (this.canDeleteSong(song)) {
-        this.selectedSongIds.add(song.id);
-      }
-    });
-  }
-
-  deselectAllSongs() {
-    this.selectedSongIds.clear();
-  }
-
-  onSelectAllChange(event: Event) {
-    const checkbox = event.target as HTMLInputElement;
-    if (checkbox.checked) {
-      this.selectAllSongs();
-    } else {
-      this.deselectAllSongs();
-    }
-  }
-
-  async bulkDeleteSongs() {
-    if (this.selectedSongIds.size === 0) {
-      this.notificationService.error(this.translate.instant('songView.errors.noSongsSelected'));
-      return;
+        await this.loadSongs(currentPage + 1);
     }
 
-    // Check for protected songs that cannot be deleted
-    const protectedSongs = this.songs.filter(song =>
-      this.selectedSongIds.has(song.id) && !this.canDeleteSong(song)
-    );
+    async previousPage() {
+        if (this.pagination.offset === 0) return;
 
-    if (protectedSongs.length > 0) {
-      const songTitles = protectedSongs.map(song =>
-        song.title || song.lyrics?.slice(0, 30) + '...' || this.translate.instant('songView.messages.untitled')
-      ).join(', ');
-
-      const workflowTypes = [...new Set(protectedSongs.map(song => song.workflow))];
-      const workflowText = workflowTypes.map(w =>
-        w === 'inUse' ? this.translate.instant('songView.filters.inUse') : w === 'onWork' ? this.translate.instant('songView.filters.onWork') : w
-      ).join(' and ');
-
-      this.notificationService.error(
-        this.translate.instant('songView.errors.cannotDeleteProtected', { workflow: workflowText, songs: songTitles })
-      );
-      return;
+        const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+        await this.loadSongs(Math.max(0, currentPage - 1));
     }
 
-    const confirmation = confirm(this.translate.instant('songView.confirmations.bulkDelete', { count: this.selectedSongIds.size }));
-    if (!confirmation) {
-      return;
+    async loadMore() {
+        if (!this.pagination.has_more) return;
+
+        this.isLoadingSongs = true;
+        try {
+            const newOffset = this.pagination.offset + this.pagination.limit;
+            // Send workflow filter to backend (including "all")
+            const workflowParam = this.currentWorkflow === "all" ? "all" : this.currentWorkflow;
+            const data = await this.songService.getSongs(
+                this.pagination.limit,
+                newOffset,
+                "SUCCESS",
+                this.searchTerm.trim(),
+                this.sortBy,
+                this.sortDirection,
+                workflowParam
+            );
+
+            // Append new songs to existing list
+            this.songs = [...this.songs, ...(data.songs || [])];
+            this.pagination = data.pagination || this.pagination;
+            this.pagination.offset = newOffset;
+
+            // Backend handles filtering, no client-side filter needed
+            this.filteredSongs = this.songs;
+        } catch (error: any) {
+            this.notificationService.error(this.translate.instant("songView.errors.loadingMore", {error: error.message}));
+        } finally {
+            this.isLoadingSongs = false;
+        }
     }
 
-    this.isLoading = true;
-    try {
-      const result = await firstValueFrom(
-        this.http.delete<any>(this.apiConfig.endpoints.song.bulkDelete, {
-          body: {
-            ids: Array.from(this.selectedSongIds)
-          }
-        })
-      );
+    // Utility methods
+    getSongPreview(song: any): string {
+        if (!song.lyrics) return this.translate.instant("songView.messages.noLyrics");
+        // Use similar logic to DisplayNamePipe but for 20 chars
+        const lyrics = song.lyrics.trim();
+        return lyrics.length > 20 ? lyrics.substring(0, 17) + "..." : lyrics;
+    }
 
-      // Show detailed result notification
-      if (result.summary) {
-        const { deleted, not_found, errors } = result.summary;
-        let message = this.translate.instant('songView.bulkDelete.completed', { deleted });
-        if (not_found > 0) message += `, ${this.translate.instant('songView.bulkDelete.notFound', { count: not_found })}`;
-        if (errors > 0) message += `, ${this.translate.instant('songView.bulkDelete.errors', { count: errors })}`;
+    getSongTitle(song: any): string {
+        return song.prompt || this.translate.instant("songView.messages.untitledSong");
+    }
 
-        if (deleted > 0) {
-          this.notificationService.success(message);
+    // Title editing methods
+    getDisplayTitle(song: any): string {
+        if (song.title && song.title.trim()) {
+            return song.title.trim();
+        }
+        // Fallback to lyrics preview like before (using DisplayNamePipe logic)
+        if (song.lyrics && song.lyrics.trim()) {
+            const lyrics = song.lyrics.trim();
+            return lyrics.length > 30 ? lyrics.substring(0, 27) + "..." : lyrics;
+        }
+        // Final fallback
+        return this.translate.instant("songView.messages.untitledSong");
+    }
+
+    startEditTitle() {
+        if (!this.selectedSong) return;
+
+        this.editingTitle = true;
+        // Use current title if exists, otherwise use generated title as template
+        this.editTitleValue = this.selectedSong.title || this.getDisplayTitle(this.selectedSong);
+
+        // Focus input after view updates
+        setTimeout(() => {
+            if (this.titleInput) {
+                this.titleInput.nativeElement.focus();
+                this.titleInput.nativeElement.select();
+            }
+        }, 100);
+    }
+
+    cancelEditTitle() {
+        this.editingTitle = false;
+        this.editTitleValue = "";
+    }
+
+    async saveTitle() {
+        if (!this.selectedSong) return;
+
+        this.isLoading = true;
+        try {
+            const updatedSong = await firstValueFrom(
+                this.http.put<any>(this.apiConfig.endpoints.song.update(this.selectedSong.id), {
+                    title: this.editTitleValue.trim()
+                })
+            );
+
+            // Update selected song with new data (ensure all fields are preserved)
+            this.selectedSong = {
+                ...this.selectedSong,
+                title: updatedSong.title,
+                updated_at: updatedSong.updated_at
+            };
+
+            // Update in songs list too
+            const songIndex = this.songs.findIndex(song => song.id === this.selectedSong!.id);
+            if (songIndex !== -1) {
+                this.songs[songIndex] = {
+                    ...this.songs[songIndex],
+                    title: updatedSong.title
+                };
+                // Stay on current page after update
+                const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+                this.loadSongs(currentPage);
+            }
+
+            this.editingTitle = false;
+            this.editTitleValue = "";
+
+
+        } catch (error: any) {
+            this.notificationService.error(this.translate.instant("songView.errors.updatingTitle", {error: error.message}));
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    formatDate(dateString: string): string {
+        return new Date(dateString).toLocaleDateString();
+    }
+
+    formatDateShort(dateString: string): string {
+        return new Date(dateString).toLocaleDateString("de-CH", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+    }
+
+    formatDateDetailed(dateString: string): string {
+        return new Date(dateString).toLocaleDateString("de-CH", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    // Server-side search and sort - no client-side filtering needed
+    // applyFilterAndSort() method removed as filtering is done server-side
+
+    onSearchChange(searchTerm: string) {
+        this.searchSubject.next(searchTerm);
+    }
+
+    clearSearch() {
+        this.searchTerm = "";
+        this.searchSubject.next("");
+    }
+
+    toggleSort() {
+        this.sortDirection = this.sortDirection === "desc" ? "asc" : "desc";
+        this.loadSongs(0); // Reset to first page and reload with new sort
+    }
+
+    setWorkflowFilter(workflow: string) {
+        this.currentWorkflow = workflow;
+        this.loadSongs(0); // Reset to first page and reload with new filter
+    }
+
+
+    // Selection mode methods
+    toggleSelectionMode() {
+        this.isSelectionMode = !this.isSelectionMode;
+        if (!this.isSelectionMode) {
+            this.selectedSongIds.clear();
+        }
+    }
+
+    toggleSongSelection(songId: string) {
+        if (this.selectedSongIds.has(songId)) {
+            this.selectedSongIds.delete(songId);
         } else {
-          this.notificationService.error(message);
+            this.selectedSongIds.add(songId);
         }
-      }
-
-      // Clear selections and reload
-      this.selectedSongIds.clear();
-      this.isSelectionMode = false;
-
-      // Clear selected song if it was deleted
-      if (this.selectedSong && this.selectedSongIds.has(this.selectedSong.id)) {
-        this.selectedSong = null;
-        // Player is now self-contained in detail panel
-      }
-
-      // Reload current page
-      const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
-      await this.loadSongs(currentPage);
-
-    } catch (error: any) {
-      this.notificationService.error(this.translate.instant('songView.errors.deletingSongs', { error: error.message }));
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  // Modern pagination methods
-  getVisiblePages(): (number | string)[] {
-    const totalPages = Math.ceil(this.pagination.total / this.pagination.limit);
-    const current = Math.floor(this.pagination.offset / this.pagination.limit) + 1;
-    const pages: (number | string)[] = [];
-
-    if (totalPages <= 7) {
-      // Show all pages if 7 or less
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Smart pagination with ellipsis
-      if (current <= 4) {
-        // Show: 1 2 3 4 5 ... last
-        for (let i = 1; i <= 5; i++) pages.push(i);
-        pages.push('...');
-        pages.push(totalPages);
-      } else if (current >= totalPages - 3) {
-        // Show: 1 ... n-4 n-3 n-2 n-1 n
-        pages.push(1);
-        pages.push('...');
-        for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
-      } else {
-        // Show: 1 ... current-1 current current+1 ... last
-        pages.push(1);
-        pages.push('...');
-        for (let i = current - 1; i <= current + 1; i++) pages.push(i);
-        pages.push('...');
-        pages.push(totalPages);
-      }
     }
 
-    return pages;
-  }
-
-  goToPage(pageIndex: number) {
-    if (pageIndex >= 0 && pageIndex < Math.ceil(this.pagination.total / this.pagination.limit) && !this.isLoading) {
-      this.loadSongs(pageIndex);
+    selectAllSongs() {
+        this.filteredSongs.forEach(song => {
+            if (this.canDeleteSong(song)) {
+                this.selectedSongIds.add(song.id);
+            }
+        });
     }
-  }
 
-  trackByPage(index: number, page: number | string): number | string {
-    return page;
-  }
-
-  trackBySong(index: number, song: any): string {
-    return song.id;
-  }
-
-  // Modal methods
-  showLyrics(song: any) {
-    this.modalTitle = this.translate.instant('songView.dialogs.lyricsTitle', { title: this.getSongTitle(song) });
-    this.modalContent = song.lyrics || this.translate.instant('songView.messages.noLyricsAvailable');
-    this.modalType = 'lyrics';
-    this.showModal = true;
-  }
-
-  showPrompt(song: any) {
-    this.modalTitle = this.translate.instant('songView.dialogs.stylePromptTitle', { title: this.getSongTitle(song) });
-    this.modalContent = song.prompt || this.translate.instant('songView.messages.noStylePrompt');
-    this.modalType = 'prompt';
-    this.showModal = true;
-  }
-
-  closeModal() {
-    this.showModal = false;
-    this.modalTitle = '';
-    this.modalContent = '';
-    this.modalType = '';
-  }
-
-  async copyToClipboard() {
-    try {
-      await navigator.clipboard.writeText(this.modalContent);
-    } catch (error) {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = this.modalContent;
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try {
-        document.execCommand('copy');
-      } catch (err) {
-        this.notificationService.error(this.translate.instant('songView.errors.copyFailed'));
-      }
-      document.body.removeChild(textArea);
+    deselectAllSongs() {
+        this.selectedSongIds.clear();
     }
-  }
 
-  // Lyrics dialog methods
-  openLyricsDialog() {
-    if (!this.selectedSong?.lyrics) return;
-    this.showLyricsDialog = true;
-  }
-
-  closeLyricsDialog() {
-    this.showLyricsDialog = false;
-  }
-
-  async copyLyricsToClipboard() {
-    if (!this.selectedSong?.lyrics) return;
-
-    try {
-      await navigator.clipboard.writeText(this.selectedSong.lyrics);
-    } catch (error) {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = this.selectedSong.lyrics;
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try {
-        document.execCommand('copy');
-      } catch (err) {
-        this.notificationService.error(this.translate.instant('songView.errors.copyLyricsFailed'));
-      }
-      document.body.removeChild(textArea);
-    }
-  }
-
-  // Event handlers for song detail panel - now handles audio in parent
-  onPlayAudio(event: {url: string, id: string, choiceNumber: number}) {
-    this.onPlayAudioInternal(event.url, event.id);
-  }
-
-  // Audio methods
-  onPlayAudioInternal(url: string, id: string) {
-    if (this.currentlyPlaying === id) {
-      this.stopAudio();
-    } else {
-      this.playAudioInternal(url, id);
-    }
-  }
-
-  private playAudioInternal(mp3Url: string, choiceId: string) {
-    this.audioUrl = mp3Url;
-    this.currentlyPlaying = choiceId;
-
-    // Get song title and limit to 40 characters
-    const songTitle = this.selectedSong?.title || this.translate.instant('songView.messages.unknownSong');
-    this.currentSongTitle = songTitle.length > 40 ? songTitle.substring(0, 37) + '...' : songTitle;
-
-    // Wait for audio element to be ready
-    setTimeout(() => {
-      if (this.audioPlayer?.nativeElement) {
-        this.audioPlayer.nativeElement.load();
-        this.audioPlayer.nativeElement.play();
-      }
-    });
-  }
-
-  playPauseAudio() {
-    if (!this.audioPlayer?.nativeElement) return;
-
-    if (this.isPlaying) {
-      this.audioPlayer.nativeElement.pause();
-    } else {
-      this.audioPlayer.nativeElement.play();
-    }
-  }
-
-  stopAudio() {
-    if (this.audioPlayer?.nativeElement) {
-      this.audioPlayer.nativeElement.pause();
-      this.audioPlayer.nativeElement.currentTime = 0;
-    }
-    this.currentlyPlaying = null;
-    this.audioUrl = null;
-    this.isPlaying = false;
-    this.currentTime = 0;
-  }
-
-  onTimeUpdate() {
-    if (this.audioPlayer?.nativeElement) {
-      this.currentTime = this.audioPlayer.nativeElement.currentTime;
-      this.duration = this.audioPlayer.nativeElement.duration || 0;
-    }
-  }
-
-  onLoadedMetadata() {
-    if (this.audioPlayer?.nativeElement) {
-      this.duration = this.audioPlayer.nativeElement.duration;
-    }
-  }
-
-  onPlay() {
-    this.isPlaying = true;
-  }
-
-  onPause() {
-    this.isPlaying = false;
-  }
-
-  seekTo(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const seekTime = parseFloat(target.value);
-
-    if (this.audioPlayer?.nativeElement) {
-      this.audioPlayer.nativeElement.currentTime = seekTime;
-    }
-  }
-
-  setVolume(event: Event) {
-    const target = event.target as HTMLInputElement;
-    this.volume = parseFloat(target.value);
-
-    if (this.audioPlayer?.nativeElement) {
-      this.audioPlayer.nativeElement.volume = this.volume;
-    }
-  }
-
-  formatTime(seconds: number): string {
-    if (isNaN(seconds)) return '0:00';
-
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  }
-
-  onDownloadStems(url: string) {
-    this.downloadStems(url);
-  }
-
-  onCopyLyrics() {
-    this.copyLyricsToClipboard();
-  }
-
-  downloadFlac(flacUrl: string) {
-    // Create a temporary anchor element to trigger the download
-    const link = document.createElement('a');
-    link.href = flacUrl;
-    link.download = ''; // This will use the filename from the URL
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  downloadStems(stemsUrl: string) {
-    // Create a temporary anchor element to trigger the download
-    const link = document.createElement('a');
-    link.href = stemsUrl;
-    link.download = ''; // This will use the filename from the URL
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-
-  // Tags editing methods
-  parseTagsFromString(tagsString: string): Set<string> {
-    if (!tagsString || !tagsString.trim()) {
-      return new Set();
-    }
-    return new Set(
-      tagsString.split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0)
-    );
-  }
-
-  startEditTags() {
-    if (!this.selectedSong) return;
-
-    this.editingTags = true;
-    // Parse existing tags into selectedTags set
-    this.selectedTags = this.parseTagsFromString(this.selectedSong.tags || '');
-  }
-
-  cancelEditTags() {
-    this.editingTags = false;
-    this.selectedTags.clear();
-  }
-
-  toggleTag(tag: string) {
-    if (this.selectedTags.has(tag)) {
-      this.selectedTags.delete(tag);
-    } else {
-      this.selectedTags.add(tag);
-    }
-  }
-
-  isTagSelected(tag: string): boolean {
-    return this.selectedTags.has(tag);
-  }
-
-  async saveTags() {
-    if (!this.selectedSong) return;
-
-    this.isLoading = true;
-    try {
-      const updatedSong = await firstValueFrom(
-        this.http.put<any>(this.apiConfig.endpoints.song.update(this.selectedSong.id), {
-          tags: Array.from(this.selectedTags)
-        })
-      );
-
-      // Update selected song with new data
-      this.selectedSong = {
-        ...this.selectedSong,
-        tags: updatedSong.tags,
-        updated_at: updatedSong.updated_at
-      };
-
-      // Update in songs list too
-      const songIndex = this.songs.findIndex(song => song.id === this.selectedSong!.id);
-      if (songIndex !== -1) {
-        this.songs[songIndex] = {
-          ...this.songs[songIndex],
-          tags: updatedSong.tags
-        };
-      }
-
-      this.editingTags = false;
-      this.selectedTags.clear();
-
-
-    } catch (error: any) {
-      this.notificationService.error(this.translate.instant('songView.errors.updatingTags', { error: error.message }));
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  getSelectedTagsDisplay(): string {
-    if (!this.selectedSong?.tags) {
-      return this.translate.instant('songView.messages.noTags');
-    }
-    const tags = this.parseTagsFromString(this.selectedSong.tags);
-    return tags.size > 0 ? Array.from(tags).join(', ') : this.translate.instant('songView.messages.noTags');
-  }
-
-  // Handlers for shared song detail panel
-  onTitleChanged(newTitle: string) {
-    this.editTitleValue = newTitle;
-    this.saveTitle();
-  }
-
-  onTagsChanged(newTags: string[]) {
-    this.selectedTags = new Set(newTags);
-    this.saveTags();
-  }
-
-  async onWorkflowChanged(newWorkflow: string) {
-    if (!this.selectedSong) return;
-
-    this.isLoading = true;
-    try {
-      const updatedSong = await firstValueFrom(
-        this.http.put<any>(this.apiConfig.endpoints.song.update(this.selectedSong.id), {
-          workflow: newWorkflow
-        })
-      );
-
-      // Update selected song with new data
-      this.selectedSong = {
-        ...this.selectedSong,
-        workflow: updatedSong.workflow,
-        updated_at: updatedSong.updated_at
-      };
-
-      // Update in songs list too
-      const songIndex = this.songs.findIndex(song => song.id === this.selectedSong!.id);
-      if (songIndex !== -1) {
-        this.songs[songIndex] = {
-          ...this.songs[songIndex],
-          workflow: updatedSong.workflow
-        };
-        // Stay on current page after update
-        const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
-        this.loadSongs(currentPage);
-      }
-    } catch (error: any) {
-      this.notificationService.error(this.translate.instant('songView.errors.updatingWorkflow', { error: error.message }));
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  onDownloadFlac(url: string) {
-    this.downloadFlac(url);
-  }
-
-
-  async onUpdateRating(event: { choiceId: string, rating: number | null }) {
-    try {
-      await this.songService.updateChoiceRating(event.choiceId, event.rating);
-
-      // Update the rating in the current song data
-      if (this.selectedSong && this.selectedSong.choices) {
-        const choice = this.selectedSong.choices.find((c: any) => c.id === event.choiceId);
-        if (choice) {
-          choice.rating = event.rating;
+    onSelectAllChange(event: Event) {
+        const checkbox = event.target as HTMLInputElement;
+        if (checkbox.checked) {
+            this.selectAllSongs();
+        } else {
+            this.deselectAllSongs();
         }
-      }
-
-
-    } catch (error: any) {
-      this.notificationService.error(this.translate.instant('songView.errors.updatingRating', { error: error.message }));
-    }
-  }
-
-
-  // Check if a song can be deleted (not "In Use", "On Work", or assigned to a project)
-  canDeleteSong(song: any): boolean {
-    return song.workflow !== 'inUse' && song.workflow !== 'onWork' && !song.project_id;
-  }
-
-  // Check if the current selection contains any undeletable songs
-  hasUndeletableSongs(): boolean {
-    return this.songs.some(song =>
-      this.selectedSongIds.has(song.id) && !this.canDeleteSong(song)
-    );
-  }
-
-  // Check if a song is instrumental
-  isInstrumental(song: any): boolean {
-    return song.is_instrumental === true;
-  }
-
-  // Get the appropriate icon class for a song
-  getSongIcon(song: any): string {
-    return this.isInstrumental(song) ? 'fa-guitar' : 'fa-microphone';
-  }
-
-  // Get the song type display text
-  getSongTypeText(song: any): string {
-    return this.isInstrumental(song)
-      ? this.translate.instant('songView.tooltips.instrumental')
-      : this.translate.instant('songView.tooltips.withVocals');
-  }
-
-  // Workflow filter methods (for new UI)
-  onWorkflowChange(workflow: string) {
-    this.setWorkflowFilter(workflow);
-  }
-
-  getWorkflowClass(workflow: string): string {
-    if (!workflow) {
-      return 'badge-no-workflow'; // No workflow set
-    }
-    switch (workflow) {
-      case 'inUse':
-        return 'badge-in-use';
-      case 'onWork':
-        return 'badge-on-work';
-      case 'notUsed':
-        return 'badge-not-used';
-      case 'fail':
-        return 'badge-fail';
-      default:
-        return 'badge-no-workflow'; // Unknown workflow
-    }
-  }
-
-  getWorkflowLabel(workflow: string): string {
-    if (!workflow) {
-      return '-'; // No workflow set
-    }
-    switch (workflow) {
-      case 'inUse':
-        return this.translate.instant('songView.filters.inUse');
-      case 'onWork':
-        return this.translate.instant('songView.filters.onWork');
-      case 'notUsed':
-        return this.translate.instant('songView.filters.notUsed');
-      case 'fail':
-        return this.translate.instant('songView.filters.fail');
-      default:
-        return '-'; // Unknown workflow
-    }
-  }
-
-  navigateToSongGenerator() {
-    this.router.navigate(['/songgen']);
-  }
-
-  /**
-   * Open dialog to assign song to a project
-   */
-  openAssignToProjectDialog() {
-    if (!this.selectedSong) {
-      return;
     }
 
-    const dialogRef = this.dialog.open(AssignToProjectDialogComponent, {
-      width: '600px',
-      maxHeight: '90vh',
-      data: {
-        assetType: 'song',
-        assetId: this.selectedSong.id
-      }
-    });
+    async bulkDeleteSongs() {
+        if (this.selectedSongIds.size === 0) {
+            this.notificationService.error(this.translate.instant("songView.errors.noSongsSelected"));
+            return;
+        }
 
-    dialogRef.afterClosed().subscribe(async (result) => {
-      if (result?.success) {
-        this.notificationService.success(
-          this.translate.instant('assignToProject.success')
+        // Check for protected songs that cannot be deleted
+        const protectedSongs = this.songs.filter(song =>
+            this.selectedSongIds.has(song.id) && !this.canDeleteSong(song)
         );
-        // Reload songs to reflect updated project assignment
-        const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
-        await this.loadSongs(currentPage);
-      }
-    });
-  }
 
-  /**
-   * Navigate to project overview with auto-selection
-   */
-  navigateToProject(projectId: string, event: Event): void {
-    event.stopPropagation(); // Prevent song selection
-    this.router.navigate(['/song-projects'], {
-      state: { selectedProjectId: projectId }
-    });
-  }
+        if (protectedSongs.length > 0) {
+            const songTitles = protectedSongs.map(song =>
+                song.title || song.lyrics?.slice(0, 30) + "..." || this.translate.instant("songView.messages.untitled")
+            ).join(", ");
 
-  /**
-   * Unassign song from its project (link only, song remains)
-   */
-  async unassignFromProject(): Promise<void> {
-    if (!this.selectedSong || !this.selectedSong.project_id) {
-      return;
+            const workflowTypes = [...new Set(protectedSongs.map(song => song.workflow))];
+            const workflowText = workflowTypes.map(w =>
+                w === "inUse" ? this.translate.instant("songView.filters.inUse") : w === "onWork" ? this.translate.instant("songView.filters.onWork") : w
+            ).join(" and ");
+
+            this.notificationService.error(
+                this.translate.instant("songView.errors.cannotDeleteProtected", {
+                    workflow: workflowText,
+                    songs: songTitles
+                })
+            );
+            return;
+        }
+
+        const confirmation = confirm(this.translate.instant("songView.confirmations.bulkDelete", {count: this.selectedSongIds.size}));
+        if (!confirmation) {
+            return;
+        }
+
+        this.isLoading = true;
+        try {
+            const result = await firstValueFrom(
+                this.http.delete<any>(this.apiConfig.endpoints.song.bulkDelete, {
+                    body: {
+                        ids: Array.from(this.selectedSongIds)
+                    }
+                })
+            );
+
+            // Show detailed result notification
+            if (result.summary) {
+                const {deleted, not_found, errors} = result.summary;
+                let message = this.translate.instant("songView.bulkDelete.completed", {deleted});
+                if (not_found > 0) message += `, ${this.translate.instant("songView.bulkDelete.notFound", {count: not_found})}`;
+                if (errors > 0) message += `, ${this.translate.instant("songView.bulkDelete.errors", {count: errors})}`;
+
+                if (deleted > 0) {
+                    this.notificationService.success(message);
+                } else {
+                    this.notificationService.error(message);
+                }
+            }
+
+            // Clear selections and reload
+            this.selectedSongIds.clear();
+            this.isSelectionMode = false;
+
+            // Clear selected song if it was deleted
+            if (this.selectedSong && this.selectedSongIds.has(this.selectedSong.id)) {
+                this.selectedSong = null;
+                // Player is now self-contained in detail panel
+            }
+
+            // Reload current page
+            const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+            await this.loadSongs(currentPage);
+
+        } catch (error: any) {
+            this.notificationService.error(this.translate.instant("songView.errors.deletingSongs", {error: error.message}));
+        } finally {
+            this.isLoading = false;
+        }
     }
 
-    const confirmation = confirm(
-      this.translate.instant('songView.confirmations.unassignFromProject', {
-        song: this.getDisplayTitle(this.selectedSong),
-        project: this.selectedSong.project_name || ''
-      })
-    );
+    // Modern pagination methods
+    getVisiblePages(): (number | string)[] {
+        const totalPages = Math.ceil(this.pagination.total / this.pagination.limit);
+        const current = Math.floor(this.pagination.offset / this.pagination.limit) + 1;
+        const pages: (number | string)[] = [];
 
-    if (!confirmation) {
-      return;
+        if (totalPages <= 7) {
+            // Show all pages if 7 or less
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Smart pagination with ellipsis
+            if (current <= 4) {
+                // Show: 1 2 3 4 5 ... last
+                for (let i = 1; i <= 5; i++) pages.push(i);
+                pages.push("...");
+                pages.push(totalPages);
+            } else if (current >= totalPages - 3) {
+                // Show: 1 ... n-4 n-3 n-2 n-1 n
+                pages.push(1);
+                pages.push("...");
+                for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+            } else {
+                // Show: 1 ... current-1 current current+1 ... last
+                pages.push(1);
+                pages.push("...");
+                for (let i = current - 1; i <= current + 1; i++) pages.push(i);
+                pages.push("...");
+                pages.push(totalPages);
+            }
+        }
+
+        return pages;
     }
 
-    this.isLoading = true;
-    try {
-      await this.songService.unassignFromProject(this.selectedSong.id);
-
-      this.notificationService.success(
-        this.translate.instant('songView.messages.unassignedFromProject')
-      );
-
-      // Reload songs to reflect updated project assignment
-      const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
-      await this.loadSongs(currentPage);
-
-    } catch (error: any) {
-      this.notificationService.error(
-        this.translate.instant('songView.errors.unassigningFromProject', { error: error.message })
-      );
-    } finally {
-      this.isLoading = false;
+    goToPage(pageIndex: number) {
+        if (pageIndex >= 0 && pageIndex < Math.ceil(this.pagination.total / this.pagination.limit) && !this.isLoading) {
+            this.loadSongs(pageIndex);
+        }
     }
-  }
+
+    trackByPage(index: number, page: number | string): number | string {
+        return page;
+    }
+
+    trackBySong(index: number, song: any): string {
+        return song.id;
+    }
+
+    // Modal methods
+    showLyrics(song: any) {
+        this.modalTitle = this.translate.instant("songView.dialogs.lyricsTitle", {title: this.getSongTitle(song)});
+        this.modalContent = song.lyrics || this.translate.instant("songView.messages.noLyricsAvailable");
+        this.modalType = "lyrics";
+        this.showModal = true;
+    }
+
+    showPrompt(song: any) {
+        this.modalTitle = this.translate.instant("songView.dialogs.stylePromptTitle", {title: this.getSongTitle(song)});
+        this.modalContent = song.prompt || this.translate.instant("songView.messages.noStylePrompt");
+        this.modalType = "prompt";
+        this.showModal = true;
+    }
+
+    closeModal() {
+        this.showModal = false;
+        this.modalTitle = "";
+        this.modalContent = "";
+        this.modalType = "";
+    }
+
+    async copyToClipboard() {
+        try {
+            await navigator.clipboard.writeText(this.modalContent);
+        } catch (error) {
+            // Fallback for older browsers
+            const textArea = document.createElement("textarea");
+            textArea.value = this.modalContent;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand("copy");
+            } catch (err) {
+                this.notificationService.error(this.translate.instant("songView.errors.copyFailed"));
+            }
+            document.body.removeChild(textArea);
+        }
+    }
+
+    // Lyrics dialog methods
+    openLyricsDialog() {
+        if (!this.selectedSong?.lyrics) return;
+        this.showLyricsDialog = true;
+    }
+
+    closeLyricsDialog() {
+        this.showLyricsDialog = false;
+    }
+
+    async copyLyricsToClipboard() {
+        if (!this.selectedSong?.lyrics) return;
+
+        try {
+            await navigator.clipboard.writeText(this.selectedSong.lyrics);
+        } catch (error) {
+            // Fallback for older browsers
+            const textArea = document.createElement("textarea");
+            textArea.value = this.selectedSong.lyrics;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand("copy");
+            } catch (err) {
+                this.notificationService.error(this.translate.instant("songView.errors.copyLyricsFailed"));
+            }
+            document.body.removeChild(textArea);
+        }
+    }
+
+    // Event handlers for song detail panel - now handles audio in parent
+    onPlayAudio(event: { url: string, id: string, choiceNumber: number }) {
+        this.onPlayAudioInternal(event.url, event.id);
+    }
+
+    // Audio methods
+    onPlayAudioInternal(url: string, id: string) {
+        if (this.currentlyPlaying === id) {
+            this.stopAudio();
+        } else {
+            this.playAudioInternal(url, id);
+        }
+    }
+
+    private playAudioInternal(mp3Url: string, choiceId: string) {
+        this.audioUrl = mp3Url;
+        this.currentlyPlaying = choiceId;
+
+        // Get song title and limit to 40 characters
+        const songTitle = this.selectedSong?.title || this.translate.instant("songView.messages.unknownSong");
+        this.currentSongTitle = songTitle.length > 40 ? songTitle.substring(0, 37) + "..." : songTitle;
+
+        // Wait for audio element to be ready
+        setTimeout(() => {
+            if (this.audioPlayer?.nativeElement) {
+                this.audioPlayer.nativeElement.load();
+                this.audioPlayer.nativeElement.play();
+            }
+        });
+    }
+
+    playPauseAudio() {
+        if (!this.audioPlayer?.nativeElement) return;
+
+        if (this.isPlaying) {
+            this.audioPlayer.nativeElement.pause();
+        } else {
+            this.audioPlayer.nativeElement.play();
+        }
+    }
+
+    stopAudio() {
+        if (this.audioPlayer?.nativeElement) {
+            this.audioPlayer.nativeElement.pause();
+            this.audioPlayer.nativeElement.currentTime = 0;
+        }
+        this.currentlyPlaying = null;
+        this.audioUrl = null;
+        this.isPlaying = false;
+        this.currentTime = 0;
+    }
+
+    onTimeUpdate() {
+        if (this.audioPlayer?.nativeElement) {
+            this.currentTime = this.audioPlayer.nativeElement.currentTime;
+            this.duration = this.audioPlayer.nativeElement.duration || 0;
+        }
+    }
+
+    onLoadedMetadata() {
+        if (this.audioPlayer?.nativeElement) {
+            this.duration = this.audioPlayer.nativeElement.duration;
+        }
+    }
+
+    onPlay() {
+        this.isPlaying = true;
+    }
+
+    onPause() {
+        this.isPlaying = false;
+    }
+
+    seekTo(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const seekTime = parseFloat(target.value);
+
+        if (this.audioPlayer?.nativeElement) {
+            this.audioPlayer.nativeElement.currentTime = seekTime;
+        }
+    }
+
+    setVolume(event: Event) {
+        const target = event.target as HTMLInputElement;
+        this.volume = parseFloat(target.value);
+
+        if (this.audioPlayer?.nativeElement) {
+            this.audioPlayer.nativeElement.volume = this.volume;
+        }
+    }
+
+    formatTime(seconds: number): string {
+        if (isNaN(seconds)) return "0:00";
+
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+    }
+
+    onDownloadStems(url: string) {
+        this.downloadStems(url);
+    }
+
+    onCopyLyrics() {
+        this.copyLyricsToClipboard();
+    }
+
+    downloadFlac(flacUrl: string) {
+        // Create a temporary anchor element to trigger the download
+        const link = document.createElement("a");
+        link.href = flacUrl;
+        link.download = ""; // This will use the filename from the URL
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    downloadStems(stemsUrl: string) {
+        // Create a temporary anchor element to trigger the download
+        const link = document.createElement("a");
+        link.href = stemsUrl;
+        link.download = ""; // This will use the filename from the URL
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+
+    // Tags editing methods
+    parseTagsFromString(tagsString: string): Set<string> {
+        if (!tagsString || !tagsString.trim()) {
+            return new Set();
+        }
+        return new Set(
+            tagsString.split(",")
+                .map(tag => tag.trim())
+                .filter(tag => tag.length > 0)
+        );
+    }
+
+    startEditTags() {
+        if (!this.selectedSong) return;
+
+        this.editingTags = true;
+        // Parse existing tags into selectedTags set
+        this.selectedTags = this.parseTagsFromString(this.selectedSong.tags || "");
+    }
+
+    cancelEditTags() {
+        this.editingTags = false;
+        this.selectedTags.clear();
+    }
+
+    toggleTag(tag: string) {
+        if (this.selectedTags.has(tag)) {
+            this.selectedTags.delete(tag);
+        } else {
+            this.selectedTags.add(tag);
+        }
+    }
+
+    isTagSelected(tag: string): boolean {
+        return this.selectedTags.has(tag);
+    }
+
+    async saveTags() {
+        if (!this.selectedSong) return;
+
+        this.isLoading = true;
+        try {
+            const updatedSong = await firstValueFrom(
+                this.http.put<any>(this.apiConfig.endpoints.song.update(this.selectedSong.id), {
+                    tags: Array.from(this.selectedTags)
+                })
+            );
+
+            // Update selected song with new data
+            this.selectedSong = {
+                ...this.selectedSong,
+                tags: updatedSong.tags,
+                updated_at: updatedSong.updated_at
+            };
+
+            // Update in songs list too
+            const songIndex = this.songs.findIndex(song => song.id === this.selectedSong!.id);
+            if (songIndex !== -1) {
+                this.songs[songIndex] = {
+                    ...this.songs[songIndex],
+                    tags: updatedSong.tags
+                };
+            }
+
+            this.editingTags = false;
+            this.selectedTags.clear();
+
+
+        } catch (error: any) {
+            this.notificationService.error(this.translate.instant("songView.errors.updatingTags", {error: error.message}));
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    getSelectedTagsDisplay(): string {
+        if (!this.selectedSong?.tags) {
+            return this.translate.instant("songView.messages.noTags");
+        }
+        const tags = this.parseTagsFromString(this.selectedSong.tags);
+        return tags.size > 0 ? Array.from(tags).join(", ") : this.translate.instant("songView.messages.noTags");
+    }
+
+    // Handlers for shared song detail panel
+    onTitleChanged(newTitle: string) {
+        this.editTitleValue = newTitle;
+        this.saveTitle();
+    }
+
+    onTagsChanged(newTags: string[]) {
+        this.selectedTags = new Set(newTags);
+        this.saveTags();
+    }
+
+    async onWorkflowChanged(newWorkflow: string) {
+        if (!this.selectedSong) return;
+
+        this.isLoading = true;
+        try {
+            const updatedSong = await firstValueFrom(
+                this.http.put<any>(this.apiConfig.endpoints.song.update(this.selectedSong.id), {
+                    workflow: newWorkflow
+                })
+            );
+
+            // Update selected song with new data
+            this.selectedSong = {
+                ...this.selectedSong,
+                workflow: updatedSong.workflow,
+                updated_at: updatedSong.updated_at
+            };
+
+            // Update in songs list too
+            const songIndex = this.songs.findIndex(song => song.id === this.selectedSong!.id);
+            if (songIndex !== -1) {
+                this.songs[songIndex] = {
+                    ...this.songs[songIndex],
+                    workflow: updatedSong.workflow
+                };
+                // Stay on current page after update
+                const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+                this.loadSongs(currentPage);
+            }
+        } catch (error: any) {
+            this.notificationService.error(this.translate.instant("songView.errors.updatingWorkflow", {error: error.message}));
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    onDownloadFlac(url: string) {
+        this.downloadFlac(url);
+    }
+
+
+    async onUpdateRating(event: { choiceId: string, rating: number | null }) {
+        try {
+            await this.songService.updateChoiceRating(event.choiceId, event.rating);
+
+            // Update the rating in the current song data
+            if (this.selectedSong && this.selectedSong.choices) {
+                const choice = this.selectedSong.choices.find((c: any) => c.id === event.choiceId);
+                if (choice) {
+                    choice.rating = event.rating;
+                }
+            }
+
+
+        } catch (error: any) {
+            this.notificationService.error(this.translate.instant("songView.errors.updatingRating", {error: error.message}));
+        }
+    }
+
+
+    // Check if a song can be deleted (not "In Use", "On Work", or assigned to a project)
+    canDeleteSong(song: any): boolean {
+        return song.workflow !== "inUse" && song.workflow !== "onWork" && !song.project_id;
+    }
+
+    // Check if the current selection contains any undeletable songs
+    hasUndeletableSongs(): boolean {
+        return this.songs.some(song =>
+            this.selectedSongIds.has(song.id) && !this.canDeleteSong(song)
+        );
+    }
+
+    // Check if a song is instrumental
+    isInstrumental(song: any): boolean {
+        return song.is_instrumental === true;
+    }
+
+    // Get the appropriate icon class for a song
+    getSongIcon(song: any): string {
+        return this.isInstrumental(song) ? "fa-guitar" : "fa-microphone";
+    }
+
+    // Get the song type display text
+    getSongTypeText(song: any): string {
+        return this.isInstrumental(song)
+            ? this.translate.instant("songView.tooltips.instrumental")
+            : this.translate.instant("songView.tooltips.withVocals");
+    }
+
+    // Workflow filter methods (for new UI)
+    onWorkflowChange(workflow: string) {
+        this.setWorkflowFilter(workflow);
+    }
+
+    getWorkflowClass(workflow: string): string {
+        if (!workflow) {
+            return "badge-no-workflow"; // No workflow set
+        }
+        switch (workflow) {
+            case "inUse":
+                return "badge-in-use";
+            case "onWork":
+                return "badge-on-work";
+            case "notUsed":
+                return "badge-not-used";
+            case "fail":
+                return "badge-fail";
+            default:
+                return "badge-no-workflow"; // Unknown workflow
+        }
+    }
+
+    getWorkflowLabel(workflow: string): string {
+        if (!workflow) {
+            return "-"; // No workflow set
+        }
+        switch (workflow) {
+            case "inUse":
+                return this.translate.instant("songView.filters.inUse");
+            case "onWork":
+                return this.translate.instant("songView.filters.onWork");
+            case "notUsed":
+                return this.translate.instant("songView.filters.notUsed");
+            case "fail":
+                return this.translate.instant("songView.filters.fail");
+            default:
+                return "-"; // Unknown workflow
+        }
+    }
+
+    navigateToSongGenerator() {
+        this.router.navigate(["/songgen"]);
+    }
+
+    /**
+     * Open dialog to assign song to a project
+     */
+    openAssignToProjectDialog() {
+        if (!this.selectedSong) {
+            return;
+        }
+
+        const dialogRef = this.dialog.open(AssignToProjectDialogComponent, {
+            width: "600px",
+            maxHeight: "90vh",
+            data: {
+                assetType: "song",
+                assetId: this.selectedSong.id
+            }
+        });
+
+        dialogRef.afterClosed().subscribe(async (result) => {
+            if (result?.success) {
+                this.notificationService.success(
+                    this.translate.instant("assignToProject.success")
+                );
+                // Reload songs to reflect updated project assignment
+                const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+                await this.loadSongs(currentPage);
+            }
+        });
+    }
+
+    /**
+     * Navigate to project overview with auto-selection
+     */
+    navigateToProject(projectId: string, event: Event): void {
+        event.stopPropagation(); // Prevent song selection
+        this.router.navigate(["/song-projects"], {
+            state: {selectedProjectId: projectId}
+        });
+    }
+
+    /**
+     * Unassign song from its project (link only, song remains)
+     */
+    async unassignFromProject(): Promise<void> {
+        if (!this.selectedSong || !this.selectedSong.project_id) {
+            return;
+        }
+
+        const confirmation = confirm(
+            this.translate.instant("songView.confirmations.unassignFromProject", {
+                song: this.getDisplayTitle(this.selectedSong),
+                project: this.selectedSong.project_name || ""
+            })
+        );
+
+        if (!confirmation) {
+            return;
+        }
+
+        this.isLoading = true;
+        try {
+            await this.songService.unassignFromProject(this.selectedSong.id);
+
+            this.notificationService.success(
+                this.translate.instant("songView.messages.unassignedFromProject")
+            );
+
+            // Reload songs to reflect updated project assignment
+            const currentPage = Math.floor(this.pagination.offset / this.pagination.limit);
+            await this.loadSongs(currentPage);
+
+        } catch (error: any) {
+            this.notificationService.error(
+                this.translate.instant("songView.errors.unassigningFromProject", {error: error.message})
+            );
+        } finally {
+            this.isLoading = false;
+        }
+    }
 }

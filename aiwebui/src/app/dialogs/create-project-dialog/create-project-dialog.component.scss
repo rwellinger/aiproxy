@@ -8,7 +8,7 @@ h2[mat-dialog-title] {
   margin: 0;
   padding: $spacing-md;
   color: $text-primary;
-
+  
   i {
     color: $primary-color;
     font-size: $font-xl;
@@ -57,22 +57,22 @@ mat-dialog-content {
   font-size: $font-sm;
   cursor: pointer;
   transition: all $transition-fast;
-
+  
   &:hover {
     background-color: $background-selected;
     border-color: $primary-color;
     color: $primary-color;
   }
-
+  
   i:first-child {
     color: $text-muted;
   }
-
+  
   i:last-child {
     margin-left: auto;
     font-size: $font-xs;
   }
-
+  
   .assignments-count {
     color: $text-muted;
     font-weight: normal;
@@ -95,11 +95,11 @@ mat-dialog-actions {
   display: inline-flex;
   align-items: center;
   gap: $spacing-xs;
-
+  
   i {
     font-size: $font-sm;
   }
-
+  
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -139,11 +139,11 @@ mat-dialog-actions {
   color: $text-secondary;
   font-weight: $font-weight-medium;
   font-size: $font-sm;
-
+  
   i {
     color: $text-muted;
   }
-
+  
   .assignments-count {
     color: $text-muted;
     font-weight: normal;
@@ -158,11 +158,11 @@ mat-dialog-actions {
 
 .assignment-category {
   margin-bottom: $spacing-md;
-
+  
   &:last-child {
     margin-bottom: 0;
   }
-
+  
   h4 {
     display: flex;
     align-items: center;
@@ -173,7 +173,7 @@ mat-dialog-actions {
     margin: 0 0 $spacing-xs 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-
+    
     i {
       color: $primary-color;
       font-size: $font-xs;
@@ -195,7 +195,7 @@ mat-dialog-actions {
   background-color: $background-white;
   border-radius: $border-radius-sm;
   border: 1px solid $border-light;
-
+  
   .item-title {
     flex: 1;
     font-size: $font-xs;
@@ -204,7 +204,7 @@ mat-dialog-actions {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
+  
   .item-badge {
     font-size: 10px;
     padding: 1px $spacing-xs;
@@ -212,11 +212,11 @@ mat-dialog-actions {
     background-color: rgba($primary-color, 0.1);
     color: $primary-color;
   }
-
+  
   .workflow-badge {
     text-transform: capitalize;
   }
-
+  
   .unassign-btn {
     background: none;
     border: none;
@@ -228,12 +228,12 @@ mat-dialog-actions {
     display: flex;
     align-items: center;
     justify-content: center;
-
+    
     &:hover {
       color: $danger-color;
       background-color: rgba($danger-color, 0.1);
     }
-
+    
     i {
       font-size: $font-xs;
     }
@@ -249,7 +249,7 @@ mat-dialog-actions {
   color: $text-muted;
   font-size: $font-xs;
   text-align: center;
-
+  
   i {
     color: $info-color;
     font-size: $font-lg;

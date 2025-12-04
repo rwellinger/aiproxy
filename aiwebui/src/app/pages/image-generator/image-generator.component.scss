@@ -17,6 +17,7 @@
     .image-generator-title {
       margin: 0;
       padding: 0;
+      
       h2 {
         display: flex;
         align-items: center;
@@ -24,7 +25,7 @@
         font-weight: 600;
         line-height: 1.5;
         font-size: 1.25rem;
-
+        
         i {
           color: $primary-color;
         }
@@ -230,7 +231,7 @@
   margin-top: $spacing-20;
   padding-top: $spacing-20;
   border-top: 1px solid $border-light;
-
+  
   .section-title {
     font-size: $font-lg;
     font-weight: $font-weight-medium;
@@ -239,24 +240,24 @@
     display: flex;
     align-items: center;
     gap: $spacing-10;
-
+    
     i {
       color: $primary-color;
     }
   }
-
+  
   // Style Selectors Grid (2x2)
   .style-selectors {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $spacing-15;
     margin-bottom: $spacing-15;
-
+    
     .style-field {
       width: 100%;
     }
   }
-
+  
   // Detail Level & Enhancement Quality (Side by Side)
   .detail-enhancement-row {
     display: grid;
@@ -277,7 +278,7 @@
   background-color: $ai-color !important;
   flex: 1;
   font-weight: $font-weight-medium !important;
-
+  
   &:hover:not(:disabled) {
     background-color: $ai-hover !important;
   }
@@ -516,7 +517,7 @@
     gap: 1rem;
     height: auto;
   }
-
+  
   .image-creation-section {
     height: auto;
     max-height: 50vh;
@@ -524,13 +525,13 @@
     border-bottom: 1px solid $border-light;
     padding: $spacing-sm;
   }
-
+  
   .generated-image-section {
     height: auto;
     max-height: 50vh;
     padding: $spacing-sm;
   }
-
+  
   .image-creation-card,
   .generated-image-card {
     height: auto;
@@ -542,38 +543,38 @@
   .image-generator-container {
     padding: $spacing-sm;
   }
-
+  
   .generator-card {
     max-width: 100%;
     height: calc(100vh - 1rem);
   }
-
+  
   // Larger form inputs for touch
   .form-input,
   .form-textarea {
     min-height: 44px;
     font-size: 16px; // Prevent iOS zoom
   }
-
+  
   .prompt-input {
     min-height: 120px;
     font-size: 16px;
   }
-
+  
   // Vertical stacking of action buttons
   .action-section {
     flex-direction: column;
     align-items: stretch;
     gap: 0.5rem;
   }
-
+  
   .utility-actions,
   .submit-actions {
     flex-direction: column;
     width: 100%;
     gap: 0.5rem;
   }
-
+  
   // Full-width buttons with larger touch targets
   .utility-button,
   .generate-button,
@@ -582,13 +583,13 @@
     height: 60px;
     font-size: 1rem;
   }
-
+  
   // Grid Position Selector - larger touch targets
   .grid-position-button {
     min-width: 44px;
     min-height: 44px;
   }
-
+  
   // Style selectors - 2 columns on iPad
   .style-selectors {
     grid-template-columns: repeat(2, 1fr);
@@ -598,7 +599,7 @@
 @media (max-width: 1024px) {
   .image-generator-container {
     padding: 1rem;
-
+    
     .generator-grid {
       gap: 1rem;
     }
@@ -608,10 +609,10 @@
 @media (max-width: 768px) {
   .image-generator-container {
     padding: 1rem;
-
+    
     .generator-grid {
       gap: 1rem;
-
+      
       .image-creation-card,
       .generated-image-card {
         mat-card-content {
@@ -620,35 +621,35 @@
       }
     }
   }
-
+  
   .controls-content {
     padding: 1rem;
   }
-
+  
   .image-actions {
     flex-direction: column;
     gap: 8px;
   }
-
+  
   .action-button {
     width: 100%;
   }
-
+  
   .button-group {
     flex-direction: column;
   }
-
+  
   .reset-button {
     flex: 1;
   }
-
+  
   // Style Preferences Responsive
   .style-preferences-section {
     .style-selectors {
       grid-template-columns: 1fr; // Single column on mobile
       gap: $spacing-10;
     }
-
+    
     .detail-enhancement-row {
       grid-template-columns: 1fr; // Stack vertically on mobile
     }
@@ -661,14 +662,14 @@
     height: auto;
     overflow: visible;
   }
-
+  
   .image-creation-section,
   .generated-image-section {
     height: auto;
     max-height: none;
     overflow-y: auto;
   }
-
+  
   .image-creation-card,
   .generated-image-card {
     height: auto;

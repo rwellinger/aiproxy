@@ -133,7 +133,8 @@
                 </button>
 
                 <span class="pagination-info">
-                    {{ Math.floor(pagination.offset / pagination.limit) + 1 }} / {{ Math.ceil(pagination.total / pagination.limit) }}
+                    {{ Math.floor(pagination.offset / pagination.limit) + 1 }}
+                    / {{ Math.ceil(pagination.total / pagination.limit) }}
                 </span>
 
                 <button type="button"
@@ -155,7 +156,8 @@
                     <div class="detail-title-group">
                         <h3>{{ getTemplateDisplayName(selectedTemplate) }}</h3>
                         <div class="detail-subtitle">
-                            <span class="version-badge" *ngIf="selectedTemplate.version">v{{ selectedTemplate.version }}</span>
+                            <span class="version-badge"
+                                  *ngIf="selectedTemplate.version">v{{ selectedTemplate.version }}</span>
                             <span class="status-badge" [class.active]="selectedTemplate.active">
                                 {{ (selectedTemplate.active ? 'promptTemplates.list.status.active' : 'promptTemplates.list.status.inactive') | translate }}
                             </span>

@@ -1,120 +1,120 @@
-import {Routes} from '@angular/router';
-import { AuthGuard } from './guards/auth.guard';
+import {Routes} from "@angular/router";
+import {AuthGuard} from "./guards/auth.guard";
 
 export const routes: Routes = [
-    {path: '', redirectTo: '/ai-chat', pathMatch: 'full'},
+    {path: "", redirectTo: "/ai-chat", pathMatch: "full"},
     {
-        path: 'login',
-        loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
+        path: "login",
+        loadComponent: () => import("./auth/login/login.component").then(m => m.LoginComponent)
     },
     {
-        path: 'ai-chat',
+        path: "ai-chat",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/ai-chat/ai-chat.component').then(m => m.AiChatComponent)
+        loadComponent: () => import("./pages/ai-chat/ai-chat.component").then(m => m.AiChatComponent)
     },
     {
-        path: 'openai-chat',
+        path: "openai-chat",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/openai-chat/openai-chat.component').then(m => m.OpenaiChatComponent)
+        loadComponent: () => import("./pages/openai-chat/openai-chat.component").then(m => m.OpenaiChatComponent)
     },
     {
-        path: 'songgen',
+        path: "songgen",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/song-generator/song-generator.component').then(m => m.SongGeneratorComponent)
+        loadComponent: () => import("./pages/song-generator/song-generator.component").then(m => m.SongGeneratorComponent)
     },
     {
-        path: 'songview',
+        path: "songview",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/song-view/song-view.component').then(m => m.SongViewComponent)
+        loadComponent: () => import("./pages/song-view/song-view.component").then(m => m.SongViewComponent)
     },
     {
-        path: 'song-sketch-creator',
+        path: "song-sketch-creator",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/song-sketch-creator/song-sketch-creator.component').then(m => m.SongSketchCreatorComponent)
+        loadComponent: () => import("./pages/song-sketch-creator/song-sketch-creator.component").then(m => m.SongSketchCreatorComponent)
     },
     {
-        path: 'song-sketch-library',
+        path: "song-sketch-library",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/song-sketch-library/song-sketch-library.component').then(m => m.SongSketchLibraryComponent)
+        loadComponent: () => import("./pages/song-sketch-library/song-sketch-library.component").then(m => m.SongSketchLibraryComponent)
     },
     {
-        path: 'lyriccreation',
+        path: "lyriccreation",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/lyric-creation/lyric-creation.component').then(m => m.LyricCreationComponent)
+        loadComponent: () => import("./pages/lyric-creation/lyric-creation.component").then(m => m.LyricCreationComponent)
     },
     {
-        path: 'music-style-prompt',
+        path: "music-style-prompt",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/music-style-prompt/music-style-prompt.component').then(m => m.MusicStylePromptComponent)
+        loadComponent: () => import("./pages/music-style-prompt/music-style-prompt.component").then(m => m.MusicStylePromptComponent)
     },
     {
-        path: 'imagegen',
+        path: "imagegen",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/image-generator/image-generator.component').then(m => m.ImageGeneratorComponent)
+        loadComponent: () => import("./pages/image-generator/image-generator.component").then(m => m.ImageGeneratorComponent)
     },
     {
-        path: 'imageview',
+        path: "imageview",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/image-view/image-view.component').then(m => m.ImageViewComponent)
+        loadComponent: () => import("./pages/image-view/image-view.component").then(m => m.ImageViewComponent)
     },
     {
-        path: 'profile',
+        path: "profile",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/user-profile/user-profile.component').then(m => m.UserProfileComponent)
+        loadComponent: () => import("./pages/user-profile/user-profile.component").then(m => m.UserProfileComponent)
     },
     {
-        path: 'prompt-templates',
+        path: "prompt-templates",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/prompt-templates/prompt-templates.component').then(m => m.PromptTemplatesComponent)
+        loadComponent: () => import("./pages/prompt-templates/prompt-templates.component").then(m => m.PromptTemplatesComponent)
     },
     {
-        path: 'prompt-template-editor',
+        path: "prompt-template-editor",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/prompt-template-editor/prompt-template-editor.component').then(m => m.PromptTemplateEditorComponent)
+        loadComponent: () => import("./pages/prompt-template-editor/prompt-template-editor.component").then(m => m.PromptTemplateEditorComponent)
     },
     {
-        path: 'lyric-parsing-rules',
+        path: "lyric-parsing-rules",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/lyric-parsing-rules/lyric-parsing-rules.component').then(m => m.LyricParsingRulesComponent)
+        loadComponent: () => import("./pages/lyric-parsing-rules/lyric-parsing-rules.component").then(m => m.LyricParsingRulesComponent)
     },
     {
-        path: 'text-overlay-editor',
+        path: "text-overlay-editor",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/text-overlay-editor/text-overlay-editor.component').then(m => m.TextOverlayEditorComponent)
+        loadComponent: () => import("./pages/text-overlay-editor/text-overlay-editor.component").then(m => m.TextOverlayEditorComponent)
     },
     {
-        path: 'equipment-gallery',
+        path: "equipment-gallery",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/equipment-gallery/equipment-gallery.component').then(m => m.EquipmentGalleryComponent)
+        loadComponent: () => import("./pages/equipment-gallery/equipment-gallery.component").then(m => m.EquipmentGalleryComponent)
     },
     {
-        path: 'equipment-editor',
+        path: "equipment-editor",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/equipment-editor/equipment-editor.component').then(m => m.EquipmentEditorComponent)
+        loadComponent: () => import("./pages/equipment-editor/equipment-editor.component").then(m => m.EquipmentEditorComponent)
     },
     {
-        path: 'equipment-editor/:id',
+        path: "equipment-editor/:id",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/equipment-editor/equipment-editor.component').then(m => m.EquipmentEditorComponent)
+        loadComponent: () => import("./pages/equipment-editor/equipment-editor.component").then(m => m.EquipmentEditorComponent)
     },
     {
-        path: 'song-projects',
+        path: "song-projects",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/song-projects/song-projects.component').then(m => m.SongProjectsComponent)
+        loadComponent: () => import("./pages/song-projects/song-projects.component").then(m => m.SongProjectsComponent)
     },
     {
-        path: 'song-releases/new',
+        path: "song-releases/new",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/song-release-editor/song-release-editor.component').then(m => m.SongReleaseEditorComponent)
+        loadComponent: () => import("./pages/song-release-editor/song-release-editor.component").then(m => m.SongReleaseEditorComponent)
     },
     {
-        path: 'song-releases/edit/:id',
+        path: "song-releases/edit/:id",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/song-release-editor/song-release-editor.component').then(m => m.SongReleaseEditorComponent)
+        loadComponent: () => import("./pages/song-release-editor/song-release-editor.component").then(m => m.SongReleaseEditorComponent)
     },
     {
-        path: 'song-releases',
+        path: "song-releases",
         canActivate: [AuthGuard],
-        loadComponent: () => import('./pages/song-release-gallery/song-release-gallery.component').then(m => m.SongReleaseGalleryComponent)
+        loadComponent: () => import("./pages/song-release-gallery/song-release-gallery.component").then(m => m.SongReleaseGalleryComponent)
     }
 ];

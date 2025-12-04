@@ -1,21 +1,32 @@
-import {Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnInit, OnChanges, SimpleChanges, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {HttpClient} from '@angular/common/http';
-import {firstValueFrom} from 'rxjs';
-import {TranslateModule, TranslateService} from '@ngx-translate/core';
-import {SongService} from '../../services/business/song.service';
-import {NotificationService} from '../../services/ui/notification.service';
-import {ApiConfigService} from '../../services/config/api-config.service';
-import {ResourceBlobService} from '../../services/ui/resource-blob.service';
-import {MUSIC_STYLE_CATEGORIES} from '../../models/music-style-chooser.model';
+import {
+    Component,
+    ElementRef,
+    EventEmitter,
+    inject,
+    Input,
+    OnChanges,
+    OnInit,
+    Output,
+    SimpleChanges,
+    ViewChild
+} from "@angular/core";
+import {CommonModule} from "@angular/common";
+import {FormsModule} from "@angular/forms";
+import {HttpClient} from "@angular/common/http";
+import {firstValueFrom} from "rxjs";
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
+import {SongService} from "../../services/business/song.service";
+import {NotificationService} from "../../services/ui/notification.service";
+import {ApiConfigService} from "../../services/config/api-config.service";
+import {ResourceBlobService} from "../../services/ui/resource-blob.service";
+import {MUSIC_STYLE_CATEGORIES} from "../../models/music-style-chooser.model";
 
 @Component({
-    selector: 'app-song-detail-panel',
+    selector: "app-song-detail-panel",
     standalone: true,
     imports: [CommonModule, FormsModule, TranslateModule],
-    templateUrl: './song-detail-panel.component.html',
-    styleUrl: './song-detail-panel.component.scss'
+    templateUrl: "./song-detail-panel.component.html",
+    styleUrl: "./song-detail-panel.component.scss"
 })
 export class SongDetailPanelComponent implements OnInit, OnChanges {
     @Input() song: any = null;
@@ -24,10 +35,10 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     @Input() showEditTags: boolean = true;
     @Input() showEditWorkflow: boolean = true;
     @Input() showRating: boolean = true;
-    @Input() title: string = 'Song Details';
-    @Input() showMetaInfo: string[] = ['job_id', 'model', 'status', 'created', 'completed'];
-    @Input() placeholderText: string = 'Select a song from the list to view details';
-    @Input() placeholderIcon: string = 'fas fa-music';
+    @Input() title: string = "Song Details";
+    @Input() showMetaInfo: string[] = ["job_id", "model", "status", "created", "completed"];
+    @Input() placeholderText: string = "Select a song from the list to view details";
+    @Input() placeholderIcon: string = "fas fa-music";
     @Input() currentlyPlayingId: string | null = null;
     @Input() isGenerating: boolean = false;
 
@@ -49,8 +60,8 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     @Output() copyLyrics = new EventEmitter<void>();
     @Output() updateRating = new EventEmitter<{ choiceId: string, rating: number | null }>();
 
-    @ViewChild('titleInput') titleInput!: ElementRef;
-    @ViewChild('lyricsTextarea') lyricsTextarea!: ElementRef;
+    @ViewChild("titleInput") titleInput!: ElementRef;
+    @ViewChild("lyricsTextarea") lyricsTextarea!: ElementRef;
 
     // Services
     private songService = inject(SongService);
@@ -62,11 +73,11 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
 
     // Component state
     editingTitle = false;
-    editTitleValue = '';
+    editTitleValue = "";
     editingTags = false;
     selectedTags: string[] = [];
     editingWorkflow = false;
-    selectedWorkflow = '';
+    selectedWorkflow = "";
     showLyricsDialog = false;
 
     // Tag categories from shared constants
@@ -102,20 +113,20 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
             await this.reloadSong();
 
         } catch (error: any) {
-            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.updateTitle')}: ${error.message}`);
+            this.notificationService.error(`${this.translate.instant("songDetailPanel.errors.updateTitle")}: ${error.message}`);
         }
     }
 
     cancelEditTitle() {
         this.editingTitle = false;
-        this.editTitleValue = '';
+        this.editTitleValue = "";
     }
 
     // Tags editing methods
     startEditTags() {
         if (!this.showEditTags || !this.song) return;
         this.editingTags = true;
-        this.selectedTags = this.song.tags ? this.song.tags.split(',').map((tag: string) => tag.trim()) : [];
+        this.selectedTags = this.song.tags ? this.song.tags.split(",").map((tag: string) => tag.trim()) : [];
     }
 
     async saveTags() {
@@ -135,7 +146,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
             await this.reloadSong();
 
         } catch (error: any) {
-            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.updateTags')}: ${error.message}`);
+            this.notificationService.error(`${this.translate.instant("songDetailPanel.errors.updateTags")}: ${error.message}`);
         }
     }
 
@@ -158,7 +169,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     }
 
     getSelectedTagsDisplay(): string {
-        if (!this.song?.tags) return this.translate.instant('songDetailPanel.tags.noTags');
+        if (!this.song?.tags) return this.translate.instant("songDetailPanel.tags.noTags");
         return this.song.tags;
     }
 
@@ -166,7 +177,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     startEditWorkflow() {
         if (!this.showEditWorkflow || !this.song) return;
         this.editingWorkflow = true;
-        this.selectedWorkflow = this.song.workflow || '';
+        this.selectedWorkflow = this.song.workflow || "";
     }
 
     async saveWorkflow() {
@@ -186,17 +197,17 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
             await this.reloadSong();
 
         } catch (error: any) {
-            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.updateWorkflow')}: ${error.message}`);
+            this.notificationService.error(`${this.translate.instant("songDetailPanel.errors.updateWorkflow")}: ${error.message}`);
         }
     }
 
     cancelEditWorkflow() {
         this.editingWorkflow = false;
-        this.selectedWorkflow = '';
+        this.selectedWorkflow = "";
     }
 
     getWorkflowDisplay(): string {
-        if (!this.song?.workflow) return this.translate.instant('songDetailPanel.workflow.noWorkflow');
+        if (!this.song?.workflow) return this.translate.instant("songDetailPanel.workflow.noWorkflow");
         const option = this.workflowOptions.find(opt => opt.value === this.song.workflow);
         return option?.label || this.song.workflow;
     }
@@ -210,12 +221,12 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
         this.resourceBlobService.getResourceBlobUrl(backendUrl).subscribe({
             next: (blobUrl) => {
                 if (blobUrl) {
-                    this.playAudio.emit({ url: blobUrl, id, choiceNumber });
+                    this.playAudio.emit({url: blobUrl, id, choiceNumber});
                 }
             },
             error: (error) => {
-                console.error('Failed to load audio:', error);
-                this.notificationService.error(this.translate.instant('songDetailPanel.errors.loadAudio'));
+                console.error("Failed to load audio:", error);
+                this.notificationService.error(this.translate.instant("songDetailPanel.errors.loadAudio"));
             }
         });
     }
@@ -237,19 +248,19 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
                     })
                 ),
                 this.delay(120000).then(() => {
-                    throw new Error(this.translate.instant('songDetailPanel.errors.stemTimeout'));
+                    throw new Error(this.translate.instant("songDetailPanel.errors.stemTimeout"));
                 })
             ]);
 
-            if (data.status === 'SUCCESS' && data.result && data.result.zip_url) {
+            if (data.status === "SUCCESS" && data.result && data.result.zip_url) {
                 await this.reloadSong();
             } else {
-                this.notificationService.error(this.translate.instant('songDetailPanel.errors.stemFailed'));
+                this.notificationService.error(this.translate.instant("songDetailPanel.errors.stemFailed"));
             }
 
 
         } catch (error: any) {
-            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.generateStem')}: ${error.message}`);
+            this.notificationService.error(`${this.translate.instant("songDetailPanel.errors.generateStem")}: ${error.message}`);
         } finally {
             this.stemGenerationInProgress.delete(choiceId);
         }
@@ -270,14 +281,14 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
         try {
             await this.songService.updateChoiceRating(choiceId, rating);
 
-            this.updateRating.emit({ choiceId, rating });
+            this.updateRating.emit({choiceId, rating});
 
             // Auto-refresh to show updated rating
             await this.reloadSong();
 
         } catch (error: any) {
-            console.error('Rating update error:', error);
-            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.updateRating')}: ${error.message}`);
+            console.error("Rating update error:", error);
+            this.notificationService.error(`${this.translate.instant("songDetailPanel.errors.updateRating")}: ${error.message}`);
         }
     }
 
@@ -296,44 +307,44 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
 
     // Utility methods
     getDisplayTitle(song: any): string {
-        if (!song) return '';
-        return song.title || song.lyrics?.slice(0, 50) + (song.lyrics?.length > 50 ? '...' : '') || this.translate.instant('songDetailPanel.untitled');
+        if (!song) return "";
+        return song.title || song.lyrics?.slice(0, 50) + (song.lyrics?.length > 50 ? "..." : "") || this.translate.instant("songDetailPanel.untitled");
     }
 
     formatDateDetailed(dateString: string): string {
-        if (!dateString) return '';
-        return new Date(dateString).toLocaleDateString('de-DE', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
+        if (!dateString) return "";
+        return new Date(dateString).toLocaleDateString("de-DE", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
         });
     }
 
     formatDuration(createdAt: string, completedAt: string): string {
-        if (!createdAt || !completedAt) return '';
+        if (!createdAt || !completedAt) return "";
 
         const created = new Date(createdAt);
         const completed = new Date(completedAt);
         const diffMs = completed.getTime() - created.getTime();
 
-        if (diffMs < 0) return '';
+        if (diffMs < 0) return "";
 
         const totalMinutes = Math.floor(diffMs / (1000 * 60));
         const hours = Math.floor(totalMinutes / 60);
         const minutes = totalMinutes % 60;
 
         if (hours > 0) {
-            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}h`;
+            return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}h`;
         } else {
-            return `${minutes.toString().padStart(2, '0')}:${Math.floor((diffMs % (1000 * 60)) / 1000).toString().padStart(2, '0')}m`;
+            return `${minutes.toString().padStart(2, "0")}:${Math.floor((diffMs % (1000 * 60)) / 1000).toString().padStart(2, "0")}m`;
         }
     }
 
     formatDateShort(dateString: string): string {
-        if (!dateString) return '';
-        return new Date(dateString).toLocaleDateString('de-DE');
+        if (!dateString) return "";
+        return new Date(dateString).toLocaleDateString("de-DE");
     }
 
     shouldShowMetaInfo(type: string): boolean {
@@ -343,11 +354,11 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     ngOnInit() {
         // Initialize workflow options with translated labels
         this.workflowOptions = [
-            { value: '', label: this.translate.instant('songDetailPanel.workflow.noWorkflow') },
-            { value: 'inUse', label: this.translate.instant('songDetailPanel.workflow.inUse') },
-            { value: 'onWork', label: this.translate.instant('songDetailPanel.workflow.onWork') },
-            { value: 'notUsed', label: this.translate.instant('songDetailPanel.workflow.notUsed') },
-            { value: 'fail', label: this.translate.instant('songDetailPanel.workflow.fail') }
+            {value: "", label: this.translate.instant("songDetailPanel.workflow.noWorkflow")},
+            {value: "inUse", label: this.translate.instant("songDetailPanel.workflow.inUse")},
+            {value: "onWork", label: this.translate.instant("songDetailPanel.workflow.onWork")},
+            {value: "notUsed", label: this.translate.instant("songDetailPanel.workflow.notUsed")},
+            {value: "fail", label: this.translate.instant("songDetailPanel.workflow.fail")}
         ];
 
         if (this.songId) {
@@ -356,7 +367,7 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes['songId'] && this.songId && this.songId !== changes['songId'].previousValue) {
+        if (changes["songId"] && this.songId && this.songId !== changes["songId"].previousValue) {
             this.loadSongFromDB(this.songId);
         }
     }
@@ -379,8 +390,8 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
                 this.song = response;
             }
         } catch (error: any) {
-            this.loadingError = `${this.translate.instant('songDetailPanel.errors.loadSong')}: ${error.message}`;
-            this.notificationService.error(`${this.translate.instant('songDetailPanel.errors.loadSongDetails')}: ${error.message}`);
+            this.loadingError = `${this.translate.instant("songDetailPanel.errors.loadSong")}: ${error.message}`;
+            this.notificationService.error(`${this.translate.instant("songDetailPanel.errors.loadSongDetails")}: ${error.message}`);
             this.song = null;
         } finally {
             this.isLoading = false;
@@ -394,14 +405,14 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
 
     // Get the appropriate icon class for a song
     getSongIcon(song: any): string {
-        return this.isInstrumental(song) ? 'fa-guitar' : 'fa-microphone';
+        return this.isInstrumental(song) ? "fa-guitar" : "fa-microphone";
     }
 
     // Get the song type display text
     getSongTypeText(song: any): string {
         return this.isInstrumental(song)
-            ? this.translate.instant('songDetailPanel.type.instrumental')
-            : this.translate.instant('songDetailPanel.type.withVocals');
+            ? this.translate.instant("songDetailPanel.type.instrumental")
+            : this.translate.instant("songDetailPanel.type.withVocals");
     }
 
     // === Copy to Clipboard ===
@@ -410,10 +421,10 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
         if (!text) return;
 
         navigator.clipboard.writeText(text).then(() => {
-            this.notificationService.success(this.translate.instant('songDetailPanel.idCopied'));
+            this.notificationService.success(this.translate.instant("songDetailPanel.idCopied"));
         }).catch(err => {
-            console.error('Failed to copy to clipboard:', err);
-            this.notificationService.error(this.translate.instant('songDetailPanel.errors.copyFailed'));
+            console.error("Failed to copy to clipboard:", err);
+            this.notificationService.error(this.translate.instant("songDetailPanel.errors.copyFailed"));
         });
     }
 }

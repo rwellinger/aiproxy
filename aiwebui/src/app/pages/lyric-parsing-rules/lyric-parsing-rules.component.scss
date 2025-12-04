@@ -6,13 +6,13 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-
+  
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
-
+    
     h1 {
       display: flex;
       align-items: center;
@@ -20,23 +20,23 @@
       margin: 0;
       font-size: 1.75rem;
       font-weight: 500;
-
+      
       i {
         color: #1976d2;
       }
     }
-
+    
     button mat-icon {
       margin-right: 0.5rem;
     }
   }
-
+  
   .header__title-group {
     display: flex;
     align-items: center;
     gap: 0.75rem;
   }
-
+  
   .rules-count-badge {
     display: inline-block;
     padding: 4px 8px;
@@ -47,73 +47,73 @@
     border-radius: 12px;
     white-space: nowrap;
   }
-
+  
   .table-card {
     padding: 0;
     overflow-y: auto;
     flex: 1;
-
+    
     .rules-table {
       width: 100%;
-
+      
       th {
         font-weight: 600;
         background-color: #f5f5f5;
         padding: 1rem;
-
+        
         &.col-active {
           width: 80px;
           text-align: center;
         }
-
+        
         &.col-order {
           width: 60px;
         }
       }
-
+      
       td {
         padding: 1rem;
         border-bottom: 1px solid #e0e0e0;
-
+        
         &.col-active {
           text-align: center;
           padding: 0.5rem;
         }
-
+        
         &.col-order {
           padding: 0.5rem 1rem;
         }
       }
-
+      
       .rule-name {
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
-
+        
         small {
           color: #666;
           font-size: 0.85rem;
         }
       }
-
+      
       .type-badge {
         display: inline-block;
         padding: 0.25rem 0.75rem;
         border-radius: 12px;
         font-size: 0.85rem;
         font-weight: 500;
-
+        
         &.type-cleanup {
           background-color: #e3f2fd;
           color: #1976d2;
         }
-
+        
         &.type-section {
           background-color: #f3e5f5;
           color: #7b1fa2;
         }
       }
-
+      
       .pattern-code,
       .replacement-code {
         font-family: 'Courier New', monospace;
@@ -127,7 +127,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-
+      
       .drag-handle {
         cursor: grab;
         color: #999;
@@ -136,51 +136,51 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
+        
         &:hover {
           color: #1976d2;
         }
-
+        
         &:active {
           cursor: grabbing;
         }
-
+        
         i {
           font-size: 1.2rem;
         }
       }
-
+      
       .action-buttons {
         display: flex;
         gap: 0.25rem;
-
+        
         button {
           width: 36px;
           height: 36px;
         }
       }
     }
-
+    
     // Drag & Drop Row Styles
     tr.mat-row {
       transition: background-color 0.2s ease;
-
+      
       &:hover {
         background-color: #f5f5f5;
         cursor: pointer;
       }
-
+      
       &.cdk-drag-placeholder {
         opacity: 0.5;
         background: #e0e0e0;
         border: 2px dashed #999;
       }
-
+      
       &.cdk-drag-animating {
         transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
       }
     }
-
+    
     .cdk-drag-preview {
       box-sizing: border-box;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -188,21 +188,21 @@
       border: 2px solid #1976d2;
       border-radius: 4px;
       opacity: 0.95;
-
+      
       .mat-cell {
         border-bottom: none;
       }
     }
-
+    
     .cdk-drop-list-dragging .cdk-drag {
       transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
     }
-
+    
     .empty-state {
       text-align: center;
       padding: 3rem 1rem;
       color: #999;
-
+      
       mat-icon {
         font-size: 64px;
         width: 64px;
@@ -210,19 +210,19 @@
         margin-bottom: 1rem;
         opacity: 0.5;
       }
-
+      
       p {
         font-size: 1.1rem;
       }
     }
-
+    
     .loading-state {
       text-align: center;
       padding: 3rem 1rem;
       color: #666;
     }
   }
-
+  
   .dialog-overlay {
     position: fixed;
     top: 0;
@@ -234,74 +234,74 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
-
+    
     .dialog-card {
       width: 90%;
       max-width: 900px;
       max-height: 85vh;
       overflow-y: auto;
       padding: 1.5rem;
-
+      
       h2 {
         margin-top: 0;
         margin-bottom: 1.5rem;
         font-size: 1.5rem;
         font-weight: 500;
       }
-
+      
       form {
         display: flex;
         flex-direction: column;
         gap: 1rem;
-
+        
         .form-layout {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 1.5rem;
-
+          
           .definition-column {
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
-
+            
             mat-form-field {
               width: 100%;
             }
           }
-
+          
           .preview-column {
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
-
+            
             h3 {
               margin: 0 0 0.5rem 0;
               font-size: 1.1rem;
               font-weight: 500;
             }
-
+            
             mat-form-field {
               width: 100%;
             }
-
+            
             textarea {
               font-family: 'Courier New', monospace;
               font-size: 0.9rem;
             }
           }
-
+          
           .preview-diff-container {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
           }
-
+          
           .preview-diff-label {
             font-size: 0.875rem;
             font-weight: 500;
             color: rgba(0, 0, 0, 0.87);
           }
-
+          
           .preview-diff-content {
             min-height: 200px;
             max-height: 400px;
@@ -317,7 +317,7 @@
             word-wrap: break-word;
           }
         }
-
+        
         .dialog-actions {
           display: flex;
           justify-content: flex-end;
@@ -327,7 +327,7 @@
       }
     }
   }
-
+  
   // Toggle field styling (BEM pattern)
   .toggle-field {
     display: flex;
@@ -336,12 +336,12 @@
     padding: 0.5rem 0;
     margin-bottom: 0.25rem;
   }
-
+  
   .toggle-field__label {
     font-size: 1rem;
     color: rgba(0, 0, 0, 0.87);
   }
-
+  
   // Override global form button styles for Material toggle
   form .toggle-field mat-slide-toggle button {
     background: none !important;
@@ -350,7 +350,7 @@
     min-height: unset !important;
     border-radius: 0 !important;
     transform: none !important;
-
+    
     &:hover {
       background: none !important;
       background-color: transparent !important;
@@ -401,7 +401,7 @@
   background-color: #e3f2fd;
   color: #1565c0;
   border-left: 3px solid #1976d2;
-
+  
   &.no-matches {
     background-color: #fafafa;
     color: #757575;
@@ -421,43 +421,43 @@
 @media (max-width: 768px) {
   .lyric-parsing-rules-container {
     padding: 1rem;
-
+    
     .header {
       flex-direction: column;
       align-items: stretch;
       gap: 1rem;
-
+      
       h1 {
         font-size: 1.5rem;
       }
-
+      
       button {
         width: 100%;
       }
     }
-
+    
     .table-card .rules-table {
       font-size: 0.85rem;
-
+      
       th,
       td {
         padding: 0.5rem;
       }
-
+      
       .pattern-code,
       .replacement-code {
         max-width: 150px;
       }
-
+      
       .action-buttons {
         flex-wrap: wrap;
       }
     }
-
+    
     .dialog-overlay .dialog-card {
       width: 95%;
       padding: 1rem;
-
+      
       form .form-layout {
         grid-template-columns: 1fr;
         gap: 1rem;

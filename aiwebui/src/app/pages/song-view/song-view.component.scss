@@ -4,17 +4,17 @@
 .song-view-container {
   height: 100vh;
   overflow: hidden;
-
+  
   &.master-detail-layout {
     display: grid;
-    grid-template-columns: 40fr 60fr;  // 40% Liste (mehr Platz für Buttons), 60% Detail
+    grid-template-columns: 40fr 60fr; // 40% Liste (mehr Platz für Buttons), 60% Detail
     gap: 0;
-
+    
     @media (max-width: 1200px) {
-      grid-template-columns: 1fr;  // Stacked layout on smaller screens
+      grid-template-columns: 1fr; // Stacked layout on smaller screens
     }
   }
-
+  
   .song-grid {
     display: contents;
   }
@@ -37,7 +37,7 @@
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   overflow: hidden;
-
+  
   mat-card-content {
     padding: 0;
     flex: 1;
@@ -52,14 +52,14 @@
   align-items: center;
   padding: $spacing-md;
   border-bottom: 1px solid $border-light;
-
+  
   .header-title {
     .header-title-group {
       display: flex;
       align-items: center;
       gap: $spacing-sm;
     }
-
+    
     h2 {
       display: flex;
       align-items: center;
@@ -68,12 +68,12 @@
       font-size: 1.25rem;
       font-weight: 600;
       color: $text-primary;
-
+      
       i {
         color: $primary-color;
       }
     }
-
+    
     .songs-count-badge {
       display: inline-block;
       padding: 4px 8px;
@@ -84,7 +84,7 @@
       border-radius: 12px;
       white-space: nowrap;
     }
-
+    
     .subtitle {
       margin: 0;
       color: $text-muted;
@@ -101,7 +101,7 @@
 .search-box {
   position: relative;
   margin-bottom: $spacing-sm;
-
+  
   i.fa-search {
     position: absolute;
     left: $spacing-sm;
@@ -109,14 +109,14 @@
     transform: translateY(-50%);
     color: $text-muted;
   }
-
+  
   .search-input {
     width: 100%;
     padding: $spacing-sm $spacing-sm $spacing-sm 2.5rem;
     border: 1px solid $border-standard;
     border-radius: 8px;
     font-size: $font-sm;
-
+    
     &:focus {
       outline: none;
       border-color: $primary-color;
@@ -142,17 +142,17 @@
   justify-content: center;
   transition: all 0.2s ease;
   z-index: 2;
-
+  
   &:hover:not(:disabled) {
-    background-color: rgba(0,0,0,0.1);
+    background-color: rgba(0, 0, 0, 0.1);
     color: $text-primary;
   }
-
+  
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-
+  
   i {
     font-size: 12px;
   }
@@ -161,7 +161,7 @@
 .workflow-filter {
   display: flex;
   gap: $spacing-xs;
-
+  
   .filter-btn {
     flex: 1;
     padding: $spacing-xs $spacing-sm;
@@ -171,11 +171,11 @@
     font-size: $font-sm;
     cursor: pointer;
     transition: all 0.2s ease;
-
+    
     &:hover {
       background-color: $background-light;
     }
-
+    
     &.active {
       background-color: $primary-color;
       color: $background-white;
@@ -199,54 +199,54 @@
   transition: all 0.2s ease;
   background-color: $background-white;
   position: relative;
-
+  
   &:hover {
     border-color: $primary-color;
     box-shadow: 0 2px 8px rgba($primary-color, 0.1);
   }
-
+  
   &.selected {
     border-color: $primary-color;
     background-color: rgba($primary-color, 0.05);
   }
-
+  
   &.selection-selected {
     background: linear-gradient(135deg,
-                rgba(255,193,7,0.15) 0%,
-                rgba(255,193,7,0.25) 100%) !important;
+        rgba(255, 193, 7, 0.15) 0%,
+        rgba(255, 193, 7, 0.25) 100%) !important;
     border-left: 4px solid $warning-color !important;
-    box-shadow: 0 2px 8px rgba(255,193,7,0.2);
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
   }
-
+  
   &.in-use {
     background-color: rgba(255, 193, 7, 0.1);
     border-left: 3px solid #ffc107;
   }
-
+  
   &.on-work {
     background-color: rgba(255, 152, 0, 0.1);
     border-left: 3px solid #ff9800;
   }
-
+  
   .song-checkbox {
     position: absolute;
     top: $spacing-md;
     left: $spacing-sm;
     transform: scale(1.1);
     cursor: pointer;
-
+    
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
   }
-
+  
   .song-item-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: $spacing-xs;
-
+    
     .song-title {
       margin: 0;
       font-size: 1rem;
@@ -255,27 +255,27 @@
       display: flex;
       align-items: center;
       gap: $spacing-xs;
-
+      
       i {
         font-size: 0.9rem;
-
+        
         &.fa-guitar {
           color: #8B4513;
         }
-
+        
         &.fa-microphone {
           color: #007bff;
         }
       }
     }
   }
-
+  
   .song-item-meta {
     display: flex;
     gap: $spacing-sm;
     margin-bottom: $spacing-xs;
     flex-wrap: wrap;
-
+    
     .meta-tags,
     .meta-date {
       display: flex;
@@ -283,12 +283,12 @@
       gap: $spacing-xs;
       font-size: 0.75rem;
       color: $text-muted;
-
+      
       i {
         font-size: 0.7rem;
       }
     }
-
+    
     .meta-tags {
       font-weight: 500;
       color: $primary-color;
@@ -305,18 +305,18 @@
   padding: $spacing-xl;
   text-align: center;
   color: $text-muted;
-
+  
   i {
     font-size: 3rem;
     margin-bottom: $spacing-md;
     color: $text-muted;
     opacity: 0.5;
   }
-
+  
   p {
     margin: 0 0 $spacing-md 0;
   }
-
+  
   small {
     font-size: $font-sm;
     color: $text-muted;
@@ -330,7 +330,7 @@
   gap: $spacing-md;
   padding: $spacing-md;
   border-top: 1px solid $border-light;
-
+  
   .pagination-btn {
     padding: $spacing-xs $spacing-sm;
     border: 1px solid $border-standard;
@@ -338,19 +338,19 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-
+    
     &:hover:not(:disabled) {
       background-color: $primary-color;
       color: $background-white;
       border-color: $primary-color;
     }
-
+    
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
   }
-
+  
   .pagination-info {
     font-size: $font-sm;
     color: $text-muted;
@@ -372,13 +372,13 @@
   display: flex;
   flex-direction: column;
   height: calc(100vh - 2rem);
-
+  
   mat-card-content {
     padding: 0;
     flex: 1;
     overflow-y: auto;
   }
-
+  
   mat-card-actions {
     padding: 0.75rem 1.5rem 1rem 1.5rem;
     border-top: 1px solid $border-light;
@@ -401,28 +401,28 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-
+  
   &.badge-in-use {
     background-color: #fff9c4;
     color: #f57f17;
   }
-
+  
   &.badge-on-work {
     background-color: #ffe0b2;
     color: #e65100;
   }
-
+  
   &.badge-not-used {
     background-color: #f5f5f5;
     color: #757575;
   }
-
+  
   &.badge-no-workflow {
     background-color: #e0e0e0;
     color: #9e9e9e;
     font-style: italic;
   }
-
+  
   &.badge-fail {
     background-color: #f5f5f5;
     color: #b71c1c;
@@ -440,15 +440,15 @@
   align-items: center;
   gap: $spacing-xs;
   font-weight: $font-weight-medium !important;
-
+  
   i {
     font-size: $font-base;
   }
-
+  
   span {
     display: inline-block;
   }
-
+  
   &:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -465,12 +465,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
+  
   i {
     font-size: $font-lg;
     margin: 0;
   }
-
+  
   &:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -480,21 +480,21 @@
 // Library Actions
 .library-actions {
   width: 100%;
-
+  
   .action-groups {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
     gap: 2rem;
-
+    
     .action-group-left {
       display: flex;
       gap: 0.5rem;
       align-items: center;
       flex: 1;
     }
-
+    
     .action-group-right {
       display: flex;
       gap: 0.5rem;
@@ -509,7 +509,7 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-md;
-
+  
   .assign-to-project-button {
     @include button-secondary('base');
     display: flex;
@@ -518,12 +518,12 @@
     margin: 0 auto;
     padding: $spacing-10 $spacing-md;
     font-size: 0.875rem;
-
+    
     i {
       font-size: 1rem;
     }
   }
-
+  
   .player-bar {
     width: 100%;
     max-width: 90%;
@@ -534,31 +534,31 @@
     min-height: 50px;
     display: flex;
     align-items: center;
-
+    
     .player-content {
       display: flex;
       align-items: center;
       gap: $spacing-15;
       width: 100%;
     }
-
+    
     .song-info {
       display: flex;
       align-items: center;
       gap: $spacing-10;
       min-width: 0;
       flex: 1;
-
+      
       .song-icon {
         color: $primary-color;
         font-size: $font-lg;
         flex-shrink: 0;
       }
-
+      
       .song-text {
         min-width: 0;
         flex: 1;
-
+        
         .song-title-player {
           font-size: $font-sm;
           font-weight: $font-weight-medium;
@@ -569,13 +569,13 @@
         }
       }
     }
-
+    
     .player-controls {
       display: flex;
       align-items: center;
       gap: $spacing-sm;
       flex-shrink: 0;
-
+      
       .control-btn {
         @include button-style($background-white, $text-primary);
         width: 36px;
@@ -586,30 +586,30 @@
         align-items: center;
         justify-content: center;
         border: 1px solid $border-standard;
-
+        
         &.play-btn {
           background-color: $primary-color;
           color: white;
           border-color: $primary-color;
-
+          
           &:hover:not(:disabled) {
             background-color: darken($primary-color, 10%);
           }
         }
-
+        
         i {
           font-size: $font-sm;
         }
       }
     }
-
+    
     .progress-section {
       display: flex;
       align-items: center;
       gap: $spacing-sm;
       flex: 1;
       min-width: 0;
-
+      
       .time-display {
         font-size: $font-xs;
         color: $text-muted;
@@ -617,7 +617,7 @@
         min-width: 40px;
         text-align: center;
       }
-
+      
       .progress-slider {
         flex: 1;
         height: 4px;
@@ -625,7 +625,7 @@
         border-radius: 2px;
         outline: none;
         cursor: pointer;
-
+        
         &::-webkit-slider-thumb {
           appearance: none;
           width: 14px;
@@ -634,9 +634,9 @@
           background: $primary-color;
           cursor: pointer;
           border: 2px solid white;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
-
+        
         &::-moz-range-thumb {
           width: 14px;
           height: 14px;
@@ -644,28 +644,28 @@
           background: $primary-color;
           cursor: pointer;
           border: 2px solid white;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
-
+        
         &:disabled {
           opacity: 0.5;
           cursor: not-allowed;
         }
       }
     }
-
+    
     .volume-section {
       display: flex;
       align-items: center;
       gap: $spacing-6;
       flex-shrink: 0;
-
+      
       .volume-icon {
         color: $text-muted;
         font-size: $font-sm;
         width: 14px;
       }
-
+      
       .volume-slider {
         width: 60px;
         height: 3px;
@@ -673,7 +673,7 @@
         border-radius: 2px;
         outline: none;
         cursor: pointer;
-
+        
         &::-webkit-slider-thumb {
           appearance: none;
           width: 12px;
@@ -682,7 +682,7 @@
           background: $text-muted;
           cursor: pointer;
         }
-
+        
         &::-moz-range-thumb {
           width: 12px;
           height: 12px;
@@ -693,25 +693,25 @@
         }
       }
     }
-
+    
     .player-placeholder {
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-
+      
       .placeholder-info {
         display: flex;
         align-items: center;
         gap: $spacing-sm;
         color: $text-muted;
         font-style: italic;
-
+        
         .placeholder-icon {
           font-size: $font-lg;
           opacity: 0.6;
         }
-
+        
         .placeholder-text {
           font-size: $font-sm;
         }
@@ -728,7 +728,7 @@
 .lyrics-dialog {
   background: $background-white;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   width: 850px;
   max-width: 90vw;
   height: 650px;
@@ -746,7 +746,7 @@
   border-bottom: 1px solid $border-light;
   background: $background-light;
   border-radius: $spacing-sm $spacing-sm 0 0;
-
+  
   h3 {
     margin: 0;
     color: $text-primary;
@@ -764,7 +764,7 @@
   padding: 5px;
   border-radius: $border-radius-sm;
   transition: color 0.2s ease;
-
+  
   &:hover {
     color: $text-primary;
     background: $border-light;
@@ -795,11 +795,11 @@
   color: $text-primary;
   box-sizing: border-box;
   overflow-y: auto;
-
+  
   &:focus {
     outline: none;
     border-color: $primary-color;
-    box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, .25);
   }
 }
 
@@ -833,13 +833,13 @@
   padding: 30px;
   text-align: center;
   color: $text-primary;
-
+  
   i {
     font-size: $font-3xl;
     color: $primary-color;
     margin-bottom: $spacing-15;
   }
-
+  
   p {
     margin: 0;
     font-size: $font-lg;
@@ -853,7 +853,7 @@
     gap: 1rem;
     height: auto;
   }
-
+  
   .song-library-section {
     height: auto;
     max-height: 50vh;
@@ -861,13 +861,13 @@
     border-bottom: 1px solid $border-light;
     padding: $spacing-sm;
   }
-
+  
   .song-details-section {
     height: auto;
     max-height: 50vh;
     padding: $spacing-sm;
   }
-
+  
   .song-library-card,
   .song-details-card {
     height: auto;
@@ -880,14 +880,14 @@
     height: auto;
     overflow: visible;
   }
-
+  
   .song-library-section,
   .song-details-section {
     height: auto;
     max-height: none;
     overflow-y: auto;
   }
-
+  
   .song-library-card,
   .song-details-card {
     height: auto;
@@ -902,7 +902,7 @@
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-
+  
   // Sections with adjusted heights
   .song-library-section,
   .song-details-section {
@@ -910,18 +910,18 @@
     max-height: 50vh;
     overflow-y: auto;
   }
-
+  
   // Larger touch targets for song items
   .song-item {
     min-height: 60px;
     padding: 12px;
-
+    
     &:active {
       background: rgba($primary-color, 0.08);
       transform: scale(0.99);
     }
   }
-
+  
   // Full-width action buttons
   .action-button,
   .detail-actions button {
@@ -929,13 +929,13 @@
     height: 60px;
     margin-bottom: 0.5rem;
   }
-
+  
   // Adjust card heights
   .song-library-card,
   .song-details-card {
     height: auto;
   }
-
+  
   // Player bar adjustments for touch
   .player-bar {
     .player-controls button {
@@ -948,33 +948,33 @@
 @media (max-width: 768px) {
   .song-view-container {
     padding: 1rem;
-
+    
     .song-grid {
       gap: 1rem;
-
+      
       .song-library-card,
       .song-details-card {
         min-height: 300px;
-
+        
         mat-card-content {
           padding: 0.75rem;
         }
       }
     }
   }
-
+  
   .detail-actions .player-bar {
     padding: $spacing-10;
-
+    
     .player-content {
       gap: $spacing-10;
     }
-
+    
     .progress-section .time-display {
       min-width: 35px;
       font-size: 10px;
     }
-
+    
     .volume-section {
       display: none;
     }

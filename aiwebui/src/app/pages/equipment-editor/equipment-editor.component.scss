@@ -9,7 +9,7 @@
   display: flex;
   justify-content: center;
   box-sizing: border-box;
-
+  
   // MacBook Air: Reduce container padding
   @media (max-height: 1000px) {
     padding: $spacing-sm;
@@ -39,7 +39,7 @@
 
 .header-title {
   flex: 1;
-
+  
   h2 {
     display: flex;
     align-items: center;
@@ -49,12 +49,12 @@
     font-size: 1.5rem;
     font-weight: 600;
     color: $text-primary;
-
+    
     mat-icon {
       color: $primary-color;
     }
   }
-
+  
   .subtitle {
     margin: 0;
     color: $text-muted;
@@ -72,14 +72,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
+  
   mat-icon {
     color: $text-muted;
   }
-
+  
   &:hover {
     background-color: rgba(0, 0, 0, 0.05);
-
+    
     mat-icon {
       color: $text-primary;
     }
@@ -94,7 +94,7 @@
 
 .form-content {
   padding: $spacing-lg;
-
+  
   // MacBook Air: Reduce form padding
   @media (max-height: 1000px) {
     padding: $spacing-sm $spacing-md;
@@ -109,7 +109,7 @@
   display: flex;
   gap: $spacing-md;
   align-items: flex-start;
-
+  
   // iPad/Tablet: Stack form rows vertically
   @media (max-width: 1024px) {
     flex-direction: column;
@@ -119,7 +119,7 @@
 
 .form-row__type {
   flex: 0 0 25%;
-
+  
   @media (max-width: 1024px) {
     flex: 1 1 100%;
   }
@@ -127,7 +127,7 @@
 
 .form-row__name {
   flex: 1;
-
+  
   @media (max-width: 1024px) {
     flex: 1 1 100%;
   }
@@ -135,7 +135,7 @@
 
 .form-row__version {
   flex: 0 0 20%;
-
+  
   @media (max-width: 1024px) {
     flex: 1 1 100%;
   }
@@ -143,7 +143,7 @@
 
 .form-row__half {
   flex: 1;
-
+  
   @media (max-width: 1024px) {
     flex: 1 1 100%;
   }
@@ -153,19 +153,19 @@
   margin-top: $spacing-lg;
   padding-top: $spacing-lg;
   border-top: 1px solid $border-light;
-
+  
   h3 {
     margin: 0 0 $spacing-md 0;
     font-size: $font-lg;
     font-weight: 600;
     color: $text-primary;
   }
-
+  
   // MacBook Air: Reduce section spacing
   @media (max-height: 1000px) {
     margin-top: $spacing-sm;
     padding-top: $spacing-sm;
-
+    
     h3 {
       margin: 0 0 $spacing-xs 0;
       font-size: $font-base;
@@ -194,37 +194,37 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-
+  
   mat-icon {
     font-size: 18px;
     width: 18px;
     height: 18px;
   }
-
+  
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-
+  
   &:not(:disabled):hover {
     border-color: $primary-color;
     background-color: rgba(25, 118, 210, 0.05);
   }
-
+  
   &.primary-button {
     background-color: $primary-color;
     color: white;
     border-color: $primary-color;
-
+    
     &:not(:disabled):hover {
       background-color: darken($primary-color, 10%);
     }
   }
-
+  
   &.secondary-button {
     background-color: $background-light;
     border-color: $border-light;
-
+    
     &:not(:disabled):hover {
       background-color: darken($background-light, 5%);
     }
@@ -234,25 +234,25 @@
 // Material Form Field Customization
 mat-form-field {
   margin-bottom: $spacing-sm;
-
+  
   &.full-width {
     width: 100%;
   }
-
+  
   mat-label {
     font-weight: 500;
   }
-
+  
   mat-hint {
     font-size: 0.75rem;
     color: $text-muted;
   }
-
+  
   mat-error {
     font-size: 0.75rem;
     color: #f44336;
   }
-
+  
   // MacBook Air: Reduce field spacing
   @media (max-height: 1000px) {
     margin-bottom: $spacing-xs;
@@ -265,7 +265,7 @@ mat-select {
     display: flex;
     align-items: center;
     gap: $spacing-xs;
-
+    
     mat-icon {
       font-size: 20px;
       width: 20px;
@@ -278,7 +278,7 @@ mat-select {
 button[mat-icon-button] {
   &[matSuffix] {
     color: $text-muted;
-
+    
     &:hover {
       color: $text-primary;
     }
