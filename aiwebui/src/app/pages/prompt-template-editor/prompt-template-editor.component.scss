@@ -1,5 +1,5 @@
-@import '../../../scss/variables';
-@import '../../../scss/mixins';
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
 
 // SCSS copied from lyric-creation.component.scss with renamed classes
 // (lyric-* → prompt-editor-*)

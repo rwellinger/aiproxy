@@ -1,5 +1,6 @@
-@import '../../../scss/variables';
-@import '../../../scss/mixins';
+@use "sass:color";
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
 
 /* ===== SONG PROFILE CONTAINER ===== */
 .song-profile-container {
@@ -250,8 +251,8 @@
 }
 
 .status-active {
-  background: lighten($success-color, 45%);
-  color: darken($success-color, 30%);
+  background: color.adjust($success-color, $lightness: 45%);
+  color: color.adjust($success-color, $lightness: -30%);
   
   i {
     color: $success-color;
@@ -259,8 +260,8 @@
 }
 
 .status-inactive {
-  background: lighten($danger-color, 45%);
-  color: darken($danger-color, 25%);
+  background: color.adjust($danger-color, $lightness: 45%);
+  color: color.adjust($danger-color, $lightness: -25%);
   
   i {
     color: $danger-color;
@@ -268,8 +269,8 @@
 }
 
 .status-pending {
-  background: lighten($warning-color, 45%);
-  color: darken($warning-color, 25%);
+  background: color.adjust($warning-color, $lightness: 45%);
+  color: color.adjust($warning-color, $lightness: -25%);
   
   i {
     color: $warning-color;

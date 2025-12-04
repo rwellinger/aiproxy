@@ -1,5 +1,6 @@
-@import '../../../scss/variables';
-@import '../../../scss/mixins';
+@use "sass:color";
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
 
 .music-style-prompt-container {
   height: 100vh;
@@ -138,7 +139,7 @@
   
   &.manual-mode {
     background: rgba($warning-color, 0.1);
-    color: darken($warning-color, 10%);
+    color: color.adjust($warning-color, $lightness: -10%);
     border: 1px solid rgba($warning-color, 0.3);
   }
 }

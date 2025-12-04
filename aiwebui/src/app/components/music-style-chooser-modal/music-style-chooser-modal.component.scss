@@ -1,4 +1,5 @@
-@import '../../../scss/_variables.scss';
+@use "sass:color";
+@use '../../../scss/variables' as *;
 
 .music-style-chooser-modal {
   .dialog-content {
@@ -125,8 +126,8 @@
       }
       
       &:hover {
-        background: darken($primary-color, 10%);
-        border-color: darken($primary-color, 10%);
+        background: color.adjust($primary-color, $lightness: -10%);
+        border-color: color.adjust($primary-color, $lightness: -10%);
       }
     }
     

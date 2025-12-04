@@ -1,5 +1,6 @@
-@import '../../../scss/variables';
-@import '../../../scss/mixins';
+@use "sass:color";
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
 
 .user-profile-container {
   height: 100vh;
@@ -152,8 +153,8 @@
                 color: $text-muted;
                 
                 &.active {
-                  background: lighten($success-color, 45%);
-                  color: darken($success-color, 30%);
+                  background: color.adjust($success-color, $lightness: 45%);
+                  color: color.adjust($success-color, $lightness: -30%);
                   
                   i {
                     color: $success-color;
@@ -161,8 +162,8 @@
                 }
                 
                 &.verified {
-                  background: lighten($primary-color, 40%);
-                  color: darken($primary-color, 35%);
+                  background: color.adjust($primary-color, $lightness: 40%);
+                  color: color.adjust($primary-color, $lightness: -35%);
                   
                   i {
                     color: $primary-color;
@@ -275,7 +276,7 @@
             }
             
             &:hover .mat-mdc-form-field {
-              background-color: darken($background-light, 3%);
+              background-color: color.adjust($background-light, $lightness: -3%);
             }
           }
           

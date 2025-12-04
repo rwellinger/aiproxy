@@ -1,5 +1,6 @@
-@import '../../../scss/variables';
-@import '../../../scss/mixins';
+@use "sass:color";
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
 
 .equipment-gallery-container {
   height: 100vh;
@@ -894,7 +895,7 @@
     border-color: $border-light;
     
     &:hover {
-      background-color: darken($background-light, 5%);
+      background-color: color.adjust($background-light, $lightness: -5%);
     }
   }
 }

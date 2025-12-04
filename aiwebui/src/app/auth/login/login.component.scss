@@ -1,5 +1,6 @@
-@import '../../../scss/variables';
-@import '../../../scss/mixins';
+@use "sass:color";
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
 
 .login-container {
   min-height: 100vh;
@@ -117,19 +118,19 @@
   }
   
   .global-error {
-    background: lighten($danger-color, 45%);
+    background: color.adjust($danger-color, $lightness: 45%);
     border: 1px solid $danger-color;
     border-radius: $border-radius-sm;
     padding: 0.75rem;
     margin-bottom: $spacing-md;
-    color: darken($danger-color, 10%);
+    color: color.adjust($danger-color, $lightness: -10%);
     font-size: $font-sm;
   }
   
   .login-button {
     @include button-primary('lg');
     width: 100%;
-    background: linear-gradient(135deg, darken($primary-color, 20%) 0%, darken($primary-color, 15%) 100%);
+    background: linear-gradient(135deg, color.adjust($primary-color, $lightness: -20%) 0%, color.adjust($primary-color, $lightness: -15%) 100%);
     
     &:hover:not(:disabled) {
       transform: translateY(-1px);

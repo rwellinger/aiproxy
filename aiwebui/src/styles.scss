@@ -1,12 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
-@import 'scss/variables';
-@import 'scss/mixins';
-@import 'scss/components';
-@import 'scss/touch-optimization';
+@use "@angular/material/prebuilt-themes/indigo-pink.css";
+@use "scss/variables" as *;
+@use "scss/mixins" as *;
+@use "scss/components";
+@use "scss/touch-optimization";
 
 /* Highlight.js Theme for Code Syntax Highlighting */
-@import 'highlight.js/styles/github.css';
+@use "highlight.js/styles/github.css";
 
 /* Custom Fonts for Text Overlay Editor */
 @font-face {
@@ -281,9 +281,9 @@ select {
 
 /* ===== TABLES ===== */
 .result-table {
-  @include list-table-styling();
   margin-top: $spacing-20;
-  
+  @include list-table-styling();
+
   a {
     color: $primary-color;
     text-decoration: none;

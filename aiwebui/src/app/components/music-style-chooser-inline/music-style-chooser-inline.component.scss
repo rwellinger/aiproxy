@@ -1,4 +1,5 @@
-@import '../../../scss/_variables.scss';
+@use "sass:color";
+@use '../../../scss/variables' as *;
 
 .music-style-chooser-inline {
   margin-top: $spacing-md;
@@ -59,7 +60,7 @@
     padding: $spacing-sm $spacing-md;
     background: rgba($warning-color, 0.1);
     border-bottom: 1px solid rgba($warning-color, 0.3);
-    color: darken($warning-color, 10%);
+    color: color.adjust($warning-color, $lightness: -10%);
     font-size: $font-sm;
     font-weight: $font-weight-medium;
     
@@ -278,7 +279,7 @@
       min-height: auto;
       
       &:hover {
-        background: darken($primary-color, 8%);
+        background: color.adjust($primary-color, $lightness: -8%);
         transform: translateY(-1px);
         box-shadow: 0 3px 6px rgba($primary-color, 0.3);
       }
