@@ -1,4 +1,4 @@
-@import '../../../scss/variables';
+@use '../../../scss/variables' as *;
 
 .search-replace-dialog {
   min-width: 400px;

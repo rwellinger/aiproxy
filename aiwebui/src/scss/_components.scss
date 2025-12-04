@@ -1,4 +1,6 @@
 // ===== COMPONENT-SPECIFIC SCSS PARTIALS =====
+@use "variables" as *;
+@use "mixins" as *;
 
 // Loading States - Standardized
 .loading,

@@ -1,5 +1,6 @@
-@import '../../../scss/variables';
-@import '../../../scss/mixins';
+@use "sass:color";
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
 
 .song-projects-container {
   display: grid;
@@ -449,7 +450,7 @@
         transition: border-color 0.2s ease;
         
         &:focus {
-          border-color: darken($primary-color, 10%);
+          border-color: color.adjust($primary-color, $lightness: -10%);
         }
         
         &::placeholder {

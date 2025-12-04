@@ -1,5 +1,5 @@
-@import '../../../scss/variables';
-@import '../../../scss/mixins';
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
 
 /* ===== SONG DETAILS PANEL ===== */
 .song-details-panel {
@@ -467,8 +467,8 @@
 }
 
 .choices-table {
-  @include list-table-styling($background-light, $text-primary);
   font-size: $font-sm;
+  @include list-table-styling($background-light, $text-primary);
 }
 
 .choices-table th {

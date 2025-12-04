@@ -1,4 +1,4 @@
-@import '../../../scss/_variables.scss';
+@use '../../../scss/variables' as *;
 
 .lyric-architect-modal {
   .dialog-content {

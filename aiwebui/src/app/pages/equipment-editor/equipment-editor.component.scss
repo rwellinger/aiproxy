@@ -1,5 +1,6 @@
-@import '../../../scss/variables';
-@import '../../../scss/mixins';
+@use "sass:color";
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
 
 .equipment-editor-container {
   height: 100%;
@@ -217,7 +218,7 @@
     border-color: $primary-color;
     
     &:not(:disabled):hover {
-      background-color: darken($primary-color, 10%);
+      background-color: color.adjust($primary-color, $lightness: -10%);
     }
   }
   
@@ -226,7 +227,7 @@
     border-color: $border-light;
     
     &:not(:disabled):hover {
-      background-color: darken($background-light, 5%);
+      background-color: color.adjust($background-light, $lightness: -5%);
     }
   }
 }

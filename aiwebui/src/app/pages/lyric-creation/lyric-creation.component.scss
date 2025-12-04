@@ -1,5 +1,6 @@
-@import '../../../scss/variables';
-@import '../../../scss/mixins';
+@use "sass:color";
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
 
 .lyric-creation-container {
   height: 100vh;
@@ -381,7 +382,7 @@
   
   &.active {
     border-color: $primary-color;
-    background: lighten($primary-color, 45%);
+    background: color.adjust($primary-color, $lightness: 45%);
     box-shadow: 0 2px 8px rgba($primary-color, 0.2);
     
     .section-label {

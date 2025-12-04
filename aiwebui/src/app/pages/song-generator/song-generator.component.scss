@@ -1,5 +1,6 @@
-@import '../../../scss/variables';
-@import '../../../scss/mixins';
+@use "sass:color";
+@use '../../../scss/variables' as *;
+@use '../../../scss/mixins' as *;
 
 /* ===== SONG GENERATOR CARD LAYOUT ===== */
 
@@ -770,7 +771,7 @@ form .segment-control {
           border-color: $primary-color;
           
           &:hover:not(:disabled) {
-            background-color: darken($primary-color, 10%);
+            background-color: color.adjust($primary-color, $lightness: -10%);
           }
         }
         
