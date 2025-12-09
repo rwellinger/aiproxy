@@ -43,6 +43,9 @@ export class SongGeneratorComponent implements OnInit {
     isStorageHealthy = true;
     isCheckingStorage = true;
 
+    // Available Mureka models (loaded from server)
+    availableModels: string[] = ["auto"];
+
     // Audio player state
     audioUrl: string | null = null;
     currentSongTitle: string = "";
@@ -88,6 +91,9 @@ export class SongGeneratorComponent implements OnInit {
 
         // Initialize validators based on current state
         this.updateValidators(this.songForm.get("isInstrumental")?.value || false);
+
+        // Load available models from server
+        this.loadAvailableModels();
 
         // Load sketches
         this.loadSketches();
@@ -561,6 +567,15 @@ export class SongGeneratorComponent implements OnInit {
 
         if (action === "generate") {
             this.generateTitle();
+        }
+    }
+
+    // Load available Mureka models from server
+    private async loadAvailableModels(): Promise<void> {
+        try {
+            this.availableModels = await this.songService.getAvailableModels();
+        } catch (error) {
+            console.error("Failed to load models, using fallback:", error);
         }
     }
 

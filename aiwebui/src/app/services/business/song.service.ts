@@ -122,6 +122,14 @@ export class SongService {
         localStorage.removeItem(key);
     }
 
+    async getAvailableModels(): Promise<string[]> {
+        const response = await this.httpWithTimeout<{models: string[]}>(
+            "GET",
+            this.apiConfig.endpoints.song.models
+        );
+        return response.models;
+    }
+
     async generateSong(lyrics: string, prompt: string, model: string, title?: string, sketchId?: string): Promise<SongGenerateResponse> {
         const body: any = {lyrics, model, prompt};
         if (title) body.title = title;

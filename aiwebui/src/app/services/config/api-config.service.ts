@@ -11,6 +11,7 @@ export class ApiConfigService {
     readonly endpoints = {
         song: {
             generate: `${this.baseUrl}/api/v1/song/generate`,
+            models: `${this.baseUrl}/api/v1/song/models`,
             status: (taskId: string) => `${this.baseUrl}/api/v1/song/task/status/${taskId}`,
             tasks: `${this.baseUrl}/api/v1/song/tasks`,
             stems: `${this.baseUrl}/api/v1/song/stem/generate`,

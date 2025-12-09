@@ -43,6 +43,14 @@ def mureka_account():
     return jsonify(response_data), status_code
 
 
+@api_song_v1.route("/models", methods=["GET"])
+def get_available_models():
+    """Returns available Mureka models for song generation"""
+    from config.allowed_models import MUREKA_ALLOWED_MODELS
+
+    return jsonify({"models": MUREKA_ALLOWED_MODELS}), 200
+
+
 @api_song_v1.route("/generate", methods=["POST"])
 @jwt_required
 @validate()

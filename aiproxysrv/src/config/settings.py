@@ -48,6 +48,9 @@ MUREKA_POLL_INTERVAL_LONG = int(os.getenv("MUREKA_POLL_INTERVAL_LONG", "30"))
 _mureka_choices = int(os.getenv("MUREKA_CHOICES", "2"))
 MUREKA_CHOICES = max(1, min(3, _mureka_choices))  # Enforce min=1, max=3
 
+# Mureka Models (comma-separated list of available models)
+MUREKA_MODELS = os.getenv("MUREKA_MODELS", "auto,mureka-7.6,mureka-7.5,mureka-o2,mureka-o1")
+
 # --------------------------------------------------
 # OpenAI Config (Images + Chat + Admin API)
 # --------------------------------------------------
