@@ -65,12 +65,14 @@ class SongTransformer:
                 # Legacy Mureka URLs (kept for backward compatibility)
                 "mp3_url": choice.mp3_url,
                 "flac_url": choice.flac_url,
+                "wav_url": choice.wav_url,
                 "video_url": choice.video_url,
                 "image_url": choice.image_url,
                 "stem_url": choice.stem_url,
                 # S3 storage keys (new - for lazy migration)
                 "mp3_s3_key": choice.mp3_s3_key,
                 "flac_s3_key": choice.flac_s3_key,
+                "wav_s3_key": choice.wav_s3_key,
                 "stem_s3_key": choice.stem_s3_key,
                 "stem_generated_at": choice.stem_generated_at.isoformat() if choice.stem_generated_at else None,
                 "duration": choice.duration,

@@ -165,6 +165,7 @@ class SongChoice(Base):
     # URLs and files (legacy Mureka URLs - kept for backward compatibility)
     mp3_url = Column(String(1000), nullable=True)
     flac_url = Column(String(1000), nullable=True)
+    wav_url = Column(String(1000), nullable=True)  # WAV audio URL
     video_url = Column(String(1000), nullable=True)  # Falls verfügbar
     image_url = Column(String(1000), nullable=True)  # Cover image
     stem_url = Column(String(1000), nullable=True)  # Stems ZIP file URL
@@ -172,6 +173,7 @@ class SongChoice(Base):
     # S3 storage keys (new - for lazy migration pattern)
     mp3_s3_key = Column(String(500), nullable=True)  # S3 key for MP3 audio file
     flac_s3_key = Column(String(500), nullable=True)  # S3 key for FLAC audio file
+    wav_s3_key = Column(String(500), nullable=True)  # S3 key for WAV audio file
     stem_s3_key = Column(String(500), nullable=True)  # S3 key for stems ZIP file
 
     # Metadata

@@ -534,12 +534,16 @@
   cursor: not-allowed;
 }
 
-.download-stems-btn, .download-flac-btn {
+.download-stems-btn, .download-flac-btn, .download-wav-btn {
   background-color: $primary-color !important;
 }
 
-.download-stems-btn:hover:not(:disabled), .download-flac-btn:hover:not(:disabled) {
+.download-stems-btn:hover:not(:disabled), .download-flac-btn:hover:not(:disabled), .download-wav-btn:hover:not(:disabled) {
   background-color: $primary-hover !important;
+}
+
+.download-wav-btn {
+  margin-left: $spacing-sm !important;
 }
 
 .not-available {

@@ -19,8 +19,8 @@ OLLAMA_ALLOWED_MODELS = [
 # Mureka Models (used for song generation)
 MUREKA_ALLOWED_MODELS = [
     "auto",
+    "mureka-7.6",
     "mureka-7.5",
-    "mureka-7",
-    "mureka-6",
+    "mureka-o2",
     "mureka-o1",
 ]

@@ -849,6 +849,8 @@ class SongService:
                 choice.mp3_s3_key = s3_key
             elif file_type == "flac":
                 choice.flac_s3_key = s3_key
+            elif file_type == "wav":
+                choice.wav_s3_key = s3_key
             elif file_type == "stems":
                 choice.stem_s3_key = s3_key
             else:

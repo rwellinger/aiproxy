@@ -8,6 +8,7 @@
     {
       "url": "http://localhost:3080/static/audio/0001-01.mp3",
       "flac_url": "http://localhost:3080/static/audio/0001-01.flac",
+      "wav_url": "http://localhost:3080/static/audio/0001-01.wav",
       "duration": 178120,
       "lyrics_sections": [
         {
@@ -1007,6 +1008,7 @@
       "index": 1,
       "url": "http://localhost:3080/static/audio/0001-02.mp3",
       "flac_url": "http://localhost:3080/static/audio/0001-02.flac",
+      "wav_url": "http://localhost:3080/static/audio/0001-02.wav",
       "duration": 144520,
       "lyrics_sections": [
         {

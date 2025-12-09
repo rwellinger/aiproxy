@@ -102,6 +102,7 @@ class SongMurekaTransformer:
             "choice_index": choice_data.get("index"),
             "mp3_url": choice_data.get("url"),
             "flac_url": choice_data.get("flac_url"),
+            "wav_url": choice_data.get("wav_url"),
             "video_url": choice_data.get("video_url"),
             "image_url": choice_data.get("image_url"),
             "duration": SongMurekaTransformer.parse_duration(choice_data.get("duration")),

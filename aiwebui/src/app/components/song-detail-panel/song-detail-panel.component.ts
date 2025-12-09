@@ -237,6 +237,12 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
         this.resourceBlobService.downloadResource(backendUrl, `song-choice-${choiceId}.flac`);
     }
 
+    onDownloadWav(choiceId: string) {
+        // Use authenticated download via ResourceBlobService
+        const backendUrl = this.apiConfigService.endpoints.song.choiceWav(choiceId);
+        this.resourceBlobService.downloadResource(backendUrl, `song-choice-${choiceId}.wav`);
+    }
+
     async onGenerateStem(choiceId: string) {
         this.stemGenerationInProgress.add(choiceId);
 

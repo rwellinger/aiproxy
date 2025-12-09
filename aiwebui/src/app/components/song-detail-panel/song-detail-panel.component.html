@@ -203,7 +203,7 @@
                     <thead>
                     <tr>
                         <th>{{ 'songDetailPanel.choices.duration' | translate }}</th>
-                        <th>{{ 'songDetailPanel.choices.flacFile' | translate }}</th>
+                        <th>{{ 'songDetailPanel.choices.audioDownloads' | translate }}</th>
                         <th>{{ 'songDetailPanel.choices.mp3File' | translate }}</th>
                         <th>{{ 'songDetailPanel.choices.stemGeneration' | translate }}</th>
                         <th *ngIf="showRating">{{ 'songDetailPanel.choices.rating' | translate }}</th>
@@ -219,7 +219,13 @@
                                     class="download-flac-btn">
                                 <i class="fas fa-download"></i> {{ 'songDetailPanel.choices.downloadFlac' | translate }}
                             </button>
-                            <span *ngIf="!choice.flac_url && !choice.flac_s3_key"
+                            <button type="button"
+                                    *ngIf="choice.wav_url || choice.wav_s3_key"
+                                    (click)="onDownloadWav(choice.id)"
+                                    class="download-wav-btn">
+                                <i class="fas fa-download"></i> {{ 'songDetailPanel.choices.downloadWav' | translate }}
+                            </button>
+                            <span *ngIf="!choice.flac_url && !choice.flac_s3_key && !choice.wav_url && !choice.wav_s3_key"
                                   class="not-available">{{ 'songDetailPanel.choices.notAvailable' | translate }}</span>
                         </td>
                         <td>

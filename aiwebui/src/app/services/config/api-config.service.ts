@@ -32,6 +32,7 @@ export class ApiConfigService {
             // S3 Proxy endpoints (lazy migration from Mureka CDN)
             choiceMp3: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/mp3`,
             choiceFlac: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/flac`,
+            choiceWav: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/wav`,
             choiceStems: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/stems`
         },
         image: {

@@ -479,6 +479,7 @@ class SongOrchestrator:
         s3_key_map = {
             "mp3": choice.mp3_s3_key,
             "flac": choice.flac_s3_key,
+            "wav": choice.wav_s3_key,
             "stems": choice.stem_s3_key,
         }
         return s3_key_map.get(file_type)
@@ -488,6 +489,7 @@ class SongOrchestrator:
         url_map = {
             "mp3": choice.mp3_url,
             "flac": choice.flac_url,
+            "wav": choice.wav_url,
             "stems": choice.stem_url,
         }
         return url_map.get(file_type)
@@ -515,6 +517,7 @@ class SongOrchestrator:
         content_types = {
             "mp3": "audio/mpeg",
             "flac": "audio/flac",
+            "wav": "audio/wav",
             "stems": "application/zip",
         }
         return content_types.get(file_type, "application/octet-stream")

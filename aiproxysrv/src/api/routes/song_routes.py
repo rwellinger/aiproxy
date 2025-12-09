@@ -392,6 +392,65 @@ def serve_choice_flac(choice_id: str):
         return jsonify({"error": "Failed to load FLAC"}), 500
 
 
+@api_song_v1.route("/choice/<choice_id>/wav", methods=["GET"])
+@jwt_required
+def serve_choice_wav(choice_id: str):
+    """
+    Serve song choice WAV via backend proxy (lazy migration from Mureka to S3)
+
+    CRITICAL: This endpoint implements lazy migration pattern:
+    1. Check if file exists in S3 (wav_s3_key)
+    2. If not, download from Mureka URL and upload to S3
+    3. Stream file from S3 to browser
+
+    Path Parameters:
+        - choice_id (UUID): Choice ID
+
+    Response:
+        200: Binary audio data (audio/wav)
+        401: {'error': 'Unauthorized'}
+        404: {'error': 'Choice not found' | 'WAV not available'}
+        500: {'error': 'Failed to load WAV'}
+
+    Example:
+        GET /api/v1/song/choice/550e8400-e29b-41d4-a716-446655440000/wav
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        from adapters.s3.s3_proxy_service import s3_proxy_service
+        from business.song_orchestrator import song_orchestrator
+        from config.settings import S3_SONGS_BUCKET
+
+        choice_uuid = UUID(choice_id)
+
+        logger.debug("Serving choice WAV", choice_id=choice_id, user_id=user_id)
+
+        # Get DB session
+        db: Session = next(get_db())
+        try:
+            # Lazy migration: Download from Mureka to S3 if needed
+            s3_key = song_orchestrator.migrate_choice_to_s3(db, str(choice_uuid), "wav")
+
+            # Stream from S3 using generic proxy service
+            return s3_proxy_service.serve_resource(bucket=S3_SONGS_BUCKET, s3_key=s3_key, filename="song.wav")
+
+        finally:
+            db.close()
+
+    except ValueError:
+        return jsonify({"error": "Invalid choice ID format"}), 400
+    except SongS3MigrationError as e:
+        logger.warning("WAV migration failed", choice_id=choice_id, error=str(e))
+        return jsonify({"error": "WAV not available"}), 404
+    except Exception as e:
+        logger.error("Error serving choice WAV", choice_id=choice_id, error=str(e), error_type=type(e).__name__)
+        return jsonify({"error": "Failed to load WAV"}), 500
+
+
 @api_song_v1.route("/choice/<choice_id>/stems", methods=["GET"])
 @jwt_required
 def serve_choice_stems(choice_id: str):

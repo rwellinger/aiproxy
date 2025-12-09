@@ -805,10 +805,11 @@
   },
   "songDetailPanel": {
     "choices": {
-      "downloadFlac": "Download FLAC",
+      "audioDownloads": "Audio Downloads",
+      "downloadFlac": "FLAC",
+      "downloadWav": "WAV",
       "downloadStems": "Download Stems",
       "duration": "Duration",
-      "flacFile": "FLAC File",
       "generateStems": "Generate Stems",
       "generating": "Generating...",
       "mp3File": "MP3 File",
