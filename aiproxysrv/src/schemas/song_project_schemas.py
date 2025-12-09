@@ -93,7 +93,7 @@ class AssignedSongResponse(BaseModel):
 
     id: str
     title: str | None
-    workflow: str
+    workflow: str | None
     file_type: str | None
     file_size_bytes: int | None
     created_at: str | None
@@ -109,7 +109,7 @@ class AssignedSketchResponse(BaseModel):
     title: str | None
     prompt: str
     sketch_type: str
-    workflow: str
+    workflow: str | None
     created_at: str | None
 
     class Config:

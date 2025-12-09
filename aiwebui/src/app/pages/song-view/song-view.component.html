@@ -243,10 +243,8 @@
                 <mat-card-actions align="end">
                     <div class="detail-actions">
                         <!-- Assign to Project Button -->
-                        <button
+                        <button mat-button type="button"
                                 *ngIf="selectedSong && !selectedSong.project_id"
-                                type="button"
-                                class="assign-to-project-button"
                                 (click)="openAssignToProjectDialog()"
                                 [title]="'songView.actions.assignToProject' | translate">
                             <i class="fas fa-folder-plus"></i>
@@ -254,10 +252,8 @@
                         </button>
 
                         <!-- Unassign from Project Button -->
-                        <button
+                        <button mat-button type="button"
                                 *ngIf="selectedSong && selectedSong.project_id"
-                                type="button"
-                                class="unassign-from-project-button"
                                 (click)="unassignFromProject()"
                                 [title]="'songView.actions.unassignFromProject' | translate">
                             <i class="fas fa-folder-minus"></i>

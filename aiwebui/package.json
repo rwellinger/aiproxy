@@ -1,6 +1,6 @@
 {
   "name": "aiwebui",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "scripts": {
     "ng": "ng",
     "prestart": "node scripts/update-version.js",
