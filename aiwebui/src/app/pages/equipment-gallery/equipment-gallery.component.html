@@ -510,6 +510,30 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Section 6: Attachments -->
+                <div class="detail-section-block" *ngIf="attachments.length > 0">
+                    <h3 class="section-title">
+                        <i class="fas fa-paperclip"></i>
+                        {{ 'equipment.attachments.title' | translate }}
+                    </h3>
+
+                    <div class="attachments-list">
+                        <div class="attachment-item" *ngFor="let attachment of attachments">
+                            <div class="attachment-info">
+                                <i class="fas fa-file attachment-icon"></i>
+                                <div class="attachment-details">
+                                    <span class="attachment-name">{{ attachment.filename }}</span>
+                                    <span class="attachment-meta">{{ formatFileSize(attachment.file_size) }}</span>
+                                </div>
+                            </div>
+                            <button class="download-btn" (click)="downloadAttachment(attachment)"
+                                    [title]="'equipment.attachments.download' | translate">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Detail Actions -->

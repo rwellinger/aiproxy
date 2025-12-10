@@ -244,6 +244,70 @@
                         <mat-error>{{ getFieldError('price') }}</mat-error>
                     </mat-form-field>
                 </mat-expansion-panel>
+
+                <!-- Attachments Section (only in edit mode) -->
+                <mat-expansion-panel class="form-section" *ngIf="isEditMode">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            <mat-icon>attach_file</mat-icon>
+                            {{ 'equipment.attachments.title' | translate }}
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <!-- Upload Button -->
+                    <div class="attachment-upload">
+                        <input
+                            type="file"
+                            #fileInput
+                            (change)="onFileSelect($event)"
+                            style="display: none">
+                        <button
+                            type="button"
+                            class="action-button secondary-button"
+                            (click)="fileInput.click()"
+                            [disabled]="isUploadingFile">
+                            <mat-icon>{{ isUploadingFile ? 'hourglass_empty' : 'upload' }}</mat-icon>
+                            {{ (isUploadingFile ? 'equipment.attachments.uploading' : 'equipment.attachments.upload') | translate }}
+                        </button>
+                        <span class="upload-hint">{{ 'equipment.attachments.uploadHint' | translate }}</span>
+                    </div>
+
+                    <!-- Attachments List -->
+                    <div class="attachments-list" *ngIf="attachments.length > 0">
+                        <div class="attachment-item" *ngFor="let attachment of attachments">
+                            <div class="attachment-info">
+                                <mat-icon class="attachment-icon">description</mat-icon>
+                                <div class="attachment-details">
+                                    <span class="attachment-name">{{ attachment.filename }}</span>
+                                    <span class="attachment-meta">{{ formatFileSize(attachment.file_size) }}</span>
+                                </div>
+                            </div>
+                            <div class="attachment-actions">
+                                <button
+                                    type="button"
+                                    mat-icon-button
+                                    (click)="downloadAttachment(attachment)"
+                                    [title]="'equipment.attachments.download' | translate">
+                                    <mat-icon>download</mat-icon>
+                                </button>
+                                <button
+                                    type="button"
+                                    mat-icon-button
+                                    color="warn"
+                                    (click)="deleteAttachment(attachment)"
+                                    [title]="'equipment.attachments.delete' | translate">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="attachments-empty" *ngIf="attachments.length === 0">
+                        <mat-icon>folder_open</mat-icon>
+                        <span>{{ 'equipment.attachments.empty' | translate }}</span>
+                    </div>
+                </mat-expansion-panel>
             </div>
 
             <!-- Form Actions -->

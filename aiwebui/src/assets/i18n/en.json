@@ -1704,6 +1704,21 @@
       "required": "This field is required",
       "maxLength": "Maximum {{max}} characters allowed",
       "formInvalid": "Please fill in all required fields"
+    },
+    "attachments": {
+      "title": "File Attachments",
+      "upload": "Upload File",
+      "uploading": "Uploading...",
+      "uploadHint": "Max 50 MB, no executable files",
+      "download": "Download",
+      "delete": "Delete",
+      "empty": "No attachments",
+      "uploadSuccess": "File uploaded successfully",
+      "uploadError": "Failed to upload file",
+      "deleteConfirm": "Delete attachment \"{{filename}}\"?",
+      "deleteSuccess": "Attachment deleted",
+      "deleteError": "Failed to delete attachment",
+      "downloadError": "Failed to download attachment"
     }
   },
   "songRelease": {

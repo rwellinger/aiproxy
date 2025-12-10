@@ -111,6 +111,7 @@ S3_SONG_PROJECTS_BUCKET = os.getenv("S3_SONG_PROJECTS_BUCKET", "song-projects") 
 S3_SONG_RELEASES_BUCKET = os.getenv("S3_SONG_RELEASES_BUCKET", "song-releases")  # Dedicated bucket for song releases
 S3_SONGS_BUCKET = os.getenv("S3_SONGS_BUCKET", "songs")  # Dedicated bucket for Mureka songs (MP3/FLAC/stems)
 S3_IMAGES_BUCKET = os.getenv("S3_IMAGES_BUCKET", "ai-generated-images")  # Dedicated bucket for AI-generated images
+S3_EQUIPMENT_DATA_BUCKET = os.getenv("S3_EQUIPMENT_DATA_BUCKET", "equipment-data")  # Equipment file attachments
 S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "minioadmin")
 S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "minioadmin")
 S3_REGION = os.getenv("S3_REGION", "us-east-1")

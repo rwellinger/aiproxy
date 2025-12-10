@@ -1704,6 +1704,21 @@
       "required": "Dieses Feld ist erforderlich",
       "maxLength": "Maximal {{max}} Zeichen erlaubt",
       "formInvalid": "Bitte fülle alle Pflichtfelder aus"
+    },
+    "attachments": {
+      "title": "Dateianhänge",
+      "upload": "Datei hochladen",
+      "uploading": "Wird hochgeladen...",
+      "uploadHint": "Max 50 MB, keine ausführbaren Dateien",
+      "download": "Herunterladen",
+      "delete": "Löschen",
+      "empty": "Keine Anhänge",
+      "uploadSuccess": "Datei erfolgreich hochgeladen",
+      "uploadError": "Fehler beim Hochladen der Datei",
+      "deleteConfirm": "Anhang \"{{filename}}\" löschen?",
+      "deleteSuccess": "Anhang gelöscht",
+      "deleteError": "Fehler beim Löschen des Anhangs",
+      "downloadError": "Fehler beim Herunterladen des Anhangs"
     }
   },
   "songRelease": {

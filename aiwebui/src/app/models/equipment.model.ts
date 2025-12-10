@@ -106,3 +106,22 @@ export interface EquipmentUpdateRequest {
     system_requirements?: string;
     status?: EquipmentStatus;
 }
+
+// Attachment interfaces
+export interface EquipmentAttachment {
+    id: string;
+    filename: string;
+    file_size: number;
+    content_type: string;
+    uploaded_at: string; // ISO format
+    download_url: string; // Backend proxy URL
+}
+
+export interface EquipmentAttachmentListResponse {
+    data: EquipmentAttachment[];
+}
+
+export interface EquipmentAttachmentUploadResponse {
+    data: EquipmentAttachment;
+    message: string;
+}

@@ -785,9 +785,79 @@
   display: flex;
   flex-wrap: wrap;
   gap: $spacing-xs;
-  
+
   mat-chip {
     font-size: $font-sm;
+  }
+}
+
+// Attachments List (Gallery Detail View)
+.attachments-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.attachment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  background-color: $background-light;
+  border-radius: 6px;
+  border: 1px solid $border-light;
+
+  &:hover {
+    border-color: $primary-color;
+    background-color: rgba(25, 118, 210, 0.02);
+  }
+}
+
+.attachment-info {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+
+  .attachment-icon {
+    color: $text-muted;
+    font-size: 16px;
+  }
+}
+
+.attachment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .attachment-name {
+    font-weight: 500;
+    color: $text-primary;
+    font-size: $font-sm;
+    word-break: break-all;
+  }
+
+  .attachment-meta {
+    font-size: 0.75rem;
+    color: $text-muted;
+  }
+}
+
+.download-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: $spacing-xs;
+  border-radius: 4px;
+  color: $text-muted;
+  transition: all 0.2s;
+
+  &:hover {
+    color: $primary-color;
+    background-color: rgba(25, 118, 210, 0.1);
+  }
+
+  i {
+    font-size: 14px;
   }
 }
 

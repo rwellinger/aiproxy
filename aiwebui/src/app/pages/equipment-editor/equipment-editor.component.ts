@@ -17,6 +17,7 @@ import {firstValueFrom, Subject, takeUntil} from "rxjs";
 import {EquipmentService} from "../../services/business/equipment.service";
 import {NotificationService} from "../../services/ui/notification.service";
 import {
+    EquipmentAttachment,
     EquipmentCreateRequest,
     EquipmentStatus,
     EquipmentType,
@@ -58,6 +59,10 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
     // Password/License Key visibility
     showPassword = false;
     showLicenseKey = false;
+
+    // Attachments
+    attachments: EquipmentAttachment[] = [];
+    isUploadingFile = false;
 
     // Enums for template
     EquipmentType = EquipmentType;
@@ -185,6 +190,9 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
                     system_requirements: response.data.system_requirements,
                     status: response.data.status
                 });
+
+                // Load attachments
+                this.loadAttachments();
             } catch (error) {
                 console.error("Failed to load equipment:", error);
                 this.notificationService.error(
@@ -404,5 +412,124 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
         }
 
         return "";
+    }
+
+    // ============================================================
+    // Attachment Methods
+    // ============================================================
+
+    /**
+     * Load attachments for current equipment.
+     */
+    loadAttachments(): void {
+        if (!this.equipmentId) return;
+
+        this.equipmentService.getAttachments(this.equipmentId).subscribe({
+            next: (response) => {
+                this.attachments = response.data;
+            },
+            error: (error) => {
+                console.error("Failed to load attachments:", error);
+            }
+        });
+    }
+
+    /**
+     * Handle file selection and upload.
+     */
+    onFileSelect(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (!input.files || input.files.length === 0 || !this.equipmentId) return;
+
+        const file = input.files[0];
+        this.uploadFile(file);
+
+        // Reset input to allow selecting the same file again
+        input.value = "";
+    }
+
+    /**
+     * Upload a single file.
+     */
+    private uploadFile(file: File): void {
+        if (!this.equipmentId) return;
+
+        this.isUploadingFile = true;
+
+        this.equipmentService.uploadAttachment(this.equipmentId, file).subscribe({
+            next: () => {
+                this.notificationService.success(
+                    this.translate.instant("equipment.attachments.uploadSuccess")
+                );
+                this.loadAttachments();
+                this.isUploadingFile = false;
+            },
+            error: (error) => {
+                console.error("Upload failed:", error);
+                const errorMsg = error.error?.error || this.translate.instant("equipment.attachments.uploadError");
+                this.notificationService.error(errorMsg);
+                this.isUploadingFile = false;
+            }
+        });
+    }
+
+    /**
+     * Delete an attachment.
+     */
+    deleteAttachment(attachment: EquipmentAttachment): void {
+        if (!this.equipmentId) return;
+
+        // Simple confirmation
+        if (!confirm(this.translate.instant("equipment.attachments.deleteConfirm", {filename: attachment.filename}))) {
+            return;
+        }
+
+        this.equipmentService.deleteAttachment(this.equipmentId, attachment.id).subscribe({
+            next: () => {
+                this.notificationService.success(
+                    this.translate.instant("equipment.attachments.deleteSuccess")
+                );
+                this.loadAttachments();
+            },
+            error: (error) => {
+                console.error("Delete failed:", error);
+                this.notificationService.error(
+                    this.translate.instant("equipment.attachments.deleteError")
+                );
+            }
+        });
+    }
+
+    /**
+     * Download an attachment.
+     */
+    downloadAttachment(attachment: EquipmentAttachment): void {
+        if (!this.equipmentId) return;
+
+        this.equipmentService.downloadAttachment(this.equipmentId, attachment.id).subscribe({
+            next: (blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = attachment.filename;
+                link.click();
+                window.URL.revokeObjectURL(url);
+            },
+            error: (error) => {
+                console.error("Download failed:", error);
+                this.notificationService.error(
+                    this.translate.instant("equipment.attachments.downloadError")
+                );
+            }
+        });
+    }
+
+    /**
+     * Format file size for display.
+     */
+    formatFileSize(bytes: number): string {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(1) + " MB";
     }
 }

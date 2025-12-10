@@ -519,11 +519,43 @@ class Equipment(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    # Relationship
+    # Relationships
     user = relationship("User", back_populates="equipment")
+    attachments = relationship("EquipmentAttachment", back_populates="equipment", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Equipment(id={self.id}, type='{self.type}', name='{self.name}', status='{self.status}')>"
+
+
+class EquipmentAttachment(Base):
+    """Model for equipment file attachments (license files, manuals, etc.)"""
+
+    __tablename__ = "equipment_attachments"
+    __table_args__ = {"extend_existing": True}
+
+    # Primary identifier
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+
+    # Foreign keys
+    equipment_id = Column(
+        UUID(as_uuid=True), ForeignKey("equipment.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # File metadata
+    filename = Column(String(500), nullable=False)
+    s3_key = Column(String(500), nullable=False)
+    file_size = Column(BigInteger, nullable=False)
+    content_type = Column(String(100), nullable=False)
+
+    # Timestamp
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    equipment = relationship("Equipment", back_populates="attachments")
+
+    def __repr__(self):
+        return f"<EquipmentAttachment(id={self.id}, filename='{self.filename}', equipment_id={self.equipment_id})>"
 
 
 class SongProject(Base):

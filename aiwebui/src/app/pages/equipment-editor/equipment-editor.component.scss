@@ -279,9 +279,103 @@ mat-select {
 button[mat-icon-button] {
   &[matSuffix] {
     color: $text-muted;
-    
+
     &:hover {
       color: $text-primary;
     }
+  }
+}
+
+// Attachments Section
+.attachment-upload {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+
+  .upload-hint {
+    color: $text-muted;
+    font-size: $font-sm;
+  }
+}
+
+.attachments-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.attachment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  background-color: $background-light;
+  border-radius: 8px;
+  border: 1px solid $border-light;
+
+  &:hover {
+    border-color: $primary-color;
+    background-color: rgba(25, 118, 210, 0.02);
+  }
+}
+
+.attachment-info {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+
+  .attachment-icon {
+    color: $text-muted;
+  }
+}
+
+.attachment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .attachment-name {
+    font-weight: 500;
+    color: $text-primary;
+    word-break: break-all;
+  }
+
+  .attachment-meta {
+    font-size: $font-sm;
+    color: $text-muted;
+  }
+}
+
+.attachment-actions {
+  display: flex;
+  gap: $spacing-xs;
+
+  button {
+    color: $text-muted;
+
+    &:hover {
+      color: $primary-color;
+    }
+
+    &[color="warn"]:hover {
+      color: #f44336;
+    }
+  }
+}
+
+.attachments-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-lg;
+  color: $text-muted;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.5;
   }
 }

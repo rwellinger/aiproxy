@@ -6,14 +6,21 @@ CRITICAL:
 - User ID from JWT token (get_current_user_id), NOT from URL params
 - Input validation with Pydantic schemas
 - Parameter validation (limit, offset)
+- File attachments via backend proxy (NO presigned URLs!)
 
 Endpoints:
-- POST   /api/v1/equipment              Create equipment
-- GET    /api/v1/equipment              List equipment (paginated, filterable)
-- GET    /api/v1/equipment/{id}         Get equipment by ID
-- PUT    /api/v1/equipment/{id}         Update equipment
-- DELETE /api/v1/equipment/{id}         Delete equipment
+- POST   /api/v1/equipment                                Create equipment
+- GET    /api/v1/equipment                                List equipment (paginated, filterable)
+- GET    /api/v1/equipment/{id}                           Get equipment by ID
+- PUT    /api/v1/equipment/{id}                           Update equipment
+- DELETE /api/v1/equipment/{id}                           Delete equipment
+- POST   /api/v1/equipment/{id}/attachments               Upload attachment (multipart/form-data)
+- GET    /api/v1/equipment/{id}/attachments               List attachments
+- GET    /api/v1/equipment/{id}/attachments/{att_id}/download   Download attachment (backend proxy)
+- DELETE /api/v1/equipment/{id}/attachments/{att_id}      Delete attachment
 """
+
+from uuid import UUID
 
 from flask import Blueprint, jsonify, request
 from sqlalchemy.orm import Session
@@ -25,6 +32,7 @@ from api.controllers.equipment_controller import (
     EquipmentUpdateRequest,
 )
 from db.database import get_db
+from utils.logger import logger
 
 
 # Blueprint definition
@@ -230,5 +238,189 @@ def delete_equipment(equipment_id: str):
     try:
         result, status_code = EquipmentController.delete_equipment(db, equipment_id, str(user_id))
         return jsonify(result), status_code
+    finally:
+        db.close()
+
+
+# ============================================================
+# Attachment Routes
+# ============================================================
+
+
+@api_equipment_v1.route("/<equipment_id>/attachments", methods=["POST"])
+@jwt_required
+def upload_attachment(equipment_id: str):
+    """
+    Upload file attachment for equipment.
+
+    Request:
+        Content-Type: multipart/form-data
+        file: Binary file (max 50 MB, no executables)
+
+    Response:
+        201: {'data': {...}, 'message': 'File uploaded successfully'}
+        400: {'error': 'File validation error...'}
+        404: {'error': 'Equipment not found'}
+        500: {'error': 'Upload failed'}
+
+    Example:
+        POST /api/v1/equipment/123e4567-e89b-12d3-a456-426614174000/attachments
+        Headers: Authorization: Bearer <JWT_TOKEN>
+        Form Data: file=@license.pdf
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+
+    file = request.files["file"]
+    if not file.filename:
+        return jsonify({"error": "Empty filename"}), 400
+
+    try:
+        file_data = file.read()
+        filename = file.filename
+
+        db: Session = next(get_db())
+        try:
+            from business.equipment_orchestrator import equipment_orchestrator
+
+            result, error = equipment_orchestrator.upload_attachment(db, equipment_id, user_id, file_data, filename)
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return jsonify({"data": result, "message": "File uploaded successfully"}), 201
+        finally:
+            db.close()
+
+    except Exception as e:
+        logger.error("Attachment upload error", error=str(e), equipment_id=equipment_id)
+        return jsonify({"error": "Upload failed"}), 500
+
+
+@api_equipment_v1.route("/<equipment_id>/attachments", methods=["GET"])
+@jwt_required
+def list_attachments(equipment_id: str):
+    """
+    List all attachments for equipment.
+
+    Response:
+        200: {'data': [...]}
+        401: {'error': 'Unauthorized'}
+
+    Example:
+        GET /api/v1/equipment/123e4567-e89b-12d3-a456-426614174000/attachments
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    from db.equipment_attachment_service import equipment_attachment_service
+
+    db: Session = next(get_db())
+    try:
+        attachments = equipment_attachment_service.get_attachments_by_equipment(db, UUID(equipment_id), UUID(user_id))
+
+        result = [
+            {
+                "id": str(att.id),
+                "filename": att.filename,
+                "file_size": att.file_size,
+                "content_type": att.content_type,
+                "uploaded_at": att.uploaded_at.isoformat(),
+                "download_url": f"/api/v1/equipment/{equipment_id}/attachments/{att.id}/download",
+            }
+            for att in attachments
+        ]
+
+        return jsonify({"data": result}), 200
+    finally:
+        db.close()
+
+
+@api_equipment_v1.route("/<equipment_id>/attachments/<attachment_id>/download", methods=["GET"])
+@jwt_required
+def download_attachment(equipment_id: str, attachment_id: str):  # noqa: ARG001
+    """
+    Download attachment via backend proxy (streams from S3).
+
+    CRITICAL: Backend proxy - NEVER return presigned URLs!
+
+    Response:
+        200: Binary file data
+        404: {'error': 'Attachment not found'}
+        500: {'error': 'Download failed'}
+
+    Example:
+        GET /api/v1/equipment/123e.../attachments/456e.../download
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        from adapters.s3.s3_proxy_service import s3_proxy_service
+        from config.settings import S3_EQUIPMENT_DATA_BUCKET
+        from db.equipment_attachment_service import equipment_attachment_service
+
+        db: Session = next(get_db())
+        try:
+            # Get attachment
+            attachment = equipment_attachment_service.get_attachment_by_id(db, UUID(attachment_id), UUID(user_id))
+
+            if not attachment:
+                return jsonify({"error": "Attachment not found"}), 404
+
+            # Stream from S3
+            return s3_proxy_service.serve_resource(
+                bucket=S3_EQUIPMENT_DATA_BUCKET,
+                s3_key=attachment.s3_key,
+                filename=attachment.filename,
+            )
+        finally:
+            db.close()
+
+    except Exception as e:
+        logger.error("Attachment download error", error=str(e), attachment_id=attachment_id)
+        return jsonify({"error": "Download failed"}), 500
+
+
+@api_equipment_v1.route("/<equipment_id>/attachments/<attachment_id>", methods=["DELETE"])
+@jwt_required
+def delete_attachment(equipment_id: str, attachment_id: str):  # noqa: ARG001
+    """
+    Delete attachment (with S3 cleanup).
+
+    Response:
+        200: {'message': 'Attachment deleted successfully'}
+        404: {'error': 'Attachment not found'}
+        500: {'error': 'Delete failed'}
+
+    Example:
+        DELETE /api/v1/equipment/123e.../attachments/456e...
+        Headers: Authorization: Bearer <JWT_TOKEN>
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    db: Session = next(get_db())
+    try:
+        from business.equipment_orchestrator import equipment_orchestrator
+
+        success = equipment_orchestrator.delete_attachment_with_cleanup(db, attachment_id, user_id)
+
+        if not success:
+            return jsonify({"error": "Attachment not found"}), 404
+
+        return jsonify({"message": "Attachment deleted successfully"}), 200
+    except Exception as e:
+        logger.error("Attachment delete error", error=str(e), attachment_id=attachment_id)
+        return jsonify({"error": "Delete failed"}), 500
     finally:
         db.close()

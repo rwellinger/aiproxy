@@ -18,7 +18,7 @@ import {MatExpansionModule} from "@angular/material/expansion";
 import {EquipmentService} from "../../services/business/equipment.service";
 import {NotificationService} from "../../services/ui/notification.service";
 import {UserSettingsService} from "../../services/user-settings.service";
-import {Equipment, EquipmentStatus, EquipmentType, LicenseManagement} from "../../models/equipment.model";
+import {Equipment, EquipmentAttachment, EquipmentStatus, EquipmentType, LicenseManagement} from "../../models/equipment.model";
 
 @Component({
     selector: "app-equipment-gallery",
@@ -66,6 +66,9 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
     // Visibility toggles for sensitive fields
     showPassword = false;
     showLicenseKey = false;
+
+    // Attachments for selected equipment
+    attachments: EquipmentAttachment[] = [];
 
     // Enums for template
     EquipmentType = EquipmentType;
@@ -243,6 +246,9 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
             // Reset visibility toggles when selecting new equipment
             this.showPassword = false;
             this.showLicenseKey = false;
+
+            // Load attachments for this equipment
+            this.loadAttachments(equipment.id);
         } catch (error) {
             console.error("Failed to load equipment details:", error);
             this.notificationService.error(
@@ -445,5 +451,57 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
      */
     shouldUseAccordion(): boolean {
         return this.hasCredentials() && this.hasLicenseInfo();
+    }
+
+    // ============================================================
+    // Attachment Methods
+    // ============================================================
+
+    /**
+     * Load attachments for selected equipment.
+     */
+    loadAttachments(equipmentId: string): void {
+        this.equipmentService.getAttachments(equipmentId).subscribe({
+            next: (response) => {
+                this.attachments = response.data;
+            },
+            error: (error) => {
+                console.error("Failed to load attachments:", error);
+                this.attachments = [];
+            }
+        });
+    }
+
+    /**
+     * Download an attachment.
+     */
+    downloadAttachment(attachment: EquipmentAttachment): void {
+        if (!this.selectedEquipment) return;
+
+        this.equipmentService.downloadAttachment(this.selectedEquipment.id, attachment.id).subscribe({
+            next: (blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = attachment.filename;
+                link.click();
+                window.URL.revokeObjectURL(url);
+            },
+            error: (error) => {
+                console.error("Download failed:", error);
+                this.notificationService.error(
+                    this.translate.instant("equipment.attachments.downloadError")
+                );
+            }
+        });
+    }
+
+    /**
+     * Format file size for display.
+     */
+    formatFileSize(bytes: number): string {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(1) + " MB";
     }
 }
