@@ -40,3 +40,4 @@ dump.rdb
 /logs/
 /CLAUDE.md.orgi
 /CLAUDE.md.orgi.old
+/aiproxysrv/celerybeat-schedule.db
