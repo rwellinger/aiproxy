@@ -118,6 +118,21 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
         this.initialReturnPage = this.navigationState?.["returnPage"] || 0;
         this.initialSelectedId = this.navigationState?.["selectedId"];
 
+        // Restore filter state from navigation
+        const savedSearchTerm = this.navigationState?.["searchTerm"];
+        const savedType = this.navigationState?.["selectedType"];
+        const savedStatus = this.navigationState?.["selectedStatus"];
+
+        if (savedSearchTerm !== undefined) {
+            this.searchTerm = savedSearchTerm;
+        }
+        if (savedType !== undefined && (savedType === "all" || Object.values(EquipmentType).includes(savedType))) {
+            this.selectedType = savedType;
+        }
+        if (savedStatus !== undefined && (savedStatus === "all" || Object.values(EquipmentStatus).includes(savedStatus))) {
+            this.selectedStatus = savedStatus;
+        }
+
         // Load user settings (will trigger initial load with returnPage)
         this.loadUserSettings();
     }
@@ -264,7 +279,12 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
      */
     editEquipment(id: string): void {
         this.router.navigate(["/equipment-editor", id], {
-            state: {returnPage: this.currentPage}
+            state: {
+                returnPage: this.currentPage,
+                searchTerm: this.searchTerm,
+                selectedType: this.selectedType,
+                selectedStatus: this.selectedStatus
+            }
         });
     }
 
@@ -272,14 +292,29 @@ export class EquipmentGalleryComponent implements OnInit, OnDestroy {
      * Navigate to equipment editor (duplicate mode).
      */
     duplicateEquipment(id: string): void {
-        this.router.navigate(["/equipment-editor"], {queryParams: {duplicate: id}});
+        this.router.navigate(["/equipment-editor"], {
+            queryParams: {duplicate: id},
+            state: {
+                returnPage: this.currentPage,
+                searchTerm: this.searchTerm,
+                selectedType: this.selectedType,
+                selectedStatus: this.selectedStatus
+            }
+        });
     }
 
     /**
      * Navigate to equipment editor (create mode).
      */
     createNew(): void {
-        this.router.navigate(["/equipment-editor"]);
+        this.router.navigate(["/equipment-editor"], {
+            state: {
+                returnPage: this.currentPage,
+                searchTerm: this.searchTerm,
+                selectedType: this.selectedType,
+                selectedStatus: this.selectedStatus
+            }
+        });
     }
 
     /**

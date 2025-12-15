@@ -356,7 +356,10 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
         this.router.navigate(["/equipment-gallery"], {
             state: {
                 selectedId: response.data.id,
-                returnPage: this.navigationState?.["returnPage"] || 0
+                returnPage: this.navigationState?.["returnPage"] || 0,
+                searchTerm: this.navigationState?.["searchTerm"] || "",
+                selectedType: this.navigationState?.["selectedType"] || "all",
+                selectedStatus: this.navigationState?.["selectedStatus"] || "all"
             }
         });
     }
@@ -378,7 +381,10 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
         this.router.navigate(["/equipment-gallery"], {
             state: {
                 selectedId: this.equipmentId,
-                returnPage: this.navigationState?.["returnPage"] || 0
+                returnPage: this.navigationState?.["returnPage"] || 0,
+                searchTerm: this.navigationState?.["searchTerm"] || "",
+                selectedType: this.navigationState?.["selectedType"] || "all",
+                selectedStatus: this.navigationState?.["selectedStatus"] || "all"
             }
         });
     }
@@ -389,7 +395,10 @@ export class EquipmentEditorComponent implements OnInit, OnDestroy {
     onCancel(): void {
         this.router.navigate(["/equipment-gallery"], {
             state: {
-                returnPage: this.navigationState?.["returnPage"] || 0
+                returnPage: this.navigationState?.["returnPage"] || 0,
+                searchTerm: this.navigationState?.["searchTerm"] || "",
+                selectedType: this.navigationState?.["selectedType"] || "all",
+                selectedStatus: this.navigationState?.["selectedStatus"] || "all"
             }
         });
     }
