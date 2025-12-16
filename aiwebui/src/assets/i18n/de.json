@@ -879,7 +879,7 @@
   "songGenerator": {
     "charCounter": "{{count}}/50",
     "charactersCount": "Zeichen",
-    "costInfo": "Song-Erstellung: ~$0.15 pro Stück",
+    "costInfo": "Song-Erstellung: $0.03 Model 7.6 oder $0.05 Model O2 pro Song",
     "createButton": "Song erstellen",
     "createInstrumental": "Instrumental erstellen",
     "creating": "Erstelle...",

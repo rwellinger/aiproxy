@@ -879,7 +879,7 @@
   "songGenerator": {
     "charCounter": "{{count}}/50",
     "charactersCount": "characters",
-    "costInfo": "Song generation: ~$0.15 each",
+    "costInfo": "Song generation: $0.03 Model 7.6 or 0.05 Model O2 each Song",
     "createButton": "Create Song",
     "createInstrumental": "Create Instrumental",
     "creating": "Creating...",
