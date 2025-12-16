@@ -86,6 +86,9 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     private searchSubject = new Subject<string>();
     private destroy$ = new Subject<void>();
 
+    // Navigation state
+    private navigationState: any;
+
     // Modal state
     showImageModal = false;
 
@@ -124,6 +127,9 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     Math = Math;
 
     constructor() {
+        // Capture navigation state for filter preservation
+        this.navigationState = this.router.getCurrentNavigation()?.extras?.state;
+
         // Setup search debouncing
         this.searchSubject.pipe(
             debounceTime(300),
@@ -142,6 +148,20 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnInit() {
+        // Restore filter state from navigation
+        if (this.navigationState?.["searchTerm"] !== undefined) {
+            this.searchTerm = this.navigationState["searchTerm"];
+        }
+        if (this.navigationState?.["sortBy"]) {
+            this.sortBy = this.navigationState["sortBy"];
+        }
+        if (this.navigationState?.["sortDirection"]) {
+            this.sortDirection = this.navigationState["sortDirection"];
+        }
+        if (this.navigationState?.["returnPage"] !== undefined) {
+            this.currentPage = this.navigationState["returnPage"];
+        }
+
         this.loadUserSettings();
     }
 
@@ -155,7 +175,7 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe(settings => {
                 this.pagination.limit = settings.imageListLimit;
-                this.loadImages();
+                this.loadImages(this.currentPage);
             });
     }
 
@@ -610,7 +630,14 @@ export class ImageViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     navigateToImageGenerator() {
-        this.router.navigate(["/imagegen"]);
+        this.router.navigate(["/imagegen"], {
+            state: {
+                searchTerm: this.searchTerm,
+                sortBy: this.sortBy,
+                sortDirection: this.sortDirection,
+                returnPage: this.currentPage
+            }
+        });
     }
 
     /**

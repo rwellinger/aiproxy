@@ -108,9 +108,15 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
             this.templates = await this.promptService.getAllTemplates().toPromise() || [];
 
             // Check if returning from editor with navigation state
+            const savedSearchTerm = this.navigationState?.["searchTerm"];
             const returnPage = this.navigationState?.["returnPage"];
             const selectTemplate = this.navigationState?.["selectTemplate"];
             const targetCategory = this.navigationState?.["targetCategory"];
+
+            // Restore search term
+            if (savedSearchTerm !== undefined) {
+                this.searchTerm = savedSearchTerm;
+            }
 
             // Set category filter BEFORE applying filter (for returning from editor)
             if (targetCategory && ["all", "lyrics", "image", "music", "titel", "description", "other"].includes(targetCategory)) {
@@ -341,6 +347,7 @@ export class PromptTemplatesComponent implements OnInit, OnDestroy {
                 template: this.selectedTemplate,
                 category: this.selectedTemplate.category,
                 action: this.selectedTemplate.action,
+                searchTerm: this.searchTerm,
                 returnPage: currentPage,
                 targetCategory: this.currentCategory
             }

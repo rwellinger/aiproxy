@@ -88,6 +88,17 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        // Restore filter state from navigation
+        if (this.navigationState?.["searchTerm"] !== undefined) {
+            this.searchTerm = this.navigationState["searchTerm"];
+        }
+        if (this.navigationState?.["sortBy"]) {
+            this.sortBy = this.navigationState["sortBy"];
+        }
+        if (this.navigationState?.["sortDirection"]) {
+            this.sortDirection = this.navigationState["sortDirection"];
+        }
+
         // Check if returning from save/edit with a selected sketch ID
         const selectedSketchId = this.navigationState?.["selectedSketchId"];
         const targetWorkflow = this.navigationState?.["targetWorkflow"];
@@ -191,6 +202,10 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
             state: {
                 editMode: true,
                 sketchId: this.selectedSketch.id,
+                searchTerm: this.searchTerm,
+                targetWorkflow: this.currentWorkflow,
+                sortBy: this.sortBy,
+                sortDirection: this.sortDirection,
                 returnPage: this.currentPage
             }
         });
@@ -353,7 +368,15 @@ export class SongSketchLibraryComponent implements OnInit, OnDestroy {
     }
 
     navigateToSketchCreator(): void {
-        this.router.navigate(["/song-sketch-creator"]);
+        this.router.navigate(["/song-sketch-creator"], {
+            state: {
+                searchTerm: this.searchTerm,
+                targetWorkflow: this.currentWorkflow,
+                sortBy: this.sortBy,
+                sortDirection: this.sortDirection,
+                returnPage: this.currentPage
+            }
+        });
     }
 
     formatDate(dateString: string): string {

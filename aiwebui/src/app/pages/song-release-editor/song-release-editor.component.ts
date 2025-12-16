@@ -599,7 +599,9 @@ export class SongReleaseEditorComponent implements OnInit, OnDestroy {
      * Navigate back to gallery
      */
     private goBack(): void {
-        this.router.navigate(["/song-releases"]);
+        this.router.navigate(["/song-releases"], {
+            state: this.navigationState
+        });
     }
 
     /**

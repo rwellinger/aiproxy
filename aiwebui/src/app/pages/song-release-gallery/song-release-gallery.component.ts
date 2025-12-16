@@ -61,6 +61,9 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
     private searchSubject = new Subject<string>();
     private destroy$ = new Subject<void>();
 
+    // Navigation state
+    private navigationState: any;
+
     private releaseService = inject(SongReleaseService);
     private notificationService = inject(NotificationService);
     private resourceBlobService = inject(ResourceBlobService);
@@ -68,6 +71,9 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
     private router = inject(Router);
 
     constructor() {
+        // Capture navigation state for filter preservation
+        this.navigationState = this.router.getCurrentNavigation()?.extras?.state;
+
         // Setup search debouncing
         this.searchSubject.pipe(
             debounceTime(300),
@@ -87,7 +93,20 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.loadReleases(0).then(() => {
+        // Restore filter state from navigation
+        if (this.navigationState?.['searchTerm']) {
+            this.searchTerm = this.navigationState['searchTerm'];
+        }
+        if (this.navigationState?.['selectedStatusFilter']) {
+            this.selectedStatusFilter = this.navigationState['selectedStatusFilter'];
+        }
+
+        // Restore pagination
+        const returnPage = this.navigationState?.['returnPage'] !== undefined
+            ? this.navigationState['returnPage']
+            : 0;
+
+        this.loadReleases(returnPage).then(() => {
             // Auto-select first release if list is not empty
             if (this.releaseList.length > 0 && !this.selectedRelease) {
                 this.selectRelease(this.releaseList[0]);
@@ -276,7 +295,13 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
      * Create new release (navigate to editor)
      */
     createNewRelease(): void {
-        this.router.navigate(["/song-releases/new"]);
+        this.router.navigate(["/song-releases/new"], {
+            state: {
+                searchTerm: this.searchTerm,
+                selectedStatusFilter: this.selectedStatusFilter,
+                returnPage: this.currentPage
+            }
+        });
     }
 
     /**
@@ -284,7 +309,13 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
      */
     editRelease(): void {
         if (!this.selectedRelease) return;
-        this.router.navigate(["/song-releases/edit", this.selectedRelease.id]);
+        this.router.navigate(["/song-releases/edit", this.selectedRelease.id], {
+            state: {
+                searchTerm: this.searchTerm,
+                selectedStatusFilter: this.selectedStatusFilter,
+                returnPage: this.currentPage
+            }
+        });
     }
 
     /**
