@@ -233,6 +233,8 @@ class MirrorMoveAction(BaseModel):
     new_path: str = Field(..., description="New relative path")
     file_hash: str = Field(..., description="SHA256 hash (for verification)")
     file_size_bytes: int = Field(..., description="File size in bytes")
+    s3_key_old: str = Field(..., description="Current S3 key")
+    s3_key_new: str = Field(..., description="New S3 key")
 
     class Config:
         from_attributes = True
