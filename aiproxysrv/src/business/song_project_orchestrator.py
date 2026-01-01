@@ -855,13 +855,15 @@ class SongProjectOrchestrator:
             # IMPORTANT: Remote files have relative_path like "01 Arrangement/Bounces/file.wav"
             # but CLI sends "Bounces/file.wav" (without folder_name prefix).
             # We need to strip the folder_name prefix from remote paths for comparison!
-            local_map = {f["relative_path"]: f for f in local_files}
+            local_map = {f["relative_path"].lstrip("/"): f for f in local_files}
             remote_map = {}
             for f in remote_files:
                 # Strip folder_name prefix (e.g., "01 Arrangement/" → "")
                 normalized_path = f.relative_path
                 if normalized_path.startswith(f"{folder_name}/"):
                     normalized_path = normalized_path[len(folder_name) + 1 :]  # +1 for trailing slash
+                # Also strip leading slash if present
+                normalized_path = normalized_path.lstrip("/")
                 remote_map[normalized_path] = f
 
             # Calculate diff
@@ -932,7 +934,8 @@ class SongProjectOrchestrator:
                     remote_file = next(item["file"] for item in remote_items if item["path"] == old_path)
 
                     # Construct new S3 key (must include folder_name prefix)
-                    new_s3_key = f"{project.s3_prefix}/{folder_name}/{new_path}"
+                    # Strip leading slash from new_path to avoid double slashes
+                    new_s3_key = f"{project.s3_prefix}/{folder_name}/{new_path.lstrip('/')}"
 
                     to_move.append(
                         {
