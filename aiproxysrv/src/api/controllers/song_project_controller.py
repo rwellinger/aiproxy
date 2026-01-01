@@ -566,6 +566,45 @@ class SongProjectController:
             return {"error": f"Batch delete failed: {str(e)}"}, 500
 
     @staticmethod
+    def batch_move_files(
+        db: Session, user_id: UUID, project_id: str, move_actions: list[dict]
+    ) -> tuple[dict[str, Any], int]:
+        """
+        Move multiple files in S3 and update DB (for Mirror sync)
+
+        Args:
+            db: Database session
+            user_id: User ID (from JWT)
+            project_id: Project UUID string
+            move_actions: List of move action dicts
+
+        Returns:
+            Tuple of (response_data, status_code)
+        """
+        try:
+            # Convert string UUID to UUID object
+            project_uuid = UUID(project_id)
+
+            # Call orchestrator
+            result = song_project_orchestrator.batch_move_files(
+                db=db, project_id=project_uuid, user_id=user_id, move_actions=move_actions
+            )
+
+            return {"data": result}, 200
+
+        except ValueError as e:
+            logger.error("Batch move validation error", error=str(e))
+            return {"error": f"Invalid UUID: {str(e)}"}, 400
+        except Exception as e:
+            logger.error(
+                "Batch move controller error",
+                project_id=project_id,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {"error": f"Batch move failed: {str(e)}"}, 500
+
+    @staticmethod
     def fix_mime_types(
         db: Session, user_id: UUID, project_id: str, folder_id: str | None, dry_run: bool
     ) -> tuple[dict[str, Any], int]:

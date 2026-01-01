@@ -1145,6 +1145,7 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
     # Step 3: Show preview
     to_upload = diff["to_upload"]
     to_update = diff["to_update"]
+    to_move = diff.get("to_move", [])  # Backwards compatible
     to_delete = diff["to_delete"]
     unchanged = diff["unchanged"]
 
@@ -1153,6 +1154,7 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
     console.print(f"  [green]✅ Unchanged:[/green] {len(unchanged)} files")
     console.print(f"  [yellow]⬆️  Upload:[/yellow] {len(to_upload)} files (new)")
     console.print(f"  [blue]🔄 Update:[/blue] {len(to_update)} files (hash mismatch)")
+    console.print(f"  [magenta]🔀 Move:[/magenta] {len(to_move)} files (relocated)")
     console.print(f"  [red]🗑️  Delete:[/red] {len(to_delete)} files (remote only)")
 
     # Calculate sizes
@@ -1160,12 +1162,17 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
     update_files = [f for f in local_files if f["relative_path"] in to_update]
     upload_size = sum(f["file_size_bytes"] for f in upload_files)
     update_size = sum(f["file_size_bytes"] for f in update_files)
+    move_size = sum(m["file_size_bytes"] for m in to_move)
     delete_size = sum(d["file_size_bytes"] for d in to_delete)
 
     if to_upload:
         console.print(f"    [dim]({upload_size / (1024 * 1024):.1f} MB)[/dim]")
     if to_update:
         console.print(f"    [dim]({update_size / (1024 * 1024):.1f} MB)[/dim]")
+    if to_move:
+        console.print(
+            f"    [dim]({move_size / (1024 * 1024):.1f} MB will be moved server-side)[/dim]"
+        )
     if to_delete:
         console.print(
             f"    [dim]({delete_size / (1024 * 1024):.1f} MB will be freed)[/dim]"
@@ -1185,7 +1192,7 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
         console.print()
 
     # Check if there's anything to do
-    if not to_upload and not to_update and not to_delete:
+    if not to_upload and not to_update and not to_move and not to_delete:
         console.print("[green]✓ Everything in sync! No changes needed.[/green]")
         sys.exit(0)
 
@@ -1212,6 +1219,7 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
     # Step 4: Execute sync
     uploaded_count = 0
     updated_count = 0
+    moved_count = 0
     deleted_count = 0
     errors = []
 
@@ -1302,7 +1310,59 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
 
         console.print()
 
-    # 4b) Delete obsolete files (batch delete)
+    # 4b) Move files (S3 server-side copy)
+    if to_move:
+        console.print("[bold]🔀 Moving files...[/bold]")
+
+        move_url = f"{config['api_url']}/api/v1/song-projects/{project_id}/files/batch-move"
+        move_payload = {
+            "move_actions": [
+                {
+                    "file_id": m["file_id"],
+                    "old_path": m["old_path"],
+                    "new_path": m["new_path"],
+                    "s3_key_old": m["s3_key_old"],
+                    "s3_key_new": m["s3_key_new"],
+                    "file_hash": m["file_hash"],
+                }
+                for m in to_move
+            ]
+        }
+
+        try:
+            response = requests.post(
+                move_url,
+                headers={
+                    "Authorization": f"Bearer {config['jwt_token']}",
+                    "Content-Type": "application/json",
+                },
+                json=move_payload,
+                verify=config.get("ssl_verify", False),
+                timeout=30,
+            )
+
+            if response.status_code == 200:
+                result = response.json()["data"]
+                moved_count = result["moved"]
+                if result.get("errors"):
+                    errors.extend(
+                        [
+                            {"file": e["file_id"], "error": e["error"]}
+                            for e in result["errors"]
+                        ]
+                    )
+            else:
+                error = response.json().get("error", f"HTTP {response.status_code}")
+                console.print(f"[red]✗ Batch move failed: {error}[/red]")
+
+        except requests.exceptions.Timeout:
+            console.print("[red]✗ Move timeout[/red]")
+        except Exception as e:
+            console.print(f"[red]✗ Move error: {str(e)}[/red]")
+
+        console.print()
+
+    # 4c) Delete obsolete files (batch delete)
     if to_delete:
         console.print("[bold]🗑️  Deleting obsolete files...[/bold]")
 
@@ -1348,6 +1408,7 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
     console.print(f"  [green]✅ Unchanged:[/green] {len(unchanged)} files")
     console.print(f"  [yellow]⬆️  Uploaded:[/yellow] {uploaded_count} files")
     console.print(f"  [blue]🔄 Updated:[/blue] {updated_count} files")
+    console.print(f"  [magenta]🔀 Moved:[/magenta] {moved_count} files")
     console.print(f"  [red]🗑️  Deleted:[/red] {deleted_count} files")
 
     if errors:

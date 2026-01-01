@@ -647,6 +647,58 @@ class SongProjectService:
             logger.error("File deletion failed", file_id=str(file_id), error=str(e), error_type=type(e).__name__)
             return False
 
+    def move_file(
+        self,
+        db: Session,
+        file_id: UUID,
+        new_relative_path: str,
+        new_s3_key: str,
+    ) -> ProjectFile | None:
+        """
+        Move file to new path (update DB record only)
+
+        Args:
+            db: Database session
+            file_id: File UUID
+            new_relative_path: New relative path (e.g., "Audio/file.flac")
+            new_s3_key: New S3 key (e.g., "projects/{uuid}/01 Arrangement/Audio/file.flac")
+
+        Returns:
+            Updated ProjectFile instance if successful, None otherwise
+
+        Note:
+            - S3 move must be done separately by orchestrator
+            - This only updates the DB record
+            - Preserves file_id (identity)
+            - Updates updated_at timestamp
+        """
+        try:
+            file = db.query(ProjectFile).filter(ProjectFile.id == file_id).first()
+
+            if not file:
+                logger.debug("File not found for move", file_id=str(file_id))
+                return None
+
+            # Extract new filename from relative_path
+            new_filename = new_relative_path.split("/")[-1]
+
+            # Update fields
+            file.relative_path = new_relative_path
+            file.s3_key = new_s3_key
+            file.filename = new_filename
+            file.updated_at = datetime.now(UTC)
+
+            db.commit()
+            db.refresh(file)
+
+            logger.info("File moved in DB", file_id=str(file_id), new_path=new_relative_path)
+            return file
+
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error("File move DB error", file_id=str(file_id), error=str(e), error_type=type(e).__name__)
+            return None
+
     def get_folder_by_id(self, db: Session, folder_id: UUID) -> ProjectFolder | None:
         """
         Get a folder by its ID

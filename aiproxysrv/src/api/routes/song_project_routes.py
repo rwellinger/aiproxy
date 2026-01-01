@@ -464,6 +464,75 @@ def batch_delete_files(project_id: str):
         db.close()
 
 
+@api_song_projects_v1.route("/<project_id>/files/batch-move", methods=["POST"])
+@jwt_required
+def batch_move_files(project_id: str):
+    """
+    Move multiple files within project (S3 server-side copy + DB update).
+
+    Request Body:
+        {
+            "move_actions": [
+                {
+                    "file_id": "uuid",
+                    "old_path": "Media/file.flac",
+                    "new_path": "Audio/file.flac",
+                    "s3_key_old": "projects/.../Media/file.flac",
+                    "s3_key_new": "projects/.../Audio/file.flac",
+                    "file_hash": "sha256..."
+                }
+            ]
+        }
+
+    Response:
+        200: {
+            'data': {
+                'moved': 3,
+                'failed': 1,
+                'errors': [{'file_id': '...', 'error': '...'}]
+            }
+        }
+        401: {'error': 'Unauthorized'}
+        400: {'error': 'Missing move_actions'}
+        500: {'error': 'Batch move failed: ...'}
+
+    Example:
+        POST /api/v1/song-projects/{id}/files/batch-move
+        Headers: Authorization: Bearer <JWT_TOKEN>
+        Body: {
+            "move_actions": [
+                {
+                    "file_id": "550e8400-e29b-41d4-a716-446655440000",
+                    "old_path": "Media/drums.flac",
+                    "new_path": "Audio/drums.flac",
+                    "s3_key_old": "projects/.../01 Arrangement/Media/drums.flac",
+                    "s3_key_new": "projects/.../01 Arrangement/Audio/drums.flac",
+                    "file_hash": "abc123..."
+                }
+            ]
+        }
+    """
+    user_id = get_current_user_id()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    db: Session = next(get_db())
+    try:
+        # Parse request body
+        data = request.get_json()
+        if not data or "move_actions" not in data:
+            return jsonify({"error": "Missing move_actions in request body"}), 400
+
+        # Call controller
+        result, status_code = song_project_controller.batch_move_files(
+            db=db, user_id=UUID(user_id), project_id=project_id, move_actions=data["move_actions"]
+        )
+
+        return jsonify(result), status_code
+    finally:
+        db.close()
+
+
 @api_song_projects_v1.route("/<project_id>/files/fix-mime", methods=["POST"])
 @jwt_required
 def fix_mime_types(project_id: str):
