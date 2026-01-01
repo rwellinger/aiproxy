@@ -855,7 +855,14 @@ class SongProjectOrchestrator:
             # IMPORTANT: Remote files have relative_path like "01 Arrangement/Bounces/file.wav"
             # but CLI sends "Bounces/file.wav" (without folder_name prefix).
             # We need to strip the folder_name prefix from remote paths for comparison!
-            local_map = {f["relative_path"].lstrip("/"): f for f in local_files}
+            # CRITICAL: Normalize the relative_path IN the dictionary itself, not just the key!
+            local_map = {}
+            for f in local_files:
+                normalized_path = f["relative_path"].lstrip("/")
+                # Create new dict with normalized path
+                normalized_file = {**f, "relative_path": normalized_path}
+                local_map[normalized_path] = normalized_file
+
             remote_map = {}
             for f in remote_files:
                 # Strip folder_name prefix (e.g., "01 Arrangement/" → "")
