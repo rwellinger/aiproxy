@@ -225,11 +225,29 @@ class MirrorFileAction(BaseModel):
         from_attributes = True
 
 
+class MirrorMoveAction(BaseModel):
+    """Schema for a file move action in mirror response (same hash, different path)"""
+
+    file_id: str = Field(..., description="File UUID to move")
+    old_path: str = Field(..., description="Current relative path")
+    new_path: str = Field(..., description="New relative path")
+    file_hash: str = Field(..., description="SHA256 hash (for verification)")
+    file_size_bytes: int = Field(..., description="File size in bytes")
+    s3_key_old: str = Field(..., description="Current S3 key")
+    s3_key_new: str = Field(..., description="New S3 key")
+
+    class Config:
+        from_attributes = True
+
+
 class MirrorResponse(BaseModel):
     """Response schema for mirror endpoint (diff result)"""
 
     to_upload: list[str] = Field(default_factory=list, description="Files to upload (not on remote)")
     to_update: list[str] = Field(default_factory=list, description="Files to update (hash mismatch)")
+    to_move: list[MirrorMoveAction] = Field(
+        default_factory=list, description="Files to move (same hash, different path)"
+    )
     to_delete: list[MirrorFileAction] = Field(default_factory=list, description="Files to delete (only on remote)")
     unchanged: list[str] = Field(default_factory=list, description="Files unchanged (hash match)")
 

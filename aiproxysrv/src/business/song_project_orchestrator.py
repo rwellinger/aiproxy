@@ -855,13 +855,22 @@ class SongProjectOrchestrator:
             # IMPORTANT: Remote files have relative_path like "01 Arrangement/Bounces/file.wav"
             # but CLI sends "Bounces/file.wav" (without folder_name prefix).
             # We need to strip the folder_name prefix from remote paths for comparison!
-            local_map = {f["relative_path"]: f for f in local_files}
+            # CRITICAL: Normalize the relative_path IN the dictionary itself, not just the key!
+            local_map = {}
+            for f in local_files:
+                normalized_path = f["relative_path"].lstrip("/")
+                # Create new dict with normalized path
+                normalized_file = {**f, "relative_path": normalized_path}
+                local_map[normalized_path] = normalized_file
+
             remote_map = {}
             for f in remote_files:
                 # Strip folder_name prefix (e.g., "01 Arrangement/" → "")
                 normalized_path = f.relative_path
                 if normalized_path.startswith(f"{folder_name}/"):
                     normalized_path = normalized_path[len(folder_name) + 1 :]  # +1 for trailing slash
+                # Also strip leading slash if present
+                normalized_path = normalized_path.lstrip("/")
                 remote_map[normalized_path] = f
 
             # Calculate diff
@@ -897,12 +906,71 @@ class SongProjectOrchestrator:
                         }
                     )
 
+            # MOVE DETECTION: Detect files with same hash but different path
+            # Build hash-to-files maps for move detection
+            local_hash_map: dict[str, list[str]] = {}
+            remote_hash_map: dict[str, list[dict]] = {}
+
+            for rel_path, local_file in local_map.items():
+                hash_val = local_file["file_hash"]
+                local_hash_map.setdefault(hash_val, []).append(rel_path)
+
+            for rel_path, remote_file in remote_map.items():
+                hash_val = remote_file.file_hash
+                remote_hash_map.setdefault(hash_val, []).append({"path": rel_path, "file": remote_file})
+
+            # Detect moves (same hash, different path)
+            to_move = []
+            moved_upload_paths = set()  # Track paths to remove from to_upload
+            moved_delete_items = []  # Track items to remove from to_delete
+
+            for hash_val in local_hash_map.keys() & remote_hash_map.keys():
+                local_paths = set(local_hash_map[hash_val])
+                remote_items = remote_hash_map[hash_val]
+                remote_paths = {item["path"] for item in remote_items}
+
+                # Files that disappeared from old location
+                disappeared = remote_paths - local_paths
+                # Files that appeared at new location
+                appeared = local_paths - remote_paths
+
+                # Only handle clear 1:1 moves to avoid ambiguity
+                if len(disappeared) == 1 and len(appeared) == 1:
+                    old_path = list(disappeared)[0]
+                    new_path = list(appeared)[0]
+                    remote_file = next(item["file"] for item in remote_items if item["path"] == old_path)
+
+                    # Construct new S3 key (must include folder_name prefix)
+                    # Strip leading slash from new_path to avoid double slashes
+                    new_s3_key = f"{project.s3_prefix.rstrip('/')}/{folder_name}/{new_path.lstrip('/')}"
+
+                    to_move.append(
+                        {
+                            "file_id": str(remote_file.id),
+                            "old_path": old_path,
+                            "new_path": new_path,
+                            "file_hash": hash_val,
+                            "file_size_bytes": remote_file.file_size_bytes,
+                            "s3_key_old": remote_file.s3_key,
+                            "s3_key_new": new_s3_key,
+                        }
+                    )
+
+                    # Mark for removal from to_upload/to_delete
+                    moved_upload_paths.add(new_path)
+                    moved_delete_items.append(str(remote_file.id))
+
+            # Remove moved files from to_upload and to_delete
+            to_upload = [p for p in to_upload if p not in moved_upload_paths]
+            to_delete = [d for d in to_delete if d["file_id"] not in moved_delete_items]
+
             logger.info(
                 "Mirror compare completed",
                 project_id=str(project_id),
                 folder_id=str(folder_id),
                 to_upload=len(to_upload),
                 to_update=len(to_update),
+                to_move=len(to_move),
                 to_delete=len(to_delete),
                 unchanged=len(unchanged),
             )
@@ -910,6 +978,7 @@ class SongProjectOrchestrator:
             return {
                 "to_upload": to_upload,
                 "to_update": to_update,
+                "to_move": to_move,
                 "to_delete": to_delete,
                 "unchanged": unchanged,
             }
@@ -1030,6 +1099,140 @@ class SongProjectOrchestrator:
                 "deleted": deleted,
                 "failed": len(file_ids) - deleted,
                 "errors": [{"file_id": "unknown", "error": f"Batch delete orchestration failed: {str(e)}"}],
+            }
+
+    def batch_move_files(
+        self,
+        db: Session,
+        project_id: UUID,
+        user_id: UUID,
+        move_actions: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        """
+        Move multiple files in S3 and update DB (for Mirror sync)
+
+        Args:
+            db: Database session
+            project_id: Project UUID
+            user_id: User ID (for ownership check)
+            move_actions: List with keys: file_id, old_path, new_path,
+                          s3_key_old, s3_key_new, file_hash
+
+        Returns:
+            Dictionary with move results:
+            {
+                'moved': int,
+                'failed': int,
+                'errors': [{'file_id': str, 'error': str}, ...]
+            }
+        """
+        moved = 0
+        failed = 0
+        errors = []
+
+        try:
+            # Get project for ownership check
+            project = self.db_service.get_project_by_id(db, project_id)
+            if not project or project.user_id != user_id:
+                logger.warning("Unauthorized batch move", project_id=str(project_id), user_id=str(user_id))
+                return {
+                    "moved": 0,
+                    "failed": len(move_actions),
+                    "errors": [{"error": "Unauthorized"}],
+                }
+
+            # Process each move action
+            for action in move_actions:
+                try:
+                    file_id = UUID(action["file_id"])
+                    s3_key_old = action["s3_key_old"]
+                    s3_key_new = action["s3_key_new"]
+                    new_path = action["new_path"]
+
+                    # Step 1: S3 move (server-side copy + delete)
+                    move_success = self.storage.move(s3_key_old, s3_key_new)
+
+                    if not move_success:
+                        failed += 1
+                        errors.append(
+                            {
+                                "file_id": str(file_id),
+                                "error": f"S3 move failed: {s3_key_old} → {s3_key_new}",
+                            }
+                        )
+                        logger.warning(
+                            "S3 move failed", file_id=str(file_id), s3_key_old=s3_key_old, s3_key_new=s3_key_new
+                        )
+                        continue
+
+                    # Step 2: Update DB record
+                    updated_file = self.db_service.move_file(
+                        db=db,
+                        file_id=file_id,
+                        new_relative_path=new_path,
+                        new_s3_key=s3_key_new,
+                    )
+
+                    if not updated_file:
+                        failed += 1
+                        errors.append(
+                            {
+                                "file_id": str(file_id),
+                                "error": "DB update failed after S3 move (inconsistent state!)",
+                            }
+                        )
+                        logger.error(
+                            "DB update failed after S3 move",
+                            file_id=str(file_id),
+                            old_path=action.get("old_path"),
+                            new_path=new_path,
+                        )
+                        continue
+
+                    moved += 1
+                    logger.debug(
+                        "File moved successfully",
+                        file_id=str(file_id),
+                        old_path=action.get("old_path"),
+                        new_path=new_path,
+                    )
+
+                except Exception as e:
+                    failed += 1
+                    errors.append(
+                        {
+                            "file_id": action.get("file_id", "unknown"),
+                            "error": str(e),
+                        }
+                    )
+                    logger.error(
+                        "Move action failed",
+                        file_id=action.get("file_id"),
+                        error=str(e),
+                        error_type=type(e).__name__,
+                    )
+
+            logger.info(
+                "Batch move completed",
+                project_id=str(project_id),
+                moved=moved,
+                failed=failed,
+                total=len(move_actions),
+            )
+
+            return {"moved": moved, "failed": failed, "errors": errors}
+
+        except Exception as e:
+            logger.error(
+                "Batch move orchestration failed",
+                project_id=str(project_id),
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            return {
+                "moved": 0,
+                "failed": len(move_actions),
+                "errors": [{"error": f"Batch move failed: {str(e)}"}],
             }
 
     def get_all_project_files_with_urls(self, db: Session, project_id: UUID, user_id: UUID) -> dict[str, Any] | None:

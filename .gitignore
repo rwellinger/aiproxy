@@ -41,3 +41,4 @@ dump.rdb
 /CLAUDE.md.orgi
 /CLAUDE.md.orgi.old
 /aiproxysrv/celerybeat-schedule.db
+/test_song_prj/
