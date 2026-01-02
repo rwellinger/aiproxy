@@ -942,7 +942,7 @@ class SongProjectOrchestrator:
 
                     # Construct new S3 key (must include folder_name prefix)
                     # Strip leading slash from new_path to avoid double slashes
-                    new_s3_key = f"{project.s3_prefix}/{folder_name}/{new_path.lstrip('/')}"
+                    new_s3_key = f"{project.s3_prefix.rstrip('/')}/{folder_name}/{new_path.lstrip('/')}"
 
                     to_move.append(
                         {
