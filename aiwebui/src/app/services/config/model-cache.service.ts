@@ -1,7 +1,7 @@
 import {inject, Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {BehaviorSubject, firstValueFrom, Observable} from "rxjs";
-import {OllamaChatModel, OllamaModel, OpenAIModel} from "../../models/conversation.model";
+import {ClaudeModel, OllamaChatModel, OllamaModel, OpenAIModel} from "../../models/conversation.model";
 import {ApiConfigService} from "./api-config.service";
 
 interface CacheEntry<T> {
@@ -28,16 +28,19 @@ export class ModelCacheService {
     private ollamaModels$ = new BehaviorSubject<OllamaModel[]>([]);
     private ollamaChatModels$ = new BehaviorSubject<OllamaChatModel[]>([]);
     private openaiModels$ = new BehaviorSubject<OpenAIModel[]>([]);
+    private claudeModels$ = new BehaviorSubject<ClaudeModel[]>([]);
 
     // Cache entries
     private ollamaCache: CacheEntry<OllamaModel[]> | null = null;
     private ollamaChatCache: CacheEntry<OllamaChatModel[]> | null = null;
     private openaiCache: CacheEntry<OpenAIModel[]> | null = null;
+    private claudeCache: CacheEntry<ClaudeModel[]> | null = null;
 
     // Loading states
     private isLoadingOllama = false;
     private isLoadingOllamaChat = false;
     private isLoadingOpenAI = false;
+    private isLoadingClaude = false;
 
     /**
      * Get Ollama models (from cache or API)
@@ -91,6 +94,23 @@ export class ModelCacheService {
     }
 
     /**
+     * Get Claude models (from cache or API)
+     */
+    public getClaudeModels(): Observable<ClaudeModel[]> {
+        // Check if cache is valid
+        if (this.isCacheValid(this.claudeCache)) {
+            return this.claudeModels$.asObservable();
+        }
+
+        // Load from API if not already loading
+        if (!this.isLoadingClaude) {
+            this.loadClaudeModels();
+        }
+
+        return this.claudeModels$.asObservable();
+    }
+
+    /**
      * Manually invalidate Ollama cache (force reload)
      */
     public invalidateOllamaCache(): void {
@@ -115,15 +135,25 @@ export class ModelCacheService {
     }
 
     /**
+     * Manually invalidate Claude cache (force reload)
+     */
+    public invalidateClaudeCache(): void {
+        this.claudeCache = null;
+        this.loadClaudeModels();
+    }
+
+    /**
      * Clear all caches
      */
     public clearCache(): void {
         this.ollamaCache = null;
         this.ollamaChatCache = null;
         this.openaiCache = null;
+        this.claudeCache = null;
         this.ollamaModels$.next([]);
         this.ollamaChatModels$.next([]);
         this.openaiModels$.next([]);
+        this.claudeModels$.next([]);
     }
 
     /**
@@ -210,6 +240,35 @@ export class ModelCacheService {
             // Keep old cache on error
         } finally {
             this.isLoadingOpenAI = false;
+        }
+    }
+
+    /**
+     * Load Claude models from API
+     */
+    private async loadClaudeModels(): Promise<void> {
+        this.isLoadingClaude = true;
+
+        try {
+            const response = await firstValueFrom(
+                this.http.get<{ models: ClaudeModel[] }>(this.apiConfig.endpoints.claude.models)
+            );
+
+            const models = response.models || [];
+
+            // Update cache
+            this.claudeCache = {
+                data: models,
+                timestamp: Date.now()
+            };
+
+            // Emit new data
+            this.claudeModels$.next(models);
+        } catch (error) {
+            console.error("Error loading Claude models:", error);
+            // Keep old cache on error
+        } finally {
+            this.isLoadingClaude = false;
         }
     }
 

@@ -49,6 +49,7 @@
       "title": "Title",
       "titlePlaceholder": "Chat title"
     },
+    "loadingModels": "Loading models...",
     "messages": {
       "archived": "This conversation is archived. Messages cannot be sent.",
       "copyMarkdown": "Copy as Markdown",
@@ -631,6 +632,11 @@
   "openaiChat": {
     "costInfo": "Pay-per-use: costs vary by model (~$0.001-0.06 per 1K tokens)",
     "title": "OpenAI Chat (External)"
+  },
+  "externalChat": {
+    "title": "External Chat",
+    "subtitle": "Chat with OpenAI or Claude models",
+    "providerLabel": "Provider"
   },
   "passwordChangeModal": {
     "actions": {

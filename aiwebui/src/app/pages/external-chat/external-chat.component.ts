@@ -17,13 +17,14 @@ import {TranslateModule, TranslateService} from "@ngx-translate/core";
 
 import {ConversationService} from "../../services/business/conversation.service";
 import {OpenaiChatService} from "../../services/business/openai-chat.service";
+import {ClaudeChatService} from "../../services/business/claude-chat.service";
 import {NotificationService} from "../../services/ui/notification.service";
 import {ChatExportService} from "../../services/business/chat-export.service";
-import {Conversation, ConversationDetailResponse, Message, OpenAIModel} from "../../models/conversation.model";
+import {ClaudeModel, Conversation, ConversationDetailResponse, Message, OpenAIModel} from "../../models/conversation.model";
 import {MessageContentPipe} from "../../pipes/message-content.pipe";
 
 @Component({
-    selector: "app-openai-chat",
+    selector: "app-external-chat",
     standalone: true,
     imports: [
         CommonModule,
@@ -42,13 +43,14 @@ import {MessageContentPipe} from "../../pipes/message-content.pipe";
         TranslateModule,
         MessageContentPipe
     ],
-    templateUrl: "./openai-chat.component.html",
-    styleUrl: "./openai-chat.component.scss"
+    templateUrl: "./external-chat.component.html",
+    styleUrl: "./external-chat.component.scss"
 })
-export class OpenaiChatComponent implements OnInit, OnDestroy {
+export class ExternalChatComponent implements OnInit, OnDestroy {
     // Services
     private conversationService = inject(ConversationService);
     private openaiChatService = inject(OpenaiChatService);
+    private claudeChatService = inject(ClaudeChatService);
     private notificationService = inject(NotificationService);
     private chatExportService = inject(ChatExportService);
     private translate = inject(TranslateService);
@@ -59,7 +61,14 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
     conversations: Conversation[] = [];
     currentConversation: Conversation | null = null;
     messages: Message[] = [];
-    models: OpenAIModel[] = [];
+    models: (OpenAIModel | ClaudeModel)[] = [];
+
+    // Provider Selection
+    selectedProvider: "openai" | "claude" = "openai";
+    availableProviders = [
+        {value: "openai" as const, label: "OpenAI"},
+        {value: "claude" as const, label: "Claude"}
+    ];
 
     // UI State
     isLoading = false;
@@ -89,8 +98,8 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.loadConversations();
 
-        // Load saved system context from localStorage
-        this.systemContext = this.openaiChatService.loadSystemContext();
+        // Load saved system context from localStorage based on default provider
+        this.loadSystemContextForProvider();
     }
 
     ngOnDestroy(): void {
@@ -99,34 +108,71 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Load available OpenAI models (via cache)
+     * Load system context for current provider
+     */
+    private loadSystemContextForProvider(): void {
+        if (this.selectedProvider === "openai") {
+            this.systemContext = this.openaiChatService.loadSystemContext();
+        } else if (this.selectedProvider === "claude") {
+            this.systemContext = this.claudeChatService.loadSystemContext();
+        }
+    }
+
+    /**
+     * Load models based on selected provider
      */
     private loadModels(): void {
-        // Skip if models already loaded
-        if (this.models.length > 0) {
-            return;
-        }
-
         this.isLoadingModels = true;
-        this.openaiChatService
-            .getModels()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (models) => {
-                    this.models = models || [];
-                    // Set default model if available
-                    if (this.models.length > 0 && !this.selectedModel) {
-                        this.selectedModel = this.models[0].name;
+
+        if (this.selectedProvider === "openai") {
+            this.openaiChatService
+                .getModels()
+                .pipe(takeUntil(this.destroy$))
+                .subscribe({
+                    next: (models) => {
+                        this.models = models || [];
+                        if (this.models.length > 0 && !this.selectedModel) {
+                            this.selectedModel = this.models[0].name;
+                        }
+                    },
+                    error: (error) => {
+                        console.error("Error loading OpenAI models:", error);
+                        this.notificationService.error(this.translate.instant("aiChat.notifications.modelsFailed"));
+                    },
+                    complete: () => {
+                        this.isLoadingModels = false;
                     }
-                },
-                error: (error) => {
-                    console.error("Error loading models:", error);
-                    this.notificationService.error(this.translate.instant("aiChat.notifications.modelsFailed"));
-                },
-                complete: () => {
-                    this.isLoadingModels = false;
-                }
-            });
+                });
+        } else if (this.selectedProvider === "claude") {
+            this.claudeChatService
+                .getModels()
+                .pipe(takeUntil(this.destroy$))
+                .subscribe({
+                    next: (models) => {
+                        this.models = models || [];
+                        if (this.models.length > 0 && !this.selectedModel) {
+                            this.selectedModel = this.models[0].name;
+                        }
+                    },
+                    error: (error) => {
+                        console.error("Error loading Claude models:", error);
+                        this.notificationService.error(this.translate.instant("aiChat.notifications.modelsFailed"));
+                    },
+                    complete: () => {
+                        this.isLoadingModels = false;
+                    }
+                });
+        }
+    }
+
+    /**
+     * Handle provider change - reload models
+     */
+    public onProviderChange(): void {
+        this.selectedModel = "";
+        this.models = [];
+        this.loadSystemContextForProvider();
+        this.loadModels();
     }
 
     /**
@@ -197,8 +243,8 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
     public showNewChat(): void {
         this.showNewChatForm = true;
         this.newChatTitle = "";
-        // Load persisted system context
-        this.systemContext = this.openaiChatService.loadSystemContext();
+        // Load persisted system context for current provider
+        this.loadSystemContextForProvider();
         // Lazy load models when needed
         this.loadModels();
     }
@@ -213,7 +259,7 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Create new conversation (with provider: 'external')
+     * Create new conversation (with provider: 'external' and external_provider: 'openai'|'claude')
      */
     public createConversation(): void {
         if (!this.newChatTitle.trim() || !this.selectedModel) {
@@ -227,7 +273,8 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
                 title: this.newChatTitle.trim(),
                 model: this.selectedModel,
                 system_context: this.systemContext.trim() || undefined,
-                provider: "external"
+                provider: "external",
+                external_provider: this.selectedProvider
             })
             .pipe(takeUntil(this.destroy$))
             .subscribe({
@@ -443,18 +490,26 @@ export class OpenaiChatComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Handle system context changes and save to localStorage
+     * Handle system context changes and save to localStorage for current provider
      */
     public onSystemContextChange(): void {
-        this.openaiChatService.saveSystemContext(this.systemContext);
+        if (this.selectedProvider === "openai") {
+            this.openaiChatService.saveSystemContext(this.systemContext);
+        } else if (this.selectedProvider === "claude") {
+            this.claudeChatService.saveSystemContext(this.systemContext);
+        }
     }
 
     /**
-     * Clear saved system context
+     * Clear saved system context for current provider
      */
     public clearSystemContext(): void {
         this.systemContext = "";
-        this.openaiChatService.clearSystemContext();
+        if (this.selectedProvider === "openai") {
+            this.openaiChatService.clearSystemContext();
+        } else if (this.selectedProvider === "claude") {
+            this.claudeChatService.clearSystemContext();
+        }
     }
 
     /**

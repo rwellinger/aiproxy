@@ -102,6 +102,9 @@ export class ApiConfigService {
         openai: {
             models: `${this.baseUrl}/api/v1/openai/chat/models`
         },
+        claude: {
+            models: `${this.baseUrl}/api/v1/claude/chat/models`
+        },
         lyricParsingRule: {
             list: (ruleType?: string, activeOnly?: boolean) => {
                 const params = new URLSearchParams();

@@ -13,9 +13,14 @@ export const routes: Routes = [
         loadComponent: () => import("./pages/ai-chat/ai-chat.component").then(m => m.AiChatComponent)
     },
     {
-        path: "openai-chat",
+        path: "external-chat",
         canActivate: [AuthGuard],
-        loadComponent: () => import("./pages/openai-chat/openai-chat.component").then(m => m.OpenaiChatComponent)
+        loadComponent: () => import("./pages/external-chat/external-chat.component").then(m => m.ExternalChatComponent)
+    },
+    {
+        path: "openai-chat",
+        redirectTo: "/external-chat",
+        pathMatch: "full"
     },
     {
         path: "songgen",
