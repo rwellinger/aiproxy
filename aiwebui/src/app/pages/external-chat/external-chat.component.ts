@@ -134,12 +134,11 @@ export class ExternalChatComponent implements OnInit, OnDestroy {
                         if (this.models.length > 0 && !this.selectedModel) {
                             this.selectedModel = this.models[0].name;
                         }
+                        this.isLoadingModels = false;
                     },
                     error: (error) => {
                         console.error("Error loading OpenAI models:", error);
                         this.notificationService.error(this.translate.instant("aiChat.notifications.modelsFailed"));
-                    },
-                    complete: () => {
                         this.isLoadingModels = false;
                     }
                 });
@@ -153,12 +152,11 @@ export class ExternalChatComponent implements OnInit, OnDestroy {
                         if (this.models.length > 0 && !this.selectedModel) {
                             this.selectedModel = this.models[0].name;
                         }
+                        this.isLoadingModels = false;
                     },
                     error: (error) => {
                         console.error("Error loading Claude models:", error);
                         this.notificationService.error(this.translate.instant("aiChat.notifications.modelsFailed"));
-                    },
-                    complete: () => {
                         this.isLoadingModels = false;
                     }
                 });

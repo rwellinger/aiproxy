@@ -516,9 +516,12 @@ class ConversationController:
                         }, 500
 
                     if conversation.external_provider == "claude":
+                        # Enhance system context with model information for Claude
+                        enhanced_messages = self._enhance_claude_system_context(chat_messages, conversation.model)
+
                         # Call Claude Chat API
                         assistant_content, prompt_eval_count, eval_count = self._call_claude_chat_api(
-                            conversation.model, chat_messages
+                            conversation.model, enhanced_messages
                         )
                     elif conversation.external_provider == "openai":
                         # Call OpenAI Chat API
@@ -711,6 +714,57 @@ class ConversationController:
         except ClaudeError as e:
             logger.error("Claude API Error", error=str(e), stacktrace=traceback.format_exc())
             raise
+
+    def _enhance_claude_system_context(self, messages: list[dict[str, str]], model: str) -> list[dict[str, str]]:
+        """
+        Enhance system context for Claude with model identification.
+
+        Claude models don't automatically know which version they are.
+        This method adds model information to the system context.
+
+        Args:
+            messages: List of messages with role and content
+            model: Model name (e.g., "claude-sonnet-4-5-20250929")
+
+        Returns:
+            Enhanced messages list with updated system context
+        """
+        # Model version mapping
+        model_info = {
+            "claude-sonnet-4-5-20250929": "Claude Sonnet 4.5",
+            "claude-opus-4-5-20251101": "Claude Opus 4.5",
+            "claude-haiku-4-5-20250929": "Claude Haiku 4.5",
+        }
+
+        # Get friendly model name
+        model_version = model_info.get(model, model)
+
+        # Model info text to prepend
+        model_context = f"You are {model_version}. The exact model ID is {model}."
+
+        # Find existing system message or create new one
+        enhanced = []
+        system_found = False
+
+        for msg in messages:
+            if msg.get("role") == "system":
+                # Enhance existing system context
+                existing_content = msg.get("content", "")
+                enhanced.append(
+                    {
+                        "role": "system",
+                        "content": f"{model_context}\n\n{existing_content}" if existing_content else model_context,
+                    }
+                )
+                system_found = True
+            else:
+                enhanced.append(msg)
+
+        # If no system message exists, prepend one
+        if not system_found:
+            enhanced.insert(0, {"role": "system", "content": model_context})
+
+        return enhanced
 
 
 class OllamaAPIError(Exception):
