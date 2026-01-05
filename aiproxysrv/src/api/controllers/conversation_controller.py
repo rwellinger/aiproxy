@@ -9,10 +9,12 @@ import requests
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from api.controllers.claude_chat_controller import ClaudeAPIError as ClaudeError
+from api.controllers.claude_chat_controller import ClaudeChatController
 from api.controllers.openai_chat_controller import OpenAIAPIError as OpenAIError
 from api.controllers.openai_chat_controller import OpenAIChatController
 from config.model_context_windows import get_context_window_size
-from config.settings import OLLAMA_TIMEOUT, OLLAMA_URL
+from config.settings import CLAUDE_MAX_TOKENS, OLLAMA_TIMEOUT, OLLAMA_URL, OPENAI_MAX_TOKENS
 from db.models import Conversation, Message, MessageArchive
 from schemas.conversation_schemas import (
     ConversationCreate,
@@ -271,6 +273,15 @@ class ConversationController:
             Tuple of (response_data, status_code)
         """
         try:
+            # Validate external_provider field
+            provider = data.provider or "internal"
+
+            if provider == "external" and not data.external_provider:
+                return {"error": "external_provider is required when provider='external'"}, 400
+
+            if provider == "internal" and data.external_provider:
+                return {"error": "external_provider should not be set when provider='internal'"}, 400
+
             # Get context window size for the model
             context_window_size = get_context_window_size(data.model)
 
@@ -280,7 +291,8 @@ class ConversationController:
                 user_id=user_id,
                 title=data.title,
                 model=data.model,
-                provider=data.provider or "internal",
+                provider=provider,
+                external_provider=data.external_provider,
                 system_context=data.system_context,
                 context_window_size=context_window_size,
                 current_token_count=0,
@@ -492,16 +504,41 @@ class ConversationController:
             # Route to appropriate provider
             try:
                 if conversation.provider == "external":
-                    # Call OpenAI Chat API
-                    assistant_content, prompt_eval_count, eval_count = self._call_openai_chat_api(
-                        conversation.model, chat_messages
-                    )
+                    # Route to external provider based on external_provider field
+                    if not conversation.external_provider:
+                        db.rollback()
+                        logger.error(
+                            "External conversation without external_provider field",
+                            conversation_id=str(conversation_id),
+                        )
+                        return {
+                            "error": "Invalid conversation: external provider requires external_provider field"
+                        }, 500
+
+                    if conversation.external_provider == "claude":
+                        # Call Claude Chat API
+                        assistant_content, prompt_eval_count, eval_count = self._call_claude_chat_api(
+                            conversation.model, chat_messages
+                        )
+                    elif conversation.external_provider == "openai":
+                        # Call OpenAI Chat API
+                        assistant_content, prompt_eval_count, eval_count = self._call_openai_chat_api(
+                            conversation.model, chat_messages
+                        )
+                    else:
+                        db.rollback()
+                        logger.error(
+                            "Unknown external_provider",
+                            external_provider=conversation.external_provider,
+                            conversation_id=str(conversation_id),
+                        )
+                        return {"error": f"Unknown external_provider: {conversation.external_provider}"}, 500
                 else:
                     # Call Ollama chat API (default/internal)
                     assistant_content, prompt_eval_count, eval_count = self._call_ollama_chat_api(
                         conversation.model, chat_messages
                     )
-            except (OllamaAPIError, OpenAIError) as e:
+            except (OllamaAPIError, OpenAIError, ClaudeError) as e:
                 db.rollback()
                 logger.error(
                     "Chat API Error", error=str(e), provider=conversation.provider, stacktrace=traceback.format_exc()
@@ -633,7 +670,7 @@ class ConversationController:
 
         try:
             content, prompt_tokens, completion_tokens = openai_controller.send_chat_message(
-                model=model, messages=messages
+                model=model, messages=messages, max_tokens=OPENAI_MAX_TOKENS
             )
 
             logger.debug("Token counts extracted", prompt_tokens=prompt_tokens, completion_tokens=completion_tokens)
@@ -642,6 +679,37 @@ class ConversationController:
 
         except OpenAIError as e:
             logger.error("OpenAI API Error", error=str(e), stacktrace=traceback.format_exc())
+            raise
+
+    def _call_claude_chat_api(self, model: str, messages: list[dict[str, str]]) -> tuple[str, int, int]:
+        """
+        Call Claude chat API.
+
+        Args:
+            model: Model name
+            messages: List of messages with role and content
+
+        Returns:
+            Tuple of (assistant_content, input_tokens, output_tokens)
+
+        Raises:
+            ClaudeError: If API call fails
+        """
+        claude_controller = ClaudeChatController()
+        logger.debug("Calling Claude chat API", model=model)
+
+        try:
+            content, input_tokens, output_tokens = claude_controller.send_chat_message(
+                model=model, messages=messages, max_tokens=CLAUDE_MAX_TOKENS
+            )
+
+            logger.debug("Token counts extracted", input_tokens=input_tokens, output_tokens=output_tokens)
+
+            # Claude uses input_tokens/output_tokens, we map to prompt_tokens/completion_tokens
+            return content, input_tokens, output_tokens
+
+        except ClaudeError as e:
+            logger.error("Claude API Error", error=str(e), stacktrace=traceback.format_exc())
             raise
 
 

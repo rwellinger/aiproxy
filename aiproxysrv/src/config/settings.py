@@ -63,10 +63,23 @@ OPENAI_CHAT_MODELS = os.getenv(
 )
 OPENAI_TIMEOUT = int(os.getenv("OPENAI_TIMEOUT", "120"))
 OPENAI_ADMIN_TIMEOUT = int(os.getenv("OPENAI_ADMIN_TIMEOUT", "30"))
+OPENAI_MAX_TOKENS = int(os.getenv("OPENAI_MAX_TOKENS", "4096"))
 
 # Backwards compatibility (deprecated - use OPENAI_ADMIN_BASE_URL + endpoints)
 OPENAI_URL = os.getenv("OPENAI_URL", f"{OPENAI_ADMIN_BASE_URL}/images")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", OPENAI_IMAGE_MODEL)
+
+# --------------------------------------------------
+# Claude Config (Anthropic Claude API)
+# --------------------------------------------------
+CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY", "")
+CLAUDE_BASE_URL = os.getenv("CLAUDE_BASE_URL", "https://api.anthropic.com/v1")
+CLAUDE_API_VERSION = os.getenv("CLAUDE_API_VERSION", "2023-06-01")
+CLAUDE_CHAT_MODELS = os.getenv(
+    "CLAUDE_CHAT_MODELS", "claude-sonnet-4-5-20250929,claude-haiku-4-5-20250929,claude-opus-4-5-20251101"
+)
+CLAUDE_TIMEOUT = int(os.getenv("CLAUDE_TIMEOUT", "120"))
+CLAUDE_MAX_TOKENS = int(os.getenv("CLAUDE_MAX_TOKENS", "4096"))
 
 # --------------------------------------------------
 # Image URL Config

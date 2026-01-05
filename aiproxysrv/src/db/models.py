@@ -312,10 +312,13 @@ class Conversation(Base):
 
     # Conversation metadata
     title = Column(String(255), nullable=False)
-    model = Column(String(100), nullable=False)  # Model name (Ollama or OpenAI)
+    model = Column(String(100), nullable=False)  # Model name (Ollama or OpenAI or Claude)
     provider = Column(
         String(50), nullable=False, server_default="internal", index=True
-    )  # 'internal' (Ollama) or 'external' (OpenAI, DeepSeek)
+    )  # 'internal' (Ollama) or 'external' (OpenAI, Claude, DeepSeek)
+    external_provider = Column(
+        String(50), nullable=True, index=True
+    )  # For external providers: 'openai', 'claude', etc. NULL for internal (Ollama)
     system_context = Column(Text, nullable=True)  # System prompt/context
     archived = Column(Boolean, nullable=False, server_default="false")  # Archive status
 
