@@ -1,8 +1,8 @@
-<div class="openai-chat-container">
+<div class="external-chat-container">
     <!-- Left sidebar - Conversation list -->
     <aside class="conversation-list">
         <div class="conversation-list-header">
-            <h2>{{ 'openaiChat.title' | translate }}</h2>
+            <h2>{{ 'externalChat.title' | translate }}</h2>
             <div class="header-actions">
                 <button mat-icon-button (click)="toggleShowArchived()"
                         [title]="(showArchived ? 'aiChat.sidebar.showActive' : 'aiChat.sidebar.showArchive') | translate">
@@ -18,19 +18,34 @@
         <!-- New chat form -->
         @if (showNewChatForm) {
             <mat-card class="new-chat-form">
+                <!-- Provider selection -->
                 <mat-form-field appearance="outline">
-                    <mat-label>{{ 'aiChat.form.title' | translate }}</mat-label>
-                    <input matInput [(ngModel)]="newChatTitle"
-                           [placeholder]="'aiChat.form.titlePlaceholder' | translate">
+                    <mat-label>{{ 'externalChat.providerLabel' | translate }}</mat-label>
+                    <mat-select [(ngModel)]="selectedProvider" (selectionChange)="onProviderChange()">
+                        @for (provider of availableProviders; track provider.value) {
+                            <mat-option [value]="provider.value">{{ provider.label }}</mat-option>
+                        }
+                    </mat-select>
                 </mat-form-field>
 
+                <!-- Model selection -->
                 <mat-form-field appearance="outline">
                     <mat-label>{{ 'aiChat.form.model' | translate }}</mat-label>
-                    <mat-select [(ngModel)]="selectedModel">
+                    <mat-select [(ngModel)]="selectedModel" [disabled]="isLoadingModels">
                         @for (model of models; track model.name) {
                             <mat-option [value]="model.name">{{ model.name }}</mat-option>
                         }
                     </mat-select>
+                    @if (isLoadingModels) {
+                        <mat-hint>{{ 'aiChat.loadingModels' | translate }}</mat-hint>
+                    }
+                </mat-form-field>
+
+                <!-- Title input -->
+                <mat-form-field appearance="outline">
+                    <mat-label>{{ 'aiChat.form.title' | translate }}</mat-label>
+                    <input matInput [(ngModel)]="newChatTitle"
+                           [placeholder]="'aiChat.form.titlePlaceholder' | translate">
                 </mat-form-field>
 
                 <mat-expansion-panel class="system-context-panel">

@@ -8,6 +8,7 @@ export interface Conversation {
     title: string;
     model: string;
     provider?: "internal" | "external";
+    external_provider?: "openai" | "claude";
     system_context?: string;
     archived?: boolean;
     context_window_size?: number;
@@ -67,10 +68,16 @@ export interface ConversationCreateRequest {
     title: string;
     model: string;
     provider?: "internal" | "external";
+    external_provider?: "openai" | "claude";
     system_context?: string;
 }
 
 export interface OpenAIModel {
+    name: string;
+    context_window: number;
+}
+
+export interface ClaudeModel {
     name: string;
     context_window: number;
 }

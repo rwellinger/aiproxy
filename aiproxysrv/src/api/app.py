@@ -16,6 +16,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from utils.logger import logger
 
 from .routes.chat_routes import api_chat_v1
+from .routes.claude_chat_routes import api_claude_chat_v1
 from .routes.conversation_routes import api_conversation_v1
 from .routes.cost_routes import api_openai_costs_v1
 from .routes.equipment_routes import api_equipment_v1
@@ -368,6 +369,7 @@ def create_app():
                     "api_chat_v1": "Chat",
                     "api_conversation_v1": "Conversations",
                     "api_openai_chat_v1": "OpenAI Chat",
+                    "api_claude_chat_v1": "Claude Chat",
                     "api_openai_costs_v1": "OpenAI Costs",
                     "api_equipment_v1": "Equipment",
                     "api_user_v1": "User Management",
@@ -395,6 +397,7 @@ def create_app():
                             "api_chat_v1",
                             "api_conversation_v1",
                             "api_openai_chat_v1",
+                            "api_claude_chat_v1",
                             "api_openai_costs_v1",
                             "api_equipment_v1",
                             "api_user_v1",
@@ -630,6 +633,7 @@ def create_app():
     app.register_blueprint(api_conversation_v1)
     app.register_blueprint(api_ollama_v1)
     app.register_blueprint(api_openai_chat_v1)
+    app.register_blueprint(api_claude_chat_v1)
     app.register_blueprint(api_equipment_v1)
 
     return app

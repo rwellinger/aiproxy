@@ -116,6 +116,10 @@ OPENAI_CHAT_MODELS=gpt-4o,gpt-4o-mini,gpt-4,gpt-5,gpt-5-mini,gpt-5-nano,gpt-4.1,
 OPENAI_TIMEOUT=120
 OPENAI_ADMIN_TIMEOUT=30
 
+# OpenAI Max Tokens (default: 4096)
+# Default max_tokens value if not specified in API request
+OPENAI_MAX_TOKENS=4096
+
 # OpenAI Cost Cache TTL in seconds (default: 3600 = 1 hour)
 # Controls how long cost data is cached before fetching fresh data from OpenAI Admin API
 # Lower values = more frequent API calls (useful for testing)
@@ -125,6 +129,31 @@ OPENAI_COST_CACHE_TTL=3600
 # Deprecated (backwards compatibility) - will be removed in future
 # OPENAI_URL=https://api.openai.com/v1/images
 # OPENAI_MODEL=dall-e-3
+
+# ==================================================
+# CLAUDE CONFIGURATION (Anthropic Claude API)
+# ==================================================
+# Claude API Key (for chat)
+# Get from: https://console.anthropic.com/settings/keys
+CLAUDE_API_KEY=
+
+# Claude Base URL (Messages API)
+CLAUDE_BASE_URL=https://api.anthropic.com/v1
+
+# Claude API Version Header
+# See: https://docs.anthropic.com/en/api/versioning
+CLAUDE_API_VERSION=2023-06-01
+
+# Claude Chat Models (comma-separated list)
+# Available: claude-sonnet-4-5-20250929, claude-haiku-4-5-20250929, claude-opus-4-5-20251101
+CLAUDE_CHAT_MODELS=claude-sonnet-4-5-20250929,claude-haiku-4-5-20250929,claude-opus-4-5-20251101
+
+# Timeout for Claude API requests in seconds (default: 120)
+CLAUDE_TIMEOUT=120
+
+# Claude Max Tokens (default: 4096)
+# REQUIRED by Claude Messages API - must be specified in every request
+CLAUDE_MAX_TOKENS=4096
 
 # ==================================================
 # APPLICATION SETTINGS
