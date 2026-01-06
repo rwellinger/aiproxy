@@ -87,13 +87,18 @@ def parse_chat_response(response_json: dict[str, Any]) -> tuple[str, int, int]:
 
 def get_model_context_window(model_name: str) -> int:
     """
-    Get context window size for OpenAI model.
+    Get context window size for OpenAI model from central config.
 
     Args:
         model_name: OpenAI model name
 
     Returns:
         Context window size in tokens
+
+    Notes:
+        - Delegates to central MODEL_CONTEXT_WINDOWS config
+        - Single Source of Truth for all model context windows
+        - New models automatically available when added to central config
 
     Examples:
         >>> get_model_context_window("gpt-5")
@@ -103,31 +108,16 @@ def get_model_context_window(model_name: str) -> int:
         >>> get_model_context_window("gpt-3.5-turbo")
         16385
         >>> get_model_context_window("unknown-model")
-        8192
+        2048
     """
-    context_windows = {
-        # GPT-5 Series
-        "gpt-5": 200000,
-        "gpt-5-pro": 200000,
-        "gpt-5-mini": 200000,
-        "gpt-5-nano": 200000,
-        "gpt-5-codex": 200000,
-        "gpt-5-chat-latest": 200000,
-        # GPT-4.1 Series
-        "gpt-4.1": 128000,
-        "gpt-4.1-mini": 128000,
-        "gpt-4.1-nano": 128000,
-        # GPT-4o Series
-        "gpt-4o": 128000,
-        "gpt-4o-mini": 128000,
-        # GPT-4 Series
-        "gpt-4-turbo": 128000,
-        "gpt-4": 8192,
-        # GPT-3.5 Series
-        "gpt-3.5-turbo": 16385,
-    }
+    from config.model_context_windows import MODEL_CONTEXT_WINDOWS
 
-    return context_windows.get(model_name, 8192)  # Default to 8k
+    # Use central config (same as Ollama models)
+    if model_name in MODEL_CONTEXT_WINDOWS:
+        return MODEL_CONTEXT_WINDOWS[model_name]
+
+    # Fallback for unknown models (use central default)
+    return MODEL_CONTEXT_WINDOWS.get("default", 2048)
 
 
 def get_available_models(models_config: str) -> list[dict[str, Any]]:

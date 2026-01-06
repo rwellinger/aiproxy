@@ -104,3 +104,51 @@ def get_context_window_size(model_name: str) -> int:
 
     # Return default
     return MODEL_CONTEXT_WINDOWS["default"]
+
+
+def get_external_provider_context_window(provider: str, model_name: str) -> int:
+    """
+    Get context window for external providers (OpenAI, Claude, etc.).
+
+    Delegates to provider-specific transformers to avoid hardcoding
+    provider models in central config.
+
+    Args:
+        provider: External provider name ('openai', 'claude', etc.)
+        model_name: Model name
+
+    Returns:
+        Context window size in tokens
+
+    Notes:
+        - Claude: Delegates to claude_chat_transformer (all models = 200k)
+        - OpenAI: Delegates to openai_chat_transformer (uses central config)
+        - Future providers (deepseek, gemini): Fallback to central map
+
+    Examples:
+        >>> get_external_provider_context_window("claude", "claude-sonnet-4-5-20250929")
+        200000
+        >>> get_external_provider_context_window("openai", "gpt-4o")
+        128000
+        >>> get_external_provider_context_window("openai", "gpt-5.1")
+        200000
+    """
+    if provider == "claude":
+        # Delegate to Claude transformer (all Claude models = 200k)
+        from business.claude_chat_transformer import (
+            get_model_context_window as get_claude_context_window,
+        )
+
+        return get_claude_context_window(model_name)
+
+    elif provider == "openai":
+        # Delegate to OpenAI transformer (uses central config after refactor)
+        from business.openai_chat_transformer import (
+            get_model_context_window as get_openai_context_window,
+        )
+
+        return get_openai_context_window(model_name)
+
+    else:
+        # Future providers (deepseek, gemini, etc.) - fallback to central map
+        return get_context_window_size(model_name)

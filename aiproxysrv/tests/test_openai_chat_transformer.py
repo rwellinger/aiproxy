@@ -173,28 +173,65 @@ class TestGetModelContextWindow:
 
     def test_gpt5_context_window(self):
         """Get context window for GPT-5 models"""
-        assert get_model_context_window("gpt-5") == 200000
-        assert get_model_context_window("gpt-5-pro") == 200000
-        assert get_model_context_window("gpt-5-mini") == 200000
+        from config.model_context_windows import MODEL_CONTEXT_WINDOWS
+
+        expected = MODEL_CONTEXT_WINDOWS.get("gpt-5", 2048)
+        assert get_model_context_window("gpt-5") == expected
+
+        expected_pro = MODEL_CONTEXT_WINDOWS.get("gpt-5-pro", 2048)
+        assert get_model_context_window("gpt-5-pro") == expected_pro
+
+        expected_mini = MODEL_CONTEXT_WINDOWS.get("gpt-5-mini", 2048)
+        assert get_model_context_window("gpt-5-mini") == expected_mini
 
     def test_gpt4o_context_window(self):
         """Get context window for GPT-4o models"""
-        assert get_model_context_window("gpt-4o") == 128000
-        assert get_model_context_window("gpt-4o-mini") == 128000
+        from config.model_context_windows import MODEL_CONTEXT_WINDOWS
+
+        expected = MODEL_CONTEXT_WINDOWS.get("gpt-4o", 2048)
+        assert get_model_context_window("gpt-4o") == expected
+
+        expected_mini = MODEL_CONTEXT_WINDOWS.get("gpt-4o-mini", 2048)
+        assert get_model_context_window("gpt-4o-mini") == expected_mini
 
     def test_gpt4_context_window(self):
         """Get context window for GPT-4 models"""
-        assert get_model_context_window("gpt-4-turbo") == 128000
-        assert get_model_context_window("gpt-4") == 8192
+        from config.model_context_windows import MODEL_CONTEXT_WINDOWS
+
+        expected_turbo = MODEL_CONTEXT_WINDOWS.get("gpt-4-turbo", 2048)
+        assert get_model_context_window("gpt-4-turbo") == expected_turbo
+
+        expected = MODEL_CONTEXT_WINDOWS.get("gpt-4", 2048)
+        assert get_model_context_window("gpt-4") == expected
 
     def test_gpt35_context_window(self):
         """Get context window for GPT-3.5 models"""
-        assert get_model_context_window("gpt-3.5-turbo") == 16385
+        from config.model_context_windows import MODEL_CONTEXT_WINDOWS
+
+        expected = MODEL_CONTEXT_WINDOWS.get("gpt-3.5-turbo", 2048)
+        assert get_model_context_window("gpt-3.5-turbo") == expected
 
     def test_unknown_model(self):
-        """Get context window for unknown model (default 8k)"""
-        assert get_model_context_window("unknown-model") == 8192
-        assert get_model_context_window("gpt-6") == 8192
+        """Get context window for unknown model (default from central config)"""
+        from config.model_context_windows import MODEL_CONTEXT_WINDOWS
+
+        expected_default = MODEL_CONTEXT_WINDOWS.get("default", 2048)
+        assert get_model_context_window("unknown-model") == expected_default
+        assert get_model_context_window("gpt-6") == expected_default
+
+    def test_new_models_auto_available(self):
+        """Test that new models from central config are automatically available"""
+        from config.model_context_windows import MODEL_CONTEXT_WINDOWS
+
+        # Test new GPT-4.1 series (should be in central config but was missing in old hardcoded dict)
+        if "gpt-4.1" in MODEL_CONTEXT_WINDOWS:
+            expected = MODEL_CONTEXT_WINDOWS["gpt-4.1"]
+            assert get_model_context_window("gpt-4.1") == expected
+
+        # Test new GPT-5.1 series
+        if "gpt-5.1" in MODEL_CONTEXT_WINDOWS:
+            expected = MODEL_CONTEXT_WINDOWS["gpt-5.1"]
+            assert get_model_context_window("gpt-5.1") == expected
 
 
 class TestGetAvailableModels:
@@ -235,16 +272,19 @@ class TestGetAvailableModels:
         assert models[2]["context_window"] == 200000
 
     def test_unknown_models(self):
-        """Parse unknown models (default context window)"""
+        """Parse unknown models (default context window from central config)"""
+        from config.model_context_windows import MODEL_CONTEXT_WINDOWS
+
         models_config = "unknown-model-1,unknown-model-2"
 
         models = get_available_models(models_config)
 
+        expected_default = MODEL_CONTEXT_WINDOWS.get("default", 2048)
         assert len(models) == 2
         assert models[0]["name"] == "unknown-model-1"
-        assert models[0]["context_window"] == 8192
+        assert models[0]["context_window"] == expected_default
         assert models[1]["name"] == "unknown-model-2"
-        assert models[1]["context_window"] == 8192
+        assert models[1]["context_window"] == expected_default
 
     def test_empty_string(self):
         """Parse empty string (single empty model)"""

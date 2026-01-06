@@ -631,7 +631,7 @@
   },
   "openaiChat": {
     "costInfo": "Kostenpflichtig: Preise variieren je Modell (~$0.001-0.06 pro 1K Tokens)",
-    "title": "OpenAI Chat (Extern)"
+    "title": "Externer Chat"
   },
   "externalChat": {
     "title": "Externer Chat",
@@ -782,7 +782,7 @@
     }
   },
   "sideMenu": {
-    "aiChat": "AI Chat",
+    "aiChat": "Externer Chat",
     "brandName": "thWelly's AI Toolbox",
     "createImage": "Erstellen",
     "createSong": "Song Erstellen",
@@ -799,7 +799,7 @@
     "newEquipment": "Neu",
     "newSketch": "Neue Skizze",
     "ollamaChat": "Ollama Chat",
-    "openaiChat": "OpenAI Chat",
+    "openaiChat": "Externer Chat",
     "picture": "Bild",
     "profile": "Profil",
     "promptTemplates": "Prompt Vorlagen",

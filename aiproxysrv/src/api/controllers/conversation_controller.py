@@ -13,7 +13,10 @@ from api.controllers.claude_chat_controller import ClaudeAPIError as ClaudeError
 from api.controllers.claude_chat_controller import ClaudeChatController
 from api.controllers.openai_chat_controller import OpenAIAPIError as OpenAIError
 from api.controllers.openai_chat_controller import OpenAIChatController
-from config.model_context_windows import get_context_window_size
+from config.model_context_windows import (
+    get_context_window_size,
+    get_external_provider_context_window,
+)
 from config.settings import CLAUDE_MAX_TOKENS, OLLAMA_TIMEOUT, OLLAMA_URL, OPENAI_MAX_TOKENS
 from db.models import Conversation, Message, MessageArchive
 from schemas.conversation_schemas import (
@@ -282,8 +285,13 @@ class ConversationController:
             if provider == "internal" and data.external_provider:
                 return {"error": "external_provider should not be set when provider='internal'"}, 400
 
-            # Get context window size for the model
-            context_window_size = get_context_window_size(data.model)
+            # Get context window size for the model (provider-aware)
+            if provider == "external" and data.external_provider:
+                # External providers (Claude, OpenAI, etc.)
+                context_window_size = get_external_provider_context_window(data.external_provider, data.model)
+            else:
+                # Internal (Ollama) models
+                context_window_size = get_context_window_size(data.model)
 
             # Create conversation
             conversation = Conversation(
