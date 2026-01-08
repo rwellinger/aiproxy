@@ -143,6 +143,11 @@ class OpenAICostController:
                 for result in bucket.get("results", []):
                     line_item_name = result.get("line_item", "unknown")
                     amount_value = result.get("amount", {}).get("value", 0)
+
+                    # Convert to float if string (defensive handling for API changes)
+                    if isinstance(amount_value, str):
+                        amount_value = float(amount_value) if amount_value else 0.0
+
                     line_items[line_item_name] += amount_value
 
             # Categorize: Image vs Chat
