@@ -2,8 +2,15 @@
 
 from typing import Any
 
-from adapters.claude.api_client import ClaudeAPIClient
-from business.claude_chat_transformer import build_messages_payload, get_available_models, parse_messages_response
+from adapters.claude.api_client import ClaudeAPIClient, ClaudeAPIError
+from business.claude_chat_transformer import (
+    build_messages_payload,
+    filter_models_by_whitelist,
+    get_available_models,
+    parse_configured_claude_models,
+    parse_messages_response,
+    transform_api_models_to_frontend,
+)
 from config.settings import CHAT_DEBUG_LOGGING, CLAUDE_CHAT_MODELS
 from utils.logger import logger
 
@@ -53,10 +60,79 @@ class ClaudeChatOrchestrator:
 
     def get_available_models(self) -> list[dict[str, Any]]:
         """
-        Get list of available Claude Chat models from configuration.
+        Get available Claude Chat models from Anthropic API.
+
+        Orchestrates: API client + Transformer
+        - CLAUDE_CHAT_MODELS empty: Fetch all models from API (dynamic)
+        - CLAUDE_CHAT_MODELS set: Fetch from API, then filter by whitelist (hybrid)
+
+        Fallback Strategy:
+        - On API failure: Return hardcoded fallback list
+        - Log error but don't fail the request
 
         Returns:
             List of model dictionaries with name and context_window
+
+        Notes:
+            - Always calls Anthropic API (simple approach per user decision)
+            - Applies whitelist filter if CLAUDE_CHAT_MODELS is set
+            - Falls back to static list on API errors
         """
-        # Use transformer to parse models config
-        return get_available_models(CLAUDE_CHAT_MODELS)
+        try:
+            # Parse whitelist from configuration
+            whitelist = parse_configured_claude_models(CLAUDE_CHAT_MODELS)
+
+            # Always call API (simple solution - per user decision)
+            logger.info("Fetching Claude models from Anthropic API", has_whitelist=bool(whitelist))
+
+            # Call API client
+            api_response = self.api_client.get_models()
+            api_models = api_response.get("data", [])
+
+            # Transform API models to frontend format
+            models = transform_api_models_to_frontend(api_models)
+
+            # Apply whitelist filter if configured
+            if whitelist:
+                models = filter_models_by_whitelist(models, whitelist)
+                logger.info(
+                    "Claude models fetched and filtered by whitelist",
+                    total_from_api=len(api_models),
+                    after_filtering=len(models),
+                )
+            else:
+                logger.info(
+                    "Claude models fetched (no whitelist)",
+                    model_count=len(models),
+                )
+
+            return models
+
+        except ClaudeAPIError as e:
+            # Fallback to static list on API error
+            logger.warning(
+                "Claude API error, falling back to static model list",
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+
+            # Return fallback hardcoded list
+            fallback_models = get_available_models(CLAUDE_CHAT_MODELS)
+
+            logger.info(
+                "Using fallback Claude model list",
+                model_count=len(fallback_models),
+            )
+
+            return fallback_models
+
+        except Exception as e:
+            # Unexpected error - also fallback to static list
+            logger.error(
+                "Unexpected error in get_available_models, falling back to static list",
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+
+            fallback_models = get_available_models(CLAUDE_CHAT_MODELS)
+            return fallback_models

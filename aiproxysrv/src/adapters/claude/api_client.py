@@ -104,6 +104,96 @@ class ClaudeAPIClient:
             )
             raise ClaudeAPIError(f"Unexpected Error: {e}")
 
+    def get_models(self) -> dict[str, Any]:
+        """
+        Get available Claude models from Anthropic API.
+
+        API Reference:
+            GET https://api.anthropic.com/v1/models
+            Headers: x-api-key, anthropic-version: 2023-06-01
+            Response: {
+                "data": [
+                    {
+                        "id": "claude-sonnet-4-5-20250929",
+                        "created_at": "2025-01-15T12:00:00Z",
+                        "display_name": "Claude Sonnet 4.5",
+                        "type": "model"
+                    }
+                ],
+                "has_more": false,
+                "first_id": "...",
+                "last_id": "..."
+            }
+
+        Returns:
+            Anthropic API response JSON with models list
+
+        Raises:
+            ClaudeAPIError: If API call fails
+        """
+        if not self.api_key:
+            raise ClaudeAPIError("Claude API key not configured")
+
+        api_url = f"{self.base_url}/models"
+
+        headers = {
+            "x-api-key": self.api_key,
+            "anthropic-version": self.api_version,
+        }
+
+        if CHAT_DEBUG_LOGGING:
+            logger.debug("Fetching Claude models from API", api_url=api_url)
+        else:
+            logger.info("Fetching Claude models")
+
+        try:
+            resp = requests.get(api_url, headers=headers, timeout=self.timeout)
+
+            if CHAT_DEBUG_LOGGING:
+                logger.debug("Claude Models API Response received", status_code=resp.status_code)
+
+            # Check for HTTP errors
+            if resp.status_code != 200:
+                error_body = resp.text
+                logger.error(
+                    "Claude Models API HTTP Error",
+                    status_code=resp.status_code,
+                    response_body=error_body[:500],
+                )
+                raise ClaudeAPIError(f"HTTP {resp.status_code}: {error_body[:200]}")
+
+            resp_json = resp.json()
+
+            if CHAT_DEBUG_LOGGING:
+                logger.debug(
+                    "Claude Models API Response",
+                    model_count=len(resp_json.get("data", [])),
+                    has_more=resp_json.get("has_more", False),
+                    full_response=resp_json,
+                )
+
+            return resp_json
+
+        except requests.exceptions.Timeout:
+            logger.error("Claude Models API timeout", url=self.base_url)
+            raise ClaudeAPIError("Claude Models API timeout")
+
+        except requests.exceptions.ConnectionError:
+            logger.error("Claude Models API connection failed", url=self.base_url)
+            raise ClaudeAPIError("Cannot connect to Claude Models API")
+
+        except requests.exceptions.RequestException as e:
+            logger.error("Claude Models API request failed", error=str(e), error_type=type(e).__name__)
+            raise ClaudeAPIError(f"Claude Models API error: {str(e)}")
+
+        except Exception as e:
+            logger.error(
+                "Unexpected error in get_models",
+                error_type=type(e).__name__,
+                error=str(e),
+            )
+            raise ClaudeAPIError(f"Unexpected error: {str(e)}")
+
 
 class ClaudeAPIError(Exception):
     """Custom exception for Claude API errors."""
