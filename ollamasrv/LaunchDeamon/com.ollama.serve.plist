@@ -28,7 +28,7 @@
             <key>OLLAMA_ORIGINS</key>
             <string>*</string>
             <key>OLLAMA_KEEP_ALIVE</key>
-            <string>3600</string>
+            <string>10800</string>
             <key>OLLAMA_MAX_MEMORY</key>
             <string>25GiB</string>
             <key>OLLAMA_DEVICE</key>
