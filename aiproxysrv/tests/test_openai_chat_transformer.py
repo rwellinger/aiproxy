@@ -236,6 +236,29 @@ class TestGetModelContextWindow:
             expected = MODEL_CONTEXT_WINDOWS["gpt-5.1"]
             assert get_model_context_window("gpt-5.1") == expected
 
+    def test_pattern_fallback_gpt5_series(self):
+        """Test pattern-based fallback for unknown GPT-5 models (gpt-5.2, gpt-5.3, etc.)"""
+        # These models are NOT in central config but should get 200k via pattern matching
+        assert get_model_context_window("gpt-5.2") == 200000
+        assert get_model_context_window("gpt-5.3") == 200000
+        assert get_model_context_window("gpt-5.2-mini") == 200000
+        assert get_model_context_window("gpt-5-ultra") == 200000
+
+    def test_pattern_fallback_gpt4o_series(self):
+        """Test pattern-based fallback for unknown GPT-4o models"""
+        assert get_model_context_window("gpt-4o-ultra") == 128000
+        assert get_model_context_window("gpt-4o-2025-01") == 128000
+
+    def test_pattern_fallback_gpt4_series(self):
+        """Test pattern-based fallback for unknown GPT-4 models"""
+        assert get_model_context_window("gpt-4-preview") == 8192
+        assert get_model_context_window("gpt-4-new") == 8192
+
+    def test_pattern_fallback_gpt35_series(self):
+        """Test pattern-based fallback for unknown GPT-3.5 models"""
+        assert get_model_context_window("gpt-3.5-turbo-new") == 16385
+        assert get_model_context_window("gpt-3.5-preview") == 16385
+
 
 class TestGetAvailableModels:
     """Test get_available_models() - Model list parsing"""
