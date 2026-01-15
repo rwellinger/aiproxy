@@ -40,7 +40,8 @@ def build_chat_payload(
         payload["temperature"] = temperature
 
     if max_tokens:
-        payload["max_tokens"] = max_tokens
+        # max_completion_tokens is the new standard (max_tokens is deprecated)
+        payload["max_completion_tokens"] = max_tokens
 
     return payload
 

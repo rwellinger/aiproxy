@@ -54,14 +54,16 @@ class TestBuildChatPayload:
         assert "temperature" not in payload
 
     def test_max_tokens_included(self):
-        """Build payload with max_tokens"""
+        """Build payload with max_tokens (uses max_completion_tokens in payload)"""
         model = "gpt-4o"
         messages = [{"role": "user", "content": "Hello"}]
         max_tokens = 100
 
         payload = build_chat_payload(model, messages, max_tokens=max_tokens)
 
-        assert payload["max_tokens"] == 100
+        # OpenAI deprecated max_tokens in favor of max_completion_tokens
+        assert payload["max_completion_tokens"] == 100
+        assert "max_tokens" not in payload
 
     def test_max_tokens_none(self):
         """Build payload without max_tokens (None)"""
@@ -70,6 +72,7 @@ class TestBuildChatPayload:
 
         payload = build_chat_payload(model, messages, max_tokens=None)
 
+        assert "max_completion_tokens" not in payload
         assert "max_tokens" not in payload
 
     def test_multiple_messages(self):
