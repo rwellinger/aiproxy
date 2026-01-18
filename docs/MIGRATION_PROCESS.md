@@ -154,7 +154,7 @@ docker-compose restart db-migration
 
 ```bash
 # SSH to production
-ssh rob@10.0.1.120
+ssh rob@<production-server>
 
 # Backup database
 cd /path/to/mac_ki_service/aiproxysrv
@@ -219,7 +219,7 @@ docker logs celery-worker
 
 **6. Verify Application**
 
-- Open frontend: https://10.0.1.120
+- Open frontend: https://<production-server>
 - Test affected features
 - Check browser console for errors
 - Monitor backend logs

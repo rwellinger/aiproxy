@@ -15,14 +15,14 @@
         <key>KeepAlive</key>
         <true/>
         <key>StandardOutPath</key>
-        <string>/Users/robertw/.ollama/logs/ollama.log</string>
+        <string>/Users/<your-username>/.ollama/logs/ollama.log</string>
         <key>StandardErrorPath</key>
-        <string>/Users/robertw/.ollama/logs/ollama-error.log</string>
+        <string>/Users/<your-username>/.ollama/logs/ollama-error.log</string>
         <key>EnvironmentVariables</key>
         <dict>
             <!-- Core‑Params -->
             <key>HOME</key>
-            <string>/Users/robertw</string>
+            <string>/Users/<your-username></string>
             <key>OLLAMA_HOST</key>
             <string>0.0.0.0:11434</string>
             <key>OLLAMA_ORIGINS</key>

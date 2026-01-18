@@ -1759,7 +1759,7 @@ S3_REGION=us-east-1
 ### 7.1 Development Environment
 
 **Repository:** `mac_ki_service/` (Development)
-**Location:** `/Users/robertw/Workspace/mac_ki_service`
+**Location:** `~/Workspace/mac_ki_service` (or your preferred location)
 
 ```
 MacBook Air M4 (32GB RAM)
@@ -1782,36 +1782,36 @@ MacBook Air M4 (32GB RAM)
 ### 7.2 Production Environment
 
 **Repository:** `thwelly_ki_app/` (Production - Separate Repository!)
-**Location:** `/Users/robertw/Workspace/thwelly_ki_app`
+**Location:** Separate directory (deployment configs only)
 
 ```
-Mac Studio M1 Max (32GB RAM) - IP: 10.0.1.120
+Production Server (Apple Silicon recommended)
 ├── Host macOS
-├── Docker colima
+├── Docker (Colima)
 │   ├── webui-network (Bridge)
 │   ├── PostgreSQL (Container: postgres)
 │   ├── Redis (Container: redis)
 │   ├── Celery Worker (Container: celery-worker)
-│   │   └── Image: ghcr.io/rwellinger/celery-worker-app:latest
+│   │   └── Image: ghcr.io/<your-registry>/celery-worker-app:latest
 │   ├── API Server (Container: aiproxysrv)
-│   │   └── Image: ghcr.io/rwellinger/aiproxysrv-app:latest
+│   │   └── Image: ghcr.io/<your-registry>/aiproxysrv-app:latest
 │   └── Nginx Proxy (Container: forward-proxy)
-│       └── Image: ghcr.io/rwellinger/aiwebui-app:latest (serves Angular app with integrated chat UI)
+│       └── Image: ghcr.io/<your-registry>/aiwebui-app:latest
 ├── Native Services
 │   └── Ollama (Port 11434) - LLM backend for chat conversations
 └── Storage
     ├── postgres-data (Volume)
     └── redis-data (Volume)
 
-Synology NAS (10.0.1.200)
+NAS / S3 Storage (optional)
 ├── MinIO S3 Storage
 │   ├── S3 API (Port 9000) - S3-compatible object storage
 │   ├── Web Console (Port 9001) - MinIO admin UI
-│   └── Data: /volume1/minio-data (RAID protected)
+│   └── Data: RAID protected storage
 └── Network Access
-    ├── Backend: MINIO_ENDPOINT=10.0.1.200:9000
-    ├── Console: https://macstudio/ (proxied via Nginx)
-    └── Docker container with user: 1000:1000
+    ├── Backend: MINIO_ENDPOINT=<nas-ip>:9000
+    ├── Console: https://<hostname>/ (proxied via Nginx)
+    └── Docker container with appropriate user permissions
 
 All images built via GitHub Actions (Multi-platform: AMD64 + ARM64)
 Images pulled from GitHub Container Registry (GHCR)
@@ -2427,7 +2427,7 @@ services:
 | **Task ID**    | Celery task identifier for async operations                                     |
 | **Job ID**     | Mureka job identifier for song generation                                       |
 | **Choice**     | Single music variant from Mureka (usually 2 per generation)                     |
-| **Ollama**     | Open-source LLM runtime for local chat generation (10.0.1.120:11434)           |
+| **Ollama**     | Open-source LLM runtime for local chat generation (localhost:11434)             |
 | **Chat API**   | Ollama-based text generation for conversational AI with 4 endpoints             |
 | **Conversation** | Persistent chat session with AI model, system context, and token tracking     |
 | **Message**    | Individual user or assistant message within a conversation                      |

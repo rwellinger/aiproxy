@@ -373,7 +373,7 @@ curl http://localhost:5050/api/v1/ollama/models
 docker compose logs -f aiproxysrv
 
 # Verify OLLAMA_API_BASE_URL in .env
-# Should be: http://10.0.1.120:11434 (or localhost:11434 for dev)
+# Should be: http://localhost:11434 (or production server IP for prod)
 ```
 
 ## Model Management

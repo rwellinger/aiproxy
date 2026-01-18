@@ -28,13 +28,13 @@
 ### SCHRITT 1: Backup erstellen (KRITISCH!)
 ```bash
 # SSH auf Production Server
-ssh rob@10.0.1.120
+ssh rob@<production-server>
 
 # PostgreSQL Backup
 docker exec -t mac_ki_service-postgres-1 pg_dump -U aiuser -d aiproxy > /tmp/aiproxy_backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Backup auf lokalen Rechner kopieren
-scp rob@10.0.1.120:/tmp/aiproxy_backup_*.sql ~/Desktop/
+scp rob@<production-server>:/tmp/aiproxy_backup_*.sql ~/Desktop/
 ```
 
 ### SCHRITT 2: Alembic-Status auf Produktion prüfen
@@ -100,7 +100,7 @@ docker logs -f mac_ki_service-aiproxysrv-1
 ```
 
 ### SCHRITT 6: Funktionstest
-1. **Frontend öffnen:** https://10.0.1.120
+1. **Frontend öffnen:** https://<production-server>
 2. **Songs-Übersicht öffnen**
 3. **Verifizieren:** Songs werden wieder angezeigt
 4. **Test:** Song-Details öffnen, abspielen testen
@@ -120,10 +120,10 @@ docker restart mac_ki_service-aiproxysrv-1
 ### Option 2: Backup wiederherstellen
 ```bash
 # Backup auf Server kopieren
-scp ~/Desktop/aiproxy_backup_*.sql rob@10.0.1.120:/tmp/
+scp ~/Desktop/aiproxy_backup_*.sql rob@<production-server>:/tmp/
 
 # Restore
-ssh rob@10.0.1.120
+ssh rob@<production-server>
 docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy < /tmp/aiproxy_backup_*.sql
 ```
 

@@ -3,7 +3,7 @@ graph TB
         CLIENT[Browser Client]
     end
 
-    subgraph "Mac Studio Production (10.0.1.120)"
+    subgraph "Production Server"
         subgraph "Docker Network: webui-network"
             NGINX[Nginx Proxy<br/>:443<br/>serves Angular + API]
             API[AI Proxy Server<br/>:5050]
@@ -17,7 +17,7 @@ graph TB
         end
     end
 
-    subgraph "Synology NAS (10.0.1.200)"
+    subgraph "NAS / S3 Storage"
         MINIO[MinIO S3 Storage<br/>:9000 S3 API<br/>:9001 Console<br/>/volume1/minio-data]
     end
 
