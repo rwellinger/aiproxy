@@ -1,6 +1,5 @@
 # Claude Code Configuration
 
-**Author:** Rob
 **Language:** English
 **Last Updated:** 2025-11-10
 
@@ -202,7 +201,7 @@ cat scripts/db/seed_prompts.sql | docker exec -i postgres psql -U aiproxy -d aip
 cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i postgres psql -U aiproxy -d aiproxysrv
 ```
 
-**DB Credentials:** Service: `postgres`, DB: `aiproxysrv`, User: `aiproxy`, Password: `aiproxy123`
+**DB Credentials:** See `.env` file (not committed to repository)
 
 ---
 
@@ -232,7 +231,7 @@ cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i postgres psql -U ai
 
 # 📖 Full Documentation
 
-**When you (Rob) need details:**
+**When you need details:**
 - **Project Overview:** `README.md` (803 lines - Build, Features, Commands)
 - **Architecture Deep-Dive:** `docs/arch42/README.md` (2000+ lines - arc42, ADRs, Workflows)
 - **UI Patterns:** `docs/UI_PATTERNS.md` (CRITICAL - Read before new UI!)
@@ -276,21 +275,15 @@ cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i postgres psql -U ai
 **Backend:** FastAPI, Python 3.12.12, Celery, SQLAlchemy, Alembic
 **Database:** PostgreSQL, Redis
 **Deployment:** Docker (Colima), Nginx
-**Hardware:** Apple Silicon M4, Conda env `mac_ki_service_py312`
-
-**Repository Split:**
-- **mac_ki_service/** - DEV (Source code, CI/CD) ← We work here!
-- **thwelly_ki_app/** - PROD (Deployment configs only) ← No code edits!
+**Hardware:** Apple Silicon (M-Series), Python 3.12 via Conda
 
 ---
 
-# 💬 Communication
+# 💬 Communication Style
 
-- Call me "Rob"
-- Conversation: German
 - Code/Comments/Docs: English only
-- No polite forms, be factual and direct
-- Always present analysis, plan & effort estimation first
+- Be factual and direct
+- Present analysis, plan & effort estimation first
 
 ---
 
