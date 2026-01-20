@@ -153,9 +153,7 @@ main() {
     echo "  3. Create release: cd scripts/build && ./create_release.sh"
     echo ""
     echo -e "${YELLOW}⚠️  IMPORTANT:${NC}"
-    echo "  After release, manually update image versions in:"
-    echo "  - thwelly_ki_app/aiproxysrv/docker-compose.yml"
-    echo "  - thwelly_ki_app/forwardproxy/docker-compose.yml"
+    echo "  After release, manually update image versions in your deployment docker-compose.yml files."
     echo ""
 }
 

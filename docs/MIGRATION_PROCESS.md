@@ -467,8 +467,7 @@ docker run --rm -it \
 ## Emergency Contacts
 
 **Issues?**
-- Rob Wellinger: rob.wellinger@gmail.com
-- GitHub Issues: https://github.com/rwellinger/thwelly_ai_tools/issues
+- GitHub Issues: https://github.com/rwellinger/aiproxy/issues
 
 **Documentation:**
 - ARC42 Docs: `docs/arch42/README.md`

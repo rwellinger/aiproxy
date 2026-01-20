@@ -15,7 +15,14 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-REGISTRY="ghcr.io/rwellinger"
+# Determine GitHub owner dynamically (requires gh CLI)
+GITHUB_OWNER="${GITHUB_OWNER:-$(gh api user --jq '.login' 2>/dev/null)}"
+if [ -z "$GITHUB_OWNER" ]; then
+    echo -e "${RED}Error: Could not determine GitHub owner.${NC}"
+    echo "Either set GITHUB_OWNER environment variable or login with 'gh auth login'"
+    exit 1
+fi
+REGISTRY="ghcr.io/$GITHUB_OWNER"
 APP_IMAGE="aiproxysrv-app"
 WORKER_IMAGE="celery-worker-app"
 PROJECT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -123,7 +130,7 @@ build_images() {
     docker build -f Dockerfile --target app \
         --label "org.opencontainers.image.created=$BUILD_DATE" \
         --label "org.opencontainers.image.version=$VERSION" \
-        --label "org.opencontainers.image.source=https://github.com/rwellinger/mac_ki_service" \
+        --label "org.opencontainers.image.source=https://github.com/$GITHUB_OWNER/aiproxy" \
         -t "$APP_IMAGE:local" -t "$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:latest" .
     print_success "$APP_IMAGE built successfully"
 
@@ -131,7 +138,7 @@ build_images() {
     docker build -f Dockerfile --target worker \
         --label "org.opencontainers.image.created=$BUILD_DATE" \
         --label "org.opencontainers.image.version=$VERSION" \
-        --label "org.opencontainers.image.source=https://github.com/rwellinger/mac_ki_service" \
+        --label "org.opencontainers.image.source=https://github.com/$GITHUB_OWNER/aiproxy" \
         -t "$WORKER_IMAGE:local" -t "$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:latest" .
     print_success "$WORKER_IMAGE built successfully"
 }

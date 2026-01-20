@@ -4,7 +4,7 @@
 
 > A full-stack platform for AI-powered creative content generation - combining image generation, music creation, lyric writing, and project management in one cohesive application.
 
-[![Build Status](https://github.com/rwellinger/thwelly_ai_tools/actions/workflows/release.yml/badge.svg)](https://github.com/rwellinger/thwelly_ai_tools/actions)
+[![Build Status](https://github.com/rwellinger/aiproxy/actions/workflows/release.yml/badge.svg)](https://github.com/rwellinger/aiproxy/actions)
 [![License: ELv2](https://img.shields.io/badge/License-ELv2-blue.svg)](LICENSE)
 [![Angular](https://img.shields.io/badge/Angular-20-red.svg)](https://angular.io/)
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
@@ -173,8 +173,8 @@ mac_ki_service/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/rwellinger/thwelly_ai_tools.git
-   cd thwelly_ai_tools
+   git clone https://github.com/rwellinger/aiproxy.git
+   cd aiproxy
    ```
 
 2. **Backend Setup**

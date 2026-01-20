@@ -22,7 +22,14 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-REGISTRY="ghcr.io/rwellinger"
+# Determine GitHub owner dynamically (requires gh CLI)
+GITHUB_OWNER="${GITHUB_OWNER:-$(gh api user --jq '.login' 2>/dev/null)}"
+if [ -z "$GITHUB_OWNER" ]; then
+    echo -e "${RED}Error: Could not determine GitHub owner.${NC}"
+    echo "Either set GITHUB_OWNER environment variable or login with 'gh auth login'"
+    exit 1
+fi
+REGISTRY="ghcr.io/$GITHUB_OWNER"
 GITHUB_TOKEN=""
 FORCE_CLEANUP=false
 DRY_RUN=false

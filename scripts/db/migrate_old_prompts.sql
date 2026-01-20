@@ -2,7 +2,6 @@
 -- Migration: Old Image Prompts → user_prompt
 -- =============================================================================
 -- Purpose: Migrate legacy prompt data to new user_prompt/enhanced_prompt structure
--- Author: Rob
 -- Date: 2025-10-22
 --
 -- Background:

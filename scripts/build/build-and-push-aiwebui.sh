@@ -15,7 +15,14 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-REGISTRY="ghcr.io/rwellinger"
+# Determine GitHub owner dynamically (requires gh CLI)
+GITHUB_OWNER="${GITHUB_OWNER:-$(gh api user --jq '.login' 2>/dev/null)}"
+if [ -z "$GITHUB_OWNER" ]; then
+    echo -e "${RED}Error: Could not determine GitHub owner.${NC}"
+    echo "Either set GITHUB_OWNER environment variable or login with 'gh auth login'"
+    exit 1
+fi
+REGISTRY="ghcr.io/$GITHUB_OWNER"
 APP_IMAGE="aiwebui-app"
 PROJECT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 BUILD_DIR="$PROJECT_DIR/aiwebui"
@@ -124,7 +131,7 @@ build_image() {
     docker build -f Dockerfile --target production \
         --label "org.opencontainers.image.created=$BUILD_DATE" \
         --label "org.opencontainers.image.version=$VERSION" \
-        --label "org.opencontainers.image.source=https://github.com/rwellinger/mac_ki_service" \
+        --label "org.opencontainers.image.source=https://github.com/$GITHUB_OWNER/aiproxy" \
         -t "$APP_IMAGE:local" \
         -t "$APP_IMAGE:$VERSION" \
         -t "$REGISTRY/$APP_IMAGE:$VERSION" \

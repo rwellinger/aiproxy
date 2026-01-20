@@ -160,7 +160,6 @@ docker exec -i mac_ki_service-postgres-1 psql -U aiuser -d aiproxy < /tmp/aiprox
 ---
 
 ## Kontakt bei Problemen
-- **Rob:** rob.wellinger@gmail.com
-- **Claude Code:** Dokumentation im Projekt
+- **GitHub Issues:** https://github.com/rwellinger/aiproxy/issues
 
 **Status:** ⏳ Warte auf Bestätigung für Durchführung

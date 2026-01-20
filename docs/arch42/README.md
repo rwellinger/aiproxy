@@ -162,8 +162,8 @@ The Mac AI Service System is a personal AI-based multimedia generation platform 
 ### 2.2 Organizational Constraints
 - Personal project (no team development)
 - **Repository Separation**: Two separate Git repositories for DEV and PROD environments
-  - **mac_ki_service/** - Development repository (source code, CI/CD, builds)
-  - **thwelly_ki_app/** - Production repository (deployment configs, secrets, data volumes)
+  - **aiproxy/** - Development repository (source code, CI/CD, builds)
+  - **Separate production repository** - Production repository (deployment configs, secrets, data volumes)
 - Development and production environments separated
 - .env files not in Git (API keys, passwords)
 
@@ -1781,7 +1781,7 @@ MacBook Air M4 (32GB RAM)
 
 ### 7.2 Production Environment
 
-**Repository:** `thwelly_ki_app/` (Production - Separate Repository!)
+**Repository:** Separate production repository (deployment configs only)
 **Location:** Separate directory (deployment configs only)
 
 ```
@@ -1823,8 +1823,8 @@ Only deployment configuration: docker-compose.yml, .env, runtime scripts
 **Purpose:** Production deployment only (configs, secrets, data volumes)
 
 **Workflow:**
-1. **DEV (mac_ki_service):** Code changes → Commit → GitHub Actions builds images → Push to GHCR
-2. **PROD (thwelly_ki_app):** Update docker-compose.yml image versions → `docker compose pull` → `docker compose up -d`
+1. **DEV (aiproxy):** Code changes → Commit → GitHub Actions builds images → Push to GHCR
+2. **PROD:** Update docker-compose.yml image versions → `docker compose pull` → `docker compose up -d`
 
 **Note:** Chat functionality previously provided by Open WebUI is now integrated directly into the thWelly Toolbox Angular frontend.
 
@@ -2794,4 +2794,4 @@ cd src && alembic current
 *Document created: 01.09.2025*
 *Last updated: 31.10.2025*
 *Version: 2.1*
-*Author: Rob (rob.wellinger@gmail.com)*
+*Author: rwellinger*

@@ -12,7 +12,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  OWNER: rwellinger
 
 jobs:
   # ─────────────────────────────────────────────────────────
@@ -124,8 +123,8 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/aiproxysrv-app:${{ steps.version.outputs.VERSION }}
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/aiproxysrv-app:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/aiproxysrv-app:${{ steps.version.outputs.VERSION }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/aiproxysrv-app:latest
           cache-from: type=gha,scope=aiproxysrv-app
           cache-to: type=gha,mode=max,scope=aiproxysrv-app
 
@@ -133,7 +132,7 @@ jobs:
         run: |
           echo "## Backend Build Successful! :rocket:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** \`${{ env.REGISTRY }}/${{ env.OWNER }}/aiproxysrv-app:${{ steps.version.outputs.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ env.REGISTRY }}/${{ github.repository_owner }}/aiproxysrv-app:${{ steps.version.outputs.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
 
   # ─────────────────────────────────────────────────────────
   # Worker: celery-worker-app
@@ -178,8 +177,8 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/celery-worker-app:${{ steps.version.outputs.VERSION }}
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/celery-worker-app:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/celery-worker-app:${{ steps.version.outputs.VERSION }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/celery-worker-app:latest
           cache-from: type=gha,scope=celery-worker-app
           cache-to: type=gha,mode=max,scope=celery-worker-app
 
@@ -187,7 +186,7 @@ jobs:
         run: |
           echo "## Worker Build Successful! :rocket:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** \`${{ env.REGISTRY }}/${{ env.OWNER }}/celery-worker-app:${{ steps.version.outputs.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ env.REGISTRY }}/${{ github.repository_owner }}/celery-worker-app:${{ steps.version.outputs.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
 
   # ─────────────────────────────────────────────────────────
   # Frontend: aiwebui-app
@@ -232,8 +231,8 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/aiwebui-app:${{ steps.version.outputs.VERSION }}
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/aiwebui-app:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/aiwebui-app:${{ steps.version.outputs.VERSION }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/aiwebui-app:latest
           cache-from: type=gha,scope=aiwebui-app
           cache-to: type=gha,mode=max,scope=aiwebui-app
 
@@ -241,4 +240,4 @@ jobs:
         run: |
           echo "## Frontend Build Successful! :rocket:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** \`${{ env.REGISTRY }}/${{ env.OWNER }}/aiwebui-app:${{ steps.version.outputs.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ env.REGISTRY }}/${{ github.repository_owner }}/aiwebui-app:${{ steps.version.outputs.VERSION }}\`" >> $GITHUB_STEP_SUMMARY

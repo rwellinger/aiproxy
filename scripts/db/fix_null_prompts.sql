@@ -2,7 +2,6 @@
 -- Migration: Fix NULL prompts in generated_images
 -- =============================================================================
 -- Purpose: Fill NULL prompt values before setting NOT NULL constraint
--- Author: Rob
 -- Date: 2025-11-10
 --
 -- Background:

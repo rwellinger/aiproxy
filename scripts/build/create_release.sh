@@ -268,7 +268,7 @@ print_header "GitHub Actions Build"
 if [ "$REMOTE_AVAILABLE" = true ]; then
     print_info "Build wird automatisch in GitHub Actions gestartet..."
     echo ""
-    echo "  🔗 Build Status: ${BLUE}https://github.com/rwellinger/thwelly_ai_tools/actions${NC}"
+    echo "  🔗 Build Status: ${BLUE}https://github.com/rwellinger/aiproxy/actions${NC}"
     echo ""
     print_info "GitHub Actions wird folgende Images bauen und pushen:"
     echo "  • ghcr.io/rwellinger/aiproxysrv-app:${VERSION}"

@@ -3,7 +3,6 @@
 -- =====================================================================
 -- Purpose: Migrate existing filesystem images to S3-compatible storage
 -- Date: 2025-11-02
--- Author: Rob
 --
 -- Prerequisites:
 --   1. All images with storage_backend='filesystem' must be manually uploaded to MinIO
