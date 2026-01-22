@@ -9,15 +9,16 @@ This guide covers deploying thWelly's AI Toolbox in a production environment usi
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Prerequisites](#prerequisites)
-3. [Network Architecture](#network-architecture)
-4. [Service Stacks](#service-stacks)
-5. [Docker Compose Configurations](#docker-compose-configurations)
-6. [Nginx Configuration](#nginx-configuration)
-7. [Environment Variables](#environment-variables)
-8. [Deployment Checklist](#deployment-checklist)
-9. [Health Checks](#health-checks)
-10. [Backup & Recovery](#backup--recovery)
+2. [Building Docker Images](#building-docker-images)
+3. [Prerequisites](#prerequisites)
+4. [Network Architecture](#network-architecture)
+5. [Service Stacks](#service-stacks)
+6. [Docker Compose Configurations](#docker-compose-configurations)
+7. [Nginx Configuration](#nginx-configuration)
+8. [Environment Variables](#environment-variables)
+9. [Deployment Checklist](#deployment-checklist)
+10. [Health Checks](#health-checks)
+11. [Backup & Recovery](#backup--recovery)
 
 ---
 
@@ -64,6 +65,46 @@ The production deployment consists of three service stacks distributed across tw
 | **NAS Stack** | NAS Server | PostgreSQL, MinIO (S3) |
 | **Backend Stack** | App Server | Redis, Celery, FastAPI |
 | **Proxy Stack** | App Server | Nginx, Angular SPA |
+
+---
+
+## Building Docker Images
+
+Before deploying, you need Docker images for the application components. There are two options:
+
+### Option 1: GitHub Actions CI/CD (Recommended)
+
+If you fork this repository, the included GitHub Actions workflow automatically builds and publishes images to GitHub Container Registry (GHCR) when you push a version tag:
+
+```bash
+# Create a release tag
+git tag v1.0.0
+git push origin v1.0.0
+
+# Images will be available at:
+# ghcr.io/<your-username>/aiproxysrv-app:v1.0.0
+# ghcr.io/<your-username>/celery-worker-app:v1.0.0
+# ghcr.io/<your-username>/aiwebui-app:v1.0.0
+```
+
+See [docs/CI_CD.md](CI_CD.md) for details on the build pipeline.
+
+### Option 2: Build Locally
+
+Build images directly on your deployment server:
+
+```bash
+# Backend (FastAPI + Celery)
+cd aiproxysrv
+docker build -t aiproxysrv-app:latest .
+docker build -t celery-worker-app:latest .  # Same image, different entrypoint
+
+# Frontend (Angular)
+cd aiwebui
+docker build -t aiwebui-app:latest .
+```
+
+When building locally, update the `docker-compose.yml` files to use local image names instead of GHCR paths.
 
 ---
 
@@ -651,7 +692,40 @@ CELERY_RESULT_BACKEND=redis://redis:6379/0
    docker compose ps
    ```
 
-6. **Start Proxy Stack**
+6. **Seed Database (Required for AI Features)**
+
+   The Ollama integration uses template-driven prompts stored in the database. Seed the required data:
+
+   ```bash
+   # From project root - run against PostgreSQL on NAS
+   cat scripts/db/seed_prompts.sql | docker exec -i postgres psql -U aiproxy -d aiproxysrv
+   cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i postgres psql -U aiproxy -d aiproxysrv
+   ```
+
+   > **Note:** Without seeding, AI chat features (lyric improvement, title generation, etc.) will not work.
+
+7. **Setup Ollama (Optional - for Local LLM)**
+
+   If you want to use local AI models instead of cloud APIs:
+
+   ```bash
+   # Install Ollama on App Server
+   curl -fsSL https://ollama.com/install.sh | sh
+
+   # Pull recommended model
+   ollama pull llama3.2:3b
+
+   # Verify Ollama is running
+   curl http://localhost:11434/api/tags
+   ```
+
+   Configure in `.env`:
+   ```bash
+   OLLAMA_URL=http://localhost:11434
+   OLLAMA_DEFAULT_MODEL=llama3.2:3b
+   ```
+
+8. **Start Proxy Stack**
    ```bash
    cd forwardproxy/
    docker compose up -d
@@ -659,6 +733,19 @@ CELERY_RESULT_BACKEND=redis://redis:6379/0
    # Verify nginx
    docker logs nginx
    ```
+
+9. **Create First User**
+
+   The application has an open registration endpoint. Create your first user via API or the web UI:
+
+   ```bash
+   # Via API
+   curl -X POST https://your-domain/api/v1/user/create \
+     -H "Content-Type: application/json" \
+     -d '{"username": "admin", "email": "admin@example.com", "password": "your-secure-password"}'
+   ```
+
+   Or simply navigate to the application URL and use the registration form.
 
 ### Update Deployment
 
