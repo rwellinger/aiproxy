@@ -55,6 +55,25 @@ Track your music production software, plugins, and gear. Secure credential stora
 
 ---
 
+## API Keys & Costs
+
+**This project is free and open source.** However, some AI features require API keys from external providers that may incur usage costs:
+
+| Feature | Provider | Cost |
+|---------|----------|------|
+| Cover Art Generation | [OpenAI](https://platform.openai.com/) (DALL-E 3) | Pay-per-use |
+| Music Generation | [Mureka](https://mureka.ai/) | Pay-per-use |
+| AI Chat (cloud) | [OpenAI](https://platform.openai.com/) or [Anthropic](https://console.anthropic.com/) | Pay-per-use |
+| AI Chat (local) | [Ollama](https://ollama.ai/) | Free (runs locally) |
+
+**Important:**
+- All API keys are configured in your local `.env` file on your own infrastructure
+- You obtain and manage API keys directly with each provider
+- The project author has no access to your keys or usage data
+- Ollama provides a free, local alternative for AI chat features
+
+---
+
 ## Quick Start
 
 ### Prerequisites

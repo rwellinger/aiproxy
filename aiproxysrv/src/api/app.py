@@ -92,7 +92,7 @@ def create_app():
         openapi_version="3.0.2",
         info={
             "description": "API für AI-Services: Bildgenerierung, Musikgenerierung und Chat-Integration",
-            "contact": {"name": "rwellinger", "url": "https://github.com/rwellinger/aiproxy"},
+            "contact": {"name": "rwellinger", "url": "https://github.com/rwellinger/thwellys-ai-toolbox"},
         },
         servers=[{"url": "http://localhost:5050/api/v1", "description": "Development Server"}],
     )

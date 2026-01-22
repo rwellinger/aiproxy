@@ -467,7 +467,7 @@ docker run --rm -it \
 ## Emergency Contacts
 
 **Issues?**
-- GitHub Issues: https://github.com/rwellinger/aiproxy/issues
+- GitHub Issues: https://github.com/rwellinger/thwellys-ai-toolbox/issues
 
 **Documentation:**
 - ARC42 Docs: `docs/arch42/README.md`

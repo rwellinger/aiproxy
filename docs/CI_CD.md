@@ -69,18 +69,18 @@
 
 **Via GitHub UI:**
 ```
-https://github.com/rwellinger/aiproxy/actions
+https://github.com/rwellinger/thwellys-ai-toolbox/actions
 ```
 
 **Via gh CLI:**
 ```bash
-gh run list --repo rwellinger/aiproxy
-gh run watch --repo rwellinger/aiproxy
+gh run list --repo rwellinger/thwellys-ai-toolbox
+gh run watch --repo rwellinger/thwellys-ai-toolbox
 ```
 
 **Badge for README:**
 ```markdown
-[![Build Status](https://github.com/rwellinger/aiproxy/actions/workflows/release.yml/badge.svg)](https://github.com/rwellinger/aiproxy/actions)
+[![Build Status](https://github.com/rwellinger/thwellys-ai-toolbox/actions/workflows/release.yml/badge.svg)](https://github.com/rwellinger/thwellys-ai-toolbox/actions)
 ```
 
 ---
@@ -92,13 +92,13 @@ gh run watch --repo rwellinger/aiproxy
 **Check logs:**
 ```bash
 # Via GitHub UI
-https://github.com/rwellinger/aiproxy/actions
+https://github.com/rwellinger/thwellys-ai-toolbox/actions
 
 # Via CLI
-gh run view --repo rwellinger/aiproxy
+gh run view --repo rwellinger/thwellys-ai-toolbox
 
 # Re-run failed build
-gh run rerun <RUN_ID> --repo rwellinger/aiproxy
+gh run rerun <RUN_ID> --repo rwellinger/thwellys-ai-toolbox
 ```
 
 ### Images nicht in GHCR
@@ -176,7 +176,7 @@ https://github.com/rwellinger?tab=packages
 
 ### GHCR Registry Structure
 ```
-ghcr.io/rwellinger/aiproxysrv-app:v2.2.6
+ghcr.io/rwellinger/thwellys-ai-toolboxsrv-app:v2.2.6
 ghcr.io/rwellinger/celery-worker-app:v2.2.6
 ghcr.io/rwellinger/aiwebui-app:v2.2.6
 ```
@@ -233,7 +233,7 @@ ghcr.io/rwellinger/aiwebui-app:v2.2.6
 
 1. **Identify last working version:**
    ```bash
-   gh run list --repo rwellinger/aiproxy --limit 10
+   gh run list --repo rwellinger/thwellys-ai-toolbox --limit 10
    ```
 
 2. **Rollback Docker images:**
