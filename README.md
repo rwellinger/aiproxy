@@ -242,6 +242,12 @@ make lint-fix     # Auto-fix issues
 
 ---
 
+## Deployment
+
+For production deployment instructions including Docker Compose configurations, Nginx setup, and backup strategies, see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
+---
+
 ## Documentation
 
 - **Architecture**: [docs/arch42/README.md](docs/arch42/README.md) - Comprehensive arc42 documentation
