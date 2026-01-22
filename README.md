@@ -2,76 +2,112 @@
 
 <img src="thwellysAIToolbar.jpg" alt="thWelly's AI Toolbox" width="100%">
 
-> A full-stack platform for AI-powered creative content generation - combining image generation, music creation, lyric writing, and project management in one cohesive application.
+**Your AI-powered music production workflow** — from first idea to finished release.
 
-[![Build Status](https://github.com/rwellinger/aiproxy/actions/workflows/release.yml/badge.svg)](https://github.com/rwellinger/aiproxy/actions)
+Capture song ideas, write lyrics with AI assistance, generate full songs, create cover art, and manage your music projects — all in one self-hosted application.
+
+[![Build Status](https://github.com/rwellinger/thwellys-ai-toolbox/actions/workflows/release.yml/badge.svg)](https://github.com/rwellinger/thwellys-ai-toolbox/actions)
 [![License: ELv2](https://img.shields.io/badge/License-ELv2-blue.svg)](LICENSE)
 [![Angular](https://img.shields.io/badge/Angular-20-red.svg)](https://angular.io/)
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
 
 ---
 
-## What is this?
+## The Workflow
 
-**thWelly's AI Toolbox** is a personal AI multimedia platform that I built to explore and integrate various AI APIs into a unified, production-ready application. It demonstrates modern full-stack architecture patterns, async processing, and clean code practices.
+```
+Idea → Sketch → Lyrics → Song → Cover → Project
+```
 
-**Key highlights:**
-- Full-stack application with Angular 20 frontend and FastAPI backend
-- Integration of multiple AI services (OpenAI, Mureka, Ollama)
-- Async task processing with Celery for long-running operations
-- S3-compatible storage with hybrid filesystem/cloud architecture
-- CLI tool for local workflow integration
-- Comprehensive arc42 architecture documentation
+| Stage | What happens | AI helps with |
+|-------|--------------|---------------|
+| **Idea** | Capture a musical concept or mood | — |
+| **Sketch** | Structure your idea with title, genre, mood | Generate catchy titles |
+| **Lyrics** | Write verses, chorus, bridge | Improve, rewrite, extend lyrics |
+| **Song** | Generate full audio from lyrics | AI music generation (Mureka) |
+| **Cover** | Create album artwork | Image generation (DALL-E 3) |
+| **Project** | Organize files, sync with DAW | S3 storage, CLI integration |
 
 ---
 
 ## Features
 
-### AI Chat
-- Multi-model support (Ollama LLMs: Llama, Mistral, etc.)
-- Persistent conversation history with context management
-- Token usage tracking with visual indicators
-- Markdown rendering with syntax highlighting
-
-### Image Generation
-- DALL-E 3 integration via OpenAI API
-- One-click AI-powered prompt enhancement
-- Text overlay editor for adding titles/artist names
-- Gallery view with filtering and search
-- Usage cost tracking
-
-### Music Generation
-- Mureka API integration for AI song generation
-- Async processing via Celery workers
-- Stem separation support
-- Multiple model selection
+### Song Sketches
+Capture and organize your song ideas before they slip away. Tag with genre, mood, and tempo. Track workflow status (draft, ready, used, archived). Convert sketches directly to full songs when you're ready.
 
 ### Lyric Creation
-- Section-based editor (Verse, Chorus, Bridge, etc.)
-- AI-powered improvement, rewriting, and extension
-- Song architecture builder with drag & drop
-- Integration with music generator
+Section-based editor for verses, choruses, bridges, and more. AI-powered tools help you improve phrasing, rewrite weak lines, or extend sections. Build your song architecture with drag & drop, then export to the music generator.
 
-### Song Sketches
-- Organize song ideas before generation
-- Workflow management (draft, used, archived)
-- AI-powered title generation
-- Direct conversion to full songs
+### Music Generation
+Mureka API integration generates full songs from your lyrics. Async processing handles the wait. Get stems separated for mixing. Multiple AI models to choose from based on your style.
 
-### Song Projects
-- Complete project management for music production
-- Hierarchical folder structure (Arrangement, Mixing, Stems, etc.)
-- S3 cloud storage with batch upload/download
-- CLI integration for local DAW workflow
+### Cover Art
+DALL-E 3 integration creates album artwork. One-click AI prompt enhancement for better results. Built-in text overlay editor adds titles and artist names. Gallery view keeps all your artwork organized.
 
-### Equipment Management
-- Track music production software and plugins
-- Secure credential storage (encrypted)
-- License management (iLok, online, keys)
+### Project Management
+Complete file management for music production. Hierarchical folder structure (Arrangement, Mixing, Stems, etc.) mirrors your DAW project. S3 cloud storage with batch upload/download. CLI tool syncs files between cloud and local DAW folder.
+
+### AI Chat Assistant
+Multi-model support via Ollama (Llama, Mistral, etc.). Persistent conversation history. Use it for brainstorming, research, or general creative assistance.
+
+### Equipment Tracking
+Track your music production software, plugins, and gear. Secure credential storage (encrypted). License management for iLok, online activations, and serial keys.
 
 ---
 
-## Tech Stack
+## Quick Start
+
+### Prerequisites
+
+- Python 3.12+ with Conda/Miniconda
+- Node.js 20+ with npm
+- Docker (via Colima on macOS)
+- PostgreSQL 15+
+- Redis
+
+### Development Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/rwellinger/thwellys-ai-toolbox.git
+   cd thwellys-ai-toolbox
+   ```
+
+2. **Backend Setup**
+   ```bash
+   cd aiproxysrv
+   conda create -n mac_ki_service_py312 python=3.12
+   conda activate mac_ki_service_py312
+   pip install -r requirements.txt
+
+   # Copy and configure environment
+   cp env_template .env
+   # Edit .env with your API keys (OpenAI, Mureka)
+
+   # Run database migrations
+   cd src && alembic upgrade head
+
+   # Start backend
+   python src/server.py
+   ```
+
+3. **Frontend Setup**
+   ```bash
+   cd aiwebui
+   npm install
+   npm run dev
+   ```
+
+4. **Start Celery Worker** (for async tasks like music generation)
+   ```bash
+   python src/worker.py
+   ```
+
+---
+
+## For Developers
+
+### Tech Stack
 
 | Layer | Technologies |
 |-------|-------------|
@@ -84,9 +120,7 @@
 | **Deployment** | Docker, Docker Compose, Nginx, GitHub Actions |
 | **Code Quality** | Ruff (Python), ESLint (TypeScript), import-linter |
 
----
-
-## Architecture
+### Architecture
 
 This project follows a **3-layer architecture** with strict separation of concerns:
 
@@ -118,20 +152,12 @@ This project follows a **3-layer architecture** with strict separation of concer
 └──────────────┘  └──────────────┘  └──────────────┘
 ```
 
-**Key patterns:**
-- **Controller Layer**: HTTP handling, validation (Pydantic), JWT auth
-- **Orchestrator Layer**: Coordinates services, no business logic
-- **Transformer Layer**: Pure functions (100% unit-testable)
-- **Repository Layer**: CRUD operations only
-
 For detailed architecture documentation, see [docs/arch42/README.md](docs/arch42/README.md).
 
----
-
-## Project Structure
+### Project Structure
 
 ```
-mac_ki_service/
+thwellys-ai-toolbox/
 ├── aiproxysrv/          # Python Backend (FastAPI)
 │   ├── src/
 │   │   ├── adapters/    # External API clients (OpenAI, Mureka, Ollama)
@@ -143,7 +169,7 @@ mac_ki_service/
 │
 ├── aiwebui/             # Angular 20 Frontend
 │   └── src/app/
-│       ├── pages/       # Feature pages (17 pages)
+│       ├── pages/       # Feature pages
 │       ├── services/    # API services
 │       ├── components/  # Shared components
 │       └── models/      # TypeScript interfaces
@@ -157,69 +183,15 @@ mac_ki_service/
 └── docs/                # Documentation (arc42, patterns)
 ```
 
----
-
-## Quick Start
-
-### Prerequisites
-
-- Python 3.12+ with Conda/Miniconda
-- Node.js 20+ with npm
-- Docker (via Colima on macOS)
-- PostgreSQL 15+
-- Redis
-
-### Development Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/rwellinger/aiproxy.git
-   cd aiproxy
-   ```
-
-2. **Backend Setup**
-   ```bash
-   cd aiproxysrv
-   conda create -n mac_ki_service_py312 python=3.12
-   conda activate mac_ki_service_py312
-   pip install -r requirements.txt
-
-   # Copy and configure environment
-   cp env_template .env
-   # Edit .env with your API keys
-
-   # Run database migrations
-   cd src && alembic upgrade head
-
-   # Start backend
-   python src/server.py
-   ```
-
-3. **Frontend Setup**
-   ```bash
-   cd aiwebui
-   npm install
-   npm run dev
-   ```
-
-4. **Start Celery Worker** (for async tasks)
-   ```bash
-   python src/worker.py
-   ```
-
----
-
-## API Documentation
+### API Documentation
 
 The backend provides auto-generated OpenAPI documentation:
 - **Swagger UI**: `http://localhost:5050/docs`
 - **ReDoc**: `http://localhost:5050/redoc`
 
----
+### CLI Tool
 
-## CLI Tool
-
-The project includes a CLI tool for local workflow integration:
+The CLI tool integrates with your local DAW workflow:
 
 ```bash
 # Install
@@ -228,7 +200,7 @@ make install-cli
 # Login
 aiproxy-cli login
 
-# Clone project
+# Clone project to local folder
 aiproxy-cli clone <project-id> ~/Music/Projects/ -d
 
 # Mirror sync (local to cloud)
@@ -237,9 +209,7 @@ aiproxy-cli mirror <project-id> <folder-id> ~/path --dry-run
 
 See [scripts/cli/README.md](scripts/cli/README.md) for full documentation.
 
----
-
-## Testing & Code Quality
+### Testing & Code Quality
 
 ```bash
 # Backend
@@ -280,13 +250,6 @@ This project is licensed under the [Elastic License 2.0 (ELv2)](LICENSE).
 ## Author
 
 **Robert Wellinger**
-
-This project showcases modern full-stack development practices including:
-- Clean architecture with testable business logic
-- Async processing for long-running operations
-- Multi-service AI integration
-- Production-ready deployment with Docker
-- Comprehensive documentation (arc42)
 
 ---
 
