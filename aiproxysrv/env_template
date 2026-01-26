@@ -82,6 +82,15 @@ OLLAMA_CHAT_MODELS=
 # Default Ollama Chat Model (must be in OLLAMA_CHAT_MODELS if set)
 OLLAMA_DEFAULT_MODEL=llama3.2:3b
 
+# Allowed models for Prompt Templates (comma-separated list)
+# These models can be assigned to prompt templates for text generation
+OLLAMA_ALLOWED_MODELS=llama3.2:3b,gpt-oss:20b,deepseek-r1:8b,gemma3:4b,MichelRosselli/apertus:latest
+
+# Dedicated model for conversation summarization/compression (optional)
+# If set, this model will be used for all Ollama conversation summaries
+# If empty, the conversation's own model will be used (default behavior)
+OLLAMA_SUMMARY_MODEL=MichelRosselli/apertus:latest
+
 # ==================================================
 # REDIS CONFIGURATION
 # ==================================================

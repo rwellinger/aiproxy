@@ -9,15 +9,12 @@ Architecture:
 """
 
 from config.settings import MUREKA_MODELS
+from config.settings import OLLAMA_ALLOWED_MODELS as _OLLAMA_MODELS_RAW
 
 
-# Ollama Models (used for template-based generation, chat, compression)
-OLLAMA_ALLOWED_MODELS = [
-    "llama3.2:3b",
-    "gpt-oss:20b",
-    "deepseek-r1:8b",
-    "gemma3:4b",
-]
+# Ollama Models (configured via .env OLLAMA_ALLOWED_MODELS, comma-separated)
+# Used for template-based generation, chat, compression
+OLLAMA_ALLOWED_MODELS = [m.strip() for m in _OLLAMA_MODELS_RAW.split(",") if m.strip()]
 
 # Mureka Models (configured via .env MUREKA_MODELS, comma-separated)
 MUREKA_ALLOWED_MODELS = [m.strip() for m in MUREKA_MODELS.split(",") if m.strip()]

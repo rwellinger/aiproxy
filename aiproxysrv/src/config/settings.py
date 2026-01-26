@@ -141,6 +141,8 @@ OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "60"))
 OLLAMA_CHAT_MODELS = os.getenv("OLLAMA_CHAT_MODELS", "")
 OLLAMA_DEFAULT_MODEL = os.getenv("OLLAMA_DEFAULT_MODEL", "llama3.2:3b")
+OLLAMA_ALLOWED_MODELS = os.getenv("OLLAMA_ALLOWED_MODELS", "llama3.2:3b,gpt-oss:20b,deepseek-r1:8b,gemma3:4b")
+OLLAMA_SUMMARY_MODEL = os.getenv("OLLAMA_SUMMARY_MODEL", "")  # Empty = use conversation model
 
 # --------------------------------------------------
 # JWT Authentication Config

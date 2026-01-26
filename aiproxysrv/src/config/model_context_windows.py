@@ -32,6 +32,10 @@ MODEL_CONTEXT_WINDOWS = {
     "gpt-3.5-turbo-16k": 16385,
     # GPT-OSS Models (Ollama)
     "gpt-oss:20b": 8192,
+    # DeepSeek Models
+    "deepseek-r1:8b": 131072,  # 128k context
+    # Apertus Models
+    "MichelRosselli/apertus:latest": 65536,  # 64k context
     # LLaMA Models
     "llama2:7b": 4096,
     "llama2:13b": 4096,
@@ -51,6 +55,7 @@ MODEL_CONTEXT_WINDOWS = {
     "gemma:7b": 8192,
     "gemma2:9b": 8192,
     "gemma2:27b": 8192,
+    "gemma3:4b": 131072,  # 128k context
     # CodeLlama Models
     "codellama:7b": 16384,  # 16k context
     "codellama:13b": 16384,

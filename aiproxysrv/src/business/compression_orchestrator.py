@@ -16,7 +16,7 @@ from business.compression_transformer import (
     format_summary_message,
 )
 from business.openai_chat_orchestrator import OpenAIChatOrchestrator
-from config.settings import OLLAMA_TIMEOUT, OLLAMA_URL
+from config.settings import OLLAMA_SUMMARY_MODEL, OLLAMA_TIMEOUT, OLLAMA_URL
 from db.conversation_compression_service import ConversationCompressionService
 from db.conversation_service import ConversationService
 from db.message_service import MessageService
@@ -155,10 +155,11 @@ class CompressionOrchestrator:
                 # For OpenAI, we only care about completion tokens (the summary itself)
                 token_count = completion_tokens
             else:
-                # Use Ollama
+                # Use Ollama - prefer dedicated summary model if configured
+                summary_model = OLLAMA_SUMMARY_MODEL if OLLAMA_SUMMARY_MODEL else model
                 api_url = f"{OLLAMA_URL}/api/chat"
                 payload = {
-                    "model": model,
+                    "model": summary_model,
                     "messages": summary_messages,
                     "stream": False,
                 }
@@ -174,7 +175,10 @@ class CompressionOrchestrator:
                 else:
                     raise Exception("Invalid Ollama API response")
 
-            logger.info("AI summary created successfully", provider=provider, token_count=token_count)
+            summary_model_used = OLLAMA_SUMMARY_MODEL if (provider != "external" and OLLAMA_SUMMARY_MODEL) else model
+            logger.info(
+                "AI summary created successfully", provider=provider, model=summary_model_used, token_count=token_count
+            )
             return content, token_count
 
         except Exception as e:
