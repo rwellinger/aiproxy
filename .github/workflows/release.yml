@@ -233,8 +233,6 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/aiwebui-app:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/aiwebui-app:latest
-          cache-from: type=gha,scope=aiwebui-app
-          cache-to: type=gha,mode=max,scope=aiwebui-app
 
       - name: Build Summary
         run: |
