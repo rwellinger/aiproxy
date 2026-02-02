@@ -58,6 +58,7 @@ def validate_required_fields_for_status(status: str, data: dict[str, Any]) -> tu
         "arranging": base_fields,
         "mixing": base_fields,
         "mastering": base_fields,
+        "pre_release": base_fields,  # Uploaded to SoundCloud, not yet to Ditto/Spotify
         "rejected": base_fields + ["rejected_reason"],
         "archived": base_fields,
         "uploaded": base_fields
@@ -311,7 +312,7 @@ def get_status_filter_values(status_filter: str) -> list[str] | None:
         >>> get_status_filter_values("all")
     """
     filters = {
-        "progress": ["arranging", "mixing", "mastering"],
+        "progress": ["arranging", "mixing", "mastering", "pre_release"],
         "uploaded": ["uploaded"],
         "released": ["released"],
         "archive": ["rejected", "downtaken", "archived"],

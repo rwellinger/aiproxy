@@ -708,7 +708,7 @@ class SongRelease(Base):
     type = Column(String(20), nullable=False, index=True)  # 'single', 'album'
     name = Column(String(255), nullable=False)
     status = Column(String(50), nullable=False, server_default="draft", index=True)
-    # Status: 'draft', 'arranging', 'mixing', 'mastering', 'rejected', 'uploaded', 'released', 'downtaken', 'archived'
+    # Status: 'draft', 'arranging', 'mixing', 'mastering', 'pre_release', 'rejected', 'uploaded', 'released', 'downtaken', 'archived'
 
     # Metadata
     description = Column(Text, nullable=True)

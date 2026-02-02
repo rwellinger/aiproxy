@@ -274,6 +274,30 @@ class TestValidateRequiredFieldsForStatus:
         assert is_valid is True
         assert error is None
 
+    def test_pre_release_status_base_fields_only(self):
+        """Test pre_release status requires only base fields (like mastering)"""
+        # Arrange
+        data = {"type": "single", "name": "SoundCloud Track", "genre": "Electronic"}
+
+        # Act
+        is_valid, error = validate_required_fields_for_status("pre_release", data)
+
+        # Assert
+        assert is_valid is True
+        assert error is None
+
+    def test_pre_release_status_missing_genre(self):
+        """Test pre_release status missing genre field"""
+        # Arrange
+        data = {"type": "single", "name": "SoundCloud Track"}
+
+        # Act
+        is_valid, error = validate_required_fields_for_status("pre_release", data)
+
+        # Assert
+        assert is_valid is False
+        assert "Genre" in error
+
     def test_unknown_status_defaults_to_base_fields(self):
         """Test unknown status defaults to base fields only"""
         # Arrange
@@ -688,7 +712,7 @@ class TestGetStatusFilterValues:
         result = get_status_filter_values("progress")
 
         # Assert
-        assert result == ["arranging", "mixing", "mastering"]
+        assert result == ["arranging", "mixing", "mastering", "pre_release"]
 
     def test_uploaded_filter(self):
         """Test uploaded filter returns correct status"""

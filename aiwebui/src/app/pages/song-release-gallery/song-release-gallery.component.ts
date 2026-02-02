@@ -270,6 +270,7 @@ export class SongReleaseGalleryComponent implements OnInit, OnDestroy {
             [ReleaseStatus.ARRANGING]: "badge-arranging",
             [ReleaseStatus.MIXING]: "badge-mixing",
             [ReleaseStatus.MASTERING]: "badge-mastering",
+            [ReleaseStatus.PRE_RELEASE]: "badge-pre-release",
             [ReleaseStatus.REJECTED]: "badge-rejected",
             [ReleaseStatus.UPLOADED]: "badge-uploaded",
             [ReleaseStatus.RELEASED]: "badge-released",

@@ -12,6 +12,7 @@ export enum ReleaseStatus {
     ARRANGING = "arranging",
     MIXING = "mixing",
     MASTERING = "mastering",
+    PRE_RELEASE = "pre_release",
     REJECTED = "rejected",
     UPLOADED = "uploaded",
     RELEASED = "released",

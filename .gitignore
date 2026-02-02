@@ -43,3 +43,4 @@ dump.rdb
 /aiproxysrv/celerybeat-schedule.db
 /test_song_prj/
 /aiproxysrv/.coverage
+/docs/gotobusiness.md
