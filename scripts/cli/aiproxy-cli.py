@@ -1314,7 +1314,9 @@ def mirror(project_id, folder_id, local_path, dry_run, yes, debug):
     if to_move:
         console.print("[bold]🔀 Moving files...[/bold]")
 
-        move_url = f"{config['api_url']}/api/v1/song-projects/{project_id}/files/batch-move"
+        move_url = (
+            f"{config['api_url']}/api/v1/song-projects/{project_id}/files/batch-move"
+        )
         move_payload = {
             "move_actions": [
                 {
