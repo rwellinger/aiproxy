@@ -194,10 +194,11 @@ SELECT upsert_lyric_parsing_rule(
 -- ============================================================
 
 -- Section Label Detection (Order: 2)
+-- Supports both Markdown bold (**Label**) and Suno bracket ([Label]) formats
 SELECT upsert_lyric_parsing_rule(
     'Section Label Detection',
-    'Detect Markdown-style section labels (Intro, Verse, Chorus, etc.)',
-    '^\*\*\s*(Intro|Verse\s*\d+|Chorus|Bridge|Outro|Pre[-_\s]?chorus|Post[-_\s]?chorus)\s*\*\*$',
+    'Detect section labels in Markdown bold or Suno bracket format (Intro, Verse, Chorus, etc.)',
+    '^(\*\*\s*(Intro|Verse\s*\d+|Chorus|Bridge|Outro|Pre[-_\s]?chorus|Post[-_\s]?chorus)\s*\*\*|\[\s*(Intro|Verse\s*\d+|Chorus|Bridge|Outro|Pre[-_\s]?chorus|Post[-_\s]?chorus)\s*\])$',
     encode_base64(''),
     'section',
     true,

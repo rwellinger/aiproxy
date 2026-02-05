@@ -523,7 +523,7 @@
     "optimizePhrasing": "AI-Optimized Formatting",
     "applyStructure": "Apply Structure",
     "rebuildFromLyrics": "Rebuild from Lyrics",
-    "rebuildFromLyricsDisabled": "Structured lyrics required (e.g., [Verse], [Chorus])",
+    "rebuildFromLyricsDisabled": "Structured lyrics required (e.g., [Verse 1], [Chorus])",
     "undoLastChange": "Undo Last Change",
     "rebuildFromText": "Rebuild from Lyric Text",
     "confirmApplyStructure": "Existing section labels detected. Replace all with structure from Lyric Architecture?",

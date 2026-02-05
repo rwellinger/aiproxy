@@ -55,6 +55,21 @@ export class LyricCreationComponent implements OnInit {
     // Section Detection Rules (loaded from API)
     private sectionDetectionPattern: RegExp | null = null;
 
+    // Non-structural Suno tags - kept in lyrics but ignored by Rebuild Architecture
+    private readonly NON_STRUCTURAL_TAGS = [
+        /^guitar\s*solo$/i,
+        /^instrumental$/i,
+        /^solo$/i,
+        /^\d+\s*beats?\s*break$/i,
+        /^break$/i,
+        /^interlude$/i,
+        /^ad[- ]?lib$/i,
+        /^fade\s*(out|in)$/i,
+        /^hook$/i,
+        /^drop$/i,
+        /^buildup$/i
+    ];
+
     // Context for form data storage (song-generator or sketch-creator)
     private context: FormDataContext = "song-generator";
 
@@ -287,13 +302,20 @@ export class LyricCreationComponent implements OnInit {
         return text.replace(/^["']|["']$/g, "").trim();
     }
 
+    private isNonStructuralTag(label: string): boolean {
+        return this.NON_STRUCTURAL_TAGS.some(pattern => pattern.test(label));
+    }
+
     private capitalizeLabel(label: string): string {
         // Capitalize first letter and letters after hyphens
-        // Examples: PRE-CHORUS -> Pre-Chorus, VERSE1 -> Verse1, POST_CHORUS -> Post-Chorus
+        // Examples: PRE-CHORUS -> Pre-Chorus, VERSE1 -> Verse 1, POST_CHORUS -> Post-Chorus
         const normalized = label.replace(/_/g, "-").toLowerCase();
-        return normalized.replace(/(^|-)(\w)/g, (match, separator, letter) =>
+        let result = normalized.replace(/(^|-)(\w)/g, (match, separator, letter) =>
             separator + letter.toUpperCase()
         );
+        // Suno format: Add space before number (Verse1 -> Verse 1)
+        result = result.replace(/([a-zA-Z])(\d)/g, "$1 $2");
+        return result;
     }
 
     get characterCount(): number {
@@ -502,12 +524,12 @@ export class LyricCreationComponent implements OnInit {
             return;
         }
 
-        // Apply structure: 1:1 mapping with Markdown bold format "**Label**\nText"
+        // Apply structure: 1:1 mapping with Suno bracket format "[Label]\nText"
         const structured = paragraphs.map((para: string, i: number) => {
             if (i < sections.length) {
-                // Capitalize properly (e.g., VERSE1 -> Verse1, PRE-CHORUS -> Pre-Chorus)
+                // Capitalize properly (e.g., VERSE1 -> Verse 1, PRE-CHORUS -> Pre-Chorus)
                 const label = this.capitalizeLabel(sections[i]);
-                return `**${label}**\n${para.trim()}`;
+                return `[${label}]\n${para.trim()}`;
             }
             return para.trim();
         }).join("\n\n");
@@ -571,12 +593,11 @@ export class LyricCreationComponent implements OnInit {
                     }
                 }
 
-                // Clean up label: remove ** markers and trailing :
-                rawLabel = rawLabel.replace(/^\*\*\s*|\s*\*\*$|:$/g, "");
+                // Clean up label: remove [] and ** markers and trailing :
+                rawLabel = rawLabel.replace(/^\[\s*|\s*\]$|^\*\*\s*|\s*\*\*$|:$/g, "");
 
-                // Normalize: Remove spaces before numbers (Verse 1 -> Verse1)
-                rawLabel = rawLabel.replace(/\s+(\d+)/g, "$1");
-                // Normalize: Convert underscores to hyphens (Pre_Chorus -> Pre-Chorus)
+                // Keep spaces before numbers for Suno format (Verse 1 stays Verse 1)
+                // Only normalize underscores to hyphens (Pre_Chorus -> Pre-Chorus)
                 rawLabel = rawLabel.replace(/_/g, "-");
 
                 // Start new section
@@ -613,7 +634,7 @@ export class LyricCreationComponent implements OnInit {
     private rebuildLyrics(sections: LyricSection[]): string {
         return sections
             .sort((a, b) => a.order - b.order)
-            .map(section => `**${section.label}**\n${section.content}`)
+            .map(section => `[${section.label}]\n${section.content}`)
             .join("\n\n");
     }
 
@@ -847,6 +868,13 @@ export class LyricCreationComponent implements OnInit {
         let hasWarnings = false;
 
         for (const section of sections) {
+            // Skip non-structural Suno tags (Guitar Solo, 8 beats break, etc.)
+            if (this.isNonStructuralTag(section.label)) {
+                console.info(`Skipping non-structural tag: ${section.label}`);
+                hasWarnings = true;
+                continue;
+            }
+
             const mapped = this.mapLabelToSongSection(section.label);
 
             if (!mapped) {

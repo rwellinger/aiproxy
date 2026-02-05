@@ -523,7 +523,7 @@
     "optimizePhrasing": "KI-Optimierte Formatierung",
     "applyStructure": "Struktur anwenden",
     "rebuildFromLyrics": "Aus Text neu aufbauen",
-    "rebuildFromLyricsDisabled": "Strukturierter Text erforderlich (z.B. [Verse], [Chorus])",
+    "rebuildFromLyricsDisabled": "Strukturierter Text erforderlich (z.B. [Verse 1], [Chorus])",
     "undoLastChange": "Letzte Änderung rückgängig",
     "rebuildFromText": "Struktur aus Text rekonstruieren",
     "confirmApplyStructure": "Vorhandene Abschnitts-Marker erkannt. Alle durch Struktur aus Text-Architektur ersetzen?",
