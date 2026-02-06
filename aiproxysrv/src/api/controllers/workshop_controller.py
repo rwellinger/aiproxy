@@ -39,6 +39,7 @@ class WorkshopController:
                 db=db,
                 title=workshop_data.title,
                 connect_topic=workshop_data.connect_topic,
+                draft_language=workshop_data.draft_language,
             )
 
             response = WorkshopResponse.model_validate(workshop)

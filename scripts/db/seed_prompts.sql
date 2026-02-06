@@ -102,11 +102,11 @@ RULES:
 - No quotation marks around the output
 
 Example (German lyrics → German description):
-Input: "**VERSE1** Die Nacht ist dunkel, der Mond scheint hell..."
+Input: "[Verse 1] Die Nacht ist dunkel, der Mond scheint hell..."
 Output: Ein atmosphärischer Song über die Schönheit der Nacht und die Kraft der Stille. Mit poetischen Bildern von Mondlicht und Schatten entfaltet sich eine Geschichte der inneren Einkehr und Selbstfindung. Die melancholische Stimmung wird durch hoffnungsvolle Momente durchbrochen.
 
 Example (English lyrics → English description):
-Input: "**VERSE1** Walking through the empty streets at dawn..."
+Input: "[Verse 1] Walking through the empty streets at dawn..."
 Output: A reflective journey through solitude and self-discovery. This song paints vivid imagery of urban landscapes at dawn, exploring themes of loneliness, hope, and renewal. The lyrics balance melancholic introspection with optimistic undertones.',
     'Generates long release descriptions from song lyrics (max 1000 chars)',
     '1.1',
@@ -483,31 +483,32 @@ SELECT upsert_prompt_template(
 - Make the phrases fluent
 
 The new lyric should feel like a new take on the same emotional core.',
-    'Only output completely original lyrics with each section as a single paragraph. Ensure all content is your own creation and not copied from existing songs.
+    'Output PLAIN TEXT lyrics only - no markdown formatting (no **bold**, no *italic*, no # headings, no bullet lists).
+Ensure all content is your own creation and not copied from existing songs.
 
 IMPORTANT: Keep the same language as the input text (if input is German, output must be German; if input is English, output must be English).
 
-FORMAT REQUIREMENT: Start each section with its label in Markdown bold format (**LABEL**) on its own line, followed by the lyrics text. Use these exact label formats:
-  - **INTRO**
-  - **VERSE1**, **VERSE2**, etc.
-  - **PRE-CHORUS**
-  - **CHORUS**
-  - **BRIDGE**
-  - **OUTRO**
+FORMAT REQUIREMENT: Start each section with its label in square bracket format [Label] on its own line, followed by the lyrics text. Use these exact label formats:
+  - [Intro]
+  - [Verse 1], [Verse 2], etc.
+  - [Pre-Chorus]
+  - [Chorus]
+  - [Bridge]
+  - [Outro]
 
   Example format:
-  **INTRO**
+  [Intro]
   First lines of intro here...
 
-  **VERSE1**
+  [Verse 1]
   First verse lyrics here...
 
-  **CHORUS**
+  [Chorus]
   Chorus lyrics here...
 
 Do not include any other explanations, comments, or metadata in your output.',
     'Generates song lyrics from input text',
-    '2.8',
+    '3.0',
     'gpt-oss:20b',
     0.7,
     null,
@@ -557,10 +558,10 @@ SELECT upsert_prompt_template(
 - Preserve the exact content and meaning
 - Only change line breaks for better musical phrasing
 - Allow for natural pauses, breathing, and emotional expression
-- If section labels (**VERSE1**, **CHORUS**, etc.) are present, preserve them',
-    'Return ONLY the reformatted lyrics. Keep the same language as input. Preserve section labels if present. No explanations or comments.',
+- If section labels ([Verse 1], [Chorus], etc.) are present, preserve them exactly in square bracket format',
+    'Return ONLY the reformatted lyrics. Keep the same language as input. Preserve section labels in [Section] format if present. No explanations or comments.',
     'Optimizes lyric phrasing for music generation (4-8 words per line)',
-    '1.0',
+    '1.1',
     'gpt-oss:20b',
     0.5,
     null,
@@ -614,12 +615,14 @@ Guidelines:
 - Try to preserve or improve the rhythm and flow
 - Maintain the emotional tone and imagery of the original
 - Ensure the translation sounds like it was written by a native English songwriter
-- IMPORTANT: Preserve all section labels exactly as they appear (e.g., **INTRO**, **VERSE1**, **CHORUS**, **BRIDGE**, **OUTRO**)
+- IMPORTANT: Preserve all section labels exactly in square bracket format (e.g., [Intro], [Verse 1], [Chorus], [Bridge], [Outro])
+- If input uses **LABEL** format, convert to [Label] format in output
 - Keep the song structure completely intact - only translate and optimize phrasing of lyric content',
     'Only output the translated lyrics with optimized phrasing. Do not include explanations or comments.
 
 CRITICAL:
-- Preserve section labels exactly: **INTRO**, **VERSE1**, **VERSE2**, **PRE-CHORUS**, **CHORUS**, **BRIDGE**, **OUTRO**
+- Use square bracket format for all section labels: [Intro], [Verse 1], [Verse 2], [Pre-Chorus], [Chorus], [Bridge], [Outro]
+- NEVER use markdown bold (**LABEL**) for section headers
 - Only translate the actual lyric text within each section
 - Break lines into singable phrases (4-8 words per line)
 - Allow for natural breathing points
@@ -627,24 +630,24 @@ CRITICAL:
 
 Example:
 Input (German):
-**VERSE1**
+[Verse 1]
 Ich vermisse dich so sehr, ohne dich ist alles leer
 
-**CHORUS**
+[Chorus]
 Du bist mein Licht in dunkler Nacht, hast mich zum Lachen gebracht
 
 Output (English):
-**VERSE1**
+[Verse 1]
 I miss you more each day
 Without you I''ve lost my way
 
-**CHORUS**
+[Chorus]
 You are my light
 In darkest night
 You made me smile
 You made things right',
     'Translates lyrics to natural English with optimized phrasing for singability (4-8 words/line, breathing points)',
-    '3.1',
+    '3.2',
     'gpt-oss:20b',
     0.5,
     null,

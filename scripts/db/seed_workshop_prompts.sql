@@ -161,7 +161,7 @@ Do NOT add follow-up questions, conversation, or offers for further help. Just d
     true
 );
 
--- workshop/shape-draft (v1.0)
+-- workshop/shape-draft (v1.2)
 SELECT upsert_prompt_template(
     'workshop',
     'shape-draft',
@@ -170,13 +170,16 @@ Using the collected material (topic, inspirations, mindmap, stories, words, rhym
 compose a coherent song text draft.
 Maintain the artist''s voice and intent. Use the collected vocabulary naturally.
 CRITICAL: If a MANDATORY SONG STRUCTURE is provided, you MUST follow it EXACTLY. Only create the sections listed - no additional sections, no omissions. If no structure is provided, use a standard verse-chorus format.',
-    'Write a complete song draft with clear section labels ([Verse 1], [Chorus], etc.).
+    'Write a complete song draft as PLAIN TEXT only.
+Format ALL section headers with square brackets: [Intro], [Verse 1], [Chorus], [Bridge], [Solo], [Outro], etc.
+Do NOT use any markdown formatting: no **bold**, no *italic*, no # headings, no bullet lists, no --- separators.
+The output must be plain lyrics text with [Section] headers - nothing else.
 Keep lines singable (not too long).
 Use natural language, avoid cliches.
 Write in the same language as the input material.
 Do NOT add follow-up questions, conversation, or offers for further help. Just deliver the content.',
     'Generate song draft from collected workshop material',
-    '1.0',
+    '1.2',
     'gpt-oss:20b',
     0.7,
     NULL,

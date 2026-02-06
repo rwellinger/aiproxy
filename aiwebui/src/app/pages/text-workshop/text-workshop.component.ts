@@ -1,5 +1,5 @@
 import {Component, inject, OnDestroy, OnInit, SecurityContext, ViewEncapsulation} from "@angular/core";
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {CommonModule} from "@angular/common";
 import {ActivatedRoute, Router} from "@angular/router";
 import {DomSanitizer} from "@angular/platform-browser";
@@ -29,6 +29,7 @@ interface SelectableItem {
     standalone: true,
     imports: [
         CommonModule,
+        FormsModule,
         ReactiveFormsModule,
         MatCardModule,
         MatDialogModule,
@@ -50,7 +51,12 @@ export class TextWorkshopComponent implements OnInit, OnDestroy {
     saveStatus: "idle" | "saving" | "saved" = "idle";
     private saveStatusTimer: ReturnType<typeof setTimeout> | null = null;
 
+    // Draft language
+    draftLanguage = "EN";
+    draftLanguages = ["EN", "DE", "FR", "IT", "ES"];
+
     // AI loading states
+    isGeneratingTitle = false;
     isGeneratingInspirations = false;
     isGeneratingMindmap = false;
     isGeneratingStories = false;
@@ -196,6 +202,7 @@ export class TextWorkshopComponent implements OnInit, OnDestroy {
             const response = await firstValueFrom(this.workshopService.getWorkshopById(id));
             const workshop = response.data;
             this.currentPhase = workshop.current_phase;
+            this.draftLanguage = workshop.draft_language || "EN";
             this.workshopForm.patchValue({
                 title: workshop.title,
                 connect_topic: workshop.connect_topic || "",
@@ -223,11 +230,14 @@ export class TextWorkshopComponent implements OnInit, OnDestroy {
 
     private async autoSave(): Promise<void> {
         if (!this.currentWorkshopId || this.saveStatus === "saving") return;
+        const title = this.workshopForm.get("title")?.value;
+        if (!title?.trim()) return;
         this.saveStatus = "saving";
 
         try {
             const formData = this.workshopForm.value;
             formData.current_phase = this.currentPhase;
+            formData.draft_language = this.draftLanguage;
             await firstValueFrom(this.workshopService.updateWorkshop(this.currentWorkshopId, formData));
             this.saveStatus = "saved";
             if (this.saveStatusTimer) clearTimeout(this.saveStatusTimer);
@@ -252,6 +262,29 @@ export class TextWorkshopComponent implements OnInit, OnDestroy {
     }
 
     // --- AI Generation Methods ---
+
+    async generateTitle(): Promise<void> {
+        const inspirations = this.workshopForm.get("connect_inspirations")?.value;
+        const existingTitle = this.workshopForm.get("title")?.value;
+        const input = inspirations?.trim() || existingTitle?.trim();
+
+        if (!input) {
+            this.notificationService.error(this.translate.instant("workshop.errors.inspirationsRequired"));
+            return;
+        }
+
+        this.isGeneratingTitle = true;
+        try {
+            const result = await this.chatService.generateTitle(input);
+            this.workshopForm.patchValue({title: result.trim()});
+            await this.autoSave();
+            this.notificationService.success(this.translate.instant("workshop.aiSuccess"));
+        } catch {
+            this.notificationService.error(this.translate.instant("workshop.errors.aiFailed"));
+        } finally {
+            this.isGeneratingTitle = false;
+        }
+    }
 
     async generateInspirations(): Promise<void> {
         const topic = this.workshopForm.get("connect_topic")?.value;
@@ -395,9 +428,11 @@ export class TextWorkshopComponent implements OnInit, OnDestroy {
             ? `\n\nMANDATORY SONG STRUCTURE (follow exactly, no extra sections): ${structure}`
             : "";
 
+        const languageInstruction = `MANDATORY: Write the entire draft in ${this.getLanguageName(this.draftLanguage)}.`;
+
         this.isGeneratingDraft = true;
         try {
-            const result = await this.chatService.generateDraft(collectedMaterial + structureInstruction);
+            const result = await this.chatService.generateDraft(collectedMaterial + structureInstruction, languageInstruction);
             this.workshopForm.patchValue({shape_draft: result});
             this.currentPhase = "shape";
             await this.autoSave();
@@ -407,6 +442,17 @@ export class TextWorkshopComponent implements OnInit, OnDestroy {
         } finally {
             this.isGeneratingDraft = false;
         }
+    }
+
+    getLanguageName(code: string): string {
+        const map: Record<string, string> = {
+            EN: "English",
+            DE: "German",
+            FR: "French",
+            IT: "Italian",
+            ES: "Spanish"
+        };
+        return map[code] || "English";
     }
 
     openStructureModal(): void {
@@ -511,6 +557,45 @@ export class TextWorkshopComponent implements OnInit, OnDestroy {
     cancelStorySelection(): void {
         this.isSelectingStories = false;
         this.storyItems = [];
+    }
+
+    // --- Markdown Export ---
+
+    exportToMarkdown(): void {
+        const title = this.workshopForm.get("title")?.value || "Untitled Workshop";
+        const date = new Date().toISOString().split("T")[0];
+
+        const sections: {label: string; key: string}[] = [
+            {label: "Topic", key: "connect_topic"},
+            {label: "Inspirations", key: "connect_inspirations"},
+            {label: "Mindmap", key: "collect_mindmap"},
+            {label: "Stories", key: "collect_stories"},
+            {label: "Words", key: "collect_words"},
+            {label: "Structure", key: "shape_structure"},
+            {label: "Rhymes", key: "shape_rhymes"},
+            {label: "Draft", key: "shape_draft"}
+        ];
+
+        let md = `# ${title}\n\n`;
+        md += `**Phase:** ${this.getPhaseLabel(this.currentPhase)} | **Language:** ${this.draftLanguage} | **Date:** ${date}\n\n---\n`;
+
+        for (const section of sections) {
+            const value = this.workshopForm.get(section.key)?.value?.trim();
+            if (value) {
+                md += `\n## ${section.label}\n\n${value}\n`;
+            }
+        }
+
+        const sanitizedTitle = title.replace(/[^a-zA-Z0-9-_ ]/g, "").replace(/\s+/g, "-").toLowerCase();
+        const filename = `workshop-${sanitizedTitle}-${date}.md`;
+
+        const blob = new Blob([md], {type: "text/markdown;charset=utf-8"});
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = filename;
+        anchor.click();
+        URL.revokeObjectURL(url);
     }
 
     // --- Markdown Preview ---

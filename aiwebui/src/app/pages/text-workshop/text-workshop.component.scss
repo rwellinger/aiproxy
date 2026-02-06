@@ -392,6 +392,33 @@
   }
 }
 
+.draft-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xs;
+
+  label {
+    margin-bottom: 0;
+  }
+}
+
+.language-select {
+  padding: $spacing-xs $spacing-sm;
+  border: 1px solid $border-standard;
+  border-radius: 8px;
+  font-size: $font-sm;
+  font-family: inherit;
+  background-color: $background-white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+  }
+}
+
 .prompt-input-group {
   position: relative;
   display: flex;
@@ -415,6 +442,10 @@
     }
 
     &::placeholder { color: $text-muted; }
+
+    &.title-invalid {
+      border-color: #dc3545;
+    }
   }
 }
 
@@ -446,13 +477,28 @@
 .phase-panel {
   margin-bottom: $spacing-md;
 
+  .mat-expansion-panel-header {
+    background-color: #eef3f8 !important;
+    border-bottom: 1px solid $border-light;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #dde7f1 !important;
+    }
+  }
+
   .mat-expansion-panel-header-title {
     display: flex;
     align-items: center;
     gap: $spacing-sm;
     font-weight: $font-weight-medium;
+    color: $text-primary;
 
-    i { font-size: $font-base; }
+    i { font-size: $font-base; color: $primary-color; }
+  }
+
+  .mat-expansion-panel-header-description {
+    color: $text-secondary;
   }
 }
 
@@ -569,6 +615,10 @@
     border-color: $primary-color;
     color: $background-white;
   }
+}
+
+.export-md-button {
+  @include button-secondary('base');
 }
 
 // ===== Selection Mode =====

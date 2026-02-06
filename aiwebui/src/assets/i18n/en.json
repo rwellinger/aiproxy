@@ -1939,6 +1939,7 @@
       "save": "Save",
       "saving": "Saving...",
       "saved": "Saved",
+      "generateTitle": "Generate Title",
       "exportToSketch": "Export as Song Sketch",
       "alreadyExported": "Already exported"
     },
@@ -1973,6 +1974,7 @@
       "rhymesPlaceholder": "Rhyming words and syllable patterns...",
       "generateRhymes": "Find Rhymes",
       "draftLabel": "Draft",
+      "draftLanguage": "Language",
       "draftPlaceholder": "Your song text draft...",
       "generateDraft": "Generate Draft"
     },
@@ -1985,6 +1987,10 @@
       "enterPreview": "Show Preview",
       "exitPreview": "Edit Mode"
     },
+    "export": {
+      "markdown": "Export MD",
+      "markdownTitle": "Export workshop as Markdown file"
+    },
     "errors": {
       "loadFailed": "Failed to load workshop.",
       "createFailed": "Failed to create workshop.",
@@ -1994,6 +2000,7 @@
       "aiFailed": "AI generation failed. Please try again.",
       "topicRequired": "Please enter a topic first.",
       "wordsRequired": "Please add words or a topic first.",
+      "inspirationsRequired": "Please add inspirations or a title first.",
       "materialRequired": "Please collect some material first."
     }
   }

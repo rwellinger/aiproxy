@@ -150,9 +150,19 @@
                                 id="workshop_title"
                                 type="text"
                                 class="title-input"
+                                [class.title-invalid]="!workshopForm.get('title')?.value?.trim()"
                                 formControlName="title"
                                 [placeholder]="'workshop.editor.titlePlaceholder' | translate"
                             />
+                            <button
+                                type="button"
+                                class="magic-icon-button"
+                                (click)="generateTitle()"
+                                [disabled]="isGeneratingTitle"
+                                [title]="'workshop.editor.generateTitle' | translate"
+                            >
+                                <i class="fas" [ngClass]="isGeneratingTitle ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -474,7 +484,18 @@
 
                             <!-- Draft -->
                             <div class="form-group">
-                                <label for="shape_draft">{{ 'workshop.shape.draftLabel' | translate }}</label>
+                                <div class="draft-header">
+                                    <label for="shape_draft">{{ 'workshop.shape.draftLabel' | translate }}</label>
+                                    <select
+                                        [(ngModel)]="draftLanguage"
+                                        [ngModelOptions]="{standalone: true}"
+                                        class="language-select"
+                                        [title]="'workshop.shape.draftLanguage' | translate"
+                                        (ngModelChange)="saveWorkshop()"
+                                    >
+                                        <option *ngFor="let lang of draftLanguages" [value]="lang">{{ lang }}</option>
+                                    </select>
+                                </div>
                                 <div class="prompt-input-group">
                                     <textarea
                                         *ngIf="!isPreviewMode"
@@ -514,6 +535,14 @@
                             (click)="togglePreviewMode()">
                             <i class="fas" [ngClass]="isPreviewMode ? 'fa-edit' : 'fa-eye'"></i>
                             <span>{{ (isPreviewMode ? 'workshop.preview.exitPreview' : 'workshop.preview.enterPreview') | translate }}</span>
+                        </button>
+                        <button
+                            type="button"
+                            class="action-button export-md-button"
+                            (click)="exportToMarkdown()"
+                            [title]="'workshop.export.markdownTitle' | translate">
+                            <i class="fas fa-file-arrow-down"></i>
+                            <span>{{ 'workshop.export.markdown' | translate }}</span>
                         </button>
                     </div>
                     <div class="submit-actions">

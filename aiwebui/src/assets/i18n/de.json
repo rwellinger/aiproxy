@@ -1939,6 +1939,7 @@
       "save": "Speichern",
       "saving": "Speichert...",
       "saved": "Gespeichert",
+      "generateTitle": "Titel generieren",
       "exportToSketch": "Als Song-Skizze exportieren",
       "alreadyExported": "Bereits exportiert"
     },
@@ -1973,6 +1974,7 @@
       "rhymesPlaceholder": "Reimwoerter und Silbenmuster...",
       "generateRhymes": "Reime finden",
       "draftLabel": "Entwurf",
+      "draftLanguage": "Sprache",
       "draftPlaceholder": "Dein Songtext-Entwurf...",
       "generateDraft": "Entwurf generieren"
     },
@@ -1985,6 +1987,10 @@
       "enterPreview": "Vorschau anzeigen",
       "exitPreview": "Bearbeitungsmodus"
     },
+    "export": {
+      "markdown": "Export MD",
+      "markdownTitle": "Workshop als Markdown-Datei exportieren"
+    },
     "errors": {
       "loadFailed": "Workshop konnte nicht geladen werden.",
       "createFailed": "Workshop konnte nicht erstellt werden.",
@@ -1994,6 +2000,7 @@
       "aiFailed": "KI-Generierung fehlgeschlagen. Bitte erneut versuchen.",
       "topicRequired": "Bitte zuerst ein Thema eingeben.",
       "wordsRequired": "Bitte zuerst Woerter oder ein Thema eingeben.",
+      "inspirationsRequired": "Bitte zuerst Inspirationen oder einen Titel eingeben.",
       "materialRequired": "Bitte zuerst Material sammeln."
     }
   }

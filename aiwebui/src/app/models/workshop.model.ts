@@ -10,6 +10,7 @@ export interface Workshop {
     shape_rhymes?: string;
     shape_draft?: string;
     current_phase: WorkshopPhase;
+    draft_language?: string;
     exported_sketch_id?: string;
     created_at: string;
     updated_at?: string;

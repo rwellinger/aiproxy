@@ -25,6 +25,7 @@ class WorkshopOrchestrator:
         db: Session,
         title: str,
         connect_topic: str | None = None,
+        draft_language: str | None = "EN",
     ) -> Any:
         """
         Create a new workshop with data normalization
@@ -45,6 +46,7 @@ class WorkshopOrchestrator:
                 {
                     "title": title,
                     "connect_topic": connect_topic,
+                    "draft_language": draft_language,
                 }
             )
 

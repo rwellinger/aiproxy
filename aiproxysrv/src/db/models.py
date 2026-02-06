@@ -115,6 +115,7 @@ class LyricWorkshop(Base):
 
     # Meta
     current_phase = Column(String(20), nullable=False, default="connect", server_default="connect")
+    draft_language = Column(String(5), nullable=True, server_default="EN", default="EN")
     exported_sketch_id = Column(UUID(as_uuid=True), ForeignKey("song_sketches.id", ondelete="SET NULL"), nullable=True)
 
     # Timestamps

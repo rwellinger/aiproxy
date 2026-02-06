@@ -21,6 +21,7 @@ class WorkshopService:
         db: Session,
         title: str,
         connect_topic: str | None = None,
+        draft_language: str | None = "EN",
     ) -> LyricWorkshop | None:
         """
         Create a new workshop record in the database
@@ -37,6 +38,7 @@ class WorkshopService:
             workshop = LyricWorkshop(
                 title=title,
                 connect_topic=connect_topic,
+                draft_language=draft_language,
             )
 
             db.add(workshop)
@@ -183,6 +185,7 @@ class WorkshopService:
         shape_rhymes: str | None = None,
         shape_draft: str | None = None,
         current_phase: str | None = None,
+        draft_language: str | None = None,
         exported_sketch_id: str | UUID | None = None,
     ) -> LyricWorkshop | None:
         """
@@ -234,6 +237,9 @@ class WorkshopService:
             if current_phase is not None:
                 workshop.current_phase = current_phase
                 updated_fields.append("current_phase")
+            if draft_language is not None:
+                workshop.draft_language = draft_language
+                updated_fields.append("draft_language")
             if exported_sketch_id is not None:
                 workshop.exported_sketch_id = exported_sketch_id
                 updated_fields.append("exported_sketch_id")
