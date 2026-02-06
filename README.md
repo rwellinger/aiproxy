@@ -1,7 +1,5 @@
 # thWelly's AI Toolbox
 
-<img src="thwellysAIToolbar.jpg" alt="thWelly's AI Toolbox" width="100%">
-
 **Your AI-powered music production workflow** — from first idea to finished release.
 
 Capture song ideas, write lyrics with AI assistance, generate full songs, create cover art, and manage your music projects — all in one self-hosted application.
