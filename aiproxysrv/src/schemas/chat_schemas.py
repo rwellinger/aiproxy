@@ -85,7 +85,7 @@ class UnifiedChatRequest(BaseModel):
 
     pre_condition: str = Field("", description="Text before user input")
     post_condition: str = Field("", description="Text after user input")
-    input_text: str = Field(..., min_length=1, max_length=10000, description="Input text for generation")
+    input_text: str = Field(..., min_length=1, max_length=50000, description="Input text for generation")
     user_instructions: str = Field(
         "", description="Optional user-specific instructions (placed between input and post_condition)"
     )

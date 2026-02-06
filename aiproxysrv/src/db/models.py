@@ -89,6 +89,45 @@ class SongSketch(Base):
         return f"<SongSketch(id={self.id}, title='{self.title}', workflow='{self.workflow}')>"
 
 
+class LyricWorkshop(Base):
+    """Model for storing lyric workshop sessions with 3-phase process (Connect, Collect, Shape)"""
+
+    __tablename__ = "lyric_workshops"
+    __table_args__ = {"extend_existing": True}
+
+    # Primary identifier
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    title = Column(String(200), nullable=False)
+
+    # Phase 1: Connect
+    connect_topic = Column(Text, nullable=True)
+    connect_inspirations = Column(Text, nullable=True)  # JSON string
+
+    # Phase 2: Collect
+    collect_mindmap = Column(Text, nullable=True)  # JSON string
+    collect_stories = Column(Text, nullable=True)  # JSON string
+    collect_words = Column(Text, nullable=True)  # JSON string
+
+    # Phase 3: Shape
+    shape_structure = Column(Text, nullable=True)  # JSON string
+    shape_rhymes = Column(Text, nullable=True)  # JSON string
+    shape_draft = Column(Text, nullable=True)
+
+    # Meta
+    current_phase = Column(String(20), nullable=False, default="connect", server_default="connect")
+    exported_sketch_id = Column(UUID(as_uuid=True), ForeignKey("song_sketches.id", ondelete="SET NULL"), nullable=True)
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    exported_sketch = relationship("SongSketch", foreign_keys=[exported_sketch_id])
+
+    def __repr__(self):
+        return f"<LyricWorkshop(id={self.id}, title='{self.title}', phase='{self.current_phase}')>"
+
+
 class Song(Base):
     """Model for storing song generation data and results"""
 

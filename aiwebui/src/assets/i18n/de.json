@@ -805,7 +805,9 @@
     "sketchLibrary": "Skizzen-Bibliothek",
     "songProjects": "Song Projekte",
     "songReleases": "Song-Releases",
-    "textOverlayEditor": "Text-Overlay"
+    "textOverlayEditor": "Text-Overlay",
+    "textWorkshop": "Text Workshop",
+    "workshopLibrary": "Workshop-Bibliothek"
   },
   "songDetailPanel": {
     "choices": {
@@ -1907,6 +1909,92 @@
       "required": "Dieses Feld ist erforderlich",
       "maxLength": "Maximal {{max}} Zeichen erlaubt",
       "formInvalid": "Bitte fülle alle Pflichtfelder aus"
+    }
+  },
+  "workshop": {
+    "library": {
+      "title": "Text Workshop",
+      "subtitle": "Erstelle und verwalte deine Songwriting-Workshops",
+      "newWorkshop": "Neuer Workshop",
+      "searchPlaceholder": "Workshops suchen...",
+      "empty": "Noch keine Workshops. Erstelle deinen ersten!"
+    },
+    "newWorkshopTitle": "Neuer Workshop",
+    "confirmDelete": "Diesen Workshop loeschen? Das kann nicht rueckgaengig gemacht werden.",
+    "deleteSuccess": "Workshop geloescht.",
+    "saveSuccess": "Workshop gespeichert.",
+    "exportSuccess": "Workshop in Song-Skizzen-Bibliothek exportiert.",
+    "aiSuccess": "KI-Inhalt generiert.",
+    "phases": {
+      "connect": "Verbinden",
+      "collect": "Sammeln",
+      "shape": "Formen",
+      "completed": "Abgeschlossen"
+    },
+    "editor": {
+      "titleHeading": "Text Workshop",
+      "titleLabel": "Workshop-Titel",
+      "backToLibrary": "Zurueck",
+      "titlePlaceholder": "Workshop-Titel...",
+      "save": "Speichern",
+      "saving": "Speichert...",
+      "saved": "Gespeichert",
+      "exportToSketch": "Als Song-Skizze exportieren",
+      "alreadyExported": "Bereits exportiert"
+    },
+    "connect": {
+      "title": "Verbinden",
+      "description": "Finde dein Thema und sammle erste Inspirationen",
+      "topicLabel": "Thema / Motiv",
+      "topicPlaceholder": "Worum geht es in deinem Song? Beschreibe das Gefuehl, die Situation oder Geschichte...",
+      "generateInspirations": "Inspirationen generieren",
+      "inspirationsLabel": "Inspirationen"
+    },
+    "collect": {
+      "title": "Sammeln",
+      "description": "Baue dein Material auf: Assoziationen, Geschichten und Vokabular",
+      "mindmapLabel": "Mindmap / Assoziationen",
+      "mindmapPlaceholder": "Assoziationen, verwandte Konzepte, Bilder...",
+      "generateMindmap": "Mindmap generieren",
+      "storiesLabel": "Story-Ideen",
+      "storiesPlaceholder": "Story-Perspektiven, Erzaehlideen, Szenarien...",
+      "generateStories": "Stories generieren",
+      "wordsLabel": "Wort-Bibliothek",
+      "wordsPlaceholder": "Schluesselwoerter, Synonyme, verwandte Ausdruecke...",
+      "generateWords": "Woerter generieren"
+    },
+    "shape": {
+      "title": "Formen",
+      "description": "Strukturiere dein Material zu einem Song-Entwurf",
+      "structureLabel": "Songstruktur",
+      "chooseStructure": "Struktur waehlen",
+      "structurePlaceholder": "z.B. Strophe 1 - Refrain - Strophe 2 - Refrain - Bridge - Refrain",
+      "rhymesLabel": "Reim-Vorschlaege",
+      "rhymesPlaceholder": "Reimwoerter und Silbenmuster...",
+      "generateRhymes": "Reime finden",
+      "draftLabel": "Entwurf",
+      "draftPlaceholder": "Dein Songtext-Entwurf...",
+      "generateDraft": "Entwurf generieren"
+    },
+    "selection": {
+      "hint": "Klicke um unerwuenschte Eintraege abzuwaehlen",
+      "applyButton": "Auswahl uebernehmen",
+      "cancelButton": "Abbrechen"
+    },
+    "preview": {
+      "enterPreview": "Vorschau anzeigen",
+      "exitPreview": "Bearbeitungsmodus"
+    },
+    "errors": {
+      "loadFailed": "Workshop konnte nicht geladen werden.",
+      "createFailed": "Workshop konnte nicht erstellt werden.",
+      "saveFailed": "Workshop konnte nicht gespeichert werden.",
+      "deleteFailed": "Workshop konnte nicht geloescht werden.",
+      "exportFailed": "Workshop konnte nicht exportiert werden.",
+      "aiFailed": "KI-Generierung fehlgeschlagen. Bitte erneut versuchen.",
+      "topicRequired": "Bitte zuerst ein Thema eingeben.",
+      "wordsRequired": "Bitte zuerst Woerter oder ein Thema eingeben.",
+      "materialRequired": "Bitte zuerst Material sammeln."
     }
   }
 }

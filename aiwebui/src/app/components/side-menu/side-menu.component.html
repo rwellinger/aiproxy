@@ -87,6 +87,19 @@
 
         <div class="nav-group">
             <span class="group-label">
+                <i class="fas fa-pen-fancy"></i>
+                {{ 'sideMenu.textWorkshop' | translate }}
+            </span>
+            <div class="group-items">
+                <a routerLink="/text-workshop" routerLinkActive="active">
+                    <i class="fas fa-book-open"></i>
+                    {{ 'sideMenu.workshopLibrary' | translate }}
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <span class="group-label">
                 <i class="fas fa-toolbox"></i>
                 {{ 'sideMenu.equipment' | translate }}
             </span>

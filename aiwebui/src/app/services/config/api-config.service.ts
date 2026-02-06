@@ -122,6 +122,22 @@ export class ApiConfigService {
             assignToProject: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}/assign-to-project`,
             unassignFromProject: (id: string) => `${this.baseUrl}/api/v1/sketches/${id}/unassign-from-project`
         },
+        workshop: {
+            create: () => `${this.baseUrl}/api/v1/workshops`,
+            list: (limit?: number, offset?: number, search?: string, phase?: string) => {
+                const params = new URLSearchParams();
+                if (limit !== undefined) params.append("limit", limit.toString());
+                if (offset !== undefined) params.append("offset", offset.toString());
+                if (search) params.append("search", search);
+                if (phase) params.append("phase", phase);
+                const query = params.toString();
+                return `${this.baseUrl}/api/v1/workshops${query ? "?" + query : ""}`;
+            },
+            detail: (id: string) => `${this.baseUrl}/api/v1/workshops/${id}`,
+            update: (id: string) => `${this.baseUrl}/api/v1/workshops/${id}`,
+            delete: (id: string) => `${this.baseUrl}/api/v1/workshops/${id}`,
+            exportToSketch: (id: string) => `${this.baseUrl}/api/v1/workshops/${id}/export-to-sketch`
+        },
         equipment: {
             create: () => `${this.baseUrl}/api/v1/equipment`,
             list: (limit?: number, offset?: number, type?: string, status?: string, search?: string) => {

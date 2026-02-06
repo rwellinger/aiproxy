@@ -111,5 +111,15 @@ export const routes: Routes = [
         path: "song-releases",
         canActivate: [AuthGuard],
         loadComponent: () => import("./pages/song-release-gallery/song-release-gallery.component").then(m => m.SongReleaseGalleryComponent)
+    },
+    {
+        path: "text-workshop",
+        canActivate: [AuthGuard],
+        loadComponent: () => import("./pages/text-workshop/text-workshop.component").then(m => m.TextWorkshopComponent)
+    },
+    {
+        path: "text-workshop/:id",
+        canActivate: [AuthGuard],
+        loadComponent: () => import("./pages/text-workshop/text-workshop.component").then(m => m.TextWorkshopComponent)
     }
 ];
