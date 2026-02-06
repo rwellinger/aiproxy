@@ -805,7 +805,9 @@
     "sketchLibrary": "Sketch Library",
     "songProjects": "Song Projects",
     "songReleases": "Song Releases",
-    "textOverlayEditor": "Text Overlay"
+    "textOverlayEditor": "Text Overlay",
+    "textWorkshop": "Text Workshop",
+    "workshopLibrary": "Workshop Library"
   },
   "songDetailPanel": {
     "choices": {
@@ -1907,6 +1909,99 @@
       "required": "This field is required",
       "maxLength": "Maximum {{max}} characters allowed",
       "formInvalid": "Please fill in all required fields"
+    }
+  },
+  "workshop": {
+    "library": {
+      "title": "Text Workshop",
+      "subtitle": "Create and manage your songwriting workshops",
+      "newWorkshop": "New Workshop",
+      "searchPlaceholder": "Search workshops...",
+      "empty": "No workshops yet. Create your first one!"
+    },
+    "newWorkshopTitle": "New Workshop",
+    "confirmDelete": "Delete this workshop? This cannot be undone.",
+    "deleteSuccess": "Workshop deleted.",
+    "saveSuccess": "Workshop saved.",
+    "exportSuccess": "Workshop exported to Song Sketch Library.",
+    "aiSuccess": "AI content generated.",
+    "phases": {
+      "connect": "Connect",
+      "collect": "Collect",
+      "shape": "Shape",
+      "completed": "Completed"
+    },
+    "editor": {
+      "titleHeading": "Text Workshop",
+      "titleLabel": "Workshop Title",
+      "backToLibrary": "Back",
+      "titlePlaceholder": "Workshop title...",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved": "Saved",
+      "generateTitle": "Generate Title",
+      "exportToSketch": "Export as Song Sketch",
+      "alreadyExported": "Already exported"
+    },
+    "connect": {
+      "title": "Connect",
+      "description": "Find your topic and gather initial inspirations",
+      "topicLabel": "Topic / Theme",
+      "topicPlaceholder": "What is your song about? Describe the feeling, situation, or story...",
+      "generateInspirations": "Generate Inspirations",
+      "inspirationsLabel": "Inspirations"
+    },
+    "collect": {
+      "title": "Collect",
+      "description": "Build your material: associations, stories, and vocabulary",
+      "mindmapLabel": "Mindmap / Associations",
+      "mindmapPlaceholder": "Associations, related concepts, imagery...",
+      "generateMindmap": "Generate Mindmap",
+      "storiesLabel": "Story Ideas",
+      "storiesPlaceholder": "Story angles, narrative ideas, scenarios...",
+      "generateStories": "Generate Stories",
+      "wordsLabel": "Word Library",
+      "wordsPlaceholder": "Keywords, synonyms, related expressions...",
+      "generateWords": "Generate Words"
+    },
+    "shape": {
+      "title": "Shape",
+      "description": "Structure your material into a song draft",
+      "structureLabel": "Song Structure",
+      "chooseStructure": "Choose Structure",
+      "structurePlaceholder": "e.g. Verse 1 - Chorus - Verse 2 - Chorus - Bridge - Chorus",
+      "rhymesLabel": "Rhyme Suggestions",
+      "rhymesPlaceholder": "Rhyming words and syllable patterns...",
+      "generateRhymes": "Find Rhymes",
+      "draftLabel": "Draft",
+      "draftLanguage": "Language",
+      "draftPlaceholder": "Your song text draft...",
+      "generateDraft": "Generate Draft"
+    },
+    "selection": {
+      "hint": "Click to deselect items you don't need",
+      "applyButton": "Apply Selection",
+      "cancelButton": "Cancel"
+    },
+    "preview": {
+      "enterPreview": "Show Preview",
+      "exitPreview": "Edit Mode"
+    },
+    "export": {
+      "markdown": "Export MD",
+      "markdownTitle": "Export workshop as Markdown file"
+    },
+    "errors": {
+      "loadFailed": "Failed to load workshop.",
+      "createFailed": "Failed to create workshop.",
+      "saveFailed": "Failed to save workshop.",
+      "deleteFailed": "Failed to delete workshop.",
+      "exportFailed": "Failed to export workshop.",
+      "aiFailed": "AI generation failed. Please try again.",
+      "topicRequired": "Please enter a topic first.",
+      "wordsRequired": "Please add words or a topic first.",
+      "inspirationsRequired": "Please add inspirations or a title first.",
+      "materialRequired": "Please collect some material first."
     }
   }
 }

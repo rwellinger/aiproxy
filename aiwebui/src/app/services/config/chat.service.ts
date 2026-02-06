@@ -271,4 +271,42 @@ export class ChatService {
             userInstructions
         );
     }
+
+    // Workshop AI methods
+
+    async generateInspirations(topic: string): Promise<string> {
+        return this.callUnifiedWithValidation("workshop", "connect-inspire", topic);
+    }
+
+    async generateMindmap(topic: string, inspirations?: string): Promise<string> {
+        return this.callUnifiedWithValidation("workshop", "collect-mindmap", topic, (template) => {
+            let enhanced = template.pre_condition || "";
+            if (inspirations) {
+                enhanced += `\n\nExisting inspirations to build upon:\n${inspirations}`;
+            }
+            return enhanced;
+        });
+    }
+
+    async generateStories(topic: string, context?: string): Promise<string> {
+        return this.callUnifiedWithValidation("workshop", "collect-stories", topic, (template) => {
+            let enhanced = template.pre_condition || "";
+            if (context) {
+                enhanced += `\n\nContext and collected material:\n${context}`;
+            }
+            return enhanced;
+        });
+    }
+
+    async generateWordLibrary(topic: string): Promise<string> {
+        return this.callUnifiedWithValidation("workshop", "collect-words", topic);
+    }
+
+    async generateRhymes(words: string): Promise<string> {
+        return this.callUnifiedWithValidation("workshop", "shape-rhymes", words);
+    }
+
+    async generateDraft(collectedMaterial: string, userInstructions?: string): Promise<string> {
+        return this.callUnifiedWithValidation("workshop", "shape-draft", collectedMaterial, undefined, userInstructions);
+    }
 }

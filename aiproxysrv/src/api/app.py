@@ -31,6 +31,7 @@ from .routes.song_project_routes import api_song_projects_v1
 from .routes.song_release_routes import api_song_releases_v1
 from .routes.song_routes import api_song_v1
 from .routes.user_routes import api_user_v1
+from .routes.workshop_routes import api_workshop_v1
 
 
 def get_version() -> str:
@@ -585,5 +586,6 @@ def create_app():
     app.register_blueprint(api_openai_chat_v1)
     app.register_blueprint(api_claude_chat_v1)
     app.register_blueprint(api_equipment_v1)
+    app.register_blueprint(api_workshop_v1)
 
     return app

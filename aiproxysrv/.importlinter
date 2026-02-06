@@ -43,6 +43,7 @@ ignore_imports =
     src.business.sketch_orchestrator -> sqlalchemy
     src.business.song_project_orchestrator -> sqlalchemy
     src.business.song_release_orchestrator -> sqlalchemy
+    src.business.workshop_orchestrator -> sqlalchemy
 
 [importlinter:contract:business-no-controllers]
 name = Business layer must not import controllers

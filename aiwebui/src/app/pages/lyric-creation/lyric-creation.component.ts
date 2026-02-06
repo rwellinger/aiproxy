@@ -510,11 +510,13 @@ export class LyricCreationComponent implements OnInit {
         // Save current state before applying structure
         this.lastStructureState = lyrics;
 
-        // Remove existing labels from lyrics (various formats)
-        // Match labels like: Intro:, Verse1:, Pre-Chorus:, Post-Chorus:, etc.
-        lyrics = lyrics.replace(/^([\w-]+:|[*[\]].*|)$/gm, "");
-        lyrics = lyrics.replace(/^\*{2}[A-Z\s-]+\*{2}\s*/gm, "");
-        lyrics = lyrics.replace(/^[A-Z][a-z-]*\d*:\s*/gm, "");
+        // Remove existing structural section labels only (preserve non-structural Suno tags like [Guitar Solo])
+        if (this.sectionDetectionPattern) {
+            const stripPattern = new RegExp(this.sectionDetectionPattern.source, "gm");
+            lyrics = lyrics.replace(stripPattern, "");
+        }
+        // Also handle colon format labels (Intro:, Verse 1:, etc.)
+        lyrics = lyrics.replace(/^(Intro|Verse\s*\d*|Chorus\s*\d*|Bridge\s*\d*|Outro|Pre[-_\s]?Chorus|Post[-_\s]?Chorus)\s*:\s*$/gmi, "");
 
         // Split into paragraphs (separated by blank lines)
         const paragraphs = lyrics.split(/\n\s*\n/).filter((p: string) => p.trim());
