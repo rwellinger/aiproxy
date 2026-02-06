@@ -1,6 +1,6 @@
 # Makefile for aiproxysrv development tasks
 
-.PHONY: help check-conda lint lint-ruff lint-imports lint-all format format-check test install-dev db-current db-upgrade db-downgrade db-revision db-history db-heads
+.PHONY: help check-conda lint lint-ruff lint-imports lint-all format format-check test install-dev security-check db-current db-upgrade db-downgrade db-revision db-history db-heads
 
 # Default target
 help:
@@ -14,6 +14,7 @@ help:
 	@echo "  lint-all       - Run all linters (Ruff + import-linter + format-check)"
 	@echo "  format         - Format code with Ruff"
 	@echo "  test           - Run pytest"
+	@echo "  security-check - Check dependencies for known vulnerabilities (warn only)"
 	@echo "  install-dev    - Install development dependencies"
 	@echo ""
 	@echo "Database Migrations (Alembic):"
@@ -66,6 +67,13 @@ format: check-conda
 test: check-conda
 	@echo "Running pytest..."
 	pytest -v
+
+# Security: Check dependencies for known vulnerabilities (warn only, never fails)
+security-check: check-conda
+	@echo "Checking Python dependencies for known vulnerabilities..."
+	@pip-audit --desc 2>/dev/null || echo "pip-audit not installed. Run: pip install pip-audit"
+	@echo ""
+	@echo "Done. This check is informational only - no build was blocked."
 
 # Install development dependencies
 install-dev: check-conda
