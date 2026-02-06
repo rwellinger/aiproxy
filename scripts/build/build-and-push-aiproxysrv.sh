@@ -24,7 +24,6 @@ if [ -z "$GITHUB_OWNER" ]; then
 fi
 REGISTRY="ghcr.io/$GITHUB_OWNER"
 APP_IMAGE="aiproxysrv-app"
-WORKER_IMAGE="celery-worker-app"
 PROJECT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 BUILD_DIR="$PROJECT_DIR/aiproxysrv"
 FORCE_PUSH=false
@@ -133,14 +132,6 @@ build_images() {
         --label "org.opencontainers.image.source=https://github.com/$GITHUB_OWNER/aiproxy" \
         -t "$APP_IMAGE:local" -t "$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:$VERSION" -t "$REGISTRY/$APP_IMAGE:latest" .
     print_success "$APP_IMAGE built successfully"
-
-    print_info "Building $WORKER_IMAGE..."
-    docker build -f Dockerfile --target worker \
-        --label "org.opencontainers.image.created=$BUILD_DATE" \
-        --label "org.opencontainers.image.version=$VERSION" \
-        --label "org.opencontainers.image.source=https://github.com/$GITHUB_OWNER/aiproxy" \
-        -t "$WORKER_IMAGE:local" -t "$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:$VERSION" -t "$REGISTRY/$WORKER_IMAGE:latest" .
-    print_success "$WORKER_IMAGE built successfully"
 }
 
 # Push images
@@ -157,17 +148,6 @@ push_images() {
     print_info "Pushing $APP_IMAGE:latest..."
     docker push "$REGISTRY/$APP_IMAGE:latest"
     print_success "$APP_IMAGE:latest pushed"
-
-    # Check WORKER_IMAGE version tag
-    confirm_overwrite "$REGISTRY/$WORKER_IMAGE:$VERSION"
-    print_info "Pushing $WORKER_IMAGE:$VERSION..."
-    docker push "$REGISTRY/$WORKER_IMAGE:$VERSION"
-    print_success "$WORKER_IMAGE:$VERSION pushed"
-
-    # latest tag is always pushed without confirmation
-    print_info "Pushing $WORKER_IMAGE:latest..."
-    docker push "$REGISTRY/$WORKER_IMAGE:latest"
-    print_success "$WORKER_IMAGE:latest pushed"
 }
 
 # Summary
@@ -176,8 +156,6 @@ print_summary() {
     echo "Successfully built and pushed:"
     echo -e "  ${GREEN}•${NC} $REGISTRY/$APP_IMAGE:$VERSION"
     echo -e "  ${GREEN}•${NC} $REGISTRY/$APP_IMAGE:latest"
-    echo -e "  ${GREEN}•${NC} $REGISTRY/$WORKER_IMAGE:$VERSION"
-    echo -e "  ${GREEN}•${NC} $REGISTRY/$WORKER_IMAGE:latest"
     echo ""
     print_info "You can now use these images in your docker-compose.yml"
     echo ""
