@@ -20,38 +20,6 @@ if not dotenv_file:
 load_dotenv(dotenv_file)
 
 # --------------------------------------------------
-# Celery Config
-# --------------------------------------------------
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
-
-# --------------------------------------------------
-# MUREKA Config
-# --------------------------------------------------
-MUREKA_GENERATE_ENDPOINT = os.getenv("MUREKA_GENERATE_ENDPOINT")
-MUREKA_INSTRUMENTAL_GENERATE_ENDPOINT = os.getenv("MUREKA_INSTRUMENTAL_GENERATE_ENDPOINT")
-MUREKA_INSTRUMENTAL_STATUS_ENDPOINT = os.getenv("MUREKA_INSTRUMENTAL_STATUS_ENDPOINT")
-MUREKA_STEM_GENERATE_ENDPOINT = os.getenv("MUREKA_STEM_GENERATE_ENDPOINT")
-MUREKA_STATUS_ENDPOINT = os.getenv("MUREKA_STATUS_ENDPOINT")
-MUREKA_API_KEY = os.getenv("MUREKA_API_KEY")
-MUREKA_BILLING_URL = os.getenv("MUREKA_BILLING_URL")
-MUREKA_TIMEOUT = int(os.getenv("MUREKA_TIMEOUT", "30"))
-MUREKA_POLL_INTERVAL = int(os.getenv("MUREKA_POLL_INTERVAL", "15"))
-MUREKA_MAX_POLL_ATTEMPTS = int(os.getenv("MUREKA_MAX_POLL_ATTEMPTS", "240"))
-
-# Adaptive Polling Intervals
-MUREKA_POLL_INTERVAL_SHORT = int(os.getenv("MUREKA_POLL_INTERVAL_SHORT", "5"))
-MUREKA_POLL_INTERVAL_MEDIUM = int(os.getenv("MUREKA_POLL_INTERVAL_MEDIUM", "15"))
-MUREKA_POLL_INTERVAL_LONG = int(os.getenv("MUREKA_POLL_INTERVAL_LONG", "30"))
-
-# Number of song choices to generate (Mureka API 'n' parameter: min 1, max 3)
-_mureka_choices = int(os.getenv("MUREKA_CHOICES", "2"))
-MUREKA_CHOICES = max(1, min(3, _mureka_choices))  # Enforce min=1, max=3
-
-# Mureka Models (comma-separated list of available models)
-MUREKA_MODELS = os.getenv("MUREKA_MODELS", "auto,mureka-7.6,mureka-7.5,mureka-o2,mureka-o1")
-
-# --------------------------------------------------
 # OpenAI Config (Images + Chat + Admin API)
 # --------------------------------------------------
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -128,11 +96,6 @@ S3_EQUIPMENT_DATA_BUCKET = os.getenv("S3_EQUIPMENT_DATA_BUCKET", "equipment-data
 S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "minioadmin")
 S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "minioadmin")
 S3_REGION = os.getenv("S3_REGION", "us-east-1")
-
-# --------------------------------------------------
-# Redis Config (falls verwendet)
-# --------------------------------------------------
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 # --------------------------------------------------
 # Ollama Config

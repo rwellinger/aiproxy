@@ -46,7 +46,7 @@ private baseUrl = 'http://localhost:5050/api';
 ```
 
 ### External APIs ONLY via aiproxysrv Proxy
-- **ALL** external calls (OpenAI, Mureka, Ollama, S3/MinIO) **MUST** go through backend
+- **ALL** external calls (OpenAI, Ollama, S3/MinIO) **MUST** go through backend
 - **NEVER** call external APIs directly from Angular
 - **NEVER** use S3 presigned URLs in Angular (Browser can't access internal MinIO!)
 
@@ -180,7 +180,6 @@ conda activate mac_ki_service_py312
 
 # Development
 python src/server.py           # Dev server
-python src/worker.py           # Celery worker
 
 # Database
 make db-current                # Show current version
@@ -241,7 +240,6 @@ cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i postgres psql -U ai
 
 **External API Docs:**
 - **Ollama:** https://github.com/ollama/ollama/blob/main/docs/api.md
-- **Mureka:** https://platform.mureka.ai/docs/
 - **OpenAI:** https://platform.openai.com/docs/api-reference/introduction
 
 ---
@@ -272,8 +270,8 @@ cat scripts/db/seed_lyric_parsing_rules.sql | docker exec -i postgres psql -U ai
 # 🎯 Tech Stack Summary
 
 **Frontend:** Angular 20, Material, SCSS, TypeScript, RxJS, ngx-translate
-**Backend:** FastAPI, Python 3.12.12, Celery, SQLAlchemy, Alembic
-**Database:** PostgreSQL, Redis
+**Backend:** FastAPI, Python 3.12.12, SQLAlchemy, Alembic
+**Database:** PostgreSQL
 **Deployment:** Docker (Colima), Nginx
 **Hardware:** Apple Silicon (M-Series), Python 3.12 via Conda
 

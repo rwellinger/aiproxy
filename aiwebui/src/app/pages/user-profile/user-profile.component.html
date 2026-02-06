@@ -270,14 +270,11 @@
             </mat-card>
         </div>
 
-        <!-- Mureka Profile Section (Left) -->
-        <div class="mureka-section">
+        <!-- API Costs Section -->
+        <div class="costs-section">
             <mat-card class="profile-card">
                 <mat-card-content>
-                    <!-- Embed the existing SongProfile component -->
-                    <app-song-profile [isEmbedded]="true"></app-song-profile>
-
-                    <!-- API Costs Section (OpenAI only) -->
+                    <!-- API Costs Section (OpenAI) -->
                     <div class="api-costs-section">
                         <!-- Loading State -->
                         <div class="loading-state" *ngIf="isLoadingCosts">
@@ -334,19 +331,6 @@
                         </div>
                     </div>
                 </mat-card-content>
-                <mat-card-actions align="end">
-                    <div class="action-buttons">
-                        <button
-                                mat-raised-button
-                                color="primary"
-                                type="button"
-                                (click)="refreshMurekaAccount()"
-                                [disabled]="isLoading">
-                            <i class="fas fa-refresh"></i>
-                            {{ 'userProfile.refreshButton' | translate }}
-                        </button>
-                    </div>
-                </mat-card-actions>
             </mat-card>
         </div>
     </div>

@@ -785,11 +785,9 @@
     "aiChat": "AI Chat",
     "brandName": "thWelly's AI Toolbox",
     "createImage": "Create",
-    "createSong": "Create Song",
     "equipment": "Equipment",
     "equipmentGallery": "Gallery",
     "gallery": "Gallery",
-    "library": "Song Library",
     "login": "Login",
     "logout": "Logout",
     "lyricCreation": "Lyric Creation",
@@ -882,102 +880,6 @@
       "onWork": "On Work"
     }
   },
-  "songGenerator": {
-    "charCounter": "{{count}}/50",
-    "charactersCount": "characters",
-    "costInfo": "Song generation: $0.03 Model 7.6 or 0.05 Model O2 each Song",
-    "createButton": "Create Song",
-    "createInstrumental": "Create Instrumental",
-    "creating": "Creating...",
-    "editInLyricCreator": "Edit in Lyric Creator",
-    "editInPromptEditor": "Edit in Prompt Editor",
-    "enhanceStylePrompt": "Enhance Style Prompt",
-    "errors": {
-      "errorFetchingStatus": "Error fetching status",
-      "errorInitInstrumental": "Error initiating instrumental generation.",
-      "errorInitSong": "Error initiating song generation.",
-      "generationFailed": "Song generation failed",
-      "instrumentalFailed": "Instrumental generation failed",
-      "lyricsRequired": "Please enter lyrics first",
-      "optimizingPhrasing": "Error optimizing phrasing: {{error}}",
-      "promptRequired": "Please enter a music style prompt first",
-      "sketchNotFound": "Sketch not found",
-      "textRequired": "Please enter text first"
-    },
-    "generateTitle": "Generate Title",
-    "generateTitleFallback": "Generate a creative song title",
-    "instrumental": "Instrumental",
-    "instrumentalNotice": "Lyrics are disabled for instrumental songs",
-    "loadingMessage": "This may take several minutes",
-    "lyricArchitecture": "Lyric Architecture",
-    "lyricsActions": "Lyrics actions",
-    "lyricsLabel": "Lyrics:",
-    "lyricsPlaceholder": "Type your lyrics or a song idea here...",
-    "modelLabel": "Model:",
-    "musicStyleActions": "Music style actions",
-    "musicStyleLabel": "Music Style Prompt:",
-    "musicStylePlaceholder": "Describe the music style (e.g., upbeat pop, melancholic ballad, rock anthem)...",
-    "promptActions": "Prompt Actions",
-    "optimizePhrasing": "AI-Optimized Formatting",
-    "optimizingSuccess": "Lyrics optimized for music generation",
-    "player": {
-      "muteUnmute": "Mute/Unmute",
-      "playPause": "Play/Pause",
-      "selectSongToPlay": "Select a song to play audio",
-      "stop": "Stop"
-    },
-    "progress": {
-      "enhancing": "Enhancing Style Prompt...",
-      "enhancinghint": "AI is improving your music style description",
-      "generatingLyrics": "Creating Lyrics...",
-      "generatingLyricsHint": "AI is generating song lyrics from your text",
-      "generatingTitle": "Generating Title...",
-      "generatingTitleHint": "AI is creating a song title for you",
-      "optimizingPhrasing": "Optimizing Phrasing...",
-      "optimizingPhrasingHint": "AI is reformatting lyrics into short musical phrases",
-      "translatingLyrics": "Translating Lyrics...",
-      "translatingLyricsHint": "AI is translating your lyrics to English",
-      "translatingPrompt": "Translating Style Prompt...",
-      "translatingPromptHint": "AI is translating your music style description to English"
-    },
-    "resetButton": "Reset",
-    "status": {
-      "acquiring": "Acquiring Mureka slot",
-      "generatingAi": "Generating song with AI",
-      "initializing": "Initializing request",
-      "polling": "Processing with Mureka",
-      "preparing": "Preparing song generation",
-      "processing": "Processing",
-      "processingRequest": "Processing request",
-      "queued": "Queued for processing",
-      "starting": "Starting song generation",
-      "timeout": "Processing (timeout handling)"
-    },
-    "selectSketch": {
-      "label": "Load from Sketch",
-      "placeholder": "Select a sketch...",
-      "clear": "Clear Selection"
-    },
-    "sketch": {
-      "workflowLabel": "Sketch Workflow:",
-      "workflowHint": "Workflow is managed automatically (draft → used after first song)"
-    },
-    "styleChooser": "Style Chooser",
-    "styleChooserOverwriteWarning": "Existing style prompt will be overwritten. Continue?",
-    "success": {
-      "architectureUpdated": "Song architecture updated successfully",
-      "sketchCleared": "Sketch selection cleared",
-      "sketchLoaded": "Sketch loaded successfully",
-      "styleApplied": "Music style selection applied successfully"
-    },
-    "title": "Create Song",
-    "titleActions": "Title actions",
-    "titleLabel": "Title:",
-    "titlePlaceholder": "Enter song title (max 50 characters)...",
-    "titleRequired": "*",
-    "translateToEnglish": "Translate to English",
-    "withLyrics": "With Lyrics"
-  },
   "musicStylePrompt": {
     "title": "Music Style Prompt",
     "backToSketch": "Back to Sketch",
@@ -1043,29 +945,6 @@
       "noMatches": "No matches found",
       "applied": "Replaced {{count}} occurrences"
     }
-  },
-  "songProfile": {
-    "account": {
-      "concurrentRequests": "concurrent requests",
-      "currentBalance": "Current Balance",
-      "murekaAccount": "Mureka Account",
-      "requestLimit": "Request Limit",
-      "title": "Account Information",
-      "totalRecharge": "Total Recharge",
-      "totalSpending": "Total Spending"
-    },
-    "actions": {
-      "refresh": "Refresh Account Info"
-    },
-    "empty": {
-      "description": "Unable to load account information. Please try refreshing or check your connection.",
-      "title": "No Account Information Available"
-    },
-    "notifications": {
-      "loadError": "Error loading billing info"
-    },
-    "title": "Profile Controls",
-    "loading": "Loading account info..."
   },
   "songView": {
     "actions": {

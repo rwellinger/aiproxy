@@ -7,8 +7,6 @@ from src.schemas.chat_schemas import ChatRequest, UnifiedChatRequest
 from src.schemas.image_schemas import ImageGenerateRequest, ImageListRequest
 from src.schemas.prompt_schemas import PromptTemplateBase, PromptTemplateUpdate
 from src.schemas.song_schemas import (
-    InstrumentalGenerateRequest,
-    SongGenerateRequest,
     SongListRequest,
     SongResponse,
     SongUpdateRequest,
@@ -170,25 +168,8 @@ class TestPasswordResetRequest:
 
 
 # ========================================
-# Song Schemas Tests (8 validators)
+# Song Schemas Tests (6 validators)
 # ========================================
-
-
-class TestSongGenerateRequest:
-    """Test SongGenerateRequest validators."""
-
-    def test_valid_model(self):
-        """Valid model should pass validation."""
-        data = {"prompt": "test", "model": "mureka-7.5"}
-        request = SongGenerateRequest(**data)
-        assert request.model == "mureka-7.5"
-
-    def test_invalid_model(self):
-        """Invalid model should raise ValidationError."""
-        data = {"prompt": "test", "model": "invalid-model"}
-        with pytest.raises(ValidationError) as exc_info:
-            SongGenerateRequest(**data)
-        assert "model must be one of" in str(exc_info.value)
 
 
 class TestSongResponse:
@@ -291,23 +272,6 @@ class TestSongUpdateRequest:
         with pytest.raises(ValidationError) as exc_info:
             SongUpdateRequest(**data)
         assert "workflow must be one of" in str(exc_info.value)
-
-
-class TestInstrumentalGenerateRequest:
-    """Test InstrumentalGenerateRequest validators."""
-
-    def test_valid_model(self):
-        """Valid model should pass validation."""
-        data = {"title": "test", "prompt": "test", "model": "mureka-o1"}
-        request = InstrumentalGenerateRequest(**data)
-        assert request.model == "mureka-o1"
-
-    def test_invalid_model(self):
-        """Invalid model should raise ValidationError."""
-        data = {"title": "test", "prompt": "test", "model": "invalid"}
-        with pytest.raises(ValidationError) as exc_info:
-            InstrumentalGenerateRequest(**data)
-        assert "model must be one of" in str(exc_info.value)
 
 
 # ========================================

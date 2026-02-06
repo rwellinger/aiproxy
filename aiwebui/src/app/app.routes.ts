@@ -23,16 +23,6 @@ export const routes: Routes = [
         pathMatch: "full"
     },
     {
-        path: "songgen",
-        canActivate: [AuthGuard],
-        loadComponent: () => import("./pages/song-generator/song-generator.component").then(m => m.SongGeneratorComponent)
-    },
-    {
-        path: "songview",
-        canActivate: [AuthGuard],
-        loadComponent: () => import("./pages/song-view/song-view.component").then(m => m.SongViewComponent)
-    },
-    {
         path: "song-sketch-creator",
         canActivate: [AuthGuard],
         loadComponent: () => import("./pages/song-sketch-creator/song-sketch-creator.component").then(m => m.SongSketchCreatorComponent)

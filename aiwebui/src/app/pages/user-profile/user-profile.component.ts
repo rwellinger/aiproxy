@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MatDialog} from "@angular/material/dialog";
@@ -13,7 +13,6 @@ import {TranslateModule, TranslateService} from "@ngx-translate/core";
 import {Subject} from "rxjs";
 import {takeUntil} from "rxjs/operators";
 
-import {SongProfileComponent} from "../song-profile/song-profile.component";
 import {PasswordChangeModalComponent} from "../../components/password-change-modal/password-change-modal.component";
 
 import {UserService} from "../../services/business/user.service";
@@ -38,15 +37,12 @@ import {Language, UserSettings} from "../../models/user-settings.model";
         MatIconModule,
         MatSnackBarModule,
         MatSelectModule,
-        TranslateModule,
-        SongProfileComponent
+        TranslateModule
     ],
     templateUrl: "./user-profile.component.html",
     styleUrl: "./user-profile.component.scss"
 })
 export class UserProfileComponent implements OnInit, OnDestroy {
-    @ViewChild(SongProfileComponent) songProfileComponent!: SongProfileComponent;
-
     userForm: FormGroup;
     settingsForm: FormGroup;
     currentUser: User | null = null;
@@ -297,15 +293,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Refresh Mureka account information
-     */
-    public refreshMurekaAccount(): void {
-        if (this.songProfileComponent) {
-            this.songProfileComponent.loadBillingInfo();
-        }
-    }
-
-    /**
      * Load user settings from the service
      */
     private loadUserSettings(): void {
@@ -406,7 +393,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Load OpenAI costs (separate from Mureka)
+     * Load OpenAI costs for current month
      */
     private loadOpenAICosts(): void {
         this.isLoadingCosts = true;

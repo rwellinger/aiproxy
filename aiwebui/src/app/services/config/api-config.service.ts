@@ -10,11 +10,6 @@ export class ApiConfigService {
     // API Endpoints
     readonly endpoints = {
         song: {
-            generate: `${this.baseUrl}/api/v1/song/generate`,
-            models: `${this.baseUrl}/api/v1/song/models`,
-            status: (taskId: string) => `${this.baseUrl}/api/v1/song/task/status/${taskId}`,
-            tasks: `${this.baseUrl}/api/v1/song/tasks`,
-            stems: `${this.baseUrl}/api/v1/song/stem/generate`,
             list: (limit?: number, offset?: number, status?: string) => {
                 const params = new URLSearchParams();
                 if (limit !== undefined) params.append("limit", limit.toString());
@@ -30,7 +25,7 @@ export class ApiConfigService {
             bulkDelete: `${this.baseUrl}/api/v1/song/bulk-delete`,
             assignToProject: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}/assign-to-project`,
             unassignFromProject: (songId: string) => `${this.baseUrl}/api/v1/song/${songId}/unassign-from-project`,
-            // S3 Proxy endpoints (lazy migration from Mureka CDN)
+            // S3 Proxy endpoints (serves audio from S3)
             choiceMp3: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/mp3`,
             choiceFlac: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/flac`,
             choiceWav: (choiceId: string) => `${this.baseUrl}/api/v1/song/choice/${choiceId}/wav`,
@@ -50,17 +45,6 @@ export class ApiConfigService {
             assignToProject: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}/assign-to-project`,
             unassignFromProject: (imageId: string, projectId: string) => `${this.baseUrl}/api/v1/image/id/${imageId}/unassign-from-project/${projectId}`,
             getProjects: (id: string) => `${this.baseUrl}/api/v1/image/id/${id}/projects`
-        },
-        redis: {
-            keys: `${this.baseUrl}/api/v1/redis/list/keys`,
-            deleteTask: (taskId: string) => `${this.baseUrl}/api/v1/redis/${taskId}`
-        },
-        billing: {
-            info: `${this.baseUrl}/api/v1/song/mureka-account`
-        },
-        instrumental: {
-            generate: `${this.baseUrl}/api/v1/instrumental/generate`,
-            status: (taskId: string) => `${this.baseUrl}/api/v1/instrumental/task/status/${taskId}`
         },
         prompt: {
             list: `${this.baseUrl}/api/v1/prompts`,

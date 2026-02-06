@@ -785,11 +785,9 @@
     "aiChat": "KI Chat",
     "brandName": "thWelly's KI Toolbox",
     "createImage": "Erstellen",
-    "createSong": "Song Erstellen",
     "equipment": "Equipment",
     "equipmentGallery": "Galerie",
     "gallery": "Galerie",
-    "library": "Song Bibliothek",
     "login": "Anmelden",
     "logout": "Abmelden",
     "lyricCreation": "Songtext Editor",
@@ -882,102 +880,6 @@
       "onWork": "In Arbeit"
     }
   },
-  "songGenerator": {
-    "charCounter": "{{count}}/50",
-    "charactersCount": "Zeichen",
-    "costInfo": "Song-Erstellung: $0.03 Model 7.6 oder $0.05 Model O2 pro Song",
-    "createButton": "Song erstellen",
-    "createInstrumental": "Instrumental erstellen",
-    "creating": "Erstelle...",
-    "editInLyricCreator": "Im Lyric Creator bearbeiten",
-    "editInPromptEditor": "Im Prompt Editor bearbeiten",
-    "enhanceStylePrompt": "Stil-Prompt verbessern",
-    "errors": {
-      "errorFetchingStatus": "Fehler beim Abrufen des Status",
-      "errorInitInstrumental": "Fehler beim Initiieren der Instrumental-Erstellung.",
-      "errorInitSong": "Fehler beim Initiieren der Song-Erstellung.",
-      "generationFailed": "Song-Erstellung fehlgeschlagen",
-      "instrumentalFailed": "Instrumental-Erstellung fehlgeschlagen",
-      "lyricsRequired": "Bitte gib zuerst einen Songtext ein",
-      "optimizingPhrasing": "Fehler beim Optimieren der Phrasierung: {{error}}",
-      "promptRequired": "Bitte gib zuerst einen Musikstil-Prompt ein",
-      "sketchNotFound": "Skizze nicht gefunden",
-      "textRequired": "Bitte gib zuerst einen Text ein"
-    },
-    "generateTitle": "Titel generieren",
-    "generateTitleFallback": "Erstelle einen kreativen Song-Titel",
-    "instrumental": "Instrumental",
-    "instrumentalNotice": "Songtexte sind für Instrumentals deaktiviert",
-    "loadingMessage": "Dies kann mehrere Minuten dauern",
-    "lyricArchitecture": "Text-Struktur",
-    "lyricsActions": "Text-Aktionen",
-    "lyricsLabel": "Songtext:",
-    "lyricsPlaceholder": "Gib deinen Songtext oder eine Song-Idee ein...",
-    "modelLabel": "Modell:",
-    "musicStyleActions": "Musikstil-Aktionen",
-    "musicStyleLabel": "Musikstil Prompt:",
-    "musicStylePlaceholder": "Beschreibe den Musikstil (z.B. fröhlicher Pop, melancholische Ballade, Rock-Hymne)...",
-    "promptActions": "Prompt-Aktionen",
-    "optimizePhrasing": "KI-Optimierte Formatierung",
-    "optimizingSuccess": "Songtext für Musikgenerierung optimiert",
-    "player": {
-      "muteUnmute": "Stumm/Laut",
-      "playPause": "Abspielen/Pause",
-      "selectSongToPlay": "Wähle einen Song zum Abspielen aus",
-      "stop": "Stopp"
-    },
-    "progress": {
-      "enhancing": "Verbessere Stil-Prompt...",
-      "enhancinghint": "KI verbessert deine Musikstil-Beschreibung",
-      "generatingLyrics": "Erstelle Text...",
-      "generatingLyricsHint": "KI generiert Song-Text aus deinem Text",
-      "generatingTitle": "Erstelle Titel...",
-      "generatingTitleHint": "KI erstellt einen Song-Titel für dich",
-      "optimizingPhrasing": "Optimiere Phrasierung...",
-      "optimizingPhrasingHint": "KI formatiert Text in kurze musikalische Phrasen",
-      "translatingLyrics": "Übersetze Text...",
-      "translatingLyricsHint": "KI übersetzt deinen Text ins Englische",
-      "translatingPrompt": "Übersetze Stil-Prompt...",
-      "translatingPromptHint": "KI übersetzt deine Musikstil-Beschreibung ins Englische"
-    },
-    "resetButton": "Zurücksetzen",
-    "status": {
-      "acquiring": "Erfasse Mureka Slot",
-      "generatingAi": "Erstelle Song mit KI",
-      "initializing": "Initialisiere Anfrage",
-      "polling": "Verarbeite mit Mureka",
-      "preparing": "Bereite Song-Erstellung vor",
-      "processing": "Verarbeite",
-      "processingRequest": "Verarbeite Anfrage",
-      "queued": "In Warteschlange",
-      "starting": "Starte Song-Erstellung",
-      "timeout": "Verarbeite (Timeout-Behandlung)"
-    },
-    "selectSketch": {
-      "label": "Aus Skizze laden",
-      "placeholder": "Skizze auswählen...",
-      "clear": "Auswahl löschen"
-    },
-    "sketch": {
-      "workflowLabel": "Skizzen-Workflow:",
-      "workflowHint": "Workflow wird automatisch verwaltet (draft → used nach erstem Song)"
-    },
-    "styleChooser": "Stil-Auswahl",
-    "styleChooserOverwriteWarning": "Bestehender Stil-Prompt wird überschrieben. Fortfahren?",
-    "success": {
-      "architectureUpdated": "Song-Architektur erfolgreich aktualisiert",
-      "sketchCleared": "Skizzen-Auswahl gelöscht",
-      "sketchLoaded": "Skizze erfolgreich geladen",
-      "styleApplied": "Musikstil-Auswahl erfolgreich angewandt"
-    },
-    "title": "Song erstellen",
-    "titleActions": "Titel-Aktionen",
-    "titleLabel": "Titel:",
-    "titlePlaceholder": "Song-Titel eingeben (max. 50 Zeichen)...",
-    "titleRequired": "*",
-    "translateToEnglish": "Ins Englische übersetzen",
-    "withLyrics": "Mit Text"
-  },
   "musicStylePrompt": {
     "title": "Music Style Prompt",
     "backToSketch": "Zurück zur Skizze",
@@ -1043,29 +945,6 @@
       "noMatches": "Keine Treffer gefunden",
       "applied": "{{count}} Vorkommen ersetzt"
     }
-  },
-  "songProfile": {
-    "account": {
-      "concurrentRequests": "gleichzeitige Anfragen",
-      "currentBalance": "Aktuelles Guthaben",
-      "murekaAccount": "Mureka-Konto",
-      "requestLimit": "Anfragelimit",
-      "title": "Kontoinformationen",
-      "totalRecharge": "Gesamtaufladung",
-      "totalSpending": "Gesamtausgaben"
-    },
-    "actions": {
-      "refresh": "Kontoinformationen aktualisieren"
-    },
-    "empty": {
-      "description": "Kontoinformationen konnten nicht geladen werden. Bitte aktualisiere die Seite oder überprüfe deine Verbindung.",
-      "title": "Keine Kontoinformationen verfügbar"
-    },
-    "notifications": {
-      "loadError": "Fehler beim Laden der Rechnungsinformationen"
-    },
-    "title": "Profil-Steuerung",
-    "loading": "Lade Kontoinformationen..."
   },
   "songView": {
     "actions": {

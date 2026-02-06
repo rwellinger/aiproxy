@@ -5,7 +5,6 @@ from typing import Any
 import requests
 
 from business.bulk_delete_transformer import BulkDeleteTransformer, DeleteResult
-from business.song_mureka_transformer import SongMurekaTransformer
 from business.song_transformer import SongTransformer, generate_s3_song_key
 from business.song_validator import SongValidator
 from config.settings import S3_SONGS_BUCKET
@@ -223,58 +222,6 @@ class SongOrchestrator:
         except Exception as e:
             logger.error(f"Error updating choice rating {choice_id}: {e}")
             raise SongOrchestratorError(f"Failed to update choice rating: {e}") from e
-
-    def process_song_completion(self, task_id: str, result_data: dict[str, Any]) -> bool:
-        """
-        Process MUREKA song completion with business logic transformation
-
-        This method orchestrates:
-        1. Parse MUREKA API response (business layer)
-        2. Update database with parsed data (repository layer)
-
-        Args:
-            task_id: Celery task ID
-            result_data: Raw MUREKA API response dict
-
-        Returns:
-            True if successful, False otherwise
-
-        Example result_data:
-        {
-            "status": "SUCCESS",
-            "result": {
-                "status": "succeeded",
-                "model": "mureka-7.5",
-                "choices": [...]
-            },
-            "completed_at": 1234567890
-        }
-        """
-        try:
-            # Business logic: Parse MUREKA response
-            logger.info("Parsing MUREKA result", task_id=task_id)
-            parsed = SongMurekaTransformer.parse_mureka_result(result_data)
-
-            # Repository: Update song with parsed data
-            success = song_service.update_song_result(task_id, parsed)
-
-            if success:
-                logger.info(
-                    "Song completion processed",
-                    task_id=task_id,
-                    model=parsed.get("model"),
-                    choices_count=parsed.get("choices_count", 0),
-                )
-            else:
-                logger.warning("Failed to update song result", task_id=task_id)
-
-            return success
-
-        except Exception as e:
-            logger.error(
-                "Song completion processing failed", task_id=task_id, error=str(e), error_type=type(e).__name__
-            )
-            raise SongOrchestratorError(f"Failed to process song completion: {e}") from e
 
     def update_song(self, song_id: str, update_data: dict) -> dict | None:
         """
