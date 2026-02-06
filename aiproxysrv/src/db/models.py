@@ -1,7 +1,7 @@
 """Database models"""
 
 import uuid
-from enum import Enum
+from enum import StrEnum
 
 from sqlalchemy import (
     ARRAY,
@@ -24,7 +24,7 @@ from sqlalchemy.sql import func
 from db.database import Base
 
 
-class SongStatus(str, Enum):
+class SongStatus(StrEnum):
     """Enum for song generation status"""
 
     PENDING = "PENDING"
@@ -34,7 +34,7 @@ class SongStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
-class RuleType(str, Enum):
+class RuleType(StrEnum):
     """Enum for lyric parsing rule types"""
 
     CLEANUP = "cleanup"
