@@ -24,7 +24,7 @@ Idea → Sketch → Lyrics → Song → Cover → Project
 | **Idea** | Capture a musical concept or mood | — |
 | **Sketch** | Structure your idea with title, genre, mood | Generate catchy titles |
 | **Lyrics** | Write verses, chorus, bridge | Improve, rewrite, extend lyrics |
-| **Song** | Generate full audio from lyrics | AI music generation (Mureka) |
+| **Song** | Generate full audio from lyrics | Use your own tool (Suno, Mureka, etc.) |
 | **Cover** | Create album artwork | Image generation (DALL-E 3) |
 | **Project** | Organize files, sync with DAW | S3 storage, CLI integration |
 
@@ -39,7 +39,7 @@ Capture and organize your song ideas before they slip away. Tag with genre, mood
 Section-based editor for verses, choruses, bridges, and more. AI-powered tools help you improve phrasing, rewrite weak lines, or extend sections. Build your song architecture with drag & drop, then export to the music generator.
 
 ### Music Generation
-Mureka API integration generates full songs from your lyrics. Async processing handles the wait. Get stems separated for mixing. Multiple AI models to choose from based on your style.
+Use your preferred AI music generation tool (such as Suno, Mureka, or others) to generate songs from your lyrics. Export lyrics directly from the lyric editor in the format your tool needs. Prompt suggestions and lyric formatting are optimized for the most popular AI music generation tools.
 
 ### Cover Art
 DALL-E 3 integration creates album artwork. One-click AI prompt enhancement for better results. Built-in text overlay editor adds titles and artist names. Gallery view keeps all your artwork organized.
@@ -62,7 +62,6 @@ Track your music production software, plugins, and gear. Secure credential stora
 | Feature | Provider | Cost |
 |---------|----------|------|
 | Cover Art Generation | [OpenAI](https://platform.openai.com/) (DALL-E 3) | Pay-per-use |
-| Music Generation | [Mureka](https://mureka.ai/) | Pay-per-use |
 | AI Chat (cloud) | [OpenAI](https://platform.openai.com/) or [Anthropic](https://console.anthropic.com/) | Pay-per-use |
 | AI Chat (local) | [Ollama](https://ollama.ai/) | Free (runs locally) |
 
@@ -101,7 +100,7 @@ Track your music production software, plugins, and gear. Secure credential stora
 
    # Copy and configure environment
    cp env_template .env
-   # Edit .env with your API keys (OpenAI, Mureka)
+   # Edit .env with your API keys (OpenAI)
 
    # Run database migrations
    cd src && alembic upgrade head
@@ -135,7 +134,7 @@ Track your music production software, plugins, and gear. Secure credential stora
 | **Async Processing** | Celery 5.4, Redis |
 | **Database** | PostgreSQL 15 |
 | **Storage** | S3-compatible (MinIO, AWS S3, Backblaze B2) |
-| **AI Services** | OpenAI (DALL-E 3, GPT), Mureka, Ollama |
+| **AI Services** | OpenAI (DALL-E 3, GPT), Ollama |
 | **Deployment** | Docker, Docker Compose, Nginx, GitHub Actions |
 | **Code Quality** | Ruff (Python), ESLint (TypeScript), import-linter |
 
@@ -179,7 +178,7 @@ For detailed architecture documentation, see [docs/arch42/README.md](docs/arch42
 thwellys-ai-toolbox/
 ├── aiproxysrv/          # Python Backend (FastAPI)
 │   ├── src/
-│   │   ├── adapters/    # External API clients (OpenAI, Mureka, Ollama)
+│   │   ├── adapters/    # External API clients (OpenAI, Ollama)
 │   │   ├── api/         # Controllers & Routes
 │   │   ├── business/    # Business logic (transformers, orchestrators)
 │   │   ├── db/          # Repository layer (SQLAlchemy)
@@ -281,7 +280,6 @@ This project is licensed under the [Elastic License 2.0 (ELv2)](LICENSE).
 ## Acknowledgments
 
 - [OpenAI](https://openai.com/) - DALL-E 3 and GPT APIs
-- [Mureka](https://mureka.ai/) - Music generation API
 - [Ollama](https://ollama.ai/) - Local LLM infrastructure
 - [Angular](https://angular.io/) - Frontend framework
 - [FastAPI](https://fastapi.tiangolo.com/) - Backend framework
