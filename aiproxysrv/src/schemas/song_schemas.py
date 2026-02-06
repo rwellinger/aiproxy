@@ -4,43 +4,8 @@ from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from pydantic.types import UUID4
-
-from config.allowed_models import MUREKA_ALLOWED_MODELS
 
 from .common_schemas import BaseResponse, PaginationResponse
-
-
-class SongGenerateRequest(BaseModel):
-    """Schema for song generation requests"""
-
-    prompt: str = Field(..., min_length=1, max_length=1024, description="Song generation prompt (max 1024 chars)")
-    lyrics: str | None = Field(None, max_length=10000, description="Custom lyrics (optional)")
-    title: str | None = Field(None, min_length=1, max_length=50, description="Optional title for the song")
-    model: str = Field("auto", description="Model to use for generation")
-    style: str | None = Field(None, max_length=100, description="Music style/genre")
-    duration: int | None = Field(30, ge=15, le=120, description="Song duration in seconds")
-    sketch_id: str | None = Field(None, description="Optional sketch ID to link this song to a sketch")
-
-    @field_validator("model")
-    @classmethod
-    def validate_model(cls, v):
-        if v not in MUREKA_ALLOWED_MODELS:
-            raise ValueError(f"model must be one of: {', '.join(MUREKA_ALLOWED_MODELS)}")
-        return v
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "prompt": "Upbeat pop song about summer vacation",
-                "lyrics": "[Verse 1]\nSummer days are here again...",
-                "title": "Summer Vacation Anthem",
-                "model": "auto",
-                "style": "pop",
-                "duration": 30,
-            }
-        }
-    )
 
 
 class SongResponse(BaseModel):
@@ -81,10 +46,6 @@ class SongResponse(BaseModel):
                 "lyrics": "[Verse 1]\nSummer days are here...",
                 "style": "pop",
                 "status": "completed",
-                "job_id": "mureka_job_456",
-                "audio_url": "http://localhost:8000/api/v1/song/download/song_abc123",
-                "flac_url": "http://localhost:8000/api/v1/song/flac/song_abc123",
-                "mp3_url": "http://localhost:8000/api/v1/song/mp3/song_abc123",
                 "workflow": "notUsed",
                 "rating": 4,
                 "created_at": "2024-01-01T12:00:00Z",
@@ -93,13 +54,6 @@ class SongResponse(BaseModel):
             }
         },
     )
-
-
-class SongGenerateResponse(BaseResponse):
-    """Schema for song generation response"""
-
-    data: SongResponse = Field(..., description="Generated song data")
-    task_id: str | None = Field(None, description="Celery task ID for tracking")
 
 
 class SongListRequest(BaseModel):
@@ -185,41 +139,6 @@ class SongUpdateResponse(BaseResponse):
     data: SongResponse = Field(..., description="Updated song data")
 
 
-class StemGenerateRequest(BaseModel):
-    """Schema for stems generation requests"""
-
-    choice_id: UUID4 = Field(..., description="Choice ID to generate stems for")
-
-    model_config = ConfigDict(json_schema_extra={"example": {"choice_id": "1e6cd76e-d574-4058-9eec-9a2dc38dd737"}})
-
-
-class StemGenerateResponse(BaseResponse):
-    """Schema for stems generation response"""
-
-    data: dict = Field(..., description="Stems generation data")
-    task_id: str | None = Field(None, description="Celery task ID for tracking")
-
-
-class SongHealthResponse(BaseModel):
-    """Schema for song service health check"""
-
-    celery_status: str = Field(..., description="Celery worker status")
-    mureka_account: dict[str, Any] | None = Field(None, description="Mureka account info")
-    slot_status: dict[str, Any] | None = Field(None, description="Mureka slot status")
-
-
-class SongTaskStatusRequest(BaseModel):
-    """Schema for task status query"""
-
-    task_id: str = Field(..., description="Celery task ID")
-
-
-class SongTaskStatusResponse(BaseResponse):
-    """Schema for task status response"""
-
-    data: dict[str, Any] = Field(..., description="Task status information")
-
-
 class SongDeleteResponse(BaseResponse):
     """Schema for song deletion response"""
 
@@ -238,78 +157,3 @@ class ChoiceRatingUpdateResponse(BaseResponse):
     """Schema for choice rating update response"""
 
     data: dict[str, Any] = Field(..., description="Updated choice data")
-
-
-class MurekaAccountResponse(BaseResponse):
-    """Schema for Mureka account information"""
-
-    data: dict[str, Any] = Field(..., description="Mureka account data")
-
-
-class CeleryHealthResponse(BaseResponse):
-    """Schema for Celery health check"""
-
-    data: dict[str, str] = Field(..., description="Celery status information")
-
-
-class SongJobInfoResponse(BaseResponse):
-    """Schema for Mureka job information"""
-
-    data: dict[str, Any] = Field(..., description="MUREKA job information")
-
-
-class ForceCompleteResponse(BaseResponse):
-    """Schema for force complete task response"""
-
-    data: dict[str, Any] = Field(..., description="Force completion result")
-
-
-class QueueStatusResponse(BaseResponse):
-    """Schema for queue status response"""
-
-    data: dict[str, Any] = Field(..., description="Queue status information")
-
-
-class TaskCancelResponse(BaseResponse):
-    """Schema for task cancellation response"""
-
-    data: dict[str, Any] = Field(..., description="Cancellation result")
-
-
-class InstrumentalGenerateRequest(BaseModel):
-    """Schema for instrumental generation requests"""
-
-    title: str = Field(..., min_length=1, max_length=50, description="Title for the instrumental song")
-    prompt: str = Field(
-        ..., min_length=1, max_length=1024, description="Instrumental generation prompt (max 1024 chars)"
-    )
-    model: str = Field("auto", description="Model to use for generation")
-    style: str | None = Field(None, max_length=100, description="Music style/genre")
-    duration: int | None = Field(30, ge=15, le=120, description="Instrumental duration in seconds")
-    sketch_id: str | None = Field(None, description="Optional sketch ID to link this instrumental to a sketch")
-
-    @field_validator("model")
-    @classmethod
-    def validate_model(cls, v):
-        if v not in MUREKA_ALLOWED_MODELS:
-            raise ValueError(f"model must be one of: {', '.join(MUREKA_ALLOWED_MODELS)}")
-        return v
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "title": "Passionate R&B Instrumental",
-                "prompt": "r&b, slow, passionate",
-                "model": "auto",
-                "style": "r&b",
-                "duration": 30,
-            }
-        }
-    )
-
-
-class InstrumentalGenerateResponse(BaseResponse):
-    """Schema for instrumental generation response"""
-
-    data: SongResponse = Field(..., description="Generated instrumental data")
-    task_id: str | None = Field(None, description="Celery task ID for tracking")

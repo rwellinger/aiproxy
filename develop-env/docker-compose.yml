@@ -16,24 +16,6 @@ services:
       timeout: 5s
       retries: 3
 
-  redis:
-    image: redis:alpine
-    container_name: redis
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:6379:6379"
-    env_file: .env
-    volumes:
-      - redis-data:/data
-    networks:
-      - thwelly-net
-    command: redis-server --appendonly no
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
   minio:
     image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: minio
@@ -50,7 +32,6 @@ services:
 
 volumes:
   postgres-data:
-  redis-data:
   minio_data:
 
 networks:

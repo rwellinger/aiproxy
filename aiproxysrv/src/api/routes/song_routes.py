@@ -1,5 +1,5 @@
 """
-Song Generation Routes mit MUREKA + Pydantic validation
+Song Read/Update/Delete Routes
 """
 
 from uuid import UUID
@@ -15,9 +15,7 @@ from db.database import get_db
 from schemas.common_schemas import ErrorResponse
 from schemas.project_asset_schemas import AssignToProjectRequest
 from schemas.song_schemas import (
-    SongGenerateRequest,
     SongUpdateRequest,
-    StemGenerateRequest,
 )
 from utils.logger import logger
 
@@ -26,79 +24,6 @@ api_song_v1 = Blueprint("api_song_v1", __name__, url_prefix="/api/v1/song")
 
 # Controller instance
 song_controller = SongController()
-
-
-@api_song_v1.route("/celery-health", methods=["GET"])
-def celery_health():
-    """Überprüft Celery Worker Status"""
-    response_data, status_code = song_controller.get_celery_health()
-    return jsonify(response_data), status_code
-
-
-@api_song_v1.route("/mureka-account", methods=["GET"])
-@jwt_required
-def mureka_account():
-    """Abfrage der MUREKA Account-Informationen"""
-    response_data, status_code = song_controller.get_mureka_account()
-    return jsonify(response_data), status_code
-
-
-@api_song_v1.route("/models", methods=["GET"])
-def get_available_models():
-    """Returns available Mureka models for song generation"""
-    from config.allowed_models import MUREKA_ALLOWED_MODELS
-
-    return jsonify({"models": MUREKA_ALLOWED_MODELS}), 200
-
-
-@api_song_v1.route("/generate", methods=["POST"])
-@jwt_required
-@validate()
-def song_generate(body: SongGenerateRequest):
-    """Startet Song-Generierung"""
-    try:
-        # Convert Pydantic model to dict for controller
-        payload = body.dict()
-
-        response_data, status_code = song_controller.generate_song(payload=payload, host_url=request.host_url)
-        return jsonify(response_data), status_code
-    except Exception as e:
-        error_response = ErrorResponse(error=str(e))
-        return jsonify(error_response.dict()), 500
-
-
-@api_song_v1.route("/stem/generate", methods=["POST"])
-@jwt_required
-@validate()
-def stems_generator(body: StemGenerateRequest):
-    """Erstelle stems anhand einer MP3"""
-    try:
-        # Convert Pydantic model to dict for controller
-        payload = body.dict()
-
-        response_data, status_code = song_controller.generate_stems(payload)
-        return jsonify(response_data), status_code
-    except Exception as e:
-        error_response = ErrorResponse(error=str(e))
-        return jsonify(error_response.dict()), 500
-
-
-@api_song_v1.route("/query/<job_id>", methods=["GET"])
-@jwt_required
-def song_info(job_id):
-    """Get Song structure direct from MUREKA again who was generated successfully"""
-    response_data, status_code = song_controller.get_song_info(job_id)
-
-    return jsonify(response_data), status_code
-
-
-@api_song_v1.route("/force-complete/<job_id>", methods=["POST"])
-@jwt_required
-def force_complete_task(job_id):
-    """Erzwingt Completion eines Tasks"""
-    response_data, status_code = song_controller.force_complete_task(job_id)
-
-    return jsonify(response_data), status_code
 
 
 @api_song_v1.route("/list", methods=["GET"])
@@ -198,45 +123,6 @@ def update_choice_rating(choice_id):
     return jsonify(response_data), status_code
 
 
-api_song_task_v1 = Blueprint("api_song_task_v1", __name__, url_prefix="/api/v1/song/task")
-
-
-@api_song_task_v1.route("/status/<task_id>", methods=["GET"])
-@jwt_required
-def song_status(task_id):
-    """Überprüft Status einer Song-Generierung"""
-    response_data, status_code = song_controller.get_song_status(task_id)
-
-    return jsonify(response_data), status_code
-
-
-@api_song_task_v1.route("/cancel/<task_id>", methods=["POST"])
-@jwt_required
-def cancel_task(task_id):
-    """Cancelt einen Task"""
-    response_data, status_code = song_controller.cancel_task(task_id)
-
-    return jsonify(response_data), status_code
-
-
-@api_song_task_v1.route("/delete/<task_id>", methods=["DELETE"])
-@jwt_required
-def delete_task_result(task_id):
-    """Löscht Task-Ergebnis"""
-    response_data, status_code = song_controller.delete_task_result(task_id)
-
-    return jsonify(response_data), status_code
-
-
-@api_song_task_v1.route("/queue-status", methods=["GET"])
-@jwt_required
-def queue_status():
-    """Gibt Queue-Status zurück"""
-    response_data, status_code = song_controller.get_queue_status()
-
-    return jsonify(response_data), status_code
-
-
 @api_song_v1.route("/<song_id>", methods=["PUT"])
 @jwt_required
 @validate()
@@ -278,7 +164,7 @@ def unassign_song_from_project(song_id: str):
 
 
 # ============================================================
-# S3 Proxy Endpoints (Lazy Migration from Mureka CDN)
+# S3 Proxy Endpoints (Serves audio from S3)
 # ============================================================
 
 
@@ -286,12 +172,7 @@ def unassign_song_from_project(song_id: str):
 @jwt_required
 def serve_choice_mp3(choice_id: str):
     """
-    Serve song choice MP3 via backend proxy (lazy migration from Mureka to S3)
-
-    CRITICAL: This endpoint implements lazy migration pattern:
-    1. Check if file exists in S3 (mp3_s3_key)
-    2. If not, download from Mureka URL and upload to S3
-    3. Stream file from S3 to browser
+    Serve song choice MP3 via backend proxy from S3
 
     Path Parameters:
         - choice_id (UUID): Choice ID
@@ -322,7 +203,6 @@ def serve_choice_mp3(choice_id: str):
         # Get DB session
         db: Session = next(get_db())
         try:
-            # Lazy migration: Download from Mureka to S3 if needed
             s3_key = song_orchestrator.migrate_choice_to_s3(db, str(choice_uuid), "mp3")
 
             # Stream from S3 using generic proxy service
@@ -345,12 +225,7 @@ def serve_choice_mp3(choice_id: str):
 @jwt_required
 def serve_choice_flac(choice_id: str):
     """
-    Serve song choice FLAC via backend proxy (lazy migration from Mureka to S3)
-
-    CRITICAL: This endpoint implements lazy migration pattern:
-    1. Check if file exists in S3 (flac_s3_key)
-    2. If not, download from Mureka URL and upload to S3
-    3. Stream file from S3 to browser
+    Serve song choice FLAC via backend proxy from S3
 
     Path Parameters:
         - choice_id (UUID): Choice ID
@@ -381,7 +256,6 @@ def serve_choice_flac(choice_id: str):
         # Get DB session
         db: Session = next(get_db())
         try:
-            # Lazy migration: Download from Mureka to S3 if needed
             s3_key = song_orchestrator.migrate_choice_to_s3(db, str(choice_uuid), "flac")
 
             # Stream from S3 using generic proxy service
@@ -404,12 +278,7 @@ def serve_choice_flac(choice_id: str):
 @jwt_required
 def serve_choice_wav(choice_id: str):
     """
-    Serve song choice WAV via backend proxy (lazy migration from Mureka to S3)
-
-    CRITICAL: This endpoint implements lazy migration pattern:
-    1. Check if file exists in S3 (wav_s3_key)
-    2. If not, download from Mureka URL and upload to S3
-    3. Stream file from S3 to browser
+    Serve song choice WAV via backend proxy from S3
 
     Path Parameters:
         - choice_id (UUID): Choice ID
@@ -440,7 +309,6 @@ def serve_choice_wav(choice_id: str):
         # Get DB session
         db: Session = next(get_db())
         try:
-            # Lazy migration: Download from Mureka to S3 if needed
             s3_key = song_orchestrator.migrate_choice_to_s3(db, str(choice_uuid), "wav")
 
             # Stream from S3 using generic proxy service
@@ -463,12 +331,7 @@ def serve_choice_wav(choice_id: str):
 @jwt_required
 def serve_choice_stems(choice_id: str):
     """
-    Serve song choice stems ZIP via backend proxy (lazy migration from Mureka to S3)
-
-    CRITICAL: This endpoint implements lazy migration pattern:
-    1. Check if file exists in S3 (stem_s3_key)
-    2. If not, download from Mureka URL and upload to S3
-    3. Stream file from S3 to browser
+    Serve song choice stems ZIP via backend proxy from S3
 
     Path Parameters:
         - choice_id (UUID): Choice ID
@@ -499,7 +362,6 @@ def serve_choice_stems(choice_id: str):
         # Get DB session
         db: Session = next(get_db())
         try:
-            # Lazy migration: Download from Mureka to S3 if needed
             s3_key = song_orchestrator.migrate_choice_to_s3(db, str(choice_uuid), "stems")
 
             # Stream from S3 using generic proxy service

@@ -33,8 +33,3 @@ CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5050", \
        "--timeout", "180", \
        "--limit-request-field_size", "32768", \
        "wsgi:app"]
-
-# Worker stage - for celery-worker-app
-FROM base AS worker
-
-CMD ["celery", "-A", "src.worker", "worker", "--loglevel=info"]

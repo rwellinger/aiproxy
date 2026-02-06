@@ -14,32 +14,9 @@ interface SongFormData extends Record<string, unknown> {
 
 /**
  * Context for form data storage
- * - 'song-generator': Form data for song generation page
  * - 'sketch-creator': Form data for sketch creation page
  */
 export type FormDataContext = "song-generator" | "sketch-creator";
-
-interface SongGenerateResponse {
-    task_id: string;
-    song_id?: string;
-    status: string;
-    message?: string;
-}
-
-interface SongStatusResponse {
-    task_id: string;
-    status: string;
-    result?: {
-        error?: string;
-        [key: string]: unknown;
-    };
-    error?: string;
-}
-
-interface TasksResponse {
-    tasks: unknown[];
-    total: number;
-}
 
 interface SongsResponse {
     songs: unknown[];
@@ -120,41 +97,6 @@ export class SongService {
     clearFormData(context: FormDataContext = "song-generator"): void {
         const key = `${context}-form-data`;
         localStorage.removeItem(key);
-    }
-
-    async getAvailableModels(): Promise<string[]> {
-        const response = await this.httpWithTimeout<{models: string[]}>(
-            "GET",
-            this.apiConfig.endpoints.song.models
-        );
-        return response.models;
-    }
-
-    async generateSong(lyrics: string, prompt: string, model: string, title?: string, sketchId?: string): Promise<SongGenerateResponse> {
-        const body: any = {lyrics, model, prompt};
-        if (title) body.title = title;
-        if (sketchId) body.sketch_id = sketchId;
-
-        return this.httpWithTimeout<SongGenerateResponse>("POST", this.apiConfig.endpoints.song.generate, body, 60000);
-    }
-
-    async generateInstrumental(title: string, prompt: string, model: string, sketchId?: string): Promise<SongGenerateResponse> {
-        const body: any = {title, model, prompt};
-        if (sketchId) body.sketch_id = sketchId;
-
-        return this.httpWithTimeout<SongGenerateResponse>("POST", this.apiConfig.endpoints.instrumental.generate, body, 60000);
-    }
-
-    async checkSongStatus(taskId: string): Promise<SongStatusResponse> {
-        return this.httpWithTimeout<SongStatusResponse>("GET", this.apiConfig.endpoints.song.status(taskId), undefined, 60000);
-    }
-
-    async checkInstrumentalStatus(taskId: string): Promise<SongStatusResponse> {
-        return this.httpWithTimeout<SongStatusResponse>("GET", this.apiConfig.endpoints.instrumental.status(taskId), undefined, 60000);
-    }
-
-    async getTasks(): Promise<TasksResponse> {
-        return this.httpWithTimeout<TasksResponse>("GET", this.apiConfig.endpoints.song.tasks, undefined, 30000);
     }
 
     async getSongs(limit: number = 20, offset: number = 0, status?: string, search: string = "",

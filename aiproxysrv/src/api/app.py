@@ -22,16 +22,14 @@ from .routes.cost_routes import api_openai_costs_v1
 from .routes.equipment_routes import api_equipment_v1
 from .routes.health_routes import api_health_v1
 from .routes.image_routes import api_image_v1
-from .routes.instrumental_routes import api_instrumental_task_v1, api_instrumental_v1
 from .routes.lyric_parsing_rule_routes import api_lyric_parsing_rule_v1
 from .routes.ollama_routes import api_ollama_v1
 from .routes.openai_chat_routes import api_openai_chat_v1
 from .routes.prompt_routes import api_prompt_v1
-from .routes.redis_routes import api_redis_v1
 from .routes.sketch_routes import api_sketch_v1
 from .routes.song_project_routes import api_song_projects_v1
 from .routes.song_release_routes import api_song_releases_v1
-from .routes.song_routes import api_song_task_v1, api_song_v1
+from .routes.song_routes import api_song_v1
 from .routes.user_routes import api_user_v1
 
 
@@ -126,9 +124,6 @@ def create_app():
                 BulkDeleteResponse,
                 ErrorResponse,
                 HealthResponse,
-                RedisKeyListResponse,
-                RedisTaskListResponse,
-                RedisTaskResponse,
             )
             from schemas.conversation_schemas import (
                 ConversationCreate,
@@ -187,28 +182,14 @@ def create_app():
                 ProjectUpdateRequest,
             )
             from schemas.song_schemas import (
-                CeleryHealthResponse,
                 ChoiceRatingUpdateRequest,
                 ChoiceRatingUpdateResponse,
-                ForceCompleteResponse,
-                InstrumentalGenerateRequest,
-                InstrumentalGenerateResponse,
-                MurekaAccountResponse,
-                QueueStatusResponse,
                 SongDeleteResponse,
-                SongGenerateRequest,
-                SongGenerateResponse,
-                SongHealthResponse,
-                SongJobInfoResponse,
                 SongListRequest,
                 SongListResponse,
                 SongResponse,
-                SongTaskStatusResponse,
                 SongUpdateRequest,
                 SongUpdateResponse,
-                StemGenerateRequest,
-                StemGenerateResponse,
-                TaskCancelResponse,
             )
             from schemas.user_schemas import (
                 LoginRequest,
@@ -239,29 +220,14 @@ def create_app():
                 ("ImageUpdateResponse", ImageUpdateResponse),
                 ("ImageDeleteResponse", ImageDeleteResponse),
                 # Song schemas
-                ("SongGenerateRequest", SongGenerateRequest),
                 ("SongResponse", SongResponse),
-                ("SongGenerateResponse", SongGenerateResponse),
                 ("SongListRequest", SongListRequest),
                 ("SongListResponse", SongListResponse),
                 ("SongUpdateRequest", SongUpdateRequest),
                 ("SongUpdateResponse", SongUpdateResponse),
-                ("StemGenerateRequest", StemGenerateRequest),
-                ("StemGenerateResponse", StemGenerateResponse),
-                ("SongHealthResponse", SongHealthResponse),
-                ("SongTaskStatusResponse", SongTaskStatusResponse),
                 ("SongDeleteResponse", SongDeleteResponse),
                 ("ChoiceRatingUpdateRequest", ChoiceRatingUpdateRequest),
                 ("ChoiceRatingUpdateResponse", ChoiceRatingUpdateResponse),
-                ("MurekaAccountResponse", MurekaAccountResponse),
-                ("CeleryHealthResponse", CeleryHealthResponse),
-                ("SongJobInfoResponse", SongJobInfoResponse),
-                ("ForceCompleteResponse", ForceCompleteResponse),
-                ("QueueStatusResponse", QueueStatusResponse),
-                ("TaskCancelResponse", TaskCancelResponse),
-                # Instrumental schemas
-                ("InstrumentalGenerateRequest", InstrumentalGenerateRequest),
-                ("InstrumentalGenerateResponse", InstrumentalGenerateResponse),
                 # Chat schemas
                 ("ChatRequest", ChatRequest),
                 ("ChatResponse", ChatResponse),
@@ -299,9 +265,6 @@ def create_app():
                 ("HealthResponse", HealthResponse),
                 ("BulkDeleteRequest", BulkDeleteRequest),
                 ("BulkDeleteResponse", BulkDeleteResponse),
-                ("RedisTaskResponse", RedisTaskResponse),
-                ("RedisTaskListResponse", RedisTaskListResponse),
-                ("RedisKeyListResponse", RedisKeyListResponse),
                 # User schemas
                 ("UserCreateRequest", UserCreateRequest),
                 ("UserCreateResponse", UserCreateResponse),
@@ -356,15 +319,11 @@ def create_app():
                 tag_mapping = {
                     "api_image_v1": "Images",
                     "api_song_v1": "Songs",
-                    "api_song_task_v1": "Song Tasks",
                     "api_song_projects_v1": "Song Projects",
                     "api_song_releases_v1": "Song Releases",
                     "api_sketch_v1": "Sketches",
-                    "api_instrumental_v1": "Instrumentals",
-                    "api_instrumental_task_v1": "Instrumental Tasks",
                     "api_lyric_parsing_rule_v1": "Lyric Parsing Rules",
                     "api_prompt_v1": "Prompt Templates",
-                    "api_redis_v1": "Redis/Celery",
                     "api_chat_v1": "Chat",
                     "api_conversation_v1": "Conversations",
                     "api_openai_chat_v1": "OpenAI Chat",
@@ -384,15 +343,11 @@ def create_app():
                         (
                             "api_image_v1",
                             "api_song_v1",
-                            "api_song_task_v1",
                             "api_song_projects_v1",
                             "api_song_releases_v1",
                             "api_sketch_v1",
-                            "api_instrumental_v1",
-                            "api_instrumental_task_v1",
                             "api_lyric_parsing_rule_v1",
                             "api_prompt_v1",
-                            "api_redis_v1",
                             "api_chat_v1",
                             "api_conversation_v1",
                             "api_openai_chat_v1",
@@ -617,14 +572,10 @@ def create_app():
     app.register_blueprint(api_health_v1)
     app.register_blueprint(api_image_v1)
     app.register_blueprint(api_song_v1)
-    app.register_blueprint(api_song_task_v1)
     app.register_blueprint(api_song_projects_v1)
     app.register_blueprint(api_song_releases_v1)
     app.register_blueprint(api_sketch_v1)
-    app.register_blueprint(api_instrumental_v1)
-    app.register_blueprint(api_instrumental_task_v1)
     app.register_blueprint(api_lyric_parsing_rule_v1)
-    app.register_blueprint(api_redis_v1)
     app.register_blueprint(api_chat_v1)
     app.register_blueprint(api_openai_costs_v1)
     app.register_blueprint(api_prompt_v1)

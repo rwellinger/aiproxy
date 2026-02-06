@@ -22,7 +22,7 @@
     display: contents;
     
     .user-section,
-    .mureka-section {
+    .costs-section {
       height: 100vh;
       overflow-y: auto;
       overflow-x: hidden;
@@ -477,14 +477,14 @@
   }
   
   .user-section,
-  .mureka-section {
+  .costs-section {
     max-height: 50vh;
     overflow-y: auto;
     padding: $spacing-sm;
   }
   
   .profile-card,
-  .mureka-card {
+  .costs-card {
     height: auto;
   }
 }
@@ -637,14 +637,14 @@
   }
   
   .user-section,
-  .mureka-section {
+  .costs-section {
     height: auto;
     max-height: none;
     overflow-y: auto;
   }
   
   .profile-card,
-  .mureka-card {
+  .costs-card {
     height: auto;
     max-height: none;
   }

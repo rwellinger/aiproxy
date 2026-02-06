@@ -90,29 +90,3 @@ class BulkDeleteResponse(BaseResponse):
     )
 
     data: dict[str, Any] = Field(..., description="Bulk deletion results")
-
-
-class RedisTaskResponse(BaseModel):
-    """Schema for Redis/Celery task response"""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    task_id: str = Field(..., description="Celery task ID")
-    status: str = Field(..., description="Task status")
-    result: dict[str, Any] | None = Field(None, description="Task result if completed")
-    created_at: datetime | None = Field(None, description="Task creation time")
-    updated_at: datetime | None = Field(None, description="Task last update time")
-
-
-class RedisTaskListResponse(BaseResponse):
-    """Schema for Redis task list response"""
-
-    data: list[RedisTaskResponse] = Field(..., description="List of Redis tasks")
-    total: int = Field(..., description="Total number of tasks")
-
-
-class RedisKeyListResponse(BaseResponse):
-    """Schema for Redis key list response"""
-
-    data: list[str] = Field(..., description="List of Redis keys")
-    total: int = Field(..., description="Total number of keys")
