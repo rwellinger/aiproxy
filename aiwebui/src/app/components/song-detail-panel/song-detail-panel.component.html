@@ -205,7 +205,7 @@
                         <th>{{ 'songDetailPanel.choices.duration' | translate }}</th>
                         <th>{{ 'songDetailPanel.choices.audioDownloads' | translate }}</th>
                         <th>{{ 'songDetailPanel.choices.mp3File' | translate }}</th>
-                        <th>{{ 'songDetailPanel.choices.stemGeneration' | translate }}</th>
+                        <th>{{ 'songDetailPanel.choices.stems' | translate }}</th>
                         <th *ngIf="showRating">{{ 'songDetailPanel.choices.rating' | translate }}</th>
                     </tr>
                     </thead>
@@ -241,20 +241,12 @@
                         </td>
                         <td>
                             <button type="button"
-                                    *ngIf="(choice.mp3_url || choice.mp3_s3_key) && !choice.stem_url && !choice.stem_s3_key"
-                                    (click)="onGenerateStem(choice.id)"
-                                    [disabled]="stemGenerationInProgress.has(choice.id)">
-                                <i class="fas fa-spinner fa-spin" *ngIf="stemGenerationInProgress.has(choice.id)"></i>
-                                <i class="fas fa-brain" *ngIf="!stemGenerationInProgress.has(choice.id)"></i>
-                                {{ stemGenerationInProgress.has(choice.id) ? ('songDetailPanel.choices.generating' | translate) : ('songDetailPanel.choices.generateStems' | translate) }}
-                            </button>
-                            <button type="button"
                                     *ngIf="choice.stem_url || choice.stem_s3_key"
                                     (click)="onDownloadStems(choice.id)"
                                     class="download-stems-btn">
                                 <i class="fas fa-download"></i> {{ 'songDetailPanel.choices.downloadStems' | translate }}
                             </button>
-                            <span *ngIf="!choice.mp3_url && !choice.mp3_s3_key"
+                            <span *ngIf="!choice.stem_url && !choice.stem_s3_key"
                                   class="not-available">{{ 'songDetailPanel.choices.notAvailable' | translate }}</span>
                         </td>
                         <td *ngIf="showRating">

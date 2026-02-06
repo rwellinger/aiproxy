@@ -46,9 +46,6 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
     isLoading = false;
     loadingError: string | null = null;
 
-    // Stem generation tracking
-    public stemGenerationInProgress = new Set<string>();
-
 
     @Output() titleChanged = new EventEmitter<string>();
     @Output() tagsChanged = new EventEmitter<string[]>();
@@ -242,40 +239,6 @@ export class SongDetailPanelComponent implements OnInit, OnChanges {
         const backendUrl = this.apiConfigService.endpoints.song.choiceWav(choiceId);
         this.resourceBlobService.downloadResource(backendUrl, `song-choice-${choiceId}.wav`);
     }
-
-    async onGenerateStem(choiceId: string) {
-        this.stemGenerationInProgress.add(choiceId);
-
-        try {
-            const data = await Promise.race([
-                firstValueFrom(
-                    this.http.post<any>(this.apiConfigService.endpoints.song.stems, {
-                        choice_id: choiceId
-                    })
-                ),
-                this.delay(120000).then(() => {
-                    throw new Error(this.translate.instant("songDetailPanel.errors.stemTimeout"));
-                })
-            ]);
-
-            if (data.status === "SUCCESS" && data.result && data.result.zip_url) {
-                await this.reloadSong();
-            } else {
-                this.notificationService.error(this.translate.instant("songDetailPanel.errors.stemFailed"));
-            }
-
-
-        } catch (error: any) {
-            this.notificationService.error(`${this.translate.instant("songDetailPanel.errors.generateStem")}: ${error.message}`);
-        } finally {
-            this.stemGenerationInProgress.delete(choiceId);
-        }
-    }
-
-    private delay(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
 
     onDownloadStems(choiceId: string) {
         // Use authenticated download via ResourceBlobService
